@@ -1,0 +1,73 @@
+<?xml version="1.0" ?>
+<%
+    light_radius = 0.05
+    light_thickness = 0.01
+    num_lights = 7
+    spacing = 0.14
+%>
+<sdf version='1.6'>
+  <model name='light_panel'>
+    <link name='base'>
+      <inertial>
+        <mass>50</mass>
+        <inertia>
+          <ixx>20.8333</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>20.8333</iyy>
+          <iyz>0</iyz>
+          <izz>8.33333</izz>
+        </inertia>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <box>
+            <size>1 1 2</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Grey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <box>
+            <size>1 1 2</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+    <% for i in 0..(num_lights-1) %>
+        <link name='light<%=i%>'>
+          <pose frame='unit_box'>0.5 <%= (i - (num_lights / 2)) * spacing %> 0.5 0 1.5707 0</pose>
+          <visual name='visual'>
+            <geometry>
+              <cylinder>
+                <radius><%= light_radius %></radius>
+                <length><%= light_thickness %></length>
+              </cylinder>
+            </geometry>
+            <plugin name="blink" filename="libBlinkVisualPlugin.so">
+              <color_a>1 0 0 1</color_a>
+              <color_b>1 0 0 0</color_b>
+              <period>10</period>
+            </plugin>
+            <material>
+              <script>
+                <name>Gazebo/Black</name>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+              </script>
+            </material>
+          </visual>
+        </link>
+        <joint name='light<%=i%>_joint' type='fixed'>
+          <parent>base</parent>
+          <child>light<%=i%></child>
+        </joint>
+      <% end %>
+  </model>
+</sdf>

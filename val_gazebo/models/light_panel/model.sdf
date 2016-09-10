@@ -1,0 +1,230 @@
+<?xml version="1.0" ?>
+
+<sdf version='1.6'>
+  <model name='light_panel'>
+    <link name='base'>
+      <inertial>
+        <mass>50</mass>
+        <inertia>
+          <ixx>20.8333</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>20.8333</iyy>
+          <iyz>0</iyz>
+          <izz>8.33333</izz>
+        </inertia>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <box>
+            <size>1 1 2</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Grey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <box>
+            <size>1 1 2</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+    
+        <link name='light0'>
+          <pose frame='unit_box'>0.5 -0.42000000000000004 0.5 0 1.5707 0</pose>
+          <visual name='visual'>
+            <geometry>
+              <cylinder>
+                <radius>0.05</radius>
+                <length>0.01</length>
+              </cylinder>
+            </geometry>
+            <plugin name="blink" filename="libBlinkVisualPlugin.so">
+              <color_a>1 0 0 1</color_a>
+              <color_b>1 0 0 0</color_b>
+              <period>10</period>
+            </plugin>
+            <material>
+              <script>
+                <name>Gazebo/Black</name>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+              </script>
+            </material>
+          </visual>
+        </link>
+        <joint name='light0_joint' type='fixed'>
+          <parent>base</parent>
+          <child>light0</child>
+        </joint>
+      
+        <link name='light1'>
+          <pose frame='unit_box'>0.5 -0.28 0.5 0 1.5707 0</pose>
+          <visual name='visual'>
+            <geometry>
+              <cylinder>
+                <radius>0.05</radius>
+                <length>0.01</length>
+              </cylinder>
+            </geometry>
+            <plugin name="blink" filename="libBlinkVisualPlugin.so">
+              <color_a>1 0 0 1</color_a>
+              <color_b>1 0 0 0</color_b>
+              <period>10</period>
+            </plugin>
+            <material>
+              <script>
+                <name>Gazebo/Black</name>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+              </script>
+            </material>
+          </visual>
+        </link>
+        <joint name='light1_joint' type='fixed'>
+          <parent>base</parent>
+          <child>light1</child>
+        </joint>
+      
+        <link name='light2'>
+          <pose frame='unit_box'>0.5 -0.14 0.5 0 1.5707 0</pose>
+          <visual name='visual'>
+            <geometry>
+              <cylinder>
+                <radius>0.05</radius>
+                <length>0.01</length>
+              </cylinder>
+            </geometry>
+            <plugin name="blink" filename="libBlinkVisualPlugin.so">
+              <color_a>1 0 0 1</color_a>
+              <color_b>1 0 0 0</color_b>
+              <period>10</period>
+            </plugin>
+            <material>
+              <script>
+                <name>Gazebo/Black</name>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+              </script>
+            </material>
+          </visual>
+        </link>
+        <joint name='light2_joint' type='fixed'>
+          <parent>base</parent>
+          <child>light2</child>
+        </joint>
+      
+        <link name='light3'>
+          <pose frame='unit_box'>0.5 0.0 0.5 0 1.5707 0</pose>
+          <visual name='visual'>
+            <geometry>
+              <cylinder>
+                <radius>0.05</radius>
+                <length>0.01</length>
+              </cylinder>
+            </geometry>
+            <plugin name="blink" filename="libBlinkVisualPlugin.so">
+              <color_a>1 0 0 1</color_a>
+              <color_b>1 0 0 0</color_b>
+              <period>10</period>
+            </plugin>
+            <material>
+              <script>
+                <name>Gazebo/Black</name>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+              </script>
+            </material>
+          </visual>
+        </link>
+        <joint name='light3_joint' type='fixed'>
+          <parent>base</parent>
+          <child>light3</child>
+        </joint>
+      
+        <link name='light4'>
+          <pose frame='unit_box'>0.5 0.14 0.5 0 1.5707 0</pose>
+          <visual name='visual'>
+            <geometry>
+              <cylinder>
+                <radius>0.05</radius>
+                <length>0.01</length>
+              </cylinder>
+            </geometry>
+            <plugin name="blink" filename="libBlinkVisualPlugin.so">
+              <color_a>1 0 0 1</color_a>
+              <color_b>1 0 0 0</color_b>
+              <period>10</period>
+            </plugin>
+            <material>
+              <script>
+                <name>Gazebo/Black</name>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+              </script>
+            </material>
+          </visual>
+        </link>
+        <joint name='light4_joint' type='fixed'>
+          <parent>base</parent>
+          <child>light4</child>
+        </joint>
+      
+        <link name='light5'>
+          <pose frame='unit_box'>0.5 0.28 0.5 0 1.5707 0</pose>
+          <visual name='visual'>
+            <geometry>
+              <cylinder>
+                <radius>0.05</radius>
+                <length>0.01</length>
+              </cylinder>
+            </geometry>
+            <plugin name="blink" filename="libBlinkVisualPlugin.so">
+              <color_a>1 0 0 1</color_a>
+              <color_b>1 0 0 0</color_b>
+              <period>10</period>
+            </plugin>
+            <material>
+              <script>
+                <name>Gazebo/Black</name>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+              </script>
+            </material>
+          </visual>
+        </link>
+        <joint name='light5_joint' type='fixed'>
+          <parent>base</parent>
+          <child>light5</child>
+        </joint>
+      
+        <link name='light6'>
+          <pose frame='unit_box'>0.5 0.42000000000000004 0.5 0 1.5707 0</pose>
+          <visual name='visual'>
+            <geometry>
+              <cylinder>
+                <radius>0.05</radius>
+                <length>0.01</length>
+              </cylinder>
+            </geometry>
+            <plugin name="blink" filename="libBlinkVisualPlugin.so">
+              <color_a>1 0 0 1</color_a>
+              <color_b>1 0 0 0</color_b>
+              <period>10</period>
+            </plugin>
+            <material>
+              <script>
+                <name>Gazebo/Black</name>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+              </script>
+            </material>
+          </visual>
+        </link>
+        <joint name='light6_joint' type='fixed'>
+          <parent>base</parent>
+          <child>light6</child>
+        </joint>
+      
+  </model>
+</sdf>
