@@ -3,9 +3,8 @@ This package has all the models and world files you might find useful in startin
 
 ## How to use it
 
- - open up gazebo with the path to the models folder in GAZEBO_MODEL_PATH
- - insert light_pane and camera_on_stick
- - rosrun image_view2 image_view2 image:=/my_camera/image_raw
+ 1. make sure you've built your catkin workspace and source setup.bash
+ 1. roslaunch val_gazebo qual_task_1.launch
+ 1. rosrun image_view2 image_view2 image:=/my_camera/image_raw #to test camera view
 
-
-A small window should show up with the camera feed. You can also view cameras from within gazebo, using the "topic visualizer". Hit ctrl+t, then find the image topic and click on it.
+A small window should show up with the camera feed.
