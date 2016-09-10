@@ -14,7 +14,7 @@
     </include>
 
     <include>
-      <pose>4 0 1 0 0 0</pose>
+      <pose>4 0 1 0 0 3.1415926</pose>
       <uri>model://camera_on_stick</uri>
     </include>
   </world>
