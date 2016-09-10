@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>val_gazebo</name>
+  <version>0.0.0</version>
+  <description>models and worlds for SRC</description>
+  <maintainer email="mitranopeter@gmail.com">peter</maintainer>
+  <license>WTFPL</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>gazebo_ros</depend>
+</package>
