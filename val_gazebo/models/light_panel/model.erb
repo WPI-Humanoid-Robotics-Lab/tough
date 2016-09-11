@@ -58,6 +58,9 @@
                 <uri>file://media/materials/scripts/gazebo.material</uri>
               </script>
             </material>
+            <plugin name="plugin" filename="libLightControl.so">
+              <topicName>light<%=i%>_control</topicName>
+            </plugin>
           </visual>
         </link>
         <joint name='light<%=i%>_joint' type='fixed'>

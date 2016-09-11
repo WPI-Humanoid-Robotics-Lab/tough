@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 
-<!-- THIS FILE WAS GENERATED AT 1473570497-->
+<!-- THIS FILE WAS GENERATED AT 1473625907-->
 <sdf version='1.6'>
   <model name='light_panel'>
     <link name='base'>
@@ -53,6 +53,9 @@
                 <uri>file://media/materials/scripts/gazebo.material</uri>
               </script>
             </material>
+            <plugin name="plugin" filename="libLightControl.so">
+              <topicName>light0_control</topicName>
+            </plugin>
           </visual>
         </link>
         <joint name='light0_joint' type='fixed'>
@@ -75,6 +78,9 @@
                 <uri>file://media/materials/scripts/gazebo.material</uri>
               </script>
             </material>
+            <plugin name="plugin" filename="libLightControl.so">
+              <topicName>light1_control</topicName>
+            </plugin>
           </visual>
         </link>
         <joint name='light1_joint' type='fixed'>
@@ -97,6 +103,9 @@
                 <uri>file://media/materials/scripts/gazebo.material</uri>
               </script>
             </material>
+            <plugin name="plugin" filename="libLightControl.so">
+              <topicName>light2_control</topicName>
+            </plugin>
           </visual>
         </link>
         <joint name='light2_joint' type='fixed'>
@@ -119,6 +128,9 @@
                 <uri>file://media/materials/scripts/gazebo.material</uri>
               </script>
             </material>
+            <plugin name="plugin" filename="libLightControl.so">
+              <topicName>light3_control</topicName>
+            </plugin>
           </visual>
         </link>
         <joint name='light3_joint' type='fixed'>
@@ -141,6 +153,9 @@
                 <uri>file://media/materials/scripts/gazebo.material</uri>
               </script>
             </material>
+            <plugin name="plugin" filename="libLightControl.so">
+              <topicName>light4_control</topicName>
+            </plugin>
           </visual>
         </link>
         <joint name='light4_joint' type='fixed'>
@@ -163,6 +178,9 @@
                 <uri>file://media/materials/scripts/gazebo.material</uri>
               </script>
             </material>
+            <plugin name="plugin" filename="libLightControl.so">
+              <topicName>light5_control</topicName>
+            </plugin>
           </visual>
         </link>
         <joint name='light5_joint' type='fixed'>
@@ -185,6 +203,9 @@
                 <uri>file://media/materials/scripts/gazebo.material</uri>
               </script>
             </material>
+            <plugin name="plugin" filename="libLightControl.so">
+              <topicName>light6_control</topicName>
+            </plugin>
           </visual>
         </link>
         <joint name='light6_joint' type='fixed'>
