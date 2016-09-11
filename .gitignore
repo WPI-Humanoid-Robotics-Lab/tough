@@ -1,1 +1,16 @@
 *.swp
+*~
+
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+CMakeLists.txt.user
+
+
+build/
+devel/
+.catkin_workspace
