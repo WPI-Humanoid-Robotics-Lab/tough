@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 
+<!-- THIS FILE WAS GENERATED AT 1473570497-->
 <sdf version='1.6'>
   <model name='light_panel'>
     <link name='base'>
