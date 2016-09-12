@@ -11,7 +11,7 @@
 #### Setting up workspace
 Create catkin workspace. If you already have one, move to the nest step    
 ```bash
-    mkdir -p ~/indigo_ws/src && cd ~/indigo/src
+    mkdir -p ~/indigo_ws/src && cd ~/indigo_ws/src
     catkin_init_workspace
     cd ~/indigo_ws
     catkin_make
