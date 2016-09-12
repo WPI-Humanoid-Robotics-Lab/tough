@@ -37,6 +37,8 @@ class LightControl : public ModelPlugin
     static constexpr int SEQUENCE_LENGTH = 20;
     static constexpr int NUM_LIGHTS = 7;
     static constexpr float LIGHT_SPACING = 0.15;
+    static constexpr int MIN_ON_TIME = 1;
+    static constexpr int MAX_ON_TIME = 4;
 
 
     typedef struct {

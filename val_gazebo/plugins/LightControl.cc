@@ -20,9 +20,20 @@ LightControl::LightControl() : seq_index(0)
   // for now it's just each light sequentially turns red
   for (int i = 0; i < SEQUENCE_LENGTH; i++) {
     seq_t new_light;
-    new_light.light_num = i % NUM_LIGHTS;
-    new_light.duration = 0.2;
-    new_light.color = common::Color::Red;
+    new_light.light_num = std::rand() % NUM_LIGHTS;
+    new_light.duration = (std::rand() % (MAX_ON_TIME - MIN_ON_TIME)) + MIN_ON_TIME; // from 5 to 20 seconds
+    int color_index = std::rand() % 3;
+    switch (color_index) {
+      case 0:
+        new_light.color = common::Color::Red;
+        break;
+      case 1:
+        new_light.color = common::Color::Green;
+        break;
+      case 2:
+        new_light.color = common::Color::Blue;
+        break;
+    }
     sequence[i] = new_light;
   }
 }
