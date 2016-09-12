@@ -42,31 +42,7 @@
         </geometry>
       </collision>
     </link>
-    <% for i in 0..(num_lights-1) %>
-        <link name='light<%=i%>'>
-          <pose frame='unit_box'>0.5 <%= (i - (num_lights / 2)) * spacing %> 0.5 0 1.5707 0</pose>
-          <visual name='visual'>
-            <geometry>
-              <cylinder>
-                <radius><%= light_radius %></radius>
-                <length><%= light_thickness %></length>
-              </cylinder>
-            </geometry>
-            <material>
-              <script>
-                <name>Gazebo/Black</name>
-                <uri>file://media/materials/scripts/gazebo.material</uri>
-              </script>
-            </material>
-            <plugin name="plugin" filename="libLightControl.so">
-              <topicName>light<%=i%>_control</topicName>
-            </plugin>
-          </visual>
-        </link>
-        <joint name='light<%=i%>_joint' type='fixed'>
-          <parent>base</parent>
-          <child>light<%=i%></child>
-        </joint>
-      <% end %>
+    <plugin name="plugin" filename="libLightControl.so">
+    </plugin>
   </model>
 </sdf>

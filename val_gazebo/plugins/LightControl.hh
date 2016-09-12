@@ -19,25 +19,35 @@ class LightControl : public ModelPlugin
     LightControl();
     ~LightControl();
 
-    /// \brief Load the dc motor and configures it according to the sdf.
     void Load(physics::ModelPtr model, sdf::ElementPtr sdf);
-
-    /// \brief Update the torque on the joint from the dc motor each timestep.
     void Update(const common::UpdateInfo &info);
 
   private:
+    void OnCmd(const std_msgs::ColorRGBA &msg);
 
-    void PublishInfo();
-
-    physics::ModelPtr model;
+    physics::ModelPtr _model;
     physics::LinkPtr body;
     event::ConnectionPtr updateConn;
     transport::NodePtr node;
-    transport::PublisherPtr pose_pub;
+    transport::PublisherPtr visual_pub;
 
-    void OnCmd(const std_msgs::ColorRGBA &msg);
     ros::Subscriber _sub;
+    ros::Time start_time;
 
+    static constexpr int SEQUENCE_LENGTH = 20;
+    static constexpr int NUM_LIGHTS = 7;
+    static constexpr float LIGHT_SPACING = 0.15;
+
+
+    typedef struct {
+      int light_num;
+      float duration;
+      common::Color color;
+    } seq_t;
+
+    std::array<seq_t, SEQUENCE_LENGTH> sequence;
+
+    int seq_index;
 };
 
 }
