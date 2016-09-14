@@ -2,6 +2,6 @@
   <!-- We grab the logic in empty_world.launch, changing only the name of the world to be launched -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="verbose" value="true"/>
-    <arg name="world_name" value="$(find val_gazebo)/worlds/light_panel.world"/>
+    <arg name="world_name" value="$(find val_gazebo)/worlds/qual_task_1.world"/>
   </include>
 </launch>
