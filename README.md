@@ -7,6 +7,12 @@
 * Ros Indigo
 * Gazebo 7
 
+##### Additional Packages
+* ruby (if you seeing erb related error, install ruby)    
+
+```bash
+    sudo apt-get install ruby    
+```
 
 #### Setting up workspace
 Create catkin workspace. If you already have one, move to the nest step    
