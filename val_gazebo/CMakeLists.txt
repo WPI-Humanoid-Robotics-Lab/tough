@@ -10,7 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
 set(CMAKE_BUILD_TYPE DEBUG)
 
 set(erb_models
-  light_panel
+  # there aren't any currently, but just list model folder name
 )
 
 add_custom_target(erb ALL)
