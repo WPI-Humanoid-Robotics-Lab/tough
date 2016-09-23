@@ -122,6 +122,10 @@
           <stddev>0.01</stddev>
         </noise>
       </ray>
+      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_gpu_laser.so">
+        <topicName>/multisense/lidar_scan</topicName>
+        <frameName>head_hokuyo_frame</frameName>
+      </plugin>
     </sensor>
   </gazebo>
   <!-- Stereo Camera -->
@@ -199,6 +203,21 @@
           <stddev>0.007</stddev>
         </noise>
       </camera>
+        <plugin name="stereo_camera_controller" filename="libgazebo_ros_multicamera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>multisense/camera</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>left_camera_optical_frame</frameName>
+        <!--<rightFrameName>right_camera_optical_frame</rightFrameName>-->
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
     </sensor>
   </gazebo>
 
@@ -276,6 +295,11 @@
     </inertial>
   </link>
 
+  
+  <gazebo>
+    <plugin filename="libMultiSenseSLPlugin.so" name="multisense_plugin"/>
+  </gazebo>
+  
   <!-- imu link -->
   <link name="head_imu_link">
     <inertial>
@@ -340,4 +364,4 @@
       </imu>
     </sensor>
   </gazebo>
-</robot>
+  </robot>

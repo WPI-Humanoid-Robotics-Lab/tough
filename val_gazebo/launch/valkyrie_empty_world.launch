@@ -3,10 +3,10 @@
 <launch>
   
     <param name="robot_description" textfile="$(find val_description)/model/urdf/valkyrie_sim.urdf"/>
-
+    
     <!-- send fake joint values -->
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-        <param name="use_gui" value="TRUE"/>
+        <param name="use_gui" value="FALSE"/>
     </node>
 
     <!-- Combine joint values -->
@@ -24,4 +24,8 @@
   <!-- Spawn a robot into Gazebo -->
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model valkyrie -z 1.18" />
     
+  <!-- Start spinning the lidar
+  @TODO: implement this using a parameter or check if one exists already-->
+  <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 5.0"/>
+  
 </launch>
