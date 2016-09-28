@@ -7,6 +7,15 @@
 * Ros Indigo
 * Gazebo 7
 
+##### Gazebo 7 Installation
+
+```bash
+sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu trusty main" > /etc/apt/sources.list.d/gazebo-latest.list'
+wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install ros-indigo-gazebo7-*
+```
+
 ##### Additional Packages
 * ruby (if you seeing erb related error, install ruby)    
 
