@@ -26,6 +26,9 @@
     
   <!-- Start spinning the lidar
   @TODO: implement this using a parameter or check if one exists already-->
-  <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 5.0"/>
+  <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 0.5"/>
+  
+  <!-- Start val_laser2point_cloud_node to publish pointcloud2 data -->
+  <node pkg="val_laser2point_cloud" type="val_laser2point_cloud_node" name="val_laser2point_cloud_node"/>
   
 </launch>
