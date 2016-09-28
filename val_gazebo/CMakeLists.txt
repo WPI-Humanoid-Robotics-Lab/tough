@@ -7,6 +7,14 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   roscpp
 )
+
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES src_door
+  CATKIN_DEPENDS std_msgs
+  DEPENDS gazebo
+)
+
 set(CMAKE_BUILD_TYPE DEBUG)
 
 set(erb_models
@@ -22,7 +30,7 @@ foreach(model_folder_name ${erb_models})
                      COMMENT "generating model.sdf for ${model_folder_name}")
 endforeach()
 
-include_directories(${GAZEBO_INCLUDE_DIRS})
+include_directories(${GAZEBO_INCLUDE_DIRS} include)
 link_directories(${GAZEBO_LIBRARY_DIRS})
 list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
 
@@ -37,3 +45,5 @@ foreach(plugin_src ${plugins_src})
   target_link_libraries(${plugin_src} ${catkin_LIBRARIES})
 endforeach()
 
+add_executable(src_door src/src_door.cc)
+target_link_libraries(src_door ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
