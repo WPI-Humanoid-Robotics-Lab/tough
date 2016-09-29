@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 <sdf version='1.6'>
   <model name='button_panel'>
-    <link name='link_0'>
+    <link name='base'>
       <pose frame=''>-0.25 0 0 0 -0 0</pose>
       <inertial>
         <mass>50</mass>
@@ -35,7 +35,7 @@
         </geometry>
       </collision>
     </link>
-    <link name='link_1'>
+    <link name='button'>
       <pose frame=''>0.25 0 0 0 1.5707 0</pose>
       <inertial>
         <mass>1</mass>
@@ -71,14 +71,14 @@
         </geometry>
       </collision>
     </link>
-    <joint name='link_0_JOINT_0' type='prismatic'>
-      <parent>link_0</parent>
-      <child>link_1</child>
+    <joint name='button_joint' type='prismatic'>
+      <parent>base</parent>
+      <child>button</child>
       <axis>
         <xyz>1 0 0</xyz>
         <use_parent_model_frame>1</use_parent_model_frame>
         <limit>
-          <lower>-0.05</lower>
+          <lower>-0.045</lower>
           <upper>0.0</upper>
         </limit>
         <dynamics>
@@ -87,5 +87,10 @@
         </dynamics>
       </axis>
     </joint>
+    <plugin name="button_plugin" filename="libButtonPanel.so">
+      <pressed_position_lower>-0.045</pressed_position_lower>
+      <pressed_position_upper>-0.025</pressed_position_upper>
+      <joint>button_joint</joint>
+    </plugin>
   </model>
 </sdf>

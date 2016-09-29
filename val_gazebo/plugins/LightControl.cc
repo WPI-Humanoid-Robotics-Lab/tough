@@ -59,7 +59,7 @@ void LightControl::Load(physics::ModelPtr model, sdf::ElementPtr sdf)
 
   visual_pub = node->Advertise<msgs::Visual>("~/visual", 10);
 
-  ros::NodeHandle private_nh;
+  ros::NodeHandle private_nh("~");
 
   ROS_INFO("subscribing to: %s", topic_name.c_str());
   _sub = private_nh.subscribe(topic_name, 10, &LightControl::OnCmd, this);
