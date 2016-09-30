@@ -88,7 +88,7 @@
       </axis>
     </joint>
     <plugin name="button_plugin" filename="libButtonPanel.so">
-      <pressed_position_lower>-0.045</pressed_position_lower>
+      <pressed_position_lower>-0.05</pressed_position_lower>
       <pressed_position_upper>-0.025</pressed_position_upper>
       <joint>button_joint</joint>
     </plugin>

@@ -58,19 +58,22 @@ void ButtonPanel::Update(const common::UpdateInfo &info)
   if (_joint)
   {
     double joint_position = _joint->GetAngle(0).Radian();
-    if (!_was_pressed && joint_position > _pressed_position_lower && joint_position < _pressed_position_upper)
+    if (joint_position > _pressed_position_lower && joint_position < _pressed_position_upper)
     {
-      std_msgs::Bool msg;
-      msg.data = true;
-      _pub.publish(msg);
-      _was_pressed = true;
+      if (!_was_pressed)
+      {
+        _was_pressed = true;
+        std_msgs::Bool msg;
+        msg.data = true;
+        _pub.publish(msg);
+      }
     }
     else if (_was_pressed)
     {
-        std_msgs::Bool msg;
-        msg.data = false;
-        _pub.publish(msg);
-        _was_pressed = false;
+      std_msgs::Bool msg;
+      msg.data = false;
+      _pub.publish(msg);
+      _was_pressed = false;
     }
   }
   else {
