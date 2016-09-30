@@ -1,16 +1,11 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
   <model name="src_door">
-
     <link name="frame">
-
-
       <pose>0.06 -0.0005 0 0 0 0</pose>
-
       <inertial>
         <pose> -0.025145 -0.03429 1.0541 0 0 0</pose>
         <mass>19</mass>
-
         <inertia>
           <ixx>7.044583222633334</ixx>
           <ixy>0</ixy>
@@ -19,9 +14,7 @@
           <iyz>0</iyz>
           <izz>0.011451142458333334</izz>
         </inertia>
-
       </inertial>
-
       <collision name="collision_2">
         <pose> -0.025145 -0.03429 1.0541 0 0 0</pose>
         <geometry>
@@ -30,7 +23,6 @@
           </box>
         </geometry>
       </collision>
-
       <visual name="visual">
         <pose>-0.025145 -0.03429 1.0541 0 0 0</pose>
         <geometry>
@@ -45,18 +37,13 @@
           </script>
         </material>
       </visual>
-
     </link>
     <link name="door">
       <pose>-0.0 0.000 2.040 3.14159 0 0</pose>
-
-
-
       <inertial>
         <mass>41.3256</mass>
         <pose>0.4569 0.0349 1.016 0 0 0</pose>
         <inertia>
-
           <ixx>14.226337119849498</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
@@ -82,14 +69,10 @@
         </geometry>
       </visual>
     </link>
-
     <link name="handles">
-
       <pose>0.8144 0 1.05 0 3.14 0</pose>
-
       <inertial>
         <pose>0 -0.035 0 0 0 0</pose>
-
         <mass>2</mass>
         <inertia>
           <ixx>0.011011481198666666</ixx>
@@ -100,7 +83,6 @@
           <izz>0.008243720166666666</izz>
         </inertia>
       </inertial>
-
       <collision name="handle1_collision">
         <pose>0.015 -0.015 0 -1.57 0 0</pose>
         <geometry>
