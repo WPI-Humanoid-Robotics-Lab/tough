@@ -4,4 +4,8 @@
     <arg name="verbose" value="true"/>
     <arg name="world_name" value="$(find val_gazebo)/worlds/qual_task_2.world"/>
   </include>
+
+  <node name="src_door" pkg="val_gazebo" type="src_door">
+    <remap from="open_door" to="button_pressed" />
+  </node>
 </launch>

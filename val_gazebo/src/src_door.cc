@@ -10,8 +10,8 @@ void SRCDoor::run(int argc, char** argv)
 {
   ros::init(argc, argv, "src_door");
 
-  ros::NodeHandle nh_private("~");
-  sub = nh_private.subscribe("open", 10, &SRCDoor::callback, this);
+  ros::NodeHandle nh;
+  sub = nh.subscribe("open_door", 10, &SRCDoor::callback, this);
 
   client::setup(argc, argv);
   transport::NodePtr node(new transport::Node());

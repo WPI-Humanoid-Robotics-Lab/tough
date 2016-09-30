@@ -43,8 +43,8 @@ void ButtonPanel::Load(physics::ModelPtr model, sdf::ElementPtr sdf)
     gzwarn << "missing pressed_position_upper element. Assuming 0.01" << std::endl;
   }
 
-  ros::NodeHandle private_nh("~");
-  _pub = private_nh.advertise<std_msgs::Bool>("button_pressed", 10, true); // yes latch
+  ros::NodeHandle nh;
+  _pub = nh.advertise<std_msgs::Bool>("button_pressed", 10, true); // yes latch
 
   _updateConn = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&ButtonPanel::Update, this, _1));
