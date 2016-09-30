@@ -160,7 +160,7 @@ void MultiSenseSL::LoadThread()
   // publish joint states for tf (robot state publisher)
   this->pubJointStatesQueue = this->pmq->addPub<sensor_msgs::JointState>();
   this->pubJointStates = this->rosnode_->advertise<sensor_msgs::JointState>(
-    /*this->rosNamespace +*/ "/joint_states", 10);
+    this->rosNamespace + "/joint_states", 10);
 
   // publish imu data
   this->pubImuQueue = this->pmq->addPub<sensor_msgs::Imu>();
