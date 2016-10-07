@@ -1,8 +1,0 @@
-moveit_setup_assistant_config:
-  URDF:
-    package: val_description
-    relative_path: urdf/valkyrie_sim.urdf
-  SRDF:
-    relative_path: config/valkyrie.srdf
-  CONFIG:
-    generated_timestamp: 1475549373

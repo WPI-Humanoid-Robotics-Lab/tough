@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(moveit_pkg)
+project(moveit_config_trac_ik)
 
 find_package(catkin REQUIRED)
 
