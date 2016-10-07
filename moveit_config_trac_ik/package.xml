@@ -1,6 +1,6 @@
 <package>
 
-  <name>moveit_pkg</name>
+  <name>moveit_config_trac_ik</name>
   <version>0.2.0</version>
   <description>
      An automatically generated package with all the configuration and launch files for using the valkyrie with the MoveIt Motion Planning Framework
@@ -20,9 +20,7 @@
   <run_depend>joint_state_publisher</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>xacro</run_depend>
-  <build_depend>val_description</build_depend>
-  <run_depend>val_description</run_depend>
-
+  ]
 
   <buildtool_depend>catkin</buildtool_depend>
   
