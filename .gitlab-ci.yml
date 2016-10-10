@@ -64,6 +64,6 @@ indigo-master:
     - catkin_make
     - echo "Joder tio"
   only:
-    - curiosity-master
+    - master
   tags:
     - ros
