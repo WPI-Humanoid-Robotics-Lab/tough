@@ -1,59 +1,9 @@
-# env:
-#   global:
-#     - ROS_DISTRO=indigo
-#     - ROS_CI_DESKTOP="`lsb_release -cs`"
-#     - CI_SOURCE_PATH=$(pwd)
-#     - ROSINSTALL_FILE=$CI_SOURCE_PATH/dependencies.rosinstall
-#     - CATKIN_OPTIONS=$CI_SOURCE_PATH/catkin.options
-#     - ROS_PARALLEL_JOBS='-j8 -l6'
 variables:
   ROS_DISTRO: "indigo"
-  ROS_CI_DESKTOP: "`lsb_release -cs`"
-  CI_SOURCE_PATH: "`pwd`"
-  ROSINSTALL_FILE: "$CI_SOURCE_PATH/dependencies.rosinstall"
-  CATKIN_OPTIONS: "$CI_SOURCE_PATH/catkin.options"
+  CI_SOURCE_PATH: "$CI_PROJECT_DIR"
   ROS_PARALLEL_JOBS: "-j8 -l6"
 
-# before_install:
-#   - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
-#   - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
-#   - sudo apt-get update -qq
-#   - sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin
-#   - source /opt/ros/$ROS_DISTRO/setup.bash
-#   - sudo rosdep init
-#   - rosdep update
-
-# install:
-#   - mkdir -p ~/indigo_ws/src
-#   - cd ~/indigo_ws/src
-#   - catkin_init_workspace
-#   - cd ~/indigo_ws
-#   - catkin_make
-#   - source devel/setup.bash
-#   - cd ~/indigo_ws/src
-#   - ln -s $CI_SOURCE_PATH .
-
 before_script:
-<<<<<<< HEAD
-  #- sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
-  #- wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
-  #- sudo apt-get update -qq
-  #- sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin
-  - source /opt/ros/$ROS_DISTRO/setup.bash
-  - sudo rosdep init
-  # add to sh better
-  - rosdep update
-  # add to sh
-# before install
-  - mkdir -p ~/indigo_ws/src
-  - cd ~/indigo_ws/src
-  - catkin_init_workspace
-  - cd ~/indigo_ws
-  - catkin_make
-  - source devel/setup.bash
-  - cd ~/indigo_ws/src
-  - ln -s $CI_SOURCE_PATH .
-=======
   # - source /opt/ros/indigo/setup.bash
   # - ROS_CI_DESKTOP=$(lsb_release -cs)
   # - ROSINSTALL_FILE=$CI_SOURCE_PATH"/dependencies.rosinstall"
@@ -94,38 +44,26 @@ before_script:
   - if [ ! -f .rosinstall ]; then wstool init; else echo "rosinstall file already there";fi
   - if [ -f $CI_PROJECT_NAME ]; then rm $CI_PROJECT_NAME; else echo "no past symlink";fi
   # - ln -s $CI_SOURCE_PATH .
->>>>>>> 5d3b258... try this config in the main branch, somehow the config in the curiosity branch is broken
 # install
-  - cd ~/indigo_ws/src
-  - wstool init
+  - cd ~/catkin_ws/src
+  - if [ ! -f .rosinstall ]; then wstool init; else echo "rosinstall file already there";fi
   - if [[ -f $ROSINSTALL_FILE ]] ; then wstool merge $ROSINSTALL_FILE ; fi
   - wstool up
-  - cd ~/indigo_ws
-  - rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
-
-# script:
-#   - source /opt/ros/$ROS_DISTRO/setup.bash
-#   - cd ~/indigo_ws
-#   - catkin_make $( [ -f $CATKIN_OPTIONS ] && cat $CATKIN_OPTIONS )
-#   - source devel/setup.bash
-#   - catkin_make run_tests && catkin_make test
+  - cd ~/catkin_ws
+  - ls -a
+  # - rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
 
 indigo-master:
   stage: build
   script:
     - source /opt/ros/$ROS_DISTRO/setup.bash
-    - cd ~/indigo_ws
+    - cd ~/catkin_ws
     - catkin_make $( [ -f $CATKIN_OPTIONS ] && cat $CATKIN_OPTIONS )
     - source devel/setup.bash
-<<<<<<< HEAD
-    #- catkin_make run_tests && catkin_make test
-    - catkin_make
-=======
     # - catkin_make run_tests && catkin_make test
     - catkin_make
     - echo "Joder tio"
->>>>>>> 5d3b258... try this config in the main branch, somehow the config in the curiosity branch is broken
   only:
-    - master
+    - curiosity-master
   tags:
     - ros
