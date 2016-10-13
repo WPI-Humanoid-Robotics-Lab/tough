@@ -1,0 +1,19 @@
+<Robot file="atlas.dae">
+  <Manipulator name="leftarm">
+    <base>utorso</base>
+    <effector>l_hand</effector>
+    <!--           <joints>left_finger_joint right_finger_joint</joints>
+    <closingdirection>-1 1</closingdirection>-->
+    <direction>1 0 0</direction>
+    <translation>0 0 0</translation>
+  </Manipulator>
+  <Manipulator name="rightarm">
+    <base>utorso</base>
+    <effector>r_hand</effector>
+    <!--           <joints>left_finger_joint right_finger_joint</joints>
+    <closingdirection>-1 1</closingdirection>-->
+    <direction>1 0 0</direction>
+    <translation>0 0 0</translation>
+  </Manipulator>
+
+</Robot>

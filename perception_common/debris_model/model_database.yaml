@@ -1,0 +1,13 @@
+names:
+ - "debris_model_1"
+ - "debris_model_2"
+ - "debris_mdoel_3"
+ - "debris_model_4"
+ - "debris_model_5"
+
+files:
+ - "perception_common/debris_model/a2x4x48_debri.stl"
+ - "perception_common/debris_model/a2x6x48_debri.stl"
+ - "perception_common/debris_model/a4x4x20_debri.stl"
+ - "perception_common/debris_model/a4x4x40_debri.stl"
+ - "perception_common/debris_model/a6_inch_block.stl"
