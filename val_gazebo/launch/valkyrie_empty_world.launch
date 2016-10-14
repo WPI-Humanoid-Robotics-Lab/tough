@@ -20,6 +20,7 @@
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
   <!-- We use the empty world with no gravity, To make robot stand as we dont have actuator controllers yet -->
         <arg name="world_name" value="$(find val_gazebo)/worlds/GravityDisabled.world"/>
+        <arg name="verbose" value="true" />
   </include>
   
   <!-- Spawn a robot into Gazebo -->
