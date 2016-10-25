@@ -46,18 +46,18 @@ void button_detected_callback(const std_msgs::Bool::ConstPtr& msg)
   if(msg->data == true){
 	  ROS_INFO("Button detected!!");
 	  //Planning 
-  	  moveit::planning_interface::MoveGroup group("right_arm");
+      moveit::planning_interface::MoveGroup group("left_arm");
   	  moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 	  
           //Planning to a Joint-space goal
 	  std::vector<double> group_joint_values;
-	  group_joint_values[0]=0.0;
-	  group_joint_values[1]=0.0;
-	  group_joint_values[2]=0.0;
-	  group_joint_values[3]=0.0;
-	  group_joint_values[4]=1.266;
-	  group_joint_values[5]=0.0;
-	  group_joint_values[6]=0.0;
+      group_joint_values.push_back(0.0);
+      group_joint_values.push_back(0.0);
+      group_joint_values.push_back(0.0);
+      group_joint_values.push_back(0.0);
+      group_joint_values.push_back(1.266);
+      group_joint_values.push_back(0.0);
+      group_joint_values.push_back(0.0);
 	  group.setJointValueTarget(group_joint_values);
 	  
 	  //Planning to a catersian-space goal
