@@ -1,0 +1,8 @@
+- git:
+    local-name: humanoid_msgs
+    uri: https://github.com/ahornung/humanoid_msgs
+    version: indigo-devel
+- git:
+    local-name: humanoid_navigation
+    uri: https://github.com/ahornung/humanoid_navigation
+    version: indigo-devel
