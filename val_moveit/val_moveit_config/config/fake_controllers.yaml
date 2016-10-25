@@ -1,0 +1,19 @@
+controller_list:
+  - name: fake_right_arm_controller
+    joints:
+      - rightShoulderPitch
+      - rightShoulderRoll
+      - rightShoulderYaw
+      - rightElbowPitch
+      - rightForearmYaw
+      - rightWristRoll
+      - rightWristPitch
+  - name: fake_left_arm_controller
+    joints:
+      - leftShoulderPitch
+      - leftShoulderRoll
+      - leftShoulderYaw
+      - leftElbowPitch
+      - leftForearmYaw
+      - leftWristRoll
+      - leftWristPitch

@@ -1,0 +1,8 @@
+<launch>
+
+  <include file="$(find val_moveit_config)/launch/demo.launch"/>
+
+  <node name="raise_arm_move_group" pkg="val_moveit_tasks" type="raise_arm_move_group" respawn="false" output="screen">
+  </node>
+
+</launch>
