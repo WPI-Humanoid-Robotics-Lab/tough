@@ -1,7 +1,7 @@
 moveit_setup_assistant_config:
   URDF:
     package: ""
-    relative_path: /home/samyuktha/indigo_ws/devel/share/val_description/model/urdf/valkyrie_sim.urdf
+    relative_path:$(find val_description)/model/urdf/valkyrie_sim.urdf
   SRDF:
     relative_path: config/valkyrie.srdf
   CONFIG:
