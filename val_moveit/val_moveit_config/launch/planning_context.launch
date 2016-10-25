@@ -6,19 +6,19 @@
   <arg name="robot_description" default="robot_description"/>
 
   <!-- Load universal robot description format (URDF) -->
-  <param if="$(arg load_robot_description)" name="$(arg robot_description)" textfile="$(find val_description)/model/urdf/valkyrie_sim.urdf"/>
+  <param if="$(arg load_robot_description)" name="$(arg robot_description)" textfile="/home/samyuktha/indigo_ws/devel/share/val_description/model/urdf/valkyrie_sim.urdf"/>
 
   <!-- The semantic description that corresponds to the URDF -->
-  <param name="$(arg robot_description)_semantic" textfile="$(find moveit_config_trac_ik)/config/valkyrie.srdf" />
+  <param name="$(arg robot_description)_semantic" textfile="$(find val_moveit_config)/config/valkyrie.srdf" />
   
   <!-- Load updated joint limits (override information from URDF) -->
   <group ns="$(arg robot_description)_planning">
-    <rosparam command="load" file="$(find moveit_config_trac_ik)/config/joint_limits.yaml"/>
+    <rosparam command="load" file="$(find val_moveit_config)/config/joint_limits.yaml"/>
   </group>
 
   <!-- Load default settings for kinematics; these settings are overridden by settings in a node's namespace -->
   <group ns="$(arg robot_description)_kinematics">
-    <rosparam command="load" file="$(find moveit_config_trac_ik)/config/kinematics.yaml"/>
+    <rosparam command="load" file="$(find val_moveit_config)/config/kinematics.yaml"/>
   </group>
   
 </launch>
