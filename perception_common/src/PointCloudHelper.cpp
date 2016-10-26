@@ -14,7 +14,7 @@
 typedef pcl::PointXYZRGB ARPoint;
 typedef pcl::PointCloud<ARPoint> ARCloud;
 
-namespace drc_perception {
+namespace src_perception {
 
 //void createIntensityImage(const drc_perception::LaserPointCloud::Ptr lcloud,
 //		ARCloud &cloud)
@@ -46,7 +46,7 @@ namespace drc_perception {
 void PointCloudHelper::generateOrganizedRGBDCloud( const cv::Mat &dispImage,
 												   const cv::Mat &colorImage,
 												   const cv::Mat Qmat,
-												   drc_perception::StereoPointCloudColor::Ptr &cloud)
+												   src_perception::StereoPointCloudColor::Ptr &cloud)
 {
 	cv::Mat xyz;
 	int width=dispImage.cols;
@@ -62,7 +62,7 @@ void PointCloudHelper::generateOrganizedRGBDCloud( const cv::Mat &dispImage,
 			if(dispImage.at<float>(cv::Point(v,u))==0.0)
 				continue;
 			cv::Vec3f cv_pt=xyz.at<cv::Vec3f>(cv::Point(v,u));
-			drc_perception::StereoPointColor pt;
+			src_perception::StereoPointColor pt;
 			pt.x=cv_pt.val[0];
 			pt.y=cv_pt.val[1];
 			pt.z=cv_pt.val[2];

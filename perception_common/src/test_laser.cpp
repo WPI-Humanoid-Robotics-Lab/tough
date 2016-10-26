@@ -15,11 +15,11 @@ int main(int argc, char** argv)
 {
 	ros::init(argc,argv,"pub_pointcloud");
 	ros::NodeHandle nh;
-	drc_perception::MultisensePointCloud point_cloud_combiner(nh);
+	src_perception::MultisensePointCloud point_cloud_combiner(nh);
 	ros::Publisher pub_laser_test = nh.advertise<pcl::PCLPointCloud2> ("/test/laser_points2", 1,true);
 	while(ros::ok())
 	{
-		drc_perception::LaserPointCloud::Ptr cloud;
+		src_perception::LaserPointCloud::Ptr cloud;
         /*if(point_cloud_combiner.giveLaserCloud(cloud))
 		{
 			pcl::PCLPointCloud2 output;

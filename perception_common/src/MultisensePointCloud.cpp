@@ -8,12 +8,12 @@
 
 #include <perception_common/MultisensePointCloud.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <perception_common/WRECS_Names.h>
+#include <perception_common/val_Names.h>
 #include <tf_conversions/tf_eigen.h>
 #include <pcl/common/transforms.h>
 
 
-namespace drc_perception {
+namespace src_perception {
 
 bool MultisensePointCloud::laser_wrt_l_foot_callback_active_ = false;
 bool MultisensePointCloud::laser_callback_active_=false;
@@ -43,11 +43,11 @@ MultisensePointCloud::MultisensePointCloud(ros::NodeHandle &nh):nh_(nh),
 	ros::NodeHandle pnh("~");
 	if(!pnh.getParam("laser_topic",laser_topic_))
 	{
-		laser_topic_=WRECS_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC;        
+		laser_topic_=VAL_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC;        
 	}
 	if(!pnh.getParam("stereo_topic",stereo_topic_))
 	{
-		stereo_topic_=WRECS_NAMES::MULTISENSE_STEREO_CLOUD_TOPIC;
+		stereo_topic_=VAL_NAMES::MULTISENSE_STEREO_CLOUD_TOPIC;
 	}
 
 
@@ -95,7 +95,7 @@ void MultisensePointCloud::saveToLaserCloud(const sensor_msgs::PointCloud2ConstP
 //			if((T.x*T.x+T.y*T.y+T.z*T.z)<0.30*0.30)
 //				T.x=T.y=T.z=T.intensity=-1;
 			// fix: if the first line doesn't work, then use the second line
-			memcpy (&laser_cloud_->points[bin*msg->width + i], &T, sizeof(drc_perception::LaserPoint));
+			memcpy (&laser_cloud_->points[bin*msg->width + i], &T, sizeof(src_perception::LaserPoint));
 		}
 	}
 }
@@ -108,10 +108,10 @@ void MultisensePointCloud::saveToLaserCloudWrtLFoot(const sensor_msgs::PointClou
     //pcl header issues we need to fix this later
     static tf::TransformListener    tf_listener;
 
-    tf_listener.waitForTransform(WRECS_NAMES::L_FOOT_TF, msg->header.frame_id, ros::Time::now(), ros::Duration(3.0));
+    tf_listener.waitForTransform(VAL_NAMES::L_FOOT_TF, msg->header.frame_id, ros::Time::now(), ros::Duration(3.0));
 
 
-    laser_cloud_wrt_l_foot_->header.frame_id = WRECS_NAMES::L_FOOT_TF;
+    laser_cloud_wrt_l_foot_->header.frame_id = VAL_NAMES::L_FOOT_TF;
     laser_cloud_wrt_l_foot_->header.seq	= msg->header.seq;
     laser_cloud_wrt_l_foot_->header.stamp = msg->header.stamp.toNSec()/10e2; //the stamp in pcl data type is in ms and not ns
     laser_cloud_wrt_l_foot_->width    = msg->width;
@@ -134,7 +134,7 @@ void MultisensePointCloud::saveToLaserCloudWrtLFoot(const sensor_msgs::PointClou
             p1.pose.position.z = pointT->z;
             p1.pose.orientation.w = 1.0;
 
-            tf_listener.transformPose(WRECS_NAMES::L_FOOT_TF, p1, p2);
+            tf_listener.transformPose(VAL_NAMES::L_FOOT_TF, p1, p2);
 
             T.x = p2.pose.position.x;
             T.y = p2.pose.position.y;
@@ -146,7 +146,7 @@ void MultisensePointCloud::saveToLaserCloudWrtLFoot(const sensor_msgs::PointClou
 //			if((T.x*T.x+T.y*T.y+T.z*T.z)<0.30*0.30)
 //				T.x=T.y=T.z=T.intensity=-1;
             // fix: if the first line doesn't work, then use the second line
-            memcpy (&laser_cloud_wrt_l_foot_->points[bin*msg->width + i], &T, sizeof(drc_perception::LaserPoint));
+            memcpy (&laser_cloud_wrt_l_foot_->points[bin*msg->width + i], &T, sizeof(src_perception::LaserPoint));
         }
     }
 }
@@ -190,8 +190,8 @@ void MultisensePointCloud::laserCallbackWrtLFoot(const sensor_msgs::PointCloud2C
     {
         tf::StampedTransform stamped_tf;
 
-        tf_listener.waitForTransform(WRECS_NAMES::L_FOOT_TF, WRECS_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, ros::Time::now(), ros::Duration(3.0));
-        tf_listener.lookupTransform(WRECS_NAMES::L_FOOT_TF, WRECS_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, ros::Time(0), stamped_tf);
+        tf_listener.waitForTransform(VAL_NAMES::L_FOOT_TF, VAL_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, ros::Time::now(), ros::Duration(3.0));
+        tf_listener.lookupTransform(VAL_NAMES::L_FOOT_TF, VAL_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, ros::Time(0), stamped_tf);
 
         pcl::PCLPointCloud2 pcl_pc2;
 
@@ -202,13 +202,13 @@ void MultisensePointCloud::laserCallbackWrtLFoot(const sensor_msgs::PointCloud2C
                 LaserScanPoint *pointT = (LaserScanPoint*) &msg->data[bin * msg->width * sizeof(LaserScanPoint) + i * sizeof(LaserScanPoint)];
                 geometry_msgs::PoseStamped  p1, p2;
 
-                p1.header.frame_id = WRECS_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
+                p1.header.frame_id = VAL_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
                 p1.pose.position.x = pointT->x;
                 p1.pose.position.y = pointT->y;
                 p1.pose.position.z = pointT->z;
                 p1.pose.orientation.w = 1.0;
 
-                tf_listener.transformPose(WRECS_NAMES::L_FOOT_TF, p1, p2);
+                tf_listener.transformPose(VAL_NAMES::L_FOOT_TF, p1, p2);
 
                 pointT->x = p2.pose.position.x;
                 pointT->y = p2.pose.position.y;
@@ -219,7 +219,7 @@ void MultisensePointCloud::laserCallbackWrtLFoot(const sensor_msgs::PointCloud2C
         pcl_conversions::toPCL(*msg, pcl_pc2);
         pcl::fromPCLPointCloud2(pcl_pc2, *laser_cloud_wrt_l_foot_);
 
-        laser_cloud_wrt_l_foot_->header.frame_id = WRECS_NAMES::L_FOOT_TF;
+        laser_cloud_wrt_l_foot_->header.frame_id = VAL_NAMES::L_FOOT_TF;
     }
     new_laser_wrt_l_foot_=true;
     ROS_INFO_ONCE("Laser Cloud Wrt LFoot: width = %d, height = %d, header = %s, isdense = %d\n", laser_cloud_->width, laser_cloud_->height,laser_cloud_->header.frame_id.c_str(),laser_cloud_->is_dense);
@@ -247,8 +247,8 @@ bool MultisensePointCloud::giveLaserCloudForTime(const ros::Time &time, LaserPoi
 	tf::StampedTransform stamped_tf;
 	try
 	{
-		tf_listener.waitForTransform(WRECS_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF,"left_camera_optical_sweep_fixed" , ros::Time(0)/*time ros::Time().fromNSec(laser_cloud_->header.stamp*10e2)*/, ros::Duration(1.0));
-	    tf_listener.lookupTransform(WRECS_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF,"left_camera_optical_sweep_fixed" , ros::Time(0)/*time ros::Time().fromNSec(laser_cloud_->header.stamp*10e2)*/, stamped_tf);
+		tf_listener.waitForTransform(VAL_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF,"left_camera_optical_sweep_fixed" , ros::Time(0)/*time ros::Time().fromNSec(laser_cloud_->header.stamp*10e2)*/, ros::Duration(1.0));
+	    tf_listener.lookupTransform(VAL_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF,"left_camera_optical_sweep_fixed" , ros::Time(0)/*time ros::Time().fromNSec(laser_cloud_->header.stamp*10e2)*/, stamped_tf);
 	}
 	catch(tf::TransformException &ex)
 	{
@@ -366,4 +366,4 @@ MultisensePointCloud::~MultisensePointCloud()
 	unified_cloud_.reset();
 }
 
-} /* namespace drc_perception */
+} /* namespace src_perception */

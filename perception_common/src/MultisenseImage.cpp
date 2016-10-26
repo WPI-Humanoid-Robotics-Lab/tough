@@ -11,12 +11,12 @@
  */
 
 #include <perception_common/MultisenseImage.h>
-#include <perception_common/WRECS_Names.h>
+#include <perception_common/val_Names.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
 
-namespace drc_perception {
+namespace src_perception {
 
 using namespace std;
 
@@ -45,23 +45,23 @@ MultisenseImage::MultisenseImage(ros::NodeHandle &n):nh_(n),
 
     if(!pnh.getParam("image_topic",image_topic_))
     {
-    	image_topic_ = WRECS_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC;
+        image_topic_ = VAL_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC;
     }
     if(!pnh.getParam("disp_topic",disp_topic_))
     {
-        disp_topic_ = WRECS_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC;
+        disp_topic_ = VAL_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC;
     }
     if(!pnh.getParam("multisense_config_topic",multisense_topic_))
     {
-    	multisense_topic_ = WRECS_NAMES::MULTISENSE_RAW_CAM_CONFIG_TOPIC;
+        multisense_topic_ = VAL_NAMES::MULTISENSE_RAW_CAM_CONFIG_TOPIC;
     }
     if(!pnh.getParam("depth_topic",depth_topic_))
     {
-    	depth_topic_ = WRECS_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;
+        depth_topic_ = VAL_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;
     }
     if(!pnh.getParam("cost_topic",depth_cost_topic_))
     {
-    	depth_cost_topic_ = WRECS_NAMES::MULTISENSE_DEPTH_COST_TOPIC;
+        depth_cost_topic_ = VAL_NAMES::MULTISENSE_DEPTH_COST_TOPIC;
     }
     //hard coded values specific to simulation, later on can be made to be not hard coded.
 #ifdef GAZEBO_SIMULATION
@@ -586,4 +586,4 @@ MultisenseImage::~MultisenseImage() {
 //	delete sync_disp_sub_;
 }
 
-} /* namespace drc_perception */
+} /* namespace src_perception */

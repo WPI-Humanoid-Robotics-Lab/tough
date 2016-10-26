@@ -25,7 +25,7 @@
 #include <image_transport/subscriber_filter.h>
 #include <memory>
 
-namespace drc_perception {
+namespace src_perception {
 
 class MultisenseImage {
 

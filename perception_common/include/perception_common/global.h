@@ -30,7 +30,7 @@
 
 /*** TYPE DEFS ***/
 
-namespace drc_perception
+namespace src_perception
 {
 	typedef pcl::PointXYZI						LaserPoint;
 	typedef	pcl::PointXYZ						StereoPoint;

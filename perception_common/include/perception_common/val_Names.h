@@ -1,8 +1,8 @@
-#ifndef WRECS_NAMES_H
-#define WRECS_NAMES_H
+#ifndef VAL_NAMES_H
+#define VAL_NAMES_H
 
 #include <string>
-namespace WRECS_NAMES
+namespace VAL_NAMES
 {
 	/********* MSGS *********/
 

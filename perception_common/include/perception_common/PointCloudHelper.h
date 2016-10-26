@@ -11,7 +11,7 @@
 
 #include <perception_common/global.h>
 
-namespace drc_perception {
+namespace src_perception {
 
 class PointCloudHelper {
 public:
@@ -25,7 +25,7 @@ public:
 	static void generateOrganizedRGBDCloud( const cv::Mat &dispImage,
 											const cv::Mat &colorImage,
 											const cv::Mat Qmat,
-											drc_perception::StereoPointCloudColor::Ptr &cloud);
+											src_perception::StereoPointCloudColor::Ptr &cloud);
 
 	static void getLaserFOV(const float hfov, float vfov,
 	  	  	   	   	   	    const cv::Size img_sz,
