@@ -14,7 +14,7 @@
    <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
    <include file="$(find gazebo_ros)/launch/empty_world.launch">
    <!-- We use the empty world with no gravity, To make robot stand as we dont have actuator controllers yet -->
-         <arg name="world_name" value="$(find val_gazebo)/worlds/qual1_nogravity.world"/>
+         <arg name="world_name" value="$(find srcsim)/worlds/qual1_nogravity.world"/>
          <arg name="verbose" value="true" />
    </include>
 
