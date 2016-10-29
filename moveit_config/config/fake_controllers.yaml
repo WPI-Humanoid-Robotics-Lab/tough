@@ -1,0 +1,35 @@
+controller_list:
+  - name: fake_Left_Wrist_controller
+    joints:
+      - leftWristRoll
+      - leftWristPitch
+      - leftIndexFingerPitch1
+      - leftIndexFingerPitch2
+      - leftIndexFingerPitch3
+      - leftMiddleFingerPitch1
+      - leftMiddleFingerPitch2
+      - leftMiddleFingerPitch3
+      - leftPinkyPitch1
+      - leftPinkyPitch2
+      - leftPinkyPitch3
+      - leftThumbRoll
+      - leftThumbPitch1
+      - leftThumbPitch2
+      - leftThumbPitch3
+  - name: fake_Right_Wrist_controller
+    joints:
+      - rightWristRoll
+      - rightWristPitch
+      - rightIndexFingerPitch1
+      - rightIndexFingerPitch2
+      - rightIndexFingerPitch3
+      - rightMiddleFingerPitch1
+      - rightMiddleFingerPitch2
+      - rightMiddleFingerPitch3
+      - rightPinkyPitch1
+      - rightPinkyPitch2
+      - rightPinkyPitch3
+      - rightThumbRoll
+      - rightThumbPitch1
+      - rightThumbPitch2
+      - rightThumbPitch3

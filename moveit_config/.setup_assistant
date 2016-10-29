@@ -1,0 +1,8 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: ""
+    relative_path: /home/janani/indigo_ws/devel/share/val_description/model/urdf/valkyrie_sim.urdf
+  SRDF:
+    relative_path: config/valkyrie.srdf
+  CONFIG:
+    generated_timestamp: 1477503014
