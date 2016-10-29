@@ -126,9 +126,8 @@ class MultisenseImage {
 	 * @brief this function loads the disparity image
 	 * @param img the ros image published
 	 */
-#ifndef GAZEBO_SIMULATION
-	void loadDisparityImage(const sensor_msgs::ImageConstPtr &img);
-#endif
+    void loadDisparityImageSensorMsgs(const sensor_msgs::ImageConstPtr &img);
+
 	/**
 	 * @brief this function loads the camera parameter from the multisense topic
 	 * @param config the ros data published by the multisense head
@@ -140,7 +139,7 @@ class MultisenseImage {
 	 * @brief this function loads the camera parameter from the multisense in SIM topic
 	 * @param config the ros data published by the multisense head in SIM
 	 */
-	void loadDisparityImage(const stereo_msgs::DisparityImageConstPtr &img);
+    void loadDisparityImageStereoMsgs(const stereo_msgs::DisparityImageConstPtr &img);
 #endif
 
 #ifndef GAZEBO_SIMULATION

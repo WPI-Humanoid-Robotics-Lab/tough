@@ -43,7 +43,7 @@ MultisensePointCloud::MultisensePointCloud(ros::NodeHandle &nh):nh_(nh),
 	ros::NodeHandle pnh("~");
 	if(!pnh.getParam("laser_topic",laser_topic_))
 	{
-		laser_topic_=VAL_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC;        
+        laser_topic_=VAL_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC;
 	}
 	if(!pnh.getParam("stereo_topic",stereo_topic_))
 	{
@@ -61,7 +61,7 @@ MultisensePointCloud::MultisensePointCloud(ros::NodeHandle &nh):nh_(nh),
 
 void MultisensePointCloud::setLaserTopic(const std::string &name)
 {
-	laser_topic_=name;
+    laser_topic_=name;
 }
 
 /**
@@ -228,7 +228,7 @@ bool MultisensePointCloud::giveLaserCloudForTime(const ros::Time &time, LaserPoi
 {
 	if(!laser_callback_active_)
 	{
-			laser_sub_ = nh_.subscribe<sensor_msgs::PointCloud2>(laser_topic_.c_str(), 1, &MultisensePointCloud::laserCallback, this);
+            laser_sub_ = nh_.subscribe<sensor_msgs::PointCloud2>(laser_topic_.c_str(), 1, &MultisensePointCloud::laserCallback, this);
 			ROS_INFO_STREAM("Listening to laser cloud in: "<<laser_sub_.getTopic()<<endl);
 			laser_callback_active_=true;
 			ros::Duration(1).sleep();

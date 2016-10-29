@@ -45,6 +45,7 @@ add_library(${PROJECT_NAME}_drcsim  src/MultisensePointCloud.cpp
 				    src/MultisenseImage.cpp
 				    src/ImageHelper.cpp
 				    src/PointCloudHelper.cpp
+                                    src/test_image.cpp
 				    )
 									
 # TODO
@@ -56,8 +57,11 @@ target_link_libraries(${PROJECT_NAME}_drcsim  ${PCL_LIBRARIES} ${catkin_LIBRARIE
 add_dependencies(${PROJECT_NAME}_drcsim  ${catkin_EXPORTED_TARGETS})
 
 
-add_executable(test_lasercloud_drcsim src/test_laser.cpp)
-target_link_libraries(test_lasercloud_drcsim ${PROJECT_NAME}_drcsim)
+add_executable(test_lasercloud_srcsim src/test_laser.cpp)
+target_link_libraries(test_lasercloud_srcsim ${PROJECT_NAME}_drcsim)
+
+add_executable(test_image_srcsim src/test_image.cpp)
+target_link_libraries(test_image_srcsim ${PROJECT_NAME}_drcsim)
 
 ## Mark executables and/or libraries for installation
 #install(TARGETS ${PROJECT_NAME} multisense_backend

@@ -127,14 +127,14 @@ void MultisenseImage::syncCallback(const sensor_msgs::ImageConstPtr &img, const 
 {
 
 	loadImage(img);
-	loadDisparityImage(dimg);
+    loadDisparityImageSensorMsgs(dimg);
 }
 #else
 void MultisenseImage::syncCallback(const sensor_msgs::ImageConstPtr &img, const stereo_msgs::DisparityImageConstPtr &dimg)
 {
 
 	loadImage(img);
-	loadDisparityImage(dimg);
+    loadDisparityImageStereoMsgs(dimg);
 }
 #endif
 
@@ -235,11 +235,10 @@ void MultisenseImage::loadCostImage(const sensor_msgs::ImageConstPtr &img)
 
 }
 
-#ifdef GAZEBO_SIMULATION
 /*
  *  @note callback for simulation disparity as it is published as stereo_msgs instead of sensor_msgs
  */
-void MultisenseImage::loadDisparityImage(const stereo_msgs::DisparityImageConstPtr &img)
+void MultisenseImage::loadDisparityImageStereoMsgs(const stereo_msgs::DisparityImageConstPtr &img)
 {
 
     try
@@ -278,12 +277,12 @@ void MultisenseImage::loadDisparityImage(const stereo_msgs::DisparityImageConstP
     }
 
 }
-#endif
+
 /**
  * @note callback for loading disparity
  */
-#ifndef GAZEBO_SIMULATION
-void MultisenseImage::loadDisparityImage(const sensor_msgs::ImageConstPtr &img)
+
+void MultisenseImage::loadDisparityImageSensorMsgs(const sensor_msgs::ImageConstPtr &img)
 {
     try
     {
@@ -320,7 +319,7 @@ void MultisenseImage::loadDisparityImage(const sensor_msgs::ImageConstPtr &img)
     }
 
 }
-#endif
+
 
 
 
@@ -333,9 +332,9 @@ bool MultisenseImage::giveDisparityImage(cv::Mat &disp_img)
 	if(!disp_callback_active_)
 	{
 #ifndef GAZEBO_SIMULATION
-		 disp_sub_ = it_.subscribe(disp_topic_, 1, &MultisenseImage::loadDisparityImage, this);
+         disp_sub_ = it_.subscribe(disp_topic_, 1, &MultisenseImage::loadDisparityImageSensorMsgs, this);
 #else
-		 disp_sub_ = nh_.subscribe(disp_topic_, 1, &MultisenseImage::loadDisparityImage, this);
+         disp_sub_ = nh_.subscribe(disp_topic_, 1, &MultisenseImage::loadDisparityImageStereoMsgs, this);
 #endif
 		 disp_callback_active_=true;
 		 ROS_INFO_STREAM("Listening to: "<<disp_sub_.getTopic()<<endl);

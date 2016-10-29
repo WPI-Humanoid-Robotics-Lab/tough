@@ -40,4 +40,4 @@ ImageHelper::~ImageHelper() {
 	// TODO Auto-generated destructor stub
 }
 
-} /* namespace drc_perception */
+} /* namespace src_perception */
