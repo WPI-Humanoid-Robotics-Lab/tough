@@ -8,8 +8,13 @@
       <uri>model://ground_plane</uri>
     </include>
 
+    <!-- Disable gravity along all axis -->
+    <gravity>0 0 0</gravity>
+
+
     <include>
-      <pose>0 0 1 0 0 0</pose>
+      <static>true</static>
+      <pose>3 0 1 0 0 3.141592</pose>
       <uri>model://light_panel</uri>
     </include>
   </world>

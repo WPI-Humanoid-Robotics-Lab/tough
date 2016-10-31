@@ -10,6 +10,7 @@
         <rosparam param="source_list">["/multisense/joint_states"]</rosparam>
     </node>
 
+
     <!-- Combine joint values -->
     	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
 		<param name="publish_frequency" value="50" />
@@ -20,6 +21,7 @@
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
   <!-- We use the empty world with no gravity, To make robot stand as we dont have actuator controllers yet -->
         <arg name="world_name" value="$(find val_gazebo)/worlds/GravityDisabled.world"/>
+        <arg name="verbose" value="true" />
   </include>
   
   <!-- Spawn a robot into Gazebo -->
@@ -31,5 +33,14 @@
   
   <!-- Start val_laser2point_cloud_node to publish pointcloud2 data -->
   <node pkg="val_laser2point_cloud" type="val_laser2point_cloud_node" name="val_laser2point_cloud_node"/>
-  
+
+  <!-- Start stereo_image_proc to pusblish disparity image -->
+  <node ns="/multisense/camera" name="stereo_proc" pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" output="log">
+    <param name="disparity_range" type="int" value="128"/>
+    <param name="approximate_sync" type="bool" value="false"/>
+    <!-- remap from="/multisense/camera/disparity" to="/multisense/left/disparity" / -->
+    <remap from="/multisense/camera/points2" to="/multisense/image_points2" />
+  </node>
+
+
 </launch>

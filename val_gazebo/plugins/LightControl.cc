@@ -83,41 +83,53 @@ void LightControl::Update(const common::UpdateInfo &info) {
     {
       seq_index = 0;
     }
-  }
 
-  msgs::Visual* visual_msgs[NUM_LIGHTS];
+    msgs::Visual visual_msgs[NUM_LIGHTS];
 
-  for (int i = 0; i < NUM_LIGHTS; i++)
-  {
-    visual_msgs[i] = new msgs::Visual();
-
-    std::string visual_name = "light" + std::to_string(i);
-    visual_msgs[i]->set_name(visual_name);
-    visual_msgs[i]->set_visible(true);
-    visual_msgs[i]->set_parent_name("light_panel::base");
-    visual_msgs[i]->set_cast_shadows(false);
-
-    msgs::Geometry *geomMsg = visual_msgs[i]->mutable_geometry();
-    geomMsg->set_type(gazebo::msgs::Geometry::CYLINDER);
-    geomMsg->mutable_cylinder()->set_radius(0.05);
-    geomMsg->mutable_cylinder()->set_length(0.01);
-
-    math::Pose model_pose = _model->GetWorldPose();
-    float x = model_pose.pos.x + 0.51;
-    float y = model_pose.pos.y + (i - (NUM_LIGHTS/2)) * LIGHT_SPACING;
-    float z = model_pose.pos.z + 0.75;
-
-    msgs::Set(visual_msgs[i]->mutable_pose(), ignition::math::Pose3d(x, y, z, 0, 1.5707, 0));
-
-    if (sequence[seq_index].light_num == i)
+    for (int i = 0; i < NUM_LIGHTS; i++)
     {
-      msgs::Set(visual_msgs[i]->mutable_material()->mutable_diffuse(), sequence[seq_index].color);
-    }
-    else {
-      msgs::Set(visual_msgs[i]->mutable_material()->mutable_diffuse(), common::Color::Black);
-    }
-    visual_pub->Publish(*visual_msgs[i]);
+      visual_msgs[i] = msgs::Visual();
 
+      std::string visual_name = "light" + std::to_string(i);
+      visual_msgs[i].set_name(visual_name);
+      visual_msgs[i].set_visible(true);
+      visual_msgs[i].set_parent_name("light_panel::base");
+      visual_msgs[i].set_cast_shadows(false);
+
+      msgs::Geometry *geomMsg = visual_msgs[i].mutable_geometry();
+      geomMsg->set_type(gazebo::msgs::Geometry::CYLINDER);
+      geomMsg->mutable_cylinder()->set_radius(0.05);
+      geomMsg->mutable_cylinder()->set_length(0.01);
+
+      math::Pose model_pose = _model->GetWorldPose();
+
+
+      math::Vector3 model_angle_before = model_pose.rot.GetAsEuler();
+      math::Pose light_pose(math::Vector3(0.505, (i - (NUM_LIGHTS/2)) * LIGHT_SPACING, 0.75),
+                            math::Vector3(0, 3 * M_PI_2, 0));
+      math::Pose combined_pose = light_pose + model_pose;
+      math::Vector3 model_rot = combined_pose.rot.GetAsEuler();
+
+      ignition::math::Pose3d ignition_pose(
+            combined_pose.pos[0],
+          combined_pose.pos[1],
+          combined_pose.pos[2],
+          model_rot[0],
+          model_rot[1],
+          model_rot[2]);
+
+      msgs::Set(visual_msgs[i].mutable_pose(), ignition_pose);
+
+      if (sequence[seq_index].light_num == i)
+      {
+        msgs::Set(visual_msgs[i].mutable_material()->mutable_emissive(), sequence[seq_index].color);
+      }
+      else {
+        msgs::Set(visual_msgs[i].mutable_material()->mutable_emissive(), common::Color::Black);
+      }
+      visual_pub->Publish(visual_msgs[i]);
+
+    }
   }
 }
 
