@@ -22,6 +22,11 @@ sudo apt-get install ros-indigo-gazebo7-*
 ```bash
     sudo apt-get install ruby    
 ```
+* pcl
+
+```bash
+    sudo apt-get install ros-indigo-pcl-ros ros-indigo-pcl-conversions
+```
 
 #### Setting up workspace
 Create catkin workspace. If you already have one, move to the nest step    
