@@ -13,7 +13,7 @@
 #include <perception_common/MultisenseImage.h>
 
 
-using namespace drc_perception;
+using namespace src_perception;
 int main(int argc, char** argv)
 {
 	ros::init(argc,argv,"test_rgbdgen");

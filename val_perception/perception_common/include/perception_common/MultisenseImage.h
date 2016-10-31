@@ -264,6 +264,6 @@ public:
     virtual ~MultisenseImage();
 };
 
-} /* namespace drc_perception */
+} /* namespace src_perception */
 
 #endif /* MULTISENSEIMAGE_H_ */

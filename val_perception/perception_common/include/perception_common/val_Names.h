@@ -4,11 +4,7 @@
 #include <string>
 namespace VAL_NAMES
 {
-	/********* MSGS *********/
-
-	static const std::string FIELD_STATE = "/field_state";
-	static const std::string FIELD_COMMAND = "/field_command";
-
+    /********* MSGS *********/
 
 	//laser topics
 	static const std::string MULTISENSE_LASER_SCAN_TOPIC = "/multisense/lidar_scan";
@@ -22,8 +18,7 @@ namespace VAL_NAMES
 	static const std::string MULTISENSE_DEPTH_COST_TOPIC = "/multisense/left/cost";
 	static const std::string MULTISENSE_STEREO_CLOUD_TOPIC = "/multisense/image_points2";
 	static const std::string MULTISENSE_RAW_CAM_CONFIG_TOPIC = "/multisense/calibration/raw_cam_config";
-	static const std::string MULTISENSE_STEREO_CLOUD_COLOR_TOPIC = "/multisense/image_points2";
-	static const std::string ATLAS_GUI_MULTISENSE_TOPIC = "/atlas/multisensecontrol";
+    static const std::string MULTISENSE_STEREO_CLOUD_COLOR_TOPIC = "/multisense/image_points2";
 
 	//imu topic
 	static const std::string MULTISENSE_IMU_TOPIC = "/atlas/sensors/imu/imu";
@@ -44,10 +39,6 @@ namespace VAL_NAMES
 	//scribble topics
 	static const std::string SCRIBBLE_TOPIC = "/drc_gui/scribble";
 	static const std::string OBJECT_TYPE_TOPIC = "/drc_gui/object_type";
-
-	//slam topic
-	static const std::string KINEMATIC_POSE_TOPIC = "/kinematic_head_pose";
-	static const std::string SLAM_POSE_TOPIC = "/slam_head_pose";
 
 	//services
 	static const std::string PLANE_DETECTION_SERVICE = "/perception/atlas_plane_point_service";
@@ -95,6 +86,10 @@ namespace VAL_NAMES
 
 
 /*****************************/
+
+
+
+
 
 }
 
