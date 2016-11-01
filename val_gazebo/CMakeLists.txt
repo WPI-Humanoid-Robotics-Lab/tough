@@ -37,7 +37,7 @@ list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
 set (plugins_src
   LightControl
   ButtonPanel
-  MultiSenseSLPlugin
+#  MultiSenseSLPlugin
 )
 
 foreach(plugin_src ${plugins_src})
