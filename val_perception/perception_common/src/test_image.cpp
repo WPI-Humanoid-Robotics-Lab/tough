@@ -87,22 +87,10 @@ int main(int argc, char** argv)
 
         while(ros::ok())
         {
-            if(image_assistance.giveImage(color_image))
-            {
-                image_assistance.giveTime(time);
-                cv::imshow("Color Image",color_image);
-                assert(ptime<time);
-                ros::Duration d(time-ptime);
-                camera_fps=1.0/d.toSec();
-                ptime=time;
-                time_data.updateValue(frame_id++,"device fps",camera_fps);
-                cv::waitKey(1);
-            }
-//            if(image_assistance.giveDisparityImage(disp))
+//            if(image_assistance.giveImage(color_image))
 //            {
-//                src_perception::ImageHelper::colorDisparity(disp,disp_img);
-//                cv::imshow("Disparity Image",*disp_img);
 //                image_assistance.giveTime(time);
+//                cv::imshow("Color Image",color_image);
 //                assert(ptime<time);
 //                ros::Duration d(time-ptime);
 //                camera_fps=1.0/d.toSec();
@@ -110,6 +98,18 @@ int main(int argc, char** argv)
 //                time_data.updateValue(frame_id++,"device fps",camera_fps);
 //                cv::waitKey(1);
 //            }
+            if(image_assistance.giveDisparityImage(disp))
+            {
+                src_perception::ImageHelper::colorDisparity(disp,disp_img);
+                cv::imshow("Disparity Image",*disp_img);
+                image_assistance.giveTime(time);
+                assert(ptime<time);
+                ros::Duration d(time-ptime);
+                camera_fps=1.0/d.toSec();
+                ptime=time;
+                time_data.updateValue(frame_id++,"device fps",camera_fps);
+                cv::waitKey(1);
+            }
 //            if(image_assistance.giveSyncImageswTime(color_image,disp,time))
 //            {
 //                cv::imshow("Color Image",color_image);

@@ -20,18 +20,16 @@ int main(int argc, char** argv)
 	while(ros::ok())
 	{
 		src_perception::LaserPointCloud::Ptr cloud;
-        /*if(point_cloud_combiner.giveLaserCloud(cloud))
-		{
-			pcl::PCLPointCloud2 output;
-			pcl::toPCLPointCloud2(*cloud,output);
-//			pcl::PointXYZI pt;
-//			memcpy(&pt,&output.data[0],sizeof(float)*4);
-//			std::cout<<cloud->points[0].intensity<<"->"<<pt.intensity<<std::endl;
-			output.header.stamp=ros::Time::now().toNSec()/10e2;
-			pub_laser_test.publish(output);
-        }*/
-
-        ROS_INFO_ONCE("meow!");
+//        if(point_cloud_combiner.giveLaserCloud(cloud))
+//        {
+//            pcl::PCLPointCloud2 output;
+//            pcl::toPCLPointCloud2(*cloud,output);
+////			pcl::PointXYZI pt;
+////			memcpy(&pt,&output.data[0],sizeof(float)*4);
+////			std::cout<<cloud->points[0].intensity<<"->"<<pt.intensity<<std::endl;
+//            output.header.stamp=ros::Time::now().toNSec()/10e2;
+//            pub_laser_test.publish(output);
+//        }
 
         if (point_cloud_combiner.giveLaserCloudWrtLFoot(cloud))
         {

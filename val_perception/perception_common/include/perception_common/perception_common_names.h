@@ -19,7 +19,6 @@ namespace PERCEPTION_COMMON_NAMES
 	static const std::string MULTISENSE_STEREO_CLOUD_TOPIC = "/multisense/image_points2";
     // TODO: //needed camera calibration paramters
     static const std::string MULTISENSE_RAW_CAM_CONFIG_TOPIC = "/multisense/calibration/raw_cam_config";
-    static const std::string MULTISENSE_STEREO_CLOUD_COLOR_TOPIC = "/multisense/image_points2";
 
     //multisense Topics
 	static const std::string MULTISENSE_CONTROL_MOTOR_TOPIC = "/multisense/set_spindle_speed";
