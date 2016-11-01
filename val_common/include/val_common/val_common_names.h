@@ -1,9 +1,9 @@
-#ifndef VAL_DESCRIPTION_NAMES_H
-#define VAL_DESCRIPTION_NAMES_H
+#ifndef VAL_COMMON_NAMES_H
+#define VAL_COMMON_NAMES_H
 
 #include <string>
 
-namespace DESCRIPTION_COMMON_NAMES
+namespace VAL_COMMON_NAMES
 {
     /********* TF Frames *********/
 
