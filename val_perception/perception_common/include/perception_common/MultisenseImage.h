@@ -29,40 +29,40 @@ namespace src_perception {
 
 class MultisenseImage {
 
-	DISALLOW_COPY_AND_ASSIGN(MultisenseImage)
+    DISALLOW_COPY_AND_ASSIGN(MultisenseImage)
 
-	cv::Mat 				image_;
+    cv::Mat 				image_;
     cv::Mat         		disparity_;
     cv::Mat					depth_;
     cv::Mat					cost_;
 
     struct
     {
-    	cv::Mat         		camera_;
-    	cv::Mat_<double>		Q_matrix_;
-    	int						height_;
-    	int 					width_;
-    	float					fps_;
-    	float					gain_;
-    	float					exposure_;
-    	float					baselength_;
+        cv::Mat         		camera_;
+        cv::Mat_<double>		Q_matrix_;
+        int						height_;
+        int 					width_;
+        float					fps_;
+        float					gain_;
+        float					exposure_;
+        float					baselength_;
     }settings;									//this is the data that is available within the config message that multisense
-    											//uses so
+    //uses so
 
-	std_msgs::Header		img_header_;
-	std_msgs::Header		disp_header_;
-	std_msgs::Header		depth_header_;
-	std_msgs::Header		cost_header_;
+    std_msgs::Header		img_header_;
+    std_msgs::Header		disp_header_;
+    std_msgs::Header		depth_header_;
+    std_msgs::Header		cost_header_;
 
-	cv_bridge::CvImagePtr   cv_ptr_;			//feels like it has both the header and the image information
-												//use this data type instead of the image_ and img_header_??
+    cv_bridge::CvImagePtr   cv_ptr_;			//feels like it has both the header and the image information
+    //use this data type instead of the image_ and img_header_??
 
-	ros::NodeHandle 		nh_;
+    ros::NodeHandle 		nh_;
     std::string 			image_topic_,
-    						disp_topic_,
-    						depth_topic_,
-							depth_cost_topic_,
-    						multisense_topic_;
+    disp_topic_,
+    depth_topic_,
+    depth_cost_topic_,
+    multisense_topic_;
 
     bool					new_image_;
     bool            		new_disp_;
@@ -77,105 +77,99 @@ class MultisenseImage {
 
     image_transport::ImageTransport it_;
 
-	image_transport::Subscriber 		cam_sub_;
-	image_transport::SubscriberFilter   *sync_cam_sub_;
-	image_transport::SubscriberFilter   *sync_cam_depth_sub_;
-	image_transport::SubscriberFilter   *sync_cam_cost_sub_;
+    image_transport::Subscriber 		cam_sub_;
+    image_transport::SubscriberFilter   *sync_cam_sub_;
+    image_transport::SubscriberFilter   *sync_cam_depth_sub_;
+    image_transport::SubscriberFilter   *sync_cam_cost_sub_;
 #ifndef GAZEBO_SIMULATION
-	typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image> exactTimePolicy;
-	std::shared_ptr<message_filters::Synchronizer< exactTimePolicy > > sync_;
-	image_transport::SubscriberFilter   *sync_disp_sub_;
+    typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image> exactTimePolicy;
+    std::shared_ptr<message_filters::Synchronizer< exactTimePolicy > > sync_;
+    image_transport::SubscriberFilter   *sync_disp_sub_;
 
 #else
-	typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, stereo_msgs::DisparityImage> approxTimePolicy;
-	std::shared_ptr<message_filters::Synchronizer< approxTimePolicy > > sync_;
+    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, stereo_msgs::DisparityImage> approxTimePolicy;
+    std::shared_ptr<message_filters::Synchronizer< approxTimePolicy > > sync_;
 #endif
 
-	typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image> depthImageCostExactTimePolicy;
-	std::shared_ptr<message_filters::Synchronizer< depthImageCostExactTimePolicy > > sync_depth_;
+    typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image> depthImageCostExactTimePolicy;
+    std::shared_ptr<message_filters::Synchronizer< depthImageCostExactTimePolicy > > sync_depth_;
 
-	image_transport::Subscriber 		depth_sub_;
-	image_transport::Subscriber 		cost_sub_;
+    image_transport::Subscriber 		depth_sub_;
+    image_transport::Subscriber 		cost_sub_;
 #ifndef GAZEBO_SIMULATION
-	image_transport::Subscriber 		disp_sub_;
+    image_transport::Subscriber 		disp_sub_;
 
 #else
-	ros::Subscriber 					disp_sub_;
-	message_filters::Subscriber<stereo_msgs::DisparityImage> *sync_disp_sub_;
+    ros::Subscriber 					disp_sub_;
+    message_filters::Subscriber<stereo_msgs::DisparityImage> *sync_disp_sub_;
 #endif
-	ros::Subscriber						multisense_sub_;
+    ros::Subscriber						multisense_sub_;
 
-	/**
-	 * @brief this function is the callback for loading the images, as of now it needs the image topic to
-	 *        have the camerainfo be published, but I think this should be removed as multisense head does
-	 *        not necesarrily publish the right topics.
-	 * @param img the image from the multisense head
-	 */
-	void loadImage(const sensor_msgs::ImageConstPtr &img);
+    /**
+     * @brief this function is the callback for loading the images, as of now it needs the image topic to
+     *        have the camerainfo be published, but I think this should be removed as multisense head does
+     *        not necesarrily publish the right topics.
+     * @param img the image from the multisense head
+     */
+    void loadImage(const sensor_msgs::ImageConstPtr &img);
 
 
-	/**
-	 * @brief this function is the callback for loading the depth image
-	 * @param depth_img the depth image from the multisense head
-	 */
-	void loadDepthImage(const sensor_msgs::ImageConstPtr &depth_img);
+    /**
+     * @brief this function is the callback for loading the depth image
+     * @param depth_img the depth image from the multisense head
+     */
+    void loadDepthImage(const sensor_msgs::ImageConstPtr &depth_img);
 
-	void loadCostImage(const sensor_msgs::ImageConstPtr &img);
+    void loadCostImage(const sensor_msgs::ImageConstPtr &img);
 
-	/**
-	 * @brief this function loads the disparity image
-	 * @param img the ros image published
-	 */
+    /**
+     * @brief this function loads the disparity image
+     * @param img the ros image published
+     */
     void loadDisparityImageSensorMsgs(const sensor_msgs::ImageConstPtr &img);
 
-	/**
-	 * @brief this function loads the camera parameter from the multisense topic
-	 * @param config the ros data published by the multisense head
-	 */
-	void loadCameraConfig(const multisense_ros::RawCamConfigConstPtr &config);
+    /**
+     * @brief this function loads the camera parameter from the multisense topic
+     * @param config the ros data published by the multisense head
+     */
+    void loadCameraConfig(const multisense_ros::RawCamConfigConstPtr &config);
 
 #ifdef GAZEBO_SIMULATION
-	/**
-	 * @brief this function loads the camera parameter from the multisense in SIM topic
-	 * @param config the ros data published by the multisense head in SIM
-	 */
+    /**
+     * @brief this function loads the camera parameter from the multisense in SIM topic
+     * @param config the ros data published by the multisense head in SIM
+     */
     void loadDisparityImageStereoMsgs(const stereo_msgs::DisparityImageConstPtr &img);
 #endif
 
 #ifndef GAZEBO_SIMULATION
-	void syncCallback(const sensor_msgs::ImageConstPtr &img, const sensor_msgs::ImageConstPtr &dimg);
+    void syncCallback(const sensor_msgs::ImageConstPtr &img, const sensor_msgs::ImageConstPtr &dimg);
 #else
-	void syncCallback(const sensor_msgs::ImageConstPtr &img, const stereo_msgs::DisparityImageConstPtr &dimg);
+    void syncCallback(const sensor_msgs::ImageConstPtr &img, const stereo_msgs::DisparityImageConstPtr &dimg);
 #endif
-	void syncDepthCallback(const sensor_msgs::ImageConstPtr &img, const sensor_msgs::ImageConstPtr &dimg, const sensor_msgs::ImageConstPtr &cimg);
+    void syncDepthCallback(const sensor_msgs::ImageConstPtr &img, const sensor_msgs::ImageConstPtr &dimg, const sensor_msgs::ImageConstPtr &cimg);
 public:
-	/**
-	 * @brief Constructor
-	 * @param nh the ros nodehandle - why do i have this as an argument? expect for the fact to make sure
-	 * 		  the constructor knows that it is ros. I have no idea why I do this!
-	 */
-	MultisenseImage(ros::NodeHandle &nh);
+    /**
+     * @brief Constructor
+     * @param nh the ros nodehandle - why do i have this as an argument? expect for the fact to make sure
+     * 		  the constructor knows that it is ros. I have no idea why I do this!
+     */
+    MultisenseImage(ros::NodeHandle &nh);
 
-	void setDepthTopic(const std::string &topic);
+    void setDepthTopic(const std::string &topic);
 
-	/**
-	 * @brief gives an image loaded
-	 * @param img as a refernce which will be filled by the image from the multisense head
-	 * @return	if we have a new image
-	 */
-	bool giveImage(cv::Mat &img);
-	/**
-	 * Deprecated function, please use giveImage
-	 */
-	bool giveLeftColorImage(cv::Mat &img)
-	{
-		return(giveImage(img));
-	}
-	/**
-	 * @brief gives the camera intrinsic matrix
-	 * @param cam the cmaera matrix
-	 * @return true if you have a new camera matrix
-	 */
+    /**
+     * @brief gives an image loaded
+     * @param img as a refernce which will be filled by the image from the multisense head
+     * @return	if we have a new image
+     */
+    bool giveImage(cv::Mat &img);
+
+    /**
+     * @brief gives the camera intrinsic matrix
+     * @param cam the cmaera matrix
+     * @return true if you have a new camera matrix
+     */
     bool giveCameraInfo(cv::Mat &cam);
     /**
      * @brief gives the disparity image that the camera has for the disparity
@@ -183,13 +177,7 @@ public:
      * @return true if you have new disparity image
      */
     bool giveDisparityImage(cv::Mat &disp_img);
-    /**
-     * @brief Deprecated use giveDisparity
-     */
-    bool giveLeftDisparityImage(cv::Mat_<float> &disp_img)
-    {
-    	return(giveDisparityImage(disp_img));
-    }
+
     /**
      * @brief the Q matrix that is used to convert disparity to 3D points
      * @param Q the matrix as CV::mat
@@ -227,7 +215,7 @@ public:
      */
     int giveHeight()
     {
-    	return settings.height_;
+        return settings.height_;
     }
     /**
      * @brief A function to get the width in situations where you have not yet received an image.
@@ -236,7 +224,7 @@ public:
      */
     int giveWidth()
     {
-    	return settings.width_;
+        return settings.width_;
     }
     /**
      * @brief the baselength as read from the config message.
@@ -244,7 +232,7 @@ public:
      */
     float giveBaseLength()
     {
-    	return settings.baselength_;
+        return settings.baselength_;
     }
 
     /**

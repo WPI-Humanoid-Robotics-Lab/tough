@@ -56,6 +56,7 @@ int main(int argc, char** argv)
         ROS_ERROR("usgae: <node> <param>");
         ROS_ERROR("param: ");
         ROS_ERROR("deafult: displays the left and right images ");
+        ROS_ERROR("disparity: displays disparity images ");
         exit(0);
     }
 
@@ -64,7 +65,8 @@ int main(int argc, char** argv)
         ROS_INFO("default");
         testretriveImageWithoutSpin();
     }
-    else{
+    else if (std::string(argv[1]) == "disparity")
+    {
         ros::NodeHandle nh;
         src_perception::MultisenseImage image_assistance(nh);
         cv::Mat color_image;
@@ -75,9 +77,6 @@ int main(int argc, char** argv)
         ros::Time ptime;
 
         float camera_fps;
-
-
-
         time_data.add("device fps");
         plot_=new Gnuplot();
         time_data.setup(plot_);
@@ -88,7 +87,7 @@ int main(int argc, char** argv)
 
         while(ros::ok())
         {
-            if(image_assistance.giveLeftColorImage(color_image))
+            if(image_assistance.giveImage(color_image))
             {
                 image_assistance.giveTime(time);
                 cv::imshow("Color Image",color_image);
@@ -99,31 +98,31 @@ int main(int argc, char** argv)
                 time_data.updateValue(frame_id++,"device fps",camera_fps);
                 cv::waitKey(1);
             }
-            if(image_assistance.giveDisparityImage(disp))
-            {
-                src_perception::ImageHelper::colorDisparity(disp,disp_img);
-                cv::imshow("Disparity Image",*disp_img);
-                image_assistance.giveTime(time);
-                assert(ptime<time);
-                ros::Duration d(time-ptime);
-                camera_fps=1.0/d.toSec();
-                ptime=time;
-                time_data.updateValue(frame_id++,"device fps",camera_fps);
-                cv::waitKey(1);
-            }
-            if(image_assistance.giveSyncImageswTime(color_image,disp,time))
-            {
-                cv::imshow("Color Image",color_image);
-                src_perception::ImageHelper::colorDisparity(disp,disp_img);
-                cv::imshow("Disparity Image",*disp_img);
-                cv::waitKey(1);
-                assert(ptime<time);
-                ros::Duration d(time-ptime);
-                camera_fps=1.0/d.toSec();
-                //clearing up the pointers
-                ptime=time;
-                time_data.updateValue(frame_id++,"device fps",camera_fps);
-            }
+//            if(image_assistance.giveDisparityImage(disp))
+//            {
+//                src_perception::ImageHelper::colorDisparity(disp,disp_img);
+//                cv::imshow("Disparity Image",*disp_img);
+//                image_assistance.giveTime(time);
+//                assert(ptime<time);
+//                ros::Duration d(time-ptime);
+//                camera_fps=1.0/d.toSec();
+//                ptime=time;
+//                time_data.updateValue(frame_id++,"device fps",camera_fps);
+//                cv::waitKey(1);
+//            }
+//            if(image_assistance.giveSyncImageswTime(color_image,disp,time))
+//            {
+//                cv::imshow("Color Image",color_image);
+//                src_perception::ImageHelper::colorDisparity(disp,disp_img);
+//                cv::imshow("Disparity Image",*disp_img);
+//                cv::waitKey(1);
+//                assert(ptime<time);
+//                ros::Duration d(time-ptime);
+//                camera_fps=1.0/d.toSec();
+//                //clearing up the pointers
+//                ptime=time;
+//                time_data.updateValue(frame_id++,"device fps",camera_fps);
+//            }
             ros::spinOnce();
         }
     }

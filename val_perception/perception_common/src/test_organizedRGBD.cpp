@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 
 	while(ros::ok())
 	{
-		if(mi.giveLeftColorImage(color))
+        if(mi.giveImage(color))
 		{
 			new_color=true;
 		}

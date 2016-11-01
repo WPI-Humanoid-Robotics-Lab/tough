@@ -5,13 +5,6 @@ SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
 
-IF(1)
-     string(ASCII 27 Esc)
-     set(BoldGreen   "${Esc}[1;32m")
-     set(ColourReset "${Esc}[m")
-     message("${BoldGreen}Compiling ${PROJECT_NAME} with support for drcsim${ColourReset}")
-ENDIF()
-
 find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
 find_package(PCL 1.7 REQUIRED io)
 find_package(catkin REQUIRED COMPONENTS roscpp
@@ -41,7 +34,7 @@ catkin_package(
    DEPENDS opencv pcl
 )
 
-add_library(${PROJECT_NAME}_drcsim  src/MultisensePointCloud.cpp
+add_library(${PROJECT_NAME}  src/MultisensePointCloud.cpp
 				    src/MultisenseImage.cpp
 				    src/ImageHelper.cpp
 				    src/PointCloudHelper.cpp
@@ -49,21 +42,21 @@ add_library(${PROJECT_NAME}_drcsim  src/MultisensePointCloud.cpp
 									
 # TODO
 set_property(
-   		TARGET ${PROJECT_NAME}_drcsim 
+                TARGET ${PROJECT_NAME}
    		PROPERTY COMPILE_DEFINITIONS GAZEBO_SIMULATION)
 
-target_link_libraries(${PROJECT_NAME}_drcsim  ${PCL_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(${PROJECT_NAME}_drcsim  ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}  ${PCL_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(${PROJECT_NAME}  ${catkin_EXPORTED_TARGETS})
 
 
-add_executable(test_lasercloud_srcsim src/test_laser.cpp)
-target_link_libraries(test_lasercloud_srcsim ${PROJECT_NAME}_drcsim)
+add_executable(test_lasercloud  src/test_laser.cpp)
+target_link_libraries(test_lasercloud  ${PROJECT_NAME})
 
-add_executable(test_image_srcsim src/test_image.cpp)
-target_link_libraries(test_image_srcsim ${PROJECT_NAME}_drcsim)
+add_executable(test_image  src/test_image.cpp)
+target_link_libraries(test_image  ${PROJECT_NAME})
 
-add_executable(test_organizedRGBD_srcsim src/test_organizedRGBD.cpp)
-target_link_libraries(test_organizedRGBD_srcsim ${PROJECT_NAME}_drcsim)
+add_executable(test_organizedRGBD  src/test_organizedRGBD.cpp)
+target_link_libraries(test_organizedRGBD  ${PROJECT_NAME})
 
 ## Mark executables and/or libraries for installation
 #install(TARGETS ${PROJECT_NAME} multisense_backend
