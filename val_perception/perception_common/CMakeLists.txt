@@ -37,11 +37,11 @@ catkin_package(
 )
 
 add_library(${PROJECT_NAME}  src/MultisensePointCloud.cpp
-				    src/MultisenseImage.cpp
-				    src/ImageHelper.cpp
-				    src/PointCloudHelper.cpp
-                                    src/laser2point_cloud.cpp
-				    )
+                             src/MultisenseImage.cpp
+                             src/ImageHelper.cpp
+                             src/PointCloudHelper.cpp
+                             src/laser2point_cloud.cpp
+)
 									
 # TODO
 set_property(
