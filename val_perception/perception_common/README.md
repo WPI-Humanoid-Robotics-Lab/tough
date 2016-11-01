@@ -22,16 +22,25 @@ perception_common provides the basic functionality to access data from the ros t
 
 **usage**
 
-for image
- check the test_image.cpp
- running the file:
- rosrun perception_common test_image default
+* for getting the image data from multisense     
+ check the **test_image.cpp**                                 
+ running the file:               
+ `rosrun perception_common test_image default`    --> displayes the raw left image              
+ `rosrun perception_common test_image disparoty`  --> displays the disparity image         
+ also displays the fps(frames per sec) on a gnu-plot                
+
+* for getting the laser scan data from multisense                   
+ check the **test_laser.cpp**                                      
+ running the file:                
+ `rosrun perception common test_laser`  --> gives the point cloud                
+ use the rviz and to visuslaise the point cloud                    
+
+  **note:** for testing these the simulation should be running `roslaunch val_gazebo valkyrie_empty_world.launch`               
 
 ***
 **Comments**
 * Multisense publishes intensity as uint32 but pcl::PointXYZI expects intensity to be a float datatype. The type casting is done appropriately in this package.
-* All the classes are under the namespace drc_perception, this will prevent namespace colllsion
-* I have typedef the data type the laser cloud publishes which is pcl::PointCloud<pcl::PointXYZI> as drc_perception::LaserPointCloud
-perception common is also exported as a library so you can use it in your package.
+* All the classes are under the namespace src_perception, this will prevent namespace colllsion
+* perception common can be exported as a library in different package.
 
 
