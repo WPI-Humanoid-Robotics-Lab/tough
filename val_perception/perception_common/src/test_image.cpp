@@ -55,8 +55,8 @@ int main(int argc, char** argv)
     {
         ROS_ERROR("usgae: <node> <param>");
         ROS_ERROR("param: ");
-        ROS_ERROR("deafult: displays the left and right images ");
-        ROS_ERROR("disparity: displays disparity images ");
+        ROS_ERROR("deafult: displays the left image ");
+        ROS_ERROR("disparity: displays disparity image ");
         exit(0);
     }
 
