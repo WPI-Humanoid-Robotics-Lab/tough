@@ -45,23 +45,23 @@ MultisenseImage::MultisenseImage(ros::NodeHandle &n):nh_(n),
 
     if(!pnh.getParam("image_topic",image_topic_))
     {
-        image_topic_ = VAL_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC;
+        image_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC;
     }
     if(!pnh.getParam("disp_topic",disp_topic_))
     {
-        disp_topic_ = VAL_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC;
+        disp_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC;
     }
     if(!pnh.getParam("multisense_config_topic",multisense_topic_))
     {
-        multisense_topic_ = VAL_NAMES::MULTISENSE_RAW_CAM_CONFIG_TOPIC;
+        multisense_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_RAW_CAM_CONFIG_TOPIC;
     }
     if(!pnh.getParam("depth_topic",depth_topic_))
     {
-        depth_topic_ = VAL_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;
+        depth_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;
     }
     if(!pnh.getParam("cost_topic",depth_cost_topic_))
     {
-        depth_cost_topic_ = VAL_NAMES::MULTISENSE_DEPTH_COST_TOPIC;
+        depth_cost_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_DEPTH_COST_TOPIC;
     }
     //hard coded values specific to simulation, later on can be made to be not hard coded.
 #ifdef GAZEBO_SIMULATION
@@ -94,6 +94,7 @@ void MultisenseImage::setDepthTopic(const std::string &topic)
 {
 	depth_topic_ = topic;
 }
+
 /**
  * @note this callback is needed both for the instrinsic and the Q matrix
  *        it will change when the resolution changes
