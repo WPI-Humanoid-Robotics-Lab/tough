@@ -11,7 +11,7 @@
  */
 
 #include <perception_common/MultisenseImage.h>
-#include <perception_common/val_Names.h>
+#include <perception_common/perception_common_names.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 

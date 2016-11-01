@@ -19,7 +19,9 @@ find_package(catkin REQUIRED COMPONENTS roscpp
 					std_msgs
 					message_filters
 					multisense_ros
-					tf_conversions)
+                                        tf_conversions
+                                        laser_geometry
+)
 
 include_directories(include)
 include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
@@ -38,6 +40,7 @@ add_library(${PROJECT_NAME}  src/MultisensePointCloud.cpp
 				    src/MultisenseImage.cpp
 				    src/ImageHelper.cpp
 				    src/PointCloudHelper.cpp
+                                    src/laser2point_cloud.cpp
 				    )
 									
 # TODO

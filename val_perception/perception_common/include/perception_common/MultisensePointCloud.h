@@ -43,6 +43,10 @@ class MultisensePointCloud
 
 	ros::NodeHandle 					nh_;
 
+    // tf for left foot and left camera optical frame
+    const std::string base_frame_;
+    const std::string left_camera_opt_frame_tf_;
+
 	LaserPointCloud::Ptr 				laser_cloud_;
     LaserPointCloud::Ptr                laser_cloud_wrt_l_foot_;
 	StereoPointCloud::Ptr 				stereo_cloud_;
@@ -102,9 +106,12 @@ public:
 	void removeRobot(pcl::PointCloud<T> &cloud);
     /**
      * @brief the constructor with the node handle.
-     * @param nh
+     * @param nh                        - node handle
+     *        baseFrame                 - frame that is to be used as a reference for creating pointcloud
+     *        left_camera_opt_frame_tf  - tf for left camera optical frame
      */
-	MultisensePointCloud(ros::NodeHandle &nh);
+    MultisensePointCloud(ros::NodeHandle &nh, const std::string base_frame, const std::string left_camera_opt_frame_tf);
+
 	/**
 	 * @brief this function gives the stereo cloud and connects to the subscribers
 	 * @param out the pointcloud<pcl::PointXYZ>
@@ -133,7 +140,7 @@ public:
 	virtual ~MultisensePointCloud();
 
 	void setLaserTopic(const std::string &name);
-	bool giveLaserCloudForTime(const ros::Time &time, LaserPointCloud::Ptr &out);
+    bool giveLaserCloudForTime(const ros::Time &time, LaserPointCloud::Ptr &out);
 };
 
 //might be shifted to a hpp file which has the instantiation of all the templates

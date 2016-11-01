@@ -39,45 +39,6 @@ namespace PERCEPTION_COMMON_NAMES
 //	static const std::string WALK_ACTION_SERVER = "/walkToTargetAS";
 //	static const std::string DETECTION_SERVER = "/detect_debrisAS";
 
-
-    /************************/
-
-    /********* TF Frames *********/
-
-    /* Multisense */
-    static const std::string HOKUYO_LINK_TF = "/hokuyo_link";
-    static const std::string HEAD_HOKUYO_FRAME_TF = "/head_hokuyo_frame";
-    static const std::string LEFT_CAMERA_OPTICAL_FRAME_TF = "/left_camera_frame";
-
-    //Atlas Hand
-    static const std::string R_HAND_TF = "r_hand";
-    static const std::string R_PALM_TF = "r_palm";
-    static const std::string L_HAND_TF = "l_hand";
-    static const std::string L_PALM_TF = "l_palm";
-
-    /* Atlas Torso*/
-    static const std::string PELVIS_TF = "/pelvis";
-    static const std::string IMU_LINK_TF = "/imu_link";
-
-    /* Atlas Right Foot*/
-    static const std::string R_UGLUT_TF = "/r_uglut";
-    static const std::string R_LGLUT_TF = "/r_lglut";
-    static const std::string R_ULEG_TF = "/r_uleg";
-    static const std::string R_LLEG_TF = "/r_lleg";
-    static const std::string R_TALUS_TF = "/r_talus";
-    static const std::string R_FOOT_TF = "/r_foot";
-
-    /* Atlas Left Foot*/
-    static const std::string L_UGLUT_TF = "/l_uglut";
-    static const std::string L_LGLUT_TF = "/l_lglut";
-    static const std::string L_ULEG_TF = "/l_uleg";
-    static const std::string L_LLEG_TF = "/l_lleg";
-    static const std::string L_TALUS_TF = "/l_talus";
-    static const std::string L_FOOT_TF = "/l_foot";
-
-
-/*****************************/
-
 }
 
 #endif

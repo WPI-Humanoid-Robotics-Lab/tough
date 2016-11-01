@@ -5,11 +5,9 @@ project(val_laser2point_cloud)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  laser_geometry
   roscpp
-  sensor_msgs
-  std_msgs
-  tf
+  val_description
+  perception_common
 )
 
 ## System dependencies are found with CMake's conventions
@@ -103,9 +101,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES val_laser2point_cloud
-#  CATKIN_DEPENDS laser_geometry roscpp sensor_msgs std_msgs tf
-#  DEPENDS system_lib
+  #LIBRARIES val_laser2point_cloud
+  CATKIN_DEPENDS roscpp val_description perception_common
+  DEPENDS system_lib
 )
 
 ###########
@@ -114,35 +112,35 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(include)
 include_directories(
-  ${catkin_INCLUDE_DIRS} include
+  ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
- add_library(val_laser2point_cloud
-   src/val_laser2point_cloud.cpp
- )
+# add_library(val_laser2point_cloud
+#   src/val_laser2point_cloud.cpp
+# )
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(val_laser2point_cloud
-   ${catkin_LIBRARIES}
- )
+# target_link_libraries(val_laser2point_cloud
+#   ${catkin_LIBRARIES}
+# )
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
- add_dependencies(val_laser2point_cloud ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(val_laser2point_cloud ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
  add_executable(val_laser2point_cloud_node src/val_laser2point_cloud_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(val_laser2point_cloud_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ add_dependencies(val_laser2point_cloud_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(val_laser2point_cloud_node
-   ${catkin_LIBRARIES} val_laser2point_cloud
+   ${catkin_LIBRARIES}
  )
 
 #############
@@ -160,18 +158,18 @@ include_directories(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS val_laser2point_cloud val_laser2point_cloud_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+ install(TARGETS val_laser2point_cloud_node
+   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ )
 
 ## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
+ install(DIRECTORY include/${PROJECT_NAME}/
+   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+   FILES_MATCHING PATTERN "*.h"
+   PATTERN ".svn" EXCLUDE
+ )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
