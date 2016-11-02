@@ -1,9 +1,19 @@
-FootStep Planner
+#### Short description of this merge request
+This package provides a Service "footStepService" for footstep planning . srv msg is val_footstep::footStep.   Start and Goal pose are provided to sevice using Pose2D msgs.
 
- 1.roslaunch val_footstep val_footstep.launch  - Launches Footstep Planner node , Map Server and Rviz Node (Map Server can be run by using PCL Data if launch file is modified)
- 
- 2.roslaunch val_footstep val_footstep.launch  - Runs the node which publishes Footsteps on /footStep_pub  Topic 
-  
-FootSteps are available on /footStep_pub Topic - Msg Type val_footstep/StepTargetArray
+#### Topics it subscribes to with the message type
+plan_footstep node 
+Service Server 
+footStepService - val_footstep/footStep.srv
 
-Contact - Rohan Kothari (rohan.kothari.sk@gmail.com)
+
+Service Client  
+plan_footsteps - humanoid_nav_msgs/PlanFootsteps.srv
+
+
+#### To test, run the following command
+roslaunch val_footstep val_footstep.launch - launches footstep_planner node, map_server, rviz node.
+rosrun val_footstep plan_footstep  - runs plan_footstep node which provides "footStepService" service
+rosrun val_footstep test_footstep - run test node which shows how to use the service
+#### For more details, contact:
+Rohan Kothari
