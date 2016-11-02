@@ -133,8 +133,6 @@ include_directories(
 # add_dependencies(val_led_pos ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(val_led_pos_depth src/led_depth.cpp)
-add_executable(val_led_pos_image src/led_image.cpp) 
 add_executable(val_led_pos_both src/led_position.cpp) 
 
 
@@ -143,12 +141,6 @@ add_executable(val_led_pos_both src/led_position.cpp)
 # add_dependencies(val_led_pos_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(val_led_pos_depth
-  ${catkin_LIBRARIES}
-)
-target_link_libraries(val_led_pos_image
-  ${catkin_LIBRARIES}
-)
 target_link_libraries(val_led_pos_both
   ${catkin_LIBRARIES}
 )
