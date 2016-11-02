@@ -15,7 +15,7 @@ bool planSteps(val_footstep::footStep::Request  &req, val_footstep::footStep::Re
 {
 
     ros::NodeHandle p;
-    ros::ServiceClient footStep_client = p.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("plan_footsteps");
+    ros::ServiceClient footStep_client = p.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("plan_footsteps"); // Calling footstep_planner_node
     humanoid_nav_msgs::PlanFootsteps srv;
     srv.request.start = req.start;
     srv.request.goal = req.goal;
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
 
 
-    ros::ServiceServer footStepService = n.advertiseService("footStepService", planSteps);
+    ros::ServiceServer footStepService = n.advertiseService("footStepService", planSteps); // Service Created for Getting footsteps
     ros::spin();
 
 
