@@ -65,11 +65,10 @@ link_directories(${SBPL_LIBRARY_DIRS})
   )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+   FILES
+   footStep.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -149,6 +148,11 @@ target_link_libraries(footstep_node ${catkin_LIBRARIES} ${SBPL_LIBRARIES})
 add_executable(plan_footstep src/plan_footstep.cpp)
 add_dependencies(plan_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(plan_footstep  ${catkin_LIBRARIES})
+
+
+add_executable(test_footstep src/test_footstep.cpp)
+add_dependencies(test_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_footstep  ${catkin_LIBRARIES})
 # Add cmake target dependencies of the executable
 ## same as for the library above
 
