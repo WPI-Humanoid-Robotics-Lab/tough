@@ -1,5 +1,5 @@
 #### Short description of this merge request
-This package provides a Service "plan_footsteps" for footstep planning . srv msg is humanoid_nav_msgs::PlanFootsteps.   Start and Goal pose are provided to sevice using Pose2D msgs.
+This package provides a Service "plan_footsteps" for footstep planning . srv msg is humanoid_nav_msgs::PlanFootsteps.   Start and Goal pose are provided to service using Pose2D msgs.
 
 #### Topics it subscribes to with the message type
 footstep_planner_node
