@@ -53,9 +53,9 @@ int main(int argc, char** argv)
 
     if (argc <= 1)
     {
-        ROS_ERROR("usgae: <node> <param>");
+        ROS_ERROR("usage: <node> <param>");
         ROS_ERROR("param: ");
-        ROS_ERROR("deafult: displays the left image ");
+        ROS_ERROR("default: displays the left image ");
         ROS_ERROR("disparity: displays disparity image ");
         exit(0);
     }
