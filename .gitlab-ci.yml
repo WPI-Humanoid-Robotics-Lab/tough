@@ -64,10 +64,9 @@ indigo-master:
     # - catkin_make run_tests && catkin_make test
     - catkin_make
     # Documentation
-    - cd ~/catkin_ws/src/space_robotics_challenge/docs
-    - doxygen
-    - ls -a
-    - mv html/ public/
+    #- cd ~/catkin_ws/src/space_robotics_challenge/docs
+    #- doxygen
+    #- mv html/ public/
   artifacts:
     paths:
     - public
@@ -75,3 +74,16 @@ indigo-master:
     - master
   tags:
     - ros
+
+
+pages:
+  script:
+  - cd ~/catkin_ws/src/space_robotics_challenge/docs
+  - doxygen
+  - ls -a
+  - mv html/ public/
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
