@@ -1,4 +1,0 @@
-- git:
-    local-name: humanoid_msgs
-    uri: https://github.com/ahornung/humanoid_msgs
-    version: indigo-devel
