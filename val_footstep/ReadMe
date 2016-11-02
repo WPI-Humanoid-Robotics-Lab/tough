@@ -1,19 +1,23 @@
 #### Short description of this merge request
-This package provides a Service "footStepService" for footstep planning . srv msg is val_footstep::footStep.   Start and Goal pose are provided to sevice using Pose2D msgs.
+This package provides a Service "plan_footsteps" for footstep planning . srv msg is humanoid_nav_msgs::PlanFootsteps.   Start and Goal pose are provided to sevice using Pose2D msgs.
 
 #### Topics it subscribes to with the message type
-plan_footstep node 
-Service Server 
-footStepService - val_footstep/footStep.srv
+footstep_planner_node
 
 
-Service Client  
-plan_footsteps - humanoid_nav_msgs/PlanFootsteps.srv
+Subscriptions: 
+ * /initialpose [geometry_msgs/PoseWithCovarianceStamped]
+ * /map [nav_msgs/OccupancyGrid] - Can be provided by PCL data. 
+ * /goal [geometry_msgs/PoseStamped]
 
+
+Service server 
+* /plan_footsteps [humanoid_nav_msgs/PlanFootsteps]
 
 #### To test, run the following command
-roslaunch val_footstep val_footstep.launch - launches footstep_planner node, map_server, rviz node.
-rosrun val_footstep plan_footstep  - runs plan_footstep node which provides "footStepService" service
-rosrun val_footstep test_footstep - run test node which shows how to use the service
+roslaunch val_footstep val_footstep.launch - launches footstep_planner_node, map_server, rviz node.
+rosrun val_footstep test_footstep - runs test node which shows how to use the service for getting footsteps. 
+
+
 #### For more details, contact:
 Rohan Kothari

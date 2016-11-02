@@ -65,10 +65,7 @@ link_directories(${SBPL_LIBRARY_DIRS})
   )
 
 ## Generate services in the 'srv' folder
-add_service_files(
-   FILES
-   footStep.srv
- )
+
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -145,9 +142,7 @@ include_directories( include
 add_executable(footstep_node src/footstep_node.cpp)
 target_link_libraries(footstep_node ${catkin_LIBRARIES} ${SBPL_LIBRARIES})
 
-add_executable(plan_footstep src/plan_footstep.cpp)
-add_dependencies(plan_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(plan_footstep  ${catkin_LIBRARIES})
+
 
 
 add_executable(test_footstep src/test_footstep.cpp)
