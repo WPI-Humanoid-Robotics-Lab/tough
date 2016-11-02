@@ -1,0 +1,9 @@
+FootStep Planner
+
+ 1.roslaunch val_footstep val_footstep.launch  - Launches Footstep Planner node , Map Server and Rviz Node (Map Server can be run by using PCL Data if launch file is modified)
+ 
+ 2.roslaunch val_footstep val_footstep.launch  - Runs the node which publishes Footsteps on /footStep_pub  Topic 
+  
+FootSteps are available on /footStep_pub Topic - Msg Type val_footstep/StepTargetArray
+
+Contact - Rohan Kothari (rohan.kothari.sk@gmail.com)
