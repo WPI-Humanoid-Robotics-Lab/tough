@@ -76,14 +76,14 @@ indigo-master:
     - ros
 
 
-pages:
-  script:
-  - cd ~/catkin_ws/src/space_robotics_challenge/docs
-  - doxygen
-  - ls -a
-  - mv html/ public/
-  artifacts:
-    paths:
-    - public
-  only:
-  - master
+# pages:
+#   script:
+#   - cd ~/catkin_ws/src/space_robotics_challenge/docs
+#   - doxygen
+#   - ls -a
+#   - mv html/ public/
+#   artifacts:
+#     paths:
+#     - public
+#   only:
+#   - master
