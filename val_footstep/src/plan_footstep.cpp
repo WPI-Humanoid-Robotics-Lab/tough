@@ -42,15 +42,18 @@ srv.request.start = start;
 srv.request.goal = goal;
 
 val_footstep::StepTargetArray result;
- std::cout<< " calling" << std::endl;
+ ROS_INFO("Calling footstep planner ");
 
 if(footStep_client.call(srv))
 {
-   std::cout<< " size :" <<  srv.response.footsteps.size()<< std::endl;
+   //std::cout<< " size :" <<  srv.response.footsteps.size()<< std::endl;
+   ROS_INFO("No of FootSteps : [%d]" , (int)srv.response.footsteps.size());
+   //ROS_INFO("%d", (int)srv.response.footsteps.size());
+
   result.steps = srv.response.footsteps;
 
   footStep_pub.publish(result);
-  std::cout<< " calling Done" << std::endl;
+   ROS_INFO("Footstep Ready ");
    //footStep_pub.publish(srv.response.result);
 //    ros::Rate loop_rate(10);
 //    while(ros::ok())
@@ -63,8 +66,7 @@ if(footStep_client.call(srv))
 //    }
 
 }
-while(ros::ok())
-{}
+ros::spin();
 
 
 
