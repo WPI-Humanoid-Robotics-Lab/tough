@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 {
  ros::init(argc, argv, "test_footstep");
  ros::NodeHandle n;
- ros::ServiceClient footStep_client = n.serviceClient <val_footstep::footStep> ("footStepService");
+ ros::ServiceClient footStep_client = n.serviceClient <val_footstep::footStep> ("footStepService"); // Creating client for footstep service
 
  ros::Publisher footStep_pub = n.advertise<val_footstep::StepTargetArray>("footStepPub", 50,true);
 
@@ -32,7 +32,7 @@ srv.request.start = start;
 srv.request.goal = goal;
 val_footstep::StepTargetArray steps;
  ROS_INFO("Calling footstep planner ");
-if(footStep_client.call(srv))
+if(footStep_client.call(srv)) // Service Call
 {
 
    ROS_INFO("%d", (int)srv.response.result.steps.size());
