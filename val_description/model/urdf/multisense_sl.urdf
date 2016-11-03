@@ -297,7 +297,7 @@
 
   
   <gazebo>
-    <plugin filename="libMultiSenseSLPlugin.so" name="multisense_plugin"/>
+    <plugin filename="libSRCMultiSenseSLPlugin.so" name="multisense_plugin"/>
   </gazebo>
   
   <!-- imu link -->
