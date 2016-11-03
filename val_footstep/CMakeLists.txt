@@ -113,7 +113,7 @@ link_directories(${SBPL_LIBRARY_DIRS})
 ## DEPENDS: system dependencies of this project that dependent projects also need
 
 catkin_package(
-  INCLUDE_DIRS include
+  INCLUDE_DIRS 
   CATKIN_DEPENDS message_runtime humanoid_nav_msgs
   )
 
@@ -123,7 +123,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories( include
+include_directories( 
   ${catkin_INCLUDE_DIRS}
 )
 
