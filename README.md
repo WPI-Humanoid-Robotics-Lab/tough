@@ -41,7 +41,16 @@ sudo apt-get install ros-indigo-gazebo7-*
 ```bash
     sudo apt-get install ros-indigo-trac-ik
 ```
+* footstep_planner
 
+```bash
+    sudo apt-get install ros-indigo-footstep-planner
+```
+* humanoid_localization
+
+```bash
+    sudo apt-get install ros-indigo-humanoid-localization
+```
 #### Setting up workspace
 Create catkin workspace. If you already have one, move to the nest step    
 ```bash
