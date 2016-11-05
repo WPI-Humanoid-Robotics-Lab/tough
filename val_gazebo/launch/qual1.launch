@@ -6,6 +6,7 @@
         <rosparam param="source_list">["/multisense/joint_states"]</rosparam>
      </node>
 
+     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find val_description)/launch/val_rviz.rviz"/>
      <!-- Combine joint values -->
          <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
                  <param name="publish_frequency" value="50" />
