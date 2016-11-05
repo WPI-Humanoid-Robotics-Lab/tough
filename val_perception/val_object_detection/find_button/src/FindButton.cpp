@@ -2,7 +2,7 @@
 #include <find_button/FindButton.h>
 
 
-FindButton::FindButton(ros::NodeHandle &nh)
+FindButton::FindButton(src_perception::MultisenseImage() *handle)
 {
 
 	

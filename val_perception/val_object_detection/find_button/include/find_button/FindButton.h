@@ -13,14 +13,14 @@ class FindButton
 {
 public:
 	//constructor takes in nodeHandle 
-	FindButton(ros::NodeHandle &nh);  
+	FindButton(src_perception::MultisenseImage() );  
 	// safty function to see if there is a button
 	bool buttonDectected();
 	//get the location of the button
 	geometry_msgs::PointStamped getLocation();
 private:
 	//glabel node
-	//src_perception::MultisenseImage mi;
+	src_perception::MultisenseImage() mi;
 	//Proccess the image
 	geometry_msgs::Point processImage(cv::Mat);
 	//gather the nessary Sensor data
