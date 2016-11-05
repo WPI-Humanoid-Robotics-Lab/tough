@@ -13,17 +13,30 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <ros/ros.h>
+#include <visualization_msgs/Marker.h>
+//x=340 ,y =320
 
 class PointCloudToImage
 {
 public:
   void cloud_cb (const sensor_msgs::PointCloud2ConstPtr& cloud)
   {
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = "/my_frame";
+    marker.header.stamp = ros::Time::now();
+    marker.id =  visualization_msgs::Marker::CUBE;
+
     if ((cloud->width * cloud->height) == 0)
       return; //return if the cloud is not dense!
     try
     {
       pcl::toROSMsg (*cloud, image_); //convert the cloud
+      image_.header.frame_id = cloud->header.frame_id;
+      marker.header.frame_id = image_.header.frame_id;
+      marker.pose.position.x = 0;
+      marker.pose.position.y = 0;
+      marker.pose.position.z = 0;
     }
     catch (std::runtime_error e)
     {
