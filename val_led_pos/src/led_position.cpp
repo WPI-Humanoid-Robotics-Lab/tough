@@ -1,36 +1,40 @@
 /*
   * NASA's Space Robotics Challenge
   * Qualification Task 1 - Detection and estimation of position and color of LEDs on panel
-  * Authors: Ayush Shah, Bhawna Shiwani
+  * Authors: Ayush Shah, Bhawna Shiwani, Nathan Denneler, Team M2M (Adhavan, Janani, Praneeta, Shlok)
 */
 #include <ros/ros.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <geometry_msgs/Point.h>
+#include <std_msgs/Int32MultiArray.h>
 
 namespace enc = sensor_msgs::image_encodings;
 std::vector<std::vector<cv::Point> > contours;
-cv::Mat old_image;
 bool flag = 0;
 cv::RNG rng(12345);
+
 
 class LED_Detector
 {
   //Initialization of ROS subscriber, publisher and node
   ros::NodeHandle node_handle;
   ros::Subscriber image_sub;
-  //ros::Publisher image_rgbpub;
-  //ros::Publisher image_xyzpub;
-
+  ros::Publisher image_rgbpub;
+  ros::Publisher image_xyzpub;
+  cv_bridge::CvImagePtr cv_depthptr;
+  cv::Mat old_image;
+  bool flag = false;
 
   public:
   //Constructor
   LED_Detector(int argc, char** argv)
   {
     image_sub = node_handle.subscribe("/multisense/camera/left/image_raw", 1, &LED_Detector::imageCallback, this);
-    //image_rgbpub = node_handle.publisher("/detect/light/rgb", 1);
-    //image_xyzpub = node_handle.publisher("/detect/light/xyz", 1);
+    image_rgbpub = node_handle.advertise<std_msgs::Int32MultiArray>("/detect/light/rgb", 100);
+    image_xyzpub = node_handle.advertise<geometry_msgs::Point>("/detect/light/xy", 100);
     cv::namedWindow("Raw Image with Contours");
   }
 
@@ -43,7 +47,6 @@ class LED_Detector
   // Callback function
   void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
-      cv_bridge::CvImagePtr cv_depthptr;
 
       try
       {
@@ -79,62 +82,82 @@ class LED_Detector
   // LED detection algorithm
   void DetectLED(cv::Mat new_image)
   {
-    cv::Mat diff, erod, erod_gray, erod_gray_thresh;
-    //std::vector<cv::Point2f>points;
+    cv::Mat diff, erod, erod_dil, erod_dil_gray, erod_dil_gray_thresh;
 
     // Finding the difference image
     diff = abs(new_image - old_image);
     //cv::imshow("Difference Image", diff);
-      
+
+    // Get the BGR channels
+    std::vector<cv::Mat> channels(3);
+    cv::split(diff, channels);
+
+    // Add blue to green(standard conversion to grayscale is .3R + .6G + .1B) which is less than ideal.
+    channels[1] = channels[1] + channels[0]/4;
+    channels[1] = channels[1] + channels[0]/12;
+    cv::merge(channels, diff);
+
     // Eroding to the difference in image to get rid of noise
     cv::erode(diff, erod, cv::Mat(), cv::Point(-1, -1), 2, 1, 1);
     //cv::imshow("Eroded Image", erod);
-      
+
+    // Dialate difference, to reflect size of led in the original image.
+    cv::dilate(erod, erod_dil, cv::Mat(), cv::Point(-1, -1), 2, 1, 1);  
+    //cv::imshow("Eroded and dialated Image", erod_dil);
+
     // Converting difference image to grayscale
-    cv::cvtColor(erod, erod_gray, CV_BGR2GRAY);
+    cv::cvtColor(erod_dil, erod_dil_gray, CV_BGR2GRAY);
 
     // Binary thresholding of grayscale difference image
-    cv::threshold(erod_gray, erod_gray_thresh, 40, 255, CV_THRESH_BINARY);
-    //cv::imshow("Thresholded Image", erod_gray_thresh);
+    cv::threshold(erod_dil_gray, erod_dil_gray_thresh, 45, 255, CV_THRESH_BINARY);
+    cv::imshow("Thresholded Image", erod_dil_gray_thresh);
 
     // Find the contours
     // Use if condition only to display
-    if (countNonZero(erod_gray_thresh) > 1)
+    if (countNonZero(erod_dil_gray_thresh) > 1)
     {
-        cv::Mat contourOutput = erod_gray_thresh.clone();
+        cv::Mat contourOutput = erod_dil_gray_thresh.clone();
         cv::findContours(contourOutput, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
     }
 
     std::vector<std::vector<cv::Point> >contours_poly(contours.size());
-    std::vector<cv::Rect>boundRect(contours.size());
+    //std::vector<cv::Rect>boundRect(contours.size());
     std::vector<cv::Point2f>center(contours.size());
+    std::vector<cv::Point2f>points;
 
     for( int i = 0; i< contours.size(); i++ )
     {
-        approxPolyDP( cv::Mat(contours[i]), contours_poly[i], 3, true );
-        boundRect[i] = boundingRect(cv::Mat(contours_poly[i]));
+      approxPolyDP( cv::Mat(contours[i]), contours_poly[i], 3, true );
+      //boundRect[i] = boundingRect(cv::Mat(contours_poly[i]));
     }
-
-    // Approximate contours to polygons + get bounding rect
-    // Draw polygonal contour + bounding rects
-    // cv::Mat drawing = cv::Mat::zeros(new_image.size(), CV_8UC3);
+    
+    //cv::Mat drawing = cv::Mat::zeros(new_image.size(), CV_8UC3);      //Use this to display the contours on an empty background
     for( int i = 0; i< contours.size(); i++ )
-    { 
-        cv::Moments moment = cv::moments((cv::Mat)contours[i]);
-        if (moment.m00)
-        {
-            points.push_back(cv::Point2f(moment.m10/moment.m00,moment.m01/moment.m00));
-            std::cout<<"x:"<<points[j].x<<" y:"<<points[j].y<<"\n";
-            std::cout<<new_image.at<cv::Vec3b>(points[j].y,points[j].x)<<"\n";
-            j++; 
-        }        
-        cv::Scalar color = cv::Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-        //approxPolyDP(cv::Mat(contours[i]), contours_poly[i], 3, true);
-        //boundRect[i] = boundingRect(cv::Mat(contours_poly[i]));
-        drawContours(new_image, contours_poly, i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point());
-        rectangle(new_image, boundRect[i].tl(), boundRect[i].br(), color, 1, 8, 0 );
+    {   
+      cv::Scalar color = cv::Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+      drawContours(new_image, contours_poly, i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point());
+      //rectangle(new_image, boundRect[i].tl(), boundRect[i].br(), color, 1, 8, 0 );
     }
-
+    for (int i = 0, j = 0; j < contours.size(); j++)
+    {
+      cv::Moments moment = cv::moments((cv::Mat)contours[j]);
+      if (moment.m00)
+      {
+          points.push_back(cv::Point2f(moment.m10/moment.m00,moment.m01/moment.m00));
+          cv::Vec3b pixs_value =  cv_depthptr->image.at<cv::Vec3b>(points[i].y,points[i].x);
+          std_msgs::Int32MultiArray rgb;
+          geometry_msgs::Point pixelCoordinates;
+          pixelCoordinates.x = points[i].x;
+          pixelCoordinates.y = points[i].y;
+          //pixelCoordinates.z = 0;
+          rgb.data.clear();
+          for (int iter=2;iter>=0;iter--)
+              rgb.data.push_back(pixs_value.val[iter]);
+          image_rgbpub.publish(rgb);
+          image_xyzpub.publish(pixelCoordinates);
+          i++;
+      }
+    }
     cv::imshow("Raw Image with Contours", new_image);
     cv::waitKey(3);
     old_image = new_image;
