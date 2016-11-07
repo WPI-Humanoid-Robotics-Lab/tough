@@ -1,27 +1,9 @@
 <launch>
-     <param name="robot_description" textfile="$(find val_description)/model/urdf/valkyrie_sim.urdf"/>
-     <!-- send fake joint values -->
-     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"> 
-        <param name="use_gui" value="FALSE"/>
-        <rosparam param="source_list">["/multisense/joint_states"]</rosparam>
-     </node>
 
-     <!-- Combine joint values -->
-         <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
-                 <param name="publish_frequency" value="50" />
-         </node>
-
-   <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
-   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-   <!-- We use the empty world with no gravity, To make robot stand as we dont have actuator controllers yet -->
-         <arg name="world_name" value="$(find srcsim)/worlds/qual2_nogravity.world"/>
-         <arg name="verbose" value="true" />
+   <include file="$(find srcsim)/launch/qual2.launch">
+   	<arg name="init" default="true"/> 
+	<arg name="walk_test" default="true" />
    </include>
-
-   <!-- Turn on the lights -->
-   <node pkg="rostopic" type="rostopic" name="lights" args="pub /srcsim/qual1/start std_msgs/Empty"/>
-   <!-- Spawn a robot into Gazebo -->
-   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model valkyrie -z 1.273" />
 
    <!-- Start spinning the lidar   @TODO: implement this using a parameter or check if one exists already-->
    <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 2"/> 
