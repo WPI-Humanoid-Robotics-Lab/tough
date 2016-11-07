@@ -71,5 +71,5 @@ include_directories(perception_common
 add_executable(PCLImage_test src/PCL2Image_test.cpp)
 target_link_libraries(PCLImage_test ${catkin_LIBRARIES})
 
-add_executable(ButtonDectorTest src/ButtonDectorTest.cpp)
-target_link_libraries(ButtonDectorTest ${catkin_LIBRARIES})
+add_executable(ButtonDetectorTest src/ButtonDetectorTest.cpp)
+target_link_libraries(ButtonDetectorTest ${catkin_LIBRARIES})
