@@ -1,9 +1,0 @@
-<launch>
-  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find val_description)/launch/EmptyWorldWithValkyrie.world"/>
-    <arg name="paused" value="True" />
-    <arg name="verbose" value="True" />
-  </include>
-  <node name="spawn_sdf" pkg="gazebo_ros" type="spawn_model" args="-file $(find val_description)/sdf/valkyrie_sim_harness.sdf -sdf -z 1.5 -model valkyrie" />
-</launch>
