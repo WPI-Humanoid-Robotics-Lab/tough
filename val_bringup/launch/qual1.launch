@@ -6,7 +6,7 @@
 
      <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">         
      <param name="use_gui" value="FALSE"/>         
-    <rosparam param="/source_list">[/ihmc_ros/valkyrie/output/joint_states, /hardware_joint_states, /multisense/joint_states]</rosparam>      
+    <rosparam param="/source_list">[/hardware_joint_states, /multisense/joint_states]</rosparam>      
      </node>
 
      <!-- Combine joint values >          
