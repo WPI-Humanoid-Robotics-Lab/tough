@@ -16,21 +16,21 @@ class ButtonDetector
 {
 public:
 	//constructor takes in nodeHandle 
-	ButtonDetector(src_perception::MultisenseImage*, ros::NodeHandle& );
+	ButtonDetector(src_perception::MultisenseImage*, ros::NodeHandle* );
 	//ButtonDetector(ros::NodeHandle &n);  
 
 	// safty function to see if there is a button
 	bool buttonDetected();
 	//get the location of the button
-	void getLocation(geometry_msgs::Point, cv::Mat);
+	void getLocation();
 private:
 	//glabel node
 	ros::Publisher pubButtonCenter;
 	src_perception::MultisenseImage *mi;
-	ros::NodeHandle nh;
-	geometry_msgs::Point buttonCenter;
+	ros::NodeHandle *nh;
+	//geometry_msgs::Point buttonCenter;
 	//Proccess the image
-	bool processImage();
+	geometry_msgs::Point processImage(cv::Mat);
 
 	//gather the nessary Sensor data
 	//
