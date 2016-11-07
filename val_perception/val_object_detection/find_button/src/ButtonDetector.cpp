@@ -4,19 +4,17 @@ using namespace cv;
 using namespace std;
 using namespace src_perception;
 
-ButtonDetector::ButtonDetector(src_perception::MultisenseImage *handle, ros::NodeHandle *rosHandle )
+ButtonDetector::ButtonDetector(ros::NodeHandle rosHandle ):
+    mi(new src_perception::MultisenseImage(rosHandle))
 {
-	assert(handle != nullptr && "Multisesnse pointer is null");
-	mi = handle;
-    nh = rosHandle;
-    //mi(handle);
-    pubButtonCenter = nh->advertise<geometry_msgs::PointStamped> ("/buttonCenter", 1);
+    pubButtonCenter = rosHandle.advertise<geometry_msgs::PointStamped> ("/buttonCenter", 1);
+}
+ButtonDetector::~ButtonDetector(){
+    delete mi;
 }
 
-
-geometry_msgs::Point ButtonDetector::processImage(cv::Mat src)
+geometry_msgs::Point ButtonDetector::processImage(const cv::Mat& src)
 {
-
 
     // Mat dst;
     // flip(src,dst,-1);
@@ -28,7 +26,7 @@ geometry_msgs::Point ButtonDetector::processImage(cv::Mat src)
     inRange(hsv, Scalar(0, 178, 51), Scalar(5, 255, 128), mask1);
     inRange(hsv, Scalar(170, 204, 140), Scalar(180, 255, 191), mask2);
 
-    Mat1b mask = mask1 | mask2; 
+    Mat1b mask = mask1 | mask2;
     imshow("Mask", mask);
 
     vector<vector<Point> > contours;
@@ -46,12 +44,12 @@ geometry_msgs::Point ButtonDetector::processImage(cv::Mat src)
     for( int i = 0, j = 0; i< contours.size(); i++ )
     {
             //  Find the area of contour
-        double a=contourArea( contours[i],false); 
+        double a=contourArea( contours[i],false);
         if(a>largest_area){
             largest_area=a;
                 //cout<<i<<" area  "<<a<<endl;
                 // Store the index of largest contour
-            largest_contour_index=i;               
+            largest_contour_index=i;
                 // Find the bounding rectangle for biggest contour
             bounding_rect=boundingRect(contours[i]);
         }
@@ -65,7 +63,7 @@ geometry_msgs::Point ButtonDetector::processImage(cv::Mat src)
             buttonCenter.x = points[j].x;
             buttonCenter.y = points[j].y;
             j++;
-            return buttonCenter; 
+            return buttonCenter;
         }
     }
 
@@ -85,7 +83,7 @@ void ButtonDetector::getLocation()
 {
 
 
-	StereoPointCloudColor::Ptr organized_cloud(new StereoPointCloudColor);
+    StereoPointCloudColor::Ptr organized_cloud(new StereoPointCloudColor);
     geometry_msgs::PointStamped location;
     geometry_msgs::Point index;
     cv::Mat src,fliped;
@@ -116,8 +114,8 @@ void ButtonDetector::getLocation()
         PointCloudHelper::generateOrganizedRGBDCloud(disp,src,Q,organized_cloud);
         ROS_INFO_STREAM("Organized cloud size: "<<organized_cloud->size());
 
-			// output.header.frame_id=std::string("left_camera_optical_frame");
-			// output.header.stamp=ros::Time::now().toNSec();
+            // output.header.frame_id=std::string("left_camera_optical_frame");
+            // output.header.stamp=ros::Time::now().toNSec();
 
 
     }
