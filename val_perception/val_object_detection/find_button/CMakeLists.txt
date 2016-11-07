@@ -48,7 +48,9 @@ include_directories(perception_common
 
 ## Declare a C++ library
  add_library(find_button
-   src/FindButton.cpp
+   src/ButtonDetector.cpp
+   
+
  )
 
 
@@ -68,3 +70,6 @@ include_directories(perception_common
 
 add_executable(PCLImage_test src/PCL2Image_test.cpp)
 target_link_libraries(PCLImage_test ${catkin_LIBRARIES})
+
+add_executable(ButtonDectorTest src/ButtonDectorTest.cpp)
+target_link_libraries(ButtonDectorTest ${catkin_LIBRARIES})
