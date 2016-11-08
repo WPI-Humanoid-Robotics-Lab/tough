@@ -27,11 +27,16 @@ This is the main repo for Team-WPI's participation in Space Robotics Challenge.
     echo 'export IS_GAZEBO=true' >> ~/.bashrc
 ```
 
-#### Change ownership of `ihmc_ros_java_adapter`. 
+#### Change ownership of ihmc_ros_java_adapter package. 
 This ROS package requires to write some files in its installation directory at runtime. We're working on a fix for this issue. In the meantime, please change the ownership of this directory to your user.
 
+`if you are the only user on the computer, use this`
 ```
     sudo chown -R $USER:$USER /opt/ros/indigo/share/ihmc_ros_java_adapter
+```
+`else, use this`
+```
+    sudo chmod -R 777 /opt/ros/indigo/share/ihmc_ros_java_adapter
 ```
 
 #### Copy the IHMC networking `ini` file 
@@ -40,7 +45,8 @@ This ROS package requires to write some files in its installation directory at r
     mkdir -p ${HOME}/.ihmc; curl https://raw.githubusercontent.com/ihmcrobotics/ihmc_ros_core/0.8.0/ihmc_ros_common/configurations/IHMCNetworkParametersTemplate.ini > ${HOME}/.ihmc/IHMCNetworkParameters.ini
 ```
 
-#### Increase real-time scheduling priority for current user (rtprio), which is required by the IHMC controller. Add current user to ros group:
+#### Real-time scheduling priority
+Increase real-time scheduling priority for current user (rtprio), which is required by the IHMC controller. Add current user to ros group:
 
 ```
     sudo bash -c 'echo "@ros - rtprio 99" > /etc/security/limits.d/ros-rtprio.conf'
@@ -48,9 +54,9 @@ This ROS package requires to write some files in its installation directory at r
     sudo usermod -a -G ros $USER
 ```
 
-## Logout from your current session and log in to make sure that all these changes are in place.
+## Reboot the system
 
-#### Download all the required Gazebo models
+#### Download Gazebo models
 
 ```
     wget -P /tmp/ https://bitbucket.org/osrf/gazebo_models/get/default.tar.gz
@@ -58,7 +64,8 @@ This ROS package requires to write some files in its installation directory at r
     rm /tmp/default.tar.gz
 ```
 
-#### Pre-build `ihmc_ros_java_adapter`. Open a new terminal and run:
+#### Pre-build `ihmc_ros_java_adapter`. 
+Open a new terminal and run:
 
 ```
     source /opt/nasa/indigo/setup.bash
@@ -81,7 +88,7 @@ Compile the java code that you just cloned (https://xkcd.com/303)
 ```
 
 #### Setting up workspace
-Create catkin workspace. If you already have one, move to the nest step    
+Create catkin workspace. If you already have one, move to the [next](#test-your-installation) step    
 ```bash
     mkdir -p ~/indigo_ws/src && cd ~/indigo_ws/src
     catkin_init_workspace
