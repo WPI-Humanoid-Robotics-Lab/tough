@@ -9,6 +9,7 @@ This is the main repo for Team-WPI's participation in Space Robotics Challenge.
 #### Gazebo 7 and SRCSim Installation
 
 ```bash
+    sudo rm /etc/apt/sources.list.d/gazebo*
     sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
     wget -O - http://packages.osrfoundation.org/gazebo.key | sudo apt-key add -
 
