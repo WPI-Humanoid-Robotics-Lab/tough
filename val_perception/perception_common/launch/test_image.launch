@@ -1,0 +1,5 @@
+<launch>
+	 <node name="test_image" pkg="perception_common" type="test_image" output="screen">
+		<param name="image_topic" value="/multisense_sl/left/image_rect_color" />
+        </node>
+</launch>
