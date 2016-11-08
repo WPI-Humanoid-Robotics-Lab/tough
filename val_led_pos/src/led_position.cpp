@@ -10,6 +10,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <geometry_msgs/Point.h>
 #include <std_msgs/Int32MultiArray.h>
+#include <sensor_msgs/PointCloud2.h>
 
 namespace enc = sensor_msgs::image_encodings;
 std::vector<std::vector<cv::Point> > contours;
@@ -33,6 +34,7 @@ class LED_Detector
   LED_Detector(int argc, char** argv)
   {
     image_sub = node_handle.subscribe("/multisense/camera/left/image_raw", 1, &LED_Detector::imageCallback, this);
+    pointCloud = node_handle.subscribe("/multisense/image_points2", 1, &LED_Detector::imageCallback, this);
     image_rgbpub = node_handle.advertise<std_msgs::Int32MultiArray>("/detect/light/rgb", 100);
     image_xyzpub = node_handle.advertise<geometry_msgs::Point>("/detect/light/xy", 100);
     cv::namedWindow("Raw Image with Contours");
@@ -161,6 +163,41 @@ class LED_Detector
     cv::imshow("Raw Image with Contours", new_image);
     cv::waitKey(3);
     old_image = new_image;
+
+  }
+  /**
+  Function to convert 2D pixel point to 3D point by extracting point
+  from PointCloud2 corresponding to input pixel coordinate. This function
+  can be used to get the X,Y,Z coordinates of a feature using an 
+  RGBD camera
+  */
+  void pixelTo3DPoint(const sensor_msgs::PointCloud2 pCloud, const int u, const int v, geometry_msgs::Point &p)
+  {
+    // get width and height of 2D point cloud data
+    int width = pCloud.width;
+    int height = pCloud.height;
+
+    // Convert from u (column / width), v (row/height) to position in array
+    // where X,Y,Z data starts
+    int arrayPosition = v*pCloud.row_step + u*pCloud.point_step;
+
+    // compute position in array where x,y,z data start
+    int arrayPosX = arrayPosition + pCloud.fields[0].offset; // X has an offset of 0
+    int arrayPosY = arrayPosition + pCloud.fields[1].offset; // Y has an offset of 4
+    int arrayPosZ = arrayPosition + pCloud.fields[2].offset; // Z has an offset of 8
+
+    float X = 0.0;
+    float Y = 0.0;
+    float Z = 0.0;
+
+    memcpy(&X, &pCloud.data[arrayPosX], sizeof(float));
+    memcpy(&Y, &pCloud.data[arrayPosY], sizeof(float));
+    memcpy(&Z, &pCloud.data[arrayPosZ], sizeof(float));
+
+   // put data into the point p
+    p.x = X;
+    p.y = Y;
+    p.z = Z;
 
   }
 };
