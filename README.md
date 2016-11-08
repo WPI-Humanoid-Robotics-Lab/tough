@@ -100,13 +100,13 @@ After the code is downloaded, run catkin_make.
     catkin_make
 ```
 
-#### Test your installation
+## Test your installation
 
 #### Open a new terminal and type:
 
 ```
     source /opt/nasa/indigo/setup.bash
-    cd indigo_ws
+    cd ~/indigo_ws
     source devel/setup.bash
     roslaunch val_bringup qual2.launch
 ```
