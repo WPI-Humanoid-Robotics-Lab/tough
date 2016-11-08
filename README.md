@@ -115,6 +115,8 @@ After the code is downloaded, run catkin_make.
 ```
     source /opt/nasa/indigo/setup.bash
     cd ~/indigo_ws
+    rm -rf devel/ build/
+    catkin_make
     source devel/setup.bash
     roslaunch val_bringup qual2.launch
 ```
