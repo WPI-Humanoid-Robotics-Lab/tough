@@ -129,20 +129,24 @@ After the code is downloaded, run catkin_make.
     sudo apt-get install ruby ros-indigo-pcl-ros ros-indigo-pcl-conversions ros-indigo-moveit-full ros-indigo-trac-ik ros-indigo-footstep-planner ros-indigo-humanoid-localization ros-indigo-multisense-ros
 ```
 #### Usage
-1. To start qual task 1 with controller
-```
+* To start qual task 1 with controller
+
+```bash
     roslaunch val_bringup qual1.launch
 ```
-2. To start qual task 1 without controller
-```
+* To start qual task 1 without controller
+
+```bash
     roslaunch val_bringup qual1.launch controller:=false
 ```
-3. To start qual task 2 with controller
-```
+* To start qual task 2 with controller
+
+```bash
     roslaunch val_bringup qual2.launch
 ```
-4. To start qual task 2 without controller
-```
+* To start qual task 2 without controller
+
+```bash
     roslaunch val_bringup qual2.launch controller:=false
 ```
  
