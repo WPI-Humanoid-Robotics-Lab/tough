@@ -43,7 +43,8 @@ geometry_msgs::Point ButtonDetector::processImage(const cv::Mat& src)
 
     for( int i = 0, j = 0; i< contours.size(); i++ )
     {
-            //  Find the area of contour
+
+        //  Find the area of contour
         double a=contourArea( contours[i],false);
         if(a>largest_area){
             largest_area=a;
@@ -60,8 +61,8 @@ geometry_msgs::Point ButtonDetector::processImage(const cv::Mat& src)
             points.push_back(Point2f(moment.m10/moment.m00,moment.m01/moment.m00));
             std::cout<<"m00"<<moment.m00<<"m10"<<moment.m10<<"m01"<<moment.m01;
             std::cout<<"x:"<<points[j].x<<" y:"<<points[j].y<<"\n";
-            buttonCenter.x = points[j].x;
-            buttonCenter.y = points[j].y;
+            buttonCenter.x = int (points[j].x);
+            buttonCenter.y = int (points[j].y);
             j++;
             return buttonCenter;
         }
@@ -82,53 +83,82 @@ bool ButtonDetector::buttonDetected()
 void ButtonDetector::getLocation()
 {
 
-
+    static tf::TransformBroadcaster br;
+    tf::Transform transform;
     StereoPointCloudColor::Ptr organized_cloud(new StereoPointCloudColor);
     geometry_msgs::PointStamped location;
     geometry_msgs::Point index;
-    cv::Mat src,fliped;
-    cv::Mat_<float> disp;
-    cv::Mat_<double> Q;
+    cv::Mat src,flipped;
+    cv::Mat_<float> disp, disp_flipped;
+    cv::Mat_<double> Q, Q_flipped;
 
     bool valid_Q=false;
     bool new_color=false;
     bool new_disp=false;
 
-    if(ros::ok())
+    while(ros::ok())
     {
 
-        if(mi->giveSyncImages(src,disp))
+        while(!new_color)
+        {
+            new_color=mi->giveImage(src);
+            if(new_color)
+            {
+                flip(src,flipped,-1);
+               // imshow("flip", src);
+                index = processImage(flipped);
+            }
+
+        }
+        if(mi->giveDisparityImage(disp))
         {
             new_disp=true;
-            flip(src,fliped,-1);
-            index = processImage(fliped);
+            flip(disp,disp_flipped,-1);
+
         }
 
-     if(new_disp)
-     {
-        if(!mi->giveQMatrix(Q))
+        if(new_disp&&new_color)
         {
-            ros::spinOnce();
-        }
-        std::cout<<disp.cols<<" x "<<disp.rows<<std::endl;
-        PointCloudHelper::generateOrganizedRGBDCloud(disp,src,Q,organized_cloud);
-        ROS_INFO_STREAM("Organized cloud size: "<<organized_cloud->size());
+
+            if(!mi->giveQMatrix(Q))
+            {
+                ros::spinOnce();
+
+            }
+            flip(Q,Q_flipped,-1);
+            std::cout<<disp.cols<<" x "<<disp.rows<<std::endl;
+            PointCloudHelper::generateOrganizedRGBDCloud(disp_flipped,flipped,Q_flipped,organized_cloud);
+            ROS_INFO_STREAM("Organized cloud size: "<<organized_cloud->size());
 
             // output.header.frame_id=std::string("left_camera_optical_frame");
             // output.header.stamp=ros::Time::now().toNSec();
 
 
+        }
+       // std::cout<<organized_cloud->width<<std::endl;
+        pcl::PointXYZRGB point = organized_cloud->at(index.x,index.y);
+        location.point.x = point.x;
+        location.point.y = point.y;
+        location.point.z = point.z;
+        location.header.frame_id = std::string("buttonFrame");
+        transform.setOrigin( tf::Vector3(0, 0, 0) );
+        tf::Quaternion q;
+        q.setRPY(0, 0, 0);
+        transform.setRotation(q);
+        br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "leftFoot", "buttonFrame"));
+
+        pubButtonCenter.publish(location);
+
     }
 
-}
-
-pcl::PointXYZRGB point = organized_cloud->at(index.x,index.y);
-location.point.x = point.x;
-location.point.y = point.y;
-location.point.z = point.z;
-location.header.frame_id = std::string("left_camera_optical_frame");
-    //location.header.stamp = ros::Time::now().toNSec();
-pubButtonCenter.publish(location);
+//
+;
+// location.point.x = point.x;
+// location.point.y = point.y;
+// location.point.z = point.z;
+// location.header.frame_id = std::string("left_camera_optical_frame");
+//     //location.header.stamp = ros::Time::now().toNSec();
+// pubButtonCenter.publish(location);
 
 
 

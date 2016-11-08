@@ -11,10 +11,11 @@ int main(int argc, char** argv)
 	ros::NodeHandle nh;
 //	src_perception::MultisenseImage mi(nh);
     ButtonDetector test(nh);
-	// while(ros::ok())
-	// {
-	// 	ros::spinOnce();
-	// }
+	while(ros::ok())
+	{
+		ros::spinOnce();
+		test.getLocation();
+	}
 
 
 }
