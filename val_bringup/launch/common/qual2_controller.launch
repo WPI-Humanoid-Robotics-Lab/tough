@@ -1,0 +1,10 @@
+<launch>
+<arg name="init" default="true"/>
+<arg name="walk_test" default="true" />
+
+   <include file="$(find srcsim)/launch/qual2.launch">
+   <arg name="init" value="$(arg init)" />
+   <arg name="walk_test" value="$(arg init)" />
+   </include>
+
+</launch>

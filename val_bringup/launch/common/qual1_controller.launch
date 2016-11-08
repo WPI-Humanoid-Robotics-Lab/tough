@@ -1,0 +1,6 @@
+<launch>
+    <arg name="init" default="true"/>
+    <include file="$(find srcsim)/launch/qual1.launch">
+        <arg name="init" value="$(arg init)" />
+    </include>
+</launch>

@@ -1,18 +1,18 @@
 <launch>
 
-   <include file="$(find srcsim)/launch/qual1.launch">
-   	<arg name="init" default="true"/> 
-   </include>
+    <arg name="init" default="true"/>
+    <arg name="controller" default="true" />
 
-     <!--node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-     <param name="use_gui" value="FALSE"/>         
-     <rosparam param="/source_list">[/val/joint_states, /multisense/joint_states]</rosparam>      
-     </node-->
+    <group if="$(arg controller)">
+        <include file="$(find val_bringup)/launch/common/qual1_controller.launch">
+            <arg name="init" value="$(arg init)"/>
+        </include>
+    </group>
 
-     <!-- Combine joint values -->          
-     <!-- node name="robot_state_publisher2" pkg="robot_state_publisher" type="state_publisher" respawn="true" output="screen">
-     <param name="publish_frequency" value="30" />          
-     </node -->
+
+    <group unless="$(arg controller)">
+        <include file="$(find val_bringup)/launch/common/qual1_no_controller.launch" />
+    </group>
 
    <!-- Start spinning the lidar   @TODO: implement this using a parameter or check if one exists already-->
    <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 2"/> 
@@ -28,5 +28,7 @@
    <remap from="/multisense/camera/points2" to="/multisense/image_points2" />
 </node>
 
+<!-- Turn on the lights -->
+<!--<node pkg="rostopic" type="rostopic" name="lights" args="pub /srcsim/qual1/start std_msgs/Empty"/>-->
 
 </launch>
