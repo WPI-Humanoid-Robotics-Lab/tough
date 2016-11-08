@@ -121,43 +121,29 @@ After the code is downloaded, run catkin_make.
 
 	
 #### Additional Packages
-* ruby (if you seeing erb related error, install ruby)    
+* ruby, pcl, MoveIt!, Trac\_IK, footstep\_planner, humanoid\_localization, Multisense
 
 ```bash
-    sudo apt-get install ruby    
+    sudo apt-get install ruby ros-indigo-pcl-ros ros-indigo-pcl-conversions ros-indigo-moveit-full ros-indigo-trac-ik ros-indigo-footstep-planner ros-indigo-humanoid-localization ros-indigo-multisense-ros
 ```
-
-* pcl
-
-```bash
-    sudo apt-get install ros-indigo-pcl-ros ros-indigo-pcl-conversions
+#### Usage
+1. To start qual task 1 with controller
 ```
-
-* MoveIt!  
-
-```bash
-    sudo apt-get install ros-indigo-moveit-full    
+    roslaunch val_bringup qual1.launch
 ```
-* Trac_ik 
-
-```bash
-    sudo apt-get install ros-indigo-trac-ik
+2. To start qual task 1 without controller
 ```
-* footstep_planner
-
-```bash
-    sudo apt-get install ros-indigo-footstep-planner
+    roslaunch val_bringup qual1.launch controller:=false
 ```
-* humanoid_localization
-
-```bash
-    sudo apt-get install ros-indigo-humanoid-localization
+3. To start qual task 2 with controller
 ```
-* Multisense
-
-```bash
-    sudo apt-get install ros-indigo-multisense-ros
+    roslaunch val_bringup qual2.launch
 ```
+4. To start qual task 2 without controller
+```
+    roslaunch val_bringup qual2.launch controller:=false
+```
+ 
 
 #### Packages
 * val_description   
