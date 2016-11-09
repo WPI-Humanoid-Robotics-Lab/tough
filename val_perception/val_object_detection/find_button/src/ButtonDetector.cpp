@@ -106,7 +106,7 @@ void ButtonDetector::getLocation()
             {
                 flip(src,flipped,-1);
                // imshow("flip", src);
-                index = processImage(flipped);
+                index = processImage(src);
             }
 
         }
@@ -127,7 +127,9 @@ void ButtonDetector::getLocation()
             }
             flip(Q,Q_flipped,-1);
             std::cout<<disp.cols<<" x "<<disp.rows<<std::endl;
-            PointCloudHelper::generateOrganizedRGBDCloud(disp_flipped,flipped,Q_flipped,organized_cloud);
+            PointCloudHelper::generateOrganizedRGBDCloud(disp,src,Q,organized_cloud);
+
+            //PointCloudHelper::generateOrganizedRGBDCloud(disp_flipped,flipped,Q_flipped,organized_cloud);
             ROS_INFO_STREAM("Organized cloud size: "<<organized_cloud->size());
 
             // output.header.frame_id=std::string("left_camera_optical_frame");
@@ -140,12 +142,12 @@ void ButtonDetector::getLocation()
         location.point.x = point.x;
         location.point.y = point.y;
         location.point.z = point.z;
-        location.header.frame_id = std::string("buttonFrame");
-        transform.setOrigin( tf::Vector3(0, 0, 0) );
+        //location.header.frame_id = std::string("buttonFrame");
+        transform.setOrigin( tf::Vector3(location.point.x , location.point.y, location.point.z) );
         tf::Quaternion q;
         q.setRPY(0, 0, 0);
         transform.setRotation(q);
-        br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "leftFoot", "buttonFrame"));
+        br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "left_camera_optical_frame", "buttonFrame"));
 
         pubButtonCenter.publish(location);
 
