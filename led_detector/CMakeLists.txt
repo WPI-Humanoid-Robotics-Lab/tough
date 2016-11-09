@@ -45,14 +45,14 @@ catkin_package(
 # include_directories(include)
 include_directories(include)
 include_directories(perception_common
-  # ${OpenCV_INCLUDE_DIRS} 
+   ${OpenCV_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )
 ## Declare a C++ library
-add_library(led_detector
-  src/LedDetector.cpp
-)
-target_link_libraries(led_detector ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+#add_library(led_detector
+#  src/LedDetector.cpp
+#)
+#target_link_libraries(led_detector ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
 
 
 ## Add cmake target dependencies of the library
@@ -61,7 +61,7 @@ target_link_libraries(led_detector ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 # add_dependencies(led_detector ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(val_led_pos_both src/led_position.cpp) 
+add_executable(led_detector src/LedDetector.cpp)
 
 
 ## Add cmake target dependencies of the executable
@@ -69,9 +69,10 @@ add_executable(val_led_pos_both src/led_position.cpp)
 # add_dependencies(val_led_pos_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(val_led_pos_both
+target_link_libraries(led_detector
   ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} perception_common
 )
-target_link_libraries(val_led_pos_both
-  ${OpenCV_LIBS} 
-)
+#target_link_libraries(led_detector
+#  ${OpenCV_LIBS}
+#)

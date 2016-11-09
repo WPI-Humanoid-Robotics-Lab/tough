@@ -1,21 +1,21 @@
 #include <led_detector/LedDetector.h>
+#include <ros/ros.h>
+#include <perception_common/MultisenseImage.h>
 using namespace cv;
 using namespace std;
 using namespace src_perception;
 
-namespace src_qual1_task
-{
-	LedDetector::LedDetector(ros::NodeHandle rosHandle )
-		// :mi(new src_perception::MultisenseImage(rosHandle))
+using namespace src_qual1_task;
+	LedDetector::LedDetector(ros::NodeHandle rosHandle ):
+		m_multisenseImagePtr(new src_perception::MultisenseImage(rosHandle)),
+           m_multisensePcPtr(new src_perception::MultisensePointCloud(rosHandle, m_baseFrame, m_fixedFrame)),
+           m_randomGen(cv::RNG(12345))
 	{
-		nh = rosHandle;
+		std::cout<<"DO WE GET TO THE CONSTRUCTOR"<<std::endl;
+        m_imageRGBpub = rosHandle.advertise<std_msgs::Int32MultiArray>("/detect/light/rgb", 100);
+        m_imageXYZpub = rosHandle.advertise<geometry_msgs::Point>("/detect/light/xy", 100);
+         cv::namedWindow("Raw Image with Contours"); //For demo only
 
-		multisenseImage = NULL;
-		multisensePc = NULL;
-
-		imageRGBpub = node_handle.advertise<std_msgs::Int32MultiArray>("/detect/light/rgb", 100);
-		imageXYZpub = node_handle.advertise<geometry_msgs::Point>("/detect/light/xy", 100);
-	    // cv::namedWindow("Raw Image with Contours"); //For demo only
 	}
 	LedDetector::~LedDetector(){
 	    // cv::destroyWindow("Raw Image with Contours"); //For demo only
@@ -27,26 +27,30 @@ namespace src_qual1_task
 		// This is the function where we should implement the algorithm
 		ImageFrame              img_frame;
 		cv::Mat                 img_3d;
-		if ((multisenseImage == NULL) || (multisensePc == NULL))
+        if ((m_multisenseImagePtr == NULL) || (m_multisensePcPtr == NULL))
 			return false;
 		//image_frame.img is the cv image to process
 		while(ros::ok()){
 			ros::spinOnce();
-			if (multisenseImage->giveSyncImages(img_frame.img, img_frame.disp)){
-				if (img_frame.Q.empty())
+            if (m_multisenseImagePtr->giveSyncImages(img_frame.m_originalImage, img_frame.m_disparityImage)){
+                if (img_frame.m_qMatrix.empty())
 				{
-					if (!multisenseImage->giveQMatrix(img_frame.Q))
+                    if (!m_multisenseImagePtr->giveQMatrix(img_frame.m_qMatrix))
 						continue;
 					else
-						multisenseImage->giveQMatrix(img_frame.Q);
+                        m_multisenseImagePtr->giveQMatrix(img_frame.m_qMatrix);
 				}
-				cv::reprojectImageTo3D(img_frame.disp, img_3d, img_frame.Q, false); 
-    			if (flag == false)
-    			{
-      				old_image = image_frame.img; 
-      				flag = true;
-    			}
-    			DetectLED(image_frame.img);
+				ROS_DEBUG("BEFORE REPROJECT");
+                cv::reprojectImageTo3D(img_frame.m_disparityImage, img_3d, img_frame.m_qMatrix, false);
+                ROS_DEBUG("AFTER REPROJECT");
+//    			if (flag == false)
+//    			{
+//      				old_image = image_frame.img;
+//      				flag = true;
+//    			}
+                ROS_DEBUG("BEFORE DETECTLED");
+                DetectLED(img_frame.m_originalImage);
+                ROS_DEBUG("AFTER DETECTLED");
     			//image_pub.publish(cv_depthptr->toImageMsg());
 				// now we should use ledDetector with image_frame.img
 				// I think this also does the job?:
@@ -59,11 +63,22 @@ namespace src_qual1_task
 
 	}
 	void LedDetector::getLedLocation(){
+		static tf::TransformBroadcaster br;
+	    tf::Transform transform;
+	    StereoPointCloudColor::Ptr organized_cloud(new StereoPointCloudColor);
+	    geometry_msgs::PointStamped location;
+	    geometry_msgs::Point index;
+	    cv::Mat src,flipped;
+	    cv::Mat_<float> disp, disp_flipped;
+	    cv::Mat_<double> Q, Q_flipped;
 
+	    bool valid_Q=false;
+	    bool new_color=false;
+	    bool new_disp=false;
 	}
-}
+
 // LED detection algorithm
-void DetectLED(const cv::Mat &new_image) // small change here !!!! Since no changes on the image Vinayak suggested passing it as reference
+void LedDetector::DetectLED(const cv::Mat &new_image) // small change here !!!! Since no changes on the image Vinayak suggested passing it as reference
 {
 	cv::Mat diff, erod, erod_dil, erod_dil_gray, erod_dil_gray_thresh;
 
@@ -100,34 +115,34 @@ void DetectLED(const cv::Mat &new_image) // small change here !!!! Since no chan
 	if (countNonZero(erod_dil_gray_thresh) > 1)
 	{
 		cv::Mat contourOutput = erod_dil_gray_thresh.clone();
-		cv::findContours(contourOutput, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+        cv::findContours(contourOutput, m_gradientContours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 	}
 
-	std::vector<std::vector<cv::Point> >contours_poly(contours.size());
+    std::vector<std::vector<cv::Point> >contours_poly(m_gradientContours.size());
 	//std::vector<cv::Rect>boundRect(contours.size());
-	std::vector<cv::Point2f>center(contours.size());
+    std::vector<cv::Point2f>center(m_gradientContours.size());
 	std::vector<cv::Point2f>points;
 
-	for( int i = 0; i< contours.size(); i++ )
+    for( int i = 0; i< m_gradientContours.size(); i++ )
 	{
-		approxPolyDP( cv::Mat(contours[i]), contours_poly[i], 3, true );
+        approxPolyDP( cv::Mat(m_gradientContours[i]), contours_poly[i], 3, true );
 	  //boundRect[i] = boundingRect(cv::Mat(contours_poly[i]));
 	}
 
 	//cv::Mat drawing = cv::Mat::zeros(new_image.size(), CV_8UC3);      //Use this to display the contours on an empty background
-	for( int i = 0; i< contours.size(); i++ )
+    for( int i = 0; i< m_gradientContours.size(); i++ )
 	{   
-		cv::Scalar color = cv::Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+        cv::Scalar color = cv::Scalar( m_randomGen.uniform(0, 255), m_randomGen.uniform(0,255), m_randomGen.uniform(0,255) );
 		drawContours(new_image, contours_poly, i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point());
 	  //rectangle(new_image, boundRect[i].tl(), boundRect[i].br(), color, 1, 8, 0 );
 	}
-	for (int i = 0, j = 0; j < contours.size(); j++)
+    for (int i = 0, j = 0; j < m_gradientContours.size(); j++)
 	{
-		cv::Moments moment = cv::moments((cv::Mat)contours[j]);
+        cv::Moments moment = cv::moments((cv::Mat)m_gradientContours[j]);
 		if (moment.m00)
 		{
 			points.push_back(cv::Point2f(moment.m10/moment.m00,moment.m01/moment.m00));
-			cv::Vec3b pixel_value =  cv_depthptr->image.at<cv::Vec3b>(points[i].y,points[i].x);
+            cv::Vec3b pixel_value =  m_cvDepthPtr->image.at<cv::Vec3b>(points[i].y,points[i].x);
 			std_msgs::Int32MultiArray rgb;
 			geometry_msgs::Point pixelCoordinates;
 			pixelCoordinates.x = points[i].x;
@@ -136,8 +151,8 @@ void DetectLED(const cv::Mat &new_image) // small change here !!!! Since no chan
 			rgb.data.clear();
 			for (int iter=2;iter>=0;iter--)
 				rgb.data.push_back(pixel_value.val[iter]);
-			imageRGBpub.publish(rgb);
-			imageXYZpub.publish(pixelCoordinates);
+            m_imageRGBpub.publish(rgb);
+            m_imageXYZpub.publish(pixelCoordinates);
 			i++;
 		}
 	}
@@ -151,6 +166,7 @@ void DetectLED(const cv::Mat &new_image) // small change here !!!! Since no chan
 	Function to convert 2D pixel point to 3D point by extracting point
 	from PointCloud2 corresponding to input pixel coordinate. This function
 	can be used to get the X,Y,Z coordinates
+	Deprecated
 	*/
 	void pixelTo3DPoint(const sensor_msgs::PointCloud2 pCloud, const int u, const int v, geometry_msgs::Point &p)
 	{
@@ -185,20 +201,23 @@ void DetectLED(const cv::Mat &new_image) // small change here !!!! Since no chan
 int main(int argc, char *argv[])
 {
 	ros::init(argc, argv, "led_detection");
+
     ros::NodeHandle nh;//rosHandle?
 
     // Eigen::Vector3d                 valve_centre_pt, valve_normal;
-    src_qual1_task::LedDetector   ledDetector(nh);
+    // src_qual1_task::LedDetector   LedDetector(nh);
+	std::cout<<"nh"<<std::endl;
+    LedDetector   abcd(nh);
+//    std::signal(SIGINT, shutdown);
 
-    std::signal(SIGINT, shutdown);
-
-    ledDetector.multisenseImage = new src_perception::MultisenseImage(nh);
-    ledDetector.multisensePc = new src_perception::MultisensePointCloud(nh);
+//    ledDetector.multisenseImage = new src_perception::MultisenseImage(nh);
+//    ledDetector.multisensePc = new src_perception::MultisensePointCloud(nh);
 
     // multisense_image.giveSyncImages(img, disp)
     while (ros::ok())
     {
-    	ledDetector.detectLed();
+    	std::cout<<"do we get here?2222"<<std::endl;
+    	abcd.detectLed();
 
     	ROS_INFO_STREAM("debbuging");
 
