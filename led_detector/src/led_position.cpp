@@ -14,7 +14,7 @@
 
 namespace enc = sensor_msgs::image_encodings;
 std::vector<std::vector<cv::Point> > contours;
-bool flag = 0;
+bool flag = false;
 cv::RNG rng(12345);
 
 
@@ -27,14 +27,13 @@ class LED_Detector
   ros::Publisher image_xyzpub;
   cv_bridge::CvImagePtr cv_depthptr;
   cv::Mat old_image;
-  bool flag = false;
-
+  
   public:
   //Constructor
   LED_Detector(int argc, char** argv)
   {
     image_sub = node_handle.subscribe("/multisense/camera/left/image_raw", 1, &LED_Detector::imageCallback, this);
-    pointCloud = node_handle.subscribe("/multisense/image_points2", 1, &LED_Detector::imageCallback, this);
+    //pointCloud = node_handle.subscribe("/multisense/image_points2", 1, &LED_Detector::imageCallback, this);
     image_rgbpub = node_handle.advertise<std_msgs::Int32MultiArray>("/detect/light/rgb", 100);
     image_xyzpub = node_handle.advertise<geometry_msgs::Point>("/detect/light/xy", 100);
     cv::namedWindow("Raw Image with Contours");
@@ -62,10 +61,10 @@ class LED_Detector
 
       if (cv_depthptr->image.rows > 400 && cv_depthptr->image.cols > 600)
       { 
-        if (flag == 0)
+        if (flag == false)
         {
           old_image = cv_depthptr->image; 
-          flag++;
+          flag = true;
         }
         DetectLED(cv_depthptr->image);
         //image_pub.publish(cv_depthptr->toImageMsg());
@@ -82,7 +81,7 @@ class LED_Detector
 
 
   // LED detection algorithm
-  void DetectLED(cv::Mat new_image)
+  void DetectLED(const cv::Mat &new_image) // small change here !!!! Since no changes on the image Vinayak suggested passing it as reference
   {
     cv::Mat diff, erod, erod_dil, erod_dil_gray, erod_dil_gray_thresh;
 
@@ -168,8 +167,7 @@ class LED_Detector
   /**
   Function to convert 2D pixel point to 3D point by extracting point
   from PointCloud2 corresponding to input pixel coordinate. This function
-  can be used to get the X,Y,Z coordinates of a feature using an 
-  RGBD camera
+  can be used to get the X,Y,Z coordinates
   */
   void pixelTo3DPoint(const sensor_msgs::PointCloud2 pCloud, const int u, const int v, geometry_msgs::Point &p)
   {
