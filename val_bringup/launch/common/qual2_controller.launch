@@ -4,7 +4,7 @@
 
    <include file="$(find srcsim)/launch/qual2.launch">
    <arg name="init" value="$(arg init)" />
-   <arg name="walk_test" value="$(arg init)" />
+   <arg name="walk_test" value="$(arg walk_test)" />
    </include>
 
 </launch>
