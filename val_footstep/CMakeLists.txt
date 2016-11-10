@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   angles
   map_server
   visualization_msgs
+  ihmc_msgs
   )
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SBPL REQUIRED sbpl)
@@ -142,7 +143,9 @@ include_directories(
 add_executable(footstep_node src/footstep_node.cpp)
 target_link_libraries(footstep_node ${catkin_LIBRARIES} ${SBPL_LIBRARIES})
 
-
+add_executable(pass_footstep src/pass_footstep.cpp)
+add_dependencies(pass_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pass_footstep  ${catkin_LIBRARIES})
 
 
 add_executable(test_footstep src/test_footstep.cpp)
