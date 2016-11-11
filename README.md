@@ -9,6 +9,9 @@ This is the main repo for Team-WPI's participation in Space Robotics Challenge.
 ##### Ubuntu 14.04
 To install Ubuntu on a PC that is already running Windows 10, install a bootable version of Ubuntu onto a USB flash drive. 
 
+##### Ubuntu 14.04
+To install Ubuntu on a PC that is already running Windows 10, install a bootable version of Ubuntu onto a USB flash drive. 
+
 [complete ubuntu.com tutorial](https://help.ubuntu.com/community/Installation/FromUSBStick)
 
 [creating bootable Ubuntu USB flash drive tutorial](http://www.ubuntu.com/download/desktop/create-a-usb-stick-on-ubuntu)
@@ -19,6 +22,21 @@ Turn off your PC and plug in the USB flash drive and enter the BIOS settings (us
 
 Open the Ubuntu "Install Ubuntu 14.04" link, and follow the steps. You mostly hit "Continue" through the GUI provided. Google anything you get stuck on. Be sure not to erase your Windows partition!
 When Ubuntu is successfully installed on a seperate partition from your Windows 10 installation, when you boot up you should see a "GRUB" intereface that lets you select between Ubuntu and Windows.
+
+##### ROS Indigo
+```bash
+sudo sh -c '. /etc/lsb-release && echo "deb http://mirror.umd.edu/packages.ros.org/ros/ubuntu $DISTRIB_CODENAME main" > /etc/apt/sources.list.d/ros-latest.list'
+wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install ros-indigo-desktop-full
+```
+
+##### Troubleshooting
+Make sure that your WiFi is properly set up. If you are on campus, you will have to go through the WPI-Wireless-Setup again. Once you are connected to WPI-Wireless, click the WiFi logo at the top-right of Ubuntu, then clikc "Edit Connections" and delete the old WPI-Wireless-Setup or else you will get faulty WiFi signals will you switch back and forth between the two networks.
+
+Check that your video card is properly installed by typing `lspci -v` and finding your GPU information.
+
+
 
 ##### ROS Indigo
 ```bash

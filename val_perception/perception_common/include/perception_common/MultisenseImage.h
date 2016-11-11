@@ -1,4 +1,4 @@
-/**
+    /**
  ********************************************************************************************************
  * @file 		MultisenseImage.h
  * @brief		This file contains the multisenseImage class that is used to convert from multisense
@@ -154,7 +154,7 @@ public:
      * @param nh the ros nodehandle - why do i have this as an argument? expect for the fact to make sure
      * 		  the constructor knows that it is ros. I have no idea why I do this!
      */
-    MultisenseImage(ros::NodeHandle &nh);
+    MultisenseImage(ros::NodeHandle &nh_);
 
     void setDepthTopic(const std::string &topic);
 
