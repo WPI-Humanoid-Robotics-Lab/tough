@@ -7,7 +7,7 @@
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PointStamped.h>
 #include <tf/transform_broadcaster.h>//
-
+#include <val_common/val_common_names.h>
 
 
 #include <cv_bridge/cv_bridge.h>
@@ -81,7 +81,7 @@ public:
     /**
      * @brief m_multisensePcPtr
      */
-    src_perception::MultisensePointCloud    *m_multisensePcPtr;
+//    src_perception::MultisensePointCloud    m_multisensePc;
 
 
     bool detectLed();
@@ -135,11 +135,11 @@ private:
     /**
      * @brief m_baseFrame
      */
-    std::string m_baseFrame = "";
+    std::string m_baseFrame = VAL_COMMON_NAMES::HOKUYO_LINK_TF;
 
     /**
      * @brief m_fixedFrame
      */
-    std::string m_fixedFrame = "";
+    std::string m_leftCameraOpticalFrame = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
 };
 }
