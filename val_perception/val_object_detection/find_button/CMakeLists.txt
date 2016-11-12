@@ -70,5 +70,8 @@ target_link_libraries(find_button ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_executable(PCLImage_test src/PCL2Image_test.cpp)
 target_link_libraries(PCLImage_test ${catkin_LIBRARIES})
 
+add_executable(ButtonDetectorNode src/ButtonDetectorNode.cpp)
+target_link_libraries(ButtonDetectorNode ${catkin_LIBRARIES} find_button)
+
 add_executable(ButtonDetectorTest src/ButtonDetectorTest.cpp)
 target_link_libraries(ButtonDetectorTest ${catkin_LIBRARIES} find_button)

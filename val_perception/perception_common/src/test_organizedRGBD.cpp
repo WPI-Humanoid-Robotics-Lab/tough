@@ -32,17 +32,11 @@ int main(int argc, char** argv)
 
 	ros::Publisher debug_publisher = nh.advertise<pcl::PCLPointCloud2> ("/debug/RGBD", 1);
 
-	if(mi.giveImage(color))
-		{
-			new_color=true;
-			imshow("flip", color);
-		}
 	while(ros::ok())
 	{
         if(mi.giveImage(color))
 		{
 			new_color=true;
-			imshow("flip", color);
 		}
 		if(mi.giveDisparityImage(disp))
 		{
