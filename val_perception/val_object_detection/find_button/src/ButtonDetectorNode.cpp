@@ -39,14 +39,33 @@ void getButtonFrame(ros::NodeHandle &nh)
 	cv::Mat img;
 	cv::Mat_<float> disp;
 	cv::Mat_<double> Q;
+	bool valid_Q=false;
+	bool new_img=false;
+	bool new_disp=false;
 
 
 	while(ros::ok())
 	{
 		found.data = false;
+		ROS_INFO_STREAM("Looking");
 		//get synced images from multisense. check the datatypes of arguments in function definition.
-		if ( mi.giveSyncImages(img, disp) && mi.giveQMatrix(Q))
+		
+		if(mi.giveImage(img))
 		{
+			new_img=true;
+		}
+		if(mi.giveDisparityImage(disp))
+		{
+			new_disp=true;
+		}
+
+		if(new_img&&new_disp)
+		{
+			if(!mi.giveQMatrix(Q))
+			{
+				ros::spinOnce();
+				continue;
+			}
 			PointCloudHelper::generateOrganizedRGBDCloud(disp,img,Q,organized_cloud);
 			ROS_INFO_STREAM("Organized cloud size: "<<organized_cloud->size());
 			if( processImage(img,buttonCenter) )
@@ -55,18 +74,17 @@ void getButtonFrame(ros::NodeHandle &nh)
 				found.data = true;
 				point = organized_cloud->at(buttonCenter.x,buttonCenter.y);
 				transform.setOrigin( tf::Vector3(point.x , point.y, point.z) );
-        		q.setRPY(0, 0, 0);
-        		transform.setRotation(q);
-        		br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "left_camera_optical_frame", frame));
+	    		q.setRPY(0, 0, 0);
+	    		transform.setRotation(q);
+	    		br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "left_camera_optical_frame", frame));
 				buttonDectected.publish(found);
-			}	
+				new_disp=new_img=false;
+
+			}
+			
 		}
-		else
-		{
-			ROS_INFO_STREAM("not found button");
-			buttonDectected.publish(found);
-		}
-		
+
+	
 		ros::spinOnce();
 	}	
 
