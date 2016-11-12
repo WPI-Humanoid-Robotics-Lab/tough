@@ -8,7 +8,8 @@
 
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
      <param name="use_gui" value="FALSE"/>         
-     <rosparam param="/source_list">[/joint_states, /multisense/joint_states, /hardware_joint_states]</rosparam>      
+     <rosparam param="/source_list">[/multisense/joint_states, /hardware_joint_states]</rosparam>      
+     
   </node>
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
