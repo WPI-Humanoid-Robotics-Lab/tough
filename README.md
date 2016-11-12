@@ -88,6 +88,13 @@ Compile the java code that you just cloned (https://xkcd.com/303)
     ./gradlew -q deployLocal
 ```
 
+#### ROS dependencies
+* ruby, pcl, MoveIt!, Trac\_IK, footstep\_planner, humanoid\_localization, Multisense
+
+```bash
+    sudo apt-get install ruby ros-indigo-pcl-ros ros-indigo-pcl-conversions ros-indigo-moveit-full ros-indigo-trac-ik ros-indigo-footstep-planner ros-indigo-humanoid-localization ros-indigo-multisense-ros
+```
+
 #### Setting up workspace
 Create catkin workspace. If you already have one, move to the [next](#test-your-installation) step    
 ```bash
@@ -121,13 +128,6 @@ After the code is downloaded, run catkin_make.
     roslaunch val_bringup qual2.launch
 ```
 
-	
-#### Additional Packages
-* ruby, pcl, MoveIt!, Trac\_IK, footstep\_planner, humanoid\_localization, Multisense
-
-```bash
-    sudo apt-get install ruby ros-indigo-pcl-ros ros-indigo-pcl-conversions ros-indigo-moveit-full ros-indigo-trac-ik ros-indigo-footstep-planner ros-indigo-humanoid-localization ros-indigo-multisense-ros
-```
 #### Usage
 * To start qual task 1 with controller
 
