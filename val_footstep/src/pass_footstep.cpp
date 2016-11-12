@@ -1,43 +1,36 @@
-#include "ros/ros.h"
-#include <cstdlib>
-#include"geometry_msgs/PoseStamped.h"
-#include"geometry_msgs/PoseWithCovarianceStamped.h"
-#include"geometry_msgs/Pose2D.h"
-#include <humanoid_nav_msgs/PlanFootsteps.h>
-#include <humanoid_nav_msgs/StepTarget.h>
-#include <val_footstep/StepTargetArray.h>
-#include "std_msgs/Float64MultiArray.h"
-#include <boost/array.hpp>
-#include"geometry_msgs/Vector3.h"
-#include"geometry_msgs/Quaternion.h"
-#include "ihmc_msgs/FootstepDataListRosMessage.h"
-#include "ihmc_msgs/FootstepDataRosMessage.h"
-#include "ihmc_msgs/FootstepStatusRosMessage.h"
-#include <tf2_ros/transform_listener.h>
-#include"tf2_ros/buffer.h"
-#include <geometry_msgs/TransformStamped.h>
-#include "std_msgs/String.h"
-#include "ros/time.h"
+#include "val_footstep/pass_footstep.h"
+
+enum FOOT{
+    LEFT = 0,
+    RIGHT = 1,
+};
 
 
-
-void statusCallback(const ihmc_msgs::FootstepStatusRosMessage)
+void stepsToVal::statCallback(const ihmc_msgs::FootstepStatusRosMessage & msg)
 {
+   std::cout << "Inside subscriber" << std::endl;
+    if(msg.status == 1)
+  {
+       step_counter++;
+       std::cout << "counter" << step_counter << std::endl;
+   }
 
+ return;
 }
 
 
-
-int main(int argc, char **argv)
-
+stepsToVal::stepsToVal()
 {
-    ros::init(argc, argv, "pass_footstep");
-    ros::NodeHandle n;
-    ros::ServiceClient footStep_client = n.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("pass_footsteps");
-    ros::Publisher footStepsToVal = n.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/valkyrie/control/footstep_list",1,true);
-    ros::Subscriber footStepStatus = n.subscribe("/ihmc_ros/valkyrie/output/footstep_status",20,statusCallback);
+    this->footStep_client = n.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("pass_footsteps");
+    this->footStepsToVal = n.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/valkyrie/control/footstep_list",1,true);
+    this->footStepStatus = n.subscribe("/ihmc_ros/valkyrie/output/footstep_status", 20,&stepsToVal::statCallback, this);
+
+    tf_listener = new tf2_ros::TransformListener(this->tfBuffer);
+
+
+    ros::Duration(0.5).sleep();
+    step_counter = 0;
     std::string robot_name,right_foot_frame,left_foot_frame;
-    std_msgs::String Right_Foot_Frame,Left_Foot_Frame;
 
     if (n.getParam("/ihmc_ros/robot_name",robot_name))
     {
@@ -53,11 +46,100 @@ int main(int argc, char **argv)
     {
         ROS_ERROR("Failed to get param 'my_param'");
     }
+}
 
-    tf2_ros::Buffer tfBuffer;
-    tf2_ros::TransformListener tfListener(tfBuffer);
+void stepsToVal::walk()
+{
+    ihmc_msgs::FootstepDataListRosMessage list ;
+    list.transfer_time = 1.5;
+    list.swing_time = 1.5;
+    list.execution_mode = 0;
+    list.unique_id = -1 ;
+
+    list.footstep_data_list.push_back(this->getOffsetStep(LEFT , 0.2));
+    list.footstep_data_list.push_back(this->getOffsetStep(RIGHT , 0.4));
+    list.footstep_data_list.push_back(this->getOffsetStep(LEFT , 0.6));
+
     ros::Rate loop_rate(10);
-    ros::Duration(1).sleep();
 
+    this->footStepsToVal.publish(list);
+    ROS_INFO("Published data ");
+
+   this->waitForSteps(list.footstep_data_list.size());
+
+
+   return;
+}
+
+void stepsToVal::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage & foot)
+{
+
+    std_msgs::String foot_frame;
+    if (side == LEFT)
+    {
+        foot_frame = this->Left_Foot_Frame;
+        ROS_INFO("In Left ");
+
+    }
+    else
+    {
+        foot_frame = this->Right_Foot_Frame;
+        ROS_INFO("In Right");
+    }
+
+    geometry_msgs::TransformStamped transformStamped;
+    transformStamped = tfBuffer.lookupTransform( "world",foot_frame.data,ros::Time(0));
+    foot.orientation = transformStamped.transform.rotation;
+    foot.location = transformStamped.transform.translation;
+    foot.robot_side = side;
+    return;
+}
+
+ihmc_msgs::FootstepDataRosMessage stepsToVal::getOffsetStep(int side , double x)
+{
+
+    ihmc_msgs::FootstepDataRosMessage * next = new ihmc_msgs::FootstepDataRosMessage();
+
+    this->getCurrentStep(side, *next);
+    next->location.x+=x;
+    std::cout<< " robot side = " <<     next->robot_side << std::endl;
+    std::cout<< " orientation data w = " << next->orientation.w << std::endl;
+    std::cout<< " orientation data x = " << next->orientation.x << std::endl;
+    std::cout<< " orientation data y = " << next->orientation.y << std::endl;
+    std::cout<< " orientation data z = " << next->orientation.z << std::endl;
+    std::cout<< " location data x = " << next->location.x << std::endl;
+    std::cout<< " location data y = " << next->location.y << std::endl;
+    std::cout<< " location data z = " << next->location.z << std::endl;
+
+    return (*next);
+
+
+}
+
+void stepsToVal::waitForSteps(int n)
+{
+    while (step_counter < n)
+    {
+        ros::Duration(0.1).sleep();
+
+
+    }
+    return;
+}
+
+int main(int argc, char **argv)
+
+{
+
+    ros::init(argc, argv, "pass_footstep");
+
+
+
+
+        stepsToVal agent;
+
+        agent.walk();
+        std::cout << " Enjoy the data " << std::endl;
+        ros::spin();
     return 0;
 }
