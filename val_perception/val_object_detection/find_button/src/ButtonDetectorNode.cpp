@@ -54,6 +54,7 @@ void getButtonFrame(ros::NodeHandle &nh)
 		{
 			new_img=true;
 		}
+		
 		if(mi.giveDisparityImage(disp))
 		{
 			new_disp=true;
