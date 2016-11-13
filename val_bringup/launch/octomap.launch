@@ -1,16 +1,30 @@
 <launch>
 	<node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
-		<param name="resolution" value="0.2" />
+                <!--set the resolution to 5cm. this can be modified using dunamic parameter-->
+                <param name="resolution" value="0.05" />
 		
 		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
-		<param name="frame_id" type="string" value="map" />
+                <param name="frame_id" type="string" value="world" />
 		
 		<!-- maximum range to integrate (speedup!) -->
 		<param name="sensor_model/max_range" value="10.0" />
 		
+                 <!--frameid for detecting ground plane-->
+                <param name="base_frame_id" value="world" />
+
+                <!-- filter the ground plane -->
+                <param name="filter_ground" value="true" />
+
+                <param name="ground_filter/distance" value="1.0"/>
+
+                <param name="ground_filter/plane_distance" value="0.05"/>
                 
                 <!-- data source to integrate (PointCloud2) -->
 		<remap from="cloud_in" to="/multisense/points2" />
-	
+
+                <!--remap the 2D map topic -->
+                <remap from="projected_map" to="map"/>
+
+
 	</node>
 </launch>
