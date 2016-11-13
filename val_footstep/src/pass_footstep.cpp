@@ -1,3 +1,9 @@
+/*
+ *
+ *
+ *
+ * */
+
 #include "val_footstep/pass_footstep.h"
 
 enum FOOT{
@@ -8,11 +14,23 @@ enum FOOT{
 
 void stepsToVal::statCallback(const ihmc_msgs::FootstepStatusRosMessage & msg)
 {
-   std::cout << "Inside subscriber" << std::endl;
+
     if(msg.status == 1)
   {
        step_counter++;
-       std::cout << "counter" << step_counter << std::endl;
+
+       if (step_counter == 2 )
+       {
+           begin = ros::Time::now();
+           std::cout << "start" << std::endl;
+       }
+
+       if (step_counter == 3 )
+       {
+           end = ros::Time::now();
+          std::cout << "End" << std::endl;
+       }
+
    }
 
  return;
@@ -51,18 +69,20 @@ stepsToVal::stepsToVal()
 void stepsToVal::walk()
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
-    list.transfer_time = 1.5;
-    list.swing_time = 1.5;
+    list.transfer_time = 1;
+    list.swing_time = 1;
     list.execution_mode = 0;
     list.unique_id = -1 ;
 
-    list.footstep_data_list.push_back(this->getOffsetStep(LEFT , 0.2));
-    list.footstep_data_list.push_back(this->getOffsetStep(RIGHT , 0.4));
-    list.footstep_data_list.push_back(this->getOffsetStep(LEFT , 0.6));
+    list.footstep_data_list.push_back(this->getOffsetStep(LEFT , 0.4));
+    list.footstep_data_list.push_back(this->getOffsetStep(RIGHT , 0.8));
+    list.footstep_data_list.push_back(this->getOffsetStep(LEFT , 1.2));
+    list.footstep_data_list.push_back(this->getOffsetStep(RIGHT , 1.6));
 
     ros::Rate loop_rate(10);
 
     this->footStepsToVal.publish(list);
+
     ROS_INFO("Published data ");
 
    this->waitForSteps(list.footstep_data_list.size());
@@ -78,13 +98,13 @@ void stepsToVal::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage & f
     if (side == LEFT)
     {
         foot_frame = this->Left_Foot_Frame;
-        ROS_INFO("In Left ");
+
 
     }
     else
     {
         foot_frame = this->Right_Foot_Frame;
-        ROS_INFO("In Right");
+
     }
 
     geometry_msgs::TransformStamped transformStamped;
@@ -92,6 +112,7 @@ void stepsToVal::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage & f
     foot.orientation = transformStamped.transform.rotation;
     foot.location = transformStamped.transform.translation;
     foot.robot_side = side;
+    foot.trajectory_type = 0;
     return;
 }
 
@@ -102,6 +123,7 @@ ihmc_msgs::FootstepDataRosMessage stepsToVal::getOffsetStep(int side , double x)
 
     this->getCurrentStep(side, *next);
     next->location.x+=x;
+    /*
     std::cout<< " robot side = " <<     next->robot_side << std::endl;
     std::cout<< " orientation data w = " << next->orientation.w << std::endl;
     std::cout<< " orientation data x = " << next->orientation.x << std::endl;
@@ -110,7 +132,7 @@ ihmc_msgs::FootstepDataRosMessage stepsToVal::getOffsetStep(int side , double x)
     std::cout<< " location data x = " << next->location.x << std::endl;
     std::cout<< " location data y = " << next->location.y << std::endl;
     std::cout<< " location data z = " << next->location.z << std::endl;
-
+    */
     return (*next);
 
 
@@ -120,6 +142,7 @@ void stepsToVal::waitForSteps(int n)
 {
     while (step_counter < n)
     {
+        ros::spinOnce();
         ros::Duration(0.1).sleep();
 
 
@@ -139,7 +162,10 @@ int main(int argc, char **argv)
         stepsToVal agent;
 
         agent.walk();
-        std::cout << " Enjoy the data " << std::endl;
-        ros::spin();
+       // agent.end = ros::Time::now();
+
+
+        std::cout << " time taken  " << agent.end - agent.begin << std::endl;
+
     return 0;
 }

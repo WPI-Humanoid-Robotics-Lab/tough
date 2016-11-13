@@ -34,12 +34,18 @@ class stepsToVal
 
   std_msgs::String Right_Foot_Frame,Left_Foot_Frame;
   int step_counter;
- void walk();
+
+  ros::Time begin;
+  ros::Time end;
+  void walk();
  void getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage& foot);
  void statCallback(const ihmc_msgs::FootstepStatusRosMessage & msg);
  ihmc_msgs::FootstepDataRosMessage getOffsetStep(int side, double x);
  void waitForSteps( int n); 
- private:
+
+
+
+private:
    
    ros::NodeHandle n;
    ros::ServiceClient footStep_client ;
