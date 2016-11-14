@@ -96,8 +96,8 @@ namespace src_qual1_task
 
 
             bool detectLed();
-           // void getLedColor();
-           // void getLedLocation();
+            void getLedColor();
+            void getLedLocation();
 
             /**
              * @brief DetectLED

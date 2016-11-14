@@ -69,7 +69,7 @@ namespace src_qual1_task
         }
     }
 
-    /*void LedDetector::getLedColor(){
+    void LedDetector::getLedColor(){
     }
 
     void LedDetector::getLedLocation(){
@@ -85,7 +85,7 @@ namespace src_qual1_task
         bool valid_Q=false;
         bool new_color=false;
         bool new_disp=false;
-    }*/
+    }
 
     //  LED detection algorithm
 
