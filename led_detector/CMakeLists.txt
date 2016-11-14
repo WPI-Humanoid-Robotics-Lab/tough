@@ -20,7 +20,6 @@ find_package(catkin REQUIRED COMPONENTS
   val_common
 )
 
-# find_package( OpenCV REQUIRED )
 find_package(Boost REQUIRED COMPONENTS system)
 include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
@@ -43,7 +42,6 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
 include_directories(include)
 include_directories(perception_common
    ${OpenCV_INCLUDE_DIRS}
@@ -74,6 +72,3 @@ target_link_libraries(led_detector
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} perception_common
 )
-#target_link_libraries(led_detector
-#  ${OpenCV_LIBS}
-#)
