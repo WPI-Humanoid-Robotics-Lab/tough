@@ -28,7 +28,7 @@ add_definitions(${PCL_DEFINITIONS})
 
 catkin_package(
  INCLUDE_DIRS include
-  LIBRARIES find_button
+  LIBRARIES
   CATKIN_DEPENDS cv_bridge image_transport pcl_conversions pcl_ros roscpp sensor_msgs std_msgs
   DEPENDS system_lib
 )
@@ -47,10 +47,10 @@ include_directories(perception_common
 )
 
 ## Declare a C++ library
- add_library(find_button
-   src/ButtonDetector.cpp
- )
-target_link_libraries(find_button ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+# add_library(find_button
+#   src/ButtonDetector.cpp
+# )
+#target_link_libraries(find_button ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 
 
@@ -67,11 +67,11 @@ target_link_libraries(find_button ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(PCLImage_test src/PCL2Image_test.cpp)
-target_link_libraries(PCLImage_test ${catkin_LIBRARIES})
+#add_executable(PCLImage_test src/PCL2Image_test.cpp)
+#target_link_libraries(PCLImage_test ${catkin_LIBRARIES})
 
 add_executable(ButtonDetectorNode src/ButtonDetectorNode.cpp)
-target_link_libraries(ButtonDetectorNode ${catkin_LIBRARIES} find_button)
+target_link_libraries(ButtonDetectorNode ${catkin_LIBRARIES})
 
-add_executable(ButtonDetectorTest src/ButtonDetectorTest.cpp)
-target_link_libraries(ButtonDetectorTest ${catkin_LIBRARIES} find_button)
+#add_executable(ButtonDetectorTest src/ButtonDetectorTest.cpp)
+#target_link_libraries(ButtonDetectorTest ${catkin_LIBRARIES})
