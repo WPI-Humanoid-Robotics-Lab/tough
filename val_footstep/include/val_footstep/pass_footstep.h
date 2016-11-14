@@ -37,7 +37,9 @@ class stepsToVal
 
   ros::Time begin;
   ros::Time end;
-  void walk();
+
+ void getFootstep(double startx,double starty,double goalx,double goaly, double startTh,double goalTh,ihmc_msgs::FootstepDataListRosMessage &list);
+ void walk();
  void getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage& foot);
  void statCallback(const ihmc_msgs::FootstepStatusRosMessage & msg);
  ihmc_msgs::FootstepDataRosMessage getOffsetStep(int side, double x);

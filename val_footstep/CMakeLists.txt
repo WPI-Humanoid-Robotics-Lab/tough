@@ -147,6 +147,9 @@ add_executable(pass_footstep src/pass_footstep.cpp)
 add_dependencies(pass_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(pass_footstep  ${catkin_LIBRARIES})
 
+add_executable(octomap_origin src/octomap_origin.cpp)
+add_dependencies(octomap_origin ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(octomap_origin  ${catkin_LIBRARIES})
 
 add_executable(test_footstep src/test_footstep.cpp)
 add_dependencies(test_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

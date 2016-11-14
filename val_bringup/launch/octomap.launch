@@ -17,7 +17,7 @@
 
                 <param name="ground_filter/distance" value="1.0"/>
 
-                <param name="ground_filter/plane_distance" value="0.05"/>
+                <param name="ground_filter/plane_distance" value="0.1"/>
                 
                 <!-- data source to integrate (PointCloud2) -->
 		<remap from="cloud_in" to="/multisense/points2" />

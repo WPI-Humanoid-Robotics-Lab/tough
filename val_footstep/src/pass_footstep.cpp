@@ -36,7 +36,32 @@ void stepsToVal::statCallback(const ihmc_msgs::FootstepStatusRosMessage & msg)
  return;
 }
 
+ void stepsToVal::getFootstep(double startx,double starty,double goalx,double goaly , double startTh,double goalTh,ihmc_msgs::FootstepDataListRosMessage &list)
+ {
+      geometry_msgs::Pose2D start, goal;
+       humanoid_nav_msgs::PlanFootsteps srv;
 
+      start.x = startx;
+      start.y =starty ;
+      start.theta = startTh;
+      goal.x = goalx ;
+      goal.y = goaly;
+      goal.theta = goalTh;
+
+      srv.request.start = start;
+      srv.request.goal = goal;
+
+      if(this->footStep_client.call(srv))
+      {
+         for(int i =0; i <srv.response.footsteps.size();i++)
+         {
+         // srv.response.footsteps[i].x = ;
+
+      }
+      }
+
+
+ }
 stepsToVal::stepsToVal()
 {
     this->footStep_client = n.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("pass_footsteps");
