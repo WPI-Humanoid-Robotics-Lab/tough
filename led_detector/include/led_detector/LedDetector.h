@@ -55,7 +55,6 @@ namespace src_qual1_task
             m_originalImage = i.m_originalImage.clone();
             m_disparityImage = i.m_disparityImage.clone();
             m_qMatrix = i.m_qMatrix.clone();
-            ROS_DEBUG("HEADER DETECTLED");
         }
     };
 
@@ -65,13 +64,30 @@ namespace src_qual1_task
     class LedDetector
     {
         public:
+            /**
+             * @brief m_multisenseImagePtr
+             */
+            src_perception::MultisenseImage         *m_multisenseImagePtr;
+            /**
+             * @brief m_multisensePcPtr
+             */
+            src_perception::MultisensePointCloud    *m_multisensePcPtr;
+            /**
+             * @brief m_baseFrame
+             */
+            std::string m_baseFrame = VAL_COMMON_NAMES::HOKUYO_LINK_TF;
+
+            /**
+             * @brief m_fixedFrame
+             */
+            std::string m_leftCameraOpticalFrame = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
+
 
             /**
              * @brief LedDetector
              * @param nh
              */
             LedDetector(ros::NodeHandle nh);
-
             ~LedDetector();
 
             /**
@@ -84,17 +100,6 @@ namespace src_qual1_task
              */
             bool flag = false;
 
-            /**
-             * @brief m_multisenseImagePtr
-             */
-            src_perception::MultisenseImage         *m_multisenseImagePtr;
-
-            /**
-             * @brief m_multisensePcPtr
-             */
-            src_perception::MultisensePointCloud    *m_multisensePcPtr;
-
-
             bool detectLed();
             void getLedColor();
             void getLedLocation();
@@ -106,7 +111,9 @@ namespace src_qual1_task
              * todo : return the status as true or false
              */
             void DetectLED(const cv::Mat &new_image);
-        private:
+        protected:
+
+            ros::NodeHandle                         _nh;
             /**
              * @brief m_stereoImage3D
              */
@@ -143,14 +150,6 @@ namespace src_qual1_task
              */
             cv_bridge::CvImagePtr m_cvDepthPtr;
 
-            /**
-             * @brief m_baseFrame
-             */
-            std::string m_baseFrame = VAL_COMMON_NAMES::HOKUYO_LINK_TF;
-
-            /**
-             * @brief m_fixedFrame
-             */
-            std::string m_leftCameraOpticalFrame = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
+            
     };
 }

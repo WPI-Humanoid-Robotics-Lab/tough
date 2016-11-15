@@ -1,7 +1,5 @@
 #include <led_detector/LedDetector.h>
 #include <ros/ros.h>
-#include <perception_common/MultisenseImage.h>
-//#include <perception_common/MultisensePointCloud.h>
 using namespace cv;
 using namespace std;
 using namespace src_perception;
@@ -11,8 +9,9 @@ namespace src_qual1_task
     LedDetector::LedDetector(ros::NodeHandle nh)
             //:m_multisenseImagePtr(new src_perception::MultisenseImage(nh)),m_multisensePcPtr(new src_perception::MultisensePointCloud(rosHandle, m_baseFrame, m_leftCameraOpticalFrame)))
     {
+        _nh = nh;
         m_multisenseImagePtr = NULL;
-        //m_multisensePcPtr = NULL;
+        m_multisensePcPtr = NULL;
         m_randomGen= cv::RNG(12345);
         m_imageRGBpub = nh.advertise<std_msgs::Int32MultiArray>("/detect/light/rgb", 100);
         m_imageXYZpub = nh.advertise<geometry_msgs::Point>("/detect/light/xy", 100);
@@ -34,31 +33,30 @@ namespace src_qual1_task
         //image_frame.m_originalImage is the cv image to process
         while(ros::ok())
         {
+            ros::spinOnce();
             if (m_multisenseImagePtr->giveSyncImages(img_frame.m_originalImage, img_frame.m_disparityImage))
             {
                 if (img_frame.m_qMatrix.empty())
                 {
                     if (!m_multisenseImagePtr->giveQMatrix(img_frame.m_qMatrix))
                         continue;
-                    else
-                        m_multisenseImagePtr->giveQMatrix(img_frame.m_qMatrix);
                 }
+                else
+                    m_multisenseImagePtr->giveQMatrix(img_frame.m_qMatrix);
 
                 // ROS_DEBUG("BEFORE REPROJECT");
                 cv::reprojectImageTo3D(img_frame.m_disparityImage, img_3d, img_frame.m_qMatrix, false);
                 // ROS_DEBUG("AFTER REPROJECT");
     			
-                if (flag == false)
-    			{
-      				m_oldImage = img_frame.m_originalImage;
-      				flag = true;
-    			}
-
+                //if (flag == false)
+    			//{
+      			//	m_oldImage = img_frame.m_originalImage;
+      			//	flag = true;
+    			//}
                 cout<<"Pre function"<<endl;
-                //ROS_DEBUG("BEFORE DETECTLED");
                 DetectLED(img_frame.m_originalImage);
                 //ROS_DEBUG("AFTER DETECTLED");
-                cout<<"Post function"<<endl;
+                // cout<<"Post function"<<endl;
                 
                 // image_pub.publish(cv_depthptr->toImageMsg());
                 // now we should use ledDetector with image_frame.m_originalImage
@@ -91,7 +89,6 @@ namespace src_qual1_task
 
     void LedDetector::DetectLED(const cv::Mat &new_image) // small change here !!!! Since no changes on the image Vinayak suggested passing it as reference
     {
-
         cv::Mat diff, erod, erod_dil, erod_dil_gray, erod_dil_gray_thresh;
 
         // Finding the difference image
@@ -148,19 +145,44 @@ namespace src_qual1_task
             drawContours(new_image, contours_poly, i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point());
           //rectangle(new_image, boundRect[i].tl(), boundRect[i].br(), color, 1, 8, 0 );
         }
+        cout<<"Do we get here?    5"<<endl;
+// for (int i = 0, j = 0; j < contours.size(); j++)
+//     {
+//       cv::Moments moment = cv::moments((cv::Mat)contours[j]);
+//       if (moment.m00)
+//       {
+//           points.push_back(cv::Point2f(moment.m10/moment.m00,moment.m01/moment.m00));
+//           cv::Vec3b pixs_value =  cv_depthptr->image.at<cv::Vec3b>(points[i].y,points[i].x);
+//           std_msgs::Int32MultiArray rgb;
+//           geometry_msgs::Point pixelCoordinates;
+//           pixelCoordinates.x = points[i].x;
+//           pixelCoordinates.y = points[i].y;
+//           //pixelCoordinates.z = 0;
+//           rgb.data.clear();
+//           for (int iter=2;iter>=0;iter--)
+//               rgb.data.push_back(pixs_value.val[iter]);
+//           image_rgbpub.publish(rgb);
+//           image_xyzpub.publish(pixelCoordinates);
+//           i++;
+//       }
+//     }
         for (int i = 0, j = 0; j < m_gradientContours.size(); j++)
         {
             cv::Moments moment = cv::moments((cv::Mat)m_gradientContours[j]);
+            cout<<"Do we get here?    6"<<endl;
             if (moment.m00)
             {
                 points.push_back(cv::Point2f(moment.m10/moment.m00,moment.m01/moment.m00));
-                cv::Vec3b pixel_value =  m_cvDepthPtr->image.at<cv::Vec3b>(points[i].y,points[i].x);
+                cout<<points<<endl;
+                cv::Vec3b pixel_value =  new_image.at<cv::Vec3b>(points[i].y,points[i].x);
+                cout<<"Do we get here?    9"<<endl;
                 std_msgs::Int32MultiArray rgb;
                 geometry_msgs::Point pixelCoordinates;
                 pixelCoordinates.x = points[i].x;
                 pixelCoordinates.y = points[i].y;
               //pixelCoordinates.z = 0;
                 rgb.data.clear();
+                cout<<"Do we get here?    10"<<endl;
                 for (int iter=2;iter>=0;iter--)
                     rgb.data.push_back(pixel_value.val[iter]);
                 m_imageRGBpub.publish(rgb);
@@ -168,66 +190,31 @@ namespace src_qual1_task
                 i++;
             }
         }
+        cout<<"Do we get here?    11"<<endl;
         cv::imshow("Raw Image with Contours", new_image);
         cv::waitKey(3);
-        m_oldImage = new_image;
+        // m_oldImage = new_image;
     }
-        
-
-    /**  
-      *  Function to convert 2D pixel point to 3D point by extracting point
-      *  from PointCloud2 corresponding to input pixel coordinate. This function
-      *  can be used to get the X,Y,Z coordinates
-      *  Deprecated
-      */
-    void pixelTo3DPoint(const sensor_msgs::PointCloud2 pCloud, const int u, const int v, geometry_msgs::Point &p)
-    {
-        // get width and height of 2D point cloud data
-        int width = pCloud.width;
-        int height = pCloud.height;
-
-        // Convert from u (column / width), v (row/height) to position in array
-        // where X,Y,Z data starts
-        int arrayPosition = v*pCloud.row_step + u*pCloud.point_step;
-
-        // compute position in array where x,y,z data start
-        int arrayPosX = arrayPosition + pCloud.fields[0].offset; // X has an offset of 0
-        int arrayPosY = arrayPosition + pCloud.fields[1].offset; // Y has an offset of 4
-        int arrayPosZ = arrayPosition + pCloud.fields[2].offset; // Z has an offset of 8
-
-        float X = 0.0;
-        float Y = 0.0;
-        float Z = 0.0;
-
-        memcpy(&X, &pCloud.data[arrayPosX], sizeof(float));
-        memcpy(&Y, &pCloud.data[arrayPosY], sizeof(float));
-        memcpy(&Z, &pCloud.data[arrayPosZ], sizeof(float));
-
-        // put data into the point p
-        p.x = X;
-        p.y = Y;
-        p.z = Z;
-    }
-
 }
 
 
 int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "led_detection");
-    ros::NodeHandle nh;//rosHandle?
+    ros::NodeHandle nh;
 
-    src_qual1_task::LedDetector   good(nh);
-    good.detectLed();
+    src_qual1_task::LedDetector   led_detect(nh);
+    // led_detect.detectLed();
 
-    good.m_multisenseImagePtr = new src_perception::MultisenseImage(nh);
-    //good.m_multisensePcPtr = new src_perception::MultisensePointCloud(nh);
+    led_detect.m_multisenseImagePtr = new src_perception::MultisenseImage(nh);
+    led_detect.m_multisensePcPtr = new src_perception::MultisensePointCloud(nh,led_detect.m_baseFrame,led_detect.m_leftCameraOpticalFrame);
 
     //multisense_Image.giveImages(disp)
     while (ros::ok())
     {
-        good.detectLed();
-        ros::spinOnce();
+        cout<<"starting this"<<endl;
+        led_detect.detectLed();
+        // ros::spinOnce();
     }
     return 0;
 }
