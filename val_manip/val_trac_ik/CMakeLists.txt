@@ -120,27 +120,27 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(val_trac_ik
-#   src/${PROJECT_NAME}/val_trac_ik.cpp
-# )
+ add_library(val_trac_ik
+   src/val_trac_ik.cpp
+ )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(val_trac_ik ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ add_dependencies(val_trac_ik ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-#add_executable(val_trac_ik_node src/val_trac_ik_node.cpp)
+add_executable(val_trac_ik_node src/val_trac_ik.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(val_trac_ik_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ add_dependencies(val_trac_ik_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(val_trac_ik_node
-#   ${catkin_LIBRARIES}
-#   ${orocos_kdl_LIBRARIES}
-# )
+ target_link_libraries(val_trac_ik_node
+   ${catkin_LIBRARIES}
+   ${orocos_kdl_LIBRARIES}
+ )
 
 #############
 ## Install ##
@@ -157,18 +157,18 @@ include_directories(
 # )
 
 ## Mark executables and/or libraries for installation
-#install(TARGETS val_trac_ik val_trac_ik_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS val_trac_ik val_trac_ik_node
+   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ )
 
 ## Mark cpp header files for installation
-#install(DIRECTORY launch
-#  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+   FILES_MATCHING PATTERN "*.h"
+   PATTERN ".svn" EXCLUDE
+ )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
