@@ -9,7 +9,7 @@
   <param name="robot_description" textfile="$(find val_description)/model/urdf/valkyrie_sim.urdf"/>
 
 
-  <node name="trac_ik" pkg="val_trac_ik" type="val_trac_ik_node" output="screen">
+  <node name="ik_solver" pkg="val_manipulation" type="val_ik_solver_node" output="screen">
     <param name="num_samples" value="$(arg num_samples)"/>
     <param name="chain_start" value="$(arg chain_start)"/>
     <param name="chain_end" value="$(arg chain_end)"/>

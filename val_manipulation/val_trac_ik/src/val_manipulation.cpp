@@ -1,15 +1,24 @@
-#include <trac_ik/trac_ik.hpp>
-#include <ros/ros.h>
-#include <kdl/chainiksolverpos_nr_jl.hpp>
+#include <val_manipulation/val_manipulation.h>
 
-double fRand(double min, double max)
+ValManipulation::ValManipulation(ros::NodeHandle &nh):nh_(nh)
+{
+
+}
+
+ValManipulation::~ValManipulation()
+{
+// default destructor
+
+}
+
+double ValManipulation::fRand(double min, double max)
 {
     double f = (double)rand() / RAND_MAX;
     return min + f * (max - min);
 }
 
 
-void solve_ik(ros::NodeHandle& nh, double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string urdf_param)
+void ValManipulation::solve_ik(double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string urdf_param)
 {
 
     double eps = 1e-5;
@@ -100,42 +109,4 @@ void solve_ik(ros::NodeHandle& nh, double num_samples, std::string chain_start, 
     ROS_INFO_STREAM("Result data - " << result.data);
 }
 
-int main(int argc, char** argv)
-{
-    srand(1);
-    ros::init(argc, argv, "val_track_ik");
-    ros::NodeHandle nh("~");
 
-    int num_samples;
-    std::string chain_start, chain_end, urdf_param;
-    double timeout;
-
-    nh.param("num_samples", num_samples, 1);
-    nh.param("chain_start", chain_start, std::string(""));
-    nh.param("chain_end", chain_end, std::string(""));
-
-    if (chain_start=="" || chain_end=="") {
-        ROS_FATAL("Missing chain info in launch file");
-        exit (-1);
-    }
-
-    nh.param("timeout", timeout, 0.005);
-    nh.param("urdf_param", urdf_param, std::string("/robot_description"));
-
-    if (num_samples < 1)
-        num_samples = 1;
-
-    solve_ik(nh, num_samples, chain_start, chain_end, timeout, urdf_param);
-
-    // Useful when you make a script that loops over multiple launch files that test different robot chains
-    // std::vector<char *> commandVector;
-    // commandVector.push_back((char*)"killall");
-    // commandVector.push_back((char*)"-9");
-    // commandVector.push_back((char*)"roslaunch");
-    // commandVector.push_back(NULL);
-
-    // char **command = &commandVector[0];
-    // execvp(command[0],command);
-
-    return 0;
-}
