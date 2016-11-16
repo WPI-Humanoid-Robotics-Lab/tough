@@ -2,14 +2,14 @@
 
 <launch>
   <arg name="num_samples" default="1000" />
-  <arg name="chain_start" default="torso" />
-  <arg name="chain_end" default="r_wrist_roll_link" />
+  <arg name="chain_start" default="pelvis" />
+  <arg name="chain_end" default="leftThumbRollLink" />
   <arg name="timeout" default="0.005" />
 
   <param name="robot_description" textfile="$(find val_description)/model/urdf/valkyrie_sim.urdf"/>
 
 
-  <node name="trac_ik" pkg="val_manip" type="val_trac_ik_node" output="screen">
+  <node name="trac_ik" pkg="val_trac_ik" type="val_trac_ik_node" output="screen">
     <param name="num_samples" value="$(arg num_samples)"/>
     <param name="chain_start" value="$(arg chain_start)"/>
     <param name="chain_end" value="$(arg chain_end)"/>
