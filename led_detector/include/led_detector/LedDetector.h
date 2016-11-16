@@ -12,9 +12,6 @@
 
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
-// #include <opencv2/imgproc/imgproc.hpp>
-// #include <opencv2/highgui/highgui.hpp>
-
 #include <std_msgs/Int32MultiArray.h>
 
 
@@ -64,6 +61,7 @@ namespace src_qual1_task
     class LedDetector
     {
         public:
+
             /**
              * @brief m_multisenseImagePtr
              */
@@ -88,21 +86,6 @@ namespace src_qual1_task
              * @param nh
              */
             LedDetector(ros::NodeHandle nh);
-            ~LedDetector();
-
-            /**
-             * @brief m_oldImage
-             */
-            cv::Mat                     m_oldImage;         //old image
-
-            /**
-             * @brief m_oldImage
-             */
-            bool flag = false;
-
-            bool detectLed();
-            void getLedColor();
-            void getLedLocation();
 
             /**
              * @brief DetectLED
@@ -111,6 +94,17 @@ namespace src_qual1_task
              * todo : return the status as true or false
              */
             void DetectLED(const cv::Mat &new_image);
+
+            ~LedDetector();
+            bool detectLed();
+            void getLedLocation();
+
+            /**
+             * @brief m_oldImage
+             */
+            cv::Mat                     m_oldImage;         //old image
+
+            
         protected:
 
             ros::NodeHandle                         _nh;
@@ -130,11 +124,6 @@ namespace src_qual1_task
             ros::Publisher                          m_imageRGBpub;
 
             /**
-             * @brief old_image
-             */
-            cv::Mat                                 old_image;
-
-            /**
              * @brief m_gradientContours
              */
             std::vector<std::vector<cv::Point> > m_gradientContours;
@@ -144,12 +133,6 @@ namespace src_qual1_task
              * @brief m_randomGen
              */
             cv::RNG m_randomGen;
-
-            /**
-             * @brief m_cvDepthPtr
-             */
-            cv_bridge::CvImagePtr m_cvDepthPtr;
-
-            
+      
     };
 }
