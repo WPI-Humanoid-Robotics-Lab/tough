@@ -18,7 +18,9 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   perception_common
   val_common
+  message_generation
 )
+
 
 find_package(Boost REQUIRED COMPONENTS system)
 include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
@@ -26,15 +28,28 @@ include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_I
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
+add_message_files(
+   FILES
+   LedPoseColor.msg
+  )
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
+)
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES led_detector
-  CATKIN_DEPENDS cv_bridge image_transport pcl_conversions pcl_ros roscpp sensor_msgs std_msgs val_common perception_common
+  CATKIN_DEPENDS cv_bridge image_transport pcl_conversions pcl_ros roscpp sensor_msgs std_msgs val_common perception_common message_runtime
   DEPENDS system_lib
   # INCLUDE_DIRS include
   # LIBRARIES cv_image_warp cv_line_tools cv_pca #?
 
 )
+
+
 
 ###########
 ## Build ##

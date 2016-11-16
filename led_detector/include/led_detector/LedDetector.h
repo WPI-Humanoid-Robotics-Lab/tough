@@ -8,6 +8,7 @@
 #include <geometry_msgs/PointStamped.h>
 #include <tf/transform_broadcaster.h>//
 #include <val_common/val_common_names.h>
+#include <led_detector/LedPoseColor.h>
 
 
 #include <cv_bridge/cv_bridge.h>
@@ -63,6 +64,11 @@ namespace src_qual1_task
         public:
 
             /**
+             * @brief message
+              */
+            led_detector::LedPoseColor message;
+            
+            /**
              * @brief m_multisenseImagePtr
              */
             src_perception::MultisenseImage         *m_multisenseImagePtr;
@@ -93,16 +99,9 @@ namespace src_qual1_task
              *
              * todo : return the status as true or false
              */
-            void DetectLED(const cv::Mat &new_image);
 
             ~LedDetector();
             bool detectLed();
-            void getLedLocation();
-
-            /**
-             * @brief m_oldImage
-             */
-            cv::Mat                     m_oldImage;         //old image
 
             
         protected:
@@ -121,7 +120,7 @@ namespace src_qual1_task
             /**
              * @brief m_imageRGBpub
              */
-            ros::Publisher                          m_imageRGBpub;
+            ros::Publisher                          m_imageRGBXYZpub;
 
             /**
              * @brief m_gradientContours
