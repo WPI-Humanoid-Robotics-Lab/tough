@@ -7,6 +7,30 @@
 ##   none
 ##
 
+#check if ros is installed
+if  [ "$(which roscore)" -a "$(rosversion -d)" == 'indigo' ]; then
+  echo "$(tput setaf 1)rosindigo is installed$(tput sgr0)"
+else
+# install ros-indigo
+  echo "$(tput setaf 1)rosindigo is not installed, installing ros indigo$(tput sgr0)"
+  echo "$(tput setaf 1)setup sources.list$(tput sgr0)"
+  sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+  sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net --recv-key 0xB01FA116
+  sudo apt-get update
+  sudo apt-get install ros-indigo-desktop-full
+  sudo rosdep init
+  rosdep update
+  echo "source /opt/ros/indigo/setup.bash" >> ~/.bashrc
+  source ~/.bashrc
+  source /opt/ros/indigo/setup.bash
+
+  echo "$(tput setaf 1)setting up workspace$(tput sgr0)"
+  mkdir -p ~/indigo_ws/src && cd ~/indigo_ws/src
+  catkin_init_workspace
+  cd ~/indigo_ws
+  catkin_make
+fi
+
 #Gazebo 7 and SRCSim Installation
 echo "$(tput setaf 1)Removing existing Gazebo and installing gazebo7$(tput sgr0)"
 sudo rm /etc/apt/sources.list.d/gazebo*
@@ -36,3 +60,4 @@ sudo groupadd ros
 sudo usermod -a -G ros $USER
 
 echo "$(tput setaf 1)rebooting the system...\n after reboot use the script setup2.sh$(tput sgr0)"
+sudo reboot
