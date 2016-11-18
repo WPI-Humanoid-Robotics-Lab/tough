@@ -5,47 +5,37 @@
  * */
 
 #include "val_footstep/pass_footstep.h"
-
+#include <ros/macros.h>
+/// \todo This can go in val_common
 enum FOOT{
     LEFT = 0,
     RIGHT = 1,
 };
 
 
-void stepsToVal::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage & msg)
+void ValkyrieWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage & msg)
 {
-
     if(msg.status == 1)
     {
         step_counter++;
-
-        if (step_counter == 2 )
-        {
-            begin = ros::Time::now();
-            std::cout << "start" << std::endl;
-        }
-
-        if (step_counter == 3 )
-        {
-            end = ros::Time::now();
-            std::cout << "End" << std::endl;
-            std::cout << " time taken  " << end -begin << std::endl;
-        }
-
-        std::cout << "step counter" << step_counter << std::endl;
+        ROS_INFO("step counter : %d",step_counter);
 
     }
 
     return;
 }
 
-void stepsToVal::getFootstep(double goalx,double goaly ,double goalTh,ihmc_msgs::FootstepDataListRosMessage &list)
+void ValkyrieWalker::getFootstep(double goalx,double goaly ,double goalTh,ihmc_msgs::FootstepDataListRosMessage &list)
 {
+    /// \todo fix the robot pose, if the legs are not together before walking.
+
     geometry_msgs::Pose2D start, goal;
     humanoid_nav_msgs::PlanFootsteps srv;
 
     ihmc_msgs::FootstepDataRosMessage* startstep = new ihmc_msgs::FootstepDataRosMessage() ;
     this->getCurrentStep(0,*startstep);
+
+    /// \todo get start from robot position
     start.x = startstep->location.x ;//-  0.075356;
     start.y = startstep->location.y;// - 0.0558756;
     start.theta = tf::getYaw(startstep->orientation);
@@ -77,7 +67,7 @@ void stepsToVal::getFootstep(double goalx,double goaly ,double goalTh,ihmc_msgs:
 
     //std::cout<<"Calling service"<<std::endl;
 
-    if(this->footStep_client.call(srv))
+    if(this->footstep_client.call(srv))
     {
 
         //   std::cout<< "Inside Service "<< std::endl;
@@ -87,26 +77,20 @@ void stepsToVal::getFootstep(double goalx,double goaly ,double goalTh,ihmc_msgs:
 
 
             ihmc_msgs::FootstepDataRosMessage* step = new ihmc_msgs::FootstepDataRosMessage() ;
-            int side = srv.response.footsteps.at(i).leg;
+            bool side = bool(srv.response.footsteps.at(i).leg);
 
-            if(side == 1)
-            {side = 0 ;}
-            else
-            {side = 1;}
+            side = !side;
 
-
-            this->getCurrentStep(side,*step);
+            this->getCurrentStep(int(side),*step);
 
             step->location.x = srv.response.footsteps.at(i).pose.x;
             step->location.y = srv.response.footsteps.at(i).pose.y;
 
 
-
-
             tf::Quaternion t = tf::createQuaternionFromYaw(srv.response.footsteps.at(i).pose.theta);
-            std::cout<< "Step x  " << i<<"  "<<srv.response.footsteps.at(i).pose.x<< std::endl;
-            std::cout<< "Step y  " << i<<"  "<<srv.response.footsteps.at(i).pose.y<< std::endl;
-            std::cout<< "Side  " << i<<"  "<<side<< std::endl;
+            ROS_INFO("Step x  %d %.2f", i, srv.response.footsteps.at(i).pose.x);
+            ROS_INFO("Step y  %d %.2f", i, srv.response.footsteps.at(i).pose.y);
+            ROS_INFO("Side  %d %d",i, int(side));
 
             step->orientation.w = t.w();
             step->orientation.x = t.x();
@@ -119,11 +103,11 @@ void stepsToVal::getFootstep(double goalx,double goaly ,double goalTh,ihmc_msgs:
 
 
 }
-stepsToVal::stepsToVal(ros::NodeHandle nh):n(nh)
+ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh):n(nh)
 {
-    this->footStep_client = n.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("plan_footsteps");
-    this->footStepsToVal = n.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/valkyrie/control/footstep_list",1,true);
-    this->footStepStatus = n.subscribe("/ihmc_ros/valkyrie/output/footstep_status", 20,&stepsToVal::footstepStatusCB, this);
+    this->footstep_client = n.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("plan_footsteps");
+    this->footsteps_to_val = n.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/valkyrie/control/footstep_list",1,true);
+    this->footstep_status = n.subscribe("/ihmc_ros/valkyrie/output/footstep_status", 20,&ValkyrieWalker::footstepStatusCB, this);
 
     tf_listener = new tf2_ros::TransformListener(this->tfBuffer);
 
@@ -131,16 +115,14 @@ stepsToVal::stepsToVal(ros::NodeHandle nh):n(nh)
     //wait for tf
     ros::Duration(0.5).sleep();
     step_counter = 0;
-    std::string robot_name,right_foot_frame,left_foot_frame;
+    std::string robot_name;
 
     if (n.getParam("/ihmc_ros/robot_name",robot_name))
     {
-        if(n.getParam("/ihmc_ros/valkyrie/right_foot_frame_name", right_foot_frame) && n.getParam("/ihmc_ros/valkyrie/left_foot_frame_name", left_foot_frame))
+        if(n.getParam("/ihmc_ros/valkyrie/right_foot_frame_name", right_foot_frame.data) && n.getParam("/ihmc_ros/valkyrie/left_foot_frame_name", left_foot_frame.data))
         {
-            Right_Foot_Frame.data = right_foot_frame;
-            Left_Foot_Frame.data = left_foot_frame;
-            ROS_INFO("%s", Right_Foot_Frame.data.c_str());
-            ROS_INFO("%s", Left_Foot_Frame.data.c_str());
+            ROS_DEBUG("%s", right_foot_frame.data.c_str());
+            ROS_DEBUG("%s", left_foot_frame.data.c_str());
         }
     }
     else
@@ -149,11 +131,11 @@ stepsToVal::stepsToVal(ros::NodeHandle nh):n(nh)
     }
 }
 
-stepsToVal::~stepsToVal(){
+ValkyrieWalker::~ValkyrieWalker(){
     delete tf_listener;
 }
 
-void stepsToVal::walk()
+void ValkyrieWalker::walk()
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.transfer_time = 1.0;
@@ -170,7 +152,7 @@ void stepsToVal::walk()
     //this->getFootstep(2.0,0.0,0.0,list);
     ros::Rate loop_rate(10);
 
-    this->footStepsToVal.publish(list);
+    this->footsteps_to_val.publish(list);
 
     ROS_INFO("Published data on topic");
     std::cout<<"no of steps  " << list.footstep_data_list.size()<<std::endl;
@@ -184,19 +166,19 @@ void stepsToVal::walk()
     return;
 }
 
-void stepsToVal::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage & foot)
+void ValkyrieWalker::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage & foot)
 {
 
     std_msgs::String foot_frame;
     if (side == LEFT)
     {
-        foot_frame = this->Left_Foot_Frame;
+        foot_frame = this->left_foot_frame;
 
 
     }
     else
     {
-        foot_frame = this->Right_Foot_Frame;
+        foot_frame = this->right_foot_frame;
 
     }
 
@@ -209,7 +191,7 @@ void stepsToVal::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage & f
     return;
 }
 
-ihmc_msgs::FootstepDataRosMessage stepsToVal::getOffsetStep(int side , double x)
+ihmc_msgs::FootstepDataRosMessage ValkyrieWalker::getOffsetStep(int side , double x)
 {
 
     ihmc_msgs::FootstepDataRosMessage * next = new ihmc_msgs::FootstepDataRosMessage();
@@ -231,7 +213,7 @@ ihmc_msgs::FootstepDataRosMessage stepsToVal::getOffsetStep(int side , double x)
 
 }
 
-void stepsToVal::waitForSteps(int n)
+void ValkyrieWalker::waitForSteps(int n)
 {
     while (step_counter <n)
     {
@@ -251,13 +233,12 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "pass_footstep");
     ros::NodeHandle nh;
 
-    stepsToVal agent(nh);
-
+    ValkyrieWalker agent(nh);
 
 
     agent.walk();
     // agent.end = ros::Time::now();
-    std::cout << " time taken  " << agent.end - agent.begin << std::endl;
+
 
 
 
