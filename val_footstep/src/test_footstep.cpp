@@ -1,4 +1,4 @@
-#include "ros/ros.h"
+ #include "ros/ros.h"
  #include <cstdlib>
  #include"geometry_msgs/PoseStamped.h"
  #include"geometry_msgs/PoseWithCovarianceStamped.h"
@@ -31,11 +31,11 @@
 
  geometry_msgs::Pose2D start, goal;
 
- start.x = 1.5;
- start.y = 0.5 ;
+ start.x = 0.0;
+ start.y = 0 ;
  start.theta = 0;
- goal.x = 2.5 ;
- goal.y = 2.5 ;
+ goal.x = 1.6 ;
+ goal.y = 0 ;
  goal.theta = 0;
 
  srv.request.start = start;

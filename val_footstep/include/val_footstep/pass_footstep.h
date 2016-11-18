@@ -21,30 +21,39 @@
 #include <geometry_msgs/TransformStamped.h>
 #include "std_msgs/String.h"
 #include "ros/time.h"
+#include "tf/tf.h"
 
 
 class stepsToVal
  {
    
  public:
- stepsToVal();
-
+ stepsToVal(ros::NodeHandle nh);
+~stepsToVal();
  tf2_ros::Buffer tfBuffer;
  tf2_ros::TransformListener* tf_listener;
 
   std_msgs::String Right_Foot_Frame,Left_Foot_Frame;
-  int step_counter;
+
+  ros::Time begin;
+  ros::Time end;
+
+ void getFootstep(double goalx,double goaly,double goalTh,ihmc_msgs::FootstepDataListRosMessage &list);
  void walk();
  void getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage& foot);
- void statCallback(const ihmc_msgs::FootstepStatusRosMessage & msg);
+ void footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage & msg);
  ihmc_msgs::FootstepDataRosMessage getOffsetStep(int side, double x);
  void waitForSteps( int n); 
- private:
+
+
+
+private:
    
    ros::NodeHandle n;
    ros::ServiceClient footStep_client ;
    ros::Publisher footStepsToVal ;
    ros::Subscriber footStepStatus ;  
+   int step_counter;
  };
 
 
