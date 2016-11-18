@@ -24,10 +24,14 @@ void fixOrigin(nav_msgs::OccupancyGrid msg){
 int main(int argc, char** argv){
     ros::init(argc, argv, "corrected_map_publisher");
     ros::NodeHandle n;
-    mapPub  = n.advertise<nav_msgs::OccupancyGrid>("map",5);
-    ros::Subscriber projectMapSub = n.subscribe("projected_map", 10, &fixOrigin);
-
-    ros::spin();
+    mapPub  = n.advertise<nav_msgs::OccupancyGrid>("map",1, true);
+    ros::Subscriber projectMapSub = n.subscribe("projected_map", 1, &fixOrigin);
+    ros::Rate loopRate = 0.1;
+    ros::spinOnce();
+    while (ros::ok()){
+        ros::spinOnce();
+        loopRate.sleep();
+    }
 
     return 0;
 }

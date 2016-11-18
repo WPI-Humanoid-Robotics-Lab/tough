@@ -30,8 +30,7 @@
   <run_depend>gtest</run_depend>
   <run_depend>tf_conversions</run_depend>
   <run_depend>laser_geometry</run_depend>
-  <run_depend>octomap_server</run_depend>
-
+  
   <buildtool_depend>catkin</buildtool_depend>
 </package>
 
