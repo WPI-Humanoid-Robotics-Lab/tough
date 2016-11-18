@@ -28,11 +28,11 @@ def walkTest():
     msg.unique_id = -1
 
     # walk forward starting LEFT
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [0.2, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [0.4, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [0.6, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [0.8, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.0, 0.0, 0.0]))
+    #msg.footstep_data_list.append(createFootStepOffset(LEFT, [0.265, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [0.265, 0.035, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(LEFT, [0.605, -0.225, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [1.0, 0.125, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.0, -0.125, 0.0]))
     msg.footstep_data_list.append(createFootStepOffset(RIGHT, [1.2, 0.0, 0.0]))
     msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.4, 0.0, 0.0]))
     msg.footstep_data_list.append(createFootStepOffset(RIGHT, [1.6, 0.0, 0.0]))

@@ -9,7 +9,6 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <ros/ros.h>
 
-
 ros::Publisher mapPub;
 
 void fixOrigin(nav_msgs::OccupancyGrid msg){
@@ -24,10 +23,12 @@ void fixOrigin(nav_msgs::OccupancyGrid msg){
 int main(int argc, char** argv){
     ros::init(argc, argv, "corrected_map_publisher");
     ros::NodeHandle n;
-    mapPub  = n.advertise<nav_msgs::OccupancyGrid>("map",5);
+    mapPub  = n.advertise<nav_msgs::OccupancyGrid>("map",5,true);
     ros::Subscriber projectMapSub = n.subscribe("projected_map", 10, &fixOrigin);
-
-    ros::spin();
-
+    ros::Rate loopRate(0.1);
+    while(ros::ok()){
+        ros::spinOnce();
+        loopRate.sleep();
+    }
     return 0;
 }
