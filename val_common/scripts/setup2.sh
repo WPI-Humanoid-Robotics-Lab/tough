@@ -46,6 +46,22 @@ else
   catkin_make 
 fi
 
+#TODO: this to account for the fix in humanoid navigation package
+#so, we clone the fixed repo
+if [ -d $"/home/$USER/$WORKSPACE/src/humanoid_navigation" ]; then  
+  echo "$(tput setaf 1)updating the humanoid_navigation package$(tput sgr0)"
+  cd ~/$WORKSPACE/src/humanoid_navigation
+  git checkout master
+  git pull
+  cd ~/$WORKSPACE    
+  catkin_make
+else
+  echo "$(tput setaf 1)no humanoid_navigation repo found, clonning it$(tput sgr0)" 
+  git clone https://github.com/ninja777/humanoid_navigation.git ~/$WORKSPACE/src/humanoid_navigation
+  cd ~/$WORKSPACE   
+  catkin_make
+fi
+
 # update the src repo
 if [ -d $"/home/$USER/$WORKSPACE/src/space_robotics_challenge" ]; then  
   echo "$(tput setaf 1)updating the repo$(tput sgr0)"
