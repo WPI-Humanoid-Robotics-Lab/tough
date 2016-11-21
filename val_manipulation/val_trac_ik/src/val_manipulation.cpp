@@ -18,7 +18,7 @@ double ValManipulation::fRand(double min, double max)
 }
 
 
-void ValManipulation::solve_ik(double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string urdf_param, tf::StampedTransform transform)
+bool ValManipulation::solve_ik(double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string urdf_param, tf::StampedTransform transform, KDL::JntArray &result)
 {
 
     double eps = 1e-5;
@@ -35,14 +35,14 @@ void ValManipulation::solve_ik(double num_samples, std::string chain_start, std:
 
     if (!valid) {
         ROS_ERROR("There was no valid KDL chain found");
-        return;
+        return 0;
     }
 
     valid = tracik_solver.getKDLLimits(ll,ul);
 
     if (!valid) {
         ROS_ERROR("There were no valid KDL joint limits found");
-        return;
+        return 0;
     }
 
     assert(chain.getNrOfJoints() == ll.data.size());
@@ -80,7 +80,7 @@ void ValManipulation::solve_ik(double num_samples, std::string chain_start, std:
     //  boost::posix_time::ptime start_time;
     //  boost::posix_time::time_duration diff;
 
-    KDL::JntArray result;
+    //KDL::JntArray result;
 
     KDL::Frame end_effector_pose;
     //end_effector_pose.M = KDL::Rotation::Quaternion(0, 0, 0, 1.0);
@@ -109,6 +109,7 @@ void ValManipulation::solve_ik(double num_samples, std::string chain_start, std:
 
     ROS_INFO_STREAM("TRAC-IK  "<< success ? "TRUE" : "FALSE");
     ROS_INFO_STREAM("Result data - " << result.data);
+    return 1;
 }
 
 

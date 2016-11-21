@@ -17,6 +17,6 @@ public:
     ValManipulation(ros::NodeHandle& nh);
     ~ValManipulation();
 
-    void solve_ik(double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string urdf_param,tf::StampedTransform transform);
+    bool solve_ik(double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string urdf_param,tf::StampedTransform transform, KDL::JntArray &result);
     double fRand(double min, double max);
 };

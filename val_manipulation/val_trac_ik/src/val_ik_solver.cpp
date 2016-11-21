@@ -8,6 +8,7 @@ int main(int argc, char** argv)
     ValManipulation ik_solver(nh);
     tf::StampedTransform transform;
     tf::TransformListener listener;
+    KDL::JntArray result;
 
     int num_samples;
     std::string chain_start, chain_end, urdf_param;
@@ -40,7 +41,7 @@ int main(int argc, char** argv)
 
 
 
-    ik_solver.solve_ik(num_samples, chain_start, chain_end, timeout, urdf_param, transform);
+    ik_solver.solve_ik(num_samples, chain_start, chain_end, timeout, urdf_param, transform, result);
 
     // Useful when you make a script that loops over multiple launch files that test different robot chains
     // std::vector<char *> commandVector;
