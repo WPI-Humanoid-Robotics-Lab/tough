@@ -4,6 +4,7 @@ project(val_manipulation)
 find_package(catkin REQUIRED COMPONENTS
   #  orocos_kdl
   trac_ik_lib
+  tf
 )
 
 find_package(orocos_kdl REQUIRED)

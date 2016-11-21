@@ -18,7 +18,7 @@ double ValManipulation::fRand(double min, double max)
 }
 
 
-void ValManipulation::solve_ik(double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string urdf_param)
+void ValManipulation::solve_ik(double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string urdf_param, tf::StampedTransform transform)
 {
 
     double eps = 1e-5;
@@ -84,7 +84,9 @@ void ValManipulation::solve_ik(double num_samples, std::string chain_start, std:
 
     KDL::Frame end_effector_pose;
     end_effector_pose.M = KDL::Rotation::Quaternion(0, 0, 0, 1.0);
+    //end_effector_pose.M = transform.getRotation();
     end_effector_pose.p = KDL::Vector(0.33, 0.45, 0.97);
+    //end_effector_pose.p = transform.getOrigin();
 
 
     int rc;

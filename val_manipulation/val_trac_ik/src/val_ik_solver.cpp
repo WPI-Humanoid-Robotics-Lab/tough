@@ -6,6 +6,8 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "val_track_ik");
     ros::NodeHandle nh("~");
     ValManipulation ik_solver(nh);
+    tf::StampedTransform transform;
+    tf::TransformListener listener;
 
     int num_samples;
     std::string chain_start, chain_end, urdf_param;
@@ -25,8 +27,20 @@ int main(int argc, char** argv)
 
     if (num_samples < 1)
         num_samples = 1;
+    while(ros::ok()) {
+        try {
+            listener.waitForTransform("/leftPelvis", "/buttonFrame",ros::Time(0), ros::Duration(5.0));
+            listener.lookupTransform("/leftPelvis", "/buttonFrame", ros::Time(0), transform);
+        }
+        catch (tf::TransformException ex) {
+           ROS_ERROR("%s",ex.what());
+           ros::Duration(1.0).sleep();
+        }
+    }
 
-    ik_solver.solve_ik(num_samples, chain_start, chain_end, timeout, urdf_param);
+
+
+    ik_solver.solve_ik(num_samples, chain_start, chain_end, timeout, urdf_param, transform);
 
     // Useful when you make a script that loops over multiple launch files that test different robot chains
     // std::vector<char *> commandVector;
