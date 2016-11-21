@@ -47,6 +47,19 @@ add_dependencies(val_ik_solver_node
    ${orocos_kdl_LIBRARIES}
 )
 
+add_executable(val_arm_navigation_node
+  src/val_arm_navigation.cpp)
+
+add_dependencies(val_arm_navigation_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS})
+
+ target_link_libraries(val_arm_navigation_node
+   ${catkin_LIBRARIES}
+   ${PROJECT_NAME}
+   ${orocos_kdl_LIBRARIES}
+)
+
 install(TARGETS val_ik_solver_node 
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
