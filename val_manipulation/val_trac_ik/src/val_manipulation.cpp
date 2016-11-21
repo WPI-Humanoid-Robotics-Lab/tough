@@ -83,10 +83,10 @@ void ValManipulation::solve_ik(double num_samples, std::string chain_start, std:
     KDL::JntArray result;
 
     KDL::Frame end_effector_pose;
-    end_effector_pose.M = KDL::Rotation::Quaternion(0, 0, 0, 1.0);
-    //end_effector_pose.M = transform.getRotation();
-    end_effector_pose.p = KDL::Vector(0.33, 0.45, 0.97);
-    //end_effector_pose.p = transform.getOrigin();
+    //end_effector_pose.M = KDL::Rotation::Quaternion(0, 0, 0, 1.0);
+    end_effector_pose.M = KDL::Rotation::Quaternion(transform.getRotation().getX(),transform.getRotation().getY(),transform.getRotation().getZ(),transform.getRotation().getW());
+    //end_effector_pose.p = KDL::Vector(0.33, 0.45, 0.97);
+    end_effector_pose.p = KDL::Vector(transform.getOrigin().getX(),transform.getOrigin().getY(),transform.getOrigin().getZ());
 
 
     int rc;
