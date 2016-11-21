@@ -6,6 +6,24 @@ This is the main repo for Team-WPI's participation in Space Robotics Challenge.
   * Ubuntu 14.04
   * Ros Indigo
 
+### Installation using scripts
+Download the scripts from [this location](https://gitlab.com/whrl/space_robotics_challenge/tree/master/val_common/scripts) and run the following commands:
+```bash
+    bash setup1.sh
+```
+after the system restarts, run the following
+```bash
+    bash setup2.sh
+```
+once everything is setup successfully, it should automatically launch the gazebo with valkyire, controllers and the robot should start walking.               
+*note:*
+The scripts also handle installing ros, dependencies, setting up workspace, checkout - updated repo etc. So basically  running the scripts on a fresh linux machine (with out any package except git) should install and setup everything, finally making valyire walk in gazebo.
+(run `setup1.sh` first and after reboot run `setup2.sh`).                      
+*known problems*                           
+- after everything getting launched (gazebo with valkyire standing), if for any reason the process dies and say the tf is missing, then remove the build, devel `rm -rf /build /devel` and rebuild the workspace `catkin_make`, this should fix the problem and valkyire should start walking this time.
+
+
+### Manual Installation
 #### Gazebo 7 and SRCSim Installation
 
 ```bash
