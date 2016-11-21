@@ -102,6 +102,7 @@ namespace src_qual1_task
 
             ~LedDetector();
             bool detectLed();
+            bool detectLight();
 
             
         protected:
