@@ -9,8 +9,6 @@
 #include <tf/transform_broadcaster.h>//
 #include <val_common/val_common_names.h>
 #include <led_detector/LedPositionColor.h>
-
-
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <std_msgs/Int32MultiArray.h>
@@ -65,6 +63,8 @@ namespace src_qual1_task
              LedDetector(ros::NodeHandle nh);
             ~LedDetector();
             bool detectLight();
+            bool getLight(cv::Mat &new_image,geometry_msgs::Point &pixelCoordinates);
+            bool getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCoordinates);
 
             /**
              * @brief message - Message of type LedPositionColor (Custom defined message type with x,y,z,r,g,b,a)
