@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp
 					multisense_ros
                                         tf_conversions
                                         laser_geometry
+                                        laser_assembler
 )
 
 include_directories(include)
@@ -32,7 +33,7 @@ add_definitions(${PCL_DEFINITIONS})
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}
-   CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros 
+   CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros laser_assembler
    DEPENDS opencv pcl
 )
 
@@ -60,6 +61,9 @@ target_link_libraries(test_image  ${PROJECT_NAME})
 
 add_executable(test_organizedRGBD  src/test_organizedRGBD.cpp)
 target_link_libraries(test_organizedRGBD  ${PROJECT_NAME})
+
+add_executable(periodic_snapshotter  src/periodic_snapshotter.cpp)
+target_link_libraries(periodic_snapshotter  ${PROJECT_NAME})
 
 ## Mark executables and/or libraries for installation
 #install(TARGETS ${PROJECT_NAME} multisense_backend

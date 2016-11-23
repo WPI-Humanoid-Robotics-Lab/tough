@@ -41,6 +41,11 @@ private:
     tf::TransformListener m_listener;
 
     /**
+     * @brief m_pointCloud2Publisher class variable used to publish pointcloud2
+     */
+    ros::Publisher m_pointCloud2Publisher;
+
+    /**
      * @brief m_pointCloudPublisher class variable used to publish pointcloud
      */
     ros::Publisher m_pointCloudPublisher;
