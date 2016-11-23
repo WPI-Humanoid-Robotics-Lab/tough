@@ -8,7 +8,7 @@
 #include <geometry_msgs/PointStamped.h>
 #include <tf/transform_broadcaster.h>//
 #include <val_common/val_common_names.h>
-#include <led_detector/LedPoseColor.h>
+#include <led_detector/LedPositionColor.h>
 
 
 #include <cv_bridge/cv_bridge.h>
@@ -25,17 +25,17 @@ namespace src_qual1_task
     {
     public:
         /**
-         * @brief m_originalImage
+         * @brief m_originalImage - Original image obtained from Multisense headset
          */
         cv::Mat                     m_originalImage;        //original image
 
         /**
-         * @brief m_disparityImage
+         * @brief m_disparityImage - Disparity image obtained from Multisense headset
          */
         cv::Mat                     m_disparityImage;       //disparity image
 
         /**
-         * @brief m_qMatrix
+         * @brief m_qMatrix - Q matrix obtained from Multisense headset
          */
         cv::Mat                     m_qMatrix;          //Q matrix
 
@@ -62,20 +62,25 @@ namespace src_qual1_task
     class LedDetector
     {
         public:
+             LedDetector(ros::NodeHandle nh);
+            ~LedDetector();
+            bool detectLight();
 
             /**
-             * @brief message
+             * @brief message - Message of type LedPositionColor (Custom defined message type with x,y,z,r,g,b,a)
               */
-            led_detector::LedPoseColor message;
+            led_detector::LedPositionColor message;
             
             /**
-             * @brief m_multisenseImagePtr
+             * @brief m_multisenseImagePtr - Pointer to original image obtained from Multisense headset
              */
             src_perception::MultisenseImage         *m_multisenseImagePtr;
+            
             /**
-             * @brief m_multisensePcPtr
+             * @brief m_multisensePcPtr - Pointer to Point Cloud obtained from Multisense headset
              */
             src_perception::MultisensePointCloud    *m_multisensePcPtr;
+
             /**
              * @brief m_baseFrame
              */
@@ -86,45 +91,25 @@ namespace src_qual1_task
              */
             std::string m_leftCameraOpticalFrame = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
 
-
-            /**
-             * @brief LedDetector
-             * @param nh
-             */
-            LedDetector(ros::NodeHandle nh);
-
-            /**
-             * @brief DetectLED
-             * @param new_image
-             *
-             * todo : return the status as true or false
-             */
-
-            ~LedDetector();
-            bool detectLed();
-            bool detectLight();
+           
 
             
         protected:
 
-            ros::NodeHandle                         _nh;
+            // ros::NodeHandle                         _nh;
+            
             /**
              * @brief m_stereoImage3D
              */
             cv::Mat                                 m_stereoImage3D;
 
             /**
-             * @brief m_imageXYZpub
-             */
-            ros::Publisher                          m_imageXYZpub;
-
-            /**
-             * @brief m_imageRGBpub
+             * @brief m_imageRGBpub - Publisher that publishes xyz and rgb data to topic "/detect/light/rgbxyz"
              */
             ros::Publisher                          m_imageRGBXYZpub;
 
             /**
-             * @brief m_gradientContours
+             * @brief m_gradientContours - 
              */
             std::vector<std::vector<cv::Point> > m_gradientContours;
             //    cv::RNG rng(12345);

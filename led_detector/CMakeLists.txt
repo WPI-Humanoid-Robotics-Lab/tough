@@ -14,11 +14,11 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   pcl_conversions
   pcl_ros
-  sensor_msgs
-  std_msgs
   perception_common
   val_common
   message_generation
+  sensor_msgs
+  std_msgs
 )
 
 
@@ -30,7 +30,7 @@ add_definitions(${PCL_DEFINITIONS})
 
 add_message_files(
    FILES
-   LedPoseColor.msg
+   LedPositionColor.msg
   )
 
 generate_messages(
