@@ -8,7 +8,7 @@ namespace PERCEPTION_COMMON_NAMES
 
 	//laser topics
 	static const std::string MULTISENSE_LASER_SCAN_TOPIC = "/multisense/lidar_scan";
-    static const std::string MULTISENSE_LASER_CLOUD_TOPIC = "/multisense/points2";
+    static const std::string MULTISENSE_LASER_CLOUD_TOPIC = "/multisense/points";
 
 	//image topics
     static const std::string MULTISENSE_LEFT_IMAGE_COLOR_TOPIC = "/multisense/camera/left/image_rect_color";
