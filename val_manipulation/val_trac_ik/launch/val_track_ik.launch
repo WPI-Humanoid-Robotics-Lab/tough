@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 
 <launch>
-  <arg name="num_samples" default="1000" />
-  <arg name="chain_start" default="pelvis" />
-  <arg name="chain_end" default="leftThumbRollLink" />
+  <arg name="num_samples" default="2000" />
+  <arg name="chain_start" default="torso" />
+  <arg name="chain_end" default="rightPalm" />
   <arg name="timeout" default="0.005" />
 
   <param name="robot_description" textfile="$(find val_description)/model/urdf/valkyrie_sim.urdf"/>

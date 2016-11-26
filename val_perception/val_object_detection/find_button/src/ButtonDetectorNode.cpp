@@ -36,6 +36,7 @@ void getButtonFrame(ros::NodeHandle &nh)
     cv::Mat_<double> Q;
 
 
+    ros::Rate rate(1000);
     while(ros::ok())
     {
         found.data = false;
@@ -79,6 +80,7 @@ void getButtonFrame(ros::NodeHandle &nh)
                         br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "left_camera_optical_frame", frame));
 
                     }
+                    rate.sleep();
                     buttonDectected.publish(found);
                 } //processed image is recieved
             } // got diaparity image

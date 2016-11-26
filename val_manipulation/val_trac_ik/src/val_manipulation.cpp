@@ -7,7 +7,7 @@ ValManipulation::ValManipulation(ros::NodeHandle &nh):nh_(nh)
 
 ValManipulation::~ValManipulation()
 {
-// default destructor
+    // default destructor
 
 }
 
@@ -62,8 +62,16 @@ bool ValManipulation::solve_ik(double num_samples, std::string chain_start, std:
     KDL::JntArray nominal(chain.getNrOfJoints());
 
     for (uint j=0; j<nominal.data.size(); j++) {
-        nominal(j) = (ll(j)+ul(j))/2.0;
+        nominal(j) = 0; //(ll(j)+ul(j))/2.0;
     }
+
+//    nominal(0) = 1.5;
+//    nominal(1) = -0.4;
+//    nominal(2) = -1.2;
+//    nominal(3) = 1.4;
+//    nominal(4) = 0.0;
+//    nominal(5) = 0.0;
+//    nominal(6) = 0.0;
 
     //Create desired number of valid, random joint configurations
     std::vector<KDL::JntArray> JointList;
@@ -76,38 +84,68 @@ bool ValManipulation::solve_ik(double num_samples, std::string chain_start, std:
         JointList.push_back(q);
     }
 
+    boost::posix_time::ptime start_time;
+    boost::posix_time::time_duration diff;
 
-    //  boost::posix_time::ptime start_time;
-    //  boost::posix_time::time_duration diff;
-
-    //KDL::JntArray result;
-
+//    KDL::JntArray result;
     KDL::Frame end_effector_pose;
+    int rc;
+
+    double total_time=0;
+    uint success=0;
+
     //end_effector_pose.M = KDL::Rotation::Quaternion(0, 0, 0, 1.0);
     end_effector_pose.M = KDL::Rotation::Quaternion(transform.getRotation().getX(),transform.getRotation().getY(),transform.getRotation().getZ(),transform.getRotation().getW());
     //end_effector_pose.p = KDL::Vector(0.33, 0.45, 0.97);
     end_effector_pose.p = KDL::Vector(transform.getOrigin().getX(),transform.getOrigin().getY(),transform.getOrigin().getZ());
 
+    ROS_INFO_STREAM("*** Testing KDL with "<<num_samples<<" random samples");
 
-    int rc;
+    for (uint i=0; i < num_samples; i++) {
+        //fk_solver.JntToCart(JointList[i],end_effector_pose);
+        double elapsed = 0;
+        result=nominal; // start with nominal
+        start_time = boost::posix_time::microsec_clock::local_time();
+        do {
+            q=result; // when iterating start with last solution
+            rc=kdl_solver.CartToJnt(q,end_effector_pose,result);
+            diff = boost::posix_time::microsec_clock::local_time() - start_time;
+            elapsed = diff.total_nanoseconds() / 1e9;
+        } while (rc < 0 && elapsed < timeout);
+        total_time+=elapsed;
+        if (rc>=0)
+            success++;
 
-    // double total_time=0;
-    uint success=0;
+        if (int((double)i/num_samples*100)%10 == 0)
+            ROS_INFO_STREAM_THROTTLE(1,int((i)/num_samples*100)<<"\% done");
+    }
 
+    ROS_INFO_STREAM("KDL found "<<success<<" solutions ("<<100.0*success/num_samples<<"\%) with an average of "<<total_time/num_samples<<" secs per sample");
+
+
+    total_time=0;
+    success=0;
 
     ROS_INFO_STREAM("*** Testing TRAC-IK with "<<num_samples<<" random samples");
 
-   // for (uint i=0; i < num_samples; i++) {
-       // fk_solver.JntToCart(JointList[i],end_effector_pose);
-        //double elapsed = 0;
-        //start_time = boost::posix_time::microsec_clock::local_time();
+    for (uint i=0; i < num_samples; i++) {
+        //fk_solver.JntToCart(JointList[i],end_effector_pose);
+        double elapsed = 0;
+        start_time = boost::posix_time::microsec_clock::local_time();
         rc=tracik_solver.CartToJnt(nominal,end_effector_pose,result);
-        if (rc=0)
-//            success++;
-  //  }
+        diff = boost::posix_time::microsec_clock::local_time() - start_time;
+        elapsed = diff.total_nanoseconds() / 1e9;
+        total_time+=elapsed;
+        if (rc>=0)
+            success++;
+
+        if (int((double)i/num_samples*100)%10 == 0)
+            ROS_INFO_STREAM_THROTTLE(1,int((i)/num_samples*100)<<"\% done");
+    }
+
+    ROS_INFO_STREAM("TRAC-IK found "<<success<<" solutions ("<<100.0*success/num_samples<<"\%) with an average of "<<total_time/num_samples<<" secs per sample");
 
 
-    ROS_INFO_STREAM("TRAC-IK  "<< success ? "TRUE" : "FALSE");
     ROS_INFO_STREAM("Result data - " << result.data);
     return 1;
 }

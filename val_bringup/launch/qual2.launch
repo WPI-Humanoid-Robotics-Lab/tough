@@ -30,5 +30,8 @@
    <remap from="/multisense/camera/points2" to="/multisense/image_points2" />
 </node>
 
+   <!-- Start button detector node -->
+   <node pkg="find_button" type="ButtonDetectorNode" name="button_detection"/>
 
+   
 </launch>
