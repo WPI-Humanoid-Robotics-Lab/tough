@@ -4,7 +4,7 @@
 
 ihmc_msgs::ArmTrajectoryRosMessage appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage msg, float time, float* pos);
 ihmc_msgs::PelvisHeightTrajectoryRosMessage controlPelvisHeight(float height);
-
+void stateMach(int state);
 
 int main(int argc, char** argv)
 {
@@ -18,22 +18,20 @@ int main(int argc, char** argv)
     ros::Publisher pelvisHeightPublisher = nh.advertise<ihmc_msgs::PelvisHeightTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/pelvis_height_trajectory",1,true);
 
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
+    //int state =
 
     //{1.5, -0.4, -1.2, 1.4, 0.0, 0.0, 0.0};
     float BUTTON_PRESS_PREPARE [] ={1.57, -0.1, -1.6, 1.55, 0.0, 0.0, 0.0};
     float BUTTON_PRESS_ACT [] ={1.57, -0.4, -1.6, 1.1, 0.0, 0.0, 0.0};
     float RETRACT_TO_ACTUAL [] ={-0.2, 1.2, 0.7222, 1.5101, 0.0, 0.0, 0.0};
-    float TEST [] ={1.57, -0.3, -1.2, 1.4, 0.0, 0.0, 0.0};
 
     arm_traj.joint_trajectory_messages.resize(7);
     arm_traj.robot_side = arm_traj.RIGHT;
     arm_traj.unique_id = -1;
 
     arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_PREPARE);
-    arm_traj = appendTrajectoryPoint(arm_traj, 4, BUTTON_PRESS_ACT);
+  //  arm_traj = appendTrajectoryPoint(arm_traj, 4.5, BUTTON_PRESS_ACT);
     arm_traj = appendTrajectoryPoint(arm_traj, 4, RETRACT_TO_ACTUAL);
-
-    //arm_traj = appendTrajectoryPoint(arm_traj, 2, TEST);
 
     armTrajectoryPublisher.publish(arm_traj);
 
@@ -48,7 +46,7 @@ int main(int argc, char** argv)
     //  while (ros::ok())
     // {
 
-  //  stateMach(state);
+    //stateMach(state);
     ros::spinOnce();
     loop_rate.sleep();
     //}
