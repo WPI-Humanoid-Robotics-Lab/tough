@@ -1,6 +1,7 @@
 <launch>
 
   <node name="map_server" pkg="map_server" type="map_server" args="$(find val_footstep)/maps/qual2.yaml" />
+   <node name="MapTransform" pkg="val_footstep" type="MapTransform" />
    
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find val_footstep)/config/rviz_footstep_planning.rviz" /> 
   

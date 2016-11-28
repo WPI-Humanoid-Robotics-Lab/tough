@@ -28,7 +28,7 @@ public:
     ~ValkyrieWalker();
 
     /// \todo implement this function
-    bool WalkToGoal(const geometry_msgs::Pose2D &goal);
+    bool WalkToGoal( geometry_msgs::Pose2D &goal);
 
     /// \todo implement this function
     bool WalkNStepsForward(int n, float step_size);
@@ -37,9 +37,9 @@ public:
     bool WalkNStepsBackward(int n, float step_size);
 
     /// return if robot is walking. Optional
-    bool isWalking();
+    //bool isWalking();
 
-    void walk();
+
 
 private:
     ros::NodeHandle n;
@@ -59,7 +59,7 @@ private:
     /// \todo wrong implementation. get rid of this
     void waitForSteps( int n);
 
-    void getFootstep(double goal_x,double goal_y,double goal_th,ihmc_msgs::FootstepDataListRosMessage &list);
+    void getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list);
 
 };
 
