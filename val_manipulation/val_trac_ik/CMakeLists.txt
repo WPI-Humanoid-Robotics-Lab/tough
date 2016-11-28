@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(val_manipulation)
 
+SET(CMAKE_BUILD_TYPE RelWithDebInfo)
+
 find_package(catkin REQUIRED COMPONENTS
   #  orocos_kdl
   trac_ik_lib
   tf
+  val_common
 )
 
 find_package(orocos_kdl REQUIRED)
@@ -12,7 +15,7 @@ find_package(orocos_kdl REQUIRED)
 catkin_package(
   INCLUDE_DIRS include 
   LIBRARIES ${PROJECT_NAME} 
-  CATKIN_DEPENDS trac_ik_lib DEPENDS system_lib orocos_kdl
+  CATKIN_DEPENDS trac_ik_lib DEPENDS system_lib orocos_kdl val_common
 )
 
 include_directories(include)
@@ -23,6 +26,8 @@ include_directories(
 
  add_library (${PROJECT_NAME}
    src/val_manipulation.cpp
+   src/val_arm_navigation.cpp
+   src/val_pelvis_navigation.cpp
 )
 
  target_link_libraries(${PROJECT_NAME}
@@ -47,14 +52,14 @@ add_dependencies(val_ik_solver_node
    ${orocos_kdl_LIBRARIES}
 )
 
-add_executable(val_arm_navigation_node
-  src/val_arm_navigation.cpp)
+add_executable(val_qual2_node
+  src/val_qual2.cpp)
 
-add_dependencies(val_arm_navigation_node
+add_dependencies(val_qual2_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
 
- target_link_libraries(val_arm_navigation_node
+ target_link_libraries(val_qual2_node
    ${catkin_LIBRARIES}
    ${PROJECT_NAME}
    ${orocos_kdl_LIBRARIES}
