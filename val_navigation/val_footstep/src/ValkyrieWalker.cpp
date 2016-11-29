@@ -270,7 +270,7 @@ ihmc_msgs::FootstepDataRosMessage ValkyrieWalker::getOffsetStep(int side , doubl
 // wait till all the steps are taken
 void ValkyrieWalker::waitForSteps(int n)
 {
-    while (step_counter <n)
+    while (step_counter <n && ros::ok())
     {
         ros::spinOnce();
         ros::Duration(0.1).sleep();

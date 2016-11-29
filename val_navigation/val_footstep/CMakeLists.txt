@@ -7,20 +7,19 @@ project(val_footstep)
 
 
 find_package(catkin REQUIRED COMPONENTS
+  roscpp
   footstep_planner
   humanoid_localization
   humanoid_nav_msgs 
-  roscpp
-  std_msgs
-  geometry_msgs
-  message_generation
-  actionlib
   tf
   angles
-  map_server
+  navigation_common
+  message_generation
+  actionlib
+  std_msgs
+  geometry_msgs
   visualization_msgs
   ihmc_msgs
-  val_nav_common
   )
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SBPL REQUIRED sbpl)
@@ -116,7 +115,7 @@ link_directories(${SBPL_LIBRARY_DIRS})
 
 catkin_package(
   INCLUDE_DIRS 
-  CATKIN_DEPENDS message_runtime humanoid_nav_msgs val_nav_common
+  CATKIN_DEPENDS message_runtime humanoid_nav_msgs
   )
 
 ###########

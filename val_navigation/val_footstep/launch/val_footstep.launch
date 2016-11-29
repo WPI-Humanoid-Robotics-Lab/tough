@@ -1,13 +1,14 @@
 <launch>
 
   <node name="map_server" pkg="map_server" type="map_server" args="$(find val_footstep)/maps/qual2.yaml" />
-   <node name="MapTransform" pkg="val_nav_common" type="MapTransform" />
+  <!--<include file="$(find navigation_common)/launch/octomap.launch" />-->
+   <node name="MapTransform" pkg="navigation_common" type="MapTransform" />
    
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find val_footstep)/config/rviz_footstep_planning.rviz" /> 
   
   <node name="footstep_planner" pkg="val_footstep" type="footstep_node" >
     <rosparam file="$(find val_footstep)/config/planning_params.yaml" command="load" />
-    <rosparam file="$(find val_footstep)/config/planning_params_asimo.yaml" command="load" />
+    <rosparam file="$(find val_footstep)/config/planning_params_humanoid.yaml" command="load" />
     <rosparam file="$(find val_footstep)/config/footsteps_valkyrie.yaml" command="load" />
   </node>
 

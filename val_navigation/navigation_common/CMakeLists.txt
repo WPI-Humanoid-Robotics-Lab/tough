@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   roscpp
   std_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -132,6 +133,9 @@ include_directories(
 
 add_executable(publish_corrected_map  src/publish_corrected_map.cpp)
 target_link_libraries(publish_corrected_map  ${catkin_LIBRARIES})
+
+add_executable(MapTransform src/MapTransform.cpp)
+target_link_libraries(MapTransform  ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
