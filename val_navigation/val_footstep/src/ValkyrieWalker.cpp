@@ -291,7 +291,7 @@ int main(int argc, char **argv)
 
     goal.x = 2.0;
     goal.y = 0.0;
-    goal.theta = 0;
+    goal.theta = 0.0;
 
     ValkyrieWalker agent(nh);
 
