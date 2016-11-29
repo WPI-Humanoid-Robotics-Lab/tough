@@ -26,8 +26,6 @@ namespace VAL_COMMON_NAMES
     /* valkyrie Left Foot*/
     static const std::string L_FOOT_TF = "/leftFoot";
 
-    /* valkyrie odom*/
-    static const std::string ODOM_TF = "odom";
 
     /* world frame*/
     static const std::string WORLD_TF = "/world";
