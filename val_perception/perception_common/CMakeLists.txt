@@ -21,7 +21,6 @@ find_package(catkin REQUIRED COMPONENTS roscpp
                                         geometry_msgs
                                         sensor_msgs
                                         std_msgs
-                                        nav_msgs
 )
 
 include_directories(include)
@@ -51,9 +50,6 @@ set_property(
 
 target_link_libraries(${PROJECT_NAME}  ${PCL_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME}  ${catkin_EXPORTED_TARGETS})
-
-add_executable(publish_corrected_map  src/publish_corrected_map.cpp)
-target_link_libraries(publish_corrected_map  ${catkin_LIBRARIES})
 
 add_executable(test_lasercloud  src/test_laser.cpp)
 target_link_libraries(test_lasercloud  ${PROJECT_NAME})
