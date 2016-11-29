@@ -295,7 +295,7 @@ int main(int argc, char **argv)
 
     ValkyrieWalker agent(nh);
 
-    //agent.WalkNStepsBackward(2,0.5);
+   // agent.WalkNStepsBackward(2);
 
 
     agent.WalkToGoal(goal);

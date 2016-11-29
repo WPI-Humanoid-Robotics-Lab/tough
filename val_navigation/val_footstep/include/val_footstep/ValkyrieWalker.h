@@ -36,10 +36,10 @@ public:
     bool WalkToGoal( geometry_msgs::Pose2D &goal);
 
     /// \todo implement this function
-    bool WalkNStepsForward(int n, float step_size);
+    bool WalkNStepsForward(int n, float step_size = 0.4);
 
     /// \todo implement this function
-    bool WalkNStepsBackward(int n, float step_size);
+    bool WalkNStepsBackward(int n, float step_size = 0.4);
 
 
 
