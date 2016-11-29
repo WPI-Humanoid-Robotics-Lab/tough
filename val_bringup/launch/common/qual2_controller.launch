@@ -1,10 +1,12 @@
 <launch>
 <arg name="init" default="true"/>
 <arg name="walk_test" default="true" />
+<arg name="extra_gazebo_args" default="" />
 
    <include file="$(find srcsim)/launch/qual2.launch">
-   <arg name="init" value="$(arg init)" />
-   <arg name="walk_test" value="$(arg walk_test)" />
+      <arg name="init" value="$(arg init)" />
+      <arg name="walk_test" value="$(arg walk_test)" />
+      <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)" />
    </include>
 
 </launch>
