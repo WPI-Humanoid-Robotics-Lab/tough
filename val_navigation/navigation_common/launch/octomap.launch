@@ -36,6 +36,6 @@
 	</node>
 
         <!-- This node listens to /projected_map and publishes the corrected map on /map-->
-        <node pkg="perception_common" type="publish_corrected_map" name="corrected_map_publisher" />
+        <node pkg="navigation_common" type="publish_corrected_map" name="corrected_map_publisher" />
 
 </launch>
