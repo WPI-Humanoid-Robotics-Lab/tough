@@ -90,7 +90,7 @@ void Qual1Plugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
       &Qual1Plugin::OnStart, this);
   this->startSub = this->rosnode->subscribe("/srcsim/qual1/light", 10,
       &Qual1Plugin::OnLight, this);
-  this->posePub = this->rosnode->advertise<srcsim_msgs::groundTruth>("/srcsim/qual1/groundTruth", 10);
+  this->lightPub = this->rosnode->advertise<srcsim_msgs::groundTruth>("/srcsim/qual1/groundTruth", 10);
 
   this->prevLightTime = _world->GetSimTime();
 
@@ -205,8 +205,8 @@ void Qual1Plugin::OnUpdate()
     // Log light change data
     std::ostringstream stream;
     stream << "switch " << (*this->lightPatternIter).light << " "
-    this->Log(stream.str(), true);
     << (*this->lightPatternIter).color;
+    this->Log(stream.str(), true);
     // added
     srcsim_msgs::groundTruth lightThatIsOn;
     if (!((*this->lightPatternIter).color[0]==0 &&
@@ -229,7 +229,7 @@ void Qual1Plugin::OnUpdate()
         ROS_INFO("x %f",lightThatIsOn.dataPose[0]);
         ROS_INFO("y %f",lightThatIsOn.dataPose[1]);
         ROS_INFO("z %f",lightThatIsOn.dataPose[2]);
-        posePub.publish(lightThatIsOn);
+        lightPub.publish(lightThatIsOn);
     }
     //added
     // Switch the light
