@@ -16,6 +16,7 @@
 */
 
 #include <sstream>
+#include <ros/package.h>
 #include <ignition/math/Rand.hh>
 #include "gazebo/physics/World.hh"
 #include "gazebo/transport/Node.hh"
@@ -23,6 +24,7 @@
 #include "gazebo/transport/Publisher.hh"
 #include "srcsim/Qual1Plugin.hh"
 #include <srcsim_msgs/groundTruth.h>
+#include <string>
 using namespace gazebo;
 
 GZ_REGISTER_WORLD_PLUGIN(Qual1Plugin)
@@ -216,7 +218,10 @@ void Qual1Plugin::OnUpdate()
         lightThatIsOn.data[1]=(*this->lightPatternIter).color[1];
         lightThatIsOn.data[2]=(*this->lightPatternIter).color[2];
         lightThatIsOn.data[3]=(*this->lightPatternIter).color[3];
-        std::ifstream inputFile("/home/jadhu/ros_ws/src/space_robotics_challenge/srcsim/pose.txt");
+        std::string path = ros::package::getPath("srcsim");
+        path.append("/pose.txt");
+        // ROS_INFO_STREAM(path);
+        std::ifstream inputFile(path);
         std::string line;
         ROS_INFO("light %d",((*this->lightPatternIter).light));
         for(signed int itr= 1; itr<((*this->lightPatternIter).light)+1; itr++)
