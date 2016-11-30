@@ -100,6 +100,9 @@ Visualization Manager:
       Class: rviz/Path
       Color: 255; 0; 0
       Enabled: true
+      Head Diameter: 0.3
+      Head Length: 0.2
+      Length: 0.3
       Line Style: Lines
       Line Width: 0.03
       Name: Path
@@ -107,6 +110,10 @@ Visualization Manager:
         X: 0
         Y: 0
         Z: 0
+      Pose Style: None
+      Radius: 0.03
+      Shaft Diameter: 0.1
+      Shaft Length: 0.1
       Topic: /footstep_planner/path
       Unreliable: false
       Value: true
@@ -172,7 +179,7 @@ Visualization Manager:
         Value: false
       Name: Current View
       Near Clip Distance: 0.01
-      Scale: 235.399
+      Scale: 395.262
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
       X: 0
@@ -194,5 +201,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1440
-  X: 55
-  Y: 14
+  X: 243
+  Y: 114

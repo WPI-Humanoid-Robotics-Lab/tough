@@ -5,7 +5,8 @@
  * */
 
 #include "val_footstep/ValkyrieWalker.h"
-#include <ros/macros.h>
+#include <iostream>
+
 /// \todo This can go in val_common
 
 // Defining foot
@@ -15,6 +16,7 @@ enum FOOT{
 };
 
 // CallBack function for walking status
+///\todo Must have more status feedback from the Robot. Should know if it did not complete the step then what happened.
 void ValkyrieWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage & msg)
 {
     if(msg.status == 1)
@@ -135,7 +137,9 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
 
     start.x = startstep->location.x ;
-    start.y = startstep->location.y;
+    start.y = startstep->location.y - 0.12;
+    std::cout<< "Start Position  x = " << start.x << "  y = " << start.y<<std::endl;
+
     start.theta = tf::getYaw(startstep->orientation);
 
     delete startstep;
@@ -286,21 +290,37 @@ int main(int argc, char **argv)
 
     ros::init(argc, argv, "pass_footstep");
     ros::NodeHandle nh;
-
-    geometry_msgs::Pose2D goal;
-
-    goal.x = 2.0;
-    goal.y = 0.0;
-    goal.theta = 0.0;
-
-    ValkyrieWalker agent(nh);
-
-   // agent.WalkNStepsBackward(2);
+     ValkyrieWalker agent(nh,1,1,0);
+   
 
 
-    agent.WalkToGoal(goal);
+    while(ros::ok()) {
+	 	geometry_msgs::Pose2D goal;
+     	float x,y, theta = 0.0;
+	    int flag ;
+	    std::cout<<"Enter x coordinate of goal : ";
+	    std::cin>>x;
+	    std::cout<<"Enter y coordinate of goal : ";
+	    std::cin>>y;
+	    std::cout<<"Enter angle of rotation for goal in radians : ";
+	    std::cin>>theta;
+	     
+	    goal.x = x;
+	    goal.y = y;
+	    goal.theta = theta;
 
+	   
 
+	   // agent.WalkNStepsBackward(2);
+
+	    agent.WalkToGoal(goal);
+	    
+	    std::cout<<"Enter 0 to exit or 1 to continue \n";
+	    std::cin>>flag; 
+
+	    if(!flag)
+	    	break;
+	}
 
     return 0;
 }

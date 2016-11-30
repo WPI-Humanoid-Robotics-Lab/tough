@@ -21,10 +21,11 @@
 
                 <!-- filter the ground plane. \todo: tune these parameters -->
                 <param name="filter_ground" value="true" />
-                <param name="ground_filter/distance" value="0.5"/>
+                <param name="ground_filter/distance" value="0.04"/>
                 <param name="ground_filter/plane_distance" value="0.05"/>
                 <param name="pointcloud_min_z" value="0"/>
-
+                <param name="occupancy_min_z" value="0"/>
+                <param name="occupancy_max_z" value="0.4"/>
 
                 <!-- data source to integrate (PointCloud2) -->
 		<remap from="cloud_in" to="/multisense/points2" />
