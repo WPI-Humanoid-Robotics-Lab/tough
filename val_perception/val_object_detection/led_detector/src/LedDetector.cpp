@@ -128,12 +128,17 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
     message.position.y = pcl_point.y;
     message.position.z = pcl_point.z;
 
-    // Assign RGB values to ROS message to be published. Getting it from the cloud and not the image
-    message.color.r = pcl_point.r;
-    message.color.g = pcl_point.g;
-    message.color.b = pcl_point.b;
+    // Assign RGB values to ROS message to be published. Getting it from the cloud and not the image, values returned are 1 or 0.
+    message.color.r = (int)((pcl_point.r/255.0)+0.3);
+    message.color.g = (int)((pcl_point.g/255.0)+0.3);
+    message.color.b = (int)((pcl_point.b/255.0)+0.3);
     message.color.a = 1.0;
 
+    // If there is no LED turned on, then just don't detect anything
+    if (message.color.r == 0.0 && message.color.g == 0 && message.color.b == 0){
+        poseXYZDetected = false;
+        return poseXYZDetected;
+    }
     poseXYZDetected = true;
 
     // Publishing XYZ and RGB data
