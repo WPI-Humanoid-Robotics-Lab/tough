@@ -9,19 +9,19 @@ find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
 find_package(PCL 1.7 REQUIRED io)
 find_package(catkin REQUIRED COMPONENTS roscpp
                                         rospy
-                                        geometry_msgs
-                                        sensor_msgs
                                         geometric_shapes
-					cv_bridge
-					image_transport
-					pcl_conversions
+					                    cv_bridge
+					                    image_transport
+					                    pcl_conversions
                                         pcl_ros
-					std_msgs
-					message_filters
-					multisense_ros
+					                    message_filters
+					                    multisense_ros
                                         tf_conversions
                                         laser_geometry
                                         laser_assembler
+                                        geometry_msgs
+                                        sensor_msgs
+                                        std_msgs
 )
 
 include_directories(include)
@@ -51,7 +51,6 @@ set_property(
 
 target_link_libraries(${PROJECT_NAME}  ${PCL_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME}  ${catkin_EXPORTED_TARGETS})
-
 
 add_executable(test_lasercloud  src/test_laser.cpp)
 target_link_libraries(test_lasercloud  ${PROJECT_NAME})

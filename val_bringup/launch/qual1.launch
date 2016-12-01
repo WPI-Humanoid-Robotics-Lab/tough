@@ -2,10 +2,12 @@
 
     <arg name="init" default="true"/>
     <arg name="controller" default="true" />
+    <arg name="extra_gazebo_args" default="" />
 
     <group if="$(arg controller)">
         <include file="$(find val_bringup)/launch/common/qual1_controller.launch">
             <arg name="init" value="$(arg init)"/>
+	    <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)"/>  
         </include>
     </group>
 

@@ -1,6 +1,6 @@
 <package>
   <name>perception_common</name>
-  <version>0.0.1</version>
+  <version>1.0.0</version>
   <description>
      perception_common
   </description>
@@ -34,6 +34,7 @@
   <run_depend>laser_assembler</run_depend>
 
   <buildtool_depend>catkin</buildtool_depend>
+
 </package>
 
 
