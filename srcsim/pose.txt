@@ -42,3 +42,5 @@
 -0.40249 -0.28036 1.73531
 0.40249 -0.28036 1.73531
 0 -0.10511 1.3696
+#This file stores the pose of every light wrt to console. Origin of console is at <pose>3 0 0 0 0 -1.570796</pose>.
+#Every line is for the respective light number. 
