@@ -1,6 +1,6 @@
 <package>
   <name>perception_common</name>
-  <version>0.0.1</version>
+  <version>1.0.0</version>
   <description>
      perception_common
   </description>
@@ -18,6 +18,7 @@
   <build_depend>gtest</build_depend>
   <build_depend>tf_conversions</build_depend>
   <build_depend>laser_geometry</build_depend>
+  <build_depend>laser_assembler</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>opencv2</run_depend>
@@ -30,8 +31,9 @@
   <run_depend>gtest</run_depend>
   <run_depend>tf_conversions</run_depend>
   <run_depend>laser_geometry</run_depend>
+  <run_depend>laser_assembler</run_depend>
 
   <buildtool_depend>catkin</buildtool_depend>
-</package>
 
+</package>
 

@@ -61,6 +61,21 @@ def walkTest():
     # msg.footstep_data_list.append(createFootStepOffset(RIGHT, [1.6, 0.17, 0.0]))
     # msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.6, 0.19, 0.0]))
 
+    # walk setps
+    #msg.footstep_data_list.append(createFootStepOffset(LEFT, [0.265, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [0.265, 0.035, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(LEFT, [0.605, -0.225, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [1.0, 0.125, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.0, -0.125, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [1.2, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.4, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [1.6, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.8, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [2.0, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(LEFT, [2.2, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [2.4, 0.0, 0.0]))
+
+
     footStepListPublisher.publish(msg)
     rospy.loginfo('walk forward...')
     waitForFootsteps(len(msg.footstep_data_list))

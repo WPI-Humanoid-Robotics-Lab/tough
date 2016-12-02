@@ -1,0 +1,42 @@
+<launch>
+	<node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+                <!--set the resolution to 5cm. this can be modified using dynamic parameter-->
+                <param name="resolution" value="0.05" />
+		
+		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
+                <param name="frame_id" type="string" value="world" />
+
+
+                <param name="filter_speckles" type="bool" value="true" />
+		
+		<!-- maximum range to integrate (speedup!) -->
+                <param name="sensor_model/max_range" value="30" />
+                <param name="sensor_model/hit" value="0.85" />
+                <param name="sensor_model/miss" value="0.45" />
+                <param name="sensor_model/min" value="0.1" />
+                <param name="sensor_model/max" value="0.65" />
+		
+                 <!--frameid for detecting ground plane-->
+                <param name="base_frame_id" value="world" />
+
+                <!-- filter the ground plane. \todo: tune these parameters -->
+                <param name="filter_ground" value="true" />
+                <param name="ground_filter/distance" value="0.04"/>
+                <param name="ground_filter/plane_distance" value="0.05"/>
+                <param name="pointcloud_min_z" value="0"/>
+                <param name="occupancy_min_z" value="0"/>
+                <param name="occupancy_max_z" value="0.4"/>
+
+                <!-- data source to integrate (PointCloud2) -->
+		<remap from="cloud_in" to="/multisense/points2" />
+
+                <!--remap the 2D map topic. There's a bug in octomap server which causes z value of the origin to be nan. 
+		    This is fixed in a node in perception_common publish_corrected_map node. Do not use the following line, 
+	 	    instead run the mentioned node and it will publish 2D map.-->
+                <!-- remap from="projected_map" to="map"/ -->
+	</node>
+
+        <!-- This node listens to /projected_map and publishes the corrected map on /map-->
+        <node pkg="navigation_common" type="publish_corrected_map" name="corrected_map_publisher" />
+
+</launch>

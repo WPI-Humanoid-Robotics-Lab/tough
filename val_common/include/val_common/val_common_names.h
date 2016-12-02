@@ -25,6 +25,10 @@ namespace VAL_COMMON_NAMES
 
     /* valkyrie Left Foot*/
     static const std::string L_FOOT_TF = "/leftFoot";
+
+
+    /* world frame*/
+    static const std::string WORLD_TF = "/world";
 }
 
 #endif

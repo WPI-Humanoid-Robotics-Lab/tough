@@ -1,0 +1,12 @@
+
+<launch>
+  <node type="point_cloud_assembler" pkg="laser_assembler"
+        name="val_laser_assembler_svc">
+    <remap from="cloud" to="/multisense/points"/>
+    <param name="max_clouds" type="int" value="400" />
+    <param name="fixed_frame" type="string" value="world" />
+  </node>
+
+  <node type="periodic_snapshotter" pkg="perception_common" name="val_laser_assembler_node"/>  
+  
+</launch>
