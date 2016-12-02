@@ -101,7 +101,9 @@ namespace src_qual1_task
             /**
              * @brief m_stereoImage3D
              */
-            cv::Mat                                 m_stereoImage3D;
+            cv::Mat m_stereoImage3D;
+
+            cv::Mat m_qMatrix;
 
             /**
              * @brief m_imageRGBpub - Publisher that publishes xyz and rgb data to topic "/detect/light/rgbxyz"
