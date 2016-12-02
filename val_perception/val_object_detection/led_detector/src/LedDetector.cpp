@@ -7,6 +7,7 @@ LedDetector::LedDetector(ros::NodeHandle nh) {
     m_multisenseImagePtr = new src_perception::MultisenseImage(nh);
     m_randomGen= cv::RNG(12345);
     m_imageRGBXYZpub = nh.advertise<led_detector::LedPositionColor>("/detect/light/rgbxyz", 1);
+    m_multisenseImagePtr->giveQMatrix(m_qMatrix);
 }
 
 LedDetector::~LedDetector() {
@@ -18,10 +19,10 @@ bool LedDetector::getLight(cv::Mat &new_image,geometry_msgs::Point &pixelCoordin
     cv::vector<cv::Mat> inMsgChannel(3),hsv(3);
     cv::Mat inThresh,hist,backProject,drawing;
     int histSize[] = {180,256,256};
-    float hRange[] ={0,180};        //hue range
-    float sRange[] ={0,256};        //saturation range
-    float vRange[] ={0,256};        //values range
-    int channels[] ={0,1,2};
+    float hRange[] = {0,180};        //hue range
+    float sRange[] = {0,256};        //saturation range
+    float vRange[] = {0,256};        //values range
+    int channels[] = {0,1,2};
     const float* histRange[] = { hRange, sRange,vRange};
     cv::split(new_image,inMsgChannel);
 
@@ -100,10 +101,10 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
     src_perception::StereoPointCloudColor::Ptr organized_cloud(new src_perception::StereoPointCloudColor);
     static tf::TransformBroadcaster br;
     tf::Transform transform;
+    tf::StampedTransform stampedTransform;
     tf::Quaternion orientation;
     pcl::PointXYZRGB pcl_point;
-    if (m_multisenseImagePtr == NULL)
-        return false;
+
     try
     {
         listener.waitForTransform("/world", "/left_camera_optical_frame", ros::Time(0), ros::Duration(3.0));
@@ -123,17 +124,40 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
     transform.setRotation(orientation);
     br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "left_camera_optical_frame", "LED_frame")); //Co-ordinates wrt left_camera_optical_frame
 
-    // Assign XYZ values to ROS message to be published
-    message.position.x = pcl_point.x;
-    message.position.y = pcl_point.y;
-    message.position.z = pcl_point.z;
+    /// \todo Use eigen to find led position wrt to head. that way we don't need another spinOnce and publish the frame to tf wrt head
+    ros::spinOnce();
 
-    // Assign RGB values to ROS message to be published. Getting it from the cloud and not the image
-    message.color.r = pcl_point.r;
-    message.color.g = pcl_point.g;
-    message.color.b = pcl_point.b;
+    try {
+        listener.lookupTransform("/head", "/LED_frame", ros::Time(0), stampedTransform);
+    }
+    catch (tf::TransformException ex) {
+        ROS_ERROR("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+    // Assign XYZ values to ROS message to be published
+    message.position.x = stampedTransform.getOrigin().getX();
+    message.position.y = stampedTransform.getOrigin().getY();
+    message.position.z = stampedTransform.getOrigin().getZ();
+
+//    transform.setOrigin( tf::Vector3(message.position.x, message.position.y, message.position.z) );
+//    orientation.setRPY(0, 0, 0);
+//    transform.setRotation(orientation);
+//    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "head", "LED_frame2")); //Co-ordinates wrt left_camera_optical_frame
+
+    // Assign RGB values to ROS message to be published. Getting it from the cloud and not the image, values returned are 1 or 0.
+    // If the value is more than 0.7 consider it as 1
+    message.color.r = (int)((pcl_point.r/255.0)+0.3);
+    message.color.g = (int)((pcl_point.g/255.0)+0.3);
+    message.color.b = (int)((pcl_point.b/255.0)+0.3);
     message.color.a = 1.0;
 
+    // If there is no LED turned on, then just don't detect anything
+    if (message.color.r == 0.0 && message.color.g == 0 && message.color.b == 0){
+        poseXYZDetected = false;
+        return poseXYZDetected;
+    }
     poseXYZDetected = true;
 
     // Publishing XYZ and RGB data
@@ -142,14 +166,15 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
 }
 
 bool LedDetector::detectLight() {
-    ImageFrame              img_frame;
+    ImageFrame img_frame;
     geometry_msgs::Point pixelCoordinates;
+
+    img_frame.m_qMatrix = this->m_qMatrix;
 
     if(m_multisenseImagePtr->giveImage(img_frame.m_originalImage))
         if(m_multisenseImagePtr->giveDisparityImage(img_frame.m_disparityImage))
-            if (m_multisenseImagePtr->giveQMatrix(img_frame.m_qMatrix))
-                if(getLight(img_frame.m_originalImage, pixelCoordinates))
-                    return getPoseRGB(img_frame,pixelCoordinates);
+            if(getLight(img_frame.m_originalImage, pixelCoordinates))
+                return getPoseRGB(img_frame,pixelCoordinates);
 
     return false;
 
@@ -160,13 +185,13 @@ int main(int argc, char *argv[]) {
     ros::init(argc, argv, "led_detection");
     ros::NodeHandle nh;
     src_qual1_task::LedDetector   led_detect(nh);
-    ros::WallTime start= ros::WallTime::now();
+    ros::Time start= ros::Time::now();
     while (ros::ok()) {
         bool success = led_detect.detectLight();
         std::string output = success ? "Button Detected in %0.6f secs" : "Detection Failed!!! in %0.6f secs";
-        ROS_INFO(output.c_str(), (ros::WallTime::now() - start).toSec());//tbw
+        ROS_INFO(output.c_str(), (ros::Time::now() - start).toSec());//tbw
         ros::spinOnce();
-        start= ros::WallTime::now();
+        start= ros::Time::now();
     }
 
     return 0;
