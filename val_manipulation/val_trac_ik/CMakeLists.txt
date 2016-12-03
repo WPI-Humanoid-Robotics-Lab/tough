@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   trac_ik_lib
   tf
   val_common
+  val_footstep
 )
 
 find_package(orocos_kdl REQUIRED)
@@ -15,7 +16,7 @@ find_package(orocos_kdl REQUIRED)
 catkin_package(
   INCLUDE_DIRS include 
   LIBRARIES ${PROJECT_NAME} 
-  CATKIN_DEPENDS trac_ik_lib DEPENDS system_lib orocos_kdl val_common
+  CATKIN_DEPENDS trac_ik_lib DEPENDS system_lib orocos_kdl val_common val_footstep
 )
 
 include_directories(include)
@@ -49,7 +50,6 @@ add_dependencies(val_ik_solver_node
  target_link_libraries(val_ik_solver_node
    ${catkin_LIBRARIES}
    ${PROJECT_NAME}
-   ${orocos_kdl_LIBRARIES}
 )
 
 add_executable(val_qual2_node
@@ -65,7 +65,7 @@ add_dependencies(val_qual2_node
    ${orocos_kdl_LIBRARIES}
 )
 
-install(TARGETS val_ik_solver_node 
+install(TARGETS val_ik_solver_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(TARGETS ${PROJECT_NAME}

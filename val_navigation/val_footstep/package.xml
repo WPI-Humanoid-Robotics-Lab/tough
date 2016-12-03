@@ -51,6 +51,7 @@
   <build_depend>tf</build_depend>
   <build_depend>angles </build_depend>
   <build_depend>visualization_msgs</build_depend>
+  <build_depend>val_common</build_depend>
 
 
   <run_depend>footstep_planner</run_depend>
@@ -65,6 +66,7 @@
   <run_depend>angles </run_depend>
   <run_depend>visualization_msgs</run_depend>
   <run_depend>navigation_common</run_depend>
+  <run_depend>val_common</run_depend>
 
 
 

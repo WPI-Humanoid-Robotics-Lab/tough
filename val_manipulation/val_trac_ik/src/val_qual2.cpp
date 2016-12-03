@@ -1,13 +1,17 @@
 #include <ros/ros.h>
 #include <val_manipulation/val_arm_navigation_.h>
 #include <val_manipulation/val_pelvis_navigation.h>
+#include <val_footstep/ValkyrieWalker.h>
 
 enum sm {
     WALK_TO_DOOR = 0,
     LOWER_PELVIS,
     PRESS_BUTTON,
     RETRACT_POSE_TO_WALK,
-    WALK_THROUGH_DOOR
+    RETRACT_PELVIS,
+    WALK_THROUGH_DOOR,
+    ALGIN_TO_DOOR,
+    EXIT
 };
 
 void executeSM(sm state);
@@ -21,10 +25,9 @@ int main(int argc, char** argv)
 
     armTrajectory armtraj(nh);
     pelvisTrajectory pelvisTraj(nh);
+    ValkyrieWalker walk(nh, 1.1, 1.1, 0);
 
     sm state = WALK_TO_DOOR;
-    bool once = 0;
-
 
     while(ros::ok())
     {
@@ -35,14 +38,14 @@ int main(int argc, char** argv)
         {
         case WALK_TO_DOOR:
         {
-            ROS_INFO("walk to the door");
+            ROS_INFO("walking to the door");
+            walk.WalkNStepsForward(6,0.475,-0.03);
             state = LOWER_PELVIS;
             break;
         }
         case LOWER_PELVIS:
         {
             ROS_INFO("lower pelvis");
-
             // lower the pelvis
             pelvisTraj.controlPelvisHeight(0.87);
             state = PRESS_BUTTON;
@@ -50,12 +53,11 @@ int main(int argc, char** argv)
         }
         case PRESS_BUTTON:
         {
-            ROS_INFO("pressing the button");
-
             z++;
 
-            if(z >20)
+            if(z >10)
             {
+                ROS_INFO("pressing the button");
                 armtraj.buttonPressArm(RIGHT);
                 z = 0;
                 state = RETRACT_POSE_TO_WALK;
@@ -65,14 +67,40 @@ int main(int argc, char** argv)
         }
         case RETRACT_POSE_TO_WALK:
         {
-            ROS_INFO("retract hand");
-
             z++;
 
-            if(z >110)
+            if(z >50)
             {
+                ROS_INFO("retract hand");
                 armtraj.walkPoseArm(RIGHT);
                 z = 0;
+                state = RETRACT_PELVIS;
+            }
+
+            break;
+        }
+        case RETRACT_PELVIS:
+        {
+            z++;
+            if(z >15)
+            {
+                ROS_INFO("retract pelvis to normal height");
+                // pelvis back to normal state
+                pelvisTraj.controlPelvisHeight(1);
+                z=0;
+                state = ALGIN_TO_DOOR;
+            }
+            break;
+
+        }
+        case ALGIN_TO_DOOR:
+        {
+            z++;
+            if(z >10)
+            {
+                ROS_INFO("algining to door");
+                walk.WalkNStepsForward(1,0,0.19);
+                z=0;
                 state = WALK_THROUGH_DOOR;
             }
 
@@ -80,20 +108,18 @@ int main(int argc, char** argv)
         }
         case WALK_THROUGH_DOOR:
         {
-            ROS_INFO("walk through the door");
-
             z++;
-            if(z >50)
+            if(z > 45)
             {
-                // pelvis back to normal state
-                pelvisTraj.controlPelvisHeight(1);
-
-                // remove
-                return 0;
+                ROS_INFO("walk through the door");
+                walk.WalkNStepsForward(4,0.475,0);
+                z=0;
+                state = EXIT;
             }
             break;
         }
         default:
+        EXIT:
 
             break;
         }
@@ -106,7 +132,7 @@ int main(int argc, char** argv)
 }
 
 
-void executeSM(sm state)
-{
+//void executeSM(sm state)
+//{
 
-}
+//}

@@ -47,7 +47,7 @@ void armTrajectory::buttonPressArm(armSide side)
     arm_traj.unique_id = -1;
 
     arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_PREPARE);
-    arm_traj = appendTrajectoryPoint(arm_traj, 4.5, BUTTON_PRESS_ACT);
+    arm_traj = appendTrajectoryPoint(arm_traj, 3, BUTTON_PRESS_ACT);
 
     armTrajectoryPublisher.publish(arm_traj);
 }
@@ -65,7 +65,7 @@ void armTrajectory::walkPoseArm(armSide side)
     arm_traj.unique_id = -2;
 
     arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_PREPARE);
-    arm_traj = appendTrajectoryPoint(arm_traj, 2, RETRACT_TO_ACTUAL);
+    arm_traj = appendTrajectoryPoint(arm_traj, 3, RETRACT_TO_ACTUAL);
 
     armTrajectoryPublisher.publish(arm_traj);
 }

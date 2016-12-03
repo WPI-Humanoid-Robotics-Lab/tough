@@ -23,6 +23,7 @@
 #include "std_msgs/String.h"
 #include "ros/time.h"
 #include "tf/tf.h"
+#include <val_common/val_common_defines.h>
 
 
 class ValkyrieWalker
