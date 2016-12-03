@@ -56,7 +56,7 @@ bool ValkyrieWalker::WalkToGoal( geometry_msgs::Pose2D &goal)
 }
 
 // creates and n footsteps of width step_size
-bool ValkyrieWalker::WalkNStepsForward(int n, float step_size)
+bool ValkyrieWalker::WalkNStepsForward(int n, float x_offset, float y_offset, bool continous)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.transfer_time = transfer_time;
@@ -65,53 +65,55 @@ bool ValkyrieWalker::WalkNStepsForward(int n, float step_size)
 
     list.unique_id = ValkyrieWalker::id ;
 
-
     for (int m =1; m <= n ; m++)
     {
         if(m%2 == 1)
-            list.footstep_data_list.push_back(this->getOffsetStep(LEFT , m*step_size));
+            list.footstep_data_list.push_back(*getOffsetStep(LEFT , m*x_offset, m*y_offset));
         else
-            list.footstep_data_list.push_back(this->getOffsetStep(RIGHT , m*step_size));
+            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , m*x_offset, m*y_offset));
     }
 
-    if (n%2 ==1)
-    { list.footstep_data_list.push_back(this->getOffsetStep(RIGHT , n*step_size));}
-    if (n%2 ==0)
-    { list.footstep_data_list.push_back(this->getOffsetStep(LEFT , n*step_size));}
+    if(!continous){
+        if (n%2 ==1)
+            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , n*x_offset, n*y_offset));
+        if (n%2 ==0)
+            list.footstep_data_list.push_back(*getOffsetStep(LEFT , n*x_offset, n*y_offset));
+    }
 
 
     this->footsteps_to_val.publish(list);
     ValkyrieWalker::id--;
     this->waitForSteps(list.footstep_data_list.size());
 
-
-
     return true;
 }
 
 //creates and n footsteps of width step_size backwards
-bool   ValkyrieWalker::WalkNStepsBackward(int n, float step_size)
+bool   ValkyrieWalker::WalkNStepsBackward(int n, float x_offset, float y_offset, bool continous)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.transfer_time = transfer_time;
     list.swing_time = swing_time;
     list.execution_mode = exe_mode;
-
     list.unique_id = ValkyrieWalker::id;
+
 
 
     for (int m =1; m <= n ; m++)
     {
         if(m%2 == 1)
-            list.footstep_data_list.push_back(this->getOffsetStep(LEFT , -m*step_size));
+            list.footstep_data_list.push_back(*getOffsetStep(LEFT , -m*x_offset, -m*y_offset));
         else
-            list.footstep_data_list.push_back(this->getOffsetStep(RIGHT ,- m*step_size));
+            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , -m*x_offset, -m*y_offset));
     }
 
-    if (n%2 ==1)
-    { list.footstep_data_list.push_back(this->getOffsetStep(RIGHT , -n*step_size));}
-    if (n%2 ==0)
-    { list.footstep_data_list.push_back(this->getOffsetStep(LEFT , -n*step_size));}
+    if(!continous) {
+        if (n%2 ==1)
+            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , n*x_offset, n*y_offset));
+        if (n%2 ==0)
+            list.footstep_data_list.push_back(*getOffsetStep(LEFT , n*x_offset, n*y_offset));
+
+    }
 
     this->footsteps_to_val.publish(list);
     ValkyrieWalker::id--;
@@ -186,7 +188,7 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
     return false;
 }
-void ValkyrieWalker::setWalkParms(double InTransferTime,double InSwingTime, int InMode)
+void ValkyrieWalker::setWalkParms(float InTransferTime,float InSwingTime, int InMode)
 {
     this->transfer_time = InTransferTime;
     this->swing_time = InSwingTime;
@@ -259,16 +261,16 @@ void ValkyrieWalker::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage
 
 // gives footstep which are offset from current step (only for straight line)
 
-ihmc_msgs::FootstepDataRosMessage ValkyrieWalker::getOffsetStep(int side , double x)
+ihmc_msgs::FootstepDataRosMessage* ValkyrieWalker::getOffsetStep(int side , float x, float y)
 {
     ///\ todo shared pointer implementation
-    ihmc_msgs::FootstepDataRosMessage * next = new ihmc_msgs::FootstepDataRosMessage();
+    ihmc_msgs::FootstepDataRosMessage *next = new ihmc_msgs::FootstepDataRosMessage();
 
     this->getCurrentStep(side, *next);
     next->location.x+=x;
+    next->location.y+=y;
 
-    return (*next);
-
+    return next;
 
 }
 // wait till all the steps are taken
@@ -278,8 +280,6 @@ void ValkyrieWalker::waitForSteps(int n)
     {
         ros::spinOnce();
         ros::Duration(0.1).sleep();
-
-
     }
     return;
 }
@@ -290,37 +290,43 @@ int main(int argc, char **argv)
 
     ros::init(argc, argv, "pass_footstep");
     ros::NodeHandle nh;
-     ValkyrieWalker agent(nh,1,1,0);
-   
+    ValkyrieWalker agent(nh,1,1,0);
+
 
 
     while(ros::ok()) {
-	 	geometry_msgs::Pose2D goal;
-     	float x,y, theta = 0.0;
-	    int flag ;
-	    std::cout<<"Enter x coordinate of goal : ";
-	    std::cin>>x;
-	    std::cout<<"Enter y coordinate of goal : ";
-	    std::cin>>y;
-	    std::cout<<"Enter angle of rotation for goal in radians : ";
-	    std::cin>>theta;
-	     
-	    goal.x = x;
-	    goal.y = y;
-	    goal.theta = theta;
+        geometry_msgs::Pose2D goal;
+        float x = 0.0;
+        float y= 0.0;
+        float theta = 0.0;
+        int flag ;
+//        std::cout<<"Enter x coordinate of goal : ";
+//        std::cin>>x;
+//        std::cout<<"Enter y coordinate of goal : ";
+//        std::cin>>y;
+//        std::cout<<"Enter angle of rotation for goal in radians : ";
+//        std::cin>>theta;
 
-	   
+//        agent.WalkNStepsForward(2,0.4,-0.1, true);
+//        agent.WalkNStepsForward(2,0.4,0, true);
+//        agent.WalkNStepsForward(1,0.4,0);
 
-	   // agent.WalkNStepsBackward(2);
+        goal.x = x;
+        goal.y = y;
+        goal.theta = theta;
 
-	    agent.WalkToGoal(goal);
-	    
-	    std::cout<<"Enter 0 to exit or 1 to continue \n";
-	    std::cin>>flag; 
 
-	    if(!flag)
-	    	break;
-	}
+
+//        // agent.WalkNStepsBackward(2);
+
+        agent.WalkToGoal(goal);
+
+        std::cout<<"Enter 0 to exit or 1 to continue \n";
+        std::cin>>flag;
+
+        if(!flag)
+            break;
+    }
 
     return 0;
 }

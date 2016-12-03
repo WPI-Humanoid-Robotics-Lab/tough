@@ -36,14 +36,13 @@ public:
     bool WalkToGoal( geometry_msgs::Pose2D &goal);
 
     /// \todo implement this function
-    bool WalkNStepsForward(int n, float step_size = 0.4);
+    bool WalkNStepsForward(int n, float x_offset = 0.4, float y_offset=0.0, bool continous = false);
 
     /// \todo implement this function
-    bool WalkNStepsBackward(int n, float step_size = 0.4);
+    bool WalkNStepsBackward(int n, float x_offset = 0.4, float y_offset=0.0, bool continous = false);
 
+    void setWalkParms(float transfer_time, float swing_time, int mode);
 
-
-   void setWalkParms(double transfer_time,double swing_time, int mode);
 
 private:
     ros::NodeHandle n;
@@ -61,7 +60,7 @@ private:
 
     void footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage & msg);
     void getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage& foot);
-    ihmc_msgs::FootstepDataRosMessage getOffsetStep(int side, double x);
+    ihmc_msgs::FootstepDataRosMessage* getOffsetStep(int side, float x, float y);
 
     /// \todo wrong implementation. get rid of this
     void waitForSteps( int n);
