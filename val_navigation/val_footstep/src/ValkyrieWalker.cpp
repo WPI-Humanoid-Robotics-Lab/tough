@@ -102,9 +102,9 @@ bool   ValkyrieWalker::WalkNStepsBackward(int n, float x_offset, float y_offset,
 
     if(!continous) {
         if (n%2 ==1)
-            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , n*x_offset, n*y_offset));
+            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , -n*x_offset, n*y_offset));
         if (n%2 ==0)
-            list.footstep_data_list.push_back(*getOffsetStep(LEFT , n*x_offset, n*y_offset));
+            list.footstep_data_list.push_back(*getOffsetStep(LEFT , -n*x_offset, n*y_offset));
 
     }
 
