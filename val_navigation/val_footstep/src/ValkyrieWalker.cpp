@@ -73,11 +73,13 @@ bool ValkyrieWalker::WalkNStepsForward(int n, float x_offset, float y_offset, bo
             list.footstep_data_list.push_back(*getOffsetStep(LEFT , n*x_offset, n*y_offset));
     }
 
-
+    /*
     this->footsteps_to_val.publish(list);
+   
     ValkyrieWalker::id--;
     this->waitForSteps(list.footstep_data_list.size());
-
+   */
+    this->WalkGivenSteps(list);
     return true;
 }
 
@@ -90,7 +92,7 @@ bool   ValkyrieWalker::WalkNStepsBackward(int n, float x_offset, float y_offset,
     list.execution_mode = exe_mode;
     list.unique_id = ValkyrieWalker::id;
 
-
+    
 
     for (int m =1; m <= n ; m++)
     {
@@ -108,9 +110,13 @@ bool   ValkyrieWalker::WalkNStepsBackward(int n, float x_offset, float y_offset,
 
     }
 
+
+    /*std::cout<< " size of array " << list.footstep_data_list.size() << std::endl; 
     this->footsteps_to_val.publish(list);
     ValkyrieWalker::id--;
     this->waitForSteps(list.footstep_data_list.size());
+    */
+    this->WalkGivenSteps(list);
     return true;
 
 }

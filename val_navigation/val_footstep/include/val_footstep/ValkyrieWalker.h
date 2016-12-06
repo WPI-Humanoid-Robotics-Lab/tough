@@ -7,13 +7,8 @@
 #define PASS_FOOTSTEP_HPP
 
 #include "ros/ros.h"
-//#include"geometry_msgs/PoseStamped.h"
 #include"geometry_msgs/Pose2D.h"
 #include <humanoid_nav_msgs/PlanFootsteps.h>
-//#include <humanoid_nav_msgs/StepTarget.h>
-//#include <val_footstep/StepTargetArray.h>
-//#include"geometry_msgs/Vector3.h"
-//#include"geometry_msgs/Quaternion.h"
 #include "ihmc_msgs/FootstepDataListRosMessage.h"
 #include "ihmc_msgs/FootstepDataRosMessage.h"
 #include "ihmc_msgs/FootstepStatusRosMessage.h"
