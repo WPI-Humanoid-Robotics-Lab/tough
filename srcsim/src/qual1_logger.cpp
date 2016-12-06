@@ -102,10 +102,7 @@ void logger::actual_data_callback(const led_detector::LedPositionColor &msg) // 
     }
     catch(tf::TransformException ex) {
         ROS_ERROR("%s",ex.what());
-        groundtruth_msg_.dataPose[0] = 0;
-        groundtruth_msg_.dataPose[1] = 0;
-        groundtruth_msg_.dataPose[2] = 0;
-
+        return;
     }
 
     led_pos_msg_= msg;
