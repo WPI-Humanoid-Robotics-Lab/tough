@@ -14,8 +14,11 @@ schematypens="http://www.w3.org/2001/XMLSchema"?>
   <depend>gazebo_plugins</depend>
   <depend>gazebo_ros</depend>
   <depend>roscpp</depend>
+  <depend>tf</depend>
 
   <build_depend>message_generation</build_depend>
+
+
   <exec_depend>message_runtime</exec_depend>
   <exec_depend>xacro</exec_depend>
   <exec_depend>stereo_image_proc</exec_depend>
