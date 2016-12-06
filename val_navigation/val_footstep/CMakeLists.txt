@@ -20,10 +20,11 @@ find_package(catkin REQUIRED COMPONENTS
   ihmc_msgs
   val_common
   )
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(SBPL REQUIRED sbpl)
-include_directories(${SBPL_INCLUDE_DIRS})
-link_directories(${SBPL_LIBRARY_DIRS})
+#find_package(PkgConfig REQUIRED)
+
+#pkg_check_modules(SBPL REQUIRED sbpl)
+#include_directories(${SBPL_INCLUDE_DIRS})
+#link_directories(${SBPL_LIBRARY_DIRS})
 
  add_message_files(DIRECTORY msg
   FILES
@@ -32,9 +33,9 @@ link_directories(${SBPL_LIBRARY_DIRS})
 ## Generate added messages and services with any dependencies listed here
  generate_messages(
    DEPENDENCIES
-   std_msgs
+
    humanoid_nav_msgs
-   geometry_msgs
+
  )
 
 
@@ -50,7 +51,7 @@ catkin_package(
 ###########
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(include)
+
 include_directories( include
   ${catkin_INCLUDE_DIRS}
 )
@@ -65,15 +66,15 @@ include_directories( include
 ## either from message generation or dynamic reconfigure
 # add_dependencies(val_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 
 ## Declare a C++ executable
 # add_executable(val_footstep_node src/val_footstep_node.cpp)
 add_executable(footstep_node src/footstep_node.cpp)
-target_link_libraries(footstep_node ${catkin_LIBRARIES} ${SBPL_LIBRARIES})
+target_link_libraries(footstep_node ${catkin_LIBRARIES})
 
 #add_executable(ValkyrieWalker src/ValkyrieWalker.cpp)
 #add_dependencies(ValkyrieWalker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 
 add_executable(test_footstep src/test_footstep.cpp)
 add_dependencies(test_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
