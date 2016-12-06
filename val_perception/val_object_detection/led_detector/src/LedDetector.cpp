@@ -1,5 +1,6 @@
 #include <led_detector/LedDetector.h>
 #include <ros/ros.h>
+#include <geometry_msgs/PointStamped.h>
 
 using namespace src_qual1_task;
 
@@ -119,32 +120,33 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
     // Obtaining a stereo point cloud for Z position and RGB values
     src_perception::PointCloudHelper::generateOrganizedRGBDCloud(img_frame.m_disparityImage,img_frame.m_originalImage,img_frame.m_qMatrix,organized_cloud);
     pcl_point = organized_cloud->at(pixelCoordinates.x, pixelCoordinates.y);
-    transform.setOrigin( tf::Vector3(pcl_point.x, pcl_point.y, pcl_point.z) );
-    orientation.setRPY(0, 0, 0);
-    transform.setRotation(orientation);
-    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "left_camera_optical_frame", "LED_frame")); //Co-ordinates wrt left_camera_optical_frame
 
-    /// \todo Use eigen to find led position wrt to head. that way we don't need another spinOnce and publish the frame to tf wrt head
-    ros::spinOnce();
+    geometry_msgs::PointStamped light_centroid;
+    light_centroid.header.frame_id= "left_camera_optical_frame";
+    light_centroid.header.stamp = ros::Time::now();
+    light_centroid.point.x = pcl_point.x;
+    light_centroid.point.y = pcl_point.y;
+    light_centroid.point.z = pcl_point.z;
+    geometry_msgs::PointStamped light_centroid_head;
 
-    try {
-        listener.lookupTransform("/head", "/LED_frame", ros::Time(0), stampedTransform);
+    try{
+
+        listener.transformPoint("/head",light_centroid, light_centroid_head);
     }
-    catch (tf::TransformException ex) {
+    catch(tf::TransformException ex){
         ROS_ERROR("%s",ex.what());
         ros::spinOnce();
         return false;
     }
 
-    // Assign XYZ values to ROS message to be published
-    message.position.x = stampedTransform.getOrigin().getX();
-    message.position.y = stampedTransform.getOrigin().getY();
-    message.position.z = stampedTransform.getOrigin().getZ();
+    transform.setOrigin( tf::Vector3(light_centroid_head.point.x, light_centroid_head.point.y, light_centroid_head.point.z) );
+    orientation.setRPY(0, 0, 0);
+    transform.setRotation(orientation);
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "head", "LED_frame")); //Co-ordinates wrt left_camera_optical_frame
 
-//    transform.setOrigin( tf::Vector3(message.position.x, message.position.y, message.position.z) );
-//    orientation.setRPY(0, 0, 0);
-//    transform.setRotation(orientation);
-//    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "head", "LED_frame2")); //Co-ordinates wrt left_camera_optical_frame
+    message.position.x = light_centroid_head.point.x;
+    message.position.y = light_centroid_head.point.y;
+    message.position.z = light_centroid_head.point.z;
 
     // Assign RGB values to ROS message to be published. Getting it from the cloud and not the image, values returned are 1 or 0.
     // If the value is more than 0.7 consider it as 1
