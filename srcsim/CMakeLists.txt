@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_plugins
   gazebo_ros
   roscpp
+  tf
   std_msgs
   message_generation
 )
@@ -32,7 +33,7 @@ add_message_files(
 
 generate_messages()
 
-catkin_package(CATKIN_DEPENDS message_runtime)
+catkin_package(CATKIN_DEPENDS message_runtime tf)
 
 ###########
 ## Build ##
@@ -86,6 +87,10 @@ install(TARGETS ${qual1_plugin_name}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
+
+
+add_executable(qual1_logger src/qual1_logger.cpp)
+target_link_libraries(qual1_logger ${catkin_LIBRARIES})
 
 ##########################
 ## Qualification task 2 ##
