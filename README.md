@@ -121,11 +121,11 @@ Create catkin workspace. If you already have one, move to the [next](#test-your-
     cd ~/indigo_ws
     catkin_make
 ```
-Clone the git repository    
+Clone the git repositories    
 ```bash
     git clone https://gitlab.com/whrl/space_robotics_challenge.git ~/indigo_ws/src/space_robotics_challenge
+    git clone https://github.com/ninja777/humanoid_navigation.git ~/indigo_ws/src/humanoid_navigation
 ```
-@TODO: Create a script that would download and configure the environment
 
 After the code is downloaded, run catkin_make.  
 ```bash
