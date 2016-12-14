@@ -88,7 +88,7 @@ int main(int argc, char** argv)
                 // pelvis back to normal state
                 pelvisTraj.controlPelvisHeight(1);
                 z=0;
-                state = ALGIN_TO_DOOR;
+                state = EXIT; //ALGIN_TO_DOOR;
             }
             break;
 

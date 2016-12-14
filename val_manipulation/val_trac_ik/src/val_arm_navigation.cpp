@@ -40,7 +40,7 @@ void armTrajectory::buttonPressArm(armSide side)
     arm_traj.joint_trajectory_messages.clear();
 
     float BUTTON_PRESS_PREPARE [] ={1.57, -0.1, -1.6, 1.55, 0.0, 0.0, 0.0};
-    float BUTTON_PRESS_ACT [] ={1.57, -0.4, -1.6, 1.1, 0.0, 0.0, 0.0};
+    float BUTTON_PRESS_ACT [] ={1.57, -0.2, -1.6, 1.45, 0.0, 0.0, 0.2};
 
     arm_traj.joint_trajectory_messages.resize(7);
     arm_traj.robot_side = side;
@@ -64,7 +64,7 @@ void armTrajectory::walkPoseArm(armSide side)
     arm_traj.robot_side = side;
     arm_traj.unique_id = -2;
 
-    arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_PREPARE);
+    //arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_PREPARE);
     arm_traj = appendTrajectoryPoint(arm_traj, 3, RETRACT_TO_ACTUAL);
 
     armTrajectoryPublisher.publish(arm_traj);

@@ -21,6 +21,7 @@
 #include <gazebo/physics/Joint.hh>
 #include <gazebo/physics/Model.hh>
 #include <sdf/sdf.hh>
+#include <ros/ros.h>
 
 #include "srcsim/Qual2Plugin.hh"
 
@@ -104,10 +105,11 @@ void Qual2Plugin::OnUpdate()
     return;
 
   int percentagePressed =
-    (1 - ((this->buttonJoint->GetAngle(0).Radian() - this->lowerLimit) /
-      this->range)) * 100;
+    ((this->buttonJoint->GetAngle(0).Radian() - this->lowerLimit) /
+      this->range) * 100;
 
   this->pressed = percentagePressed >= this->kPercentageButtonPressed;
+  ROS_INFO("pressed %d, Percentage %d",this->pressed,percentagePressed);
 
   // Trigger the opening of the door.
   if (this->pressed)
