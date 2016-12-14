@@ -74,7 +74,7 @@ int main(int argc, char** argv)
                 ROS_INFO("retract hand");
                 armtraj.walkPoseArm(RIGHT);
                 z = 0;
-                state = EXIT; //RETRACT_PELVIS;
+                state = RETRACT_PELVIS;
             }
 
             break;
