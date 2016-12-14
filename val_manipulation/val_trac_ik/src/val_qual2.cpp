@@ -69,12 +69,12 @@ int main(int argc, char** argv)
         {
             z++;
 
-            if(z >50)
+            if(z >30)
             {
                 ROS_INFO("retract hand");
                 armtraj.walkPoseArm(RIGHT);
                 z = 0;
-                state = RETRACT_PELVIS;
+                state = EXIT; //RETRACT_PELVIS;
             }
 
             break;
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
                 // pelvis back to normal state
                 pelvisTraj.controlPelvisHeight(1);
                 z=0;
-                state = EXIT; //ALGIN_TO_DOOR;
+                state = ALGIN_TO_DOOR;
             }
             break;
 

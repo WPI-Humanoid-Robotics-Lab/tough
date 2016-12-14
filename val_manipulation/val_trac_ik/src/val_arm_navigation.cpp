@@ -40,14 +40,14 @@ void armTrajectory::buttonPressArm(armSide side)
     arm_traj.joint_trajectory_messages.clear();
 
     float BUTTON_PRESS_PREPARE [] ={1.57, -0.1, -1.6, 1.55, 0.0, 0.0, 0.0};
-    float BUTTON_PRESS_ACT [] ={1.57, -0.2, -1.6, 1.45, 0.0, 0.0, 0.2};
+    float BUTTON_PRESS_ACT [] ={1.57, -0.3, -1.6, 1.4, 0.0, 0.0, 0.2};
 
     arm_traj.joint_trajectory_messages.resize(7);
     arm_traj.robot_side = side;
     arm_traj.unique_id = -1;
 
     arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_PREPARE);
-    arm_traj = appendTrajectoryPoint(arm_traj, 3, BUTTON_PRESS_ACT);
+    arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_ACT);
 
     armTrajectoryPublisher.publish(arm_traj);
 }
@@ -57,14 +57,12 @@ void armTrajectory::walkPoseArm(armSide side)
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
 
-    float BUTTON_PRESS_PREPARE [] ={1.57, -0.1, -1.6, 1.55, 0.0, 0.0, 0.0};
     float RETRACT_TO_ACTUAL [] ={-0.2, 1.2, 0.7222, 1.5101, 0.0, 0.0, 0.0};
 
     arm_traj.joint_trajectory_messages.resize(7);
     arm_traj.robot_side = side;
     arm_traj.unique_id = -2;
 
-    //arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_PREPARE);
     arm_traj = appendTrajectoryPoint(arm_traj, 3, RETRACT_TO_ACTUAL);
 
     armTrajectoryPublisher.publish(arm_traj);
