@@ -109,7 +109,6 @@ void Qual2Plugin::OnUpdate()
       this->range) * 100;
 
   this->pressed = percentagePressed >= this->kPercentageButtonPressed;
-  ROS_INFO("pressed %d, Percentage %d",this->pressed,percentagePressed);
 
   // Trigger the opening of the door.
   if (this->pressed)
