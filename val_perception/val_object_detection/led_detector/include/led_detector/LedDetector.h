@@ -12,6 +12,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <std_msgs/Int32MultiArray.h>
+#include "srcsim/Console.h"
 
 
 /**
@@ -108,8 +109,10 @@ namespace src_qual1_task
             /**
              * @brief m_imageRGBpub - Publisher that publishes xyz and rgb data to topic "/detect/light/rgbxyz"
              */
-            ros::Publisher                          m_imageRGBXYZpub;
+            ros::Publisher m_imageRGBXYZpub;
+            ros::Publisher m_lightPub;
 
+            bool m_lightToggle = false;
             /**
              * @brief m_gradientContours - 
              */
@@ -120,6 +123,11 @@ namespace src_qual1_task
              * @brief m_randomGen
              */
             cv::RNG m_randomGen;
+
+
+            const int m_readingThreshold = 5;
+
+            std::vector<srcsim::Console> m_readings;
       
     };
 }
