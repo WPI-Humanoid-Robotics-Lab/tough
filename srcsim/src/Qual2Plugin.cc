@@ -86,14 +86,14 @@ bool Qual2Plugin::Pressed() const
 void Qual2Plugin::OpenTheDoor()
 {
   // Apply force on the hinge to open the door.
-  this->hingeJoint->SetForce(0, 10.0);
+  this->hingeJoint->SetForce(0, 400.0);
 }
 
 ////////////////////////////////////////////////
 void Qual2Plugin::CloseTheDoor()
 {
   // Apply force on the hinge to close the door.
-  this->hingeJoint->SetForce(0, -10.0);
+  this->hingeJoint->SetForce(0, -400.0);
 }
 
 

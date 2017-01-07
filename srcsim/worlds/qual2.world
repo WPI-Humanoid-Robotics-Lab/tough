@@ -50,15 +50,15 @@
     </include>
 
     <!-- A doorway -->
-    <model name="src_doorway">
+    <model name="src_doorway_q2">
       <pose>3.5 0 0 0 0 1.5708</pose>
       <include>
-        <uri>model://src_doorway</uri>
+        <uri>model://src_doorway_q2</uri>
       </include>
 
       <plugin name="door_plugin" filename="libQual2Plugin.so">
-        <hinge_joint_name>src_doorway::hinge</hinge_joint_name>
-        <button_joint_name>src_doorway::button_mechanism</button_joint_name>
+        <hinge_joint_name>src_doorway_q2::hinge</hinge_joint_name>
+        <button_joint_name>src_doorway_q2::button_mechanism</button_joint_name>
       </plugin>
     </model>
   </world>

@@ -1,22 +1,28 @@
 #!/bin/bash
 
-echo "wait 60s for system to load"
-sleep 60
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-echo "lower harness"
+echo -e "\e[32mINIT:\e[0m Wait 15s (ROS time) for system to load"
+python $DIR/rossleep.py 15
+
+echo -e "\e[32mINIT:\e[0m Lower harness"
 rostopic pub -1 /valkyrie/harness/velocity std_msgs/Float32 '{data: -0.05}'
 
-echo "switch to high level control after 20 seconds"
-sleep 20
+echo -e "\e[32mINIT:\e[0m Wait 5s (ROS time) to be lowered"
+python $DIR/rossleep.py 5
+
+echo -e "\e[32mINIT:\e[0m Switch to high level control"
 rostopic pub -1 /ihmc_ros/valkyrie/control/low_level_control_mode ihmc_valkyrie_ros/ValkyrieLowLevelControlModeRosMessage '{requested_control_mode: 2, unique_id: -1}'
 
-echo "detach in 5 seconds"
-sleep 5
+echo -e "\e[32mINIT:\e[0m Wait 2s (ROS time) for control to be switched"
+python $DIR/rossleep.py 2
+
+echo -e "\e[32mINIT:\e[0m Detach from harness"
 rostopic pub -1 /valkyrie/harness/detach std_msgs/Bool true &
 
 if [ $1 = "true" ]; then
-  echo "start walking"
+  echo -e "\e[32mINIT:\e[0m Start walking"
   rosrun srcsim walk_test.py
 fi
 
-echo "done"
+echo -e "\e[32mINIT:\e[0m Done"

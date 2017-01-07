@@ -88,9 +88,9 @@ void Qual1Plugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
 
   this->rosnode.reset(new ros::NodeHandle(robotNamespace));
 
-  this->lightSub = this->rosnode->subscribe("/srcsim/qual1/start", 10,
+  this->startSub = this->rosnode->subscribe("/srcsim/qual1/start", 10,
       &Qual1Plugin::OnStart, this);
-  this->startSub = this->rosnode->subscribe("/srcsim/qual1/light", 10,
+  this->lightSub = this->rosnode->subscribe("/srcsim/qual1/light", 10,
       &Qual1Plugin::OnLight, this);
   this->lightPub = this->rosnode->advertise<srcsim_msgs::groundTruth>("/srcsim/qual1/groundTruth", 10);
 
