@@ -112,7 +112,6 @@ namespace src_qual1_task
             ros::Publisher m_imageRGBXYZpub;
             ros::Publisher m_lightPub;
 
-            bool m_lightToggle = false;
             /**
              * @brief m_gradientContours - 
              */
