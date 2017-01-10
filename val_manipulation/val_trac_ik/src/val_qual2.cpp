@@ -6,11 +6,11 @@
 enum sm {
     WALK_TO_DOOR = 0,
     LOWER_PELVIS,
+    PREPARE_PRESS_BUTTON,
     PRESS_BUTTON,
     RETRACT_POSE_TO_WALK,
     RETRACT_PELVIS,
     WALK_THROUGH_DOOR,
-    ALGIN_TO_DOOR,
     EXIT
 };
 
@@ -25,9 +25,10 @@ int main(int argc, char** argv)
 
     armTrajectory armtraj(nh);
     pelvisTrajectory pelvisTraj(nh);
-    ValkyrieWalker walk(nh, 1.1, 1.1, 0);
+    // play with these time later
+    ValkyrieWalker walk(nh, 0.6, 0.6);
 
-    sm state = WALK_TO_DOOR;
+    sm state = PREPARE_PRESS_BUTTON;
 
     while(ros::ok())
     {
@@ -36,90 +37,79 @@ int main(int argc, char** argv)
 
         switch (state)
         {
+        case PREPARE_PRESS_BUTTON:
+        {
+            ROS_INFO("preparing the arm to press the button");
+            armtraj.buttonPressPrepareArm(RIGHT);
+            walk.WalkNStepsForward(1,0.35,-0.18,false,RIGHT);
+            state = WALK_TO_DOOR;
+
+            break;
+        }
         case WALK_TO_DOOR:
         {
             ROS_INFO("walking to the door");
-            walk.WalkNStepsForward(6,0.475,-0.03);
+            walk.WalkNStepsForward(5,0.51,0);
             state = LOWER_PELVIS;
             break;
         }
         case LOWER_PELVIS:
         {
+
             ROS_INFO("lower pelvis");
             // lower the pelvis
             pelvisTraj.controlPelvisHeight(0.87);
             state = PRESS_BUTTON;
+
             break;
         }
         case PRESS_BUTTON:
         {
-            z++;
-
-            if(z >10)
-            {
-                ROS_INFO("pressing the button");
-                armtraj.buttonPressArm(RIGHT);
-                z = 0;
-                state = RETRACT_POSE_TO_WALK;
-            }
+            ROS_INFO("pressing the button");
+            armtraj.buttonPressArm(RIGHT);
+            //the above trajectory takes 1 sec
+            ros::Duration(1).sleep();
+            state = RETRACT_POSE_TO_WALK;
 
             break;
         }
         case RETRACT_POSE_TO_WALK:
         {
-            z++;
-
-            if(z >30)
-            {
-                ROS_INFO("retract hand");
-                armtraj.walkPoseArm(RIGHT);
-                z = 0;
-                state = RETRACT_PELVIS;
-            }
+            ROS_INFO("retract hand");
+            armtraj.walkPoseArm(RIGHT);
+            //the above trajectory takes 1 sec
+            ros::Duration(1).sleep();
+            state = RETRACT_PELVIS;
 
             break;
         }
         case RETRACT_PELVIS:
         {
-            z++;
-            if(z >15)
-            {
-                ROS_INFO("retract pelvis to normal height");
-                // pelvis back to normal state
-                pelvisTraj.controlPelvisHeight(1);
-                z=0;
-                state = ALGIN_TO_DOOR;
-            }
-            break;
-
-        }
-        case ALGIN_TO_DOOR:
-        {
-            z++;
-            if(z >10)
-            {
-                ROS_INFO("algining to door");
-                walk.WalkNStepsForward(1,0,0.19);
-                z=0;
-                state = WALK_THROUGH_DOOR;
-            }
+            ROS_INFO("retract pelvis to normal height");
+            pelvisTraj.controlPelvisHeight(1);
+            state = WALK_THROUGH_DOOR;
 
             break;
+
         }
         case WALK_THROUGH_DOOR:
         {
-            z++;
-            if(z > 45)
-            {
-                ROS_INFO("walk through the door");
-                walk.WalkNStepsForward(4,0.475,0);
-                z=0;
-                state = EXIT;
-            }
+            ROS_INFO("algining and walking through to door");
+            // create a list of these steps
+            walk.setWalkParms(0.65,0.65, 0);
+            walk.WalkNStepsForward(1, 0, 0.19, true, LEFT);
+            walk.WalkNStepsForward(1, 0.5, 0.19, true, RIGHT);
+            walk.WalkNStepsForward(1, 1, 0, true, LEFT);
+            walk.WalkNStepsForward(1, 1, 0, true, RIGHT);
+            walk.WalkNStepsForward(1, 1, 0, true, LEFT);
+            walk.WalkNStepsForward(1, 1, 0, false, RIGHT);
+            state = EXIT;
+
             break;
         }
+
         default:
-        EXIT:
+EXIT:
 
             break;
         }

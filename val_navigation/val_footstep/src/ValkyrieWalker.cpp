@@ -49,7 +49,7 @@ bool ValkyrieWalker::WalkToGoal( geometry_msgs::Pose2D &goal)
 }
 
 // creates and n footsteps of width step_size
-bool ValkyrieWalker::WalkNStepsForward(int n, float x_offset, float y_offset, bool continous)
+bool ValkyrieWalker::WalkNStepsForward(int n, float x_offset, float y_offset, bool continous, armSide startLeg)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.transfer_time = transfer_time;
@@ -61,16 +61,16 @@ bool ValkyrieWalker::WalkNStepsForward(int n, float x_offset, float y_offset, bo
     for (int m =1; m <= n ; m++)
     {
         if(m%2 == 1)
-            list.footstep_data_list.push_back(*getOffsetStep(LEFT , m*x_offset, m*y_offset));
+            list.footstep_data_list.push_back(*getOffsetStep(startLeg , m*x_offset, m*y_offset));
         else
-            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , m*x_offset, m*y_offset));
+            list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2 , m*x_offset, m*y_offset));
     }
 
     if(!continous){
         if (n%2 ==1)
-            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , n*x_offset, n*y_offset));
+            list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2  , n*x_offset, n*y_offset));
         if (n%2 ==0)
-            list.footstep_data_list.push_back(*getOffsetStep(LEFT , n*x_offset, n*y_offset));
+            list.footstep_data_list.push_back(*getOffsetStep(startLeg , n*x_offset, n*y_offset));
     }
 
     /*
@@ -287,11 +287,14 @@ ihmc_msgs::FootstepDataRosMessage* ValkyrieWalker::getOffsetStep(int side , floa
 // wait till all the steps are taken
 void ValkyrieWalker::waitForSteps(int n)
 {
-    while (step_counter <n && ros::ok())
+    while (step_counter < n && ros::ok())
     {
         ros::spinOnce();
         ros::Duration(0.1).sleep();
     }
+
+    // reset back the counter
+    step_counter = 0;
     return;
 }
 

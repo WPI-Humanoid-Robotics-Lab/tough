@@ -32,7 +32,7 @@ public:
     bool WalkToGoal( geometry_msgs::Pose2D &goal);
 
     /// \todo implement this function
-    bool WalkNStepsForward(int n, float x_offset = 0.4, float y_offset=0.0, bool continous = false);
+    bool WalkNStepsForward(int n, float x_offset = 0.4, float y_offset=0.0, bool continous = false, armSide startLeg = LEFT);
 
     /// \todo implement this function
     bool WalkNStepsBackward(int n, float x_offset = 0.4, float y_offset=0.0, bool continous = false);
