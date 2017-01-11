@@ -25,9 +25,10 @@ int main(int argc, char** argv)
 
     armTrajectory armtraj(nh);
     pelvisTrajectory pelvisTraj(nh);
-    // play with these time later
-    ValkyrieWalker walk(nh, 0.5, 0.5);
-    walk.setSwing_height(0.1);
+
+    // optimum values for walking
+    ValkyrieWalker walk(nh, 0.47, 0.47);
+    walk.setSwing_height(0.15);
 
     sm state = PREPARE_START;
 
@@ -37,11 +38,11 @@ int main(int argc, char** argv)
         {
         case PREPARE_START:
         {
-            ROS_INFO("preparing Robot");
-            ROS_INFO("get the pelvis up");
-            pelvisTraj.controlPelvisHeight(1.07);
+            //ROS_INFO("preparing Robot");
+            //ROS_INFO("get the pelvis up");
+            pelvisTraj.controlPelvisHeight(1.06);
             ros::Duration(0.5).sleep();
-            ROS_INFO("prepare arm and walk to start");
+            //ROS_INFO("prepare arm and walk to start");
             armtraj.buttonPressPrepareArm(RIGHT);
             walk.WalkNStepsForward(1,0.35,0,false,RIGHT);
 
@@ -51,7 +52,7 @@ int main(int argc, char** argv)
         }
         case WALK_TO_DOOR:
         {
-            ROS_INFO("walking to the door");
+            //ROS_INFO("walking to the door");
             walk.WalkNStepsForward(5,0.51,0, false, RIGHT);
 
             state = PRESS_BUTTON_RETRACT;
@@ -59,11 +60,11 @@ int main(int argc, char** argv)
         }
         case PRESS_BUTTON_RETRACT:
         {
-            ROS_INFO("Press button and retract");
-            ROS_INFO("press button");
+            //ROS_INFO("Press button and retract");
+            //ROS_INFO("press button");
             OrientChest(0,0,3.5,pub);
             ros::Duration(0.5).sleep();
-            ROS_INFO("retract arm");
+            //ROS_INFO("retract arm");
             armtraj.walkPoseArm(RIGHT);
             OrientChest(0,0,0,pub);
 
@@ -73,7 +74,7 @@ int main(int argc, char** argv)
         }
         case WALK_THROUGH_DOOR:
         {
-            ROS_INFO("walking through to door");
+            //ROS_INFO("walking through to door");
 
             walk.WalkNStepsForward(4,0.5,0);
             state = EXIT;
@@ -105,7 +106,7 @@ bool OrientChest(float roll, float pitch, float yaw, ros::Publisher pub){
     vel.x= 0.3;
     vel.y = 0.3;
     vel.z = 0.3;
-    ROS_INFO("Executing chest trajectory");
+    //ROS_INFO("Executing chest trajectory");
     geometry_msgs::Quaternion angles2;
     angles2.x = angles.getX();
     angles2.y = angles.getY();
