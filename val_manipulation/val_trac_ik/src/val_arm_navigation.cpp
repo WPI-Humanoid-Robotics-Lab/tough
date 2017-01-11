@@ -39,7 +39,7 @@ void armTrajectory::buttonPressPrepareArm(armSide side)
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
 
-    float BUTTON_PRESS_PREPARE [] ={1.57, -0.1, -1.6, 1.55, 0.0, 0.0, 0.0};
+    float BUTTON_PRESS_PREPARE [] = {0.0, 0.25, 0.2, 1.1, 0.0, 0.0, 0.0};
     arm_traj.joint_trajectory_messages.resize(7);
     arm_traj.robot_side = side;
     arm_traj.unique_id = -1;

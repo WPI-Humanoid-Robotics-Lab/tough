@@ -25,7 +25,7 @@ class ValkyrieWalker
 {
 
 public:
-    ValkyrieWalker(ros::NodeHandle nh, double InTransferTime = 1.5,double InSwingTime =1.5 , int InMode = 0);
+    ValkyrieWalker(ros::NodeHandle nh, double InTransferTime = 1.5,double InSwingTime =1.5 , int InMode = 0, double swingHeight = 0.2);
     ~ValkyrieWalker();
 
     /// \todo implement this function
@@ -41,6 +41,9 @@ public:
     void setWalkParms(float transfer_time, float swing_time, int mode);
 
 
+    double getSwing_height() const;
+    void setSwing_height(double value);
+
 private:
     ros::NodeHandle n;
     ros::ServiceClient footstep_client ;
@@ -49,7 +52,7 @@ private:
     int step_counter;
     tf2_ros::Buffer tfBuffer;
     tf2_ros::TransformListener* tf_listener;
-    double transfer_time,swing_time;
+    double transfer_time,swing_time, swing_height;
     int exe_mode;
     static int id ;
 

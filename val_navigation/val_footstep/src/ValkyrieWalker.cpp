@@ -205,10 +205,20 @@ void ValkyrieWalker::setWalkParms(float InTransferTime,float InSwingTime, int In
     this->swing_time = InSwingTime;
     this->exe_mode = InMode;
 }
+double ValkyrieWalker::getSwing_height() const
+{
+    return swing_height;
+}
+
+void ValkyrieWalker::setSwing_height(double value)
+{
+    swing_height = value;
+}
+
 
 // constructor
 
-ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double InSwingTime, int InMode):n(nh)
+ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double InSwingTime, int InMode, double swingHeight):n(nh)
 {
     this->footstep_client = n.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("plan_footsteps");
     this->footsteps_to_val = n.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/valkyrie/control/footstep_list",1,true);
@@ -217,6 +227,7 @@ ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double 
     transfer_time = InTransferTime;
     swing_time = InSwingTime;
     exe_mode = InMode;
+    swing_height = swingHeight;
 
     tf_listener = new tf2_ros::TransformListener(this->tfBuffer);
 
@@ -280,7 +291,7 @@ ihmc_msgs::FootstepDataRosMessage* ValkyrieWalker::getOffsetStep(int side , floa
     this->getCurrentStep(side, *next);
     next->location.x+=x;
     next->location.y+=y;
-
+    next->swing_height = swing_height;
     return next;
 
 }
