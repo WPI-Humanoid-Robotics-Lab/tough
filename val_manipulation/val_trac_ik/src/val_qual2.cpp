@@ -7,8 +7,8 @@
 
 enum sm {
     WALK_TO_DOOR = 0,
-    PREPARE_PRESS_BUTTON,
-    RETRACT_POSE_TO_WALK,
+    PREPARE_START,
+    PRESS_BUTTON_RETRACT,
     WALK_THROUGH_DOOR,
     EXIT
 };
@@ -29,17 +29,19 @@ int main(int argc, char** argv)
     ValkyrieWalker walk(nh, 0.5, 0.5);
     walk.setSwing_height(0.1);
 
-    sm state = PREPARE_PRESS_BUTTON;
+    sm state = PREPARE_START;
 
     while(ros::ok())
     {
         switch (state)
         {
-        case PREPARE_PRESS_BUTTON:
+        case PREPARE_START:
         {
-            ROS_INFO("preparing the arm to press the button");
+            ROS_INFO("preparing Robot");
+            ROS_INFO("get the pelvis up");
             pelvisTraj.controlPelvisHeight(1.07);
             ros::Duration(0.5).sleep();
+            ROS_INFO("prepare arm and walk to start");
             armtraj.buttonPressPrepareArm(RIGHT);
             walk.WalkNStepsForward(1,0.35,0,false,RIGHT);
 
@@ -49,19 +51,22 @@ int main(int argc, char** argv)
         }
         case WALK_TO_DOOR:
         {
-            ROS_INFO("walking to the door and lower the pelvis");
+            ROS_INFO("walking to the door");
             walk.WalkNStepsForward(5,0.51,0, false, RIGHT);
 
-            state = RETRACT_POSE_TO_WALK;
+            state = PRESS_BUTTON_RETRACT;
             break;
         }
-        case RETRACT_POSE_TO_WALK:
+        case PRESS_BUTTON_RETRACT:
         {
-            ROS_INFO("retract hand and pelvis");
+            ROS_INFO("Press button and retract");
+            ROS_INFO("press button");
             OrientChest(0,0,3.5,pub);
             ros::Duration(0.5).sleep();
+            ROS_INFO("retract arm");
             armtraj.walkPoseArm(RIGHT);
             OrientChest(0,0,0,pub);
+
             state = WALK_THROUGH_DOOR;
 
             break;
