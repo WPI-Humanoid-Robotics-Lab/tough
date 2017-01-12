@@ -38,11 +38,18 @@ public:
     bool WalkNStepsBackward(int n, float x_offset = 0.4, float y_offset=0.0, bool continous = false);
 
     bool WalkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list );
-    void setWalkParms(float transfer_time, float swing_time, int mode);
-
+    inline void setWalkParms(float InTransferTime,float InSwingTime, int InMode)
+    {
+        this->transfer_time = InTransferTime;
+        this->swing_time = InSwingTime;
+        this->exe_mode = InMode;
+    }
 
     double getSwing_height() const;
-    void setSwing_height(double value);
+    inline void setSwing_height(double value)
+    {
+        swing_height = value;
+    }
 
 private:
     ros::NodeHandle n;

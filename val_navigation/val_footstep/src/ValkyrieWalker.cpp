@@ -15,7 +15,7 @@ void ValkyrieWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage 
     if(msg.status == 1)
     {
         step_counter++;
-        ROS_INFO("step counter : %d",step_counter);
+//        ROS_INFO("step counter : %d",step_counter);
 
     }
 
@@ -151,7 +151,7 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
     start.x = startstep->location.x ;
     start.y = startstep->location.y - 0.12;
-    std::cout<< "Start Position  x = " << start.x << "  y = " << start.y<<std::endl;
+//    std::cout<< "Start Position  x = " << start.x << "  y = " << start.y<<std::endl;
 
     start.theta = tf::getYaw(startstep->orientation);
 
@@ -183,9 +183,9 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
 
             tf::Quaternion t = tf::createQuaternionFromYaw(srv.response.footsteps.at(i).pose.theta);
-            ROS_INFO("Step x  %d %.2f", i, srv.response.footsteps.at(i).pose.x);
-            ROS_INFO("Step y  %d %.2f", i, srv.response.footsteps.at(i).pose.y);
-            ROS_INFO("Side  %d %d",i, int(side));
+//            ROS_DEBUG("Step x  %d %.2f", i, srv.response.footsteps.at(i).pose.x);
+//            ROS_DEBUG("Step y  %d %.2f", i, srv.response.footsteps.at(i).pose.y);
+//            ROS_DEBUG("Side  %d %d",i, int(side));
 
             step->orientation.w = t.w();
             step->orientation.x = t.x();
@@ -199,21 +199,13 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
     return false;
 }
-void ValkyrieWalker::setWalkParms(float InTransferTime,float InSwingTime, int InMode)
-{
-    this->transfer_time = InTransferTime;
-    this->swing_time = InSwingTime;
-    this->exe_mode = InMode;
-}
+
 double ValkyrieWalker::getSwing_height() const
 {
     return swing_height;
 }
 
-void ValkyrieWalker::setSwing_height(double value)
-{
-    swing_height = value;
-}
+
 
 
 // constructor

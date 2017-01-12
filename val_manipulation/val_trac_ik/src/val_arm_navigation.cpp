@@ -36,48 +36,79 @@ ihmc_msgs::ArmTrajectoryRosMessage armTrajectory::appendTrajectoryPoint(ihmc_msg
 
 void armTrajectory::buttonPressPrepareArm(armSide side)
 {
-    ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
-    arm_traj.joint_trajectory_messages.clear();
+    ihmc_msgs::ArmTrajectoryRosMessage arm_traj_r;
+    ihmc_msgs::ArmTrajectoryRosMessage arm_traj_l;
+    arm_traj_r.joint_trajectory_messages.clear();
+    arm_traj_l.joint_trajectory_messages.clear();
 
-    float BUTTON_PRESS_PREPARE [] = {0.0, 0.25, 0.2, 1.1, 0.0, 0.0, 0.0};
-    arm_traj.joint_trajectory_messages.resize(7);
-    arm_traj.robot_side = side;
-    arm_traj.unique_id = -1;
+    float BUTTON_PRESS_PREPARE_R [] = {0.0, 0.25, 0.2, 1.1, 0.0, 0.0, 0.0};
+    float BUTTON_PRESS_PREPARE_L [] = {0.0, -0.25, -0.2, -1.1, 0.0, 0.0, 0.0};
 
-    arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_PREPARE);
+    arm_traj_r.joint_trajectory_messages.resize(7);
+    arm_traj_r.robot_side = RIGHT;
+    arm_traj_r.unique_id = -11;
 
-    armTrajectoryPublisher.publish(arm_traj);
+    arm_traj_l.joint_trajectory_messages.resize(7);
+    arm_traj_l.robot_side = LEFT;
+    arm_traj_l.unique_id = -21;
+
+    arm_traj_r = appendTrajectoryPoint(arm_traj_r, 2, BUTTON_PRESS_PREPARE_R);
+    arm_traj_l = appendTrajectoryPoint(arm_traj_l, 2, BUTTON_PRESS_PREPARE_L);
+
+
+    armTrajectoryPublisher.publish(arm_traj_r);
+    ros::Duration(0.01).sleep();
+    armTrajectoryPublisher.publish(arm_traj_l);
 }
 
 void armTrajectory::buttonPressArm(armSide side)
 {
-    ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
-    arm_traj.joint_trajectory_messages.clear();
+    ihmc_msgs::ArmTrajectoryRosMessage arm_traj_r;
+    ihmc_msgs::ArmTrajectoryRosMessage arm_traj_l;
+    arm_traj_r.joint_trajectory_messages.clear();
+    arm_traj_l.joint_trajectory_messages.clear();
 
-    float BUTTON_PRESS_ACT [] ={1.57, -0.3, -1.6, 1.3, 0.0, 0.0, 0.0};
+    float BUTTON_PRESS_ACT_R [] ={1.57, -0.3, -1.6, 1.3, 0.0, 0.0, 0.0};
+    float BUTTON_PRESS_ACT_L [] ={-1.57, 0.3, 1.6, -1.3, 0.0, 0.0, 0.0};
 
-    arm_traj.joint_trajectory_messages.resize(7);
-    arm_traj.robot_side = side;
-    arm_traj.unique_id = -1;
-    arm_traj = appendTrajectoryPoint(arm_traj, 1, BUTTON_PRESS_ACT);
+    arm_traj_r.joint_trajectory_messages.resize(7);
+    arm_traj_r.robot_side = RIGHT;
+    arm_traj_r.unique_id = -1;
+    arm_traj_r = appendTrajectoryPoint(arm_traj_r, 1, BUTTON_PRESS_ACT_R);
 
-    armTrajectoryPublisher.publish(arm_traj);
+    arm_traj_l.joint_trajectory_messages.resize(7);
+    arm_traj_l.robot_side = LEFT;
+    arm_traj_l.unique_id = -2;
+    arm_traj_l = appendTrajectoryPoint(arm_traj_l, 1, BUTTON_PRESS_ACT_L);
+
+    armTrajectoryPublisher.publish(arm_traj_r);
+    armTrajectoryPublisher.publish(arm_traj_l);
 }
 
 void armTrajectory::walkPoseArm(armSide side)
 {
-    ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
-    arm_traj.joint_trajectory_messages.clear();
+    ihmc_msgs::ArmTrajectoryRosMessage arm_traj_r;
+    ihmc_msgs::ArmTrajectoryRosMessage arm_traj_l;
+    arm_traj_r.joint_trajectory_messages.clear();
+    arm_traj_l.joint_trajectory_messages.clear();
 
-    float RETRACT_TO_ACTUAL [] ={-0.2, 1.2, 0.7222, 1.5101, 0.0, 0.0, 0.0};
+    float RETRACT_TO_ACTUAL_R [] ={0.0, 1.2, 1.2, 0.4, 0.0, 0.0, 0.0}; //{-0.2, 1.2, 0.7222, 1.5101, 0.0, 0.0, 0.0};
+    float RETRACT_TO_ACTUAL_L [] ={0.0, -1.2, 1.2, -0.4, 0.0, 0.0, 0.0};
 
-    arm_traj.joint_trajectory_messages.resize(7);
-    arm_traj.robot_side = side;
-    arm_traj.unique_id = -2;
+    arm_traj_r.joint_trajectory_messages.resize(7);
+    arm_traj_r.robot_side = RIGHT;
+    arm_traj_r.unique_id = -5;
+    arm_traj_r = appendTrajectoryPoint(arm_traj_r, 1, RETRACT_TO_ACTUAL_R);
 
-    arm_traj = appendTrajectoryPoint(arm_traj, 1, RETRACT_TO_ACTUAL);
+    arm_traj_l.joint_trajectory_messages.resize(7);
+    arm_traj_l.robot_side = LEFT;
+    arm_traj_l.unique_id = -6;
+    arm_traj_l = appendTrajectoryPoint(arm_traj_l, 1, RETRACT_TO_ACTUAL_L);
 
-    armTrajectoryPublisher.publish(arm_traj);
+
+    armTrajectoryPublisher.publish(arm_traj_r);
+    ros::Duration(0.01).sleep();
+    armTrajectoryPublisher.publish(arm_traj_l);
 }
 
 void armTrajectory::zeroPoseArm(armSide side)

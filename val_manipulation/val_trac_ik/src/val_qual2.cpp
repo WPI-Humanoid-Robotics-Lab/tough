@@ -27,7 +27,7 @@ int main(int argc, char** argv)
     pelvisTrajectory pelvisTraj(nh);
 
     // optimum values for walking
-    ValkyrieWalker walk(nh, 0.47, 0.47);
+    ValkyrieWalker walk(nh, 0.305, 0.44);
     walk.setSwing_height(0.15);
 
     sm state = PREPARE_START;
@@ -38,44 +38,21 @@ int main(int argc, char** argv)
         {
         case PREPARE_START:
         {
-            //ROS_INFO("preparing Robot");
-            //ROS_INFO("get the pelvis up");
             pelvisTraj.controlPelvisHeight(1.06);
-            ros::Duration(0.5).sleep();
-            //ROS_INFO("prepare arm and walk to start");
-            armtraj.buttonPressPrepareArm(RIGHT);
             walk.WalkNStepsForward(1,0.35,0,false,RIGHT);
-
+            ros::Duration(0.5).sleep();
+            armtraj.buttonPressPrepareArm(RIGHT);
             state = WALK_TO_DOOR;
 
             break;
         }
         case WALK_TO_DOOR:
         {
-            //ROS_INFO("walking to the door");
             walk.WalkNStepsForward(5,0.51,0, false, RIGHT);
-
-            state = PRESS_BUTTON_RETRACT;
-            break;
-        }
-        case PRESS_BUTTON_RETRACT:
-        {
-            //ROS_INFO("Press button and retract");
-            //ROS_INFO("press button");
             OrientChest(0,0,3.5,pub);
-            ros::Duration(0.5).sleep();
-            //ROS_INFO("retract arm");
+            ros::Duration(0.27).sleep();
             armtraj.walkPoseArm(RIGHT);
-            OrientChest(0,0,0,pub);
-
-            state = WALK_THROUGH_DOOR;
-
-            break;
-        }
-        case WALK_THROUGH_DOOR:
-        {
-            //ROS_INFO("walking through to door");
-
+            walk.setWalkParms(0.31, 0.455, 0);
             walk.WalkNStepsForward(4,0.5,0);
             state = EXIT;
 
@@ -106,7 +83,6 @@ bool OrientChest(float roll, float pitch, float yaw, ros::Publisher pub){
     vel.x= 0.3;
     vel.y = 0.3;
     vel.z = 0.3;
-    //ROS_INFO("Executing chest trajectory");
     geometry_msgs::Quaternion angles2;
     angles2.x = angles.getX();
     angles2.y = angles.getY();
@@ -122,9 +98,6 @@ bool OrientChest(float roll, float pitch, float yaw, ros::Publisher pub){
     msg.execution_mode = 0;
     msg.unique_id = 13;
     msg.taskspace_trajectory_points = trajPointsVec;
-
-//    ros::Publisher pub = nh.advertise<ihmc_msgs::ChestTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/chest_trajectory", 1);
-
 
     pub.publish(msg);
 
