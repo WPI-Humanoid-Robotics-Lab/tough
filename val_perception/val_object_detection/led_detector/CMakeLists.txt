@@ -7,7 +7,7 @@ project(led_detector)
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
 
-
+set(KDSourcesList src/alglibinternal.cpp src/ap.cpp src/alglibmisc.cpp)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   cv_bridge
@@ -40,7 +40,7 @@ generate_messages(
 )
 
 catkin_package(
-  INCLUDE_DIRS include
+  INCLUDE_DIRS include 
   LIBRARIES led_detector
   CATKIN_DEPENDS cv_bridge image_transport pcl_conversions pcl_ros roscpp sensor_msgs std_msgs val_common perception_common message_runtime
   DEPENDS system_lib
@@ -57,7 +57,8 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(include)
+include_directories(include
+ src)
 include_directories(perception_common
    ${OpenCV_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
@@ -75,8 +76,8 @@ include_directories(perception_common
 # add_dependencies(led_detector ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(led_detector src/LedDetector.cpp)
-
+add_executable(led_detector src/LedDetector.cpp ${KDSourcesList})
+##add_executable(led_detector src/LedDetector.cpp src/alglibinternal.cpp src/ap.cpp src/alglibmisc.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above

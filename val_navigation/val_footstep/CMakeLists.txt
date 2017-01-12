@@ -80,7 +80,7 @@ add_executable(test_footstep src/test_footstep.cpp)
 add_dependencies(test_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_footstep  ${catkin_LIBRARIES})
 
-add_executable(walk_test src/walk_test.cpp )
+add_executable(walk_test src/walk_test.cpp)
 add_dependencies(walk_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(walk_test  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
