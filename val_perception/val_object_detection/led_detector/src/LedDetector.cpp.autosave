@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
     ros::init(argc, argv, "led_detection");
     ros::NodeHandle nh;
     src_qual1_task::LedDetector   led_detect(nh);
-    //ROS_INFO_STREAM(led_detect.m_qMatrix);
+    
     ros::Time start= ros::Time::now();
     while (ros::ok()) {
         bool success = led_detect.detectLight();

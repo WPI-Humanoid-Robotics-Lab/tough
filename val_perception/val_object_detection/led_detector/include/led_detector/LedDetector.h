@@ -92,7 +92,7 @@ namespace src_qual1_task
              */
             std::string m_leftCameraOpticalFrame = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
 
-           
+           //cv::Mat m_qMatrix;
 
             
         protected:

@@ -64,7 +64,7 @@ MultisenseImage::MultisenseImage(ros::NodeHandle &n):nh_(n),
         depth_cost_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_DEPTH_COST_TOPIC;
     }
     //hard coded values specific to simulation, later on can be made to be not hard coded.
-#ifdef GAZEBO_SIMULATION
+/*#ifdef GAZEBO_SIMULATION
     std::cout<<"Using DRCSIM dummy camera configs"<<std::endl;
     settings.Q_matrix_=cv::Mat_<double>(4,4,0.0);
     settings.Q_matrix_(0,0) =  610.1799470098168 * -0.07;
@@ -89,7 +89,31 @@ MultisenseImage::MultisenseImage(ros::NodeHandle &n):nh_(n),
  #endif
 
 }
+*/
+#ifdef GAZEBO_SIMULATION
+    std::cout<<"Using camera calibrated configs"<<std::endl;
+    settings.Q_matrix_=cv::Mat_<double>(4,4,0.0);
+    settings.Q_matrix_(0,0) =  617.605544794242 * -0.07021618373848477;
+    settings.Q_matrix_(1,1) =  617.605544794242 * -0.07021618373848477;
+    settings.Q_matrix_(0,3) = -617.605544794242 * 524.6608581542969 * -0.07021618373848477;
+    settings.Q_matrix_(1,3) = -617.605544794242 * 271.9484443664551 * -0.07021618373848477;
+    settings.Q_matrix_(2,3) =  617.605544794242 * 617.605544794242 * -0.07021618373848477;
+    settings.Q_matrix_(3,2) = -617.605544794242;
+    settings.Q_matrix_(3,3) =  0.0f;
 
+    settings.camera_=(cv::Mat_<float>(3,3)<< 608.9863806108127	,0.0		,510.8859421991814,
+    								0.0			,608.9863806108127	,272.367931603618,
+    								0.0			,0.0		,1.0);
+
+    settings.width_=1024;
+    settings.height_=544;
+    settings.fps_=30.0;
+    settings.exposure_=3233;
+    settings.gain_=0;
+    settings.baselength_=0.0700324326754;
+
+ #endif
+}
 void MultisenseImage::setDepthTopic(const std::string &topic)
 {
 	depth_topic_ = topic;
