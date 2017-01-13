@@ -43,6 +43,7 @@
 
 #include "perception_common/periodic_snapshotter.h"
 
+#include <pcl/kdtree/kdtree_flann.h>
 
 /***
  * This a simple test app that requests a point cloud from the
@@ -88,11 +89,56 @@ void PeriodicSnapshotter::timerCallback(const ros::TimerEvent& e)
     {
         ROS_DEBUG("Published Cloud with %u points", (uint32_t)(srv.response.cloud.data.size())) ;
         pub_.publish(srv.response.cloud);
+        //Store the generated pointcloud as a PCLPointcloud in a class variable
+        pcl::PCLPointCloud2 pcl_pc2;
+        pcl_conversions::toPCL(srv.response.cloud,pcl_pc2);
+        pcl::fromPCLPointCloud2(pcl_pc2,PeriodicSnapshotter::cloud_);
+
     }
     else
     {
         ROS_ERROR("Error making service call\n") ;
     }
+}
+
+geometry_msgs::Point PeriodicSnapshotter::getNearestPoint(geometry_msgs::Point &point, std::string frame, int K=1)
+{
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (&PeriodicSnapshotter::cloud_);
+    pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+    geometry_msgs::Point outputPoint;
+    pcl::PointXYZ searchPoint;
+    searchPoint.x = point.x;
+    searchPoint.y = point.y;
+    searchPoint.z = point.z;
+
+    kdtree.setInputCloud (cloud);
+    std::vector<int> pointIdxNKNSearch(K);
+    std::vector<float> pointNKNSquaredDistance(K);
+
+    std::cout << "K nearest neighbor search at (" << searchPoint.x
+              << " " << searchPoint.y
+              << " " << searchPoint.z
+              << ") with K=" << K << std::endl;
+    float meanX, meanY, meanZ;
+    if ( kdtree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
+    {
+        for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i){
+            meanX += cloud->points[ pointIdxNKNSearch[i] ].x;
+            meanY += cloud->points[ pointIdxNKNSearch[i] ].y;
+            meanZ += cloud->points[ pointIdxNKNSearch[i] ].z;
+            std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+                      << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+                      << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+                      << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+        }
+        outputPoint.x = meanX = meanX/pointIdxNKNSearch.size();
+        outputPoint.y = meanY = meanY/pointIdxNKNSearch.size();
+        outputPoint.z = meanZ = meanZ/pointIdxNKNSearch.size();
+
+    }
+
+    return outputPoint;
+    //do stuff with temp_cloud here
 }
 
 

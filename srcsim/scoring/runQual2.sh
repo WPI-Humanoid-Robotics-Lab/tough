@@ -41,7 +41,7 @@ do
      
   echo -e "\e[32mINFO:\e[0m Scoring the log"
   cd ..
-  score=`./scoring_q2.rb 'test\'$filt_log'.log'`
+  score=`./scoring_q2.rb 'test/'$filt_log'.log'`
   cd test
      
   echo -e "\e[32mINFO:\e[0m Renaming based on score"
@@ -50,12 +50,17 @@ do
   score="${score#*:}"     # Remove through first :
   score="${score#*:}"   # Remove through second :
   score="${score#*:}"   # Remove through second :
-  score="${score%%:*}"
+  score="${score#*[}"
+  score=${score/ /.}	# Replace space with .
+  score=${score:0:5}	# Take only first 4 characters
+  
   echo $score
-  if  [ "$score" == " --" ]; then
+  if  [ "$score" == ".--" ]; then
     mv $filt_log'.log' '9999'$filt_log'.log'
+    mv $state_log '9999'$state_log
   else
     mv $filt_log'.log' $score$filt_log'.log'
+    mv $state_log $score$state_log
   fi
 
 done

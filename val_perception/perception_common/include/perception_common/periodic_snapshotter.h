@@ -35,6 +35,17 @@
 #ifndef PERIODIC_SNAPSHOTTER_H
 #define PERIODIC_SNAPSHOTTER_H
 
+#include <ros/ros.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <geometry_msgs/Point.h>
+
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/point_types.h>
+#include <pcl/PCLPointCloud2.h>
+#include <pcl/conversions.h>
+#include <pcl_ros/transforms.h>
+
+
 namespace laser_assembler
 {
 
@@ -44,13 +55,19 @@ class PeriodicSnapshotter
 public:
     PeriodicSnapshotter();
     void timerCallback(const ros::TimerEvent& e);
+    static pcl::PointCloud<pcl::PointXYZ> cloud_;
+    static geometry_msgs::Point getNearestPoint(geometry_msgs::Point &point, std::string frame, int K);
+
 private:
     ros::NodeHandle n_;
     ros::Publisher pub_;
     ros::ServiceClient client_;
     ros::Timer timer_;
     bool first_time_;
+
 } ;
+
+pcl::PointCloud<pcl::PointXYZ>  PeriodicSnapshotter::cloud_;
 
 }
 
