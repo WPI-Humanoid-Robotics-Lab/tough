@@ -29,6 +29,7 @@ include_directories(
    src/val_manipulation.cpp
    src/val_arm_navigation.cpp
    src/val_pelvis_navigation.cpp
+   src/val_chest_navigation.cpp
 )
 
  target_link_libraries(${PROJECT_NAME}
