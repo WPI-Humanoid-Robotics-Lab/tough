@@ -288,9 +288,9 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
         ROS_INFO("Publishing Message");
         m_lightPub.publish(msg);
         m_readings.clear();
-
+        return true;
     }
-    return poseXYZDetected;
+    return false;
 }
 
 bool LedDetector::detectLight() {
@@ -314,10 +314,15 @@ int main(int argc, char *argv[]) {
     ros::NodeHandle nh;
     src_qual1_task::LedDetector   led_detect(nh);
     ros::Time start= ros::Time::now();
-    while (ros::ok()) {
+    unsigned int numberOfLightsDetected=0;
+    while (ros::ok() and numberOfLightsDetected < 10) {
         bool success = led_detect.detectLight();
-        std::string output = success ? "Button Detected in %0.6f secs" : "Detection Failed!!! in %0.6f secs";
-        ROS_INFO(output.c_str(), (ros::Time::now() - start).toSec());//tbw
+        if (success){
+            numberOfLightsDetected++;
+        }
+//        std::string output = success ? "Button Detected in %0.6f secs" : "Detection Failed!!! in %0.6f secs";
+
+//        ROS_INFO(output.c_str(), (ros::Time::now() - start).toSec());//tbw
         ros::spinOnce();
         start= ros::Time::now();
     }
