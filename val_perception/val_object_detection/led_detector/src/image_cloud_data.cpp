@@ -1,12 +1,12 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PointStamped.h>
 #include <sensor_msgs/Image.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <stereo_msgs/DisparityImage.h>
 
 bool flag = true;
 bool read_data = false;
 std::vector<sensor_msgs::Image> image_data;
-std::vector <sensor_msgs::PointCloud2> cloud_data;
+std::vector <stereo_msgs::DisparityImage> disp_data;
 int maxImages = 50;
 void imageCB(const sensor_msgs::Image &msg )
 {
@@ -21,15 +21,15 @@ void imageCB(const sensor_msgs::Image &msg )
         flag = !flag;
     }
 }
-void cloudCB(const sensor_msgs::PointCloud2 &msg )
+void dispCB(const stereo_msgs::DisparityImage &msg )
 {
     if(!flag)
     {
-        sensor_msgs::PointCloud2 inMsg(msg);
-        cloud_data.push_back(inMsg);
-        if(cloud_data.size() == maxImages)
+        stereo_msgs::DisparityImage inMsg(msg);
+        disp_data.push_back(inMsg);
+        if(disp_data.size() == maxImages)
         {
-            cloud_data.clear();
+            disp_data.clear();
             read_data = true;
         }
         flag = !flag;
@@ -38,10 +38,10 @@ void cloudCB(const sensor_msgs::PointCloud2 &msg )
 
 int main(int argc, char **argv)
 {
-    ros::init (argc,argv, "image_cloud_data");
+    ros::init (argc,argv, "image_disp_data");
     ros::NodeHandle nh;
     ros ::Subscriber image_data_sub = nh.subscribe("/multisense/camera/left/image_rect_color",0,imageCB);
-    ros ::Subscriber cloud_data_sub = nh.subscribe("/multisense/image_points2",0,cloudCB);
+    ros ::Subscriber disp_data_sub = nh.subscribe("/multisense/camera/disparity",0,dispCB);
     ros::Time begin = ros::Time::now();
     ros::Time end;
     float time_taken ;
