@@ -44,6 +44,10 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/conversions.h>
 #include <pcl_ros/transforms.h>
+#include <pcl/kdtree/kdtree_flann.h>
+
+#include <val_common/val_common_names.h>
+#include <tf/transform_listener.h>
 
 
 namespace laser_assembler
@@ -79,6 +83,79 @@ private:
 
 // Initialize static variable.
 pcl::PointCloud<pcl::PointXYZ>  PeriodicSnapshotter::cloud_;
+
+bool PeriodicSnapshotter::getNearestPoint(geometry_msgs::PointStamped &point, int K=1)
+{
+    // store the frameID of original point so that we can retransform the output to that frame
+    std::string originalFrame = point.header.frame_id;
+    static tf::TransformListener listener;
+
+    // transform the point to world frame
+    if (originalFrame != VAL_COMMON_NAMES::WORLD_TF){
+        try{
+//            listener.waitForTransform("/head", "/world", ros::Time(0), ros::Duration(3));
+            listener.transformPoint(VAL_COMMON_NAMES::WORLD_TF,ros::Time(0),point,VAL_COMMON_NAMES::WORLD_TF, point);
+        }
+        catch(tf::TransformException ex){
+            ROS_ERROR("%s",ex.what());
+            return false;
+        }
+    }
+
+    // get a kdtree for searching point
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (&PeriodicSnapshotter::cloud_);
+    pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+    kdtree.setInputCloud (cloud);
+
+    // index of points in the pointcloud
+    std::vector<int> pointIdxNKNSearch(K);
+    //squared distance of points
+    std::vector<float> pointNKNSquaredDistance(K);
+
+    // convert input point into PCL point for searching
+    pcl::PointXYZ searchPoint;
+    searchPoint.x = point.point.x;
+    searchPoint.y = point.point.y;
+    searchPoint.z = point.point.z;
+
+    std::cout << "K nearest neighbor search at (" << searchPoint.x
+              << " " << searchPoint.y
+              << " " << searchPoint.z
+              << ") with K=" << K << std::endl;
+
+    float meanX, meanY, meanZ;
+
+    //perform nearestKsearch
+    if ( kdtree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
+    {
+        for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i){
+            meanX += cloud->points[ pointIdxNKNSearch[i] ].x;
+            meanY += cloud->points[ pointIdxNKNSearch[i] ].y;
+            meanZ += cloud->points[ pointIdxNKNSearch[i] ].z;
+            std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+                      << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+                      << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+                      << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+        }
+        point.point.x = meanX = meanX/pointIdxNKNSearch.size();
+        point.point.y = meanY = meanY/pointIdxNKNSearch.size();
+        point.point.z = meanZ = meanZ/pointIdxNKNSearch.size();
+
+    }
+
+    //transform the point back to its original frame, if required
+    if (originalFrame != VAL_COMMON_NAMES::WORLD_TF){
+        try{
+            listener.transformPoint(originalFrame,ros::Time(0),point,VAL_COMMON_NAMES::WORLD_TF, point);
+        }
+        catch(tf::TransformException ex){
+            ROS_ERROR("%s",ex.what());
+            return false;
+        }
+    }
+
+    return true;
+}
 
 }
 

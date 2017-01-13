@@ -1,6 +1,7 @@
 #include <led_detector/LedDetector.h>
 #include <ros/ros.h>
 #include <geometry_msgs/PointStamped.h>
+#include <perception_common/periodic_snapshotter.h>
 
 using namespace src_qual1_task;
 
@@ -230,6 +231,7 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
     transform.setRotation(orientation);
     br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "head", "LED_frame")); //Co-ordinates wrt left_camera_optical_frame
 
+
     message.position.x = msg.x = light_centroid_head.point.x;
     message.position.y = msg.y = light_centroid_head.point.y;
     message.position.z = msg.z = light_centroid_head.point.z;
@@ -269,9 +271,15 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
         meanG = meanG/m_readings.size();
         meanB = meanB/m_readings.size();
         ROS_INFO("%.4f, %.4f, %.4f", pos[0], pos[1], pos[2]);
-        msg.x = pos[0];
-        msg.y = pos[1];
-        msg.z = pos[2];
+        light_centroid_head.point.x = pos[0];
+        light_centroid_head.point.y = pos[1];
+        light_centroid_head.point.z = pos[2];
+
+        if(laser_assembler::PeriodicSnapshotter::getNearestPoint(light_centroid_head, 1))
+            ROS_INFO("Updated the point with lidar data");
+        msg.x = light_centroid_head.point.x;
+        msg.y = light_centroid_head.point.y;
+        msg.z = light_centroid_head.point.z;
         msg.r = meanR < 0.9 ? 0 : 1;
         msg.g = meanG < 0.9 ? 0 : 1;
         msg.b = meanB < 0.9 ? 0 : 1;

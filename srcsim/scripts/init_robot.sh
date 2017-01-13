@@ -25,8 +25,14 @@ if [ $1 = "true" ]; then
   rosrun srcsim walk_test.py
 fi
 
-echo -e "\e[32mINIT:\e[0m Start Qual2 in 5 seconds"
 python $DIR/rossleep.py 3
-rosrun val_manipulation val_qual2_node
+
+echo -e "\e[32mINIT:\e[0m Start Qual1"
+rosrun led_detector led_detector
+
+python $DIR/rossleep.py 3
+
+echo -e "\e[32mINIT:\e[0m Starting the lights"
+rostopic pub /srcsim/qual1/start std_msgs/Empty
 
 echo -e "\e[32mINIT:\e[0m Done"
