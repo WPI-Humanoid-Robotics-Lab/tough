@@ -42,7 +42,7 @@ void armTrajectory::buttonPressPrepareArm(armSide side)
     arm_traj_l.joint_trajectory_messages.clear();
 
     float BUTTON_PRESS_PREPARE_R [] = {0.0, 0.25, 0.2, 1.1, 0.0, 0.0, 0.0};
-    float BUTTON_PRESS_PREPARE_L [] = {0.0, -0.25, -0.2, -1.1, 0.0, 0.0, 0.0};
+    float BUTTON_PRESS_PREPARE_L [] = {0.0, -0.25, 0.2, -1.1, 0.0, 0.0, 0.0};
 
     arm_traj_r.joint_trajectory_messages.resize(7);
     arm_traj_r.robot_side = RIGHT;

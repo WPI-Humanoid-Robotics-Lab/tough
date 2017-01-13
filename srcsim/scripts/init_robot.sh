@@ -27,6 +27,6 @@ fi
 
 echo -e "\e[32mINIT:\e[0m Start Qual2 in 5 seconds"
 python $DIR/rossleep.py 3
-rosrun val_manipulation val_qual2
+rosrun val_manipulation val_qual2_node
 
 echo -e "\e[32mINIT:\e[0m Done"

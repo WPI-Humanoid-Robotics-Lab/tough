@@ -27,7 +27,7 @@ int main(int argc, char** argv)
     pelvisTrajectory pelvisTraj(nh);
 
     // optimum values for walking
-    ValkyrieWalker walk(nh, 0.305, 0.44);
+    ValkyrieWalker walk(nh, 0.305, 0.435);
     walk.setSwing_height(0.15);
 
     sm state = PREPARE_START;
@@ -50,9 +50,10 @@ int main(int argc, char** argv)
         {
             walk.WalkNStepsForward(5,0.51,0, false, RIGHT);
             OrientChest(0,0,3.5,pub);
-            ros::Duration(0.27).sleep();
+            ros::Duration(0.25).sleep();
+            OrientChest(0,0,0,pub);
             armtraj.walkPoseArm(RIGHT);
-            walk.setWalkParms(0.31, 0.455, 0);
+            walk.setWalkParms(0.31, 0.44, 0);
             walk.WalkNStepsForward(4,0.5,0);
             state = EXIT;
 
@@ -79,20 +80,15 @@ bool OrientChest(float roll, float pitch, float yaw, ros::Publisher pub){
     ihmc_msgs::SO3TrajectoryPointRosMessage trajPoint;
     tf::Quaternion angles;
     angles.setRPY((tfScalar)roll*3.1427/180, (tfScalar)pitch*3.1427/180, (tfScalar)yaw*3.1427/180);
-    geometry_msgs::Vector3 vel;
-    vel.x= 0.3;
-    vel.y = 0.3;
-    vel.z = 0.3;
+
     geometry_msgs::Quaternion angles2;
     angles2.x = angles.getX();
     angles2.y = angles.getY();
     angles2.z = angles.getZ();
     angles2.w = angles.getW();
 
-
-    trajPoint.angular_velocity = vel;
     trajPoint.orientation = angles2;
-    trajPoint.time = 0;
+    trajPoint.time = 0.0;
     trajPointsVec.push_back(trajPoint);
 
     msg.execution_mode = 0;
