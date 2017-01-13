@@ -19,6 +19,8 @@
   <build_depend>tf_conversions</build_depend>
   <build_depend>laser_geometry</build_depend>
   <build_depend>laser_assembler</build_depend>
+  <build_depend>val_common</build_depend>
+
 
   <run_depend>roscpp</run_depend>
   <run_depend>opencv2</run_depend>
@@ -32,6 +34,8 @@
   <run_depend>tf_conversions</run_depend>
   <run_depend>laser_geometry</run_depend>
   <run_depend>laser_assembler</run_depend>
+  <run_depend>val_common</run_depend>
+
 
   <buildtool_depend>catkin</buildtool_depend>
 

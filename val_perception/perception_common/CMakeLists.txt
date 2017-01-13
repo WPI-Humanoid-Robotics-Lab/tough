@@ -10,18 +10,19 @@ find_package(PCL 1.7 REQUIRED io)
 find_package(catkin REQUIRED COMPONENTS roscpp
                                         rospy
                                         geometric_shapes
-					                    cv_bridge
-					                    image_transport
-					                    pcl_conversions
+                                        cv_bridge
+                                        image_transport
+                                        pcl_conversions
                                         pcl_ros
-					                    message_filters
-					                    multisense_ros
+                                        message_filters
+                                        multisense_ros
                                         tf_conversions
                                         laser_geometry
                                         laser_assembler
                                         geometry_msgs
                                         sensor_msgs
                                         std_msgs
+                                        val_common
 )
 
 include_directories(include)

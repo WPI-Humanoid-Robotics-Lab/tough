@@ -48,25 +48,36 @@
 
 namespace laser_assembler
 {
-
+/**
+ * @brief The PeriodicSnapshotter class This class publishes assembled pointcloud after every 2.5 sec. First message is published after around 8sec.
+ */
 class PeriodicSnapshotter
 {
 
 public:
     PeriodicSnapshotter();
-    void timerCallback(const ros::TimerEvent& e);
+    /**
+     * @brief cloud_ latest available pointcloud in pcl format
+     */
     static pcl::PointCloud<pcl::PointXYZ> cloud_;
-    static geometry_msgs::Point getNearestPoint(geometry_msgs::Point &point, std::string frame, int K);
+    /**
+     * @brief getNearestPoint Provides mean of nearest points from lidar cloud for a given point.
+     * @param point PointStamped for which nearest point is to be fetched. This variable is updated with the results.
+     * @param K Number of points to be searched near the given point. default value is 1.
+     * @return  true is a point was found false otherwise.
+     */
+    static bool getNearestPoint(geometry_msgs::PointStamped &point, int K);
 
 private:
+    void timerCallback(const ros::TimerEvent& e);
     ros::NodeHandle n_;
     ros::Publisher pub_;
     ros::ServiceClient client_;
     ros::Timer timer_;
     bool first_time_;
-
 } ;
 
+// Initialize static variable.
 pcl::PointCloud<pcl::PointXYZ>  PeriodicSnapshotter::cloud_;
 
 }
