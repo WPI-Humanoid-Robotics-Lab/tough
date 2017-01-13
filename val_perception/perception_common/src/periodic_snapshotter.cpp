@@ -90,19 +90,15 @@ void PeriodicSnapshotter::timerCallback(const ros::TimerEvent& e)
         ROS_DEBUG("Published Cloud with %u points", (uint32_t)(srv.response.cloud.data.size())) ;
         pub_.publish(srv.response.cloud);
         //Store the generated pointcloud as a PCLPointcloud in a class variable
-        pcl::PCLPointCloud2 pcl_pc2;
-        pcl_conversions::toPCL(srv.response.cloud,pcl_pc2);
-        pcl::fromPCLPointCloud2(pcl_pc2,PeriodicSnapshotter::cloud_);
+
+
     }
     else
     {
         ROS_ERROR("Error making service call\n") ;
     }
+
 }
-
-
-
-
 
 int main(int argc, char **argv)
 {
@@ -112,6 +108,10 @@ int main(int argc, char **argv)
     ros::service::waitForService("build_cloud");
     ROS_INFO("Found build_cloud! Starting the snapshotter");
     PeriodicSnapshotter snapshotter;
-    ros::spin();
+    ros::Rate looprate(1);
+    while(ros::ok()){
+        ros::spinOnce();
+        looprate.sleep();
+    }
     return 0;
 }
