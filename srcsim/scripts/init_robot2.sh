@@ -1,4 +1,5 @@
 #!/bin/bash
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 echo -e "\e[32mINIT:\e[0m Wait 15s (ROS time) for system to load"
@@ -18,15 +19,20 @@ python $DIR/rossleep.py 2
 
 echo -e "\e[32mINIT:\e[0m Detach from harness"
 rostopic pub -1 /valkyrie/harness/detach std_msgs/Bool true &
+python $DIR/rossleep.py 6
 
 if [ $1 = "true" ]; then
   echo -e "\e[32mINIT:\e[0m Start walking"
-#  rosrun srcsim walk_test.py
-
+  rosrun srcsim walk_test.py
 fi
 
-echo -e "\e[32mINIT:\e[0m Start Qual2 in 5 seconds"
+python $DIR/rossleep.py 6
 
-python $DIR/rossleep.py 3
-#rosrun val_manipulation val_qual2_node
+echo -e "\e[32mINIT:\e[0m Starting the lights"
+rostopic pub -1 /srcsim/qual1/start std_msgs/Empty &
+
+echo -e "\e[32mINIT:\e[0m Start Qual1"
+rosrun led_detector led_detector
+
 echo -e "\e[32mINIT:\e[0m Done"
+killall roslaunch
