@@ -19,16 +19,15 @@ python $DIR/rossleep.py 2
 
 echo -e "\e[32mINIT:\e[0m Detach from harness"
 rostopic pub -1 /valkyrie/harness/detach std_msgs/Bool true &
+python $DIR/rossleep.py 6
 
 if [ $1 = "true" ]; then
   echo -e "\e[32mINIT:\e[0m Start walking"
   rosrun srcsim walk_test.py
 fi
 
-python $DIR/rossleep.py 3
-
 echo -e "\e[32mINIT:\e[0m Starting the lights"
-rostopic pub /srcsim/qual1/start std_msgs/Empty &
+rostopic pub -1 /srcsim/qual1/start std_msgs/Empty &
 
 echo -e "\e[32mINIT:\e[0m Start Qual1"
 rosrun led_detector led_detector
