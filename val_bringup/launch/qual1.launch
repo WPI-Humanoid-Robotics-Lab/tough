@@ -19,6 +19,18 @@
    <!-- Start spinning the lidar   @TODO: implement this using a parameter or check if one exists already-->
    <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 2"/> 
 
+  <!--Laser scan filter-->
+   <node pkg="laser_filters" type="scan_to_scan_filter_chain"
+      name="laser_filter">
+
+    <rosparam command="load" file="$(find val_scan2scan)/my_laser_config.yaml" />
+    <remap from="/scan" to="/multisense/lidar_scan" />
+    <remap from="/scan_filtered" to="/multisense/lidar_scan_filtered" />
+
+    
+
+  </node>
+
    <!-- Start val_laser2point_cloud_node to publish pointcloud2 data -->
    <node pkg="val_laser2point_cloud" type="val_laser2point_cloud_node" name="val_laser2point_cloud_node"/>
 
