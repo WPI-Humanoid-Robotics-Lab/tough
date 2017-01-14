@@ -25,14 +25,13 @@ if [ $1 = "true" ]; then
   rosrun srcsim walk_test.py
 fi
 
-python $DIR/rossleep.py 3
+python $DIR/rossleep.py 6
+
+echo -e "\e[32mINIT:\e[0m Starting the lights"
+rostopic pub /srcsim/qual1/start std_msgs/Empty &
 
 echo -e "\e[32mINIT:\e[0m Start Qual1"
 rosrun led_detector led_detector
 
-python $DIR/rossleep.py 3
-
-echo -e "\e[32mINIT:\e[0m Starting the lights"
-rostopic pub /srcsim/qual1/start std_msgs/Empty
-
 echo -e "\e[32mINIT:\e[0m Done"
+killall roslaunch
