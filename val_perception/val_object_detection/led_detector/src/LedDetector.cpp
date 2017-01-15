@@ -183,7 +183,7 @@ bool LedDetector::getLight(cv::Mat &new_image,geometry_msgs::Point &pixelCoordin
 }
 
 
-bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCoordinates,int &kvalue)
+bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCoordinates)
 {
     bool poseXYZDetected = false;
     tf::TransformListener listener;
@@ -276,7 +276,8 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
         light_centroid_head.point.x = pos[0];
         light_centroid_head.point.y = pos[1];
         light_centroid_head.point.z = pos[2];
-        if(getNearestPoint(light_centroid_head, kvalue))//todo, added kvalue
+
+        if(getNearestPoint(light_centroid_head, 10))
             ROS_INFO("Updated the point with lidar data");
         msg.x = light_centroid_head.point.x;
         msg.y = light_centroid_head.point.y;
@@ -294,7 +295,7 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
     return false;
 }
 
-bool LedDetector::detectLight(int &kvalue) {
+bool LedDetector::detectLight() {
     ImageFrame img_frame;
     geometry_msgs::Point pixelCoordinates;
 
@@ -303,7 +304,7 @@ bool LedDetector::detectLight(int &kvalue) {
     if(m_multisenseImagePtr->giveImage(img_frame.m_originalImage))
         if(m_multisenseImagePtr->giveDisparityImage(img_frame.m_disparityImage))
             if(getLight(img_frame.m_originalImage, pixelCoordinates))
-                return getPoseRGB(img_frame,pixelCoordinates,kvalue);
+                return getPoseRGB(img_frame,pixelCoordinates);
 
     return false;
 
@@ -398,22 +399,13 @@ void LedDetector::laserCloudCallBack(const sensor_msgs::PointCloud2 &msg)
 
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        // Tell the user how to run the program
-        std::cerr << "Usage: " << argv[0] << " kparam" << std::endl;
-        return 1;
-    }
-    
-    int kvalue = atoi(argv[1]);
-    std::cout << "------------------------------------\n"<<kvalue<<std::endl;
-
-    ros::init(argc, argv, "led_detection"); 
+    ros::init(argc, argv, "led_detection");
     ros::NodeHandle nh;
     src_qual1_task::LedDetector   led_detect(nh);
     ros::Time start= ros::Time::now();
     unsigned int numberOfLightsDetected=0;
     while (ros::ok() and numberOfLightsDetected < 10) {
-        bool success = led_detect.detectLight(kvalue);
+        bool success = led_detect.detectLight();
         if (success){
             numberOfLightsDetected++;
         }

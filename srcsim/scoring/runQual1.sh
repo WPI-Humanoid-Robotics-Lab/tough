@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/usr/bin/bash
 terminate()
 {
 echo 'killed'
@@ -7,12 +6,8 @@ kill -s SIGTERM $!
 exit 0
 }
 trap terminate SIGINT SIGTERM
-
-i=1
-kmax=100
-# while true
-# do
-while [ "$i" -le "$kmax" ]; do
+while true
+do
   echo -e "\e[32mINFO:\e[0m Sourcing" 
   source ~/indigo_ws/devel/setup.bash
   echo -e "\e[32mINFO:\e[0m Killing exisitng ros/gazebo instances"
@@ -23,17 +18,8 @@ while [ "$i" -le "$kmax" ]; do
   
 
   echo -e "\e[32mINFO:\e[0m Launching qual1"
-  roslaunch val_bringup qual1.launch extra_gazebo_args:="-r" init:=true &
-    #comment bellow for rosbags
-  echo -e "\e[32mINIT:\e[0m Starting the lights"
-  rostopic pub -1 /srcsim/qual1/start std_msgs/Empty &
-
-  echo -e "\e[32mINIT:\e[0m Start Qual1"
-  rosrun led_detector led_detector 10 # input k value
-
-  echo -e "\e[32mINIT:\e[0m Done"
-  killall roslaunch
-
+  roslaunch val_bringup qual1.launch extra_gazebo_args:="-r" init:=true 
+     
   echo -e "\e[32mINFO:\e[0m Killing qual2"
   killall roslaunch
   killall gzserver
@@ -65,9 +51,7 @@ while [ "$i" -le "$kmax" ]; do
   score=`echo $score | sed 's/[[:space:]]//g'`
   score=${score:0:5}                                            # Take only first 4 characters
   
-  i=$(($i + 1))
-  echo $score,$i>>~/results.txt
-  # echo $i
+  echo $score
   if  [ "$score" == ".--" ]; then
     mv $filt_log '9999'$filt_log
     mv $state_log '9999'$state_log
