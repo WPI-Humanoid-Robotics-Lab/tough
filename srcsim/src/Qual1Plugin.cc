@@ -117,9 +117,10 @@ void Qual1Plugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
   };
 
   // Generate random lights
-  for (int i = 0; i < numLightSwitches; ++i)
+  for (int i = 0; i < 43; ++i)
   {
-    int light = ignition::math::Rand::IntUniform(1, maxLight);
+    //int light = ignition::math::Rand::IntUniform(1, maxLight);
+    int light=i+1;
     int console = 1;
 
     int colorIdx = ignition::math::Rand::IntUniform(0, colors.size() - 1);
