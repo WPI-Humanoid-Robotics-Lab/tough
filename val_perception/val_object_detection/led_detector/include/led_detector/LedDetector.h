@@ -74,9 +74,9 @@ namespace src_qual1_task
         public:
              LedDetector(ros::NodeHandle nh);
             ~LedDetector();
-            bool detectLight();
+            bool detectLight(int &kvalue);
             bool getLight(cv::Mat &new_image,geometry_msgs::Point &pixelCoordinates);
-            bool getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCoordinates);
+            bool getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCoordinates, int &kvalue);
             void errorCorrection(std::vector<srcsim::Console> &data, std::vector<double> &pos);
             void kdtreeInit();
             int getMode (int daArray[], int iSize);

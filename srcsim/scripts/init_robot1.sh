@@ -28,11 +28,12 @@ fi
 
 python $DIR/rossleep.py 6
 
-echo -e "\e[32mINIT:\e[0m Starting the lights"
-rostopic pub -1 /srcsim/qual1/start std_msgs/Empty &
+# #comment bellow for rosbags
+# echo -e "\e[32mINIT:\e[0m Starting the lights"
+# rostopic pub -1 /srcsim/qual1/start std_msgs/Empty &
 
-echo -e "\e[32mINIT:\e[0m Start Qual1"
-rosrun led_detector led_detector
+# echo -e "\e[32mINIT:\e[0m Start Qual1"
+# rosrun led_detector led_detector 10 # input k value
 
-echo -e "\e[32mINIT:\e[0m Done"
-killall roslaunch
+# echo -e "\e[32mINIT:\e[0m Done"
+# killall roslaunch
