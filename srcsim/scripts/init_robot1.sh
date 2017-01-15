@@ -26,6 +26,16 @@ if [ $1 = "true" ]; then
   rosrun srcsim walk_test.py
 fi
 
+gzprocess=`pgrep -x "gzserver"`
+counter=`echo "$gzprocess" | wc -l`
+
+#if [ $counter -ne 2 ]
+#then
+#  echo -e "\e[32mINIT:\e[0m gzserver process not found. Restarting!"
+#  killall roslaunch
+#  exit -1
+#fi
+
 python $DIR/rossleep.py 6
 
 echo -e "\e[32mINIT:\e[0m Starting the lights"

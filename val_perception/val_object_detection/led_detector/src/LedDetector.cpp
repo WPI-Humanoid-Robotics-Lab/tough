@@ -404,7 +404,7 @@ int main(int argc, char *argv[]) {
     src_qual1_task::LedDetector   led_detect(nh);
     ros::Time start= ros::Time::now();
     unsigned int numberOfLightsDetected=0;
-    while (ros::ok() and numberOfLightsDetected < 10) {
+    while (ros::ok() and numberOfLightsDetected < 20) {
         bool success = led_detect.detectLight();
         if (success){
             numberOfLightsDetected++;

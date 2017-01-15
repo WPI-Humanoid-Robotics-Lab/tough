@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 terminate()
 {
 echo 'killed'
@@ -6,8 +6,8 @@ kill -s SIGTERM $!
 exit 0
 }
 trap terminate SIGINT SIGTERM
-while true
-do
+ 
+
   echo -e "\e[32mINFO:\e[0m Sourcing" 
   source ~/indigo_ws/devel/setup.bash
   echo -e "\e[32mINFO:\e[0m Killing exisitng ros/gazebo instances"
@@ -61,4 +61,4 @@ do
     mv $state_log $score$state_log
     mv $data_log $score$data_log
   fi
-done
+
