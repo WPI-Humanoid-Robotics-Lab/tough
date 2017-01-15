@@ -26,15 +26,14 @@ ros::Publisher *m_lightPub;
 cv::Mat qMatrix;
 const int maxImages = 5;
 
-std::vector<cv::Mat> image_data;
-std::vector <cv::Mat> disp_data;
+std::vector<cv::Mat> colorImageVect;
+std::vector <cv::Mat> disparityImageVect;
 std::vector<std::thread> threadsVect;
 std::vector<srcsim::Console> outputMessages(maxImages);
 
 
 bool getLight(int index,geometry_msgs::Point &pixelCoordinates){
-    cv::Mat new_image = image_data[index];
-    ROS_INFO("Size of image_data after %d", image_data.size());
+    cv::Mat new_image = colorImageVect[index];
     std::vector<std::vector<cv::Point> > gradientContours;
     cv::RNG randomGen;
     bool lightXYDetected = false;
@@ -47,7 +46,6 @@ bool getLight(int index,geometry_msgs::Point &pixelCoordinates){
     int channels[] = {0,1,2};
     const float* histRange[] = { hRange, sRange,vRange};
     cv::split(new_image,inMsgChannel);
-    ROS_INFO("Size of image_data after %d", image_data.size());
     // RBG channel threshold, 180 is working,lower values gives some noise
     for(int iter=0;iter<3;iter++)
         cv::threshold(inMsgChannel[iter],inMsgChannel[iter],180,255,0);
@@ -140,7 +138,7 @@ bool getPoseRGB(int index, geometry_msgs::Point &pixelCoordinates)
     }
 
     // Obtaining a stereo point cloud for Z position and RGB values
-    src_perception::PointCloudHelper::generateOrganizedRGBDCloud(disp_data[index],image_data[index],qMatrix,organized_cloud);
+    src_perception::PointCloudHelper::generateOrganizedRGBDCloud(disparityImageVect[index],colorImageVect[index],qMatrix,organized_cloud);
     pcl_point = organized_cloud->at(pixelCoordinates.x, pixelCoordinates.y);
 
     geometry_msgs::PointStamped light_centroid;
@@ -203,10 +201,10 @@ void imageCB(sensor_msgs::ImageConstPtr msg )
         cv::Mat image;
         cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
 
-        if(image_data.size() != maxImages)
+//        if(colorImageVect.size() != maxImages)
         {
             image=cv_ptr->image.clone();
-            image_data.push_back(image);
+            colorImageVect.push_back(image);
             flag = !flag;
         }
 
@@ -247,11 +245,11 @@ void dispCB(stereo_msgs::DisparityImageConstPtr msg )
         if (!new_disp)
             return;
 
-        if(disp_data.size() != maxImages)
+        if(disparityImageVect.size() != maxImages)
         {
-            disp_data.push_back(disparity_);
+            disparityImageVect.push_back(disparity_);
             flag = !flag;
-            if(disp_data.size() == maxImages)
+            if(disparityImageVect.size() == maxImages)
                 read_data = true;
         }
 
@@ -268,33 +266,57 @@ void runner(int i){
 
 int main(int argc, char **argv)
 {
+    //Initialize ROS system
     ros::init (argc,argv, "image_disp_data");
     ros::NodeHandle nh;
+    //setup subscriber and publisher
     ros ::Subscriber image_data_sub = nh.subscribe("/multisense/camera/left/image_rect_color",0,imageCB);
     ros ::Subscriber disp_data_sub = nh.subscribe("/multisense/camera/disparity",0,dispCB);
     ros::Publisher temp = nh.advertise<srcsim::Console>("/srcsim/qual1/light",1);
+    //the pointer is public so had to use a temp variable
     m_lightPub = &temp;
+
     ros::Time begin = ros::Time::now();
     ros::Time end;
     float time_taken ;
+
+    //populate the qMatrix. it wont change with every image so no point in calculatin it everytime
     src_perception::MultisenseImage *m_multisenseImagePtr = new src_perception::MultisenseImage(nh);
     m_multisenseImagePtr->giveQMatrix(qMatrix);
 
 
     while(ros::ok())
     {
+        //wait for the light to be switched on
+        if (!colorImageVect.empty()){
+            geometry_msgs::Point pnt;
+            bool success = getLight(colorImageVect.size()-1,pnt);
+            std::string output = success ? "Light Detected ": "Light not detected";
+            cv::imshow("Image 1", colorImageVect[colorImageVect.size()-1]);
+            ROS_INFO(output.c_str());
+            end  = ros::Time::now();
+            time_taken = end.toSec() - begin.toSec();
+            ROS_INFO("Time taken = %lf",time_taken );
+            begin = ros::Time::now();
+        }
+        ros::spinOnce();
+
+     /*   //read_data is true when the vectors are full
         if(read_data)
         {
             end  = ros::Time::now();
             time_taken = end.toSec() - begin.toSec();
             ROS_INFO("Time taken = %lf",time_taken );
 
-            for (size_t i=0; i< image_data.size(); i++){
+            //create threads for every value in vector
+            for (size_t i=0; i< colorImageVect.size(); i++){
                 threadsVect.push_back(std::thread(runner, i));
             }
+            //wait till all threads finish
             for(size_t i=0; i<threadsVect.size(); i++)
                 threadsVect[i].join();
 
+            // calculating mean of the results
             float meanX, meanY,meanZ, r, g, b;
 
             for (size_t i=0; i< outputMessages.size(); i++){
@@ -303,14 +325,14 @@ int main(int argc, char **argv)
 
             begin = ros::Time::now();
             read_data = false;
-
-            image_data.clear();
-            disp_data.clear();
+            // clearing vectors to be used for next light
+            colorImageVect.clear();
+            disparityImageVect.clear();
             threadsVect.clear();
 
         }
-
-        ros::spinOnce();
+        // to make sure callback is called
+        ros::spinOnce(); */
     }
     return 0;
 
