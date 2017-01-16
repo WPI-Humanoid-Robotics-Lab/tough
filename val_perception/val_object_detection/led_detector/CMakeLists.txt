@@ -88,7 +88,7 @@ target_link_libraries(led_detector
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} perception_common
 )
-add_executable(image_cloud_data src/image_cloud_data.cpp)
+add_executable(image_cloud_data src/image_cloud_data.cpp ${KDSourcesList} )
 target_link_libraries(image_cloud_data
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} perception_common
