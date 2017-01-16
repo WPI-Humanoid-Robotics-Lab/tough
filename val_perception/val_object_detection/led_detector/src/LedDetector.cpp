@@ -56,7 +56,7 @@ int LedDetector::getMode(int daArray[], int iSize)
 void LedDetector::errorCorrection(std::vector<srcsim::Console> &data, std::vector<double> &pos)
 {
     std::cout << "Check Point A" <<std::endl;
-    int tags [3] = {100,100,100};
+    int tags [m_readingThreshold] = {100} ;
 
     alglib::ae_int_t k;
     int winnerTag;
@@ -78,26 +78,31 @@ void LedDetector::errorCorrection(std::vector<srcsim::Console> &data, std::vecto
         ROS_INFO(temp.str().c_str());
         alglib::real_1d_array point(temp.str().c_str());
         ROS_INFO(temp.str().c_str());
-//        point ="[2686.825, -555.0, 265.4125]";
+        //        point ="[2686.825, -555.0, 265.4125]";
         k = alglib::kdtreequeryknn(kdt, point, 1);
         kdtreequeryresultstags(kdt,tag_r );
         tags[m] = int(tag_r[0]);
     }
-    winnerTag = this->getMode(tags,3);
-    if (tags[0] == winnerTag )
-    {
-        pos.push_back(data[0].x + error_x[winnerTag]/1000.0);
-        pos.push_back(data[0].y + error_y[winnerTag]/1000.0);
-        pos.push_back(data[0].z + error_z[winnerTag]/1000.0);
-    }
-    else
-    {
-        pos.push_back(data[1].x + error_x[winnerTag]);
-        pos.push_back(data[1].y + error_y[winnerTag]);
-        pos.push_back(data[1].z + error_z[winnerTag]);
+    winnerTag = getMode(tags,data.size());
+    double meanX=0,meanY=0,meanZ=0;
+    int n_elements = 0;
 
+    for (int m =0; m< data.size();m++ )
+    {
+
+        if (tags[m] == winnerTag )
+        {
+            meanX += data[m].x + error_x[winnerTag]/1000.0;
+            meanY += data[m].y + error_y[winnerTag]/1000.0;
+            meanZ += data[m].z + error_z[winnerTag]/1000.0;
+            n_elements++;
+        }
     }
-     std::cout << "Check Point G  " <<std::endl;
+
+    pos.push_back(meanX/n_elements);
+    pos.push_back(meanY/n_elements);
+    pos.push_back(meanZ/n_elements);
+    std::cout << "Check Point G  " <<std::endl;
     return;
 }
 bool LedDetector::getLight(cv::Mat &new_image,geometry_msgs::Point &pixelCoordinates){
