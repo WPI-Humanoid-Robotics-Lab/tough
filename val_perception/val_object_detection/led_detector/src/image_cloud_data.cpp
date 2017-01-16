@@ -25,8 +25,9 @@ bool readData = false;
 bool lightDetected = false;
 
 ros::Publisher *m_lightPub;
-cv::Mat qMatrix;
-const int maxImages = 5;
+cv::Mat_<double> qMatrix;
+const int maxImages = 25;
+tf::Vector3 previousPoint;
 
 std::vector<cv::Mat> colorImageVect;
 std::vector<cv::Mat> tempColorImageVect;
@@ -103,12 +104,12 @@ bool getLight(int index,geometry_msgs::Point &pixelCoordinates, bool tempImage=f
         {
             // Finding x,y coordinates of centroid of the contour
             points.push_back(cv::Point2f(moment.m10/moment.m00,moment.m01/moment.m00));
-            ROS_INFO("GetLight");
+//            ROS_INFO("GetLight");
 
             // Assigning x,y xo-ordinates in image frame
             pixelCoordinates.x = points[i].x;
             pixelCoordinates.y = points[i].y;
-            ROS_INFO("Pixel Coordinates  x: %.2f y: %.2f",pixelCoordinates.x, pixelCoordinates.y);
+//            ROS_INFO("Pixel Coordinates  x: %.2f y: %.2f",pixelCoordinates.x, pixelCoordinates.y);
             lightXYDetected = true;
             i++;
         }
@@ -189,10 +190,15 @@ bool getPoseRGB(int index, geometry_msgs::Point &pixelCoordinates)
     }
 
     poseXYZDetected = true;
-    ROS_INFO("Updating Message at index :%d",index );
+//    ROS_INFO("Updating Message at index :%d",index );
     //    m_lightPub->publish(msg);
 //    outputMessages.insert(outputMessages.begin()+index,msg);
-    outputMessages[index]=msg;
+    outputMessages[index].x=msg.x;
+    outputMessages[index].y=msg.y;
+    outputMessages[index].z=msg.z;
+    outputMessages[index].r=msg.r;
+    outputMessages[index].g=msg.g;
+    outputMessages[index].b=msg.b;
     return poseXYZDetected;
 }
 
@@ -276,9 +282,10 @@ void dispCB(stereo_msgs::DisparityImageConstPtr msg )
 }
 
 void runner(int i){
+//    ROS_INFO("starting thread %d", i);
     geometry_msgs::Point pnt;
-    getLight(i,pnt);
-    getPoseRGB(i,pnt);
+    if(getLight(i,pnt))
+        getPoseRGB(i,pnt);
 }
 
 int main(int argc, char **argv)
@@ -287,30 +294,44 @@ int main(int argc, char **argv)
     ros::init (argc,argv, "image_disp_data");
     ros::NodeHandle nh;
     //setup subscriber and publisher
-    ros ::Subscriber colorImageSub = nh.subscribe("/multisense/camera/left/image_rect_color",0,imageCB);
-    ros ::Subscriber disparityImageSub = nh.subscribe("/multisense/camera/disparity",0,dispCB);
+    ros ::Subscriber colorImageSub = nh.subscribe("/multisense/camera/left/image_rect_color",1,imageCB);
+    ros ::Subscriber disparityImageSub = nh.subscribe("/multisense/camera/disparity",1,dispCB);
     ros::Publisher temp = nh.advertise<srcsim::Console>("/srcsim/qual1/light",1);
     //the pointer is public so had to use a temp variable
     m_lightPub = &temp;
-    ros::Rate loopRate = 35;
+    ros::Rate loopRate = 100;
     ros::Time begin = ros::Time::now();
     ros::Time end;
     float time_taken ;
+    float minimumLightDistance = 0.02;
 
     //populate the qMatrix. it wont change with every image so no point in calculatin it everytime
-    src_perception::MultisenseImage *m_multisenseImagePtr = new src_perception::MultisenseImage(nh);
-    m_multisenseImagePtr->giveQMatrix(qMatrix);
+//    src_perception::MultisenseImage *m_multisenseImagePtr = new src_perception::MultisenseImage(nh);
+//    m_multisenseImagePtr->giveQMatrix(qMatrix);
+    qMatrix=cv::Mat_<double>(4,4,0.0);
+    qMatrix(0,0) =  610.1799470098168 * -0.07;
+    qMatrix(1,1) =  610.1799470098168 * -0.07;
+    qMatrix(0,3) = -610.1799470098168 * 512.5 * -0.07;
+    qMatrix(1,3) = -610.1799470098168 * 272.5 * -0.07;
+    qMatrix(2,3) =  610.1799470098168 * 610.1799470098168 * -0.07;
+    qMatrix(3,2) = -610.1799470098168;
+    qMatrix(3,3) =  0.0f;
 
 
     while(ros::ok())
     {
         //wait for the light to be switched on
         //assuming light detection will work soon
-        if (!lightDetected && !tempColorImageVect.empty()){
+        if (!lightDetected){
             geometry_msgs::Point pnt;
-            lightDetected = getLight(tempColorImageVect.size()-1,pnt, true);
+            size_t index = tempColorImageVect.size()-1;
+            if (index == -1){
+                ros::spinOnce();
+                continue;
+            }
+            lightDetected = getLight(index,pnt, true);
             std::string output = lightDetected ? "Light Detected": "******Not detected";
-            ROS_INFO(output.c_str());
+//            ROS_INFO(output.c_str());
             end  = ros::Time::now();
             time_taken = end.toSec() - begin.toSec();
             begin = ros::Time::now();
@@ -329,44 +350,61 @@ int main(int argc, char **argv)
         {
             end  = ros::Time::now();
             time_taken = end.toSec() - begin.toSec();
-            ROS_INFO("Time taken = %lf",time_taken );
+//            ROS_INFO("Time taken = %lf",time_taken );
+
+            outputMessages = std::vector<srcsim::Console>(maxImages);
 
             //create threads for every value in vector
             for (size_t i=0; i< colorImageVect.size(); i++){
                 threadsVect.push_back(std::thread(runner, i));
             }
+            ROS_INFO("Running %d threads", threadsVect.size());
             //wait till all threads finish
             for(size_t i=0; i<threadsVect.size(); i++)
                 threadsVect[i].join();
 
+            threadsVect.clear();
             // calculating mean of the results
-            float meanX, meanY,meanZ;
+            float meanX=0.0, meanY=0.0,meanZ=0.0;
+            bool skipIteration = false;
 
             for (size_t i=0; i< outputMessages.size(); i++){
+                if (outputMessages[i].x == 0.0 && outputMessages[i].y == 0.0 && outputMessages[i].z == 0.0){
+                    skipIteration = true;
+                    ROS_INFO("Skipping this iteration");
+                    break;
+                }
                 meanX += outputMessages[i].x;
                 meanY += outputMessages[i].y;
                 meanZ += outputMessages[i].z;
+//                ROS_INFO("output message %d x:%.4f y:%.4f z:%.4f", i, outputMessages[i].x, outputMessages[i].y, outputMessages[i].z);
             }
 
+
             srcsim::Console msg;
-            msg.x = meanX;
-            msg.y = meanY;
-            msg.z = meanZ;
+            msg.x = meanX/outputMessages.size();
+            msg.y = meanY/outputMessages.size();
+            msg.z = meanZ/outputMessages.size();
             msg.r = outputMessages[0].r;
             msg.g = outputMessages[0].g;
             msg.b = outputMessages[0].b;
 
-            // publish the message
-            m_lightPub->publish(msg);
+
+//            tf::Vector3 currentPoint(msg.x, msg.y, msg.z);
+            // publish the message only if it is not the same light
+            if (!skipIteration){
+                ROS_INFO("Publishing message x:%.4f y:%.4f z:%.4f", msg.x, msg.y, msg.z);
+                m_lightPub->publish(msg);
+            }
+//            previousPoint = currentPoint;
 
             begin = ros::Time::now();
             lightDetected=false;
             // clearing vectors to be used for next light
             colorImageVect.clear();
             disparityImageVect.clear();
-            threadsVect.clear();
-            readData = false;
 
+            readData = false;
         }
         // to make sure callback is called
 

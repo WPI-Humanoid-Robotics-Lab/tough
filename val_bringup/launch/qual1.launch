@@ -51,4 +51,6 @@
 <!-- Turn on the lights -->
 <!--<node pkg="rostopic" type="rostopic" name="lights" args="pub /srcsim/qual1/start std_msgs/Empty"/>-->
 
+<!-- Get images at 30 fps -->
+<node pkg="rostopic" type="rostopic" name="camera_fps" args="pub /multisense/set_fps -l std_msgs/Float64 30.0"/>
 </launch>
