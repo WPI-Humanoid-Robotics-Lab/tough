@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 import rospy
 import sys
+import signal
+
+def handler(signum, frame):
+    print 'Exiting!!!'
+    sys.exit()
+
+signal.signal(signal.SIGINT, handler)
 
 if len(sys.argv) != 2:
     print("Proper usage: %s <float>" % sys.argv[0])

@@ -11,22 +11,23 @@ from ihmc_msgs.msg import OneDoFJointTrajectoryRosMessage
 from ihmc_msgs.msg import TrajectoryPoint1DRosMessage
 from ihmc_msgs.msg import HandDesiredConfigurationRosMessage
 
-ZERO_VECTOR = [0.0, -1.0, 2.0, 1.0, 0.0, 0.0, 0.0]
-ELBOW_BENT_UP = [0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
-BUTTON_PRESS = [0.0, 0.1, 0.2, 0.3, 0.0, 0.0, 0.0]
+#ZERO_VECTOR = [0.0, -1.0, 2.0, 1.0, 0.0, 0.0, 0.0]
+#ELBOW_BENT_UP = [0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
+#BUTTON_PRESS = [1.57, -0.3, -1.6, 1.3, 0.0, 0.0, 0.0]
+BUTTON_PRESS = [0.0, -0.25, 0.2, -1.1, 0.0, 0.0, 0.0]
 
 ROBOT_NAME = None
 
 def sendRightArmTrajectory():
     msg = ArmTrajectoryRosMessage()
 
-    msg.robot_side = ArmTrajectoryRosMessage.RIGHT
+    msg.robot_side = ArmTrajectoryRosMessage.LEFT
 
-    msg = appendTrajectoryPoint(msg, 2.0, ZERO_VECTOR)
-    msg = appendTrajectoryPoint(msg, 3.0, ELBOW_BENT_UP)
-    msg = appendTrajectoryPoint(msg, 4.0, ZERO_VECTOR)
+    #msg = appendTrajectoryPoint(msg, 2.0, ZERO_VECTOR)
+    #msg = appendTrajectoryPoint(msg, 3.0, ELBOW_BENT_UP)
+    #msg = appendTrajectoryPoint(msg, 4.0, ZERO_VECTOR)
 
-    msg = appendTrajectoryPoint(msg, 5.0, BUTTON_PRESS)
+    msg = appendTrajectoryPoint(msg, 1.0, BUTTON_PRESS)
     msg.unique_id = -1
 
     rospy.loginfo('publishing right trajectory')
@@ -73,7 +74,7 @@ if __name__ == '__main__':
 
         if not rospy.is_shutdown():
             sendRightArmTrajectory()
-            closeHand()
+#            closeHand()
             time.sleep(2)
 
     except rospy.ROSInterruptException:

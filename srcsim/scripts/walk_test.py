@@ -22,25 +22,18 @@ RIGHT_FOOT_FRAME_NAME = None
 
 def walkTest():
     msg = FootstepDataListRosMessage()
-    msg.transfer_time = 1.5
-    msg.swing_time = 1.5
+    msg.transfer_time = 0.31
+    msg.swing_time = 0.48
     msg.execution_mode = 0
-    msg.unique_id = -1
+    msg.unique_id = -111
 
     # walk forward starting LEFT
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [0.2, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [0.4, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [0.6, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [0.8, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.0, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [1.2, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.4, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [1.6, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.8, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [2.0, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [2.2, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [2.4, 0.0, 0.0]))
-
+    msg.footstep_data_list.append(createFootStepOffset(LEFT, [0.5, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [1, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.5, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [2, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(LEFT, [2, 0.0, 0.0]))
+    
     #walk to the button (hard coded steps, right algined)
     # msg.footstep_data_list.append(createFootStepOffset(LEFT, [0.4, 0.0, 0.0]))
     # msg.footstep_data_list.append(createFootStepOffset(RIGHT, [0.8, -0.06, 0.0]))
@@ -78,6 +71,7 @@ def createFootStepInPlace(stepSide):
     footWorld = tfBuffer.lookup_transform('world', foot_frame, rospy.Time())
     footstep.orientation = footWorld.transform.rotation
     footstep.location = footWorld.transform.translation
+    footstep.swing_height = 0.15
 
     return footstep
 

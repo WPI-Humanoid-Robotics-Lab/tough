@@ -44,6 +44,7 @@
 #include "perception_common/periodic_snapshotter.h"
 
 
+
 /***
  * This a simple test app that requests a point cloud from the
  * point_cloud_assembler every 4 seconds, and then publishes the
@@ -61,7 +62,7 @@ PeriodicSnapshotter::PeriodicSnapshotter()
     client_ = n_.serviceClient<AssembleScans2>("assemble_scans2");
 
     // Start the timer that will trigger the processing loop (timerCallback)
-    timer_ = n_.createTimer(ros::Duration(5,0), &PeriodicSnapshotter::timerCallback, this);
+    timer_ = n_.createTimer(ros::Duration(3,0), &PeriodicSnapshotter::timerCallback, this);
 
     // Need to track if we've called the timerCallback at least once
     first_time_ = true;
@@ -88,14 +89,16 @@ void PeriodicSnapshotter::timerCallback(const ros::TimerEvent& e)
     {
         ROS_DEBUG("Published Cloud with %u points", (uint32_t)(srv.response.cloud.data.size())) ;
         pub_.publish(srv.response.cloud);
+        //Store the generated pointcloud as a PCLPointcloud in a class variable
+
+
     }
     else
     {
         ROS_ERROR("Error making service call\n") ;
     }
+
 }
-
-
 
 int main(int argc, char **argv)
 {
@@ -105,6 +108,10 @@ int main(int argc, char **argv)
     ros::service::waitForService("build_cloud");
     ROS_INFO("Found build_cloud! Starting the snapshotter");
     PeriodicSnapshotter snapshotter;
-    ros::spin();
+    ros::Rate looprate(1);
+    while(ros::ok()){
+        ros::spinOnce();
+        looprate.sleep();
+    }
     return 0;
 }

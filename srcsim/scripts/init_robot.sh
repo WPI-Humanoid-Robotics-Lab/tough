@@ -1,5 +1,4 @@
 #!/bin/bash
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 echo -e "\e[32mINIT:\e[0m Wait 15s (ROS time) for system to load"
@@ -22,7 +21,12 @@ rostopic pub -1 /valkyrie/harness/detach std_msgs/Bool true &
 
 if [ $1 = "true" ]; then
   echo -e "\e[32mINIT:\e[0m Start walking"
-  rosrun srcsim walk_test.py
+#  rosrun srcsim walk_test.py
+
 fi
 
+echo -e "\e[32mINIT:\e[0m Start Qual2 in 5 seconds"
+
+python $DIR/rossleep.py 3
+#rosrun val_manipulation val_qual2_node
 echo -e "\e[32mINIT:\e[0m Done"

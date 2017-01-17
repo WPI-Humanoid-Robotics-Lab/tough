@@ -2,122 +2,64 @@
 #include <val_manipulation/val_arm_navigation_.h>
 #include <val_manipulation/val_pelvis_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
+#include <ihmc_msgs/ChestTrajectoryRosMessage.h>
+#include <tf2/utils.h>
 
 enum sm {
     WALK_TO_DOOR = 0,
-    LOWER_PELVIS,
-    PRESS_BUTTON,
-    RETRACT_POSE_TO_WALK,
-    RETRACT_PELVIS,
+    PREPARE_START,
+    PRESS_BUTTON_RETRACT,
     WALK_THROUGH_DOOR,
-    ALGIN_TO_DOOR,
     EXIT
 };
 
 void executeSM(sm state);
+bool OrientChest(float roll, float pitch, float yaw, ros::Publisher pub);
 
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "Qual2");
     ros::NodeHandle nh;
-
+    ros::Publisher pub = nh.advertise<ihmc_msgs::ChestTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/chest_trajectory", 1);
     ros::Rate loop_rate(10);
 
     armTrajectory armtraj(nh);
     pelvisTrajectory pelvisTraj(nh);
-    ValkyrieWalker walk(nh, 1.1, 1.1, 0);
 
-    sm state = WALK_TO_DOOR;
+    // optimum values for walking
+    ValkyrieWalker walk(nh, 0.305, 0.435);
+    walk.setSwing_height(0.15);
+
+    sm state = PREPARE_START;
 
     while(ros::ok())
     {
-        static int z = 0;
-        //executeSM(state);
-
         switch (state)
         {
+        case PREPARE_START:
+        {
+            pelvisTraj.controlPelvisHeight(1.06);
+            walk.WalkNStepsForward(1,0.35,0,false,RIGHT);
+            ros::Duration(0.5).sleep();
+            armtraj.buttonPressPrepareArm(RIGHT);
+            state = WALK_TO_DOOR;
+
+            break;
+        }
         case WALK_TO_DOOR:
         {
-            ROS_INFO("walking to the door");
-            walk.WalkNStepsForward(6,0.475,-0.03);
-            state = LOWER_PELVIS;
-            break;
-        }
-        case LOWER_PELVIS:
-        {
-            ROS_INFO("lower pelvis");
-            // lower the pelvis
-            pelvisTraj.controlPelvisHeight(0.87);
-            state = PRESS_BUTTON;
-            break;
-        }
-        case PRESS_BUTTON:
-        {
-            z++;
-
-            if(z >10)
-            {
-                ROS_INFO("pressing the button");
-                armtraj.buttonPressArm(RIGHT);
-                z = 0;
-                state = RETRACT_POSE_TO_WALK;
-            }
+            walk.WalkNStepsForward(5,0.51,0, false, RIGHT);
+            OrientChest(0,0,3.5,pub);
+            ros::Duration(0.25).sleep();
+            OrientChest(0,0,0,pub);
+            armtraj.walkPoseArm(RIGHT);
+            walk.setWalkParms(0.31, 0.44, 0);
+            walk.WalkNStepsForward(4,0.5,0);
+            state = EXIT;
 
             break;
         }
-        case RETRACT_POSE_TO_WALK:
-        {
-            z++;
 
-            if(z >30)
-            {
-                ROS_INFO("retract hand");
-                armtraj.walkPoseArm(RIGHT);
-                z = 0;
-                state = RETRACT_PELVIS;
-            }
-
-            break;
-        }
-        case RETRACT_PELVIS:
-        {
-            z++;
-            if(z >15)
-            {
-                ROS_INFO("retract pelvis to normal height");
-                // pelvis back to normal state
-                pelvisTraj.controlPelvisHeight(1);
-                z=0;
-                state = ALGIN_TO_DOOR;
-            }
-            break;
-
-        }
-        case ALGIN_TO_DOOR:
-        {
-            z++;
-            if(z >10)
-            {
-                ROS_INFO("algining to door");
-                walk.WalkNStepsForward(1,0,0.19);
-                z=0;
-                state = WALK_THROUGH_DOOR;
-            }
-
-            break;
-        }
-        case WALK_THROUGH_DOOR:
-        {
-            z++;
-            if(z > 45)
-            {
-                ROS_INFO("walk through the door");
-                walk.WalkNStepsForward(4,0.475,0);
-                z=0;
-                state = EXIT;
-            }
-            break;
-        }
         default:
         EXIT:
 
@@ -132,7 +74,27 @@ int main(int argc, char** argv)
 }
 
 
-//void executeSM(sm state)
-//{
+bool OrientChest(float roll, float pitch, float yaw, ros::Publisher pub){
+    ihmc_msgs::ChestTrajectoryRosMessage msg;
+    std::vector<ihmc_msgs::SO3TrajectoryPointRosMessage> trajPointsVec;
+    ihmc_msgs::SO3TrajectoryPointRosMessage trajPoint;
+    tf::Quaternion angles;
+    angles.setRPY((tfScalar)roll*3.1427/180, (tfScalar)pitch*3.1427/180, (tfScalar)yaw*3.1427/180);
 
-//}
+    geometry_msgs::Quaternion angles2;
+    angles2.x = angles.getX();
+    angles2.y = angles.getY();
+    angles2.z = angles.getZ();
+    angles2.w = angles.getW();
+
+    trajPoint.orientation = angles2;
+    trajPoint.time = 0.0;
+    trajPointsVec.push_back(trajPoint);
+
+    msg.execution_mode = 0;
+    msg.unique_id = 13;
+    msg.taskspace_trajectory_points = trajPointsVec;
+
+    pub.publish(msg);
+
+}
