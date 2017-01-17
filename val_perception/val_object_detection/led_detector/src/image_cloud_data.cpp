@@ -18,9 +18,8 @@
 
 #include <memory>
 #include <thread>
-#include <stdlib.h>
-#include <math.h>
 #include "alglibmisc.h"
+
 
 bool flag = true;
 bool readData = false;
@@ -29,7 +28,7 @@ bool lightDetected = false;
 ros::Publisher *m_lightPub;
 cv::Mat_<double> qMatrix;
 const int maxImages = 25;
-tf::Vector3 previousPoint;
+pcl::PointCloud<pcl::PointXYZ>::Ptr m_cloud;
 
 std::vector<cv::Mat> colorImageVect;
 std::vector<cv::Mat> tempColorImageVect;
@@ -39,12 +38,12 @@ std::vector<srcsim::Console> outputMessages(maxImages);
 
 
 alglib::kdtree kdt;
-double error_x[43] = {82.799999999999983, 83.714285714285651, 33.175000000000011, 147.13636363636368, 40.937500000000171, 34.766666666666502, 78.762500000000102, 11.149999999999977, 163.17999999999967, 46.340000000000174, 192.30000000000018, 43.872222222222291, 71.9769230769231, 39.083333333333258, 34.9866666666668, 24.062499999999915, 56.810526315789524, 22.937499999999716, 26.828571428571358, 70.439999999999912, 62.209090909091053, 53.142105263157788, 22.41666666666659, 75.404166666666626, 17.612500000000125, 64.225000000000023, 59.328571428571195, 22.542857142856942, 10.600000000000104, 89.500000000000171, 74.681818181818187, 6.1857142857143117, 22.189999999999873, 60.807692307692307, 26.319047619047609, 100.98571428571437, 31.153846153846082, 40.678571428571459, 93.16250000000025, 91.60909090909081, 174.04999999999987, 187.02500000000009, 15.39333333333334};
-double error_y[43] = {12.28571428571429, 8.0428571428571694, 13.250000000000057, 4.863636363636366, 13.737500000000004, 2.0333333333333221, 1.6249999999999964, 6.7500000000000142, 29.859999999999992, 14.433333333333326, 39.883333333333347, 1.5555555555555525, 19.507692307692306, 12.650000000000025, 13.553333333333352, 5.381249999999973, 3.6105263157894658, 4.7874999999999943, 11.235714285714282, 2.0300000000000069, 15.490909090909099, 15.078947368421058, 3.8916666666666608, 14.229166666666666, 3.1187499999999986, 3.800000000000002, 4.8142857142856963, 9.3928571428571299, 3.4714285714285609, 3.9250000000000007, 22.572727272727288, 6.5714285714285792, 9.3150000000000084, 1.2615384615384728, 2.900000000000015, 13.900000000000009, 11.553846153846145, 2.7142857142857224, 0.95000000000000995, 15.872727272727275, 25.583333333333332, 31.999999999999986, 4.8000000000000078};
-double error_z[43] = {4.4000000000000012, 3.999999999999992, 5.0874999999999968, 19.390909090909101, 2.6062500000000064, 4.7666666666666648, 4.1124999999999972, 4.9999999999999716, 21.840000000000011, 4.6066666666666629, 27.116666666666674, 3.9944444444444391, 2.6769230769230559, 4.6833333333333371, 2.619999999999997, 4.0874999999999808, 2.2578947368421041, 6.1875000000000018, 5.3857142857142852, 2.7200000000000015, 1.4363636363636194, 1.9789473684210479, 3.8333333333333428, 3.6000000000000014, 7.0437500000000064, 2.0083333333333351, 3.9714285714285649, 5.0, 6.7285714285714322, 6.0624999999999964, 3.0181818181818016, 5.0142857142857258, 8.4799999999999933, 2.0076923076923006, 5.5714285714285721, 4.3571428571428568, 4.546153846153846, 4.5285714285714294, 5.4000000000000092, 3.8454545454545515, 24.01666666666668, 27.024999999999991, 3.1733333333333236};
-const int m_readingThreshold = 3;
+double error_x[43] = {52.099999999999909, 78.499999999999773, -140.79999999999973, 25.099999999999909, 24.800000000000182, 83.000000000000455, 42.5, 47.749999999999773, -178.69999999999936, -189.00000000000045, 89.350000000000364, 48.200000000000273, -32.099999999999909, -1.3000000000004093, 88.800000000000182, 53.899999999999864, 71.400000000000091, 31.199999999999818, 4.5000000000004547, 42.299999999999955, 37.200000000000273, 0.3000000000001819, 19.400000000000091, 10.799999999999727, 34.300000000000182, 53.450000000000045, 86.200000000000045, -29.099999999999682, 49.099999999999909, -11.149999999999864, 44.799999999999727, 84.899999999999636, 39.700000000000045, 62.900000000000091, 73.400000000000091, 100.29999999999973, 20.799999999999727, 74.800000000000182, 54.900000000000091, 89.300000000000182, -4.7500000000002274, 33.099999999999454, 39.800000000000182};
+double error_y[43] = {-0.59999999999996589, -24.300000000000011, -0.70000000000001705, -4.6000000000000227, -11.199999999999932, -16.400000000000006, -17.100000000000023, 1.0999999999999943, 31.399999999999977, -32.0, -4.1500000000000057, -15.200000000000045, -9.2000000000000455, -6.9000000000000341, 6.0, 1.9499999999999886, -14.900000000000034, -11.700000000000045, -7.0999999999999659, -1.4499999999999886, -2.8000000000000682, -5.4000000000000341, -9.7000000000000455, -7.1999999999999886, -14.5, -16.199999999999989, -2.2000000000000028, 0.59999999999999432, 0.85000000000002274, -6.75, -14.799999999999955, -16.600000000000023, -1.5500000000000114, -20.899999999999977, 4.0, -17.199999999999989, -6.5999999999999659, -3.5499999999999972, -17.150000000000034, -3.0999999999999943, -4.2999999999999545, 0.30000000000001137, -12.199999999999932};
+double error_z[43] = {0.60000000000002274, 3.5499999999999829, 18.200000000000045, -5.5, -5.6999999999999993, 5.7000000000000455, 1.6499999999999773, 3.5499999999999829, 24.5, 27.300000000000011, 6.0, -3.8999999999999915, -9.3000000000000682, -5.0999999999999659, 3.4000000000000341, -3.8999999999999915, 2.1999999999999886, -4.5999999999999943, -4.0, -3.5999999999999943, -6.1999999999999993, -4.8000000000000114, -5.0, -4.0, -5.2999999999999972, 1.3499999999999943, 3.2500000000000142, -9.4000000000000057, 0.69999999999998863, -5.0499999999999829, -0.099999999999965894, 3.1999999999999602, -0.90000000000003411, 2.6999999999999318, 4.2999999999999545, 4.3000000000000114, -7.0, 3.6500000000000057, 3.0999999999999943, 6.4000000000000057, -6.5500000000000114, -7.2000000000000028, -5.3999999999999915};
 
 
+bool getNearestPoint(geometry_msgs::PointStamped &point, int K=1);
 int getMode(int daArray[], int iSize)
 {
     int* ipRepetition = new int[iSize];
@@ -73,7 +72,7 @@ int getMode(int daArray[], int iSize)
 
 void kdtreeInit()
 {
-    alglib::real_2d_array centers = "[[2649.1555555555556, -161.05555555555557, 289.97777777777776], [2684.6555555555556, 519.7666666666668, 265.5333333333333], [2810.5, -615.97, 0.6200000000000045], [2596.730769230769, -7.792307692307694, -471.1000000000001], [2559.6944444444443, -491.5944444444445, 343.2], [2810.0375, 577.4375, -45.17500000000001], [2649.35, 209.96, 289.88], [2512.0333333333333, 362.5333333333333, 380.1166666666667], [2553.6857142857143, -470.0142857142857, -454.37142857142857], [2809.9764705882353, -563.3647058823528, 86.25294117647057], [2553.225, 429.06249999999994, -454.0375000000001], [2821.395, 458.09, 84.71999999999998], [2691.5066666666667, -473.52, 264.6733333333333], [2815.8125, -437.05, 85.52499999999999], [2496.1470588235293, -490.5941176470588, 382.2470588235294], [2457.438888888889, 518.0611111111111, 402.48333333333335], [2623.704761904762, 474.6190476190476, 304.1904761904762], [2831.5, 395.31, -15.110000000000014], [2816.1375, -528.5625, -46.006249999999966], [2709.2166666666667, 310.9666666666667, 254.99166666666667], [2699.146153846154, -374.7076923076923, 260.32307692307694], [2627.6809523809525, -438.04285714285714, 303.7809523809524], [2501.4714285714285, 438.5857142857143, 381.42857142857144], [2649.857692307692, -266.71923076923076, 289.80384615384617], [2466.1222222222223, -394.35, 401.4611111111111], [2693.9285714285716, 440.3142857142857, 264.3071428571429], [2554.788888888889, 518.6666666666666, 343.84444444444443], [2818.475, -436.56874999999997, -13.456250000000011], [2430.99375, -488.74999999999994, 421.225], [2674.3, 122.05, 280.56], [2665.107692307692, -557.3461538461538, 277.65384615384613], [2563.1555555555556, -394.78888888888883, 342.87777777777774], [2440.2772727272727, 415.98636363636376, 420.16363636363644], [2643.94, 320.86000000000007, 295.74], [2817.2652173913043, 488.6652173913042, -6.15217391304347], [2713.9777777777776, -160.64444444444445, 250.79999999999998], [2815.4066666666668, -526.0333333333334, 19.81333333333336], [2806.33125, 577.83125, 53.8125], [2714.39, 210.07, 250.47], [2714.8076923076924, -242.15384615384616, 250.66923076923075], [2560.7375, -376.3374999999999, -455.2250000000001], [2573.7833333333333, 337.68333333333334, -456.8333333333332], [2567.9470588235295, 416.16470588235296, 342.06470588235294]]";
+    alglib::real_2d_array centers = "[[2642.5285714285715, 357.9714285714284, 301.84285714285716], [2686.825, -555.0, 265.4125], [2602.12, -62.4, -471.85999999999996], [2831.98, 398.6, 17.74000000000001], [2811.842857142857, -531.3000000000001, 20.25714285714284], [2652.1285714285714, -250.0, 289.57142857142856], [2492.15, -552.05, 382.625], [2515.383333333333, 432.5, 379.46666666666664], [2556.7400000000002, -465.5, -454.7799999999999], [2574.94, 340.24, -456.9800000000001], [2661.1375000000003, 122.87499999999997, 288.4375], [2806.057142857143, -616.8142857142857, 86.84285714285714], [2447.357142857143, 364.0571428571428, 419.1714285714286], [2493.85, -476.30000000000007, 382.55], [2709.8, 428.98, 262.1], [2832.45, 478.775, 83.125], [2650.4285714285716, -322.4428571428572, 289.7857142857143], [2811.633333333333, -617.1666666666666, -45.366666666666646], [2558.5, -476.67999999999995, 343.46000000000004], [2831.616666666667, 396.29999999999995, 83.51666666666667], [2834.7000000000003, 481.96000000000004, 17.279999999999973], [2449.4857142857145, 437.42857142857144, 418.9857142857143], [2813.6857142857143, -532.0142857142856, -45.72857142857143], [2577.6800000000003, 358.64, 341.02], [2810.0142857142855, -615.4571428571428, 20.32857142857145], [2688.4666666666667, -482.45000000000005, 265.05], [2727.9, 196.85000000000005, 248.0], [2430.1000000000004, -480.20000000000005, 420.8], [2580.1, 431.525, 340.4], [2512.0333333333333, 362.5333333333333, 380.1166666666667], [2623.9666666666667, -481.9666666666667, 304.3666666666667], [2716.0, -328.4333333333333, 250.1], [2707.15, 356.54999999999995, 262.625], [2621.8, -554.2666666666667, 304.5], [2646.1, 427.4666666666667, 300.8666666666667], [2717.0, -249.43333333333337, 250.43333333333334], [2832.9333333333334, 401.20000000000005, -48.26666666666668], [2663.4, 196.9, 288.04999999999995], [2557.3, -554.25, 343.55], [2726.95, 118.75, 249.05], [2427.25, -550.0, 421.9], [2833.8999999999996, 489.29999999999995, -48.19999999999999], [2811.1000000000004, -535.4, 85.7]]";
     alglib::ae_int_t nx = 3;
     alglib::ae_int_t ny = 0;
     alglib::ae_int_t normtype = 2;
@@ -85,38 +84,40 @@ void kdtreeInit()
 }
 
 
-void errorCorrection(srcsim::Console &data, std::vector<double> &pos)
+void errorCorrection(srcsim::Console &data)
 {
-    std::cout << "Check Point A" <<std::endl;
+    //    std::cout << "Check Point A" <<std::endl;
 
 
     alglib::ae_int_t k;
     int winnerTag;
-    std::cout << "Check Point B" <<std::endl;
+    //    std::cout << "Check Point B" <<std::endl;
 
-        alglib::integer_1d_array tag_r;
-        double x_p = data.x*1000;
-        double y_p = data.y*1000;
-        double z_p = data.z*1000;
-        std::ostringstream temp;
-        temp<<"[";
-        temp<<x_p;
-        temp<<",";
-        temp<<y_p;
-        temp<<",";
-        temp<<z_p;
-        temp<<"]";
-        ROS_INFO(temp.str().c_str());
-        alglib::real_1d_array point(temp.str().c_str());
-        ROS_INFO(temp.str().c_str());
-        //        point ="[2686.825, -555.0, 265.4125]";
-        k = alglib::kdtreequeryknn(kdt, point, 1);
-        kdtreequeryresultstags(kdt,tag_r );
-        winnerTag = int(tag_r[0]);
+    alglib::integer_1d_array tag_r;
+    double x_p = data.x*1000;
+    double y_p = data.y*1000;
+    double z_p = data.z*1000;
+    std::ostringstream temp;
+    temp<<"[";
+    temp<<x_p;
+    temp<<",";
+    temp<<y_p;
+    temp<<",";
+    temp<<z_p;
+    temp<<"]";
+    //        ROS_INFO(temp.str().c_str());
+    alglib::real_1d_array point(temp.str().c_str());
+    //        point ="[2686.825, -555.0, 265.4125]";
+    k = alglib::kdtreequeryknn(kdt, point, 1);
+    alglib::kdtreequeryresultstags(kdt,tag_r );
+    //modify it to check if the value is updated
+    winnerTag = int(tag_r[0]);
+    if(winnerTag < 0 || winnerTag > 42)
+        return;
 
-        pos.push_back(data.x + error_x[winnerTag]/1000.0);
-        pos.push_back(data.y + error_y[winnerTag]/1000.0);
-        pos.push_back(data.z + error_z[winnerTag]/1000.0);
+    data.x = (data.x + error_x[winnerTag]/1000.0);
+    data.y = (data.y + error_y[winnerTag]/1000.0);
+    data.z = (data.z + error_z[winnerTag]/1000.0);
     return;
 }
 
@@ -171,7 +172,7 @@ bool getLight(int index,geometry_msgs::Point &pixelCoordinates, bool tempImage=f
     // Approximate the contours to a polygonal shape
     for( int i = 0; i< gradientContours.size(); i++ )
     {
-        approxPolyDP( cv::Mat(gradientContours[i]), contours_poly[i], 3, true );
+        approxPolyDP(cv::Mat(gradientContours[i]), contours_poly[i], 3, true );
     }
 
     // Draws the contours onto the original image. Comment this section if no need to draw contours
@@ -189,12 +190,12 @@ bool getLight(int index,geometry_msgs::Point &pixelCoordinates, bool tempImage=f
         {
             // Finding x,y coordinates of centroid of the contour
             points.push_back(cv::Point2f(moment.m10/moment.m00,moment.m01/moment.m00));
-//            ROS_INFO("GetLight");
+            //            ROS_INFO("GetLight");
 
             // Assigning x,y xo-ordinates in image frame
             pixelCoordinates.x = points[i].x;
             pixelCoordinates.y = points[i].y;
-//            ROS_INFO("Pixel Coordinates  x: %.2f y: %.2f",pixelCoordinates.x, pixelCoordinates.y);
+            //            ROS_INFO("Pixel Coordinates  x: %.2f y: %.2f",pixelCoordinates.x, pixelCoordinates.y);
             lightXYDetected = true;
             i++;
         }
@@ -266,12 +267,9 @@ bool getPoseRGB(int index, geometry_msgs::Point &pixelCoordinates)
     msg.r = (int)((pcl_point.r/255.0)+0.3);
     msg.g = (int)((pcl_point.g/255.0)+0.3);
     msg.b = (int)((pcl_point.b/255.0)+0.3);
-    std::vector<double> pos;
-    errorCorrection(msg,pos);
 
-    msg.x = pos[0];
-    msg.z = pos[1];
-    msg.y = pos[2];
+    errorCorrection(msg);
+
     // If there is no LED turned on, then just don't detect anything
     if (msg.r == 0.0 && msg.g == 0 && msg.b == 0){
         poseXYZDetected = false;
@@ -279,9 +277,7 @@ bool getPoseRGB(int index, geometry_msgs::Point &pixelCoordinates)
     }
 
     poseXYZDetected = true;
-//    ROS_INFO("Updating Message at index :%d",index );
-    //    m_lightPub->publish(msg);
-//    outputMessages.insert(outputMessages.begin()+index,msg);
+    //    ROS_INFO("Updating Message at index :%d",index );
     outputMessages[index]=msg;
     return poseXYZDetected;
 }
@@ -356,8 +352,10 @@ void dispCB(stereo_msgs::DisparityImageConstPtr msg )
         {
             disparityImageVect.push_back(disparity_);
             flag = !flag;
-            if(disparityImageVect.size() == maxImages)
+            if(disparityImageVect.size() == maxImages){
+                ROS_INFO("Read %d images", maxImages);
                 readData = true;
+            }
         }
 
 
@@ -366,32 +364,146 @@ void dispCB(stereo_msgs::DisparityImageConstPtr msg )
 }
 
 void runner(int i){
-//    ROS_INFO("starting thread %d", i);
+    //    ROS_INFO("starting thread %d", i);
     geometry_msgs::Point pnt;
     if(getLight(i,pnt))
         getPoseRGB(i,pnt);
 }
+
+bool isLessThan(const srcsim::Console &lhs,const srcsim::Console &rhs){
+    return lhs.x< rhs.x;
+}
+
+bool getNearestPoint(srcsim::Console &msg, int K=1){
+    geometry_msgs::PointStamped pnt;
+    pnt.point.x = msg.x;
+    pnt.point.y = msg.y;
+    pnt.point.z = msg.z;
+    pnt.header.frame_id="/head";
+
+    bool success = getNearestPoint(pnt, K);
+    if(success){
+        msg.x = pnt.point.x;
+        msg.y = pnt.point.y;
+        msg.z = pnt.point.z;
+    }
+
+    return success;
+}
+
+bool getNearestPoint(geometry_msgs::PointStamped &point, int K)
+{
+    if (m_cloud->empty()){
+        ROS_INFO("Point cloud is empty");
+        return false;
+    }
+
+    // store the frameID of original point so that we can retransform the output to that frame
+    std::string originalFrame = point.header.frame_id;
+    point.header.stamp = ros::Time(0);
+    tf::TransformListener listener;
+
+    //     transform the point to world frame
+    if (originalFrame != VAL_COMMON_NAMES::WORLD_TF){
+        try{
+            listener.waitForTransform("/head", "/world", ros::Time(0), ros::Duration(3));
+            listener.transformPoint(VAL_COMMON_NAMES::WORLD_TF,point, point);
+        }
+        catch(tf::TransformException ex){
+            ROS_ERROR("%s",ex.what());
+            return false;
+        }
+    }
+
+    // get a kdtree for searching point
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (m_cloud);
+    pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+    kdtree.setInputCloud (cloud);
+
+    // index of points in the pointcloud
+    std::vector<int> pointIdxNKNSearch(K);
+    //squared distance of points
+    std::vector<float> pointNKNSquaredDistance(K);
+
+    // convert input point into PCL point for searching
+    pcl::PointXYZ searchPoint;
+    searchPoint.x = point.point.x;
+    searchPoint.y = point.point.y;
+    searchPoint.z = point.point.z;
+
+    std::cout << "K nearest neighbor search at (" << searchPoint.x
+              << " " << searchPoint.y
+              << " " << searchPoint.z
+              << ") with K=" << K << std::endl;
+
+    float meanX=0.0, meanY=0.0, meanZ=0.0;
+
+    //perform nearestKsearch
+    if ( kdtree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
+    {
+        for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i){
+            meanX += cloud->points[ pointIdxNKNSearch[i] ].x;
+            meanY += cloud->points[ pointIdxNKNSearch[i] ].y;
+            meanZ += cloud->points[ pointIdxNKNSearch[i] ].z;
+            std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+                      << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+                      << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+                      << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+        }
+        point.point.x = meanX = meanX/pointIdxNKNSearch.size();
+        point.point.y = meanY = meanY/pointIdxNKNSearch.size();
+        point.point.z = meanZ = meanZ/pointIdxNKNSearch.size();
+
+    }
+
+    point.header.stamp = ros::Time(0);
+
+    //transform the point back to its original frame, if required
+    if (originalFrame != VAL_COMMON_NAMES::WORLD_TF){
+        try{
+            listener.transformPoint(originalFrame, point, point);
+        }
+        catch(tf::TransformException ex){
+            ROS_ERROR("%s",ex.what());
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void laserCloudCallBack(const sensor_msgs::PointCloud2 &msg)
+{
+    pcl::PCLPointCloud2 pcl_pc2;
+    pcl_conversions::toPCL(msg,pcl_pc2);
+    pcl::fromPCLPointCloud2(pcl_pc2,*m_cloud);
+}
+
+
 
 int main(int argc, char **argv)
 {
     //Initialize ROS system
     ros::init (argc,argv, "image_disp_data");
     ros::NodeHandle nh;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    m_cloud = temp_cloud;
     //setup subscriber and publisher
     ros ::Subscriber colorImageSub = nh.subscribe("/multisense/camera/left/image_rect_color",1,imageCB);
     ros ::Subscriber disparityImageSub = nh.subscribe("/multisense/camera/disparity",1,dispCB);
+    ros::Subscriber m_laserCloudSub = nh.subscribe("/assembled_cloud2",1, laserCloudCallBack);
     ros::Publisher temp = nh.advertise<srcsim::Console>("/srcsim/qual1/light",1);
     //the pointer is public so had to use a temp variable
     m_lightPub = &temp;
+
     ros::Rate loopRate = 100;
     ros::Time begin = ros::Time::now();
     ros::Time end;
     float time_taken ;
-    float minimumLightDistance = 0.02;
 
     //populate the qMatrix. it wont change with every image so no point in calculatin it everytime
-//    src_perception::MultisenseImage *m_multisenseImagePtr = new src_perception::MultisenseImage(nh);
-//    m_multisenseImagePtr->giveQMatrix(qMatrix);
+    //    src_perception::MultisenseImage *m_multisenseImagePtr = new src_perception::MultisenseImage(nh);
+    //    m_multisenseImagePtr->giveQMatrix(qMatrix);
     qMatrix=cv::Mat_<double>(4,4,0.0);
     qMatrix(0,0) =  610.1799470098168 * -0.07;
     qMatrix(1,1) =  610.1799470098168 * -0.07;
@@ -401,6 +513,8 @@ int main(int argc, char **argv)
     qMatrix(3,2) = -610.1799470098168;
     qMatrix(3,3) =  0.0f;
 
+    //initialize kdtree for error correction
+    kdtreeInit();
 
     while(ros::ok())
     {
@@ -434,7 +548,7 @@ int main(int argc, char **argv)
         {
             end  = ros::Time::now();
             time_taken = end.toSec() - begin.toSec();
-//            ROS_INFO("Time taken = %lf",time_taken );
+            //            ROS_INFO("Time taken = %lf",time_taken );
 
             outputMessages = std::vector<srcsim::Console>(maxImages);
 
@@ -451,6 +565,12 @@ int main(int argc, char **argv)
             // calculating mean of the results
             float meanX=0.0, meanY=0.0,meanZ=0.0;
             bool skipIteration = false;
+            //            for (size_t i=0; i< outputMessages.size(); i++){
+            //                cv::imshow("Images",colorImageVect[i]);
+            //                cv::waitKey(3);
+            //            }
+            pcl::PointCloud<pcl::PointXYZ>::Ptr m_cloud;
+            std::sort(outputMessages.begin(), outputMessages.end(), isLessThan);
 
             for (size_t i=0; i< outputMessages.size(); i++){
                 if (outputMessages[i].x == 0.0 && outputMessages[i].y == 0.0 && outputMessages[i].z == 0.0){
@@ -458,36 +578,38 @@ int main(int argc, char **argv)
                     ROS_INFO("Skipping this iteration");
                     break;
                 }
-                meanX += outputMessages[i].x;
-                meanY += outputMessages[i].y;
-                meanZ += outputMessages[i].z;
-//                ROS_INFO("output message %d x:%.4f y:%.4f z:%.4f", i, outputMessages[i].x, outputMessages[i].y, outputMessages[i].z);
+                //                meanX += outputMessages[i].x;
+                //                meanY += outputMessages[i].y;
+                //                meanZ += outputMessages[i].z;
+                //                ROS_INFO("output message %d x:%.4f y:%.4f z:%.4f", i, outputMessages[i].x, outputMessages[i].y, outputMessages[i].z);
             }
 
 
             srcsim::Console msg;
-            msg.x = meanX/outputMessages.size();
-            msg.y = meanY/outputMessages.size();
-            msg.z = meanZ/outputMessages.size();
-            msg.r = outputMessages[0].r;
-            msg.g = outputMessages[0].g;
-            msg.b = outputMessages[0].b;
+            int index = outputMessages.size()/2;
+            msg.x = outputMessages[index].x;
+            msg.y = outputMessages[index].y;
+            msg.z = outputMessages[index].z;
+            // This will always exist due to line #437
+            msg.r = outputMessages[index].r;
+            msg.g = outputMessages[index].g;
+            msg.b = outputMessages[index].b;
 
-
-//            tf::Vector3 currentPoint(msg.x, msg.y, msg.z);
             // publish the message only if it is not the same light
             if (!skipIteration){
+                if(getNearestPoint(msg, 10))
+                    ROS_INFO("Updated the point with lidar data");
                 ROS_INFO("Publishing message x:%.4f y:%.4f z:%.4f", msg.x, msg.y, msg.z);
                 m_lightPub->publish(msg);
+                ros::Duration(0.2).sleep();
             }
-//            previousPoint = currentPoint;
 
             begin = ros::Time::now();
             lightDetected=false;
+
             // clearing vectors to be used for next light
             colorImageVect.clear();
             disparityImageVect.clear();
-
             readData = false;
 
         }
