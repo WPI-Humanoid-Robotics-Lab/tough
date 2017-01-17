@@ -23,7 +23,7 @@
    <node pkg="laser_filters" type="scan_to_scan_filter_chain"
       name="laser_filter">
 
-    <rosparam command="load" file="$(find val_scan2scan)/my_laser_config.yaml" />
+    <rosparam command="load" file="$(find val_scan2scan)/range_filter.yaml" />
     <remap from="/scan" to="/multisense/lidar_scan" />
     <remap from="/scan_filtered" to="/multisense/lidar_scan_filtered" />
 
