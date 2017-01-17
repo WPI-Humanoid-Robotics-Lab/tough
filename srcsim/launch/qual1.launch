@@ -30,7 +30,7 @@
   <include file="$(find ihmc_valkyrie_ros)/launch/val_wholebody_control_gazebo.launch"/>
 
   <group if="$(arg init)">
-    <node name="startup_robot" pkg="srcsim" type="init_robot.sh" args="$(arg walk_test)" output="screen"/>
+    <node name="startup_robot" pkg="srcsim" type="init_robot1.sh" args="$(arg walk_test)" output="screen"/>
   </group>
 
   <!--

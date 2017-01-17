@@ -17,6 +17,14 @@
 #include <math.h>
 #include "alglibmisc.h"
 
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/point_types.h>
+#include <pcl/PCLPointCloud2.h>
+#include <pcl/conversions.h>
+#include <pcl_ros/transforms.h>
+#include <pcl/kdtree/kdtree_flann.h>
+
+
 
 /**
  * @brief The ImageFrame class Datatype for storing image frames
@@ -97,7 +105,8 @@ namespace src_qual1_task
              */
             std::string m_leftCameraOpticalFrame = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
 
-
+            bool getNearestPoint(geometry_msgs::PointStamped &point, int K=1);
+            void laserCloudCallBack(const sensor_msgs::PointCloud2 &msg);
             
         protected:
 
@@ -115,7 +124,8 @@ namespace src_qual1_task
              */
             ros::Publisher m_imageRGBXYZpub;
             ros::Publisher m_lightPub;
-
+            ros::Subscriber m_laserCloudSub;
+            pcl::PointCloud<pcl::PointXYZ>::Ptr m_cloud;
             /**
              * @brief m_gradientContours - 
              */

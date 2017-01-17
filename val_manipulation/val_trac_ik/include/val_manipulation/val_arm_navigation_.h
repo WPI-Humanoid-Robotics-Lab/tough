@@ -20,6 +20,7 @@ public:
     armTrajectory(ros::NodeHandle nh);
     ~armTrajectory();
 
+    void buttonPressPrepareArm(armSide side);
     void buttonPressArm(armSide side);
     void walkPoseArm(armSide side);
     void zeroPoseArm(armSide side);

@@ -1,16 +1,19 @@
 #include <led_detector/LedDetector.h>
 #include <ros/ros.h>
 #include <geometry_msgs/PointStamped.h>
+#include <perception_common/periodic_snapshotter.h>
 
 using namespace src_qual1_task;
 
-LedDetector::LedDetector(ros::NodeHandle nh) {
+LedDetector::LedDetector(ros::NodeHandle nh):m_laserCloudSub(nh.subscribe("/assembled_cloud2",1, &LedDetector::laserCloudCallBack, this)) {
     m_multisenseImagePtr = new src_perception::MultisenseImage(nh);
     m_randomGen= cv::RNG(12345);
     m_imageRGBXYZpub = nh.advertise<led_detector::LedPositionColor>("/detect/light/rgbxyz", 1);
     m_lightPub = nh.advertise<srcsim::Console>("/srcsim/qual1/light",1);
     m_multisenseImagePtr->giveQMatrix(m_qMatrix);
     this->kdtreeInit();
+    pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    m_cloud= temp_cloud;
 }
 
 LedDetector::~LedDetector() {
@@ -235,6 +238,7 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
     transform.setRotation(orientation);
     br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "head", "LED_frame")); //Co-ordinates wrt left_camera_optical_frame
 
+
     message.position.x = msg.x = light_centroid_head.point.x;
     message.position.y = msg.y = light_centroid_head.point.y;
     message.position.z = msg.z = light_centroid_head.point.z;
@@ -274,20 +278,26 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
         meanG = meanG/m_readings.size();
         meanB = meanB/m_readings.size();
         ROS_INFO("%.4f, %.4f, %.4f", pos[0], pos[1], pos[2]);
-        msg.x = pos[0];
-        msg.y = pos[1];
-        msg.z = pos[2];
-        msg.r = meanR < 0.9 ? 0 : 1;
-        msg.g = meanG < 0.9 ? 0 : 1;
-        msg.b = meanB < 0.9 ? 0 : 1;
+        light_centroid_head.point.x = pos[0];
+        light_centroid_head.point.y = pos[1];
+        light_centroid_head.point.z = pos[2];
+
+        if(getNearestPoint(light_centroid_head, 10))
+            ROS_INFO("Updated the point with lidar data");
+        msg.x = light_centroid_head.point.x;
+        msg.y = light_centroid_head.point.y;
+        msg.z = light_centroid_head.point.z;
+        msg.r = message.color.r;
+        msg.g = message.color.g;
+        msg.b = message.color.b;
         pos.clear();
         m_imageRGBXYZpub.publish(message);
         ROS_INFO("Publishing Message");
         m_lightPub.publish(msg);
         m_readings.clear();
-
+        return true;
     }
-    return poseXYZDetected;
+    return false;
 }
 
 bool LedDetector::detectLight() {
@@ -304,6 +314,93 @@ bool LedDetector::detectLight() {
     return false;
 
 }
+bool LedDetector::getNearestPoint(geometry_msgs::PointStamped &point, int K)
+{
+    if (m_cloud->empty()){
+        ROS_INFO("Point cloud is empty");
+        return false;
+    }
+
+    // store the frameID of original point so that we can retransform the output to that frame
+    std::string originalFrame = point.header.frame_id;
+    point.header.stamp = ros::Time(0);
+    tf::TransformListener listener;
+
+//     transform the point to world frame
+    if (originalFrame != VAL_COMMON_NAMES::WORLD_TF){
+        try{
+            listener.waitForTransform("/head", "/world", ros::Time(0), ros::Duration(3));
+            listener.transformPoint(VAL_COMMON_NAMES::WORLD_TF,point, point);
+        }
+        catch(tf::TransformException ex){
+            ROS_ERROR("%s",ex.what());
+            return false;
+        }
+    }
+
+    // get a kdtree for searching point
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (m_cloud);
+    pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+    kdtree.setInputCloud (cloud);
+
+    // index of points in the pointcloud
+    std::vector<int> pointIdxNKNSearch(K);
+    //squared distance of points
+    std::vector<float> pointNKNSquaredDistance(K);
+
+    // convert input point into PCL point for searching
+    pcl::PointXYZ searchPoint;
+    searchPoint.x = point.point.x;
+    searchPoint.y = point.point.y;
+    searchPoint.z = point.point.z;
+
+    std::cout << "K nearest neighbor search at (" << searchPoint.x
+              << " " << searchPoint.y
+              << " " << searchPoint.z
+              << ") with K=" << K << std::endl;
+
+    float meanX, meanY, meanZ;
+
+    //perform nearestKsearch
+    if ( kdtree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
+    {
+        for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i){
+            meanX += cloud->points[ pointIdxNKNSearch[i] ].x;
+            meanY += cloud->points[ pointIdxNKNSearch[i] ].y;
+            meanZ += cloud->points[ pointIdxNKNSearch[i] ].z;
+            std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+                      << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+                      << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+                      << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+        }
+        point.point.x = meanX = meanX/pointIdxNKNSearch.size();
+        point.point.y = meanY = meanY/pointIdxNKNSearch.size();
+        point.point.z = meanZ = meanZ/pointIdxNKNSearch.size();
+
+    }
+
+    point.header.stamp = ros::Time(0);
+
+    //transform the point back to its original frame, if required
+    if (originalFrame != VAL_COMMON_NAMES::WORLD_TF){
+        try{
+            listener.transformPoint(originalFrame, point, point);
+        }
+        catch(tf::TransformException ex){
+            ROS_ERROR("%s",ex.what());
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void LedDetector::laserCloudCallBack(const sensor_msgs::PointCloud2 &msg)
+{
+    pcl::PCLPointCloud2 pcl_pc2;
+    pcl_conversions::toPCL(msg,pcl_pc2);
+    pcl::fromPCLPointCloud2(pcl_pc2,*m_cloud);
+}
 
 
 int main(int argc, char *argv[]) {
@@ -311,13 +408,19 @@ int main(int argc, char *argv[]) {
     ros::NodeHandle nh;
     src_qual1_task::LedDetector   led_detect(nh);
     ros::Time start= ros::Time::now();
-    while (ros::ok()) {
+    unsigned int numberOfLightsDetected=0;
+    while (ros::ok() and numberOfLightsDetected < 20) {
         bool success = led_detect.detectLight();
-        std::string output = success ? "Button Detected in %0.6f secs" : "Detection Failed!!! in %0.6f secs";
-        ROS_INFO(output.c_str(), (ros::Time::now() - start).toSec());//tbw
+        if (success){
+            numberOfLightsDetected++;
+        }
+//        std::string output = success ? "Button Detected in %0.6f secs" : "Detection Failed!!! in %0.6f secs";
+
+//        ROS_INFO(output.c_str(), (ros::Time::now() - start).toSec());//tbw
         ros::spinOnce();
         start= ros::Time::now();
     }
+    ros::Duration(8).sleep();
 
     return 0;
 }

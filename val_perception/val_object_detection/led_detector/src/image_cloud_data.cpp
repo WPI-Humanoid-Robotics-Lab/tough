@@ -495,6 +495,7 @@ int main(int argc, char **argv)
     ros::Publisher temp = nh.advertise<srcsim::Console>("/srcsim/qual1/light",1);
     //the pointer is public so had to use a temp variable
     m_lightPub = &temp;
+     unsigned int numberOfLightsDetected=0;
 
     ros::Rate loopRate = 100;
     ros::Time begin = ros::Time::now();
@@ -516,7 +517,7 @@ int main(int argc, char **argv)
     //initialize kdtree for error correction
     kdtreeInit();
 
-    while(ros::ok())
+    while (ros::ok() and numberOfLightsDetected < 20)
     {
         //wait for the light to be switched on
         //assuming light detection will work soon
@@ -601,6 +602,7 @@ int main(int argc, char **argv)
                     ROS_INFO("Updated the point with lidar data");
                 ROS_INFO("Publishing message x:%.4f y:%.4f z:%.4f", msg.x, msg.y, msg.z);
                 m_lightPub->publish(msg);
+                numberOfLightsDetected++;
                 ros::Duration(0.2).sleep();
             }
 
@@ -618,6 +620,7 @@ int main(int argc, char **argv)
         ros::spinOnce();
         loopRate.sleep();
     }
+    ros::Duration(7).sleep();
     return 0;
 
 }

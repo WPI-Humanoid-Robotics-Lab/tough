@@ -6,7 +6,7 @@
 
 #include "val_footstep/ValkyrieWalker.h"
 #include <iostream>
-
+#include<ros/ros.h>
 
 // CallBack function for walking status
 ///\todo Must have more status feedback from the Robot. Should know if it did not complete the step then what happened.
@@ -15,7 +15,7 @@ void ValkyrieWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage 
     if(msg.status == 1)
     {
         step_counter++;
-        ROS_INFO("step counter : %d",step_counter);
+        //        ROS_INFO("step counter : %d",step_counter);
 
     }
 
@@ -49,7 +49,7 @@ bool ValkyrieWalker::WalkToGoal( geometry_msgs::Pose2D &goal)
 }
 
 // creates and n footsteps of width step_size
-bool ValkyrieWalker::WalkNStepsForward(int n, float x_offset, float y_offset, bool continous)
+bool ValkyrieWalker::WalkNStepsForward(int n, float x_offset, float y_offset, bool continous, armSide startLeg)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.transfer_time = transfer_time;
@@ -61,21 +61,21 @@ bool ValkyrieWalker::WalkNStepsForward(int n, float x_offset, float y_offset, bo
     for (int m =1; m <= n ; m++)
     {
         if(m%2 == 1)
-            list.footstep_data_list.push_back(*getOffsetStep(LEFT , m*x_offset, m*y_offset));
+            list.footstep_data_list.push_back(*getOffsetStep(startLeg , m*x_offset, m*y_offset));
         else
-            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , m*x_offset, m*y_offset));
+            list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2 , m*x_offset, m*y_offset));
     }
 
     if(!continous){
         if (n%2 ==1)
-            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , n*x_offset, n*y_offset));
+            list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2  , n*x_offset, n*y_offset));
         if (n%2 ==0)
-            list.footstep_data_list.push_back(*getOffsetStep(LEFT , n*x_offset, n*y_offset));
+            list.footstep_data_list.push_back(*getOffsetStep(startLeg , n*x_offset, n*y_offset));
     }
 
     /*
     this->footsteps_to_val.publish(list);
-   
+
     ValkyrieWalker::id--;
     this->waitForSteps(list.footstep_data_list.size());
    */
@@ -103,7 +103,7 @@ bool   ValkyrieWalker::WalkNStepsBackward(int n, float x_offset, float y_offset,
     }
 
     if(!continous) {
-            if (n%2 ==1)
+        if (n%2 ==1)
             list.footstep_data_list.push_back(*getOffsetStep(RIGHT , -n*x_offset, n*y_offset));
         if (n%2 ==0)
             list.footstep_data_list.push_back(*getOffsetStep(LEFT , -n*x_offset, n*y_offset));
@@ -111,7 +111,7 @@ bool   ValkyrieWalker::WalkNStepsBackward(int n, float x_offset, float y_offset,
     }
 
 
-    /*std::cout<< " size of array " << list.footstep_data_list.size() << std::endl; 
+    /*std::cout<< " size of array " << list.footstep_data_list.size() << std::endl;
     this->footsteps_to_val.publish(list);
     ValkyrieWalker::id--;
     this->waitForSteps(list.footstep_data_list.size());
@@ -151,7 +151,7 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
     start.x = startstep->location.x ;
     start.y = startstep->location.y - 0.12;
-    std::cout<< "Start Position  x = " << start.x << "  y = " << start.y<<std::endl;
+    //    std::cout<< "Start Position  x = " << start.x << "  y = " << start.y<<std::endl;
 
     start.theta = tf::getYaw(startstep->orientation);
 
@@ -183,9 +183,9 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
 
             tf::Quaternion t = tf::createQuaternionFromYaw(srv.response.footsteps.at(i).pose.theta);
-            ROS_INFO("Step x  %d %.2f", i, srv.response.footsteps.at(i).pose.x);
-            ROS_INFO("Step y  %d %.2f", i, srv.response.footsteps.at(i).pose.y);
-            ROS_INFO("Side  %d %d",i, int(side));
+            //            ROS_DEBUG("Step x  %d %.2f", i, srv.response.footsteps.at(i).pose.x);
+            //            ROS_DEBUG("Step y  %d %.2f", i, srv.response.footsteps.at(i).pose.y);
+            //            ROS_DEBUG("Side  %d %d",i, int(side));
 
             step->orientation.w = t.w();
             step->orientation.x = t.x();
@@ -199,16 +199,18 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
     return false;
 }
-void ValkyrieWalker::setWalkParms(float InTransferTime,float InSwingTime, int InMode)
+
+double ValkyrieWalker::getSwing_height() const
 {
-    this->transfer_time = InTransferTime;
-    this->swing_time = InSwingTime;
-    this->exe_mode = InMode;
+    return swing_height;
 }
+
+
+
 
 // constructor
 
-ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double InSwingTime, int InMode):n(nh)
+ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double InSwingTime, int InMode, double swingHeight):n(nh)
 {
     this->footstep_client = n.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("plan_footsteps");
     this->footsteps_to_val = n.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/valkyrie/control/footstep_list",1,true);
@@ -217,6 +219,7 @@ ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double 
     transfer_time = InTransferTime;
     swing_time = InSwingTime;
     exe_mode = InMode;
+    swing_height = swingHeight;
 
     tf_listener = new tf2_ros::TransformListener(this->tfBuffer);
 
@@ -280,64 +283,44 @@ ihmc_msgs::FootstepDataRosMessage* ValkyrieWalker::getOffsetStep(int side , floa
     this->getCurrentStep(side, *next);
     next->location.x+=x;
     next->location.y+=y;
-
+    next->swing_height = swing_height;
     return next;
 
 }
 // wait till all the steps are taken
 void ValkyrieWalker::waitForSteps(int n)
 {
-    while (step_counter <n && ros::ok())
+    while (step_counter < n && ros::ok())
     {
         ros::spinOnce();
         ros::Duration(0.1).sleep();
     }
+
+    // reset back the counter
+    step_counter = 0;
     return;
 }
 
-//int main(int argc, char **argv)
+int main(int argc, char **argv)
 
-//{
+{
 
-//    ros::init(argc, argv, "pass_footstep");
-//    ros::NodeHandle nh;
-//    ValkyrieWalker agent(nh,1,1,0);
+    ros::init(argc, argv, "test_walking");
+    ros::NodeHandle nh;
+    ValkyrieWalker agent(nh,1,1,0);
+    float transferTime, swingTime, swingHeight, stepLength;
+    if ( argc != 5 ) // argc should be 2 for correct execution
+        std::cout<<"usage: "<< argv[0] <<" transferTime swingTime swingHeight stepLengtho\n";
+    else {
+        transferTime = std::atof(argv[1]);
+        swingTime = std::atof(argv[2]);
+        swingHeight = std::atof(argv[3]);
+        stepLength = std::atof(argv[4]);
+       }
 
+   agent.setWalkParms(transferTime, swingTime, 0);
+   agent.setSwing_height(swingHeight);
+   agent.WalkNStepsForward(5,stepLength);
 
-
-//    while(ros::ok()) {
-//        geometry_msgs::Pose2D goal;
-//        float x = 0.0;
-//        float y= 0.0;
-//        float theta = 0.0;
-//        int flag ;
-////        std::cout<<"Enter x coordinate of goal : ";
-////        std::cin>>x;
-////        std::cout<<"Enter y coordinate of goal : ";
-////        std::cin>>y;
-////        std::cout<<"Enter angle of rotation for goal in radians : ";
-////        std::cin>>theta;
-
-////        agent.WalkNStepsForward(2,0.4,-0.1, true);
-////        agent.WalkNStepsForward(2,0.4,0, true);
-////        agent.WalkNStepsForward(1,0.4,0);
-
-//        goal.x = x;
-//        goal.y = y;
-//        goal.theta = theta;
-
-
-
-////        // agent.WalkNStepsBackward(2);
-
-//        agent.WalkToGoal(goal);
-
-//        std::cout<<"Enter 0 to exit or 1 to continue \n";
-//        std::cin>>flag;
-
-//        if(!flag)
-//            break;
-//    }
-
-//    return 0;
-//}
+   return 0;
+}
