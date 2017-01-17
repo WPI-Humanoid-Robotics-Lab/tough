@@ -1,4 +1,5 @@
 #!/bin/bash
+
 terminate()
 {
 echo 'killed'
@@ -7,7 +8,6 @@ exit 0
 }
 trap terminate SIGINT SIGTERM
  
-
   echo -e "\e[32mINFO:\e[0m Sourcing" 
   source ~/indigo_ws/devel/setup.bash
   echo -e "\e[32mINFO:\e[0m Killing exisitng ros/gazebo instances"
