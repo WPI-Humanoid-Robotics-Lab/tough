@@ -87,7 +87,7 @@ void LedDetector::errorCorrection(std::vector<srcsim::Console> &data, std::vecto
         tags[m] = int(tag_r[0]);
     }
     winnerTag = getMode(tags,data.size());
-    double meanX=0,meanY=0,meanZ=0;
+    float meanX=0.0,meanY=0.0,meanZ=0.0;
     int n_elements = 0;
 
     for (int m =0; m< data.size();m++ )
