@@ -87,20 +87,20 @@ start_line_crossed, start_time = state.event('start_line')
 finish_line_crossed, finish_time = state.event('finish_line')
 
 if start_line_crossed
-  printf("Start line crossed: [%d %d]\n", start_time.sec, start_time.nsec)
+  printf("Start line crossed: [%d %09d]\n", start_time.sec, start_time.nsec)
 else
   printf('Start line crossed: --')
 end
 
 if finish_line_crossed
-  printf("Finish line crossed: [%d %d]\n", finish_time.sec, finish_time.nsec)
+  printf("Finish line crossed: [%d %09d]\n", finish_time.sec, finish_time.nsec)
 else
   printf('Finish line crossed: --')
 end
 
 if start_line_crossed && finish_line_crossed
   elapsed = finish_time - start_time
-  printf("Elapsed time: [%d %d]\n", elapsed.sec, elapsed.nsec)
+  printf("Elapsed time: [%d %09d]\n", elapsed.sec, elapsed.nsec)
 else
   printf('Elapsed time: --')
 end

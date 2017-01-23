@@ -1,7 +1,7 @@
 data/cmake/TargetArch.cmake.i
 data/test/gtest/include/gtest/internal/gtest-tuple.h.pump.i
 data/models/src_doorway_q2/materials/textures/Doorway.png.d
-data/test/gtest/src/gtest-death-test.cc.i
+data/AUTHORS.i
 data/test/gtest/src/gtest-test-part.cc.i
 data/include/srcsim/Qual1Plugin.hh.i
 data/msg/SRCConsole.msg.i
@@ -16,7 +16,7 @@ data/cmake/TestUtils.cmake.i
 data/test/gtest/include/gtest/gtest-param-test.h.pump.i
 data/src/Qual2Plugin.cc.i
 data/satellite/satellite.world.i
-data/COPYING.i
+data/LICENSE.i
 data/src/LogPlugin.cc.i
 data/test/gtest/src/gtest-port.cc.i
 data/include/srcsim/LogPlugin.hh.i
@@ -33,7 +33,7 @@ data/test/gtest/src/gtest.cc.i
 data/cmake/FindSSE.cmake.i
 data/models/src_doorway_q2/model.sdf.i
 data/include/srcsim/srcsim.hh.in.i
-data/test/gtest/include/gtest/internal/gtest-param-util.h.i
+data/test/gtest/include/gtest/gtest-typed-test.h.i
 data/cmake/cpack.cmake.i
 data/cmake/99_srcsim_setup.sh.in.i
 data/scoring/scoring_q2.rb.i
@@ -53,7 +53,7 @@ data/test/gtest/include/gtest/internal/gtest-linked_ptr.h.i
 data/cmake/upload_doc.sh.in.i
 data/test/gtest/src/gtest-typed-test.cc.i
 data/test/CMakeLists.txt.i
-data/AUTHORS.i
+data/test/gtest/src/gtest-death-test.cc.i
 data/cmake/DissectVersion.cmake.i
 data/scripts/rossleep.py.i
 data/launch/qual2.launch.i
@@ -81,7 +81,7 @@ data/models/src_doorway_q2/materials/scripts/button.material.i
 data/src/Qual1Plugin.cc.i
 data/cmake/cmake_uninstall.cmake.in.i
 data/cmake/config.hh.in.i
-data/cmake/srcsim-config.cmake.in.i
+data/scripts/Traj_data.yaml.i
 data/include/CMakeLists.txt.i
 data/test/gtest/include/gtest/internal/gtest-port-arch.h.i
 data/doc/srcsim.in.i
@@ -102,12 +102,13 @@ data/test/gtest/cmake/internal_utils.cmake.i
 data/cmake/DefaultCFlags.cmake.i
 data/satellite/setup.sh.i
 data/test/gtest/include/gtest/gtest-death-test.h.i
+data/scripts/keyboard_teleop.py.i
 data/test/gtest/include/gtest/internal/custom/gtest.h.i
-data/LICENSE.i
+data/COPYING.i
 data/test/gtest/include/gtest/internal/gtest-internal.h.i
 data/scripts/head_traj_yaml.py.i
 data/test/gtest/include/gtest/gtest-test-part.h.i
-data/test/gtest/include/gtest/gtest-typed-test.h.i
+data/test/gtest/include/gtest/internal/gtest-param-util.h.i
 data/NEWS.i
 data/satellite/model/satellite_dish/materials/textures/satellite.png.i
 data/satellite/plugin/CMakeLists.txt.i
@@ -117,10 +118,10 @@ data/test/gtest/include/gtest/internal/gtest-port.h.i
 data/src/SRCMultiSenseSLPlugin.cpp.i
 data/worlds/qual2.world.i
 data/src/SRCMultiSenseSLPlugin.cc.i
-data/scripts/Traj_data.yaml.i
+data/cmake/srcsim-config.cmake.in.i
 data/include/srcsim/SRCMultiSenseSLPlugin.h.i
 data/test/performance/CMakeLists.txt.i
 data/test/gtest/include/gtest/internal/gtest-death-test-internal.h.i
 data/test/test_config.h.in.i
-data/models/src_doorway_q2/meshes/doorway_base.dae.i
 data/test/gtest/include/gtest/gtest-printers.h.i
+data/models/src_doorway_q2/meshes/doorway_base.dae.i

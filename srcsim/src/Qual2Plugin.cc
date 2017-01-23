@@ -21,7 +21,6 @@
 #include <gazebo/physics/Joint.hh>
 #include <gazebo/physics/Model.hh>
 #include <sdf/sdf.hh>
-#include <ros/ros.h>
 
 #include "srcsim/Qual2Plugin.hh"
 

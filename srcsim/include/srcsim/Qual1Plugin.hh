@@ -114,7 +114,7 @@ namespace gazebo
 
     /// \brief Ros light subscriber
     private: ros::Subscriber lightSub;
-    private: ros::Publisher lightPub;  /// changed
+
     /// \brief Ros start subscriber
     private: ros::Subscriber startSub;
 

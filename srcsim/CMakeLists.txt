@@ -9,7 +9,6 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_plugins
   gazebo_ros
   roscpp
-  tf
   std_msgs
   message_generation
 )
@@ -33,7 +32,7 @@ add_message_files(
 
 generate_messages()
 
-catkin_package(CATKIN_DEPENDS message_runtime tf)
+catkin_package(CATKIN_DEPENDS message_runtime)
 
 ###########
 ## Build ##
@@ -88,10 +87,6 @@ install(TARGETS ${qual1_plugin_name}
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
-
-add_executable(qual1_logger src/qual1_logger.cpp)
-target_link_libraries(qual1_logger ${catkin_LIBRARIES})
-
 ##########################
 ## Qualification task 2 ##
 ##########################
@@ -136,8 +131,8 @@ install(DIRECTORY models/
 
 # Configure the setup script
 catkin_add_env_hooks(99_srcsim_setup
-  SHELLS sh
-  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cmake
+  SHELLS sh)
 
 # Packaging configuration
 set (CPACK_PACKAGE_VERSION "${DRC_SIM_VERSION_FULL}")
