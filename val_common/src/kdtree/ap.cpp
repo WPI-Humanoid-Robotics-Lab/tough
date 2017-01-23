@@ -17,8 +17,8 @@ A copy of the GNU General Public License is available at
 http://www.fsf.org/licensing/licenses
 >>> END OF LICENSE >>>
 *************************************************************************/
-#include "stdafx.h"
-#include "ap.h"
+#include "val_common/kdtree/stdafx.h"
+#include "val_common/kdtree/ap.h"
 #include <limits>
 #include <locale.h>
 using namespace std;

@@ -17,8 +17,8 @@ A copy of the GNU General Public License is available at
 http://www.fsf.org/licensing/licenses
 >>> END OF LICENSE >>>
 *************************************************************************/
-#include "stdafx.h"
-#include "alglibmisc.h"
+#include "val_common/kdtree/stdafx.h"
+#include "val_common/kdtree/alglibmisc.h"
 
 // disable some irrelevant warnings
 #if (AE_COMPILER==AE_MSVC)

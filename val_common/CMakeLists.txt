@@ -8,7 +8,7 @@ find_package(catkin REQUIRED)
 
 set(KDSourcesList src/kdtree/alglibinternal.cpp src/kdtree/ap.cpp src/kdtree/alglibmisc.cpp)
 
-set(Headers
+set(HEADERS
     include/${PROJECT_NAME}/val_common_names.h
     include/${PROJECT_NAME}/val_common_defines.h)
 
@@ -121,7 +121,7 @@ catkin_package(
    ${KDSourcesList}
  )
 
-add_library(val_common ${Headers})
+add_library(val_common ${HEADERS})
 set_target_properties(val_common PROPERTIES LINKER_LANGUAGE CXX)
 
 ## Add cmake target dependencies of the library
