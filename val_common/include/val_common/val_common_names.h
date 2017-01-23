@@ -10,7 +10,8 @@ namespace VAL_COMMON_NAMES
     /* Multisense */
     static const std::string HOKUYO_LINK_TF = "/hokuyo_link";
     static const std::string HEAD_HOKUYO_FRAME_TF = "/head_hokuyo_frame";
-    static const std::string LEFT_CAMERA_OPTICAL_FRAME_TF = "/left_camera_frame";
+    static const std::string LEFT_CAMERA_OPTICAL_FRAME_TF = "/left_camera_optical_frame";
+    static const std::string ROBOT_HEAD_FRAME_TF = "/head";
 
     //valkyrie Hand
     static const std::string R_PALM_TF = "/rightPalm";
