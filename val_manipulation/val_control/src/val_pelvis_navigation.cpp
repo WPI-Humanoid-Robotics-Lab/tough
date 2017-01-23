@@ -1,4 +1,4 @@
-#include <val_manipulation/val_pelvis_navigation.h>
+#include <val_pelvis_navigation.h>
 
 pelvisTrajectory::pelvisTrajectory(ros::NodeHandle nh):nh_(nh)
 {

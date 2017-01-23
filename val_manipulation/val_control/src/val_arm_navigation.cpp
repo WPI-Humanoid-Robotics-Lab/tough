@@ -1,4 +1,4 @@
-#include<val_manipulation/val_arm_navigation_.h>
+#include<val_arm_navigation_.h>
 #include<stdlib.h>
 #include <stdio.h>
 

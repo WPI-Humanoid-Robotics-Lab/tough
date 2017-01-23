@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   val_common
   val_footstep
+  val_control
 )
 
 find_package(orocos_kdl REQUIRED)
@@ -16,10 +17,10 @@ find_package(orocos_kdl REQUIRED)
 catkin_package(
   INCLUDE_DIRS include 
   LIBRARIES ${PROJECT_NAME} 
-  CATKIN_DEPENDS trac_ik_lib DEPENDS system_lib orocos_kdl val_common val_footstep
+  CATKIN_DEPENDS trac_ik_lib DEPENDS system_lib orocos_kdl val_common val_footstep val_control
 )
 
-include_directories(include)
+include_directories(include )
 include_directories(
   ${catkin_INCLUDE_DIRS}
   ${orocos_kdl_INCLUDE_DIRS}
@@ -27,8 +28,8 @@ include_directories(
 
  add_library (${PROJECT_NAME}
    src/val_manipulation.cpp
-   src/val_arm_navigation.cpp
-   src/val_pelvis_navigation.cpp
+#   src/val_arm_navigation.cpp
+#   src/val_pelvis_navigation.cpp
 )
 
  target_link_libraries(${PROJECT_NAME}
@@ -52,18 +53,18 @@ add_dependencies(val_ik_solver_node
    ${PROJECT_NAME}
 )
 
-add_executable(val_qual2_node
-  src/val_qual2.cpp)
+#add_executable(val_qual2_node
+  #src/val_qual2.cpp)
 
-add_dependencies(val_qual2_node
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS})
+#add_dependencies(val_qual2_node
+#  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+#  ${catkin_EXPORTED_TARGETS})
 
- target_link_libraries(val_qual2_node
-   ${catkin_LIBRARIES}
-   ${PROJECT_NAME}
-   ${orocos_kdl_LIBRARIES}
-)
+# target_link_libraries(val_qual2_node
+#   ${catkin_LIBRARIES}
+#   ${PROJECT_NAME}
+#   ${orocos_kdl_LIBRARIES} val_control
+#)
 
 install(TARGETS val_ik_solver_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
