@@ -66,6 +66,10 @@ private:
      */
     void scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan_in);
 
+
+
+
+
 public:
     /**
      * @brief Laser2PointCloud uses a provided nodehandler to publish pointcloud message
@@ -76,7 +80,9 @@ public:
      */
     Laser2PointCloud(ros::NodeHandle n, const std::string laserScanTopic, const std::string baseFrame, const std::string pointCloudTopic);
 
+
 };
+
 
 
 #endif

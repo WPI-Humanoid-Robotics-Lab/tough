@@ -43,7 +43,6 @@
 
 #include "perception_common/periodic_snapshotter.h"
 
-
 /***
  * This a simple test app that requests a point cloud from the
  * point_cloud_assembler every 4 seconds, and then publishes the
@@ -86,8 +85,14 @@ void PeriodicSnapshotter::timerCallback(const ros::TimerEvent& e)
     // Make the service call
     if (client_.call(srv))
     {
-        ROS_DEBUG("Published Cloud with %u points", (uint32_t)(srv.response.cloud.data.size())) ;
+        ROS_INFO("Published Cloud with %u points", (uint32_t)(srv.response.cloud.data.size())) ;
         pub_.publish(srv.response.cloud);
+
+        pcl::PCLPointCloud2 pcl_pc2;
+        pcl_conversions::toPCL(srv.response.cloud,pcl_pc2);
+        pcl::fromPCLPointCloud2(pcl_pc2,*laser_assembler::PeriodicSnapshotter::POINTCLOUD_STATIC_PTR);
+        ROS_INFO("Size of pointcloud is %d", laser_assembler::PeriodicSnapshotter::POINTCLOUD_STATIC_PTR->size());
+
     }
     else
     {
@@ -106,5 +111,17 @@ int main(int argc, char **argv)
     ROS_INFO("Found build_cloud! Starting the snapshotter");
     PeriodicSnapshotter snapshotter;
     ros::spin();
+
+//    ros::spinOnce();
+//    while (ros::ok()){
+//        geometry_msgs::PointStamped testPoint;
+//        testPoint.point.x = 2.9;
+//        testPoint.point.y = 1.0;
+//        testPoint.point.z = 0.2;
+//        testPoint.header.frame_id= VAL_COMMON_NAMES::ROBOT_HEAD_FRAME_TF;
+//        laser_assembler::PeriodicSnapshotter::getNearestPoint(testPoint, 10);
+//        ROS_INFO("x:%.2f  y:%.2f  z:%.2f . Size of pointcloud is %d", testPoint.point.x, testPoint.point.y, testPoint.point.z, laser_assembler::PeriodicSnapshotter::POINTCLOUD_STATIC_PTR->size());
+//        ros::spinOnce();
+//    }
     return 0;
 }

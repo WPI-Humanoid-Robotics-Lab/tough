@@ -3,7 +3,7 @@
 #include <perception_common/MultisenseImage.h>
 #include <perception_common/MultisensePointCloud.h>
 #include <perception_common/PointCloudHelper.h>
-
+#include <perception_common/periodic_snapshotter.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 
@@ -414,7 +414,7 @@ bool getNearestPoint(srcsim::Console &msg, int K=1){
     pnt.point.z = msg.z;
     pnt.header.frame_id=VAL_COMMON_NAMES::ROBOT_HEAD_FRAME_TF;
 
-    bool success = getNearestPoint(pnt, K);
+    bool success = laser_assembler::PeriodicSnapshotter::getNearestPoint(pnt, K);
     if(success){
         msg.x = pnt.point.x;
         msg.y = pnt.point.y;
@@ -422,90 +422,6 @@ bool getNearestPoint(srcsim::Console &msg, int K=1){
     }
 
     return success;
-}
-
-// This function should move out to perception common as a service.
-bool getNearestPoint(geometry_msgs::PointStamped &point, int K)
-{
-    if (POINTCLOUD_PTR->empty()){
-        ROS_INFO("Point cloud is empty");
-        return false;
-    }
-
-    // store the frameID of original point so that we can retransform the output to that frame
-    std::string originalFrame = point.header.frame_id;
-    point.header.stamp = ros::Time(0);
-    tf::TransformListener listener;
-
-    //     transform the point to world frame
-    if (originalFrame != VAL_COMMON_NAMES::WORLD_TF){
-        try{
-            listener.waitForTransform(VAL_COMMON_NAMES::ROBOT_HEAD_FRAME_TF, VAL_COMMON_NAMES::WORLD_TF, ros::Time(0), ros::Duration(3));
-            listener.transformPoint(VAL_COMMON_NAMES::WORLD_TF,point, point);
-        }
-        catch(tf::TransformException ex){
-            ROS_ERROR("%s",ex.what());
-            return false;
-        }
-    }
-
-    // get a kdtree for searching point
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (POINTCLOUD_PTR);
-    pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
-    kdtree.setInputCloud (cloud);
-
-    // index of points in the pointcloud
-    std::vector<int> pointIdxNKNSearch(K);
-    //squared distance of points
-    std::vector<float> pointNKNSquaredDistance(K);
-
-    // convert input point into PCL point for searching
-    pcl::PointXYZ searchPoint;
-    searchPoint.x = point.point.x;
-    searchPoint.y = point.point.y;
-    searchPoint.z = point.point.z;
-
-    if (DEBUG)
-        std::cout << "K nearest neighbor search at (" << searchPoint.x
-                  << " " << searchPoint.y
-                  << " " << searchPoint.z
-                  << ") with K=" << K << std::endl;
-
-    float meanX=0.0, meanY=0.0, meanZ=0.0;
-
-    //perform nearestKsearch
-    if ( kdtree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
-    {
-        for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i){
-            meanX += cloud->points[ pointIdxNKNSearch[i] ].x;
-            meanY += cloud->points[ pointIdxNKNSearch[i] ].y;
-            meanZ += cloud->points[ pointIdxNKNSearch[i] ].z;
-            if (DEBUG)
-                std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
-                          << " " << cloud->points[ pointIdxNKNSearch[i] ].y
-                          << " " << cloud->points[ pointIdxNKNSearch[i] ].z
-                          << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
-        }
-        point.point.x = meanX = meanX/pointIdxNKNSearch.size();
-        point.point.y = meanY = meanY/pointIdxNKNSearch.size();
-        point.point.z = meanZ = meanZ/pointIdxNKNSearch.size();
-
-    }
-
-    point.header.stamp = ros::Time(0);
-
-    //transform the point back to its original frame, if required
-    if (originalFrame != VAL_COMMON_NAMES::WORLD_TF){
-        try{
-            listener.transformPoint(originalFrame, point, point);
-        }
-        catch(tf::TransformException ex){
-            ROS_ERROR("%s",ex.what());
-            return false;
-        }
-    }
-
-    return true;
 }
 
 // read laser data and store it in pcl form for direct usage with PCL
@@ -572,8 +488,8 @@ int main(int argc, char **argv)
             }
             LIGHT_DETECTED = getLight(index,pnt, true);
             std::string output = LIGHT_DETECTED ? "Light Detected": "******Not detected";
-            if (DEBUG)
-                ROS_INFO(output.c_str());
+//            if (DEBUG)
+//                ROS_INFO(output.c_str());
             end  = ros::Time::now();
             time_taken = end.toSec() - begin.toSec();
             begin = ros::Time::now();
@@ -630,8 +546,11 @@ int main(int argc, char **argv)
 
             // publish the message only if it is not the same light
             if (!skipIteration){
-                if(getNearestPoint(msg, 10))
+                if(getNearestPoint(msg, 10)){
                     ROS_INFO("Updated the point with lidar data");
+                }
+                else
+                    ROS_INFO("Cannot update from pointcloud");
                 ROS_INFO("Publishing message x:%.4f y:%.4f z:%.4f", msg.x, msg.y, msg.z);
                 LIGHT_PUB->publish(msg);
                 numberOfLightsDetected++;
