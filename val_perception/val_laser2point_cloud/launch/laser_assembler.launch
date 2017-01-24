@@ -7,6 +7,6 @@
     <param name="fixed_frame" type="string" value="world" />
   </node>
 
-  <node type="periodic_snapshotter" pkg="perception_common" name="val_laser_assembler_node"/>  
+ <node type="periodic_snapshotter" pkg="perception_common" name="val_laser_assembler_node"/>  
   
 </launch>

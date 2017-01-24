@@ -1,5 +1,7 @@
 #include <perception_common/laser2point_cloud.h>
 
+
+
 Laser2PointCloud::Laser2PointCloud(ros::NodeHandle n,
                                    const std::string laserScanTopic,
                                    const std::string baseFrame,
@@ -33,4 +35,7 @@ void Laser2PointCloud::scanCallBack(const sensor_msgs::LaserScan::ConstPtr& scan
     m_pointCloudPublisher.publish(cloud);
     m_pointCloud2Publisher.publish(cloud2);
 
+
 }
+
+
