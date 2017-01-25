@@ -14,7 +14,11 @@ private:
     ros::NodeHandle nh_;
     ros::Publisher armTrajectoryPublisher;
     ros::Publisher handTrajectoryPublisher;
+    ros::Subscriber armTrajectorySunscriber;
     ihmc_msgs::ArmTrajectoryRosMessage appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage msg, float time, float* pos);
+
+    static int arm_id;
+    const float ZERO_POSE [] ={0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
 public:
     armTrajectory(ros::NodeHandle nh);
@@ -23,4 +27,7 @@ public:
     void buttonPressArm(armSide side);
     void walkPoseArm(armSide side);
     void zeroPoseArm(armSide side);
+    void moveArm(armSide side,float arm_pose, float time);
+    void moveArmMessage(armSide side, ihmc_msgs::ArmTrajectoryRosMessage msg);
+   // void getArmTrajectorty(armSide side, ihmc_msgs::ArmTrajectoryRosMessage arm);
 };
