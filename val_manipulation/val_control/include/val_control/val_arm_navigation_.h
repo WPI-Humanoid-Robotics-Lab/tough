@@ -18,8 +18,8 @@ private:
     ihmc_msgs::ArmTrajectoryRosMessage appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage msg, float time, float* pos);
 
     static int arm_id;
-    const float ZERO_POSE [] ={0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    const float WALK_POSE [] ={-0.2, 1.2, 0.7222, 1.5101, 0.0, 0.0, 0.0};
+    float ZERO_POSE [7] ={0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    float WALK_POSE [7] ={-0.2, 1.2, 0.7222, 1.5101, 0.0, 0.0, 0.0};
 
 
 public:
@@ -30,7 +30,7 @@ public:
     void walkPoseArm(armSide side);
     void zeroPoseArm(armSide side);
     void moveArm(armSide side,std::vector<float> arm_pose, float time);
-    void moveArmMessage(armSide side, ihmc_msgs::ArmTrajectoryRosMessage msg);
+    void moveArmMessage(ihmc_msgs::ArmTrajectoryRosMessage& msg);
    // void getArmTrajectorty(armSide side, ihmc_msgs::ArmTrajectoryRosMessage arm);
 };
     int armTrajectory::arm_id = -1;

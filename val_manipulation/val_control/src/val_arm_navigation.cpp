@@ -95,16 +95,16 @@ void armTrajectory::moveArm(armSide side, std::vector<float> arm_pose, float tim
     arm_traj.robot_side = side;
     armTrajectory::arm_id--;
     arm_traj.unique_id = armTrajectory::arm_id;
-    arm_traj = appendTrajectoryPoint(arm_traj, time/arm_pose.size(), arm_pose);
+    //arm_traj = appendTrajectoryPoint(arm_traj, time/arm_pose.size(), arm_pose);
 
     armTrajectoryPublisher.publish(arm_traj);
 }
 
-void moveArmMessage(ihmc_msgs::ArmTrajectoryRosMessage& msg){
+void armTrajectory::moveArmMessage(ihmc_msgs::ArmTrajectoryRosMessage& msg){
 
     this->armTrajectoryPublisher.publish(msg);
     armTrajectory::arm_id--;
-    arm_traj.unique_id = armTrajectory::arm_id;
+
 }
 
 
