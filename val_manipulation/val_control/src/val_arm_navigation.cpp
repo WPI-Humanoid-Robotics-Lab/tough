@@ -44,7 +44,8 @@ void armTrajectory::buttonPressArm(armSide side)
 
     arm_traj.joint_trajectory_messages.resize(7);
     arm_traj.robot_side = side;
-    arm_traj.unique_id = -1;
+    armTrajectory::arm_id--;
+    arm_traj.unique_id = armTrajectory::arm_id;
 
     arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_PREPARE);
     arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_ACT);
@@ -57,13 +58,13 @@ void armTrajectory::walkPoseArm(armSide side)
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
 
-    float RETRACT_TO_ACTUAL [] ={-0.2, 1.2, 0.7222, 1.5101, 0.0, 0.0, 0.0};
 
     arm_traj.joint_trajectory_messages.resize(7);
     arm_traj.robot_side = side;
-    arm_traj.unique_id = -2;
+    armTrajectory::arm_id--;
+    arm_traj.unique_id = armTrajectory::arm_id;
 
-    arm_traj = appendTrajectoryPoint(arm_traj, 3, RETRACT_TO_ACTUAL);
+    arm_traj = appendTrajectoryPoint(arm_traj, 3, armTrajectory::WALK_POSE);
 
     armTrajectoryPublisher.publish(arm_traj);
 }
@@ -75,7 +76,8 @@ void armTrajectory::zeroPoseArm(armSide side)
 
     arm_traj.joint_trajectory_messages.resize(7);
     arm_traj.robot_side = side;
-    //arm_traj.unique_id = -1;
+    armTrajectory::arm_id--;
+    arm_traj.unique_id = armTrajectory::arm_id;
 
     arm_traj = appendTrajectoryPoint(arm_traj, 2, armTrajectory::ZERO_POSE);
 
@@ -83,7 +85,7 @@ void armTrajectory::zeroPoseArm(armSide side)
 
 }
 
-void armTrajectory::moveArm(armSide side, float arm_pose, float time){
+void armTrajectory::moveArm(armSide side, std::vector<float> arm_pose, float time){
 
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
@@ -92,7 +94,8 @@ void armTrajectory::moveArm(armSide side, float arm_pose, float time){
     arm_traj.joint_trajectory_messages.resize(7);
     arm_traj.robot_side = side;
     armTrajectory::arm_id--;
-    arm_traj = appendTrajectoryPoint(arm_traj, time, arm_pose);
+    arm_traj.unique_id = armTrajectory::arm_id;
+    arm_traj = appendTrajectoryPoint(arm_traj, time/arm_pose.size(), arm_pose);
 
     armTrajectoryPublisher.publish(arm_traj);
 }
@@ -101,6 +104,7 @@ void moveArmMessage(ihmc_msgs::ArmTrajectoryRosMessage& msg){
 
     this->armTrajectoryPublisher.publish(msg);
     armTrajectory::arm_id--;
+    arm_traj.unique_id = armTrajectory::arm_id;
 }
 
 
