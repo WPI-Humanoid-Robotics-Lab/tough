@@ -1,6 +1,6 @@
 #include <ros/ros.h>
-#include <val_arm_navigation_.h>
-#include <val_pelvis_navigation.h>
+#include <val_control/val_arm_navigation_.h>
+#include <val_control/val_pelvis_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
 
 enum sm {
