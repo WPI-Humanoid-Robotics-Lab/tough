@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VAL_ARM_NAVIGATION_H
+#define VAL_ARM_NAVIGATION_H
 
 #include <ros/ros.h>
 #include <ihmc_msgs/ArmTrajectoryRosMessage.h>
@@ -33,4 +34,5 @@ public:
     void moveArmMessage(ihmc_msgs::ArmTrajectoryRosMessage& msg);
    // void getArmTrajectorty(armSide side, ihmc_msgs::ArmTrajectoryRosMessage arm);
 };
-    //int armTrajectory::arm_id = -1;
+
+#endif // VAL_ARM_NAVIGATION_H

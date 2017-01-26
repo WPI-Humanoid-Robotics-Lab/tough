@@ -125,6 +125,7 @@ include_directories(
  add_library(val_control
    src/val_arm_navigation.cpp
    src/val_pelvis_navigation.cpp
+   src/val_chest_navigation.cpp
  )
 
 ## Add cmake target dependencies of the library
