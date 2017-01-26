@@ -15,22 +15,22 @@ private:
     ros::Publisher armTrajectoryPublisher;
     ros::Publisher handTrajectoryPublisher;
     ros::Subscriber armTrajectorySunscriber;
-    ihmc_msgs::ArmTrajectoryRosMessage appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage msg, float time, float* pos);
+    ihmc_msgs::ArmTrajectoryRosMessage appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos);
 
     static int arm_id;
-    float ZERO_POSE [7] ={0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    float WALK_POSE [7] ={-0.2, 1.2, 0.7222, 1.5101, 0.0, 0.0, 0.0};
+    const std::vector<float> ZERO_POSE;
+    const std::vector<float> DEFAULT_POSE;
 
 
 public:
     armTrajectory(ros::NodeHandle nh);
     ~armTrajectory();
 
-    void buttonPressArm(armSide side);
+    //void buttonPressArm(armSide side);
     void walkPoseArm(armSide side);
     void zeroPoseArm(armSide side);
-    void moveArm(armSide side,std::vector<float> arm_pose, float time);
+    void moveArm(const armSide side,const std::vector<std::vector<float> > arm_pose,const float time);
     void moveArmMessage(ihmc_msgs::ArmTrajectoryRosMessage& msg);
    // void getArmTrajectorty(armSide side, ihmc_msgs::ArmTrajectoryRosMessage arm);
 };
-    int armTrajectory::arm_id = -1;
+    //int armTrajectory::arm_id = -1;

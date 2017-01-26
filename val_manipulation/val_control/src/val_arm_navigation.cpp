@@ -3,11 +3,13 @@
 #include <stdio.h>
 
 
-armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh){
+armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
+    ZERO_POSE{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+    DEFAULT_POSE{-0.2f, 1.2f, 0.7222f, 1.5101f, 0.0f, 0.0f, 0.0f}{
 
     armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/arm_trajectory", 1,true);
     handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>("/ihmc_ros/valkyrie/control/hand_desired_configuration", 1,true);
-
+    arm_id = -1;
 }
 
 armTrajectory::~armTrajectory(){
@@ -15,7 +17,7 @@ armTrajectory::~armTrajectory(){
 }
 
 
-ihmc_msgs::ArmTrajectoryRosMessage armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage msg, float time, float* pos)
+ihmc_msgs::ArmTrajectoryRosMessage armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos)
 {
 
     ihmc_msgs::TrajectoryPoint1DRosMessage p;
@@ -34,24 +36,24 @@ ihmc_msgs::ArmTrajectoryRosMessage armTrajectory::appendTrajectoryPoint(ihmc_msg
     return msg;
 }
 
-void armTrajectory::buttonPressArm(armSide side)
-{
-    ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
-    arm_traj.joint_trajectory_messages.clear();
+//void armTrajectory::buttonPressArm(armSide side)
+//{
+//    ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
+//    arm_traj.joint_trajectory_messages.clear();
 
-    float BUTTON_PRESS_PREPARE [] ={1.57, -0.1, -1.6, 1.55, 0.0, 0.0, 0.0};
-    float BUTTON_PRESS_ACT [] ={1.57, -0.3, -1.6, 1.3, 0.0, 0.0, 0.0};
+//    float BUTTON_PRESS_PREPARE [] ={1.57, -0.1, -1.6, 1.55, 0.0, 0.0, 0.0};
+//    float BUTTON_PRESS_ACT [] ={1.57, -0.3, -1.6, 1.3, 0.0, 0.0, 0.0};
 
-    arm_traj.joint_trajectory_messages.resize(7);
-    arm_traj.robot_side = side;
-    armTrajectory::arm_id--;
-    arm_traj.unique_id = armTrajectory::arm_id;
+//    arm_traj.joint_trajectory_messages.resize(7);
+//    arm_traj.robot_side = side;
+//    armTrajectory::arm_id--;
+//    arm_traj.unique_id = armTrajectory::arm_id;
 
-    arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_PREPARE);
-    arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_ACT);
+//    arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_PREPARE);
+//    arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_ACT);
 
-    armTrajectoryPublisher.publish(arm_traj);
-}
+//    armTrajectoryPublisher.publish(arm_traj);
+//}
 
 void armTrajectory::walkPoseArm(armSide side)
 {
@@ -64,7 +66,7 @@ void armTrajectory::walkPoseArm(armSide side)
     armTrajectory::arm_id--;
     arm_traj.unique_id = armTrajectory::arm_id;
 
-    arm_traj = appendTrajectoryPoint(arm_traj, 3, armTrajectory::WALK_POSE);
+    arm_traj = appendTrajectoryPoint(arm_traj, 3, DEFAULT_POSE);
 
     armTrajectoryPublisher.publish(arm_traj);
 }
@@ -79,13 +81,13 @@ void armTrajectory::zeroPoseArm(armSide side)
     armTrajectory::arm_id--;
     arm_traj.unique_id = armTrajectory::arm_id;
 
-    arm_traj = appendTrajectoryPoint(arm_traj, 2, armTrajectory::ZERO_POSE);
+    arm_traj = appendTrajectoryPoint(arm_traj, 2, ZERO_POSE);
 
     armTrajectoryPublisher.publish(arm_traj);
 
 }
 
-void armTrajectory::moveArm(armSide side, std::vector<float> arm_pose, float time){
+void armTrajectory::moveArm(const armSide side, const std::vector<std::vector<float>> arm_pose,const float time){
 
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
@@ -95,7 +97,11 @@ void armTrajectory::moveArm(armSide side, std::vector<float> arm_pose, float tim
     arm_traj.robot_side = side;
     armTrajectory::arm_id--;
     arm_traj.unique_id = armTrajectory::arm_id;
-    //arm_traj = appendTrajectoryPoint(arm_traj, time/arm_pose.size(), arm_pose);
+    for(auto i=arm_pose.begin(); i != arm_pose.end(); i++){
+           if(i->size() != 7)
+           ROS_ERROR("Check number of trajectory points");
+        arm_traj = appendTrajectoryPoint(arm_traj, time/arm_pose.size(), *i);
+    }
 
     armTrajectoryPublisher.publish(arm_traj);
 }
