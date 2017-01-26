@@ -21,13 +21,13 @@ cd ~ && git clone https://github.com/ihmcrobotics/ihmc-open-robotics-software.gi
 
 echo "$(tput setaf 1)compile the ihmc repo$(tput sgr0)"
 cd ihmc-open-robotics-software
-git checkout master
+git checkout 0.8.1
 ./gradlew 
 ./gradlew -q deployLocal
 
 echo "$(tput setaf 1)checking and installing and missing ros dependecies$(tput sgr0)"
 # TODO:this shoould be done with rosdep
-sudo apt-get install ruby ros-indigo-pcl-ros ros-indigo-pcl-conversions ros-indigo-moveit-full ros-indigo-trac-ik ros-indigo-footstep-planner ros-indigo-humanoid-localization ros-indigo-multisense-ros
+sudo apt-get install ruby ros-indigo-pcl-ros ros-indigo-pcl-conversions ros-indigo-moveit-full ros-indigo-trac-ik ros-indigo-footstep-planner ros-indigo-humanoid-localization ros-indigo-multisense-ros  ros-indigo-laser-assembler
 
 #check if the workspace is already set
 # setup the workspace
@@ -58,6 +58,8 @@ if [ -d $"/home/$USER/$WORKSPACE/src/humanoid_navigation" ]; then
 else
   echo "$(tput setaf 1)no humanoid_navigation repo found, clonning it$(tput sgr0)" 
   git clone https://github.com/ninja777/humanoid_navigation.git ~/$WORKSPACE/src/humanoid_navigation
+  cd ~/$WORKSPACE/src/humanoid_navigation
+  git checkout indigo-devel
   cd ~/$WORKSPACE   
   catkin_make
 fi
