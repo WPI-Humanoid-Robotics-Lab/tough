@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include <stdio.h>
 
+int armTrajectory::arm_id = -1;
 
 armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
     ZERO_POSE{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
@@ -9,7 +10,6 @@ armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
 
     armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/arm_trajectory", 1,true);
     handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>("/ihmc_ros/valkyrie/control/hand_desired_configuration", 1,true);
-    arm_id = -1;
 }
 
 armTrajectory::~armTrajectory(){
@@ -105,6 +105,29 @@ void armTrajectory::moveArm(const armSide side, const std::vector<std::vector<fl
 
     armTrajectoryPublisher.publish(arm_traj);
 }
+
+
+void armTrajectory::moveArm(std::vector<moveArmData> arm_data){
+
+    ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
+    arm_traj.joint_trajectory_messages.clear();
+    arm_traj.joint_trajectory_messages.resize(7);
+
+    armTrajectory::arm_id--;
+    arm_traj.unique_id = armTrajectory::arm_id;
+
+    for(std::vector<moveArmData>::iterator i=arm_data.begin(); i != arm_data.end(); i++){
+
+        if(i->arm_pose.size() != 7)
+           ROS_ERROR("Check number of trajectory points");
+
+        arm_traj.robot_side = i->side;
+        arm_traj = appendTrajectoryPoint(arm_traj, i->time, i->arm_pose);
+    }
+
+    armTrajectoryPublisher.publish(arm_traj);
+}
+
 
 void armTrajectory::moveArmMessage(ihmc_msgs::ArmTrajectoryRosMessage& msg){
 

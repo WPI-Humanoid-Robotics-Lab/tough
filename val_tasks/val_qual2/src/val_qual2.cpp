@@ -2,6 +2,7 @@
 #include <val_control/val_arm_navigation_.h>
 #include <val_control/val_pelvis_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
+#include <val_control/val_chest_navigation.h>
 #include <ihmc_msgs/ChestTrajectoryRosMessage.h>
 #include <ihmc_msgs/FootTrajectoryRosMessage.h>
 #include <tf2/utils.h>
@@ -52,9 +53,88 @@ int main(int argc, char** argv)
 
        // walk.WalkNStepsForward(11,0.35,0,false,RIGHT);
         ros::Duration(0.5).sleep();
+        std::vector<armTrajectory::moveArmData> arm_data;
+        armTrajectory::moveArmData arm_data_seq1, arm_data_seq2, arm_data_seq3,
+                arm_data_seq4, arm_data_seq5, arm_data_seq6, arm_data_seq7,
+                arm_data_seq8, arm_data_seq9, arm_data_seq10,
+                arm_data_seq11, arm_data_seq12, arm_data_seq13, arm_data_seq14;
+
+        arm_data_seq1.side = RIGHT; // retract to actual
+        arm_data_seq1.arm_pose = {-0.2, 1.2, 0.65, 1.5, 0.0, 0.0, 0.0};
+        arm_data_seq1.time = 3;
+
+        arm_data_seq2.side = LEFT;
+        arm_data_seq2.arm_pose = {-0.2, -1.2, 0.65, -1.5, 0.0, 0.0, 0.0};
+        arm_data_seq2.time = 3;
+
+        arm_data_seq3.side = RIGHT; // stable walk
+        arm_data_seq3.arm_pose = {0.0, 0.25, 0.2, 0.9, 0.0, 0.0, 0.0};
+        arm_data_seq3.time = 4;
+
+        arm_data_seq4.side = LEFT;
+        arm_data_seq4.arm_pose = {0.0, -0.25, 0.2, -0.9, 0.0, 0.0, 0.0};
+        arm_data_seq4.time = 4;
+
+        arm_data_seq5.side = RIGHT; // stable walk
+        arm_data_seq5.arm_pose = {0.0, 0.25, 0.2, 0.9, 0.0, 0.0, 0.0};
+        arm_data_seq5.time = 5.3;
+
+        arm_data_seq6.side = LEFT;
+        arm_data_seq6.arm_pose = {0.0, -0.25, 0.2, -0.9, 0.0, 0.0, 0.0};
+        arm_data_seq6.time = 5.3;
+
+        arm_data_seq7.side = RIGHT; // button press prepare
+        arm_data_seq7.arm_pose = {1.5, -0.4, -0.65, 0.7, 0.0, 0.0, 0.0};
+        arm_data_seq7.time = 5.75;
+
+        arm_data_seq8.side = LEFT;
+        arm_data_seq8.arm_pose = {1.5, -0.4, -0.65, -0.7, 0.0, 0.0, 0.0};
+        arm_data_seq8.time = 5.75;
+
+        arm_data_seq9.side = RIGHT; // zero position
+        arm_data_seq9.arm_pose = {0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0};
+        arm_data_seq9.time = 5.75;
+
+        arm_data_seq10.side = LEFT;
+        arm_data_seq10.arm_pose = {0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0};
+        arm_data_seq10.time = 5.75;
+
+        arm_data_seq11.side = RIGHT; // arm back r
+        arm_data_seq11.arm_pose = {1.3, 1.2, 2.0, 0.0, 0.0, 0.0, 0.0};
+        arm_data_seq11.time = 7.0;
+
+        arm_data_seq12.side = RIGHT; // intermideate point r
+        arm_data_seq12.arm_pose = {1.5, -0.0, -0.1, 1.7, 0.0, 0.0, 0.0};
+        arm_data_seq12.time = 7.5;
+
+        arm_data_seq13.side = RIGHT; // retract to actual
+        arm_data_seq13.arm_pose = {-0.2, 1.2, 0.65, 1.5, 0.0, 0.0, 0.0};
+        arm_data_seq13.time = 8.0;
+
+        arm_data_seq14.side = LEFT;
+        arm_data_seq14.arm_pose = {-0.2, -1.2, 0.65, -1.5, 0.0, 0.0, 0.0};
+        arm_data_seq14.time = 6.75;
+
+        arm_data.push_back(arm_data_seq1);
+        arm_data.push_back(arm_data_seq2);
+        arm_data.push_back(arm_data_seq3);
+        arm_data.push_back(arm_data_seq4);
+        arm_data.push_back(arm_data_seq5);
+        arm_data.push_back(arm_data_seq6);
+        arm_data.push_back(arm_data_seq7);
+        arm_data.push_back(arm_data_seq8);
+        arm_data.push_back(arm_data_seq9);
+        arm_data.push_back(arm_data_seq10);
+        arm_data.push_back(arm_data_seq11);
+        arm_data.push_back(arm_data_seq12);
+        arm_data.push_back(arm_data_seq13);
+        arm_data.push_back(arm_data_seq14);
+
+
+
         ///get the armtrajectory message from the arm_trajectory*.cpp
-        /// and modify the hardcoded part from buttonpress function and publish the message
-        armtraj.buttonPressPrepareArm(RIGHT);
+        /// and modify the hardcoded part from buttonpress function and publish the message, foverload struct
+        armtraj.moveArm(arm_data);
         state = WALK_TO_DOOR;
 
         // fall through the case, so we save one iteration (0.1 sec)

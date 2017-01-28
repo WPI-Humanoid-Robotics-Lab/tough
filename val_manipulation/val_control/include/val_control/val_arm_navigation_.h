@@ -27,12 +27,20 @@ public:
     armTrajectory(ros::NodeHandle nh);
     ~armTrajectory();
 
+    struct moveArmData {
+        armSide side;
+        std::vector<float> arm_pose;
+        float time;
+    };
+
     //void buttonPressArm(armSide side);
     void walkPoseArm(armSide side);
     void zeroPoseArm(armSide side);
     void moveArm(const armSide side,const std::vector<std::vector<float> > arm_pose,const float time);
+    void moveArm(std::vector<moveArmData> arm_data);
     void moveArmMessage(ihmc_msgs::ArmTrajectoryRosMessage& msg);
    // void getArmTrajectorty(armSide side, ihmc_msgs::ArmTrajectoryRosMessage arm);
 };
+
 
 #endif // VAL_ARM_NAVIGATION_H
