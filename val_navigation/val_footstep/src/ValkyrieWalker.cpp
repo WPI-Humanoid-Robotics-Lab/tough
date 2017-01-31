@@ -51,7 +51,7 @@ bool ValkyrieWalker::WalkToGoal( geometry_msgs::Pose2D &goal)
 }
 
 // creates and n footsteps of width step_size
-bool ValkyrieWalker::WalkNStepsForward(int n, float x_offset, float y_offset, bool continous, armSide startLeg)
+bool ValkyrieWalker::WalkNSteps(int n, float x_offset, float y_offset, bool continous, armSide startLeg)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.transfer_time = transfer_time;
@@ -60,98 +60,98 @@ bool ValkyrieWalker::WalkNStepsForward(int n, float x_offset, float y_offset, bo
 
     list.unique_id = ValkyrieWalker::id ;
 
-    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 0.35, 0));
-    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 0.86,0));
-    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 1.37, 0));
-    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 1.88, 0));
-    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 2.39, 0));
-    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 2.9, 0));
-    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 3.41, 0));
-    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 3.818, 0));
-    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 4.328, 0));
-    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 4.838, 0));
-    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 4.838,0));
+//    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 0.35, 0));
+//    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 0.86,0));
+//    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 1.37, 0));
+//    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 1.88, 0));
+//    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 2.39, 0));
+//    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 2.9, 0));
+//    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 3.41, 0));
+//    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 3.818, 0));
+//    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 4.328, 0));
+//    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 4.838, 0));
+//    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 4.838,0));
 
-//    for (int m =1; m <= n ; m++)
-//    {
+    for (int m =1; m <= n ; m++) {
+        if(m%2 == 1)
+            list.footstep_data_list.push_back(*getOffsetStep(startLeg , m*x_offset, m*y_offset));
+        else
+            list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2 , m*x_offset, m*y_offset));
 
 
-//        if(m == 1){
-//            list.footstep_data_list.push_back(*getOffsetStep(startLeg , 0.35,0));
-//        }
+        if(!continous){
+            if (n%2 ==1)
+                list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2  , n*x_offset, n*y_offset));
+            if (n%2 ==0)
+                list.footstep_data_list.push_back(*getOffsetStep(startLeg , n*x_offset, n*y_offset));
+        }
+    }
 
-//        else if(m==8){
-//            list.footstep_data_list.push_back(*getOffsetStep(startLeg , (6.8*x_offset)+0.35, 6.8*y_offset));
-//        }
-//        else if (m>8) {
-//            if(m%2 == 0)
-//                list.footstep_data_list.push_back(*getOffsetStep(startLeg , (m-1)*x_offset+0.35-0.102, (m-1)/(6/5.8)*y_offset));
-//            else
-//                list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2 , (m-1)*x_offset+0.35-0.102, (m-1)/(6/5.8)*y_offset));
-
-//        }
-//        else{
-//            if(m%2 == 1)
-//                list.footstep_data_list.push_back(*getOffsetStep(startLeg , (m-1)*x_offset+0.35, (m-1)*y_offset));
-//            else
-//                list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2 , (m-1)*x_offset+0.35, (m-1)*y_offset));
-//        }
-//    }
-
-//    if(!continous){
-//        if (n%2 ==1)
-//            list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2  , n*x_offset+0.35, n*y_offset));
-//        if (n%2 ==0)
-//            list.footstep_data_list.push_back(*getOffsetStep(startLeg , n*x_offset+0.35, n*y_offset));
-//    }
-
-    /*
-    this->footsteps_to_val.publish(list);
-
-    ValkyrieWalker::id--;
-    this->waitForSteps(list.footstep_data_list.size());
-   */
     this->WalkGivenSteps(list);
     return true;
 }
 
-//creates and n footsteps of width step_size backwards
-bool   ValkyrieWalker::WalkNStepsBackward(int n, float x_offset, float y_offset, bool continous)
-{
-    ihmc_msgs::FootstepDataListRosMessage list ;
+bool ValkyrieWalker::WalkPreComputedSteps(int n, const std::vector<float> x_offset, const std::vector<float> y_offset, bool continous, armSide startLeg){
+
+    ihmc_msgs::FootstepDataListRosMessage list;
     list.transfer_time = transfer_time;
     list.swing_time = swing_time;
     list.execution_mode = exe_mode;
     list.unique_id = ValkyrieWalker::id;
 
+    if (x_offset.size() != y_offset.size())
+        ROS_ERROR("X Offset and Y Offset have different size");
 
-
-    for (int m =1; m <= n ; m++)
-    {
+    for (int m =1; m <= n ; m++) {
         if(m%2 == 1)
-            list.footstep_data_list.push_back(*getOffsetStep(LEFT , -m*x_offset, -m*y_offset));
+            list.footstep_data_list.push_back(*getOffsetStep(startLeg , x_offset[m-1], y_offset[m-1]));
         else
-            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , -m*x_offset, -m*y_offset));
+            list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2 , x_offset[m-1], y_offset[m-1]));
+
+
+        if(!continous){
+            if (n%2 ==1)
+                list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2  , x_offset[m-1], y_offset[m-1]));
+            if (n%2 ==0)
+                list.footstep_data_list.push_back(*getOffsetStep(startLeg , x_offset[m-1], y_offset[m-1]));
+        }
     }
-
-    if(!continous) {
-        if (n%2 ==1)
-            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , -n*x_offset, n*y_offset));
-        if (n%2 ==0)
-            list.footstep_data_list.push_back(*getOffsetStep(LEFT , -n*x_offset, n*y_offset));
-
-    }
-
-
-    /*std::cout<< " size of array " << list.footstep_data_list.size() << std::endl;
-    this->footsteps_to_val.publish(list);
-    ValkyrieWalker::id--;
-    this->waitForSteps(list.footstep_data_list.size());
-    */
     this->WalkGivenSteps(list);
     return true;
 
 }
+
+//creates and n footsteps of width step_size backwards
+//bool   ValkyrieWalker::WalkNStepsBackward(int n, float x_offset, float y_offset, bool continous)
+//{
+//    ihmc_msgs::FootstepDataListRosMessage list ;
+//    list.transfer_time = transfer_time;
+//    list.swing_time = swing_time;
+//    list.execution_mode = exe_mode;
+//    list.unique_id = ValkyrieWalker::id;
+
+
+
+//    for (int m =1; m <= n ; m++)
+//    {
+//        if(m%2 == 1)
+//            list.footstep_data_list.push_back(*getOffsetStep(LEFT , -m*x_offset, -m*y_offset));
+//        else
+//            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , -m*x_offset, -m*y_offset));
+//    }
+
+//    if(!continous) {
+//        if (n%2 ==1)
+//            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , -n*x_offset, n*y_offset));
+//        if (n%2 ==0)
+//            list.footstep_data_list.push_back(*getOffsetStep(LEFT , -n*x_offset, n*y_offset));
+
+//    }
+
+//    this->WalkGivenSteps(list);
+//    return true;
+
+//}
 
 
 bool ValkyrieWalker::WalkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list )
@@ -340,25 +340,25 @@ void ValkyrieWalker::waitForSteps(int n)
     return;
 }
 
-int main(int argc, char **argv)
+//int main(int argc, char **argv)
 
-{
-    ros::init(argc, argv, "test_walking");
-    ros::NodeHandle nh;
-    ValkyrieWalker agent(nh,1,1,0);
-    float transferTime, swingTime, swingHeight, stepLength;
-    if ( argc != 5 ) // argc should be 2 for correct execution
-        std::cout<<"usage: "<< argv[0] <<" transferTime swingTime swingHeight stepLengtho\n";
-    else {
-        transferTime = std::atof(argv[1]);
-        swingTime = std::atof(argv[2]);
-        swingHeight = std::atof(argv[3]);
-        stepLength = std::atof(argv[4]);
-    }
+//{
+//    ros::init(argc, argv, "test_walking");
+//    ros::NodeHandle nh;
+//    ValkyrieWalker agent(nh,1,1,0);
+//    float transferTime, swingTime, swingHeight, stepLength;
+//    if ( argc != 5 ) // argc should be 2 for correct execution
+//        std::cout<<"usage: "<< argv[0] <<" transferTime swingTime swingHeight stepLengtho\n";
+//    else {
+//        transferTime = std::atof(argv[1]);
+//        swingTime = std::atof(argv[2]);
+//        swingHeight = std::atof(argv[3]);
+//        stepLength = std::atof(argv[4]);
+//    }
 
-    agent.setWalkParms(transferTime, swingTime, 0);
-    agent.setSwing_height(swingHeight);
-    agent.WalkNStepsForward(5,stepLength);
+//    agent.setWalkParms(transferTime, swingTime, 0);
+//    agent.setSwing_height(swingHeight);
+//    agent.WalkNSteps(5,stepLength);
 
-    return 0;
-}
+//    return 0;
+//}

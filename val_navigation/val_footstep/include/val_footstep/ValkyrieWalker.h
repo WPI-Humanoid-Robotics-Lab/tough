@@ -31,11 +31,12 @@ public:
     bool WalkToGoal( geometry_msgs::Pose2D &goal);
 
     /// \todo implement this function
-    bool WalkNStepsForward(int n, float x_offset = 0.4, float y_offset=0.0, bool continous = false, armSide startLeg = LEFT);
+    bool WalkNSteps(int n, float x_offset, float y_offset, bool continous, armSide startLeg);
 
     /// \todo implement this function
-    bool WalkNStepsBackward(int n, float x_offset = 0.4, float y_offset=0.0, bool continous = false);
+    //bool WalkNStepsBackward(int n, float x_offset = 0.4, float y_offset=0.0, bool continous = false);
 
+    bool WalkPreComputedSteps(int n, const std::vector<float> x_offset, const std::vector<float> y_offset, bool continuous, armSide startleg);
     bool WalkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list );
     inline void setWalkParms(float InTransferTime,float InSwingTime, int InMode)
     {

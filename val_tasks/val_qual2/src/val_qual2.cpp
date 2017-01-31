@@ -145,8 +145,11 @@ int main(int argc, char** argv)
         walk.setWalkParms(transferTime, swingTime, 0);
         ///get the footsteplist message and modify the footsteps based on
         /// what is hardcoded in ValkyrieWalker.cpp and publish it again
-
-        walk.WalkNStepsForward(12,0.51,0, false, RIGHT);
+        std::vector<float> x_offset = {0.35,0.86,1.37,1.88,2.39,2.9,3.41,3.818,4.328,4.838,4.838};
+        std::vector<float> y_offset = {0,0,0,0,0,0,0,0,0,0,0};
+        int no_steps = 12;
+        walk.WalkPreComputedSteps(no_steps, x_offset, y_offset, false, RIGHT);
+        //walk.WalkNStepsForward(12,0.51,0, false, RIGHT);
         break;
     }
 

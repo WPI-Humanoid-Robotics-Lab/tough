@@ -42,5 +42,5 @@ public:
    // void getArmTrajectorty(armSide side, ihmc_msgs::ArmTrajectoryRosMessage arm);
 };
 
-
+int armTrajectory::arm_id = -1;
 #endif // VAL_ARM_NAVIGATION_H

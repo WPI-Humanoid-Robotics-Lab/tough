@@ -2,7 +2,6 @@
 #include<stdlib.h>
 #include <stdio.h>
 
-int armTrajectory::arm_id = -1;
 
 armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
     ZERO_POSE{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
