@@ -65,7 +65,7 @@ MultisenseImage::MultisenseImage(ros::NodeHandle &n):nh_(n),
     }
     //hard coded values specific to simulation, later on can be made to be not hard coded.
 #ifdef GAZEBO_SIMULATION
-    std::cout<<"Using DRCSIM dummy camera configs"<<std::endl;
+    std::cout<<"Using SRCSIM dummy camera configs"<<std::endl;
     settings.Q_matrix_=cv::Mat_<double>(4,4,0.0);
     settings.Q_matrix_(0,0) =  610.1799470098168 * -0.07;
     settings.Q_matrix_(1,1) =  610.1799470098168 * -0.07;
