@@ -16,23 +16,26 @@ armTrajectory::~armTrajectory(){
 }
 
 
-ihmc_msgs::ArmTrajectoryRosMessage armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos)
+void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos)
 {
 
-    ihmc_msgs::TrajectoryPoint1DRosMessage p;
-    ihmc_msgs::OneDoFJointTrajectoryRosMessage t;
-    t.trajectory_points.clear();
 
     for (int i=0;i<7;i++)
     {
+        ihmc_msgs::TrajectoryPoint1DRosMessage p;
+        ihmc_msgs::OneDoFJointTrajectoryRosMessage t;
+        t.trajectory_points.clear();
+
         p.time = time;
         p.position = pos[i];
         p.velocity = 0;
+        p.unique_id = armTrajectory::arm_id;
         t.trajectory_points.push_back(p);
+        t.unique_id = armTrajectory::arm_id;
         msg.joint_trajectory_messages[i].trajectory_points.push_back(p);
     }
 
-    return msg;
+    return;
 }
 
 //void armTrajectory::buttonPressArm(armSide side)
@@ -65,7 +68,7 @@ void armTrajectory::walkPoseArm(armSide side)
     armTrajectory::arm_id--;
     arm_traj.unique_id = armTrajectory::arm_id;
 
-    arm_traj = appendTrajectoryPoint(arm_traj, 3, DEFAULT_POSE);
+    appendTrajectoryPoint(arm_traj, 3, DEFAULT_POSE);
 
     armTrajectoryPublisher.publish(arm_traj);
 }
@@ -80,7 +83,7 @@ void armTrajectory::zeroPoseArm(armSide side)
     armTrajectory::arm_id--;
     arm_traj.unique_id = armTrajectory::arm_id;
 
-    arm_traj = appendTrajectoryPoint(arm_traj, 2, ZERO_POSE);
+    appendTrajectoryPoint(arm_traj, 2, ZERO_POSE);
 
     armTrajectoryPublisher.publish(arm_traj);
 
@@ -99,7 +102,7 @@ void armTrajectory::moveArm(const armSide side, const std::vector<std::vector<fl
     for(auto i=arm_pose.begin(); i != arm_pose.end(); i++){
            if(i->size() != 7)
            ROS_ERROR("Check number of trajectory points");
-        arm_traj = appendTrajectoryPoint(arm_traj, time/arm_pose.size(), *i);
+        appendTrajectoryPoint(arm_traj, time/arm_pose.size(), *i);
     }
 
     armTrajectoryPublisher.publish(arm_traj);
@@ -121,7 +124,7 @@ void armTrajectory::moveArm(std::vector<moveArmData> arm_data){
            ROS_ERROR("Check number of trajectory points");
 
         arm_traj.robot_side = i->side;
-        arm_traj = appendTrajectoryPoint(arm_traj, i->time, i->arm_pose);
+        appendTrajectoryPoint(arm_traj, i->time, i->arm_pose);
     }
 
     armTrajectoryPublisher.publish(arm_traj);

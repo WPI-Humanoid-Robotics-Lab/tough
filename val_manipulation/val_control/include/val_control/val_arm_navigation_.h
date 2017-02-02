@@ -16,7 +16,7 @@ private:
     ros::Publisher armTrajectoryPublisher;
     ros::Publisher handTrajectoryPublisher;
     ros::Subscriber armTrajectorySunscriber;
-    ihmc_msgs::ArmTrajectoryRosMessage appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos);
+    void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos);
 
     static int arm_id;
     const std::vector<float> ZERO_POSE;
