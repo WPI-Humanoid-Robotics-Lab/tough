@@ -42,7 +42,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES led_detector
-  CATKIN_DEPENDS cv_bridge image_transport pcl_conversions pcl_ros roscpp sensor_msgs std_msgs val_common perception_common message_runtime
+  CATKIN_DEPENDS cv_bridge image_transport pcl_conversions pcl_ros roscpp sensor_msgs std_msgs perception_common message_runtime
   DEPENDS system_lib
   # INCLUDE_DIRS include
   # LIBRARIES cv_image_warp cv_line_tools cv_pca #?
