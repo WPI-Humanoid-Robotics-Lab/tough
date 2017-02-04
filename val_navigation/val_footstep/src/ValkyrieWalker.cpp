@@ -78,14 +78,14 @@ bool ValkyrieWalker::WalkNSteps(int n, float x_offset, float y_offset, bool cont
         else
             list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2 , m*x_offset, m*y_offset));
 
-
+}
         if(!continous){
             if (n%2 ==1)
                 list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2  , n*x_offset, n*y_offset));
             if (n%2 ==0)
                 list.footstep_data_list.push_back(*getOffsetStep(startLeg , n*x_offset, n*y_offset));
         }
-    }
+
 
     this->WalkGivenSteps(list);
     return true;
@@ -107,15 +107,15 @@ bool ValkyrieWalker::WalkPreComputedSteps(int n, const std::vector<float> x_offs
             list.footstep_data_list.push_back(*getOffsetStep(startLeg , x_offset[m-1], y_offset[m-1]));
         else
             list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2 , x_offset[m-1], y_offset[m-1]));
+}
 
+//        if(!continous){
+//            if (n%2 ==1)
+//                list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2  , x_offset[m-1], y_offset[m-1]));
+//            if (n%2 ==0)
+//                list.footstep_data_list.push_back(*getOffsetStep(startLeg , x_offset[m-1], y_offset[m-1]));
+//        }
 
-        if(!continous){
-            if (n%2 ==1)
-                list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2  , x_offset[m-1], y_offset[m-1]));
-            if (n%2 ==0)
-                list.footstep_data_list.push_back(*getOffsetStep(startLeg , x_offset[m-1], y_offset[m-1]));
-        }
-    }
     this->WalkGivenSteps(list);
     return true;
 
