@@ -111,23 +111,41 @@ void armTrajectory::moveArm(const armSide side, const std::vector<std::vector<fl
 
 void armTrajectory::moveArm(std::vector<moveArmData> arm_data){
 
-    ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
-    arm_traj.joint_trajectory_messages.clear();
-    arm_traj.joint_trajectory_messages.resize(7);
+    ihmc_msgs::ArmTrajectoryRosMessage arm_traj_r;
+    ihmc_msgs::ArmTrajectoryRosMessage arm_traj_l;
+
+    arm_traj_r.joint_trajectory_messages.clear();
+    arm_traj_r.joint_trajectory_messages.resize(7);
 
     armTrajectory::arm_id--;
-    arm_traj.unique_id = armTrajectory::arm_id;
+    arm_traj_r.unique_id = armTrajectory::arm_id;
+    armTrajectory::arm_id--;
+    arm_traj_l.joint_trajectory_messages.clear();
+    arm_traj_l.joint_trajectory_messages.resize(7);
+    arm_traj_l.unique_id = armTrajectory::arm_id;
 
     for(std::vector<moveArmData>::iterator i=arm_data.begin(); i != arm_data.end(); i++){
 
         if(i->arm_pose.size() != 7)
-           ROS_ERROR("Check number of trajectory points");
 
-        arm_traj.robot_side = i->side;
-        appendTrajectoryPoint(arm_traj, i->time, i->arm_pose);
+            ROS_ERROR("Check number of trajectory points");
+
+        if(i->side == RIGHT){
+
+            arm_traj_r.robot_side = i->side;
+            appendTrajectoryPoint(arm_traj_r, i->time, i->arm_pose);
+        }
+
+        else {
+            arm_traj_l.robot_side = i->side;
+            appendTrajectoryPoint(arm_traj_l, i->time, i->arm_pose);
+        }
+
     }
 
-    armTrajectoryPublisher.publish(arm_traj);
+    armTrajectoryPublisher.publish(arm_traj_r);
+    ros::Duration(0.02).sleep();
+    armTrajectoryPublisher.publish(arm_traj_l);
 }
 
 
