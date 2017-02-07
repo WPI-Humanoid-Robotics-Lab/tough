@@ -1,4 +1,4 @@
-#include<val_control/val_arm_navigation_.h>
+#include<val_control/val_arm_navigation.h>
 #include<stdlib.h>
 #include <stdio.h>
 
@@ -124,7 +124,11 @@ void armTrajectory::moveArm(std::vector<moveArmData> arm_data){
            ROS_ERROR("Check number of trajectory points");
 
         arm_traj.robot_side = i->side;
+        ROS_INFO("Setting arm side as %d", i->side);
         appendTrajectoryPoint(arm_traj, i->time, i->arm_pose);
+        for (size_t j = 0; j< i->arm_pose.size(); j++)
+            std::cout<<" point "<<j+1<<":"<<i->arm_pose[j];
+        std::cout<<std::endl;
     }
 
     armTrajectoryPublisher.publish(arm_traj);

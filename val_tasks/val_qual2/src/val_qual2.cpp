@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <val_control/val_arm_navigation_.h>
+#include <val_control/val_arm_navigation.h>
 #include <val_control/val_pelvis_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
 #include <val_control/val_chest_navigation.h>
@@ -21,9 +21,8 @@ int main(int argc, char** argv)
 
     armTrajectory armtraj(nh);
     pelvisTrajectory pelvisTraj(nh);
-    chestTrajectory chestTraj(nh);
 
-    float swingTime=0.45, transferTime=0.35, swingHeight=0.13, pelvisHeight=1.07;
+    float transferTime=0.35, swingTime=0.45, swingHeight=0.13, pelvisHeight=1.07;
     if ( argc != 5 ) // 5 arguments required
     {
         std::cout<<"The values are not set, using the default values for run..!!!!!"<< std::endl;
@@ -35,6 +34,9 @@ int main(int argc, char** argv)
         swingTime = std::atof(argv[2]);
         swingHeight = std::atof(argv[3]);
         pelvisHeight = std::atof(argv[4]);
+
+        std::cout<<"Using the folloing paramteres for walking:"<< std::endl;
+        std::cout<<"transferTime: "<<transferTime<<"\n"<<"swingTime: "<<swingTime<<"\n"<<"swingHeight: "<<swingHeight<<"\n"<<"pelvisHeight: "<<pelvisHeight<<"\n";
     }
 
     // optimum values for walking
@@ -148,7 +150,7 @@ int main(int argc, char** argv)
         std::vector<float> x_offset = {0.35,0.86,1.37,1.88,2.39,2.9,3.41,3.818,4.328,4.838,4.838};
         std::vector<float> y_offset = {0,0,0,0,0,0,0,0,0,0,0};
         int no_steps = 12;
-        walk.WalkPreComputedSteps(no_steps, x_offset, y_offset, false, RIGHT);
+//        walk.WalkPreComputedSteps(no_steps, x_offset, y_offset, false, RIGHT);
         //walk.WalkNStepsForward(12,0.51,0, false, RIGHT);
         break;
     }
