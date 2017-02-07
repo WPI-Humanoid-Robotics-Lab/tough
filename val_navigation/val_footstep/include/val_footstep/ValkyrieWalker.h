@@ -2,8 +2,8 @@
 // There is no status feed back from VAl only if the step is taken or not
 
 
-#ifndef PASS_FOOTSTEP_HPP
-#define PASS_FOOTSTEP_HPP
+#ifndef VALKYRIE_WALKER_H
+#define VALKYRIE_WALKER_H
 
 #include "ros/ros.h"
 #include"geometry_msgs/Pose2D.h"
@@ -19,25 +19,41 @@
 #include "tf/tf.h"
 #include <val_common/val_common_defines.h>
 
-
+/**
+ * @brief The ValkyrieWalker class This class provides access to the footsteps of valkyrie. It can be used
+ * to get current position of the steps or to make Valkyrie walk given number of steps.
+ */
 class ValkyrieWalker
 {
 
 public:
+    /**
+     * @brief ValkyrieWalker This class provides access to the footsteps of valkyrie. It can be used
+     * to get current position of the steps or to make Valkyrie walk given number of steps.
+     * @param nh    ros Nodehandle to which the publishers and subscribers will be attached
+     * @param InTransferTime    transfer time in seconds for every step
+     * @param InSwingTime   swing time in seconds for every step
+     * @param InMode    execution mode of the steps. this can be 0 = OVERRIDE or 1 = QUEUE.
+     * @param swingHeight   swing height to be used for every step
+     */
     ValkyrieWalker(ros::NodeHandle nh, double InTransferTime = 1.5,double InSwingTime =1.5 , int InMode = 0, double swingHeight = 0.2);
     ~ValkyrieWalker();
 
-    /// \todo implement this function
-    bool WalkToGoal( geometry_msgs::Pose2D &goal);
+    /**
+     * @brief walkToGoal walks to a given 2D point in a map. needs a map either from map server or from octomap server
+     * @param goal  pose2d message giving position and orientation of goal point.
+     * @return true if footstep planning is successful else false
+     */
+    bool walkToGoal( geometry_msgs::Pose2D &goal);
 
-    /// \todo implement this function
-    bool WalkNSteps(int n, float x_offset, float y_offset, bool continous, armSide startLeg);
+
+    bool walkNSteps(int n, float x_offset, float y_offset, bool continous, armSide startLeg);
 
     /// \todo implement this function
     //bool WalkNStepsBackward(int n, float x_offset = 0.4, float y_offset=0.0, bool continous = false);
 
-    bool WalkPreComputedSteps(int n, const std::vector<float> x_offset, const std::vector<float> y_offset, bool continuous, armSide startleg);
-    bool WalkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list );
+    bool walkPreComputedSteps(const std::vector<float> x_offset, const std::vector<float> y_offset, armSide startleg);
+    bool walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list );
     inline void setWalkParms(float InTransferTime,float InSwingTime, int InMode)
     {
         this->transfer_time = InTransferTime;

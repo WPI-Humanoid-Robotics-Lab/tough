@@ -11,7 +11,7 @@ from ihmc_msgs.msg import OneDoFJointTrajectoryRosMessage
 from ihmc_msgs.msg import TrajectoryPoint1DRosMessage
 from ihmc_msgs.msg import HandDesiredConfigurationRosMessage
 
-ZERO_VECTOR = [0.0, -1.0, 2.0, 1.0, 0.0, 0.0, 0.0]
+ZERO_VECTOR = [0, 1.2, 2.0, 0.0, 0.0, 0.0, 0.0]
 ELBOW_BENT_UP = [0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
 BUTTON_PRESS = [0.0, 0.1, 0.2, 0.3, 0.0, 0.0, 0.0]
 
@@ -22,11 +22,12 @@ def sendRightArmTrajectory():
 
     msg.robot_side = ArmTrajectoryRosMessage.RIGHT
 
-    msg = appendTrajectoryPoint(msg, 2.0, ZERO_VECTOR)
-    msg = appendTrajectoryPoint(msg, 3.0, ELBOW_BENT_UP)
-    msg = appendTrajectoryPoint(msg, 4.0, ZERO_VECTOR)
 
-    msg = appendTrajectoryPoint(msg, 5.0, BUTTON_PRESS)
+#    msg = appendTrajectoryPoint(msg, 3.0, BUTTON_PRESS)
+    msg = appendTrajectoryPoint(msg, 4.0, ZERO_VECTOR)
+#    msg = appendTrajectoryPoint(msg, 4.0, ZERO_VECTOR)
+
+#    msg = appendTrajectoryPoint(msg, 5.0, BUTTON_PRESS)
     msg.unique_id = -1
 
     rospy.loginfo('publishing right trajectory')

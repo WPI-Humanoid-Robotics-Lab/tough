@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 
+//add default pose for both arms. the values of joints are different.
 armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
     ZERO_POSE{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
     DEFAULT_POSE{-0.2f, 1.2f, 0.7222f, 1.5101f, 0.0f, 0.0f, 0.0f}{
@@ -18,7 +19,6 @@ armTrajectory::~armTrajectory(){
 
 void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos)
 {
-
 
     for (int i=0;i<7;i++)
     {
@@ -38,30 +38,10 @@ void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &ms
     return;
 }
 
-//void armTrajectory::buttonPressArm(armSide side)
-//{
-//    ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
-//    arm_traj.joint_trajectory_messages.clear();
-
-//    float BUTTON_PRESS_PREPARE [] ={1.57, -0.1, -1.6, 1.55, 0.0, 0.0, 0.0};
-//    float BUTTON_PRESS_ACT [] ={1.57, -0.3, -1.6, 1.3, 0.0, 0.0, 0.0};
-
-//    arm_traj.joint_trajectory_messages.resize(7);
-//    arm_traj.robot_side = side;
-//    armTrajectory::arm_id--;
-//    arm_traj.unique_id = armTrajectory::arm_id;
-
-//    arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_PREPARE);
-//    arm_traj = appendTrajectoryPoint(arm_traj, 2, BUTTON_PRESS_ACT);
-
-//    armTrajectoryPublisher.publish(arm_traj);
-//}
-
-void armTrajectory::walkPoseArm(armSide side)
+void armTrajectory::moveToDefaultPose(armSide side)
 {
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
-
 
     arm_traj.joint_trajectory_messages.resize(7);
     arm_traj.robot_side = side;
@@ -71,9 +51,10 @@ void armTrajectory::walkPoseArm(armSide side)
     appendTrajectoryPoint(arm_traj, 3, DEFAULT_POSE);
 
     armTrajectoryPublisher.publish(arm_traj);
+
 }
 
-void armTrajectory::zeroPoseArm(armSide side)
+void armTrajectory::moveToZeroPose(armSide side)
 {
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
@@ -89,7 +70,7 @@ void armTrajectory::zeroPoseArm(armSide side)
 
 }
 
-void armTrajectory::moveArm(const armSide side, const std::vector<std::vector<float>> arm_pose,const float time){
+void armTrajectory::moveArmJoints(const armSide side, const std::vector<std::vector<float>> arm_pose,const float time){
 
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
@@ -109,50 +90,48 @@ void armTrajectory::moveArm(const armSide side, const std::vector<std::vector<fl
 }
 
 
-void armTrajectory::moveArm(std::vector<moveArmData> arm_data){
+void armTrajectory::moveArmJoints(std::vector<armJointData> arm_data){
 
-    ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
-    arm_traj.joint_trajectory_messages.clear();
-    arm_traj.joint_trajectory_messages.resize(7);
+    ihmc_msgs::ArmTrajectoryRosMessage arm_traj_r;
+    ihmc_msgs::ArmTrajectoryRosMessage arm_traj_l;
+
+    arm_traj_r.joint_trajectory_messages.clear();
+    arm_traj_r.joint_trajectory_messages.resize(7);
 
     armTrajectory::arm_id--;
-    arm_traj.unique_id = armTrajectory::arm_id;
+    arm_traj_r.unique_id = armTrajectory::arm_id;
+    armTrajectory::arm_id--;
+    arm_traj_l.joint_trajectory_messages.clear();
+    arm_traj_l.joint_trajectory_messages.resize(7);
+    arm_traj_l.unique_id = armTrajectory::arm_id;
 
-    for(std::vector<moveArmData>::iterator i=arm_data.begin(); i != arm_data.end(); i++){
+    for(std::vector<armJointData>::iterator i=arm_data.begin(); i != arm_data.end(); i++){
 
-        if(i->arm_pose.size() != 7)
-           ROS_ERROR("Check number of trajectory points");
+        if(i->arm_pose.size() != 7){
+            ROS_INFO("Check number of trajectory points");
+            return;
+        }
 
-        arm_traj.robot_side = i->side;
-        ROS_INFO("Setting arm side as %d", i->side);
-        appendTrajectoryPoint(arm_traj, i->time, i->arm_pose);
-        for (size_t j = 0; j< i->arm_pose.size(); j++)
-            std::cout<<" point "<<j+1<<":"<<i->arm_pose[j];
-        std::cout<<std::endl;
+        if(i->side == RIGHT){
+            arm_traj_r.robot_side = i->side;
+            appendTrajectoryPoint(arm_traj_r, i->time, i->arm_pose);
+        }
+
+        else {
+            arm_traj_l.robot_side = i->side;
+            appendTrajectoryPoint(arm_traj_l, i->time, i->arm_pose);
+        }
+
     }
 
-    armTrajectoryPublisher.publish(arm_traj);
+    armTrajectoryPublisher.publish(arm_traj_r);
+    ros::Duration(0.02).sleep();
+    armTrajectoryPublisher.publish(arm_traj_l);
 }
 
 
 void armTrajectory::moveArmMessage(ihmc_msgs::ArmTrajectoryRosMessage& msg){
-
     this->armTrajectoryPublisher.publish(msg);
     armTrajectory::arm_id--;
 
 }
-
-
-//    ihmc_msgs::HandDesiredConfigurationRosMessage hand_msg;
-//    hand_msg.robot_side = hand_msg.RIGHT;
-//    hand_msg.hand_desired_configuration = hand_msg.CLOSE;
-//    hand_msg.unique_id = -2;
-//    handTrajectoryPublisher.publish(hand_msg);
-
-
-
-
-
-
-
-

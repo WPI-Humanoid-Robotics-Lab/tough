@@ -9,7 +9,6 @@
 #include<ros/ros.h>
 
 // CallBack function for walking status
-///\todo Must have more status feedback from the Robot. Should know if it did not complete the step then what happened.
 void ValkyrieWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage & msg)
 {
     if(msg.status == 1)
@@ -26,7 +25,7 @@ void ValkyrieWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage 
 
 // creates and send footsteps to  val to reach goal position
 
-bool ValkyrieWalker::WalkToGoal( geometry_msgs::Pose2D &goal)
+bool ValkyrieWalker::walkToGoal( geometry_msgs::Pose2D &goal)
 {
 
     ihmc_msgs::FootstepDataListRosMessage list ;
@@ -34,7 +33,6 @@ bool ValkyrieWalker::WalkToGoal( geometry_msgs::Pose2D &goal)
     list.swing_time = swing_time;
     list.execution_mode = exe_mode;
     list.unique_id = ValkyrieWalker::id;
-
 
     if(this->getFootstep(goal,list))
     {
@@ -45,13 +43,11 @@ bool ValkyrieWalker::WalkToGoal( geometry_msgs::Pose2D &goal)
     }
     this->waitForSteps(list.footstep_data_list.size());
 
-
     return true;
-
 }
 
 // creates and n footsteps of width step_size
-bool ValkyrieWalker::WalkNSteps(int n, float x_offset, float y_offset, bool continous, armSide startLeg)
+bool ValkyrieWalker::walkNSteps(int n, float x_offset, float y_offset, bool continous, armSide startLeg)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.transfer_time = transfer_time;
@@ -60,38 +56,29 @@ bool ValkyrieWalker::WalkNSteps(int n, float x_offset, float y_offset, bool cont
 
     list.unique_id = ValkyrieWalker::id ;
 
-//    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 0.35, 0));
-//    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 0.86,0));
-//    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 1.37, 0));
-//    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 1.88, 0));
-//    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 2.39, 0));
-//    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 2.9, 0));
-//    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 3.41, 0));
-//    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 3.818, 0));
-//    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 4.328, 0));
-//    list.footstep_data_list.push_back(*getOffsetStep(RIGHT , 4.838, 0));
-//    list.footstep_data_list.push_back(*getOffsetStep(LEFT , 4.838,0));
-
     for (int m =1; m <= n ; m++) {
-        if(m%2 == 1)
+        if(m%2 == 1) {
             list.footstep_data_list.push_back(*getOffsetStep(startLeg , m*x_offset, m*y_offset));
-        else
+        }
+        else {
             list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2 , m*x_offset, m*y_offset));
+        }
 
-
-        if(!continous){
-            if (n%2 ==1)
-                list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2  , n*x_offset, n*y_offset));
-            if (n%2 ==0)
-                list.footstep_data_list.push_back(*getOffsetStep(startLeg , n*x_offset, n*y_offset));
+    }
+    if(!continous){
+        if (n%2 ==1) {
+            list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2  , n*x_offset, n*y_offset));
+        }
+        if (n%2 ==0) {
+            list.footstep_data_list.push_back(*getOffsetStep(startLeg , n*x_offset, n*y_offset));
         }
     }
 
-    this->WalkGivenSteps(list);
+    this->walkGivenSteps(list);
     return true;
 }
 
-bool ValkyrieWalker::WalkPreComputedSteps(int n, const std::vector<float> x_offset, const std::vector<float> y_offset, bool continous, armSide startLeg){
+bool ValkyrieWalker::walkPreComputedSteps(const std::vector<float> x_offset, const std::vector<float> y_offset, armSide startLeg){
 
     ihmc_msgs::FootstepDataListRosMessage list;
     list.transfer_time = transfer_time;
@@ -102,72 +89,31 @@ bool ValkyrieWalker::WalkPreComputedSteps(int n, const std::vector<float> x_offs
     if (x_offset.size() != y_offset.size())
         ROS_ERROR("X Offset and Y Offset have different size");
 
-    for (int m =1; m <= n ; m++) {
+
+    size_t numberOfStpes = x_offset.size();
+
+    for (int m =1; m <= numberOfStpes ; m++) {
         if(m%2 == 1)
             list.footstep_data_list.push_back(*getOffsetStep(startLeg , x_offset[m-1], y_offset[m-1]));
         else
             list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2 , x_offset[m-1], y_offset[m-1]));
-
-
-        if(!continous){
-            if (n%2 ==1)
-                list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2  , x_offset[m-1], y_offset[m-1]));
-            if (n%2 ==0)
-                list.footstep_data_list.push_back(*getOffsetStep(startLeg , x_offset[m-1], y_offset[m-1]));
-        }
     }
-    this->WalkGivenSteps(list);
-    return true;
 
+    this->walkGivenSteps(list);
+    return true;
 }
 
-//creates and n footsteps of width step_size backwards
-//bool   ValkyrieWalker::WalkNStepsBackward(int n, float x_offset, float y_offset, bool continous)
-//{
-//    ihmc_msgs::FootstepDataListRosMessage list ;
-//    list.transfer_time = transfer_time;
-//    list.swing_time = swing_time;
-//    list.execution_mode = exe_mode;
-//    list.unique_id = ValkyrieWalker::id;
 
-
-
-//    for (int m =1; m <= n ; m++)
-//    {
-//        if(m%2 == 1)
-//            list.footstep_data_list.push_back(*getOffsetStep(LEFT , -m*x_offset, -m*y_offset));
-//        else
-//            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , -m*x_offset, -m*y_offset));
-//    }
-
-//    if(!continous) {
-//        if (n%2 ==1)
-//            list.footstep_data_list.push_back(*getOffsetStep(RIGHT , -n*x_offset, n*y_offset));
-//        if (n%2 ==0)
-//            list.footstep_data_list.push_back(*getOffsetStep(LEFT , -n*x_offset, n*y_offset));
-
-//    }
-
-//    this->WalkGivenSteps(list);
-//    return true;
-
-//}
-
-
-bool ValkyrieWalker::WalkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list )
+bool ValkyrieWalker::walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list )
 {
     this->footsteps_to_val.publish(list);
     ValkyrieWalker::id--;
     this->waitForSteps(list.footstep_data_list.size());
     return true;
-
 }
 
 
-
-
 //Calls the footstep planner service to get footsteps to reach goal
-
 bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list)
 {
     /// \todo fix the robot pose, if the legs are not together before walking.
@@ -241,7 +187,6 @@ double ValkyrieWalker::getSwing_height() const
 
 
 // constructor
-
 ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double InSwingTime, int InMode, double swingHeight):n(nh)
 {
     this->footstep_client = n.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("plan_footsteps");
