@@ -110,7 +110,13 @@ int main(int argc, char **argv)
     ros::service::waitForService("build_cloud");
     ROS_INFO("Found build_cloud! Starting the snapshotter");
     PeriodicSnapshotter snapshotter;
-    ros::spin();
+    ros::Rate looprate(1);
+    while(ros::ok())
+    {
+      ros::spinOnce();
+      looprate.sleep();
+    }
+    //ros::spin();
 
 //    ros::spinOnce();
 //    while (ros::ok()){
