@@ -21,7 +21,7 @@ int main(int argc, char** argv)
     armTrajectory armtraj(nh);
     pelvisTrajectory pelvisTraj(nh);
 
-    float transferTime=0.5, swingTime=0.5, swingHeight=0.15, pelvisHeight=1.06;
+    float transferTime=0.4, swingTime=0.6, swingHeight=0.13, pelvisHeight=1.07;
     if ( argc != 5 ) // 5 arguments required
     {
         std::cout<<"The values are not set, using the default values for run..!!!!!"<< std::endl;
@@ -78,27 +78,31 @@ int main(int argc, char** argv)
 
         arm_data_seq5.side = RIGHT; // stable walk
         arm_data_seq5.arm_pose = {0.0, 0.25, 0.2, 0.9, 0.0, 0.0, 0.0};
-        arm_data_seq5.time = 6.5;
+        arm_data_seq5.time = 6.0;
 
         arm_data_seq6.side = LEFT;
         arm_data_seq6.arm_pose = {0.0, -0.25, 0.2, -0.9, 0.0, 0.0, 0.0};
         arm_data_seq6.time = 6.5;
 
         arm_data_seq7.side = RIGHT; // button press prepare
-        arm_data_seq7.arm_pose = {1.5, -0.4, -0.65, 0.8, 0.0, 0.0, 0.0};
+        arm_data_seq7.arm_pose = {1.5, -0.5, -0.65, 0.8, 0.0, 0.0, 0.0};
+        arm_data_seq7.time = 7.0;
+
+        arm_data_seq7.side = RIGHT; // button press prepare
+        arm_data_seq7.arm_pose = {1.5, -0.5, -0.65, 0.8, 0.0, 0.0, 0.0};
         arm_data_seq7.time = 7.6;
 
         arm_data_seq8.side = LEFT;
         arm_data_seq8.arm_pose = {1.5, -0.4, -0.65, -0.7, 0.0, 0.0, 0.0};
-        arm_data_seq8.time = 7.8;
+        arm_data_seq8.time = 7.7;
 
         arm_data_seq9.side = RIGHT; // zero position
         arm_data_seq9.arm_pose = {0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0};
-        arm_data_seq9.time = 7.8;
+        arm_data_seq9.time = 7.7;
 
         arm_data_seq10.side = LEFT;
         arm_data_seq10.arm_pose = {0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0};
-        arm_data_seq10.time = 7.8;
+        arm_data_seq10.time = 7.7;
 
         arm_data_seq11.side = RIGHT; // intermideate point r
         arm_data_seq11.arm_pose = {1.5, -0.0, -0.1, 1.7, 0.0, 0.0, 0.0};
@@ -144,7 +148,7 @@ int main(int argc, char** argv)
         walk.setWalkParms(transferTime, swingTime, 0);
         // each step is 0.51m offset except for the first and seventh. Why? Guy with Mad Skills told so
 //        std::vector<float> x_offset = {0.35,0.86,1.37,1.88,2.39,2.9,3.41,3.818,4.328,4.838,4.838};
-        std::vector<float> x_offset = {0.35, 0.85, 1.35, 1.85, 2.35, 2.85, 3.35, 3.7, 4.2, 4.7, 5.2};
+        std::vector<float> x_offset = {0.35, 0.85, 1.35, 1.85, 2.35, 2.85, 3.35, 3.65, 4.15, 4.65, 5.15};
         std::vector<float> y_offset = {0,0,0,0,0,0,0,0,0,0,0};
         walk.walkPreComputedSteps(x_offset, y_offset, RIGHT);
         break;
