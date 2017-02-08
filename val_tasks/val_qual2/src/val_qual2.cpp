@@ -100,17 +100,17 @@ int main(int argc, char** argv)
         arm_data_seq10.arm_pose = {0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0};
         arm_data_seq10.time = 7.8;
 
-        arm_data_seq11.side = RIGHT; // arm back r
+        arm_data_seq11.side = RIGHT; // intermideate point r
         arm_data_seq11.arm_pose = {1.5, -0.0, -0.1, 1.7, 0.0, 0.0, 0.0};
-        arm_data_seq11.time = 8.0;
+        arm_data_seq11.time = 7.9;
 
-        arm_data_seq12.side = RIGHT; // intermideate point r
+        arm_data_seq12.side = RIGHT; // retract to actual
         arm_data_seq12.arm_pose = {-0.2, 1.2, 0.65, 1.5, 0.0, 0.0, 0.0};
-        arm_data_seq12.time = 8.0;
+        arm_data_seq12.time = 7.9;
 
         arm_data_seq13.side = RIGHT; // retract to actual
         arm_data_seq13.arm_pose = {-0.2, 1.2, 0.65, 1.5, 0.0, 0.0, 0.0};
-        arm_data_seq13.time = 10.5;
+        arm_data_seq13.time = 8.1;
 
         arm_data_seq14.side = LEFT;
         arm_data_seq14.arm_pose = {-0.2, -1.2, 0.65, -1.5, 0.0, 0.0, 0.0};
