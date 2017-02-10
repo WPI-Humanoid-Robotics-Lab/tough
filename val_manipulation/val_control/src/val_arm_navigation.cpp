@@ -130,7 +130,7 @@ void armTrajectory::moveArmJoints(std::vector<armJointData> arm_data){
 }
 
 
-void armTrajectory::moveArmMessage(ihmc_msgs::ArmTrajectoryRosMessage& msg){
+void armTrajectory::moveArmMessage(const ihmc_msgs::ArmTrajectoryRosMessage &msg){
     this->armTrajectoryPublisher.publish(msg);
     armTrajectory::arm_id--;
 
