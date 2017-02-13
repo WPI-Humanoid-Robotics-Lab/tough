@@ -12,14 +12,14 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>orocos_kdl</build_depend>
+  <build_depend>tf</build_depend>
   <build_depend>trac_ik_lib</build_depend>
   <build_depend>val_common</build_depend>
   <build_depend>val_footstep</build_depend>
-  <build_depend>val_control</build_depend>
   <run_depend>orocos_kdl</run_depend>
+  <run_depend>tf</run_depend>
   <run_depend>trac_ik_lib</run_depend>
-  <run_depend>val_description</run_depend>
   <run_depend>val_common</run_depend>
+  <run_depend>val_description</run_depend>
   <run_depend>val_footstep</run_depend>
-  <run_depend>val_control</run_depend>
 </package>
