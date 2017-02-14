@@ -53,21 +53,26 @@ public:
      * @param arm_pose      A vector that stores a vector with 7 values one for each joint. Number of values in the vector are the number of trajectory points.
      * @param time          Total time to execute the trajectory. each trajectory point is equally spaced in time.
      */
-    void moveArmJoints(const armSide side,const std::vector<std::vector<float> > arm_pose,const float time);
+    void moveArmJoints(const armSide side,const std::vector<std::vector<float> > &arm_pose,const float time);
 
     /**
      * @brief moveArmJoints Moves arm joints to given joint angles. All angles in radians.
      * @param arm_data      A vector of armJointData struct. This allows customization of individual trajectory points. For example,
      * each point can have different execution times.
      */
-    void moveArmJoints(std::vector<armJointData> arm_data);
+    void moveArmJoints(std::vector<armJointData> &arm_data);
 
     /**
      * @brief moveArmMessage    Publishes a given ros message of ihmc_msgs::ArmTrajectoryRosMessage format to the robot.
      * @param msg               message to be sent to the robot.
      */
-    void moveArmMessage(const ihmc_msgs::ArmTrajectoryRosMessage& msg);
+    void moveArmMessage(const ihmc_msgs::ArmTrajectoryRosMessage &msg);
 
+    /**
+     * @brief getnumArmJoints Gives back the number of arm joints for Valkyrie R5
+     * @return
+     */
+    int getnumArmJoints() const;
 
 private:
 
@@ -75,7 +80,7 @@ private:
 
     const std::vector<float> ZERO_POSE;
     const std::vector<float> DEFAULT_POSE;
-
+    const int NUM_ARM_JOINTS;
     ros::NodeHandle nh_;
     ros::Publisher  armTrajectoryPublisher;
     ros::Publisher  handTrajectoryPublisher;
