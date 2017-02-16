@@ -60,7 +60,7 @@ public:
      * @param arm_data      A vector of armJointData struct. This allows customization of individual trajectory points. For example,
      * each point can have different execution times.
      */
-    void moveArmJoints(std::vector<armJointData> &arm_data);
+    void moveArmJoints(const std::vector<armJointData> &arm_data);
 
     /**
      * @brief moveArmMessage    Publishes a given ros message of ihmc_msgs::ArmTrajectoryRosMessage format to the robot.
