@@ -91,7 +91,7 @@ void armTrajectory::moveArmJoints(const armSide side, const std::vector<std::vec
 }
 
 
-void armTrajectory::moveArmJoints(std::vector<armJointData> &arm_data){
+void armTrajectory::moveArmJoints(const std::vector<armJointData> &arm_data){
 
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj_r;
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj_l;
