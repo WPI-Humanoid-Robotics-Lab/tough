@@ -1,0 +1,11 @@
+# ID of task to start (1, 2 or 3)
+uint8 task_id
+
+# ID of checkpoint to start within that task. Depending on the task, this may 
+# go from 1 to 8.
+uint8 checkpoint_id
+
+---
+
+# True if checkpoint started successfully
+bool success
