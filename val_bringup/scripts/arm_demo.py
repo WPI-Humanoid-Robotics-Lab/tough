@@ -10,10 +10,12 @@ from ihmc_msgs.msg import ArmTrajectoryRosMessage
 from ihmc_msgs.msg import OneDoFJointTrajectoryRosMessage
 from ihmc_msgs.msg import TrajectoryPoint1DRosMessage
 from ihmc_msgs.msg import HandDesiredConfigurationRosMessage
+from ihmc_msgs.msg import HandTrajectoryRosMessage
+from ihmc_msgs.msg import SE3TrajectoryPointRosMessage
 
 ZERO_VECTOR = [0.0, -1.0, 2.0, 1.0, 0.0, 0.0, 0.0]
 ELBOW_BENT_UP = [0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
-BUTTON_PRESS = [0.0, 0.1, 0.2, 0.3, 0.0, 0.0, 0.0]
+BUTTON_PRESS = [0.0, 0.1, 0.2, 0.3, 1.5, -0.5, -0.20]
 
 ROBOT_NAME = None
 
@@ -22,11 +24,11 @@ def sendRightArmTrajectory():
 
     msg.robot_side = ArmTrajectoryRosMessage.RIGHT
 
-    msg = appendTrajectoryPoint(msg, 2.0, ZERO_VECTOR)
-    msg = appendTrajectoryPoint(msg, 3.0, ELBOW_BENT_UP)
-    msg = appendTrajectoryPoint(msg, 4.0, ZERO_VECTOR)
+#    msg = appendTrajectoryPoint(msg, 2.0, ZERO_VECTOR)
+#    msg = appendTrajectoryPoint(msg, 3.0, ELBOW_BENT_UP)
+    msg = appendTrajectoryPoint(msg, 1.0, ZERO_VECTOR)
 
-    msg = appendTrajectoryPoint(msg, 5.0, BUTTON_PRESS)
+#    msg = appendTrajectoryPoint(msg, 2.0, BUTTON_PRESS)
     msg.unique_id = -1
 
     rospy.loginfo('publishing right trajectory')
@@ -37,7 +39,7 @@ def closeHand():
     msg.robot_side = HandDesiredConfigurationRosMessage.RIGHT
     msg.hand_desired_configuration = HandDesiredConfigurationRosMessage.CLOSE
 
-    msg.unique_id = -2
+    msg.unique_id = 2
     rospy.loginfo('Closing right hand')
     handTrajectoryPublisher.publish(msg)
 
@@ -53,6 +55,30 @@ def appendTrajectoryPoint(arm_trajectory, time, positions):
         arm_trajectory.joint_trajectory_messages[i].trajectory_points.append(point)
     return arm_trajectory
 
+def sendTaskSpaceTrajectory():
+    msg = HandTrajectoryRosMessage()
+    
+    msg.robot_side = HandTrajectoryRosMessage.RIGHT
+    msg.base_for_control = HandTrajectoryRosMessage.CHEST
+        
+    pt = SE3TrajectoryPointRosMessage()
+    pt.time = 1.0
+    
+    pt.position.x = 0.23
+    pt.position.y = -0.98
+    pt.position.z = 1.28
+    
+    pt.orientation.w=1.0
+    
+    pt.unique_id = 255
+    
+    msg.taskspace_trajectory_points.append(pt)
+    
+    msg.execution_mode = HandTrajectoryRosMessage.OVERRIDE
+    msg.unique_id = 212
+    rospy.loginfo('Moving Hand in task space')
+    taskSpaceTrajectoryPublisher.publish(msg)
+
 if __name__ == '__main__':
     try:
         rospy.init_node('ihmc_arm_demo1')
@@ -62,6 +88,9 @@ if __name__ == '__main__':
 
         armTrajectoryPublisher = rospy.Publisher("/ihmc_ros/{0}/control/arm_trajectory".format(ROBOT_NAME), ArmTrajectoryRosMessage, queue_size=1)
         handTrajectoryPublisher = rospy.Publisher("/ihmc_ros/{0}/control/hand_desired_configuration".format(ROBOT_NAME), HandDesiredConfigurationRosMessage, queue_size=1)
+        
+        taskSpaceTrajectoryPublisher = rospy.Publisher("/ihmc_ros/{0}/control/hand_trajectory".format(ROBOT_NAME), HandTrajectoryRosMessage, queue_size=1)
+        
         rate = rospy.Rate(10) # 10hz
         time.sleep(1)
 
@@ -72,8 +101,9 @@ if __name__ == '__main__':
                 rate.sleep()
 
         if not rospy.is_shutdown():
-            sendRightArmTrajectory()
-            closeHand()
+ #           sendRightArmTrajectory()
+            #closeHand()
+            sendTaskSpaceTrajectory()
             time.sleep(2)
 
     except rospy.ROSInterruptException:
