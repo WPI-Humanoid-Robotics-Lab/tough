@@ -1,4 +1,4 @@
-#include <val_manipulation/val_pelvis_navigation.h>
+#include <val_control/val_pelvis_navigation.h>
 
 pelvisTrajectory::pelvisTrajectory(ros::NodeHandle nh):nh_(nh)
 {
@@ -22,8 +22,16 @@ void pelvisTrajectory::controlPelvisHeight(float height)
 
     msg.trajectory_points.clear();
     msg.trajectory_points.push_back(p);
-    msg.unique_id = 13;
+    pelvisTrajectory::pelvis_id--;
+    msg.unique_id = pelvisTrajectory::pelvis_id;
 
     // publish the message
     pelvisHeightPublisher.publish(msg);
+}
+
+bool pelvisTrajectory::controlPelvisMessage(ihmc_msgs::PelvisHeightTrajectoryRosMessage msg){
+
+    this->pelvisHeightPublisher.publish(msg);
+    pelvisTrajectory::pelvis_id--;
+    msg.unique_id = pelvisTrajectory::pelvis_id;
 }

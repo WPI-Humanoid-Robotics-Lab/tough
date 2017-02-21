@@ -1,14 +1,17 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(val_qual2)
 
+set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  perception_common
   roscpp
-  rospy
-  tf2
+  std_msgs
+  tf
+  val_common
+  val_control
+  val_footstep
 )
 
 ## System dependencies are found with CMake's conventions
@@ -68,7 +71,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
+#   std_msgs
 # )
 
 ################################################
@@ -102,9 +105,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES val_qual2
-#  CATKIN_DEPENDS perception_common roscpp rospy tf2
-#  DEPENDS system_lib
+  LIBRARIES val_qual2
+  CATKIN_DEPENDS roscpp std_msgs tf val_common val_control val_footstep
+  DEPENDS system_lib
 )
 
 ###########
@@ -113,7 +116,7 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
@@ -133,13 +136,17 @@ include_directories(
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(val_qual2_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(val_qual2_node
-#   ${catkin_LIBRARIES}
-# )
 
+add_executable(val_qual2_node
+  src/val_qual2.cpp)
+
+
+add_dependencies(val_qual2_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(val_qual2_node
+   ${catkin_LIBRARIES} val_control
+ )
 #############
 ## Install ##
 #############
