@@ -21,7 +21,7 @@ cd ~ && git clone https://github.com/ihmcrobotics/ihmc-open-robotics-software.gi
 
 echo "$(tput setaf 1)compile the ihmc repo$(tput sgr0)"
 cd ihmc-open-robotics-software
-git checkout 0.8.1
+git checkout origin/0.9-support
 ./gradlew 
 ./gradlew -q deployLocal
 
