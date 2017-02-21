@@ -7,7 +7,6 @@ using namespace src_qual1_task;
 LedDetector::LedDetector(ros::NodeHandle nh) {
     m_multisenseImagePtr = new src_perception::MultisenseImage(nh);
     m_randomGen= cv::RNG(12345);
-    m_imageRGBXYZpub = nh.advertise<led_detector::LedPositionColor>("/detect/light/rgbxyz", 1);
     m_lightPub = nh.advertise<srcsim::Console>("/srcsim/qual1/light",1);
     m_multisenseImagePtr->giveQMatrix(m_qMatrix);
 }
@@ -146,16 +145,15 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
     transform.setRotation(orientation);
     br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "head", "LED_frame")); //Co-ordinates wrt left_camera_optical_frame
 
-    message.position.x = msg.x = light_centroid_head.point.x;
-    message.position.y = msg.y = light_centroid_head.point.y;
-    message.position.z = msg.z = light_centroid_head.point.z;
+    msg.x = light_centroid_head.point.x;
+    msg.y = light_centroid_head.point.y;
+    msg.z = light_centroid_head.point.z;
 
     // Assign RGB values to ROS message to be published. Getting it from the cloud and not the image, values returned are 1 or 0.
     // If the value is more than 0.7 consider it as 1
-    message.color.r = msg.r = (int)((pcl_point.r/255.0)+0.3);
-    message.color.g = msg.g = (int)((pcl_point.g/255.0)+0.3);
-    message.color.b = msg.b = (int)((pcl_point.b/255.0)+0.3);
-    message.color.a = 1.0;
+    msg.r = (int)((pcl_point.r/255.0)+0.3);
+    msg.g = (int)((pcl_point.g/255.0)+0.3);
+    msg.b = (int)((pcl_point.b/255.0)+0.3);
 
     // If there is no LED turned on, then just don't detect anything
     if (msg.r == 0.0 && msg.g == 0 && msg.b == 0){
@@ -193,7 +191,6 @@ bool LedDetector::getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCo
         msg.g = meanG;
         msg.b = meanB;
 
-        m_imageRGBXYZpub.publish(message);
         m_lightPub.publish(msg);
         m_readings.clear();
 

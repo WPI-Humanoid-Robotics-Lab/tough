@@ -29,8 +29,8 @@ bool ValkyrieWalker::walkToGoal( geometry_msgs::Pose2D &goal)
 {
 
     ihmc_msgs::FootstepDataListRosMessage list ;
-    list.transfer_time = transfer_time;
-    list.swing_time = swing_time;
+    list.default_transfer_time = transfer_time;
+    list.default_swing_time= swing_time;
     list.execution_mode = exe_mode;
     list.unique_id = ValkyrieWalker::id;
 
@@ -50,8 +50,8 @@ bool ValkyrieWalker::walkToGoal( geometry_msgs::Pose2D &goal)
 bool ValkyrieWalker::walkNSteps(int n, float x_offset, float y_offset, bool continous, armSide startLeg)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
-    list.transfer_time = transfer_time;
-    list.swing_time = swing_time;
+    list.default_transfer_time = transfer_time;
+    list.default_swing_time = swing_time;
     list.execution_mode = exe_mode;
 
     list.unique_id = ValkyrieWalker::id ;
@@ -81,8 +81,8 @@ bool ValkyrieWalker::walkNSteps(int n, float x_offset, float y_offset, bool cont
 bool ValkyrieWalker::walkPreComputedSteps(const std::vector<float> x_offset, const std::vector<float> y_offset, armSide startLeg){
 
     ihmc_msgs::FootstepDataListRosMessage list;
-    list.transfer_time = transfer_time;
-    list.swing_time = swing_time;
+    list.default_transfer_time= transfer_time;
+    list.default_swing_time = swing_time;
     list.execution_mode = exe_mode;
     list.unique_id = ValkyrieWalker::id;
 

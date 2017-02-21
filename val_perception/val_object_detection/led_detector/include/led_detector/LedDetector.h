@@ -8,7 +8,6 @@
 #include <geometry_msgs/PointStamped.h>
 #include <tf/transform_broadcaster.h>//
 #include <val_common/val_common_names.h>
-#include <led_detector/LedPositionColor.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <std_msgs/Int32MultiArray.h>
@@ -67,11 +66,6 @@ namespace src_qual1_task
             bool getLight(cv::Mat &new_image,geometry_msgs::Point &pixelCoordinates);
             bool getPoseRGB(ImageFrame &img_frame,geometry_msgs::Point &pixelCoordinates);
 
-            /**
-             * @brief message - Message of type LedPositionColor (Custom defined message type with x,y,z,r,g,b,a)
-              */
-            led_detector::LedPositionColor message;
-            
             /**
              * @brief m_multisenseImagePtr - Pointer to original image obtained from Multisense headset
              */
