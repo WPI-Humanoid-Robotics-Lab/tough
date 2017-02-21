@@ -38,13 +38,12 @@ cd ~/$WORKSPACE/src/ihmc_repos/ihmc_ros_core/
 git apply ~/$WORKSPACE/src/space_robotics_challenge/val_common/patches/ihmc_ros_core.patch
 
 # get the jdk 
-sudo -s
-mkdir /usr/lib/jdk/
-cd /usr/lib/jdk/
-wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u112-b15/jdk-8u112-linux-x64.tar.gz
-tar -xvzf jdk-8u112-linux-x64.tar.gz jdk1.8.0_112/
+sudo sh -c 'mkdir /usr/lib/jdk'
 
+sudo sh -c 'cd /usr/lib/jdk && wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u112-b15/jdk-8u112-linux-x64.tar.gz && tar -xvzf jdk-8u112-linux-x64.tar.gz && rm -rf jdk-8u112-linux-x64.tar.gz'
 #update the bashrc
-echo 'export JAVA_HOME=/usr/lib/jdk/jdk1.8.0_112' >> ~/.bashrc
+echo "export JAVA_HOME=/usr/lib/jdk/jdk1.8.0_112
+export IHMC_SOURCE_LOCATION=$HOME/ihmc-open-robotics-software
+" >> ~/.bashrc
 
 
