@@ -1,0 +1,687 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="SRC_qual1">
+
+    <physics type="ode">
+      <real_time_update_rate>1000.0</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>150</iters>
+          <precon_iters>0</precon_iters>
+          <sor>1.400000</sor>
+          <use_dynamic_moi_rescaling>1</use_dynamic_moi_rescaling>
+        </solver>
+        <constraints>
+          <cfm>0.000000</cfm>
+          <erp>0.800000</erp>
+          <contact_max_correcting_vel>2000.000000</contact_max_correcting_vel>
+          <contact_surface_layer>0.01000</contact_surface_layer>
+        </constraints>
+      </ode>
+    </physics>
+
+    <!-- Control plugin for qual task 1 -->
+    <plugin name="qual1" filename="libQual1Plugin.so">
+      <switch_count>20</switch_count>
+      <on_delay>1</on_delay>
+    </plugin>
+
+    <gui>
+      <camera name="user_camera">
+        <pose>-3.5 -3.5 3 0 0.34 0.588</pose>
+      </camera>
+    </gui>
+
+    <!-- A global light source -->
+    <light type="directional" name="sun">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>0.9 0.1 -0.7</direction>
+    </light>
+
+    <!-- A ground plane -->
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <model name="console1">
+      <pose>3 0 0 0 0 -1.570796</pose>
+      <static>true</static>
+      <include>
+        <uri>model://control_console</uri>
+      </include>
+      <link name="visuals">
+        <visual name="light1">
+          <pose>-0.49349 -0.24203 1.00454 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.07391 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light2">
+          <pose>-0.49349 -0.31142 0.97408 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.07391 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light3">
+          <pose>-0.49349 -0.38078 0.94363 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.07391 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light4">
+          <pose>-0.49349 -0.45016 0.91317 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.07391 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light5">
+          <pose>-0.49349 -0.51954 0.88271 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.07391 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light6">
+          <pose>-0.41939 -0.24203 1.00454 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light7">
+          <pose>-0.41939 -0.31141 0.97408 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light8">
+          <pose>-0.41939 -0.38078 0.94363 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light9">
+          <pose>-0.41939 -0.45016 0.91317 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light10">
+          <pose>-0.41939 -0.51954 0.88271 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light11">
+          <pose>-0.26276 -0.21716 1.01546 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light12">
+          <pose>-0.26276 -0.28654 0.985 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+ 
+        <visual name="light13">
+          <pose>-0.18713 -0.21716 1.01546 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light14">
+          <pose>-0.18713 -0.28654 0.985 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light15">
+          <pose>0.49349 -0.24203 1.00454 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.07391 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light16">
+          <pose>0.49349 -0.31142 0.97408 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.07391 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light17">
+          <pose>0.49349 -0.38078 0.94363 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.07391 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light18">
+          <pose>0.49349 -0.45016 0.91317 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.07391 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light19">
+          <pose>0.49349 -0.51954 0.88271 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.07391 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light20">
+          <pose>0.41939 -0.24203 1.00454 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light21">
+          <pose>0.41939 -0.31141 0.97408 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light22">
+          <pose>0.41939 -0.38078 0.94363 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light23">
+          <pose>0.41939 -0.45016 0.91317 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light24">
+          <pose>0.41939 -0.51954 0.88271 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light25">
+          <pose>0.26276 -0.21716 1.01546 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light26">
+          <pose>0.26276 -0.28654 0.985 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+ 
+        <visual name="light27">
+          <pose>0.18713 -0.21716 1.01546 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light28">
+          <pose>0.18713 -0.28654 0.985 0.42 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.04436 0.0494651008 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light29">
+          <pose>-0.54965 -0.099746 1.16625 -0.150 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0665 0.01 0.03262</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="light30">
+          <pose>-0.54965 -0.08732 1.23149 -0.150 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0665 0.01 0.03262</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="light31">
+          <pose>-0.54965 -0.07718 1.29673 -0.150 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0665 0.01 0.03262</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="light32">
+          <pose>-0.46444 -0.07718 1.29673 -0.150 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0665 0.01 0.03262</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="light33">
+          <pose>-0.46444 -0.08732 1.23149 -0.150 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0665 0.01 0.03262</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="light34">
+          <pose>-0.46444 -0.09746 1.16625 -0.150 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0665 0.01 0.03262</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+
+        <visual name="light35">
+          <pose>0.54965 -0.099746 1.16625 -0.150 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0665 0.01 0.03262</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="light36">
+          <pose>0.54965 -0.08732 1.23149 -0.150 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0665 0.01 0.03262</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="light37">
+          <pose>0.54965 -0.07718 1.29673 -0.150 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0665 0.01 0.03262</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="light38">
+          <pose>0.46444 -0.07718 1.29673 -0.150 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0665 0.01 0.03262</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="light39">
+          <pose>0.46444 -0.08732 1.23149 -0.150 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0665 0.01 0.03262</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+        <visual name="light40">
+          <pose>0.46444 -0.09746 1.16625 -0.15 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0665 0.01 0.03262</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light41">
+          <pose>0 -0.24231 1.74646 0.25 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.30878 0.01 0.18824</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light42">
+          <pose>-0.40249 -0.28036 1.73531 0.25 -0.1 0.35</pose>
+          <geometry>
+            <box>
+              <size>0.30878 0.01 0.18824</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light43">
+          <pose>0.40249 -0.28036 1.73531 0.25 0.1 -0.35</pose>
+          <geometry>
+            <box>
+              <size>0.30878 0.01 0.18824</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+
+        <visual name="light44">
+          <pose>0 -0.10511 1.3696 -0.15 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.6646 0.01 0.41477</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="walls">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual1">
+          <pose>2 4 1.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>6 0.1 3</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="collision1">
+          <pose>2 4 1.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>6 0.1 3</size>
+            </box>
+          </geometry>
+        </collision>
+
+        <visual name="visual2">
+          <pose>2 -4 1.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>6 0.1 3</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="collision2">
+          <pose>2 -4 1.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>6 0.1 3</size>
+            </box>
+          </geometry>
+        </collision>
+
+        <visual name="visual3">
+          <pose>5 0 1.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 8.1 3</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="collision3">
+          <pose>5 0 1.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 8.1 3</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+  </world>
+</sdf>

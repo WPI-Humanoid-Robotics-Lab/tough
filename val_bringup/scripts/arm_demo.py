@@ -26,10 +26,10 @@ def sendRightArmTrajectory():
 
 #    msg = appendTrajectoryPoint(msg, 2.0, ZERO_VECTOR)
 #    msg = appendTrajectoryPoint(msg, 3.0, ELBOW_BENT_UP)
-    msg = appendTrajectoryPoint(msg, 1.0, ZERO_VECTOR)
+#    msg = appendTrajectoryPoint(msg, 1.0, ZERO_VECTOR)
 #    msg = appendTrajectoryPoint(msg, 4.0, ZERO_VECTOR)
 
-#    msg = appendTrajectoryPoint(msg, 2.0, BUTTON_PRESS)
+    msg = appendTrajectoryPoint(msg, 2.0, BUTTON_PRESS)
     msg.unique_id = -1
 
     rospy.loginfo('publishing right trajectory')
@@ -63,10 +63,10 @@ def sendTaskSpaceTrajectory():
     msg.base_for_control = HandTrajectoryRosMessage.CHEST
         
     pt = SE3TrajectoryPointRosMessage()
-    pt.time = 1.0
+    pt.time = 2.0
     
-    pt.position.x = 0.23
-    pt.position.y = -0.98
+    pt.position.x = 0.9
+    pt.position.y = -0.4
     pt.position.z = 1.28
     
     pt.orientation.w=1.0
@@ -102,7 +102,7 @@ if __name__ == '__main__':
                 rate.sleep()
 
         if not rospy.is_shutdown():
- #           sendRightArmTrajectory()
+            #sendRightArmTrajectory()
             #closeHand()
             sendTaskSpaceTrajectory()
             time.sleep(2)
