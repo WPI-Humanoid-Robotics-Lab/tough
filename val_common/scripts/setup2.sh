@@ -91,6 +91,8 @@ cd ~/$WORKSPACE
 rm -rf devel/ build/
 catkin_make
 source devel/setup.bash
-roslaunch val_bringup qual2.launch
+echo "$(tput setaf 1)everything is setup sucessfully\n for testing launch$(tput sgr0)"
+echo "$(tput setaf 1)roslaunch val_bringup qual2.launch$(tput sgr0)"
+
 
 
