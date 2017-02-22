@@ -33,9 +33,6 @@ git checkout 0.9.0
 
 # modify the build.gradle and common.launch
 echo "$(tput setaf 1)patch the build.gradle and common.launch$(tput sgr0)"
-cd ~/$WORKSPACE/src/ihmc_repos/ihmc_ros_core/ihmc_ros_java_adapter/
-patch -p1 < ~/$WORKSPACE/src/space_robotics_challenge/val_common/patches/build.gradle.diff
-
 cd ~/$WORKSPACE/src/ihmc_repos/ihmc_ros_core/
 git apply ~/$WORKSPACE/src/space_robotics_challenge/val_common/patches/ihmc_ros_core.patch
 
