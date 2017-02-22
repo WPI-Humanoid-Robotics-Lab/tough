@@ -9,6 +9,7 @@
 
 #check if the workspace is already set
 # setup the workspace
+echo "$(tput setaf 1)check the workspace$(tput sgr0)" 
 if [ -d $"/home/$USER/catkin_ws" ]; then  
   WORKSPACE="catkin_ws"
   echo "$(tput setaf 1)found workspace catkin_ws$(tput sgr0)"
@@ -96,15 +97,12 @@ if [ -d $"/home/$USER/$WORKSPACE/src/space_robotics_challenge" ]; then
   cd $HOME/$WORKSPACE/src/space_robotics_challenge
   git stash
   git pull
-  git checkout srcsimUpdate
+  git checkout master
   cd $HOME/$WORKSPACE    
   catkin_make
 else
   echo "$(tput setaf 1)no src repo found, clonning it$(tput sgr0)" 
   git clone https://gitlab.com/whrl/space_robotics_challenge.git $HOME/$WORKSPACE/src/space_robotics_challenge
-  # todo remove this
-  cd $HOME/$WORKSPACE/src/space_robotics_challenge
-  git checkout srcsimUpdate
   cd $HOME/$WORKSPACE
   catkin_make
 fi
@@ -119,16 +117,13 @@ cd ~/$WORKSPACE
 catkin_make
 
 echo "$(tput setaf 1)testing the setup......$(tput sgr0)"
-echo "$(tput setaf 1)launching valkyire with controllers...$(tput sgr0)" \
+echo "$(tput setaf 1)launching valkyire with controllers...$(tput sgr0)" 
 source /opt/nasa/indigo/setup.bash
 cd $HOME/$WORKSPACE 
 rm -rf devel/ build/
 catkin_make
 source devel/setup.bash
-echo "$(tput setaf 1)everything is setup sucessfully\n for testing launch$(tput sgr0)"
-echo "$(tput setaf 1)roslaunch val_bringup qual2.launch$(tput sgr0)"
-
-#compile the code once
+echo "$(tput setaf 1)everything is setup sucessfully, launching final1.launch$(tput sgr0)"
 roslaunch val_bringup final1.launch 
 
 
