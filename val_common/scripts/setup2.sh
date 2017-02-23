@@ -50,6 +50,10 @@ export IHMC_SOURCE_LOCATION=$HOME/ihmc-open-robotics-software
 " >> ~/.bashrc
 source $HOME/.bashrc
 
+#sourcing desn't set the env variables for unknown reason. This is a workaround
+export JAVA_HOME=/usr/lib/jdk/jdk1.8.0_112 
+export IHMC_SOURCE_LOCATION=$HOME/ihmc-open-robotics-software
+
 # ihmc-open-robotics-software
 echo "$(tput setaf 1)compile the ihmc repo$(tput sgr0)"
 cd ihmc-open-robotics-software
