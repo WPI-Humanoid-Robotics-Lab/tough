@@ -50,7 +50,7 @@ before_script:
   - if [ ! -f .rosinstall ]; then wstool init; else echo "rosinstall file already there";fi
   - if [[ -f $ROSINSTALL_FILE ]] ; then wstool merge $ROSINSTALL_FILE ; fi
   - wstool up
-  - cd ~/catkin_ws
+  - cd ~/catkin_ws/src
   - ls -a
   # - rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
   
