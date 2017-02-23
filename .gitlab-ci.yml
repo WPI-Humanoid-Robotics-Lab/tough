@@ -57,6 +57,8 @@ before_script:
 indigo-master:
   stage: build
   script:
+    - sudo chmod +x ~/catkin_ws/src/space_robotics_challenge/val_common/setuptemp.sh
+    - sudo ~/catkin_ws/src/space_robotics_challenge/val_common/setuptemp.sh
     - source /opt/ros/$ROS_DISTRO/setup.bash
     - cd ~/catkin_ws
     - catkin_make $( [ -f $CATKIN_OPTIONS ] && cat $CATKIN_OPTIONS )
