@@ -1,7 +1,5 @@
 #include<val_control/val_arm_navigation.h>
 #include<stdlib.h>
-#include <stdio.h>
-
 
 //add default pose for both arms. the values of joints are different.
 armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
@@ -140,4 +138,3 @@ int armTrajectory::getnumArmJoints() const
 {
     return NUM_ARM_JOINTS;
 }
-

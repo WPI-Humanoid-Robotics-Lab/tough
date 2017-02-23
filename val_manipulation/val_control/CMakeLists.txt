@@ -32,8 +32,22 @@ include_directories(
    ${catkin_LIBRARIES}
 )
 
+
+add_executable(test_arm src/test_arm_navigation.cpp)
+add_dependencies(test_arm ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_arm  ${catkin_LIBRARIES} val_control)
+
+add_executable(test_chest src/test_chest_navigation.cpp)
+add_dependencies(test_chest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_chest  ${catkin_LIBRARIES} val_control)
+
+add_executable(test_pelvis src/test_pelvis_navigation.cpp)
+add_dependencies(test_pelvis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_pelvis  ${catkin_LIBRARIES} val_control)
+
 add_dependencies(val_control ${catkin_EXPORTED_TARGETS})
 install(TARGETS val_control ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
 
 set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")

@@ -30,7 +30,7 @@ void chestTrajectory::controlchest(float roll , float pitch , float yaw)
     v.z = 0.3;
     data.angular_velocity = v;
 
-    data.unique_id =13;
+    msg.unique_id =13;
     msg.execution_mode = 0;
 
 
