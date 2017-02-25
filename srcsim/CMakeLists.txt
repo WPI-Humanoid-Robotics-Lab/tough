@@ -7,6 +7,11 @@ if(NOT WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra ${IGNITION-MATH_CXX_FLAGS}")
 endif()
 
+include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
+pkg_check_modules(OGRE OGRE)
+include_directories( ${OGRE_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS}/Paging/)    
+link_directories( ${OGRE_LIBRARY_DIRS} )
+
 find_package(catkin REQUIRED COMPONENTS
   gazebo_plugins
   gazebo_ros
