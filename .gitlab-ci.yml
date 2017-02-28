@@ -51,6 +51,7 @@ before_script:
   - if [[ -f $ROSINSTALL_FILE ]] ; then wstool merge $ROSINSTALL_FILE ; fi
   - wstool up
   - cd ~/catkin_ws/src/space_robotics_challenge
+  - git submodule update --init --recursive
   - ls -a
   # - rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
   
