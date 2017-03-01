@@ -9,54 +9,101 @@ int main(int argc, char **argv)
   ROS_INFO("Moving the arms");
   armTrajectory armTraj(nh);
 
-  // Set the pose of the left arm to extend it to the front
-  armTrajectory::armJointData l;
-  l.side = LEFT;
-  l.arm_pose = {1.57f, 1.2f, -1.57f, 0.0f, 0.0f, 0.0f, 0.0f};
-  l.time = 3;
 
-  // Set the pose of the right arm to extend it to the front
-  armTrajectory::armJointData r;
-  r.side = RIGHT;
-  r.arm_pose = {-1.57f, 1.2f, 1.57f, 0.0f, 0.0f, 0.0f, 0.0f};
-  r.time = 3;
+  if(argc == 5){
+    int arm_side = std::atoi(argv[1]);
+    float x = std::atof(argv[2]);
+    float y = std::atof(argv[3]);
+    float z = std::atof(argv[4]);
+    geometry_msgs::Pose pt;
+    pt.position.x = x;
+    pt.position.y = y;
+    pt.position.z = z;
+    pt.orientation.w = 1.0;
+    armSide side;
+    if(arm_side == 0){
+      side = LEFT;
+    } else {
+      side = RIGHT;
+    }
+    armTraj.moveArmInTaskSpace(side, pt, 3.0);
+  } else {
+    // Set the pose of the left arm to extend it to the front
+    armTrajectory::armJointData l;
+    l.side = LEFT;
+    l.arm_pose = {1.57f, 1.2f, -1.57f, 0.0f, 0.0f, 0.0f, 0.0f};
+    l.time = 2;
 
-  // Combine the left and right arm movements
-  std::vector<armTrajectory::armJointData> hug_start;
-  hug_start.push_back(r);
-  hug_start.push_back(l);
+    // Set the pose of the right arm to extend it to the front
+    armTrajectory::armJointData r;
+    r.side = RIGHT;
+    r.arm_pose = {-1.57f, 1.2f, 1.57f, 0.0f, 0.0f, 0.0f, 0.0f};
+    r.time = 2;
 
-  // Set the pose of the left arm to embrace
-  armTrajectory::armJointData l2;
-  l2.side = LEFT;
-  l2.arm_pose = {1.57f, 1.2f, -1.57f, -1.2f, 0.0f, 0.0f, 0.0f};
-  l2.time = 3;
+    // Combine the left and right arm movements
+    std::vector<armTrajectory::armJointData> hug_start;
+    hug_start.push_back(r);
+    hug_start.push_back(l);
 
-  // Set the pose of the right arm to embrace
-  armTrajectory::armJointData r2;
-  r2.side = RIGHT;
-  r2.arm_pose = {-1.57f, 1.2f, 1.57f, 1.2f, 0.0f, 0.0f, 0.0f};
-  r2.time = 3;
+    // Set the pose of the left arm to embrace
+    armTrajectory::armJointData l2;
+    l2.side = LEFT;
+    l2.arm_pose = {1.57f, 1.2f, -1.57f, -1.1f, 0.0f, 0.0f, 0.0f};
+    l2.time = 2;
 
-  // Combine the left and right arm movements
-  std::vector<armTrajectory::armJointData> hug_end;
-  hug_end.push_back(r2);
-  hug_end.push_back(l2);
+    // Set the pose of the right arm to embrace
+    armTrajectory::armJointData r2;
+    r2.side = RIGHT;
+    r2.arm_pose = {-1.57f, 1.2f, 1.57f, 1.1f, 0.0f, 0.0f, 0.0f};
+    r2.time = 2;
 
-  // Extend the right arm out to the side
-  armTraj.moveToZeroPose(RIGHT);
-  ros::Duration(3).sleep();
+    // Combine the left and right arm movements
+    std::vector<armTrajectory::armJointData> hug_end;
+    hug_end.push_back(r2);
+    hug_end.push_back(l2);
 
-  // Extend the left arm out to the side
-  armTraj.moveToZeroPose(LEFT);
-  ros::Duration(3).sleep();
+    // Apply the first set of arm movements
+    armTraj.moveArmJoints(hug_start);
+    ros::Duration(2.5).sleep();
 
-  // Apply the first set of arm movements
-  armTraj.moveArmJoints(hug_start);
-  ros::Duration(3).sleep();
+    // Finish with the last set of arm movements
+    armTraj.moveArmJoints(hug_end);
 
-  // Finish with the last set of arm movements
-  armTraj.moveArmJoints(hug_end);
+    ros::Duration(2.5).sleep();
+
+
+
+    // Move arms to specific points in space
+    geometry_msgs::Pose right;
+    right.position.x = 0.8;
+    right.position.y = 0.4;
+    right.position.z = 1.7;
+    right.orientation.w = 1.0;
+
+    geometry_msgs::Pose left;
+    left.position.x = 2.0;
+    left.position.y = 2.0;
+    left.position.z = 1.5;
+    left.orientation.w = 1.0;
+
+    armTrajectory::armTaskSpaceData rts;
+    rts.pose = right;
+    rts.time = 2.0;
+    rts.side = RIGHT;
+
+    armTrajectory::armTaskSpaceData lts;
+    lts.pose = left;
+    lts.time = 2.0;
+    lts.side = LEFT;
+
+    std::vector<armTrajectory::armTaskSpaceData> ts;
+    ts.push_back(rts);
+    ts.push_back(lts);
+
+
+    armTraj.moveArmInTaskSpace(ts);
+  }
+
 
   while(ros::ok())
   {}

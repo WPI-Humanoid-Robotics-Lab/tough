@@ -7,6 +7,9 @@
 #include <ihmc_msgs/TrajectoryPoint1DRosMessage.h>
 #include <ihmc_msgs/HandDesiredConfigurationRosMessage.h>
 #include <val_common/val_common_defines.h>
+#include <ihmc_msgs/HandTrajectoryRosMessage.h>
+#include <ihmc_msgs/SE3TrajectoryPointRosMessage.h>
+#include <geometry_msgs/Pose.h>
 
 /**
  * @brief The armTrajectory class provides ability to move arms of valkyrie. Current implementation provides joint level without collision detection.
@@ -33,6 +36,16 @@ public:
         armSide side;
         std::vector<float> arm_pose;
         float time;
+    };
+
+    /**
+     * @brief The armTaskSpaceData struct is a structure that can store details required to generate a ros message for controlling the hand trajectory in task space.
+     * side can be either RIGHT or LEFT. pose is a Pose in task space (world frame) that the hand should move to. time is the total execution time of the trajectory.
+     */
+    struct armTaskSpaceData {
+      armSide side;
+      geometry_msgs::Pose pose;
+      float time;
     };
 
     /**
@@ -74,6 +87,33 @@ public:
      */
     int getnumArmJoints() const;
 
+    /**
+     * @brief closeHand	Closed the hand on the give side of Valkyrie R5.
+     * @param side	Side of the robot. It can be RIGHT or LEFT.
+     */
+    void closeHand(const armSide side);
+
+    /**
+     * @brief moveArmInTaskSpaceMessage Moves the arm to a given point in task space (world frame)
+     * @parm side	Side of the robot. It can be RIGHT or LEFT.
+     * @param point	The point in task space to move the arm to.
+     */
+    void moveArmInTaskSpaceMessage(const armSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point);
+
+    /**
+     * @brief moveArmInTaskSpace  Moves the arm to a give pose in task space (world frame)
+     * @param side  Side of the robot. It can be RIGHT or LEFT.
+     * @param pose  The pose in task space to move the arm to.
+     * @param time  Total time to execute the trajectory.
+     */
+    void moveArmInTaskSpace(const armSide side, const geometry_msgs::Pose &pose, const float time);
+
+    /**
+     * @brief moveArmInTaskSpace  Moves the arm(s) to the given position in task space (world frame).
+     * @param arm_data A vector of armTaskSpaceData struct.
+     */
+    void moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data);
+
 private:
 
     static int arm_id;
@@ -84,8 +124,9 @@ private:
     ros::NodeHandle nh_;
     ros::Publisher  armTrajectoryPublisher;
     ros::Publisher  handTrajectoryPublisher;
+    ros::Publisher  taskSpaceTrajectoryPublisher;
     ros::Subscriber armTrajectorySunscriber;
-
+    void poseToSE3TrajectoryPoint(const geometry_msgs::Pose &pose, ihmc_msgs::SE3TrajectoryPointRosMessage &point);
     void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos);
 
 };
