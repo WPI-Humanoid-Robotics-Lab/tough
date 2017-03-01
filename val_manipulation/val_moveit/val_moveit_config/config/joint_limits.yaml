@@ -12,11 +12,6 @@ joint_limits:
     max_velocity: 5
     has_acceleration_limits: false
     max_acceleration: 0
-  leftShoulderPitch:
-    has_velocity_limits: true
-    max_velocity: 5.89
-    has_acceleration_limits: false
-    max_acceleration: 0
   leftShoulderRoll:
     has_velocity_limits: true
     max_velocity: 5.89
