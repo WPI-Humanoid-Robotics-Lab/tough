@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 2.8.3)
 project(val_manipulation)
 
 find_package(catkin REQUIRED COMPONENTS
-  #  orocos_kdl
-
   tf
   trac_ik_lib
   val_common
@@ -13,7 +11,10 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(orocos_kdl REQUIRED)
 
 catkin_package(
-  INCLUDE_DIRS include LIBRARIES ${PROJECT_NAME} CATKIN_DEPENDS tf trac_ik_lib DEPENDS system_lib orocos_kdl val_common val_footstep
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS tf trac_ik_lib
+  DEPENDS system_lib orocos_kdl val_common val_footstep
 )
 
 include_directories(include)
