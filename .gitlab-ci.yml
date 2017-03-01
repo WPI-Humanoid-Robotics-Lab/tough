@@ -62,6 +62,7 @@ indigo-master:
 #    - sudo ~/catkin_ws/src/space_robotics_challenge/val_common/setuptemp.sh
     - source /opt/ros/$ROS_DISTRO/setup.bash
     - cd ~/catkin_ws
+    - rm -rf devel/ build/
     - catkin_make $( [ -f $CATKIN_OPTIONS ] && cat $CATKIN_OPTIONS )
     - source devel/setup.bash
     # - catkin_make run_tests && catkin_make test
