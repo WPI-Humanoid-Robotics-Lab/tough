@@ -1,0 +1,42 @@
+controller_list:
+  - name: fake_leftArm_controller
+    joints:
+      - leftShoulderRoll
+      - leftShoulderYaw
+      - leftElbowPitch
+      - leftForearmYaw
+      - leftWristRoll
+      - leftWristPitch
+  - name: fake_rightArm_controller
+    joints:
+      - rightShoulderPitch
+      - rightShoulderRoll
+      - rightShoulderYaw
+      - rightElbowPitch
+      - rightForearmYaw
+      - rightWristRoll
+      - rightWristPitch
+  - name: fake_rightPalm_controller
+    joints:
+      - torsoYaw
+      - torsoPitch
+      - torsoRoll
+      - rightShoulderPitch
+      - rightShoulderRoll
+      - rightShoulderYaw
+      - rightElbowPitch
+      - rightForearmYaw
+      - rightWristRoll
+      - rightWristPitch
+  - name: fake_leftPalm_controller
+    joints:
+      - torsoYaw
+      - torsoPitch
+      - torsoRoll
+      - leftShoulderPitch
+      - leftShoulderRoll
+      - leftShoulderYaw
+      - leftElbowPitch
+      - leftForearmYaw
+      - leftWristRoll
+      - leftWristPitch
