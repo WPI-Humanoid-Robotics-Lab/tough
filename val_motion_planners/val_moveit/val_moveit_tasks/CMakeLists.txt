@@ -167,6 +167,12 @@ add_dependencies(raise_arm_move_group ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
  target_link_libraries(raise_arm_move_group
    ${catkin_LIBRARIES}
  )
+
+add_executable(test_moveit src/test_moveit.cpp)
+target_link_libraries(test_moveit
+   ${catkin_LIBRARIES}
+ )
+
 #############
 ## Install ##
 #############
