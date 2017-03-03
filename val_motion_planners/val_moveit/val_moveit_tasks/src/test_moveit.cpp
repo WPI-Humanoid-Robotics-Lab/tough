@@ -43,6 +43,6 @@ int main(int argc, char** argv){
       sleep(5.0);
     }
 
-    group.move();
+//    group.move();
 
 }
