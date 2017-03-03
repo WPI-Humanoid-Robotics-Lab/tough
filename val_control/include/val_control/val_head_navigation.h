@@ -1,0 +1,42 @@
+#ifndef VAL_HEAD_NAVIGATION_H
+#define VAL_HEAD_NAVIGATION_H
+
+#include <ros/ros.h>
+#include <ihmc_msgs/HeadTrajectoryRosMessage.h>
+#include <tf/tf.h>
+#include <math.h>
+#include <time.h>
+#include <geometry_msgs/Quaternion.h>
+#include <geometry_msgs/Vector3.h>
+
+/**
+ * @brief The HeadTrajectory class provides ability to move the head of valkyrie. Current implementation provides the ability to move the head to a set roll, pitch, and yaw.
+ */
+class HeadTrajectory {
+
+private:
+    static int head_id;
+    ros::NodeHandle nh_;
+    ros::Publisher headTrajPublisher;
+
+public:
+
+  /**
+   * @brief The HeadTrajectory class provides ability to move the head of valkyrie. Current implementation provides the ability to move the head to a set roll, pitch, and yaw.
+   */
+    HeadTrajectory(ros::NodeHandle nh);
+    ~HeadTrajectory();
+
+    /**
+     * @brief controlHead Moves the robot head to the given roll, pitch, and yaw.
+     * @param roll The roll in degrees.
+     * @param pitch The pitch in degrees.
+     * @param yaw The yaw in degrees.
+     */
+    void controlHead(float roll, float pitch, float yaw);
+
+};
+
+int HeadTrajectory::head_id = -1;
+
+#endif // VAL_HEAD_NAVIGATION_H
