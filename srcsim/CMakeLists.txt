@@ -1,16 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(srcsim)
 
-find_package(ignition-math2 REQUIRED)
-
 if(NOT WIN32)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra ${IGNITION-MATH_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
 endif()
-
-include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
-pkg_check_modules(OGRE OGRE)
-include_directories( ${OGRE_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS}/Paging/)    
-link_directories( ${OGRE_LIBRARY_DIRS} )
 
 find_package(catkin REQUIRED COMPONENTS
   gazebo_plugins
@@ -20,8 +13,13 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
+include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
+pkg_check_modules(OGRE OGRE)
+include_directories( ${OGRE_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS}/Paging/)    
+link_directories( ${OGRE_LIBRARY_DIRS} )
+
 set (SRCSIM_MAJOR_VERSION 0)
-set (SRCSIM_MINOR_VERSION 2)
+set (SRCSIM_MINOR_VERSION 3)
 set (SRCSIM_PATCH_VERSION 0)
 set (SRCSIM_VERSION_FULL ${SRCSIM_MAJOR_VERSION}.${SRCSIM_MINOR_VERSION}.${SRCSIM_PATCH_VERSION})
 
@@ -57,13 +55,11 @@ include_directories(
   ${roscpp_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
   ${IGNITION-TRANSPORT_INCLUDE_DIRS}
-  ${IGNITION-MATH_INCLUDE_DIRS}
 )
 
 link_directories(
   ${GAZEBO_LIBRARY_DIRS}
   ${IGNITION-TRANSPORT_LIBRARY_DIRS}
-  ${IGNITION-MATH_LIBRARY_DIRS}
 )
 
 ##########################
@@ -141,6 +137,7 @@ target_link_libraries(${finals_plugin_name}
   ${roscpp_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}
 )
+add_dependencies(${finals_plugin_name} srcsim_generate_messages_cpp)
 install(TARGETS ${finals_plugin_name}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -159,7 +156,6 @@ target_link_libraries(${box_plugin_name}
   ${GAZEBO_LIBRARIES}
   ${roscpp_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}
-  ${IGNITION-MATH_LIBRARIES}
 )
 install(TARGETS ${box_plugin_name}
   ARCHIVE DESTINATION lib
@@ -184,6 +180,26 @@ target_link_libraries(${satellite_plugin_name}
 add_dependencies(${satellite_plugin_name} srcsim_generate_messages_cpp)
 
 install(TARGETS ${satellite_plugin_name}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+##########################
+##  Solar Panel plugin  ##
+##########################
+
+# Create the libSolarPanelPlugin.so library.
+set(solar_panel_plugin_name SolarPanelPlugin)
+add_library(${solar_panel_plugin_name} SHARED
+  src/SolarPanelPlugin.cc
+)
+target_link_libraries(${solar_panel_plugin_name}
+  ${catkin_LIBRARIES}
+  ${GAZEBO_LIBRARIES}
+  ${roscpp_LIBRARIES}
+)
+
+install(TARGETS ${solar_panel_plugin_name}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
