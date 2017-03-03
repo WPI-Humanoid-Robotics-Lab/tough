@@ -13,7 +13,7 @@ HeadTrajectory::~HeadTrajectory()
 }
 
 
-void HeadTrajectory::controlHead(float roll, float pitch, float yaw)
+void HeadTrajectory::controlHead(float roll, float pitch, float yaw, const float time)
 {
   ihmc_msgs::HeadTrajectoryRosMessage msg;
   ihmc_msgs::SO3TrajectoryPointRosMessage data;
@@ -22,7 +22,7 @@ void HeadTrajectory::controlHead(float roll, float pitch, float yaw)
   pitch = degToRad * pitch;
   yaw = degToRad * yaw;
 
-  data.time = 1.0;
+  data.time = time;
   tf::Quaternion q;
   q.setRPY(roll, pitch, yaw);
   tf::quaternionTFToMsg(q, data.orientation);

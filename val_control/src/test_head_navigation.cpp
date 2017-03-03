@@ -10,7 +10,7 @@ int main(int argc, char **argv)
   HeadTrajectory headTraj(nh);
 
   if(argc != 4)
-    headTraj.controlHead(20, 0, 0);
+    headTraj.controlHead(0, 0, 20, 2.0);
   else {
     float roll = std::atof(argv[1]);
     float pitch = std::atof(argv[2]);

@@ -32,8 +32,9 @@ public:
      * @param roll The roll in degrees.
      * @param pitch The pitch in degrees.
      * @param yaw The yaw in degrees.
+     * @param time The time it takes to move to the given orientation.
      */
-    void controlHead(float roll, float pitch, float yaw);
+    void controlHead(float roll, float pitch, float yaw, const float time = 1.0f);
 
 };
 
