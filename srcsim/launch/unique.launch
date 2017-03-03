@@ -10,7 +10,7 @@
   <arg name="extra_gazebo_args" default=""/>
   <arg name="init" default="false" />
   <arg name="paused" default="false" />
-  <arg name="use_local_build" default="true" />
+  <arg name="use_local_build" default="false" />
   <arg name="verbose" default="true" />
   <arg name="walk_test" default="false"/>
   <arg name="world_name" default="$(find srcsim)/worlds/unique.world" />

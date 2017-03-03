@@ -102,11 +102,14 @@ if [ -d $"/home/$USER/$WORKSPACE/src/space_robotics_challenge" ]; then
   git stash
   git pull
   git checkout master
+  git submodule update --init --recursive
   cd $HOME/$WORKSPACE    
   catkin_make
 else
   echo "$(tput setaf 1)no src repo found, clonning it$(tput sgr0)" 
   git clone https://gitlab.com/whrl/space_robotics_challenge.git $HOME/$WORKSPACE/src/space_robotics_challenge
+  cd $HOME/$WORKSPACE/src/space_robotics_challenge
+  git submodule update --init --recursive
   cd $HOME/$WORKSPACE
   catkin_make
 fi
