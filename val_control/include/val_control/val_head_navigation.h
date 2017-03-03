@@ -28,13 +28,23 @@ public:
     ~HeadTrajectory();
 
     /**
-     * @brief controlHead Moves the robot head to the given roll, pitch, and yaw.
+     * @brief moveHead Moves the robot head to the given roll, pitch, and yaw.
      * @param roll The roll in degrees.
      * @param pitch The pitch in degrees.
      * @param yaw The yaw in degrees.
-     * @param time The time it takes to move to the given orientation.
+     * @param time The time it takes to move to the given orientation. Default is 1.0
      */
-    void controlHead(float roll, float pitch, float yaw, const float time = 1.0f);
+    void moveHead(float roll, float pitch, float yaw, const float time = 1.0f);
+
+    /**
+     * @brief moveHead Moves the robot head by the given quaternion.
+     * @param quaternion The quaternion representing the rotation of the head.
+     * @param time The time it takes to move to the given orientation. Default is 1.0
+     */
+    void moveHead(const geometry_msgs::Quaternion &quaternion, const float time = 1.0f);
+
+
+    void moveHead(const std::vector<std::vector<float> > &trajectory_points, const float time = 1.0f);
 
 };
 
