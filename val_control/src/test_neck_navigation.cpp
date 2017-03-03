@@ -9,10 +9,7 @@ int main(int argc, char **argv)
 
   NeckTrajectory neckTraj(nh);
 
-  float tmp[] = { 1.57f, 1.57f };
-  std::vector<float> v( tmp, tmp+2 );
-
-  neckTraj.moveNeckJoints(v, 2.0f);
+  neckTraj.moveNeckJoints({{ 1.57f, 1.57f, 0.0f }}, 2.0f);
 
   while(ros::ok())
   {}

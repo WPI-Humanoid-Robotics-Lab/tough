@@ -21,6 +21,7 @@ private:
     const int NUM_NECK_JOINTS;
     ros::NodeHandle nh_;
     ros::Publisher neckTrajPublisher;
+    void appendTrajectoryPoint(ihmc_msgs::NeckTrajectoryRosMessage &msg, float time, std::vector<float> pos);
 
 public:
 
@@ -36,7 +37,7 @@ public:
      */
     int getNumNeckJoints() const;
 
-    void moveNeckJoints(std::vector<float> &neck_data, const float time);
+    void moveNeckJoints(const std::vector<std::vector<float> > &neck_pose, const float time);
 
 };
 
