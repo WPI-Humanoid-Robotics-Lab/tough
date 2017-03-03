@@ -35,7 +35,7 @@ public:
      * @param time The time it takes to move to the given orientation. Default is 1.0
      */
     void moveHead(float roll, float pitch, float yaw, const float time = 1.0f);
-    
+
     /**
      * @brief moveHead Moves the robot head by the given quaternion.
      * @param quaternion The quaternion representing the rotation of the head.
