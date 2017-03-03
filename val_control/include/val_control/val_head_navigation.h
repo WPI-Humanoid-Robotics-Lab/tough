@@ -45,7 +45,6 @@ public:
 
 
     void moveHead(const std::vector<std::vector<float> > &trajectory_points, const float time = 1.0f);
-
 };
 
 int HeadTrajectory::head_id = -1;
