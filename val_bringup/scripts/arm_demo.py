@@ -68,9 +68,9 @@ def sendTaskSpaceTrajectory():
     pt = SE3TrajectoryPointRosMessage()
     pt.time = 2.0
     
-    pt.position.x = 0.9
-    pt.position.y = -0.4
-    pt.position.z = 1.28
+    pt.position.x = 0.28
+    pt.position.y = -0.7
+    pt.position.z = 1.0
     
     pt.orientation.w=1.0
     
@@ -105,9 +105,9 @@ if __name__ == '__main__':
                 rate.sleep()
 
         if not rospy.is_shutdown():
-            sendRightArmTrajectory()
+            #sendRightArmTrajectory()
             #closeHand()
-            #sendTaskSpaceTrajectory()
+            sendTaskSpaceTrajectory()
             time.sleep(2)
 
     except rospy.ROSInterruptException:
