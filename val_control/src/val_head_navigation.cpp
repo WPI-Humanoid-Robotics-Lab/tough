@@ -13,7 +13,7 @@ HeadTrajectory::~HeadTrajectory()
 }
 
 
-void HeadTrajectory::controlHead(float roll, float pitch, float yaw, const float time)
+void HeadTrajectory::moveHead(float roll, float pitch, float yaw, const float time)
 {
   ihmc_msgs::HeadTrajectoryRosMessage msg;
   ihmc_msgs::SO3TrajectoryPointRosMessage data;

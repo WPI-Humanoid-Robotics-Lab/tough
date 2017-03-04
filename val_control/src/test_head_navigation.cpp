@@ -10,12 +10,12 @@ int main(int argc, char **argv)
   HeadTrajectory headTraj(nh);
 
   if(argc != 4)
-    headTraj.controlHead(0, 0, 20, 2.0);
+    headTraj.moveHead(0, 0, 20, 2.0);
   else {
     float roll = std::atof(argv[1]);
     float pitch = std::atof(argv[2]);
     float yaw = std::atof(argv[3]);
-    headTraj.controlHead(roll, pitch, yaw);
+    headTraj.moveHead(roll, pitch, yaw);
   }
 
   while(ros::ok())
