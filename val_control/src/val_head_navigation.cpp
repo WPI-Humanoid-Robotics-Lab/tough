@@ -105,3 +105,28 @@ void HeadTrajectory::moveHead(const std::vector<std::vector<float> > &trajectory
   // publish the message
   headTrajPublisher.publish(msg);
 }
+
+void HeadTrajectory::moveHead(const geometry_msgs::Quaternion &quaternion, const float time)
+{
+  ihmc_msgs::HeadTrajectoryRosMessage msg;
+  ihmc_msgs::SO3TrajectoryPointRosMessage data;
+
+  data.orientation = quaternion;
+
+  geometry_msgs::Vector3 v;
+  v.x = 0.0;
+  v.y = 0.0;
+  v.z = 0.0;
+  data.angular_velocity = v;
+
+  HeadTrajectory::head_id--;
+  msg.unique_id = HeadTrajectory::head_id;
+  msg.execution_mode = msg.OVERRIDE;
+
+  msg.taskspace_trajectory_points.clear();
+
+  msg.taskspace_trajectory_points.push_back(data);
+
+  // publish the message
+  headTrajPublisher.publish(msg);
+}
