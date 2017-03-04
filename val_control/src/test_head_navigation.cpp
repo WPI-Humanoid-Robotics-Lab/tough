@@ -10,15 +10,14 @@ int main(int argc, char **argv)
   HeadTrajectory headTraj(nh);
 
   if(argc != 4){
+    // Rotate 45 degrees to the right
     geometry_msgs::Quaternion q;
-    q.w = 1.0;
+    q.w = 0.9238;
     q.x = 0.0;
     q.y = 0.0;
-    q.z = 1.0;
-      headTraj.moveHead(q);
-    }
-    // headTraj.moveHead(0, 0, 20, 2.0);
-  else {
+    q.z = -0.3826;
+    headTraj.moveHead(q);
+  } else {
     float roll = std::atof(argv[1]);
     float pitch = std::atof(argv[2]);
     float yaw = std::atof(argv[3]);
