@@ -68,3 +68,40 @@ void HeadTrajectory::moveHead(const geometry_msgs::Quaternion &quaternion, const
   // publish the message
   headTrajPublisher.publish(msg);
 }
+
+
+void HeadTrajectory::moveHead(const std::vector<std::vector<float> > &trajectory_points, const float time)
+{
+  ihmc_msgs::HeadTrajectoryRosMessage msg;
+
+  HeadTrajectory::head_id--;
+  msg.unique_id = HeadTrajectory::head_id;
+  msg.execution_mode = msg.OVERRIDE;
+
+  msg.taskspace_trajectory_points.clear();
+
+  for(int i = 0; i < trajectory_points.size(); i++)
+  {
+    ihmc_msgs::SO3TrajectoryPointRosMessage data;
+
+    float roll = degToRad * trajectory_points[i][0];
+    float pitch = degToRad * trajectory_points[i][1];
+    float yaw = degToRad * trajectory_points[i][2];
+
+    data.time = time;
+    tf::Quaternion q;
+    q.setRPY(roll, pitch, yaw);
+    tf::quaternionTFToMsg(q, data.orientation);
+    geometry_msgs::Vector3 v;
+    v.x = 0.0;
+    v.y = 0.0;
+    v.z = 0.0;
+    data.angular_velocity = v;
+
+    msg.taskspace_trajectory_points.push_back(data);
+  }
+
+
+  // publish the message
+  headTrajPublisher.publish(msg);
+}
