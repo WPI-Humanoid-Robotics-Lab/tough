@@ -17,6 +17,11 @@ int main(int argc, char **argv)
     q.y = 0.0;
     q.z = -0.3826;
     headTraj.moveHead(q);
+
+    ros::Duration(2).sleep();
+
+    // Shake head to say no
+    headTraj.moveHead({{0, 0, 45}, {0, 0, -45}, {0, 0, 45}, {0, 0, -45}});
   } else {
     float roll = std::atof(argv[1]);
     float pitch = std::atof(argv[2]);
