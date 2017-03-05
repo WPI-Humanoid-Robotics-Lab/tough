@@ -115,9 +115,13 @@ public:
      */
     void moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data);
 
+    /**
+     * @brief moveArmTrajectory Moves the arm to follow a particular trajectory plan
+     * @param side              Side of the robot. It can be RIGHT or LEFT.
+     * @param traj              Trajectory in the form of trajectory_msgs::JointTrajectory
+     */
     void moveArmTrajectory(const armSide side, const trajectory_msgs::JointTrajectory &traj);
 
-    void appendMoveitTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point);
 
 private:
 
@@ -133,6 +137,7 @@ private:
     ros::Subscriber armTrajectorySunscriber;
     void poseToSE3TrajectoryPoint(const geometry_msgs::Pose &pose, ihmc_msgs::SE3TrajectoryPointRosMessage &point);
     void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos);
+    void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point);
 
 };
 

@@ -237,15 +237,14 @@ void armTrajectory::moveArmTrajectory(const armSide side, const trajectory_msgs:
     arm_traj.unique_id = armTrajectory::arm_id;
 
     for(auto i=traj.points.begin(); i < traj.points.end(); i++){
-        appendMoveitTrajectoryPoint(arm_traj, *i);
+        appendTrajectoryPoint(arm_traj, *i);
     }
 
-    ros::Duration(1).sleep();
     armTrajectoryPublisher.publish(arm_traj);
 }
 
 
-void armTrajectory::appendMoveitTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point)
+void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point)
 {
 
     if(point.positions.size() != NUM_ARM_JOINTS)
