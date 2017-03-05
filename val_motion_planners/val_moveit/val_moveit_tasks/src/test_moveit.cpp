@@ -21,7 +21,6 @@ int main(int argc, char** argv){
     spinner.start();
 
     moveit::planning_interface::MoveGroup group("rightArm");
-    //    moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 
     // set the start state to the current state of the robot
     group.setStartStateToCurrentState();
@@ -71,6 +70,8 @@ int main(int argc, char** argv){
         ROS_INFO("executing on robot\n");
         armTrajectory armTraj(node_handle);
         armTraj.moveArmTrajectory(RIGHT, my_plan.trajectory_.joint_trajectory);
+
+        ros::spin();
     }
     else
     {
