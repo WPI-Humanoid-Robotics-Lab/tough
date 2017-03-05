@@ -225,3 +225,42 @@ void armTrajectory::poseToSE3TrajectoryPoint(const geometry_msgs::Pose &pose, ih
   point.unique_id = 255;
   return;
 }
+
+void armTrajectory::moveArmTrajectory(const armSide side, const trajectory_msgs::JointTrajectory &traj){
+
+    ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
+    arm_traj.joint_trajectory_messages.clear();
+
+    arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
+    arm_traj.robot_side = side;
+    armTrajectory::arm_id--;
+    arm_traj.unique_id = armTrajectory::arm_id;
+
+    for(auto i=traj.points.begin(); i < traj.points.end(); i++){
+        appendMoveitTrajectoryPoint(arm_traj, *i);
+    }
+
+    ros::Duration(1).sleep();
+    armTrajectoryPublisher.publish(arm_traj);
+}
+
+
+void armTrajectory::appendMoveitTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point)
+{
+
+    if(point.positions.size() != NUM_ARM_JOINTS)
+    ROS_ERROR("Check number of trajectory points");
+
+    for (int i=0;i<NUM_ARM_JOINTS;i++)
+    {
+        ihmc_msgs::TrajectoryPoint1DRosMessage p;
+
+        p.time = point.time_from_start.toSec();
+        p.position = point.positions[i];
+        p.velocity = point.velocities[i];
+        p.unique_id = armTrajectory::arm_id;
+        msg.joint_trajectory_messages[i].trajectory_points.push_back(p);
+    }
+
+    return;
+}

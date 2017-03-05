@@ -10,6 +10,7 @@
 #include <ihmc_msgs/HandTrajectoryRosMessage.h>
 #include <ihmc_msgs/SE3TrajectoryPointRosMessage.h>
 #include <geometry_msgs/Pose.h>
+#include <trajectory_msgs/JointTrajectory.h>
 
 /**
  * @brief The armTrajectory class provides ability to move arms of valkyrie. Current implementation provides joint level without collision detection.
@@ -113,6 +114,10 @@ public:
      * @param arm_data A vector of armTaskSpaceData struct.
      */
     void moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data);
+
+    void moveArmTrajectory(const armSide side, const trajectory_msgs::JointTrajectory &traj);
+
+    void appendMoveitTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point);
 
 private:
 
