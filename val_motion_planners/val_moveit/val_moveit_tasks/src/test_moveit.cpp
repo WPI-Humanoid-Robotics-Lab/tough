@@ -51,7 +51,6 @@ int main(int argc, char** argv){
 
     moveit::planning_interface::MoveGroup::Plan my_plan;
     bool success = group.plan((my_plan));
-    my_plan.trajectory_.joint_trajectory;
     if (success)
     {
         std::cout<<"sucessfully planned the trajectory"<<std::endl;
