@@ -45,7 +45,7 @@
 
 /***
  * This a simple test app that requests a point cloud from the
- * point_cloud_assembler every 4 seconds, and then publishes the
+ * point_cloud_assembler every x seconds, and then publishes the
  * resulting data
  */
 
@@ -60,7 +60,10 @@ PeriodicSnapshotter::PeriodicSnapshotter()
     client_ = n_.serviceClient<AssembleScans2>("assemble_scans2");
 
     // Start the timer that will trigger the processing loop (timerCallback)
-    timer_ = n_.createTimer(ros::Duration(5,0), &PeriodicSnapshotter::timerCallback, this);
+    float timeout;
+    n_.param<float>("val_laser_assembler_svc/laser_snapshot_timeout", timeout, 5.0);
+    ROS_INFO("Snapshot timeout : %.2f seconds", timeout);
+    timer_ = n_.createTimer(ros::Duration(timeout,0), &PeriodicSnapshotter::timerCallback, this);
 
     // Need to track if we've called the timerCallback at least once
     first_time_ = true;
@@ -100,7 +103,20 @@ void PeriodicSnapshotter::timerCallback(const ros::TimerEvent& e)
     }
 }
 
+/// @todo configure this method as a callback on assemble_cloud2
+void PeriodicSnapshotter::mergeClouds(sensor_msgs::PointCloud2::Ptr msg){
+    if (!prev_msg_.data.empty()){
+        // merge the current msg with previous messages published till now
+        // tutorial available at http://www.pointclouds.org/documentation/tutorials/pairwise_incremental_registration.php#pairwise-incremental-registration
 
+        // check if the cloud size is growing exceptionally high. if yes, downsample the pointcloud without impacting objects and features
+
+        // publish the merged message
+
+    }
+
+//    prev_msg_ = mergedcloud
+}
 
 int main(int argc, char **argv)
 {
@@ -116,7 +132,6 @@ int main(int argc, char **argv)
       ros::spinOnce();
       looprate.sleep();
     }
-    //ros::spin();
 
 //    ros::spinOnce();
 //    while (ros::ok()){

@@ -47,20 +47,52 @@ class PeriodicSnapshotter
 {
 
 public:
+    /**
+     * @brief PeriodicSnapshotter requests a point cloud from the
+     * point_cloud_assembler every x seconds, and then publishes the
+     * resulting data
+     */
     PeriodicSnapshotter();
+
+    /**
+     * @brief timerCallback This callback is executed after a set timeout. This timeout is specified
+     * in the launch file. example: <param name="/val_laser_assembler_svc/laser_snapshot_timeout" type="double" value="6.0"/>
+     * @param e
+     */
     void timerCallback(const ros::TimerEvent& e);
+
+    /**
+     * @brief mergeClouds merges the pointcloud published on assembled_cloud2 topic with the previous messages
+     * that were published on the same topic
+     * @param msg
+     */
+    void mergeClouds(sensor_msgs::PointCloud2::Ptr msg);
+
+    /**
+     * @brief getNearestPoint returns the K-nearest neighbours of a specified point. This is a
+     * static function and can be accessed directly by using laser_assembler::PeriodicSnapshotter::getNearestPoint format.
+     * @param point This is a point with frame_id and timestamp
+     * @param K Number of neighbors to search
+     * @return true if neighbours are found.
+     */
     static bool getNearestPoint(geometry_msgs::PointStamped &point, int K=1);
+
+    /**
+     * @brief POINTCLOUD_STATIC_PTR Current snapshot of the pointcloud
+     */
     static pcl::PointCloud<pcl::PointXYZ>::Ptr POINTCLOUD_STATIC_PTR;
+
 private:
     ros::NodeHandle n_;
     ros::Publisher pub_;
     ros::ServiceClient client_;
     ros::Timer timer_;
+    sensor_msgs::PointCloud2 prev_msg_;
     bool first_time_;
 
 } ;
 
-// always provide type before a initializing a static member
+// always provide type before initializing a static member
 pcl::PointCloud<pcl::PointXYZ>::Ptr laser_assembler::PeriodicSnapshotter::POINTCLOUD_STATIC_PTR(new pcl::PointCloud<pcl::PointXYZ>);
 
 
