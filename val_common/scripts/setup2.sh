@@ -131,6 +131,6 @@ rm -rf devel/ build/
 catkin_make
 source devel/setup.bash
 echo "$(tput setaf 1)everything is setup sucessfully, launching final1.launch$(tput sgr0)"
-roslaunch val_bringup final1.launch 
+roslaunch val_bringup final1.launch init:='false'
 
 
