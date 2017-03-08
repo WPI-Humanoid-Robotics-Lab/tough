@@ -1,0 +1,15 @@
+<launch>
+    <arg name="events" default="true" />
+    <arg name="gui" default="true" />
+
+    <!-- visualisation node -->
+    <!node name="task1_visualtion" pkg="val_task1" type="task1_visualisation_node" output="screen"/>
+
+    <!-- task1 node -->
+    <node name="task1_node" pkg="val_task1" type="task1_node" output="screen"/>
+
+    <!-- state transition visualisation on rviz -->
+    <node
+    if="$(arg gui)"
+    name="rqt" pkg="rqt_gui" type="rqt_gui" args="-s rqt_decision_graph" output="screen" />
+</launch>
