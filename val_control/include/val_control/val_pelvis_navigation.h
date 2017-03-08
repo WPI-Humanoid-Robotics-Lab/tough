@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VAL_PELVIS_NAVIGATION_H
+#define VAL_PELVIS_NAVIGATION_H
 
 #include <ihmc_msgs/PelvisHeightTrajectoryRosMessage.h>
 #include <ros/ros.h>
@@ -18,4 +19,5 @@ public:
     void controlPelvisHeight(float height);
     bool controlPelvisMessage(ihmc_msgs::PelvisHeightTrajectoryRosMessage msg);
 };
-    int pelvisTrajectory::pelvis_id = -1;
+
+#endif // VAL_PELVIS_NAVIGATION_H

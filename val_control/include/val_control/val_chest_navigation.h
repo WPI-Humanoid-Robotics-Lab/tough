@@ -19,7 +19,7 @@ public:
 
     chestTrajectory(ros::NodeHandle nh);
     ~chestTrajectory();
-    void controlchest(float roll , float pitch , float yaw);
+    void controlChest(float roll , float pitch , float yaw);
 };
 
 #endif // VAL_CHEST_NAVIGATION_H

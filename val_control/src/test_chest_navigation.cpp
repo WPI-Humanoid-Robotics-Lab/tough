@@ -10,12 +10,12 @@ int main(int argc, char **argv)
   chestTrajectory chestTraj(nh);
 
   if(argc != 4)
-    chestTraj.controlchest(10, 0, 0);
+    chestTraj.controlChest(10, 0, 0);
   else {
     float roll = std::atof(argv[1]);
     float pitch = std::atof(argv[2]);
     float yaw = std::atof(argv[3]);
-    chestTraj.controlchest(roll, pitch, yaw);
+    chestTraj.controlChest(roll, pitch, yaw);
   }
 
   while(ros::ok())

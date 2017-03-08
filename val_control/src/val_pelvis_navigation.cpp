@@ -1,5 +1,7 @@
 #include <val_control/val_pelvis_navigation.h>
 
+int pelvisTrajectory::pelvis_id = -1;
+
 pelvisTrajectory::pelvisTrajectory(ros::NodeHandle nh):nh_(nh)
 {
     pelvisHeightPublisher = nh_.advertise<ihmc_msgs::PelvisHeightTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/pelvis_height_trajectory",1,true);

@@ -11,7 +11,7 @@ chestTrajectory::~chestTrajectory()
 {
 }
 
-void chestTrajectory::controlchest(float roll , float pitch , float yaw)
+void chestTrajectory::controlChest(float roll , float pitch , float yaw)
 {
 
     ihmc_msgs::ChestTrajectoryRosMessage msg;

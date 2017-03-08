@@ -141,5 +141,4 @@ private:
 
 };
 
-int armTrajectory::arm_id = -1;
 #endif // VAL_ARM_NAVIGATION_H
