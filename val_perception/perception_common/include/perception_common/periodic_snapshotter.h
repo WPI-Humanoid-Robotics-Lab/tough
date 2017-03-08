@@ -66,7 +66,10 @@ public:
      * that were published on the same topic
      * @param msg
      */
-    void mergeClouds(sensor_msgs::PointCloud2::Ptr msg);
+    void mergeClouds(const sensor_msgs::PointCloud2::Ptr msg);
+
+    void pairAlign (const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_src, const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_tgt,
+                    pcl::PointCloud<pcl::PointXYZ>::Ptr output, Eigen::Matrix4f &final_transform, bool downsample_ = false);
 
     /**
      * @brief getNearestPoint returns the K-nearest neighbours of a specified point. This is a
@@ -84,11 +87,15 @@ public:
 
 private:
     ros::NodeHandle n_;
-    ros::Publisher pub_;
+    ros::Publisher snapshot_pub_;
+    ros::Publisher registered_pointcloud_pub_;
+    ros::Subscriber snapshot_sub_;
     ros::ServiceClient client_;
     ros::Timer timer_;
-    sensor_msgs::PointCloud2 prev_msg_;
+    sensor_msgs::PointCloud2::Ptr prev_msg_;
     bool first_time_;
+    bool downsample_;
+
 
 } ;
 
@@ -100,7 +107,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr laser_assembler::PeriodicSnapshotter::POINTC
 bool PeriodicSnapshotter::getNearestPoint(geometry_msgs::PointStamped &point, int K)
 {
     if (PeriodicSnapshotter::POINTCLOUD_STATIC_PTR->empty()){
-//        ROS_INFO("Point cloud is empty");
+        //        ROS_INFO("Point cloud is empty");
         return false;
     }
 
@@ -138,10 +145,10 @@ bool PeriodicSnapshotter::getNearestPoint(geometry_msgs::PointStamped &point, in
     searchPoint.z = point.point.z;
 
 
-        std::cout << "K nearest neighbor search at (" << searchPoint.x
-                  << " " << searchPoint.y
-                  << " " << searchPoint.z
-                  << ") with K=" << K << std::endl;
+    std::cout << "K nearest neighbor search at (" << searchPoint.x
+              << " " << searchPoint.y
+              << " " << searchPoint.z
+              << ") with K=" << K << std::endl;
 
     float meanX=0.0, meanY=0.0, meanZ=0.0;
 
@@ -153,10 +160,10 @@ bool PeriodicSnapshotter::getNearestPoint(geometry_msgs::PointStamped &point, in
             meanY += cloud->points[ pointIdxNKNSearch[i] ].y;
             meanZ += cloud->points[ pointIdxNKNSearch[i] ].z;
 
-                std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
-                          << " " << cloud->points[ pointIdxNKNSearch[i] ].y
-                          << " " << cloud->points[ pointIdxNKNSearch[i] ].z
-                          << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+            std::cout << "    "  <<   cloud->points[ pointIdxNKNSearch[i] ].x
+                      << " " << cloud->points[ pointIdxNKNSearch[i] ].y
+                      << " " << cloud->points[ pointIdxNKNSearch[i] ].z
+                      << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
         }
         point.point.x = meanX = meanX/pointIdxNKNSearch.size();
         point.point.y = meanY = meanY/pointIdxNKNSearch.size();
@@ -180,6 +187,20 @@ bool PeriodicSnapshotter::getNearestPoint(geometry_msgs::PointStamped &point, in
     return true;
 }
 
+void convertROStoPCL(const sensor_msgs::PointCloud2::Ptr ros_msg, pcl::PointCloud<pcl::PointXYZ>::Ptr &pcl_msg){
+
+    pcl::PCLPointCloud2 pcl_pc2;
+    pcl_conversions::toPCL(*ros_msg,pcl_pc2);
+    pcl::fromPCLPointCloud2(pcl_pc2,*pcl_msg);
+
+}
+
+void convertPCLtoROS(const pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_msg, sensor_msgs::PointCloud2::Ptr &ros_msg ){
+    pcl::PCLPointCloud2 pcl_pc2;
+    pcl::toPCLPointCloud2(*pcl_msg, pcl_pc2);
+    pcl_conversions::moveFromPCL(pcl_pc2, *ros_msg);
+
+}
 
 }
 
