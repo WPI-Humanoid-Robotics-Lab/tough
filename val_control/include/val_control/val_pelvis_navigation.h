@@ -3,6 +3,8 @@
 
 #include <ihmc_msgs/PelvisHeightTrajectoryRosMessage.h>
 #include <ros/ros.h>
+#include <tf/transform_listener.h>
+
 
 class pelvisTrajectory {
 
@@ -20,4 +22,4 @@ public:
     bool controlPelvisMessage(ihmc_msgs::PelvisHeightTrajectoryRosMessage msg);
 };
 
-#endif // VAL_PELVIS_NAVIGATION_H
+#endif

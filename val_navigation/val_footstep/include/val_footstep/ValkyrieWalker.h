@@ -56,7 +56,7 @@ public:
      * @param startLeg   leg to be used to start walking. It can be RIGHT or LEFT
      * @return
      */
-    bool walkNSteps(int n, float x_offset, float y_offset, bool continous, armSide startLeg);
+    bool walkNSteps(int n, float x_offset, float y_offset=0.0f, bool continous=false, armSide startLeg=RIGHT);
 
     /**
      * @brief walkPreComputedSteps If the steps to be sent to the robot are not identical, use this function to send steps that are precomputed.

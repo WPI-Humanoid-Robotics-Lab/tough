@@ -128,7 +128,7 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
 
     start.x = startstep->location.x ;
-    start.y = startstep->location.y - 0.18;
+    start.y = startstep->location.y; // - 0.18; Why do we need to subtract this?
     //    std::cout<< "Start Position  x = " << start.x << "  y = " << start.y<<std::endl;
 
     start.theta = tf::getYaw(startstep->orientation);

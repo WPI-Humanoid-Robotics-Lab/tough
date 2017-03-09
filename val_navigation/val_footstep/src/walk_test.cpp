@@ -29,7 +29,7 @@ int main(int argc, char **argv)
  walk.WalkToGoal(goal);
 */
 
- //walk.WalkNStepsForward(4,0.6);
+ walk.walkNSteps(2,0.3);
  //walk.WalkNStepsBackward(5,0.4);
 
     return 0;

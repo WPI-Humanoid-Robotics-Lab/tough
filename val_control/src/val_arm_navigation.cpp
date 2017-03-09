@@ -152,11 +152,11 @@ void armTrajectory::closeHand(const armSide side)
     this->handTrajectoryPublisher.publish(msg);
 }
 
-void armTrajectory::moveArmInTaskSpaceMessage(const armSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point)
+void armTrajectory::moveArmInTaskSpaceMessage(const armSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl)
 {
     ihmc_msgs::HandTrajectoryRosMessage msg;
     msg.robot_side = side;
-    msg.base_for_control = msg.CHEST;
+    msg.base_for_control = baseForControl;
     msg.taskspace_trajectory_points.push_back(point);
     msg.execution_mode = msg.OVERRIDE;
     armTrajectory::arm_id--;
@@ -172,7 +172,7 @@ void armTrajectory::moveArmInTaskSpace(const armSide side, const geometry_msgs::
   this->moveArmInTaskSpaceMessage(side, point);
 }
 
-void armTrajectory::moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data)
+void armTrajectory::moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data, int baseForControl)
 {
   ihmc_msgs::HandTrajectoryRosMessage msg_l;
   ihmc_msgs::HandTrajectoryRosMessage msg_r;
@@ -181,11 +181,11 @@ void armTrajectory::moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data)
   msg_r.taskspace_trajectory_points.clear();
   armTrajectory::arm_id--;
   msg_l.unique_id = armTrajectory::arm_id;
-  msg_l.base_for_control = msg_l.CHEST;
+  msg_l.base_for_control = baseForControl;
   msg_l.execution_mode = msg_l.OVERRIDE;
   armTrajectory::arm_id--;
   msg_r.unique_id = armTrajectory::arm_id;
-  msg_r.base_for_control = msg_r.CHEST;
+  msg_r.base_for_control = baseForControl;
   msg_r.execution_mode = msg_r.OVERRIDE;
 
 
