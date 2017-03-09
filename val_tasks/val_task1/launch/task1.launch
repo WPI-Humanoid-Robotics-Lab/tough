@@ -2,11 +2,8 @@
     <arg name="events" default="true" />
     <arg name="gui" default="true" />
 
-    <!-- visualisation node -->
-    <!node name="task1_visualtion" pkg="val_task1" type="task1_visualisation_node" output="screen"/>
-
     <!-- task1 node -->
-    <node name="task1_node" pkg="val_task1" type="task1_node" output="screen"/>
+    <node name="task1" pkg="val_task1" type="val_task1_node" output="screen"/>
 
     <!-- state transition visualisation on rviz -->
     <node

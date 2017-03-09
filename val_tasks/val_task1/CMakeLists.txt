@@ -8,14 +8,14 @@ project(val_task1)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
   decision_making
   decision_making_parser
+  roscpp
+  rospy
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+ find_package(Boost REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -105,8 +105,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES val_task1
-#  CATKIN_DEPENDS roscpp rospy
+  LIBRARIES val_task1
+  CATKIN_DEPENDS roscpp rospy
 #  DEPENDS system_lib
 )
 
@@ -121,9 +121,9 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
+# Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/val_task1.cpp
+#   src/val_task1SM.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -134,8 +134,10 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
- add_executable(task1_node src/val_task1.cpp)
- add_executable(task1_visualisation_node src/event_visualisation.cpp)
+ add_executable(val_task1_node
+            src/val_task1.cpp
+            src/val_task1SM.cpp
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -145,20 +147,16 @@ include_directories(
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(task1_node task1_visualisation_node
+add_dependencies(val_task1_node
  ${${PROJECT_NAME}_EXPORTED_TARGETS}
  ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(task1_node
+ target_link_libraries(val_task1_node
    ${catkin_LIBRARIES}
  )
 
- target_link_libraries(task1_visualisation_node
-   ${catkin_LIBRARIES}
- )
-
-decision_making_parsing(src/val_task1.cpp)
+decision_making_parsing(src/val_task1SM.cpp)
 
 #############
 ## Install ##
