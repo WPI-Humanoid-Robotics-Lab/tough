@@ -17,7 +17,6 @@ using namespace std;
 #define foreach BOOST_FOREACH
 
 bool preemptiveWait(double ms, decision_making::EventQueue& queue) {
-  ROS_INFO("prempting");
   for (int i = 0; i < 100 && !queue.isTerminated(); i++)
     boost::this_thread::sleep(boost::posix_time::milliseconds(ms / 100.0));
 
@@ -43,12 +42,42 @@ decision_making::TaskResult initTask(string name, const FSMCallContext& context,
   return TaskResult::SUCCESS();
 }
 
+decision_making::TaskResult detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+  ROS_INFO_STREAM("executing " << name);
+
+  // generate the event
+  //eventQueue.riseEvent("/INIT_SUCESSUFL");
+
+  return TaskResult::SUCCESS();
+}
+
 
 decision_making::TaskResult walkToControlPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("executing " << name);
 
   eventQueue.riseEvent("/REACHED_PANEL");
+  return TaskResult::SUCCESS();
+}
+
+decision_making::TaskResult detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+  ROS_INFO_STREAM("executing " << name);
+
+  // generate the event
+  //eventQueue.riseEvent("/INIT_SUCESSUFL");
+
+  return TaskResult::SUCCESS();
+}
+
+decision_making::TaskResult adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+  ROS_INFO_STREAM("executing " << name);
+
+  // generate the event
+  //eventQueue.riseEvent("/INIT_SUCESSUFL");
+
   return TaskResult::SUCCESS();
 }
 
@@ -68,7 +97,17 @@ decision_making::TaskResult controlYawTask(string name, const FSMCallContext& co
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult walkToEndTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult detectfinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+  ROS_INFO_STREAM("executing " << name);
+
+  // generate the event
+  //eventQueue.riseEvent("/INIT_SUCESSUFL");
+
+  return TaskResult::SUCCESS();
+}
+
+decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("executing " << name);
 
@@ -84,6 +123,16 @@ decision_making::TaskResult endTask(string name, const FSMCallContext& context, 
   return TaskResult::SUCCESS();
 }
 
+decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+  ROS_INFO_STREAM("executing " << name);
+
+  // generate the event
+  //eventQueue.riseEvent("/INIT_SUCESSUFL");
+
+  return TaskResult::SUCCESS();
+}
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "task1");
@@ -95,11 +144,16 @@ int main(int argc, char** argv)
 
   // register the api's for states
   LocalTasks::registrate("STATE_INIT", initTask);
+  LocalTasks::registrate("STATE_DETECT_PANEL", detectPanelTask);
   LocalTasks::registrate("STATE_WALK_TO_CONTROL", walkToControlPanelTask);
+  LocalTasks::registrate("STATE_DETECT_HANDLE_CENTER", detectHandleCenterTask);
+  LocalTasks::registrate("STATE_ADJUST_ARMS", adjustArmTask);
   LocalTasks::registrate("STATE_CORRECT_PITCH", controlPitchTask);
   LocalTasks::registrate("STATE_CORRECT_YAW", controlYawTask);
-  LocalTasks::registrate("STATE_WALK_TO_FINISH", walkToEndTask);
+  LocalTasks::registrate("STATE_DETECT_FINISH", detectfinishBoxTask);
+  LocalTasks::registrate("STATE_WALK_TO_FINISH", walkToFinishTask);
   LocalTasks::registrate("END_STATE", endTask);
+  LocalTasks::registrate("STATE_ERROR", errorTask);
 
   ros::AsyncSpinner spinner(1);
   spinner.start();
