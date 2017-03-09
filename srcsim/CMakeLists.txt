@@ -68,15 +68,15 @@ link_directories(
 
 # Create the libSRCMultisensPlugin.so library.
 set(src_multisense_sl_plugin_name SRCMultiSenseSLPlugin)
-add_library(${src_multisense_sl_plugin_name} src/SRCMultiSenseSLPlugin.cc)
-target_link_libraries(${src_multisense_sl_plugin_name}
-  ${GAZEBO_LIBRARIES}
-  ${roscpp_LIBRARIES}
-)
-install(TARGETS ${src_multisense_sl_plugin_name}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
+#add_library(${src_multisense_sl_plugin_name} src/SRCMultiSenseSLPlugin.cc)
+#target_link_libraries(${src_multisense_sl_plugin_name}
+#  ${GAZEBO_LIBRARIES}
+#  ${roscpp_LIBRARIES}
+#)
+#install(TARGETS ${src_multisense_sl_plugin_name}
+#  ARCHIVE DESTINATION lib
+#  LIBRARY DESTINATION lib
+#  RUNTIME DESTINATION bin)
 
 ##########################
 ## Qualification task 1 ##

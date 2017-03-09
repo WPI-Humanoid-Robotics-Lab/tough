@@ -56,7 +56,7 @@ public:
      * @param startLeg   leg to be used to start walking. It can be RIGHT or LEFT
      * @return
      */
-    bool walkNSteps(int n, float x_offset, float y_offset=0.0f, bool continous=false, armSide startLeg=RIGHT);
+    bool walkNSteps(int n, float x_offset, float y_offset=0.0f, bool continous=false, armSide startLeg=RIGHT, bool waitForSteps=true);
 
     /**
      * @brief walkPreComputedSteps If the steps to be sent to the robot are not identical, use this function to send steps that are precomputed.
@@ -72,7 +72,7 @@ public:
      * @param list           List of steps in ihmc_msgs::FootstepDataListRosMessage format.
      * @return
      */
-    bool walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list );
+    bool walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list , bool waitForSteps=true);
 
     /**
      * @brief setWalkParms      Set the values of walking parameters
@@ -126,6 +126,5 @@ private:
     ihmc_msgs::FootstepDataRosMessage* getOffsetStep(int side, float x, float y);
 
 };
- int ValkyrieWalker::id = -1;
 
 #endif  //VALKYRIE_WALKER_H

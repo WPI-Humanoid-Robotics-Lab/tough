@@ -6,7 +6,9 @@
 
 #include "val_footstep/ValkyrieWalker.h"
 #include <iostream>
-#include<ros/ros.h>
+#include <ros/ros.h>
+
+int ValkyrieWalker::id = -1;
 
 // CallBack function for walking status
 void ValkyrieWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage & msg)
@@ -47,7 +49,7 @@ bool ValkyrieWalker::walkToGoal( geometry_msgs::Pose2D &goal)
 }
 
 // creates and n footsteps of width step_size
-bool ValkyrieWalker::walkNSteps(int n, float x_offset, float y_offset, bool continous, armSide startLeg)
+bool ValkyrieWalker::walkNSteps(int n, float x_offset, float y_offset, bool continous, armSide startLeg, bool waitForSteps)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.default_transfer_time = transfer_time;
@@ -74,7 +76,7 @@ bool ValkyrieWalker::walkNSteps(int n, float x_offset, float y_offset, bool cont
         }
     }
 
-    this->walkGivenSteps(list);
+    this->walkGivenSteps(list, waitForSteps);
     return true;
 }
 
@@ -104,11 +106,13 @@ bool ValkyrieWalker::walkPreComputedSteps(const std::vector<float> x_offset, con
 }
 
 
-bool ValkyrieWalker::walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list )
+bool ValkyrieWalker::walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list , bool waitForSteps)
 {
     this->footsteps_to_val.publish(list);
     ValkyrieWalker::id--;
-    this->waitForSteps(list.footstep_data_list.size());
+    if (waitForSteps){
+        this->waitForSteps(list.footstep_data_list.size());
+    }
     return true;
 }
 
