@@ -178,6 +178,8 @@ private:
 //  rviz::Display* imageDisplay_;
   rviz::Display* octomapDisplay_;
   rviz::Display* mapDisplay_ ;
+  rviz::Display* footstepMarkersDisplay_;
+  rviz::Display* goalDisplay_;
 
   rviz::ToolManager* toolManager_ ;
   rviz::ToolManager* mapToolManager_ ;
@@ -193,9 +195,9 @@ private:
 
 private:
   ros::NodeHandle nh_;
-  ros::Publisher moveBaseCmdPub;
-  ros::Subscriber centerDistSub;
-  ros::Subscriber baseSensorStatus;
+//  ros::Publisher moveBaseCmdPub;
+//  ros::Subscriber centerDistSub;
+//  ros::Subscriber baseSensorStatus;
   ros::Subscriber rviz2DNavGoalSub;
   ros::Subscriber jointStateSub_;
 
@@ -229,6 +231,8 @@ private:
   QString velocityTopic_;
   QString pathTopic_;
   QString robotType_;
+  QString goalTopic_;
+  QString footstepTopic_;
   QLabel* status_label_;
 
 };

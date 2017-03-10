@@ -74,8 +74,9 @@ void ValkyrieGUI::initVariables()
     pathTopic_      = QString::fromStdString(configfile.currentTopics["pathTopic"]);
     targetFrame_    = QString::fromStdString(configfile.currentTopics["targetFrame"]);
     robotType_      = QString::fromStdString(configfile.currentTopics["robotType"]);
-
-    moveBaseCmdPub  = nh_.advertise<geometry_msgs::Twist>(velocityTopic_.toStdString(),1);
+    goalTopic_      = QString::fromStdString(configfile.currentTopics["goalTopic"]);
+    footstepTopic_ = QString::fromStdString(configfile.currentTopics["footstepTopic"]);
+//    moveBaseCmdPub  = nh_.advertise<geometry_msgs::Twist>(velocityTopic_.toStdString(),1);
     //    baseSensorStatus = nh_.subscribe(baseSensorTopic_.toStdString(),1,&FallRiskGUI::baseStatusCheck,this);
     liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ValkyrieGUI::liveVideoCallback,this,image_transport::TransportHints("raw"));
 
@@ -174,6 +175,10 @@ void ValkyrieGUI::initDisplayWidgets()
     mapManager_->createDisplay( "rviz/RobotModel", robotType_, true );
     mapManager_->createDisplay("rviz/Path","Global path",true)->subProp( "Topic" )->setValue(pathTopic_);
 
+    //Add footsteps
+    mapManager_->createDisplay("rviz/MarkerArray", "Footsteps", true)->subProp("Marker Topic")->setValue(footstepTopic_);
+
+
 
     // Initialize GUI elements for main panel
     renderPanel_ = new rviz::RenderPanel();
@@ -194,15 +199,15 @@ void ValkyrieGUI::initDisplayWidgets()
     cloudDisplay_ = manager_->createDisplay( "rviz/PointCloud2", "3D Pointcloud view", false );
     assert( cloudDisplay_ != NULL && "Could not create a display");
 
-    cloudDisplay_->subProp( "Topic" )->setValue( pointCloudTopic_ );
-    cloudDisplay_->subProp( "Selectable" )->setValue( "true" );
-    cloudDisplay_->subProp( "Style" )->setValue( "Boxes" );
+    cloudDisplay_->subProp("Topic")->setValue(pointCloudTopic_);
+    cloudDisplay_->subProp("Selectable")->setValue("true");
+    cloudDisplay_->subProp("Style")->setValue("Boxes");
     cloudDisplay_->subProp("Alpha")->setValue(0.5);
 
     octomapDisplay_ = manager_->createDisplay( "rviz/MarkerArray", "Octomap view", false );
     ROS_ASSERT( octomapDisplay_ != NULL );
 
-    octomapDisplay_->subProp( "Marker Topic" )->setValue(octomapTopic_);
+    octomapDisplay_->subProp("Marker Topic")->setValue(octomapTopic_);
 
     //Assign Target Frame to the existing viewmanager of the visualization manager
     rviz::ViewManager*    viewManager_    = manager_->getViewManager();
@@ -233,8 +238,8 @@ void ValkyrieGUI::initTools(){
     setMapInitialPoseTool_ = mapToolManager_->addTool("rviz/SetInitialPose");
 
     // Find the entry in propertytreemodel and set the value for Topic
-    setGoalTool_->getPropertyContainer()->subProp("Topic")->setValue("/move_base_simple/goal");
-    setMapGoalTool_->getPropertyContainer()->subProp("Topic")->setValue("/move_base_simple/goal");
+    setGoalTool_->getPropertyContainer()->subProp("Topic")->setValue(goalTopic_);
+    setMapGoalTool_->getPropertyContainer()->subProp("Topic")->setValue(goalTopic_);
 
 }
 
