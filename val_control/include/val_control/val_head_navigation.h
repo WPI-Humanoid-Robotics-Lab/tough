@@ -3,6 +3,9 @@
 
 #include <ros/ros.h>
 #include <ihmc_msgs/HeadTrajectoryRosMessage.h>
+#include <ihmc_msgs/NeckTrajectoryRosMessage.h>
+#include <ihmc_msgs/OneDoFJointTrajectoryRosMessage.h>
+#include <ihmc_msgs/TrajectoryPoint1DRosMessage.h>
 #include <tf/tf.h>
 #include <math.h>
 #include <time.h>
@@ -16,8 +19,11 @@ class HeadTrajectory {
 
 private:
     static int head_id;
+    const int NUM_NECK_JOINTS;
     ros::NodeHandle nh_;
     ros::Publisher headTrajPublisher;
+    ros::Publisher neckTrajPublisher;
+    void appendNeckTrajectoryPoint(ihmc_msgs::NeckTrajectoryRosMessage &msg, float time, std::vector<float> pos);
 
 public:
 
@@ -49,6 +55,19 @@ public:
      * @param time              The time it takes to move to the given orientation. Default is 1.0
      */
     void moveHead(const std::vector<std::vector<float> > &trajectory_points, const float time = 1.0f);
+
+    /**
+     * @brief getNumNeckJoints Gives back the number of neck joints for Valkyrie R5
+     * @return The number of neck joints.
+     */
+    int getNumNeckJoints() const;
+
+    /**
+     * @brief moveNeckJoints  Move the joints of the neck (lowerNeckPitch, neckYaw, upperNeckPitch) through a series of trajectory points, spaced equally in the time specified.
+     * @param neck_pose       The angles of the joints of the neck as a series of trajectory points to pass through.
+     * @param time            The total time of the trajectories (each trajectory is spaced equally in time).
+     */
+    void moveNeckJoints(const std::vector<std::vector<float> > &neck_pose, const float time);
 };
 
 int HeadTrajectory::head_id = -1;

@@ -27,7 +27,6 @@ include_directories(
    src/val_pelvis_navigation.cpp
    src/val_chest_navigation.cpp
    src/val_head_navigation.cpp
-   src/val_neck_navigation.cpp
 )
 
  target_link_libraries(val_control
