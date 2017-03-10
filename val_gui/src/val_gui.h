@@ -18,6 +18,9 @@
 #include <QLineEdit>
 #include <QPushButton>
 
+// standard libraries
+#include <mutex>
+
 // rviz
 #include "rviz/visualization_manager.h"
 #include "rviz/render_panel.h"
@@ -29,14 +32,15 @@
 
 // ros
 #include <ros/ros.h>
-#include <geometry_msgs/Twist.h>
 #include <std_msgs/Float32.h>
+#include <geometry_msgs/Twist.h>
+#include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Image.h>
-#include <image_transport/image_transport.h>
-#include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
 // opencv/PCL
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 
@@ -57,7 +61,10 @@
 #define PELVIS_HEIGHT_MAX 1.16
 #define PELVIS_HEIGHT_MIN 0.8
 
-#define RIGHT_SHOULDER_ROLL_MAX 66.42
+#define TO_RADIANS 3.1415926535f / 180.0f
+#define TO_DEGREES 180.0f / 3.1415926535f
+
+#define RIGHT_SHOULDER_ROLL_MAX 66.42   // this should be in radians. wow, I learnt. Sorry Harish
 #define RIGHT_SHOULDER_ROLL_MIN -72.56
 #define RIGHT_SHOULDER_PITCH_MAX 114.64
 #define RIGHT_SHOULDER_PITCH_MIN -163.37
@@ -135,20 +142,25 @@ private:
     void initTools();
     void initDefaultValues();
     void initValkyrieControllers();
-    void sendMoveBaseCmd();
+
+    void getArmState();
+    void getChestState();
+    void getPelvisState();
+    void getNeckState();
+    void getGripperState();
 
 private Q_SLOTS:
     void closeGrippers();
     void openGrippers();
     void keyPressEvent(QKeyEvent *event);
-    void setRobotVelocity();
     void setCurrentTool(int btnID);
     void setActiveRvizToolBtns(int tabID);
     void displayPointcloud(int btnID);
-    void setStartFoot(int btnID);
     void moveChestJoints();
     void walkSteps();
     void changePelvisHeight();
+    void moveArmJoints();
+    void updateJointStateSub(int tabID);
 
 
 private:
@@ -185,6 +197,9 @@ private:
   ros::Subscriber centerDistSub;
   ros::Subscriber baseSensorStatus;
   ros::Subscriber rviz2DNavGoalSub;
+  ros::Subscriber jointStateSub_;
+
+  tf::TransformListener listener_;
 
   image_transport::ImageTransport it_;
   image_transport::Subscriber liveVideoSub;
@@ -194,26 +209,14 @@ private:
   armTrajectory    *armJointController_;
   ValkyrieWalker   *walkingController_;
 
-  geometry_msgs::Twist moveBaseCmd;
-  bool walkfoot_;
-  float linearVelocity_;
-  float angularVelocity_;
-  float shoulderpitchslider_;
-  float shoulderrollslider_;
-  float shoulderyawslider_;
-  float wristpitchslider_;
-  float wristrollslider_;
-  float wristyawslider_;
-  float neckpitchslider_;
-  float neckrollslider_;
-  float neckyawslider_;
-  float elbowslider_;
+  std::vector<std::string> jointNames_;
+  std::vector<double>       jointValues_;
+  std::mutex               mtx_;
 
   void distanceSubCallback(const std_msgs::Float32::ConstPtr& msg);
-//  void baseStatusCheck(const kobuki_msgs::SensorState::ConstPtr& msg);
   void liveVideoCallback(const sensor_msgs::ImageConstPtr &msg);
   void setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr,bool is_RGB);
-
+  void jointStateCallBack(const sensor_msgs::JointStatePtr &state);
   void changeToolButtonStatus(int btnID);
 
   QString fixedFrame_;

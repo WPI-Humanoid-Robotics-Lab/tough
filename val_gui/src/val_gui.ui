@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>ValkyrieGUI</class>
  <widget class="QMainWindow" name="ValkyrieGUI">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -209,7 +212,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>4</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tabArm">
           <attribute name="title">
@@ -373,7 +376,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>104</width>
+                   <width>437</width>
                    <height>87</height>
                   </rect>
                  </property>
@@ -578,15 +581,6 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tabPelvis">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <attribute name="title">
-           <string>Pelvis</string>
-          </attribute>
-          <layout class="QHBoxLayout" name="horizontalLayout_5"/>
-         </widget>
          <widget class="QWidget" name="tabWalk">
           <attribute name="title">
            <string>Walk</string>
@@ -693,7 +687,7 @@ p, li { white-space: pre-wrap; }
                  <enum>Qt::Vertical</enum>
                 </property>
                 <property name="tickPosition">
-                 <enum>QSlider::TicksAbove</enum>
+                 <enum>QSlider::TicksBelow</enum>
                 </property>
                 <property name="tickInterval">
                  <number>10</number>
@@ -771,8 +765,8 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="btnGroupRvizTools"/>
   <buttongroup name="btnGroupDisplays"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="btnGroupRvizTools"/>
  </buttongroups>
 </ui>
