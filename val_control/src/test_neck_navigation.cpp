@@ -9,10 +9,9 @@ int main(int argc, char **argv)
 
   NeckTrajectory neckTraj(nh);
 
-  neckTraj.moveNeckJoints({{ 1.57f, 1.57f, 0.0f }}, 2.0f);
+  neckTraj.moveNeckJoints({{ 0.0f, -1.0f, 0.0f }}, 2.0f);
 
-  while(ros::ok())
-  {}
+  ros::spin();
 
   return 0;
 }

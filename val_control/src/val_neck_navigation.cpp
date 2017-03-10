@@ -26,7 +26,7 @@ void NeckTrajectory::appendTrajectoryPoint(ihmc_msgs::NeckTrajectoryRosMessage &
       p.unique_id = NeckTrajectory::neck_id;
       t.trajectory_points.push_back(p);
       t.unique_id = NeckTrajectory::neck_id;
-      msg.joint_trajectory_messages[i].trajectory_points.push_back(p);
+      msg.joint_trajectory_messages.push_back(t);//.trajectory_points.push_back(p);
   }
 }
 
@@ -39,10 +39,10 @@ void NeckTrajectory::moveNeckJoints(const std::vector<std::vector<float> > &neck
   msg.unique_id = NeckTrajectory::neck_id;
 
   // Add all neck trajectory points to the trajectory message
-  for(auto pose=neck_pose.begin(); pose != neck_pose.end(); pose++){
-    if(pose->size() != NUM_NECK_JOINTS)
+  for(int i = 0; i < neck_pose.size(); i++){
+    if(neck_pose[i].size() != NUM_NECK_JOINTS)
       ROS_ERROR("Check number of trajectory points");
-    appendTrajectoryPoint(msg, time / neck_pose.size(), *pose);
+    appendTrajectoryPoint(msg, time / neck_pose.size(), neck_pose[i]);
   }
   // publish the message
   neckTrajPublisher.publish(msg);

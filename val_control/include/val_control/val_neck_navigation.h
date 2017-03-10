@@ -37,6 +37,11 @@ public:
      */
     int getNumNeckJoints() const;
 
+    /**
+     * @brief moveNeckJoints  Move the joints of the neck (lowerNeckPitch, neckYaw, upperNeckPitch) through a series of trajectory points, spaced equally in the time specified.
+     * @param neck_pose       The angles of the joints of the neck as a series of trajectory points to pass through.
+     * @param time            The total time of the trajectories (each trajectory is spaced equally in time).
+     */
     void moveNeckJoints(const std::vector<std::vector<float> > &neck_pose, const float time);
 
 };
