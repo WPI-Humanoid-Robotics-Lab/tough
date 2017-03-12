@@ -1,4 +1,6 @@
 #include <val_control/val_head_navigation.h>
+#include <tf/transform_listener.h>
+#include <val_common/val_common_names.h>
 
 const double degToRad = M_PI / 180;
 
@@ -51,7 +53,24 @@ void HeadTrajectory::moveHead(const geometry_msgs::Quaternion &quaternion, const
   ihmc_msgs::HeadTrajectoryRosMessage msg;
   ihmc_msgs::SO3TrajectoryPointRosMessage data;
 
-  data.orientation = quaternion;
+
+  // transorm point from pelvis to world frame
+  tf::TransformListener listener;
+
+  geometry_msgs::QuaternionStamped quatInWorldFrame;
+  quatInWorldFrame.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+  quatInWorldFrame.header.stamp = ros::Time(0);
+  quatInWorldFrame.quaternion = quaternion;
+
+  try {
+    listener.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
+    listener.transformQuaternion(VAL_COMMON_NAMES::WORLD_TF, quatInWorldFrame, quatInWorldFrame);
+  } catch (tf::TransformException ex) {
+    ROS_WARN("%s",ex.what());
+    return;
+  }
+
+  data.orientation = quatInWorldFrame.quaternion;
 
   geometry_msgs::Vector3 v;
   v.x = 0.0;
@@ -93,7 +112,26 @@ void HeadTrajectory::moveHead(const std::vector<std::vector<float> > &trajectory
     data.time = time;
     tf::Quaternion q;
     q.setRPY(roll, pitch, yaw);
-    tf::quaternionTFToMsg(q, data.orientation);
+
+    //transorm point from pelvis to world frame
+    tf::TransformListener listener;
+
+    geometry_msgs::QuaternionStamped quatInWorldFrame;
+    quatInWorldFrame.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    quatInWorldFrame.header.stamp = ros::Time(0);
+
+    tf::quaternionTFToMsg(q, quatInWorldFrame.quaternion);
+
+    try {
+      listener.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
+      listener.transformQuaternion(VAL_COMMON_NAMES::WORLD_TF, quatInWorldFrame, quatInWorldFrame);
+    } catch (tf::TransformException ex) {
+      ROS_WARN("%s",ex.what());
+      return;
+    }
+
+    data.orientation = quatInWorldFrame.quaternion;
+
     geometry_msgs::Vector3 v;
     v.x = 0.0;
     v.y = 0.0;

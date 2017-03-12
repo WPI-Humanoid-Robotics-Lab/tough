@@ -10,6 +10,7 @@
 #include <math.h>
 #include <time.h>
 #include <geometry_msgs/Quaternion.h>
+#include <geometry_msgs/QuaternionStamped.h>
 #include <geometry_msgs/Vector3.h>
 
 /**
@@ -34,7 +35,7 @@ public:
     ~HeadTrajectory();
 
     /**
-     * @brief moveHead Moves the robot head to the given roll, pitch, and yaw.
+     * @brief moveHead Moves the robot head to the given roll, pitch, and yaw. All orientations are expressed in pelvis frame.
      * @param roll The roll in degrees.
      * @param pitch The pitch in degrees.
      * @param yaw The yaw in degrees.
@@ -43,14 +44,14 @@ public:
     void moveHead(float roll, float pitch, float yaw, const float time = 1.0f);
 
     /**
-     * @brief moveHead Moves the robot head by the given quaternion.
+     * @brief moveHead Moves the robot head by the given quaternion. All orientations are expressed in pelvis frame.
      * @param quaternion The quaternion representing the rotation of the head.
      * @param time The time it takes to move to the given orientation. Default is 1.0
      */
     void moveHead(const geometry_msgs::Quaternion &quaternion, const float time = 1.0f);
 
     /**
-     * @brief moveHead          Moves the robot head through a series of trajectory roll, pitch, and yaw angles.
+     * @brief moveHead          Moves the robot head through a series of trajectory roll, pitch, and yaw angles. All orientations are expressed in pelvis frame.
      * @param trajectory_points The RPY angles for the head to move through in its trajectory.
      * @param time              The time it takes to move to the given orientation. Default is 1.0
      */

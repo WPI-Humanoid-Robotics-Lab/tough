@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     ros::Duration(2).sleep();
 
     // Shake head to say no
-    headTraj.moveHead({{0, 0, 45}, {0, 0, -45}, {0, 0, 45}, {0, 0, -45}});
+    headTraj.moveHead({{0, 0, 45}, {0, 0, -45}, {0, 0, 45}, {0, 0, -45}}, 4.0f);
   } else {
     float roll = std::atof(argv[1]);
     float pitch = std::atof(argv[2]);
@@ -29,8 +29,7 @@ int main(int argc, char **argv)
     headTraj.moveHead(roll, pitch, yaw);
   }
 
-  while(ros::ok())
-  {}
+  ros::spin();
 
   return 0;
 }
