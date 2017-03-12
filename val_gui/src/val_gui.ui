@@ -31,7 +31,7 @@
         <number>0</number>
        </property>
        <item row="0" column="1">
-        <widget class="QRadioButton" name="radiobtnpointcloud">
+        <widget class="QRadioButton" name="radioBtnPointcloud">
          <property name="text">
           <string>PointCloud</string>
          </property>
@@ -51,7 +51,7 @@
         </widget>
        </item>
        <item row="0" column="0">
-        <widget class="QRadioButton" name="radiobtnoctomap">
+        <widget class="QRadioButton" name="radioBtnOctomap">
          <property name="text">
           <string>OctoMap</string>
          </property>
@@ -66,7 +66,7 @@
     <item row="4" column="0" colspan="2">
      <widget class="QTabWidget" name="tab_display">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_3dscene">
        <attribute name="title">
@@ -99,17 +99,9 @@
        </size>
       </property>
       <property name="title">
-       <string/>
+       <string>State Machine</string>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_9">
-       <item>
-        <widget class="QGroupBox" name="groupBox_3">
-         <property name="title">
-          <string>State Machine</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <layout class="QHBoxLayout" name="horizontalLayout_9"/>
      </widget>
     </item>
     <item row="1" column="0" colspan="2">
@@ -212,7 +204,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="tabArm">
           <attribute name="title">
@@ -247,6 +239,9 @@
                    <property name="text">
                     <string>Left</string>
                    </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">btnGroupArm</string>
+                   </attribute>
                   </widget>
                  </item>
                  <item>
@@ -254,6 +249,9 @@
                    <property name="text">
                     <string>Right</string>
                    </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">btnGroupArm</string>
+                   </attribute>
                   </widget>
                  </item>
                 </layout>
@@ -503,6 +501,13 @@
                 </property>
                </widget>
               </item>
+              <item row="3" column="1">
+               <widget class="QPushButton" name="btnChestReset">
+                <property name="text">
+                 <string>Reset Chest Orientation</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>
@@ -658,7 +663,7 @@ p, li { white-space: pre-wrap; }
                     <string>Left</string>
                    </property>
                    <attribute name="buttonGroup">
-                    <string notr="true">buttonGroup</string>
+                    <string notr="true">btnGroupFeet</string>
                    </attribute>
                   </widget>
                  </item>
@@ -668,7 +673,7 @@ p, li { white-space: pre-wrap; }
                     <string>Right</string>
                    </property>
                    <attribute name="buttonGroup">
-                    <string notr="true">buttonGroup</string>
+                    <string notr="true">btnGroupFeet</string>
                    </attribute>
                   </widget>
                  </item>
@@ -765,8 +770,9 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
+  <buttongroup name="btnGroupFeet"/>
   <buttongroup name="btnGroupDisplays"/>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="btnGroupRvizTools"/>
+  <buttongroup name="btnGroupArm"/>
  </buttongroups>
 </ui>

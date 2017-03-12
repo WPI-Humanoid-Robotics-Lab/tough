@@ -1,5 +1,5 @@
-#ifndef FALLRISK_GUI_H
-#define FALLRISK_GUI_H
+#ifndef VAL_GUI_H
+#define VAL_GUI_H
 
 // QT
 #include <QMainWindow>
@@ -106,10 +106,6 @@
 #define RIGHT_ELBOW_MAX 124.61
 #define RIGHT_ELBOW_MIN -6.87
 
-#define BASE_BATTERY_CAP 165
-#define BASE_BATTERY_LOW 140
-#define BASE_BATTERY_DANGER 132
-
 namespace Ui {
 class ValkyrieGUI;
 }
@@ -154,14 +150,15 @@ private Q_SLOTS:
     void openGrippers();
     void keyPressEvent(QKeyEvent *event);
     void setCurrentTool(int btnID);
-    void setActiveRvizToolBtns(int tabID);
     void displayPointcloud(int btnID);
     void moveChestJoints();
     void walkSteps();
     void changePelvisHeight();
     void moveArmJoints();
     void updateJointStateSub(int tabID);
-
+    void updateArmSide(int btnID);
+    void resetChestOrientation();
+    void updateDisplay(int tabID);
 
 private:
   rviz::VisualizationManager* manager_;
@@ -238,4 +235,4 @@ private:
 };
 
 
-#endif // FALLRISK_GUI_H
+#endif // VAL_GUI_H

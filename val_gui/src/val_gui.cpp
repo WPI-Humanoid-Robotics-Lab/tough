@@ -20,8 +20,6 @@ ValkyrieGUI::ValkyrieGUI(QWidget *parent) :
      * Set up the QT related UI components.
      */
     ui->setupUi(this);
-    //    ui->sliderLinearVel->setValue(75);
-    //    ui->sliderAngularVel->setValue(75);
     changeToolButtonStatus(-2); //set the initial rviz tool to be "interact"
 
     //set all the controller pointers to null
@@ -76,12 +74,11 @@ void ValkyrieGUI::initVariables()
     robotType_      = QString::fromStdString(configfile.currentTopics["robotType"]);
     goalTopic_      = QString::fromStdString(configfile.currentTopics["goalTopic"]);
     footstepTopic_ = QString::fromStdString(configfile.currentTopics["footstepTopic"]);
-//    moveBaseCmdPub  = nh_.advertise<geometry_msgs::Twist>(velocityTopic_.toStdString(),1);
+    //    moveBaseCmdPub  = nh_.advertise<geometry_msgs::Twist>(velocityTopic_.toStdString(),1);
     //    baseSensorStatus = nh_.subscribe(baseSensorTopic_.toStdString(),1,&FallRiskGUI::baseStatusCheck,this);
     liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ValkyrieGUI::liveVideoCallback,this,image_transport::TransportHints("raw"));
 
     jointStateSub_ = nh_.subscribe("/joint_states",1, &ValkyrieGUI::jointStateCallBack, this);
-
 }
 
 void ValkyrieGUI::initActionsConnections()
@@ -101,8 +98,10 @@ void ValkyrieGUI::initActionsConnections()
     connect(ui->btnGroupRvizTools,       SIGNAL(buttonClicked(int)),   this, SLOT(setCurrentTool(int)));
     connect(ui->btnGroupDisplays,        SIGNAL(buttonClicked(int)),   this, SLOT(displayPointcloud(int)));
     connect(ui->controlTabs,             SIGNAL(currentChanged(int)),  this, SLOT(updateJointStateSub(int)));
+    connect(ui->tab_display,             SIGNAL(currentChanged(int)),  this, SLOT(updateDisplay(int)));
 
     //arm control
+    connect(ui->btnGroupArm,             SIGNAL(buttonClicked(int)),   this, SLOT(updateArmSide(int)));
     connect(ui->btnCloseHand,            SIGNAL(clicked()),            this, SLOT(closeGrippers()));
     connect(ui->btnOpenHand,             SIGNAL(clicked()),            this, SLOT(openGrippers()));
     connect(ui->sliderShoulderRoll,      SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
@@ -117,6 +116,7 @@ void ValkyrieGUI::initActionsConnections()
     connect(ui->sliderChestRoll,         SIGNAL(sliderReleased()),    this, SLOT(moveChestJoints()));
     connect(ui->sliderChestPitch,        SIGNAL(sliderReleased()),    this, SLOT(moveChestJoints()));
     connect(ui->sliderChestYaw,          SIGNAL(sliderReleased()),    this, SLOT(moveChestJoints()));
+    connect(ui->btnChestReset,           SIGNAL(clicked()),           this, SLOT(resetChestOrientation()));
 
     // neck control
     //    connect(ui->sliderNeckRoll,          SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
@@ -203,6 +203,7 @@ void ValkyrieGUI::initDisplayWidgets()
     cloudDisplay_->subProp("Selectable")->setValue("true");
     cloudDisplay_->subProp("Style")->setValue("Boxes");
     cloudDisplay_->subProp("Alpha")->setValue(0.5);
+    cloudDisplay_->subProp("Color Transformer")->setValue("AxisColor");
 
     octomapDisplay_ = manager_->createDisplay( "rviz/MarkerArray", "Octomap view", false );
     ROS_ASSERT( octomapDisplay_ != NULL );
@@ -271,7 +272,7 @@ void ValkyrieGUI::initDefaultValues() {
     //configure arm sliders
     getArmState();
 
-//    jointStateSub_.shutdown();
+    //    jointStateSub_.shutdown();
 }
 
 void ValkyrieGUI::initValkyrieControllers() {
@@ -291,7 +292,10 @@ void ValkyrieGUI::initValkyrieControllers() {
 
 void ValkyrieGUI::getArmState()
 {
-
+    if(jointNames_.empty()){
+        ROS_INFO("joint_states is not initialized yet. cannot update arm joints");
+        return;
+    }
     armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
     mtx_.lock();
     for (size_t i = 0; i < jointNames_.size(); i++){
@@ -395,6 +399,39 @@ void ValkyrieGUI::getArmState()
 
 void ValkyrieGUI::getChestState()
 {
+    return;
+    // No point updating the chest state as it will always updtae wrt to world
+
+    if(jointNames_.empty()){
+        ROS_INFO("joint_states is not initialized yet. cannot update arm joints");
+        return;
+    }
+
+    mtx_.lock();
+    for (size_t i = 0; i < jointNames_.size(); i++){
+        if (jointNames_[i] == "torsoYaw"){
+            double jointVal = jointValues_[i] * TO_DEGREES;
+            jointVal = ((jointVal - CHEST_YAW_MIN )* 100)/(CHEST_YAW_MAX-CHEST_YAW_MIN);
+            ui->sliderWristYaw->setValue(jointVal);
+            continue;
+        }
+        else if (jointNames_[i] == "torsoPitch"){
+            double jointVal = jointValues_[i] * TO_DEGREES;
+            jointVal = ((jointVal - CHEST_PITCH_MIN )* 100)/(CHEST_PITCH_MAX-CHEST_PITCH_MIN);
+            ui->sliderWristRoll->setValue(jointVal);
+            continue;
+        }
+        else if (jointNames_[i] == "torsoRoll"){
+            double jointVal = jointValues_[i] * TO_DEGREES;
+            jointVal = ((jointVal - CHEST_ROLL_MIN )* 100)/(CHEST_ROLL_MAX-CHEST_ROLL_MIN);
+            ui->sliderWristPitch->setValue(jointVal);
+            continue;
+        }
+
+    }
+
+    mtx_.unlock();
+
 
 }
 
@@ -425,7 +462,7 @@ void ValkyrieGUI::updateJointStateSub(int tabID){
     //1 = chest
     //2 = neck
     //3 = walk
-//    jointStateSub_ = nh_.subscribe("/joint_states",1, &ValkyrieGUI::jointStateCallBack, this);
+    //    jointStateSub_ = nh_.subscribe("/joint_states",1, &ValkyrieGUI::jointStateCallBack, this);
     switch (tabID) {
     case 0:
         getArmState();
@@ -444,7 +481,44 @@ void ValkyrieGUI::updateJointStateSub(int tabID){
         break;
     }
 
-//    jointStateSub_.shutdown();
+    //    jointStateSub_.shutdown();
+
+}
+
+void ValkyrieGUI::updateArmSide(int btnID)
+{
+    //-2 = Left arm
+    //-3 = right arm
+    getArmState();
+}
+
+void ValkyrieGUI::resetChestOrientation()
+{
+    chestController_->controlChest(0.0f, 0.0f, 0.0f);
+}
+
+void ValkyrieGUI::updateDisplay(int tabID)
+{
+    switch (tabID) {
+    case 0:
+        ui->radioBtnNone->setEnabled(true);
+        ui->radioBtnOctomap->setEnabled(true);
+        ui->radioBtnPointcloud->setEnabled(true);
+        // change current tool to interact when changing tabs
+        setCurrentTool(-2);
+        break;
+    case 1:
+        ui->radioBtnNone->setEnabled(false);
+        ui->radioBtnOctomap->setEnabled(false);
+        ui->radioBtnPointcloud->setEnabled(false);
+        // change current tool to interact when changing tabs
+        setCurrentTool(-2);
+        break;
+    default:
+        break;
+    }
+    //0 = 3d scene
+    //1 = map
 
 }
 
@@ -598,31 +672,6 @@ void ValkyrieGUI::changeToolButtonStatus(int btnID)
     }
 }
 
-void ValkyrieGUI::setActiveRvizToolBtns(int tabID)
-{
-    //    ROS_INFO("TAB:%d",tabID);
-
-    ui->btnRvizInteract->setDisabled(false);
-    ui->btnRvizMeasure->setDisabled(false);
-    ui->btnRvizPoseEstimate->setDisabled(false);
-    ui->btnRvizNavGoal->setDisabled(false);
-    ui->btnRvizPublishPoint->setDisabled(false);
-
-    if(tabID == 1)
-    {
-        ui->btnRvizMeasure->setDisabled(true);
-        ui->btnRvizPublishPoint->setDisabled(true);
-    }
-    else if(tabID == 2)
-    {
-        ui->btnRvizInteract->setDisabled(true);
-        ui->btnRvizMeasure->setDisabled(true);
-        ui->btnRvizPoseEstimate->setDisabled(true);
-        ui->btnRvizNavGoal->setDisabled(true);
-        ui->btnRvizPublishPoint->setDisabled(true);
-    }
-}
-
 void ValkyrieGUI::displayPointcloud(int btnID)
 {
 
@@ -713,33 +762,18 @@ void ValkyrieGUI::moveArmJoints(){
                     elbowValue* TO_RADIANS, wristYawValue* TO_RADIANS, wristRollValue* TO_RADIANS, wristPitchValue* TO_RADIANS};
     msg.side = side;
     msg.time = 0.0;
-    for (size_t i = 0; i< msg.arm_pose.size(); i++){
-        ROS_INFO("%s : %0.2f", joints[i].c_str(), msg.arm_pose[i]);
-    }
+    //    for (size_t i = 0; i< msg.arm_pose.size(); i++){
+    //        ROS_INFO("%s : %0.2f", joints[i].c_str(), msg.arm_pose[i]);
+    //    }
     data.push_back(msg);
+
+    //thi sis a non-blocking call
     armJointController_->moveArmJoints(data);
 
 }
 
 void ValkyrieGUI::moveChestJoints()
 {
-    //    ROS_INFO("TAB:%d",tabID);
-    //    if (tabID == 1)
-    //    {
-    //        ROS_INFO("TAB:%d",tabID);
-    //        shoulderrollslider_ = ui->sliderShoulderRoll->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //        shoulderpitchslider_ = ui->sliderShoulderPitch->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //        shoulderyawslider_ = ui->sliderShoulderYaw->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-
-    //        wristrollslider_ = ui->sliderWristRoll->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //        wristpitchslider_ = ui->sliderWristPitch->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //        wristyawslider_ = ui->sliderWristYaw->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-
-    //        elbowslider_ = ui->sliderElbow->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //    }
-
-    //    else if(tabID == 2)
-    //    {
     float chestRollSliderValue = ui->sliderChestRoll->value()*(CHEST_ROLL_MAX-CHEST_ROLL_MIN)/100+CHEST_ROLL_MIN;
     float chestPitchSliderValue = ui->sliderChestPitch->value()*(CHEST_PITCH_MAX-CHEST_PITCH_MIN)/100 + CHEST_PITCH_MIN;
     float chestYawSliderValue = -1.0f * (ui->sliderChestYaw->value()*(CHEST_YAW_MAX-CHEST_YAW_MIN)/100 + CHEST_YAW_MIN); // this is to align yaw with sliding direction
