@@ -16,7 +16,7 @@ heuristic_type: PathCostHeuristic
 # - ARAPlanner
 # - ADPlanner
 # - RSTARPlanner
-planner_type: ARAPlanner
+planner_type: ADPlanner
 
 # search until a specific time limit is reached or first solution is found
 search_until_first_solution: False
