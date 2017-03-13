@@ -174,9 +174,9 @@ void ValkyrieGUI::initDisplayWidgets()
     mapDisplay_->subProp( "Topic" )->setValue( mapTopic_ );
     mapManager_->createDisplay( "rviz/RobotModel", robotType_, true );
     mapManager_->createDisplay("rviz/Path","Global path",true)->subProp( "Topic" )->setValue(pathTopic_);
-
-    //Add footsteps
-    mapManager_->createDisplay("rviz/MarkerArray", "Footsteps", true)->subProp("Marker Topic")->setValue(footstepTopic_);
+    mapManager_->createDisplay( "rviz/Grid", "Grid", true );
+    //footsteps should be added to manager before it is initialized
+//    mapManager_->createDisplay("rviz/MarkerArray", "Footsteps", true)->subProp("Marker Topic")->setValue(footstepTopic_);
 
 
 
@@ -218,6 +218,15 @@ void ValkyrieGUI::initDisplayWidgets()
     //fix things that cannot be changed in UI
     //    ui->tabArmControlPage1->setObjectName("Shoulder");
     //    ui->tabArmControlPage2->setObjectName("Wrist");
+
+    footstepMarkersDisplay_ = mapManager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
+    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
+    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
+//    footstepMarkersDisplay_->subProp("Namespaces")->setValue("");
+    footstepMarkersDisplay_ = manager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
+    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
+    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
+//    footstepMarkersDisplay_->subProp("Namespaces")->setValue("");
 }
 
 void ValkyrieGUI::initTools(){
@@ -239,7 +248,6 @@ void ValkyrieGUI::initTools(){
     // Find the entry in propertytreemodel and set the value for Topic
     setGoalTool_->getPropertyContainer()->subProp("Topic")->setValue(goalTopic_);
     setMapGoalTool_->getPropertyContainer()->subProp("Topic")->setValue(goalTopic_);
-
 }
 
 void ValkyrieGUI::initDefaultValues() {
