@@ -1,7 +1,7 @@
 <launch>
     <arg name="init" default="true"/>
     <arg name="extra_gazebo_args" default="" />
-    <arg name="use_local_build" default="true" />
+    <arg name="use_local_build" default="false" />
 
    <include file="$(find srcsim)/launch/unique_task1.launch">
       <arg name="init" value="$(arg init)" />
@@ -40,4 +40,5 @@
         <remap from="/multisense/camera/points2" to="/multisense/image_points2" />
     </node>
     <include file="$(find val_laser2point_cloud)/launch/laser_assembler.launch"/>
+    <include file="$(find val_footstep)/launch/val_footstep.launch"/>
 </launch>

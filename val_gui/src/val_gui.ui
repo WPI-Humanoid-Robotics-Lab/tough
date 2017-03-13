@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>ValkyrieGUI</class>
  <widget class="QMainWindow" name="ValkyrieGUI">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -28,7 +31,7 @@
         <number>0</number>
        </property>
        <item row="0" column="1">
-        <widget class="QRadioButton" name="radiobtnpointcloud">
+        <widget class="QRadioButton" name="radioBtnPointcloud">
          <property name="text">
           <string>PointCloud</string>
          </property>
@@ -48,7 +51,7 @@
         </widget>
        </item>
        <item row="0" column="0">
-        <widget class="QRadioButton" name="radiobtnoctomap">
+        <widget class="QRadioButton" name="radioBtnOctomap">
          <property name="text">
           <string>OctoMap</string>
          </property>
@@ -63,7 +66,7 @@
     <item row="4" column="0" colspan="2">
      <widget class="QTabWidget" name="tab_display">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_3dscene">
        <attribute name="title">
@@ -96,17 +99,9 @@
        </size>
       </property>
       <property name="title">
-       <string/>
+       <string>State Machine</string>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_9">
-       <item>
-        <widget class="QGroupBox" name="groupBox_3">
-         <property name="title">
-          <string>State Machine</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <layout class="QHBoxLayout" name="horizontalLayout_9"/>
      </widget>
     </item>
     <item row="1" column="0" colspan="2">
@@ -209,7 +204,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>4</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="tabArm">
           <attribute name="title">
@@ -244,6 +239,9 @@
                    <property name="text">
                     <string>Left</string>
                    </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">btnGroupArm</string>
+                   </attribute>
                   </widget>
                  </item>
                  <item>
@@ -251,6 +249,9 @@
                    <property name="text">
                     <string>Right</string>
                    </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">btnGroupArm</string>
+                   </attribute>
                   </widget>
                  </item>
                 </layout>
@@ -373,7 +374,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>104</width>
+                   <width>437</width>
                    <height>87</height>
                   </rect>
                  </property>
@@ -500,6 +501,13 @@
                 </property>
                </widget>
               </item>
+              <item row="3" column="1">
+               <widget class="QPushButton" name="btnChestReset">
+                <property name="text">
+                 <string>Reset Chest Orientation</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>
@@ -578,15 +586,6 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tabPelvis">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <attribute name="title">
-           <string>Pelvis</string>
-          </attribute>
-          <layout class="QHBoxLayout" name="horizontalLayout_5"/>
-         </widget>
          <widget class="QWidget" name="tabWalk">
           <attribute name="title">
            <string>Walk</string>
@@ -664,7 +663,7 @@ p, li { white-space: pre-wrap; }
                     <string>Left</string>
                    </property>
                    <attribute name="buttonGroup">
-                    <string notr="true">buttonGroup</string>
+                    <string notr="true">btnGroupFeet</string>
                    </attribute>
                   </widget>
                  </item>
@@ -674,7 +673,7 @@ p, li { white-space: pre-wrap; }
                     <string>Right</string>
                    </property>
                    <attribute name="buttonGroup">
-                    <string notr="true">buttonGroup</string>
+                    <string notr="true">btnGroupFeet</string>
                    </attribute>
                   </widget>
                  </item>
@@ -693,7 +692,7 @@ p, li { white-space: pre-wrap; }
                  <enum>Qt::Vertical</enum>
                 </property>
                 <property name="tickPosition">
-                 <enum>QSlider::TicksAbove</enum>
+                 <enum>QSlider::TicksBelow</enum>
                 </property>
                 <property name="tickInterval">
                  <number>10</number>
@@ -771,8 +770,9 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="btnGroupRvizTools"/>
+  <buttongroup name="btnGroupFeet"/>
   <buttongroup name="btnGroupDisplays"/>
-  <buttongroup name="buttonGroup"/>
+  <buttongroup name="btnGroupRvizTools"/>
+  <buttongroup name="btnGroupArm"/>
  </buttongroups>
 </ui>

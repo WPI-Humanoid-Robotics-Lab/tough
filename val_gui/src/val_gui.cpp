@@ -7,6 +7,7 @@
 #include "configurationreader.h"
 #include "ros/package.h"
 #include "val_common/val_common_defines.h"
+
 /**
  * This class creates the GUI using rviz APIs.
  */
@@ -19,8 +20,6 @@ ValkyrieGUI::ValkyrieGUI(QWidget *parent) :
      * Set up the QT related UI components.
      */
     ui->setupUi(this);
-    //    ui->sliderLinearVel->setValue(75);
-    //    ui->sliderAngularVel->setValue(75);
     changeToolButtonStatus(-2); //set the initial rviz tool to be "interact"
 
     //set all the controller pointers to null
@@ -73,12 +72,13 @@ void ValkyrieGUI::initVariables()
     pathTopic_      = QString::fromStdString(configfile.currentTopics["pathTopic"]);
     targetFrame_    = QString::fromStdString(configfile.currentTopics["targetFrame"]);
     robotType_      = QString::fromStdString(configfile.currentTopics["robotType"]);
-
-    moveBaseCmdPub  = nh_.advertise<geometry_msgs::Twist>(velocityTopic_.toStdString(),1);
+    goalTopic_      = QString::fromStdString(configfile.currentTopics["goalTopic"]);
+    footstepTopic_ = QString::fromStdString(configfile.currentTopics["footstepTopic"]);
+    //    moveBaseCmdPub  = nh_.advertise<geometry_msgs::Twist>(velocityTopic_.toStdString(),1);
     //    baseSensorStatus = nh_.subscribe(baseSensorTopic_.toStdString(),1,&FallRiskGUI::baseStatusCheck,this);
     liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ValkyrieGUI::liveVideoCallback,this,image_transport::TransportHints("raw"));
-    //    setRobotVelocity();
 
+    jointStateSub_ = nh_.subscribe("/joint_states",1, &ValkyrieGUI::jointStateCallBack, this);
 }
 
 void ValkyrieGUI::initActionsConnections()
@@ -97,22 +97,26 @@ void ValkyrieGUI::initActionsConnections()
     // Tool and display selection
     connect(ui->btnGroupRvizTools,       SIGNAL(buttonClicked(int)),   this, SLOT(setCurrentTool(int)));
     connect(ui->btnGroupDisplays,        SIGNAL(buttonClicked(int)),   this, SLOT(displayPointcloud(int)));
+    connect(ui->controlTabs,             SIGNAL(currentChanged(int)),  this, SLOT(updateJointStateSub(int)));
+    connect(ui->tab_display,             SIGNAL(currentChanged(int)),  this, SLOT(updateDisplay(int)));
 
     //arm control
+    connect(ui->btnGroupArm,             SIGNAL(buttonClicked(int)),   this, SLOT(updateArmSide(int)));
     connect(ui->btnCloseHand,            SIGNAL(clicked()),            this, SLOT(closeGrippers()));
     connect(ui->btnOpenHand,             SIGNAL(clicked()),            this, SLOT(openGrippers()));
-    //    connect(ui->sliderShoulderRoll,      SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
-    //    connect(ui->sliderShoulderPitch,     SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
-    //    connect(ui->sliderShoulderYaw,       SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
-    //    connect(ui->sliderWristRoll,         SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
-    //    connect(ui->sliderWristPitch,        SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
-    //    connect(ui->sliderWristYaw,          SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
-    //    connect(ui->sliderElbow,             SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
+    connect(ui->sliderShoulderRoll,      SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
+    connect(ui->sliderShoulderPitch,     SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
+    connect(ui->sliderShoulderYaw,       SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
+    connect(ui->sliderWristRoll,         SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
+    connect(ui->sliderWristPitch,        SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
+    connect(ui->sliderWristYaw,          SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
+    connect(ui->sliderElbow,             SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
 
     // chest control
     connect(ui->sliderChestRoll,         SIGNAL(sliderReleased()),    this, SLOT(moveChestJoints()));
     connect(ui->sliderChestPitch,        SIGNAL(sliderReleased()),    this, SLOT(moveChestJoints()));
     connect(ui->sliderChestYaw,          SIGNAL(sliderReleased()),    this, SLOT(moveChestJoints()));
+    connect(ui->btnChestReset,           SIGNAL(clicked()),           this, SLOT(resetChestOrientation()));
 
     // neck control
     //    connect(ui->sliderNeckRoll,          SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
@@ -120,7 +124,6 @@ void ValkyrieGUI::initActionsConnections()
     //    connect(ui->sliderNeckYaw,           SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
 
     //walk
-    connect(ui->buttonGroup,             SIGNAL(buttonClicked(int)),   this, SLOT(setStartFoot(int)));
     connect(ui->btnWalk,                 SIGNAL(clicked()),            this, SLOT(walkSteps()));
     connect(ui->sliderPelvisHeight,      SIGNAL(sliderReleased()),     this, SLOT(changePelvisHeight()));
 
@@ -171,6 +174,10 @@ void ValkyrieGUI::initDisplayWidgets()
     mapDisplay_->subProp( "Topic" )->setValue( mapTopic_ );
     mapManager_->createDisplay( "rviz/RobotModel", robotType_, true );
     mapManager_->createDisplay("rviz/Path","Global path",true)->subProp( "Topic" )->setValue(pathTopic_);
+    mapManager_->createDisplay( "rviz/Grid", "Grid", true );
+    //footsteps should be added to manager before it is initialized
+//    mapManager_->createDisplay("rviz/MarkerArray", "Footsteps", true)->subProp("Marker Topic")->setValue(footstepTopic_);
+
 
 
     // Initialize GUI elements for main panel
@@ -192,26 +199,34 @@ void ValkyrieGUI::initDisplayWidgets()
     cloudDisplay_ = manager_->createDisplay( "rviz/PointCloud2", "3D Pointcloud view", false );
     assert( cloudDisplay_ != NULL && "Could not create a display");
 
-    cloudDisplay_->subProp( "Topic" )->setValue( pointCloudTopic_ );
-    cloudDisplay_->subProp( "Selectable" )->setValue( "true" );
-    cloudDisplay_->subProp( "Style" )->setValue( "Boxes" );
+    cloudDisplay_->subProp("Topic")->setValue(pointCloudTopic_);
+    cloudDisplay_->subProp("Selectable")->setValue("true");
+    cloudDisplay_->subProp("Style")->setValue("Boxes");
     cloudDisplay_->subProp("Alpha")->setValue(0.5);
+    cloudDisplay_->subProp("Color Transformer")->setValue("AxisColor");
 
     octomapDisplay_ = manager_->createDisplay( "rviz/MarkerArray", "Octomap view", false );
     ROS_ASSERT( octomapDisplay_ != NULL );
 
-    octomapDisplay_->subProp( "Marker Topic" )->setValue(octomapTopic_);
+    octomapDisplay_->subProp("Marker Topic")->setValue(octomapTopic_);
 
     //Assign Target Frame to the existing viewmanager of the visualization manager
     rviz::ViewManager*    viewManager_    = manager_->getViewManager();
     rviz::ViewController* viewController_ = viewManager_->getCurrent();
     viewController_->subProp("Target Frame")->setValue(targetFrame_);
     manager_->createDisplay("rviz/Path","Global path",true)->subProp( "Topic" )->setValue(pathTopic_);
-
-
     //fix things that cannot be changed in UI
     //    ui->tabArmControlPage1->setObjectName("Shoulder");
     //    ui->tabArmControlPage2->setObjectName("Wrist");
+
+    footstepMarkersDisplay_ = mapManager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
+    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
+    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
+//    footstepMarkersDisplay_->subProp("Namespaces")->setValue("");
+    footstepMarkersDisplay_ = manager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
+    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
+    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
+//    footstepMarkersDisplay_->subProp("Namespaces")->setValue("");
 }
 
 void ValkyrieGUI::initTools(){
@@ -231,9 +246,8 @@ void ValkyrieGUI::initTools(){
     setMapInitialPoseTool_ = mapToolManager_->addTool("rviz/SetInitialPose");
 
     // Find the entry in propertytreemodel and set the value for Topic
-    setGoalTool_->getPropertyContainer()->subProp("Topic")->setValue("/move_base_simple/goal");
-    setMapGoalTool_->getPropertyContainer()->subProp("Topic")->setValue("/move_base_simple/goal");
-
+    setGoalTool_->getPropertyContainer()->subProp("Topic")->setValue(goalTopic_);
+    setMapGoalTool_->getPropertyContainer()->subProp("Topic")->setValue(goalTopic_);
 }
 
 void ValkyrieGUI::initDefaultValues() {
@@ -261,9 +275,12 @@ void ValkyrieGUI::initDefaultValues() {
     ui->sliderChestYaw->setValue(zeroYaw);
 
     //PelvisHeight . Replace these defaults with actual values from robot
-    float defaultPelvisHeight = 0.9 * (PELVIS_HEIGHT_MAX - PELVIS_HEIGHT_MIN)/100.0;
+    float defaultPelvisHeight = (0.9 - PELVIS_HEIGHT_MIN) *100/ (PELVIS_HEIGHT_MAX - PELVIS_HEIGHT_MIN);
     ui->sliderPelvisHeight->setValue(defaultPelvisHeight);
+    //configure arm sliders
+    getArmState();
 
+    //    jointStateSub_.shutdown();
 }
 
 void ValkyrieGUI::initValkyrieControllers() {
@@ -276,6 +293,241 @@ void ValkyrieGUI::initValkyrieControllers() {
 
     //create walking controller object
     walkingController_ = new ValkyrieWalker(nh_, 1.0, 1.0, 0, 0.18);
+
+    //create arm joint controller object
+    armJointController_ = new armTrajectory(nh_);
+}
+
+void ValkyrieGUI::getArmState()
+{
+    if(jointNames_.empty()){
+        ROS_INFO("joint_states is not initialized yet. cannot update arm joints");
+        return;
+    }
+    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    mtx_.lock();
+    for (size_t i = 0; i < jointNames_.size(); i++){
+        if(side == LEFT) {
+            if (jointNames_[i] == "leftShoulderPitch"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - LEFT_SHOULDER_PITCH_MIN )* 100)/(LEFT_SHOULDER_PITCH_MAX-LEFT_SHOULDER_PITCH_MIN);
+                ui->sliderShoulderPitch->setValue(jointVal);
+                continue;
+
+            }
+            else if (jointNames_[i] == "leftShoulderRoll"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - LEFT_SHOULDER_ROLL_MIN )* 100)/(LEFT_SHOULDER_ROLL_MAX-LEFT_SHOULDER_ROLL_MIN);
+                ui->sliderShoulderRoll->setValue(jointVal);
+                continue;
+            }
+            else if (jointNames_[i] == "leftShoulderYaw"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - LEFT_SHOULDER_YAW_MIN )* 100)/(LEFT_SHOULDER_YAW_MAX-LEFT_SHOULDER_YAW_MIN);
+                ui->sliderShoulderYaw->setValue(jointVal);
+                continue;
+            }
+            else if (jointNames_[i] == "leftElbowPitch"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - LEFT_ELBOW_MIN )* 100)/(LEFT_ELBOW_MAX-LEFT_ELBOW_MIN);
+                ui->sliderElbow->setValue(jointVal);
+                continue;
+            }
+            else if (jointNames_[i] == "leftForearmYaw"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - LEFT_WRIST_YAW_MIN )* 100)/(LEFT_WRIST_YAW_MAX-LEFT_WRIST_YAW_MIN);
+                ui->sliderWristYaw->setValue(jointVal);
+                continue;
+            }
+            else if (jointNames_[i] == "leftWristRoll"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - LEFT_WRIST_ROLL_MIN )* 100)/(LEFT_WRIST_ROLL_MAX-LEFT_WRIST_ROLL_MIN);
+                ui->sliderWristRoll->setValue(jointVal);
+                continue;
+            }
+            else if (jointNames_[i] == "leftWristPitch"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - LEFT_WRIST_PITCH_MIN )* 100)/(LEFT_WRIST_PITCH_MAX-LEFT_WRIST_PITCH_MIN);
+                ui->sliderWristPitch->setValue(jointVal);
+                continue;
+            }
+        }
+        else{
+
+            if (jointNames_[i] == "rightShoulderPitch"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - RIGHT_SHOULDER_PITCH_MIN )* 100)/(RIGHT_SHOULDER_PITCH_MAX-RIGHT_SHOULDER_PITCH_MIN);
+                ui->sliderShoulderPitch->setValue(jointVal);
+                ROS_INFO("Set the shoulder pitch to %.2f rad and %.2f degrees",jointValues_[i], jointVal);
+                continue;
+            }
+            else if (jointNames_[i] == "rightShoulderRoll"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - RIGHT_SHOULDER_ROLL_MIN )* 100)/(RIGHT_SHOULDER_ROLL_MAX-RIGHT_SHOULDER_ROLL_MIN);
+                ui->sliderShoulderRoll->setValue(jointVal);
+                continue;
+            }
+            else if (jointNames_[i] == "rightShoulderYaw"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - RIGHT_SHOULDER_YAW_MIN )* 100)/(RIGHT_SHOULDER_YAW_MAX-RIGHT_SHOULDER_YAW_MIN);
+                ui->sliderShoulderYaw->setValue(jointVal);
+                continue;
+            }
+            else if (jointNames_[i] == "rightElbowPitch"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - RIGHT_ELBOW_MIN )* 100)/(RIGHT_ELBOW_MAX-RIGHT_ELBOW_MIN);
+                ui->sliderElbow->setValue(jointVal);
+                continue;
+            }
+            else if (jointNames_[i] == "rightForearmYaw"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - RIGHT_WRIST_YAW_MIN )* 100)/(RIGHT_WRIST_YAW_MAX-RIGHT_WRIST_YAW_MIN);
+                ui->sliderWristYaw->setValue(jointVal);
+                continue;
+            }
+            else if (jointNames_[i] == "rightWristRoll"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - RIGHT_WRIST_ROLL_MIN )* 100)/(RIGHT_WRIST_ROLL_MAX-RIGHT_WRIST_ROLL_MIN);
+                ui->sliderWristRoll->setValue(jointVal);
+                continue;
+            }
+            else if (jointNames_[i] == "rightWristPitch"){
+                double jointVal = jointValues_[i] * TO_DEGREES;
+                jointVal = ((jointVal - RIGHT_WRIST_PITCH_MIN )* 100)/(RIGHT_WRIST_PITCH_MAX-RIGHT_WRIST_PITCH_MIN);
+                ui->sliderWristPitch->setValue(jointVal);
+                continue;
+            }
+        }
+
+    }
+
+    mtx_.unlock();
+
+}
+
+void ValkyrieGUI::getChestState()
+{
+    return;
+    // No point updating the chest state as it will always updtae wrt to world
+
+    if(jointNames_.empty()){
+        ROS_INFO("joint_states is not initialized yet. cannot update arm joints");
+        return;
+    }
+
+    mtx_.lock();
+    for (size_t i = 0; i < jointNames_.size(); i++){
+        if (jointNames_[i] == "torsoYaw"){
+            double jointVal = jointValues_[i] * TO_DEGREES;
+            jointVal = ((jointVal - CHEST_YAW_MIN )* 100)/(CHEST_YAW_MAX-CHEST_YAW_MIN);
+            ui->sliderWristYaw->setValue(jointVal);
+            continue;
+        }
+        else if (jointNames_[i] == "torsoPitch"){
+            double jointVal = jointValues_[i] * TO_DEGREES;
+            jointVal = ((jointVal - CHEST_PITCH_MIN )* 100)/(CHEST_PITCH_MAX-CHEST_PITCH_MIN);
+            ui->sliderWristRoll->setValue(jointVal);
+            continue;
+        }
+        else if (jointNames_[i] == "torsoRoll"){
+            double jointVal = jointValues_[i] * TO_DEGREES;
+            jointVal = ((jointVal - CHEST_ROLL_MIN )* 100)/(CHEST_ROLL_MAX-CHEST_ROLL_MIN);
+            ui->sliderWristPitch->setValue(jointVal);
+            continue;
+        }
+
+    }
+
+    mtx_.unlock();
+
+
+}
+
+void ValkyrieGUI::getPelvisState()
+{
+
+}
+
+void ValkyrieGUI::getNeckState()
+{
+
+}
+
+void ValkyrieGUI::getGripperState()
+{
+
+}
+
+void ValkyrieGUI::jointStateCallBack(const sensor_msgs::JointStatePtr &state)
+{
+    jointNames_ = state->name;
+    jointValues_ = state->position;
+
+}
+
+void ValkyrieGUI::updateJointStateSub(int tabID){
+    //0 = arm
+    //1 = chest
+    //2 = neck
+    //3 = walk
+    //    jointStateSub_ = nh_.subscribe("/joint_states",1, &ValkyrieGUI::jointStateCallBack, this);
+    switch (tabID) {
+    case 0:
+        getArmState();
+        getGripperState();
+        break;
+    case 1:
+        getChestState();
+        break;
+    case 2:
+        getNeckState();
+        break;
+    case 3:
+        getPelvisState();
+        break;
+    default:
+        break;
+    }
+
+    //    jointStateSub_.shutdown();
+
+}
+
+void ValkyrieGUI::updateArmSide(int btnID)
+{
+    //-2 = Left arm
+    //-3 = right arm
+    getArmState();
+}
+
+void ValkyrieGUI::resetChestOrientation()
+{
+    chestController_->controlChest(0.0f, 0.0f, 0.0f);
+}
+
+void ValkyrieGUI::updateDisplay(int tabID)
+{
+    switch (tabID) {
+    case 0:
+        ui->radioBtnNone->setEnabled(true);
+        ui->radioBtnOctomap->setEnabled(true);
+        ui->radioBtnPointcloud->setEnabled(true);
+        // change current tool to interact when changing tabs
+        setCurrentTool(-2);
+        break;
+    case 1:
+        ui->radioBtnNone->setEnabled(false);
+        ui->radioBtnOctomap->setEnabled(false);
+        ui->radioBtnPointcloud->setEnabled(false);
+        // change current tool to interact when changing tabs
+        setCurrentTool(-2);
+        break;
+    default:
+        break;
+    }
+    //0 = 3d scene
+    //1 = map
+
 }
 
 void ValkyrieGUI::keyPressEvent(QKeyEvent *event)
@@ -357,14 +609,6 @@ void ValkyrieGUI::setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr, bool is_
 
 }
 
-void ValkyrieGUI::setRobotVelocity()
-{
-    //    linearVelocity_ = ui->sliderLinearVel->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    ROS_INFO("Linear velocity:%f",linearVelocity_);
-    //    angularVelocity_ = ui->sliderAngularVel->value()*(ANG_VEL_MAX-ANG_VEL_MIN)/100+ANG_VEL_MIN;
-    ROS_INFO("Angular velocity:%f",angularVelocity_);
-}
-
 void ValkyrieGUI::closeGrippers()
 {
     ROS_INFO("closing Grippers");
@@ -436,31 +680,6 @@ void ValkyrieGUI::changeToolButtonStatus(int btnID)
     }
 }
 
-void ValkyrieGUI::setActiveRvizToolBtns(int tabID)
-{
-    //    ROS_INFO("TAB:%d",tabID);
-
-    ui->btnRvizInteract->setDisabled(false);
-    ui->btnRvizMeasure->setDisabled(false);
-    ui->btnRvizPoseEstimate->setDisabled(false);
-    ui->btnRvizNavGoal->setDisabled(false);
-    ui->btnRvizPublishPoint->setDisabled(false);
-
-    if(tabID == 1)
-    {
-        ui->btnRvizMeasure->setDisabled(true);
-        ui->btnRvizPublishPoint->setDisabled(true);
-    }
-    else if(tabID == 2)
-    {
-        ui->btnRvizInteract->setDisabled(true);
-        ui->btnRvizMeasure->setDisabled(true);
-        ui->btnRvizPoseEstimate->setDisabled(true);
-        ui->btnRvizNavGoal->setDisabled(true);
-        ui->btnRvizPublishPoint->setDisabled(true);
-    }
-}
-
 void ValkyrieGUI::displayPointcloud(int btnID)
 {
 
@@ -477,19 +696,6 @@ void ValkyrieGUI::displayPointcloud(int btnID)
         octomapDisplay_->setEnabled(false);
         cloudDisplay_->setEnabled(false);
     default:
-        break;
-    }
-}
-
-void ValkyrieGUI::setStartFoot(int btnID)
-{
-
-    switch(btnID) {
-    case -2: // buttonID of left leg
-        walkfoot_ = LEFT;
-        break;
-    case -3: // buttonID of right leg
-        walkfoot_ = RIGHT;
         break;
     }
 }
@@ -515,25 +721,67 @@ void ValkyrieGUI::changePelvisHeight(){
 
 }
 
+void ValkyrieGUI::moveArmJoints(){
+    if(armJointController_ == nullptr) {
+        return;
+    }
+    float shoulderRollValue ;
+    float shoulderPitchValue;
+    float shoulderYawValue  ;
+
+    float wristRollValue    ;
+    float wristPitchValue   ;
+    float wristYawValue     ;
+
+    float elbowValue        ;
+
+    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    if(side == LEFT)
+    {
+        shoulderRollValue  = ui->sliderShoulderRoll->value()*(LEFT_SHOULDER_ROLL_MAX-LEFT_SHOULDER_ROLL_MIN)/100+LEFT_SHOULDER_ROLL_MIN;
+        shoulderPitchValue = ui->sliderShoulderPitch->value()*(LEFT_SHOULDER_PITCH_MAX-LEFT_SHOULDER_PITCH_MIN)/100+LEFT_SHOULDER_PITCH_MIN;
+        shoulderYawValue   = ui->sliderShoulderYaw->value()*(LEFT_SHOULDER_YAW_MAX-LEFT_SHOULDER_YAW_MIN)/100+LEFT_SHOULDER_YAW_MIN;
+
+        wristRollValue     = ui->sliderWristRoll->value()*(LEFT_WRIST_ROLL_MAX-LEFT_WRIST_ROLL_MIN)/100+LEFT_WRIST_ROLL_MIN;
+        wristPitchValue    = ui->sliderWristPitch->value()*(LEFT_WRIST_PITCH_MAX-LEFT_WRIST_PITCH_MIN)/100+LEFT_WRIST_PITCH_MIN;
+        wristYawValue      = ui->sliderWristYaw->value()*(LEFT_WRIST_YAW_MAX-LEFT_WRIST_YAW_MIN)/100+LEFT_WRIST_YAW_MIN;
+
+        elbowValue         = ui->sliderElbow->value()*(LEFT_ELBOW_MAX-LEFT_ELBOW_MIN)/100+LEFT_ELBOW_MIN;
+    }
+    else {
+        // This is for the Right shoulder
+
+        shoulderRollValue  = ui->sliderShoulderRoll->value()*(RIGHT_SHOULDER_ROLL_MAX-RIGHT_SHOULDER_ROLL_MIN)/100+RIGHT_SHOULDER_ROLL_MIN;
+        shoulderPitchValue = ui->sliderShoulderPitch->value()*(RIGHT_SHOULDER_PITCH_MAX-RIGHT_SHOULDER_PITCH_MIN)/100+RIGHT_SHOULDER_PITCH_MIN;
+        shoulderYawValue   = ui->sliderShoulderYaw->value()*(RIGHT_SHOULDER_YAW_MAX-RIGHT_SHOULDER_YAW_MIN)/100+RIGHT_SHOULDER_YAW_MIN;
+        wristRollValue     = ui->sliderWristRoll->value()*(RIGHT_WRIST_ROLL_MAX-RIGHT_WRIST_ROLL_MIN)/100+RIGHT_WRIST_ROLL_MIN;
+        wristPitchValue    = ui->sliderWristPitch->value()*(RIGHT_WRIST_PITCH_MAX-RIGHT_WRIST_PITCH_MIN)/100+RIGHT_WRIST_PITCH_MIN;
+        wristYawValue      = ui->sliderWristYaw->value()*(RIGHT_WRIST_YAW_MAX-RIGHT_WRIST_YAW_MIN)/100+RIGHT_WRIST_YAW_MIN;
+
+        elbowValue         = ui->sliderElbow->value()*(RIGHT_ELBOW_MAX-RIGHT_ELBOW_MIN)/100+RIGHT_ELBOW_MIN;
+    }
+
+
+    std::vector<armTrajectory::armJointData> data;
+    armTrajectory::armJointData msg;
+    //sequence of joints for sending arm data
+    std::vector<std::string> joints = {"leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch"};
+    msg.arm_pose = {shoulderPitchValue * TO_RADIANS, shoulderRollValue* TO_RADIANS, shoulderYawValue* TO_RADIANS,
+                    elbowValue* TO_RADIANS, wristYawValue* TO_RADIANS, wristRollValue* TO_RADIANS, wristPitchValue* TO_RADIANS};
+    msg.side = side;
+    msg.time = 0.0;
+    //    for (size_t i = 0; i< msg.arm_pose.size(); i++){
+    //        ROS_INFO("%s : %0.2f", joints[i].c_str(), msg.arm_pose[i]);
+    //    }
+    data.push_back(msg);
+
+    //thi sis a non-blocking call
+    armJointController_->moveArmJoints(data);
+
+}
+
 void ValkyrieGUI::moveChestJoints()
 {
-    //    ROS_INFO("TAB:%d",tabID);
-    //    if (tabID == 1)
-    //    {
-    //        ROS_INFO("TAB:%d",tabID);
-    //        shoulderrollslider_ = ui->sliderShoulderRoll->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //        shoulderpitchslider_ = ui->sliderShoulderPitch->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //        shoulderyawslider_ = ui->sliderShoulderYaw->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-
-    //        wristrollslider_ = ui->sliderWristRoll->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //        wristpitchslider_ = ui->sliderWristPitch->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //        wristyawslider_ = ui->sliderWristYaw->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-
-    //        elbowslider_ = ui->sliderElbow->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //    }
-
-    //    else if(tabID == 2)
-    //    {
     float chestRollSliderValue = ui->sliderChestRoll->value()*(CHEST_ROLL_MAX-CHEST_ROLL_MIN)/100+CHEST_ROLL_MIN;
     float chestPitchSliderValue = ui->sliderChestPitch->value()*(CHEST_PITCH_MAX-CHEST_PITCH_MIN)/100 + CHEST_PITCH_MIN;
     float chestYawSliderValue = -1.0f * (ui->sliderChestYaw->value()*(CHEST_YAW_MAX-CHEST_YAW_MIN)/100 + CHEST_YAW_MIN); // this is to align yaw with sliding direction

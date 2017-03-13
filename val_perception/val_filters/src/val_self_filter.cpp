@@ -57,6 +57,7 @@ public:
         id_          = 1;
         vmPub_       = nodeHandle_.advertise<visualization_msgs::Marker>("visualization_marker", 10240);
         vmOutputPub_ = nodeHandle_.advertise<sensor_msgs::PointCloud>("filtered_cloud", 1);
+        vmOutputPub2_= nodeHandle_.advertise<sensor_msgs::PointCloud2>("filtered_cloud2", 1);
         vmSub_       = nodeHandle_.subscribe(PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_CLOUD_TOPIC,100, &val_self_filter::run, this);
 
         std::vector<robot_self_filter::LinkInfo> links;
@@ -136,12 +137,14 @@ public:
             pcl_conversions::moveFromPCL(pcl_pc2, cloud2);
             cloud2.header.frame_id.assign(cloud_in->header.frame_id);
             cloud2.header.stamp = ros::Time(pcl_pc2.header.stamp);
+            vmOutputPub2_.publish(cloud2);
 
             sensor_msgs::PointCloud  cloud;
             sensor_msgs::convertPointCloud2ToPointCloud(cloud2,cloud);
             cloud.header = msg_in->header;
             ROS_DEBUG("Took %0.4f seconds for filtering",(ros::WallTime::now() - start).toSec());
             vmOutputPub_.publish(cloud);
+
             isFiltering = false;
         }
 
@@ -167,6 +170,7 @@ protected:
     robot_self_filter::SelfMask<pcl::PointXYZ>      *sf_;
     ros::Publisher                                  vmPub_;
     ros::Publisher                                  vmOutputPub_;
+    ros::Publisher                                  vmOutputPub2_;
     ros::Subscriber                                 vmSub_;
     ros::NodeHandle                                 nodeHandle_;
     pcl::PointCloud<pcl::PointXYZ>                  maskCloud_;

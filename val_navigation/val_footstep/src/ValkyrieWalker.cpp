@@ -20,7 +20,7 @@ void ValkyrieWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage 
     }
 
     // reset the timer
-    cbTime=ros::Time::now();
+    cbTime_=ros::Time::now();
 
     return;
 }
@@ -38,14 +38,12 @@ bool ValkyrieWalker::walkToGoal( geometry_msgs::Pose2D &goal)
 
     if(this->getFootstep(goal,list))
     {
-        this->footsteps_to_val.publish(list);
-
-        ROS_INFO("Published data on topic");
+        this->footsteps_pub_.publish(list);
         ValkyrieWalker::id--;
+        this->waitForSteps(list.footstep_data_list.size());
+        return true;
     }
-    this->waitForSteps(list.footstep_data_list.size());
-
-    return true;
+    return false;
 }
 
 // creates and n footsteps of width step_size
@@ -108,7 +106,7 @@ bool ValkyrieWalker::walkPreComputedSteps(const std::vector<float> x_offset, con
 
 bool ValkyrieWalker::walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list , bool waitForSteps)
 {
-    this->footsteps_to_val.publish(list);
+    this->footsteps_pub_.publish(list);
     ValkyrieWalker::id--;
     if (waitForSteps){
         this->waitForSteps(list.footstep_data_list.size());
@@ -143,11 +141,8 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
     srv.request.start = start;
     srv.request.goal = goal;
 
-
-
-    if(this->footstep_client.call(srv))
+    if(this->footstep_client_.call(srv))
     {
-
 
         for(int i=0; i <srv.response.footsteps.size();i++)
         {
@@ -165,9 +160,9 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
 
             tf::Quaternion t = tf::createQuaternionFromYaw(srv.response.footsteps.at(i).pose.theta);
-            //            ROS_DEBUG("Step x  %d %.2f", i, srv.response.footsteps.at(i).pose.x);
-            //            ROS_DEBUG("Step y  %d %.2f", i, srv.response.footsteps.at(i).pose.y);
-            //            ROS_DEBUG("Side  %d %d",i, int(side));
+            ROS_DEBUG("Step x  %d %.2f", i, srv.response.footsteps.at(i).pose.x);
+            ROS_DEBUG("Step y  %d %.2f", i, srv.response.footsteps.at(i).pose.y);
+            ROS_DEBUG("Side  %d %d",i, int(side));
 
             step->orientation.w = t.w();
             step->orientation.x = t.x();
@@ -191,33 +186,33 @@ double ValkyrieWalker::getSwing_height() const
 
 
 // constructor
-ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double InSwingTime, int InMode, double swingHeight):n(nh)
+ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double InSwingTime, int InMode, double swingHeight):nh_(nh)
 {
-    this->footstep_client = n.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("plan_footsteps");
-    this->footsteps_to_val = n.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/valkyrie/control/footstep_list",1,true);
-    this->footstep_status = n.subscribe("/ihmc_ros/valkyrie/output/footstep_status", 20,&ValkyrieWalker::footstepStatusCB, this);
+    this->footstep_client_ = nh_.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("/plan_footsteps");
+    this->footsteps_pub_   = nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/valkyrie/control/footstep_list",1,true);
+    this->footstep_status_ = nh_.subscribe("/ihmc_ros/valkyrie/output/footstep_status", 20,&ValkyrieWalker::footstepStatusCB, this);
 
     transfer_time = InTransferTime;
     swing_time = InSwingTime;
     exe_mode = InMode;
     swing_height = swingHeight;
 
-    tf_listener = new tf2_ros::TransformListener(this->tfBuffer);
+    tf_listener_ = new tf2_ros::TransformListener(this->tf_buffer_);
 
     ros::Duration(0.5).sleep();
     step_counter = 0;
     ValkyrieWalker::id = -1;
 
     //start timer
-    cbTime=ros::Time::now();
+    cbTime_=ros::Time::now();
     std::string robot_name;
 
-    if (n.getParam("/ihmc_ros/robot_name",robot_name))
+    if (nh_.getParam("/ihmc_ros/robot_name",robot_name))
     {
-        if(n.getParam("/ihmc_ros/valkyrie/right_foot_frame_name", right_foot_frame.data) && n.getParam("/ihmc_ros/valkyrie/left_foot_frame_name", left_foot_frame.data))
+        if(nh_.getParam("/ihmc_ros/valkyrie/right_foot_frame_name", right_foot_frame_.data) && nh_.getParam("/ihmc_ros/valkyrie/left_foot_frame_name", left_foot_frame_.data))
         {
-            ROS_DEBUG("%s", right_foot_frame.data.c_str());
-            ROS_DEBUG("%s", left_foot_frame.data.c_str());
+            ROS_DEBUG("%s", right_foot_frame_.data.c_str());
+            ROS_DEBUG("%s", left_foot_frame_.data.c_str());
         }
     }
     else
@@ -227,7 +222,7 @@ ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double 
 }
 // Destructor
 ValkyrieWalker::~ValkyrieWalker(){
-    delete tf_listener;
+    delete tf_listener_;
 }
 
 // Get starting location of the foot
@@ -238,15 +233,15 @@ void ValkyrieWalker::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage
     std_msgs::String foot_frame;
     if (side == LEFT)
     {
-        foot_frame = this->left_foot_frame;
+        foot_frame = this->left_foot_frame_;
     }
     else
     {
-        foot_frame = this->right_foot_frame;
+        foot_frame = this->right_foot_frame_;
     }
 
     geometry_msgs::TransformStamped transformStamped;
-    transformStamped = tfBuffer.lookupTransform( "world",foot_frame.data,ros::Time(0),ros::Duration(10.0));
+    transformStamped = tf_buffer_.lookupTransform( "world",foot_frame.data,ros::Time(0),ros::Duration(10.0));
     foot.orientation = transformStamped.transform.rotation;
     foot.location = transformStamped.transform.translation;
     foot.robot_side = side;
@@ -268,6 +263,7 @@ ihmc_msgs::FootstepDataRosMessage* ValkyrieWalker::getOffsetStep(int side , floa
     return next;
 
 }
+
 // wait till all the steps are taken
 void ValkyrieWalker::waitForSteps(int n)
 {
@@ -276,7 +272,7 @@ void ValkyrieWalker::waitForSteps(int n)
         ros::spinOnce();
 
         // hack to detect if robot has fallen and to exit this block
-        if ((ros::Time::now() - cbTime) > ros::Duration(5))
+        if ((ros::Time::now() - cbTime_) > ros::Duration(5))
         {
             ROS_INFO("robot fallen, exiting");
             break;

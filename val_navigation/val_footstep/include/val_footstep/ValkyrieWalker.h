@@ -56,7 +56,7 @@ public:
      * @param startLeg   leg to be used to start walking. It can be RIGHT or LEFT
      * @return
      */
-    bool walkNSteps(int n, float x_offset, float y_offset=0.0f, bool continous=false, armSide startLeg=RIGHT, bool waitForSteps=true);
+    bool walkNSteps(int nh_, float x_offset, float y_offset=0.0f, bool continous=false, armSide startLeg=RIGHT, bool waitForSteps=true);
 
     /**
      * @brief walkPreComputedSteps If the steps to be sent to the robot are not identical, use this function to send steps that are precomputed.
@@ -108,16 +108,16 @@ private:
     double transfer_time,swing_time, swing_height;
     int exe_mode;
     int step_counter;
-    ros::NodeHandle     n;
-    ros::Time           cbTime;
-    ros::Publisher      footsteps_to_val ;
-    ros::Subscriber     footstep_status ;
-    ros::ServiceClient  footstep_client ;
+    ros::NodeHandle     nh_;
+    ros::Time           cbTime_;
+    ros::Publisher      footsteps_pub_ ;
+    ros::Subscriber     footstep_status_ ;
+    ros::ServiceClient  footstep_client_ ;
 
-    tf2_ros::Buffer             tfBuffer;
-    tf2_ros::TransformListener* tf_listener;
+    tf2_ros::Buffer             tf_buffer_;
+    tf2_ros::TransformListener* tf_listener_;
 
-    std_msgs::String right_foot_frame,left_foot_frame;
+    std_msgs::String right_foot_frame_,left_foot_frame_;
 
     void footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage & msg);
     void getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage& foot);

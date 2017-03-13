@@ -71,7 +71,7 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 ## Declare a C++ executable
 # add_executable(val_footstep_node src/val_footstep_node.cpp)
 add_executable(footstep_node src/footstep_node.cpp)
-target_link_libraries(footstep_node ${catkin_LIBRARIES})
+target_link_libraries(footstep_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
 
 #add_executable(ValkyrieWalker src/ValkyrieWalker.cpp)
 #add_dependencies(ValkyrieWalker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
