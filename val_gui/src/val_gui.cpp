@@ -79,6 +79,19 @@ void ValkyrieGUI::initVariables()
     liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ValkyrieGUI::liveVideoCallback,this,image_transport::TransportHints("raw"));
 
     jointStateSub_ = nh_.subscribe("/joint_states",1, &ValkyrieGUI::jointStateCallBack, this);
+
+    //initialize a onetime map to lookup for joint values
+    std::vector<std::string> joints = {"leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch",
+                                      "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll", "rightWristPitch",
+                                      "torsoYaw", "torsoPitch", "torsoRoll","lowerNeckPitch", "neckYaw", "upperNeckPitch"};
+    std::vector<QLabel *> jointLabels = {ui->lblLeftShoulderPitch, ui->lblLeftShoulderRoll, ui->lblLeftShoulderYaw, ui->lblLeftElbowPitch, ui->lblLeftForearmYaw, ui->lblLeftWristRoll, ui->lblLeftWristPitch,
+                                        ui->lblRightShoulderPitch, ui->lblRightShoulderRoll, ui->lblRightShoulderYaw, ui->lblRightElbowPitch, ui->lblRightForearmYaw, ui->lblRightWristRoll, ui->lblRightWristPitch,
+                                        ui->lblChestYaw, ui->lblChestPitch, ui->lblChestRoll, ui->lblLowerNeckPitch, ui->lblNeckYaw, ui->lblNeckUpperPitch};
+    assert(joints.size() == jointLabels.size() && "joints and jointlabels must be of same size");
+
+    for(size_t i = 0; i< joints.size(); ++i){
+        jointLabelMap_[joints[i]] = jointLabels[i];
+    }
 }
 
 void ValkyrieGUI::initActionsConnections()
@@ -411,7 +424,7 @@ void ValkyrieGUI::getChestState()
     // No point updating the chest state as it will always updtae wrt to world
 
     if(jointNames_.empty()){
-        ROS_INFO("joint_states is not initialized yet. cannot update arm joints");
+        ROS_INFO("joint_states is not initialized yet. cannot update chest joints");
         return;
     }
 
@@ -460,8 +473,22 @@ void ValkyrieGUI::getGripperState()
 
 void ValkyrieGUI::jointStateCallBack(const sensor_msgs::JointStatePtr &state)
 {
+    static short count = 0;
     jointNames_ = state->name;
     jointValues_ = state->position;
+    //update every 1/10th of a second
+    if (count++ == 40){
+        for(size_t i=0; i < jointNames_.size(); i++){
+               if(jointLabelMap_.find(jointNames_[i]) != jointLabelMap_.end()){
+                   QLabel *label = jointLabelMap_[jointNames_[i]];
+                   QString text;
+                   label->setText(text.sprintf("%.2f",jointValues_[i]));
+               }
+        }
+
+        count = 0;
+
+    }
 
 }
 

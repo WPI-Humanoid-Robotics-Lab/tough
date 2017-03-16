@@ -208,9 +208,10 @@ private:
   armTrajectory    *armJointController_;
   ValkyrieWalker   *walkingController_;
 
-  std::vector<std::string> jointNames_;
-  std::vector<double>       jointValues_;
-  std::mutex               mtx_;
+  std::vector<std::string>        jointNames_;
+  std::vector<double>             jointValues_;
+  std::mutex                      mtx_;
+  std::map<std::string, QLabel*>  jointLabelMap_;
 
   void distanceSubCallback(const std_msgs::Float32::ConstPtr& msg);
   void liveVideoCallback(const sensor_msgs::ImageConstPtr &msg);
