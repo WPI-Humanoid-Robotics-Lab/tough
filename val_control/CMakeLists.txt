@@ -26,6 +26,7 @@ include_directories(
    src/val_arm_navigation.cpp
    src/val_pelvis_navigation.cpp
    src/val_chest_navigation.cpp
+   src/val_head_navigation.cpp
 )
 
  target_link_libraries(val_control
@@ -44,6 +45,14 @@ target_link_libraries(test_chest  ${catkin_LIBRARIES} val_control)
 add_executable(test_pelvis src/test_pelvis_navigation.cpp)
 add_dependencies(test_pelvis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_pelvis  ${catkin_LIBRARIES} val_control)
+
+add_executable(test_head src/test_head_navigation.cpp)
+add_dependencies(test_head ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_head  ${catkin_LIBRARIES} val_control)
+
+add_executable(test_neck src/test_neck_navigation.cpp)
+add_dependencies(test_neck ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_neck  ${catkin_LIBRARIES} val_control)
 
 add_dependencies(val_control ${catkin_EXPORTED_TARGETS})
 install(TARGETS val_control ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
