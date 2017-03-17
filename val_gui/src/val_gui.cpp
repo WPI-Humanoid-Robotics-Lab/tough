@@ -27,6 +27,7 @@ ValkyrieGUI::ValkyrieGUI(QWidget *parent) :
     pelvisHeightController_ = nullptr;
     armJointController_     = nullptr;
     walkingController_      = nullptr;
+    headController_         = nullptr;
 
     //initialize everything
     initVariables();
@@ -48,6 +49,7 @@ ValkyrieGUI::~ValkyrieGUI()
     delete chestController_;
     delete pelvisHeightController_;
     delete armJointController_;
+    delete headController_;
 }
 
 void ValkyrieGUI::initVariables()
@@ -132,9 +134,9 @@ void ValkyrieGUI::initActionsConnections()
     connect(ui->btnChestReset,           SIGNAL(clicked()),           this, SLOT(resetChestOrientation()));
 
     // neck control
-    //    connect(ui->sliderNeckRoll,          SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
-    //    connect(ui->sliderNeckPitch,         SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
-    //    connect(ui->sliderNeckYaw,           SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
+    connect(ui->sliderUpperNeckPitch,    SIGNAL(sliderReleased()),    this, SLOT(moveHeadJoints()));
+    //connect(ui->sliderLowerNeckPitch,    SIGNAL(sliderReleased()),    this, SLOT(moveChestJoints(int)));
+    connect(ui->sliderNeckYaw,           SIGNAL(sliderReleased()),    this, SLOT(moveHeadJoints()));
 
     //walk
     connect(ui->btnWalk,                 SIGNAL(clicked()),            this, SLOT(walkSteps()));
@@ -240,6 +242,8 @@ void ValkyrieGUI::initDisplayWidgets()
     footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
     footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
 //    footstepMarkersDisplay_->subProp("Namespaces")->setValue("");
+
+    ui->sliderLowerNeckPitch->setEnabled(false);
 }
 
 void ValkyrieGUI::initTools(){
@@ -287,6 +291,14 @@ void ValkyrieGUI::initDefaultValues() {
     ui->sliderChestPitch->setValue(zeroPitch);
     ui->sliderChestYaw->setValue(zeroYaw);
 
+    //Neck control . Replace these defaults with actual values from robot
+    float zeroUpperPitch = fabs(UPPER_NECK_PITCH_MIN/((UPPER_NECK_PITCH_MAX - UPPER_NECK_PITCH_MIN)/100.0));
+    float zeroLowerPitch = fabs(LOWER_NECK_PITCH_MIN/((LOWER_NECK_PITCH_MAX - LOWER_NECK_PITCH_MIN)/100.0));
+    zeroYaw   = fabs(NECK_YAW_MIN/((NECK_YAW_MAX - NECK_YAW_MIN)/100.0));
+    ui->sliderUpperNeckPitch->setValue(zeroUpperPitch);
+    //ui->sliderLowerNeckPitch->setValue(zeroLowerPitch);
+    ui->sliderNeckYaw->setValue(zeroYaw);
+
     //PelvisHeight . Replace these defaults with actual values from robot
     float defaultPelvisHeight = (0.9 - PELVIS_HEIGHT_MIN) *100/ (PELVIS_HEIGHT_MAX - PELVIS_HEIGHT_MIN);
     ui->sliderPelvisHeight->setValue(defaultPelvisHeight);
@@ -309,6 +321,9 @@ void ValkyrieGUI::initValkyrieControllers() {
 
     //create arm joint controller object
     armJointController_ = new armTrajectory(nh_);
+
+    //create a chest trajectory controller object
+    headController_ = new HeadTrajectory(nh_);
 }
 
 void ValkyrieGUI::getArmState()
@@ -816,6 +831,19 @@ void ValkyrieGUI::moveChestJoints()
         chestController_->controlChest(chestRollSliderValue, chestPitchSliderValue, chestYawSliderValue);
         ros::spinOnce();
     }
+}
+
+void ValkyrieGUI::moveHeadJoints()
+{
+    float upperNeckPitchSliderValue = ui->sliderUpperNeckPitch->value()*(UPPER_NECK_PITCH_MAX-UPPER_NECK_PITCH_MIN)/100+UPPER_NECK_PITCH_MIN;
+    //float lowerNeckPitchSliderValue = ui->sliderLowerNeckPitch->value()*(LOWER_NECK_PITCH_MAX-LOWER_NECK_PITCH_MIN)/100+LOWER_NECK_PITCH_MIN;
+    float neckYawSliderValue =  (ui->sliderNeckYaw->value()*(NECK_YAW_MAX-NECK_YAW_MIN)/100 + CHEST_YAW_MIN);
+    if(headController_ != nullptr){
+        headController_->moveHead(0, upperNeckPitchSliderValue, neckYawSliderValue);
+        ros::spinOnce();
+    }
+}
+
     //    }
 
     //    else if(tabID == 3)
@@ -825,7 +853,6 @@ void ValkyrieGUI::moveChestJoints()
     //        neckpitchslider_ = ui->sliderNeckPitch->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
     //        neckyawslider_ = ui->sliderNeckYaw->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
     //    }
-}
 
 /*
 //Image :

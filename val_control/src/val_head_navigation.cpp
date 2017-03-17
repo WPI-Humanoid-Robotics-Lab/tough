@@ -18,6 +18,11 @@ HeadTrajectory::~HeadTrajectory()
 
 void HeadTrajectory::appendNeckTrajectoryPoint(ihmc_msgs::NeckTrajectoryRosMessage &msg, float time, std::vector<float> pos)
 {
+//  if (pos.size() != NUM_NECK_JOINTS){
+//      ROS_INFO("There are %d joints but only %d values are provided.",NUM_NECK_JOINTS, pos.size());
+//      return;
+//  }
+
   for (int i = 0; i < NUM_NECK_JOINTS; i++)
   {
       ihmc_msgs::TrajectoryPoint1DRosMessage p;
