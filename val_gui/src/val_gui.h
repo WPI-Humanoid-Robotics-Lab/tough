@@ -48,6 +48,7 @@
 #include <val_control/val_arm_navigation.h>
 #include <val_control/val_chest_navigation.h>
 #include <val_control/val_pelvis_navigation.h>
+#include <val_control/val_head_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
 
 // Constants
@@ -152,6 +153,7 @@ private Q_SLOTS:
     void setCurrentTool(int btnID);
     void displayPointcloud(int btnID);
     void moveChestJoints();
+    void moveHeadJoints();
     void walkSteps();
     void changePelvisHeight();
     void moveArmJoints();
@@ -207,6 +209,7 @@ private:
   pelvisTrajectory *pelvisHeightController_;
   armTrajectory    *armJointController_;
   ValkyrieWalker   *walkingController_;
+  HeadTrajectory   *headController_;
 
   std::vector<std::string>        jointNames_;
   std::vector<double>             jointValues_;

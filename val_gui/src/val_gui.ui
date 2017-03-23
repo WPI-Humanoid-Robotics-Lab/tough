@@ -197,7 +197,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="tabArm">
           <attribute name="title">
@@ -296,7 +296,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>437</width>
-                   <height>87</height>
+                   <height>117</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -367,8 +367,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>104</width>
-                   <height>87</height>
+                   <width>112</width>
+                   <height>117</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -522,7 +522,7 @@
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QSlider" name="sliderNeckPitch">
+               <widget class="QSlider" name="sliderUpperNeckPitch">
                 <property name="minimum">
                  <number>0</number>
                 </property>
@@ -555,7 +555,7 @@
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QSlider" name="sliderNeckRoll">
+               <widget class="QSlider" name="sliderLowerNeckPitch">
                 <property name="minimum">
                  <number>0</number>
                 </property>
@@ -1012,7 +1012,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1920</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
@@ -1021,9 +1021,9 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="btnGroupRvizTools"/>
-  <buttongroup name="btnGroupDisplays"/>
   <buttongroup name="btnGroupFeet"/>
+  <buttongroup name="btnGroupDisplays"/>
+  <buttongroup name="btnGroupRvizTools"/>
   <buttongroup name="btnGroupArm"/>
  </buttongroups>
 </ui>
