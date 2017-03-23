@@ -71,6 +71,4 @@ public:
     void moveNeckJoints(const std::vector<std::vector<float> > &neck_pose, const float time);
 };
 
-int HeadTrajectory::head_id = -1;
-
 #endif // VAL_HEAD_NAVIGATION_H

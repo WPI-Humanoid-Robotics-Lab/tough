@@ -28,6 +28,7 @@ ValkyrieGUI::ValkyrieGUI(QWidget *parent) :
     armJointController_     = nullptr;
     walkingController_      = nullptr;
     headController_         = nullptr;
+    gripperController_      = nullptr;
 
     //initialize everything
     initVariables();
@@ -50,6 +51,7 @@ ValkyrieGUI::~ValkyrieGUI()
     delete pelvisHeightController_;
     delete armJointController_;
     delete headController_;
+    delete gripperController_;
 }
 
 void ValkyrieGUI::initVariables()
@@ -324,6 +326,9 @@ void ValkyrieGUI::initValkyrieControllers() {
 
     //create a chest trajectory controller object
     headController_ = new HeadTrajectory(nh_);
+
+    //create a gripper controller object
+    gripperController_ = new gripperControl(nh_);
 }
 
 void ValkyrieGUI::getArmState()
@@ -653,15 +658,17 @@ void ValkyrieGUI::setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr, bool is_
 
 void ValkyrieGUI::closeGrippers()
 {
-    ROS_INFO("closing Grippers");
     //call close grppiers function here
+    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    gripperController_->closeGripper(side);
 
 }
 
 void ValkyrieGUI::openGrippers()
 {
-    ROS_INFO("Opening Grippers");
     //call open grippers function here
+    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    gripperController_->openGripper(side);
 }
 
 void ValkyrieGUI::setCurrentTool(int btnID)
@@ -837,22 +844,13 @@ void ValkyrieGUI::moveHeadJoints()
 {
     float upperNeckPitchSliderValue = ui->sliderUpperNeckPitch->value()*(UPPER_NECK_PITCH_MAX-UPPER_NECK_PITCH_MIN)/100+UPPER_NECK_PITCH_MIN;
     //float lowerNeckPitchSliderValue = ui->sliderLowerNeckPitch->value()*(LOWER_NECK_PITCH_MAX-LOWER_NECK_PITCH_MIN)/100+LOWER_NECK_PITCH_MIN;
-    float neckYawSliderValue =  (ui->sliderNeckYaw->value()*(NECK_YAW_MAX-NECK_YAW_MIN)/100 + CHEST_YAW_MIN);
+    float neckYawSliderValue =  -1*(ui->sliderNeckYaw->value()*(NECK_YAW_MAX-NECK_YAW_MIN)/100 + CHEST_YAW_MIN);
     if(headController_ != nullptr){
-        headController_->moveHead(0, upperNeckPitchSliderValue, neckYawSliderValue);
+        headController_->moveHead(0.0f, upperNeckPitchSliderValue, neckYawSliderValue);
         ros::spinOnce();
     }
 }
 
-    //    }
-
-    //    else if(tabID == 3)
-    //    {
-    //        ROS_INFO("TAB:%d",tabID);
-    //        neckrollslider_ = ui->sliderNeckRoll->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //        neckpitchslider_ = ui->sliderNeckPitch->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //        neckyawslider_ = ui->sliderNeckYaw->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //    }
 
 /*
 //Image :

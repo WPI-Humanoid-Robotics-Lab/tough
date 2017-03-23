@@ -50,6 +50,7 @@
 #include <val_control/val_pelvis_navigation.h>
 #include <val_control/val_head_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
+#include <val_control/val_gripper_control.h>
 
 // Constants
 #define CHEST_ROLL_MAX 14.61    // this is in degrees. coz I dont talk radians :P
@@ -210,6 +211,7 @@ private:
   armTrajectory    *armJointController_;
   ValkyrieWalker   *walkingController_;
   HeadTrajectory   *headController_;
+  gripperControl   *gripperController_;
 
   std::vector<std::string>        jointNames_;
   std::vector<double>             jointValues_;

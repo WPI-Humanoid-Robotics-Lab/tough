@@ -197,7 +197,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="tabArm">
           <attribute name="title">
@@ -295,8 +295,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>437</width>
-                   <height>117</height>
+                   <width>127</width>
+                   <height>87</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -367,8 +367,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>112</width>
-                   <height>117</height>
+                   <width>104</width>
+                   <height>87</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -1012,7 +1012,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1920</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -1021,9 +1021,9 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
+  <buttongroup name="btnGroupRvizTools"/>
   <buttongroup name="btnGroupFeet"/>
   <buttongroup name="btnGroupDisplays"/>
-  <buttongroup name="btnGroupRvizTools"/>
   <buttongroup name="btnGroupArm"/>
  </buttongroups>
 </ui>
