@@ -2,6 +2,8 @@
 #include <tf/transform_listener.h>
 #include <val_common/val_common_names.h>
 
+int HeadTrajectory::head_id = -1;
+
 const double degToRad = M_PI / 180;
 
 HeadTrajectory::HeadTrajectory(ros::NodeHandle nh):nh_(nh), NUM_NECK_JOINTS(3)

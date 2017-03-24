@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+
+  <model name="solar_array">
+
+    <static>true</static>
+
+    <link name="link">
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://solar_array/meshes/solar_array.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://solar_array/meshes/solar_array.obj</uri>
+            <scale>0.0252 0.0252 0.0252</scale>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <collision name="collision_contact">
+        <pose>0 0 0.35 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.498 0.99 0.697</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+
+    </link>
+
+  </model>
+
+</sdf>

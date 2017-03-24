@@ -6,10 +6,12 @@
 
     <node pkg="val_filters" type="val_self_filter" name="robot_self_filter">
         <rosparam param="self_see_links">[leftForearmLink, leftWristRollLink, leftPalm, leftThumbRollLink, leftThumbPitch1Link,
-                                          leftThumbPitch2Link, leftThumbPitch3Link,leftShoulderPitchLink, leftShoulderRollLink, leftElbowPitchLink,
+                                          leftThumbPitch2Link, leftThumbPitch3Link,leftShoulderPitchLink, leftShoulderRollLink, leftShoulderYawLink,
+                                          leftElbowPitchLink, leftIndexFingerPitch1Link, leftMiddleFingerPitch1Link,leftPinkyPitch1Link,
                                           upperNeckPitchLink, torso,
                                           rightForearmLink, rightWristRollLink, rightPalm, rightThumbRollLink, rightThumbPitch1Link,
-                                          rightThumbPitch2Link, rightThumbPitch3Link,rightShoulderPitchLink, rightShoulderRollLink, rightElbowPitchLink]
+                                          rightThumbPitch2Link, rightThumbPitch3Link,rightShoulderPitchLink, rightShoulderRollLink, rightShoulderYawLink,
+                                          rightElbowPitchLink, rightIndexFingerPitch1Link, rightMiddleFingerPitch1Link,rightPinkyPitch1Link ]
         </rosparam>
     </node>
 

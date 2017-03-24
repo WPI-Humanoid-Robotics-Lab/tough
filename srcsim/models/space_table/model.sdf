@@ -1,0 +1,357 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="space_table">
+    <static>true</static>
+
+    <link name="link">
+
+      <collision name="leg_1">
+        <pose>-0.764945 -0.284224 0.317189 0 0 0</pose>
+        <geometry>
+          <cylinder>
+           <radius>0.149455</radius>
+           <length>0.648382</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name="leg_2">
+        <pose>-0.764945 0.432866 0.317189 0 0 0</pose>
+        <geometry>
+          <cylinder>
+           <radius>0.149455</radius>
+           <length>0.648382</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name="leg_3">
+        <pose>0.764945 -0.284224 0.317189 0 0 0</pose>
+        <geometry>
+          <cylinder>
+           <radius>0.149455</radius>
+           <length>0.648382</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name="leg_4">
+        <pose>0.764945 0.432866 0.317189 0 0 0</pose>
+        <geometry>
+          <cylinder>
+           <radius>0.149455</radius>
+           <length>0.648382</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name="top_1">
+        <pose>0 0.07432 0.588624 0 0 0</pose>
+        <geometry>
+          <box>
+           <size>1.472479 1.016692 0.110764</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+
+      <collision name="top_2">
+        <pose>0 0.07432 0.588624 0 0 0</pose>
+        <geometry>
+          <box>
+           <size>1.82739 0.712958 0.110764</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+
+      <collision name="top_3">
+        <pose>0 0.07432 0.61863 0 0 0</pose>
+        <geometry>
+          <box>
+           <size>1.517309 0.929015 0.141255</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+
+      <collision name="top_4">
+        <pose>0 0.07432 0.61863 0 0 0</pose>
+        <geometry>
+          <box>
+           <size>1.741564 0.714353 0.141255</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+
+      <collision name="side_1">
+        <pose>0 -0.402876 0.657118 -0.744512 0 0</pose>
+        <geometry>
+          <box>
+           <size>1.472479 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="side_2">
+        <pose>0 0.551784 0.657118 0.744512 0 0</pose>
+        <geometry>
+          <box>
+           <size>1.472479 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="side_3">
+        <pose>0.883448 0.07432 0.657118 0.744512 0 -1.5707</pose>
+        <geometry>
+          <box>
+           <size>0.712958 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="side_4">
+        <pose>-0.883448 0.07432 0.657118 -0.744512 0 -1.5707</pose>
+        <geometry>
+          <box>
+           <size>0.712958 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_1">
+        <pose>0.758137 0.430006 0.656031 0 0 0</pose>
+        <geometry>
+          <cylinder>
+           <radius>0.10331</radius>
+           <length>0.066452</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name="corner_2">
+        <pose>-0.758137 0.430006 0.656031 0 0 0</pose>
+        <geometry>
+          <cylinder>
+           <radius>0.10331</radius>
+           <length>0.066452</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name="corner_3">
+        <pose>0.758137 -0.282311 0.656031 0 0 0</pose>
+        <geometry>
+          <cylinder>
+           <radius>0.10331</radius>
+           <length>0.066452</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name="corner_4">
+        <pose>-0.758137 -0.282311 0.656031 0 0 0</pose>
+        <geometry>
+          <cylinder>
+           <radius>0.10331</radius>
+           <length>0.066452</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name="corner_1_a">
+        <pose>0.769 0.543695 0.657118 -0.744512 0 2.999042654</pose>
+        <geometry>
+          <box>
+           <size>0.075 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_1_b">
+        <pose>0.823 0.525499 0.657118 -0.744512 0 2.599042654</pose>
+        <geometry>
+          <box>
+           <size>0.066 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_1_c">
+        <pose>0.858 0.489695 0.657118 -0.744512 0 2.108592654</pose>
+        <geometry>
+          <box>
+           <size>0.067 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_1_d">
+        <pose>0.875288 0.448695 0.657118 -0.744512 0 1.721592654</pose>
+        <geometry>
+          <box>
+           <size>0.048 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_2_a">
+        <pose>-0.769 0.543695 0.657118 -0.744512 0 -2.999042654</pose>
+        <geometry>
+          <box>
+           <size>0.075 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_2_b">
+        <pose>-0.823 0.525499 0.657118 -0.744512 0 -2.599042654</pose>
+        <geometry>
+          <box>
+           <size>0.066 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_2_c">
+        <pose>-0.858 0.489695 0.657118 -0.744512 0 -2.108592654</pose>
+        <geometry>
+          <box>
+           <size>0.067 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_2_d">
+        <pose>-0.875288 0.448695 0.657118 -0.744512 0 -1.721592654</pose>
+        <geometry>
+          <box>
+           <size>0.048 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_3_a">
+        <pose>0.769 -0.396 0.657118 -0.744512 0 0.14255</pose>
+        <geometry>
+          <box>
+           <size>0.075 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_3_b">
+        <pose>0.823 -0.377804 0.657118 -0.744512 0 0.54255</pose>
+        <geometry>
+          <box>
+           <size>0.066 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_3_c">
+        <pose>0.858 -0.342 0.657118 -0.744512 0 1.033</pose>
+        <geometry>
+          <box>
+           <size>0.067 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_3_d">
+        <pose>0.875288 -0.301 0.657118 -0.744512 0 1.42</pose>
+        <geometry>
+          <box>
+           <size>0.048 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_4_a">
+        <pose>-0.769 -0.396 0.657118 -0.744512 0 -0.14255</pose>
+        <geometry>
+          <box>
+           <size>0.075 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_4_b">
+        <pose>-0.823 -0.377804 0.657118 -0.744512 0 -0.54255</pose>
+        <geometry>
+          <box>
+           <size>0.066 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_4_c">
+        <pose>-0.858 -0.342 0.657118 -0.744512 0 -1.033</pose>
+        <geometry>
+          <box>
+           <size>0.067 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <collision name="corner_4_d">
+        <pose>-0.875288 -0.301 0.657118 -0.744512 0 -1.42</pose>
+        <geometry>
+          <box>
+           <size>0.048 0.025006 0.064007</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <!-- in to m -->
+            <scale>0.0254 0.0254 0.0254</scale>
+            <uri>model://space_table/meshes/space_table.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+    </link>
+
+  </model>
+</sdf>

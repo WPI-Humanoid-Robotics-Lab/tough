@@ -1,0 +1,92 @@
+<%
+  # Template for air leak detector model for SRC finals world
+
+  # Requires the following global variables:
+  # $air_leak_detector_frame, $table_top_z
+
+  # Print inertial element based on a box
+  def printInertialBox(_com_x, _com_y, _com_z, _mass, _len_x, _len_y, _len_z)
+    "<inertial>\n"\
+    "      <pose>\n"\
+    "      " + _com_x.to_s() + "\n"\
+    "      " + _com_y.to_s() + "\n"\
+    "      " + _com_z.to_s() + "\n"\
+    "      " + 0.to_s() + "\n"\
+    "      " + 0.to_s() + "\n"\
+    "      " + 0.to_s() + "\n"\
+    "      </pose>\n"\
+    "      <inertia>\n"\
+    "        <ixx>" + (_mass / 12 * (_len_y*_len_y + _len_z*_len_z)).to_s() + "</ixx>\n"\
+    "        <iyy>" + (_mass / 12 * (_len_x*_len_x + _len_z*_len_z)).to_s() + "</iyy>\n"\
+    "        <izz>" + (_mass / 12 * (_len_x*_len_x + _len_y*_len_y)).to_s() + "</izz>\n"\
+    "      </inertia>\n"\
+    "      <mass>" + _mass.to_s() + "</mass>\n"\
+    "    </inertial>\n"\
+  end
+
+  # Scale
+  scale = 0.02
+
+  # Masse in kg
+  mass = 1.0
+
+  # CoM offset
+  com_x = 0
+  com_y = -0.0315 * scale
+  com_z = 1.338 * scale
+
+  # Inertia box dimensions
+  inertia_x = 3.311 * scale
+  inertia_y = 9.437 * scale
+  inertia_z = 2.673 * scale
+
+  offset_z = 4.724 * scale
+%>
+
+<model name="air_leak_detector">
+
+  <pose>
+    <%= $air_leak_detector_frame[0, 2] %>
+    <%= $air_leak_detector_frame[1, 2] %>
+    <%= $table_top_z + offset_z %>
+    <%= Math::PI * 0.5 %>
+    0
+    <%= Math::atan2($air_leak_detector_frame[1, 0], $air_leak_detector_frame[0, 0]) %>
+  </pose>
+
+  <link name="base">
+
+    <%= printInertialBox(com_x, com_y, com_z, mass, inertia_x, inertia_y, inertia_z) %>
+
+    <collision name="collision">
+      <geometry>
+        <mesh>
+          <scale><%= scale %> <%= scale %> <%= scale %></scale>
+          <uri>model://air_leak_detector/meshes/air_leak_detector.obj</uri>
+        </mesh>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+
+    <visual name="visual">
+      <geometry>
+        <mesh>
+          <scale><%= scale %> <%= scale %> <%= scale %></scale>
+          <uri>model://air_leak_detector/meshes/air_leak_detector.obj</uri>
+        </mesh>
+      </geometry>
+    </visual>
+
+  </link>
+
+</model>
+

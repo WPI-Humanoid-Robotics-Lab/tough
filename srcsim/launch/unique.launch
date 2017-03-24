@@ -13,7 +13,9 @@
   <arg name="use_local_build" default="false" />
   <arg name="verbose" default="true" />
   <arg name="walk_test" default="false"/>
-  <arg name="world_name" default="$(find srcsim)/worlds/unique.world" />
+
+  <arg if="$(optenv USE_CUSTOM_WORLD 0)" name="world_name" default="$(env CUSTOM_WORLD_PATH)" />
+  <arg unless="$(optenv USE_CUSTOM_WORLD 0)" name="world_name" default="$(find srcsim)/worlds/unique.world" />
 
   <include file="$(find val_gazebo)/launch/val_sim_gazebo_sync.launch" pass_all_args="false">
     <env name="GAZEBO_RESOURCE_PATH" value="$(find srcsim)/worlds"/>

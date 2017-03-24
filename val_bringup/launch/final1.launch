@@ -15,14 +15,14 @@
    <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 0.55"/>
 
    <!-- Start stereo_image_proc to pusblish disparity image -->
-   <node ns="/multisense/camera" name="stereo_proc" pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" output="log">
+<!--   <node ns="/multisense/camera" name="stereo_proc" pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" output="log">
        <param name="prefilter_size" type="int" value="11"/>
        <param name="prefilter_cap" type="int" value="40"/>
        <param name="correlation_window_size" type="int" value="91"/>
        <param name="min_disparity" type="int" value="0"/>
        <param name="disparity_range" type="int" value="64"/>
        <param name="uniqueness_ratio" type="double" value="4.0"/>
-       <param name="approximate_sync" type="bool" value="false"/>
+       <param name="approximate_sync" type="bool" value="false"/>-->
 
             <!--Stereo_algorithm StereoBM (0)
             prefilter_size = 11
@@ -37,8 +37,8 @@
 
             fullDP = false-->
             <!-- remap from="/multisense/camera/disparity" to="/multisense/left/disparity" / -->
-        <remap from="/multisense/camera/points2" to="/multisense/image_points2" />
-    </node>
+<!--        <remap from="/multisense/camera/points2" to="/multisense/image_points2" />
+    </node>-->
     <include file="$(find val_laser2point_cloud)/launch/laser_assembler.launch"/>
     <include file="$(find val_footstep)/launch/val_footstep.launch"/>
 </launch>

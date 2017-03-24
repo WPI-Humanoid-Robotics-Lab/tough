@@ -27,6 +27,8 @@ ValkyrieGUI::ValkyrieGUI(QWidget *parent) :
     pelvisHeightController_ = nullptr;
     armJointController_     = nullptr;
     walkingController_      = nullptr;
+    headController_         = nullptr;
+    gripperController_      = nullptr;
 
     //initialize everything
     initVariables();
@@ -48,6 +50,8 @@ ValkyrieGUI::~ValkyrieGUI()
     delete chestController_;
     delete pelvisHeightController_;
     delete armJointController_;
+    delete headController_;
+    delete gripperController_;
 }
 
 void ValkyrieGUI::initVariables()
@@ -76,9 +80,22 @@ void ValkyrieGUI::initVariables()
     footstepTopic_ = QString::fromStdString(configfile.currentTopics["footstepTopic"]);
     //    moveBaseCmdPub  = nh_.advertise<geometry_msgs::Twist>(velocityTopic_.toStdString(),1);
     //    baseSensorStatus = nh_.subscribe(baseSensorTopic_.toStdString(),1,&FallRiskGUI::baseStatusCheck,this);
-    liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ValkyrieGUI::liveVideoCallback,this,image_transport::TransportHints("raw"));
+    liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ValkyrieGUI::liveVideoCallback,this,image_transport::TransportHints("compressed"));
 
     jointStateSub_ = nh_.subscribe("/joint_states",1, &ValkyrieGUI::jointStateCallBack, this);
+
+    //initialize a onetime map to lookup for joint values
+    std::vector<std::string> joints = {"leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch",
+                                      "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll", "rightWristPitch",
+                                      "torsoYaw", "torsoPitch", "torsoRoll","lowerNeckPitch", "neckYaw", "upperNeckPitch"};
+    std::vector<QLabel *> jointLabels = {ui->lblLeftShoulderPitch, ui->lblLeftShoulderRoll, ui->lblLeftShoulderYaw, ui->lblLeftElbowPitch, ui->lblLeftForearmYaw, ui->lblLeftWristRoll, ui->lblLeftWristPitch,
+                                        ui->lblRightShoulderPitch, ui->lblRightShoulderRoll, ui->lblRightShoulderYaw, ui->lblRightElbowPitch, ui->lblRightForearmYaw, ui->lblRightWristRoll, ui->lblRightWristPitch,
+                                        ui->lblChestYaw, ui->lblChestPitch, ui->lblChestRoll, ui->lblLowerNeckPitch, ui->lblNeckYaw, ui->lblNeckUpperPitch};
+    assert(joints.size() == jointLabels.size() && "joints and jointlabels must be of same size");
+
+    for(size_t i = 0; i< joints.size(); ++i){
+        jointLabelMap_[joints[i]] = jointLabels[i];
+    }
 }
 
 void ValkyrieGUI::initActionsConnections()
@@ -119,9 +136,9 @@ void ValkyrieGUI::initActionsConnections()
     connect(ui->btnChestReset,           SIGNAL(clicked()),           this, SLOT(resetChestOrientation()));
 
     // neck control
-    //    connect(ui->sliderNeckRoll,          SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
-    //    connect(ui->sliderNeckPitch,         SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
-    //    connect(ui->sliderNeckYaw,           SIGNAL(valueChanged(int)),    this, SLOT(moveChestJoints(int)));
+    connect(ui->sliderUpperNeckPitch,    SIGNAL(sliderReleased()),    this, SLOT(moveHeadJoints()));
+    connect(ui->sliderLowerNeckPitch,    SIGNAL(sliderReleased()),    this, SLOT(moveHeadJoints()));
+    connect(ui->sliderNeckYaw,           SIGNAL(sliderReleased()),    this, SLOT(moveHeadJoints()));
 
     //walk
     connect(ui->btnWalk,                 SIGNAL(clicked()),            this, SLOT(walkSteps()));
@@ -227,6 +244,8 @@ void ValkyrieGUI::initDisplayWidgets()
     footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
     footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
 //    footstepMarkersDisplay_->subProp("Namespaces")->setValue("");
+
+    ui->sliderLowerNeckPitch->setEnabled(false);
 }
 
 void ValkyrieGUI::initTools(){
@@ -274,6 +293,14 @@ void ValkyrieGUI::initDefaultValues() {
     ui->sliderChestPitch->setValue(zeroPitch);
     ui->sliderChestYaw->setValue(zeroYaw);
 
+    //Neck control . Replace these defaults with actual values from robot
+    float zeroUpperPitch = fabs(UPPER_NECK_PITCH_MIN/((UPPER_NECK_PITCH_MAX - UPPER_NECK_PITCH_MIN)/100.0));
+    float zeroLowerPitch = fabs(LOWER_NECK_PITCH_MIN/((LOWER_NECK_PITCH_MAX - LOWER_NECK_PITCH_MIN)/100.0));
+    zeroYaw   = fabs(NECK_YAW_MIN/((NECK_YAW_MAX - NECK_YAW_MIN)/100.0));
+    ui->sliderUpperNeckPitch->setValue(zeroUpperPitch);
+    //ui->sliderLowerNeckPitch->setValue(zeroLowerPitch);
+    ui->sliderNeckYaw->setValue(zeroYaw);
+
     //PelvisHeight . Replace these defaults with actual values from robot
     float defaultPelvisHeight = (0.9 - PELVIS_HEIGHT_MIN) *100/ (PELVIS_HEIGHT_MAX - PELVIS_HEIGHT_MIN);
     ui->sliderPelvisHeight->setValue(defaultPelvisHeight);
@@ -296,6 +323,12 @@ void ValkyrieGUI::initValkyrieControllers() {
 
     //create arm joint controller object
     armJointController_ = new armTrajectory(nh_);
+
+    //create a chest trajectory controller object
+    headController_ = new HeadTrajectory(nh_);
+
+    //create a gripper controller object
+    gripperController_ = new gripperControl(nh_);
 }
 
 void ValkyrieGUI::getArmState()
@@ -411,7 +444,7 @@ void ValkyrieGUI::getChestState()
     // No point updating the chest state as it will always updtae wrt to world
 
     if(jointNames_.empty()){
-        ROS_INFO("joint_states is not initialized yet. cannot update arm joints");
+        ROS_INFO("joint_states is not initialized yet. cannot update chest joints");
         return;
     }
 
@@ -460,8 +493,22 @@ void ValkyrieGUI::getGripperState()
 
 void ValkyrieGUI::jointStateCallBack(const sensor_msgs::JointStatePtr &state)
 {
+    static short count = 0;
     jointNames_ = state->name;
     jointValues_ = state->position;
+    //update every 1/10th of a second
+    if (count++ == 40){
+        for(size_t i=0; i < jointNames_.size(); i++){
+               if(jointLabelMap_.find(jointNames_[i]) != jointLabelMap_.end()){
+                   QLabel *label = jointLabelMap_[jointNames_[i]];
+                   QString text;
+                   label->setText(text.sprintf("%.2f",jointValues_[i]));
+               }
+        }
+
+        count = 0;
+
+    }
 
 }
 
@@ -589,10 +636,10 @@ void ValkyrieGUI::setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr, bool is_
     int height = liveVideoLabel->height()-1;
     int width  = liveVideoLabel->width()-1;
 
-    if(liveVideoLabel->height()-1 >= (liveVideoLabel->width()-1)*544/1024)
-        height = (liveVideoLabel->width()-1)*544/1024;
+    if(liveVideoLabel->height()-1 >= (liveVideoLabel->width()-1)*IMAGE_HEIGHT/IMAGE_WIDTH)
+        height = (liveVideoLabel->width()-1)*IMAGE_HEIGHT/IMAGE_WIDTH;
     else
-        width  = (liveVideoLabel->height()-1)*1024/544;
+        width  = (liveVideoLabel->height()-1)*IMAGE_WIDTH/IMAGE_HEIGHT;
     if (is_RGB){
         RGBImg = cv_ptr->image;
     }
@@ -611,15 +658,17 @@ void ValkyrieGUI::setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr, bool is_
 
 void ValkyrieGUI::closeGrippers()
 {
-    ROS_INFO("closing Grippers");
     //call close grppiers function here
+    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    gripperController_->closeGripper(side);
 
 }
 
 void ValkyrieGUI::openGrippers()
 {
-    ROS_INFO("Opening Grippers");
     //call open grippers function here
+    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    gripperController_->openGripper(side);
 }
 
 void ValkyrieGUI::setCurrentTool(int btnID)
@@ -789,16 +838,19 @@ void ValkyrieGUI::moveChestJoints()
         chestController_->controlChest(chestRollSliderValue, chestPitchSliderValue, chestYawSliderValue);
         ros::spinOnce();
     }
-    //    }
-
-    //    else if(tabID == 3)
-    //    {
-    //        ROS_INFO("TAB:%d",tabID);
-    //        neckrollslider_ = ui->sliderNeckRoll->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //        neckpitchslider_ = ui->sliderNeckPitch->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //        neckyawslider_ = ui->sliderNeckYaw->value()*(LIN_VEL_MAX-LIN_VEL_MIN)/100+LIN_VEL_MIN;
-    //    }
 }
+
+void ValkyrieGUI::moveHeadJoints()
+{
+    float upperNeckPitchSliderValue = ui->sliderUpperNeckPitch->value()*(UPPER_NECK_PITCH_MAX-UPPER_NECK_PITCH_MIN)/100+UPPER_NECK_PITCH_MIN;
+    float lowerNeckPitchSliderValue = ui->sliderLowerNeckPitch->value()*(LOWER_NECK_PITCH_MAX-LOWER_NECK_PITCH_MIN)/100+LOWER_NECK_PITCH_MIN;
+    float neckYawSliderValue =  -1*(ui->sliderNeckYaw->value()*(NECK_YAW_MAX-NECK_YAW_MIN)/100 + CHEST_YAW_MIN);
+    if(headController_ != nullptr){
+        headController_->moveHead(lowerNeckPitchSliderValue, upperNeckPitchSliderValue, neckYawSliderValue);
+        ros::spinOnce();
+    }
+}
+
 
 /*
 //Image :

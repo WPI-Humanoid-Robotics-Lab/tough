@@ -1,0 +1,69 @@
+<launch>
+  <!-- start with robot harnessed by default. -->
+  <!-- set:
+         roslaunch srcsim unique_task2.launch init:=true
+       to automatically lower robot harnessed, start high level controller and detach harness. -->
+  <!-- set:
+         roslaunch srcsim unique_task2.launch init:=true walk_test:=walk
+       to automatically walk forward after harness detach. -->
+  <arg name="debug" default="false" />
+  <arg name="extra_gazebo_args" default=""/>
+  <arg name="init" default="false" />
+  <arg name="paused" default="false" />
+  <arg name="use_local_build" default="false" />
+  <arg name="verbose" default="true" />
+  <arg name="walk_test" default="false"/>
+
+  <arg if="$(optenv USE_CUSTOM_WORLD 0)" name="world_name" default="$(env CUSTOM_WORLD_PATH)" />
+  <arg unless="$(optenv USE_CUSTOM_WORLD 0)" name="world_name" default="$(find srcsim)/worlds/unique_task2.world" />
+
+  <include file="$(find val_gazebo)/launch/val_sim_gazebo_sync.launch" pass_all_args="false">
+    <env name="GAZEBO_RESOURCE_PATH" value="$(find srcsim)/worlds"/>
+    <env name="GAZEBO_MODEL_PATH" value="$(env GAZEBO_MODEL_PATH):$(find srcsim)/models"/>
+    <env name="GAZEBO_PLUGIN_PATH" value="$(find srcsim)/plugins"/>
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="extra_gazebo_args" default="$(arg extra_gazebo_args)"/>
+    <arg name="paused" value="$(arg paused)" />
+    <arg name="verbose" value="$(arg verbose)" />
+    <arg name="world_name" value="$(arg world_name)" />
+  </include>
+
+  <include file="$(find ihmc_valkyrie_ros)/launch/valkyrie_ros_api.launch" pass_all_args="false">
+    <arg name="use_local_build" value="$(arg use_local_build)" />
+  </include>
+
+  <include file="$(find ihmc_valkyrie_ros)/launch/val_wholebody_control_gazebo.launch"/>
+
+  <group if="$(arg init)">
+    <node name="startup_robot" pkg="srcsim" type="init_robot.sh" args="$(arg walk_test)" output="screen"/>
+  </group>
+
+  <!--
+  <include file="$(find ihmc_valkyrie_ros)/launch/remote_valkyrie_visualizer.launch" pass_all_args="true">
+    <arg name="use_local_build" value="$(arg use_local_build)" />
+  </include>
+  -->
+
+  <!-- Stereo image processing -->
+  <node ns="multisense/camera" name="stereo_proc" pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" output="log">
+    <param name="disparity_range" type="int" value="128"/>
+    <param name="approximate_sync" type="bool" value="false"/>
+  </node>
+
+  <!-- relay for multisense sl simulation topics
+       sim publishes to /multisense/camera/points2 (from stereo_proc node), while
+       hardware publishes to /multisense/image_points2 -->
+  <node name="multisense_points2_relay" pkg="topic_tools" type="relay"
+        args="/multisense/camera/points2 /multisense/image_points2" respawn="false" output="screen">
+    <param name="lazy" type="bool" value="True"/>
+  </node>
+
+  <!-- relay for multisense sl simulation topics
+       sim publishes to /multisense/camera/points2 (from stereo_proc node), while
+       hardware publishes to /multisense/image_points2_color -->
+  <node name="multisense_points2_color_relay" pkg="topic_tools" type="relay"
+        args="/multisense/camera/points2 /multisense/image_points2_color" respawn="false" output="screen">
+    <param name="lazy" type="bool" value="True"/>
+  </node>
+
+</launch>

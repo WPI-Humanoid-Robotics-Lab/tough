@@ -48,7 +48,9 @@
 #include <val_control/val_arm_navigation.h>
 #include <val_control/val_chest_navigation.h>
 #include <val_control/val_pelvis_navigation.h>
+#include <val_control/val_head_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
+#include <val_control/val_gripper_control.h>
 
 // Constants
 #define CHEST_ROLL_MAX 14.61    // this is in degrees. coz I dont talk radians :P
@@ -106,6 +108,9 @@
 #define RIGHT_ELBOW_MAX 124.61
 #define RIGHT_ELBOW_MIN -6.87
 
+#define IMAGE_HEIGHT 544
+#define IMAGE_WIDTH 1024
+
 namespace Ui {
 class ValkyrieGUI;
 }
@@ -152,6 +157,7 @@ private Q_SLOTS:
     void setCurrentTool(int btnID);
     void displayPointcloud(int btnID);
     void moveChestJoints();
+    void moveHeadJoints();
     void walkSteps();
     void changePelvisHeight();
     void moveArmJoints();
@@ -207,10 +213,13 @@ private:
   pelvisTrajectory *pelvisHeightController_;
   armTrajectory    *armJointController_;
   ValkyrieWalker   *walkingController_;
+  HeadTrajectory   *headController_;
+  gripperControl   *gripperController_;
 
-  std::vector<std::string> jointNames_;
-  std::vector<double>       jointValues_;
-  std::mutex               mtx_;
+  std::vector<std::string>        jointNames_;
+  std::vector<double>             jointValues_;
+  std::mutex                      mtx_;
+  std::map<std::string, QLabel*>  jointLabelMap_;
 
   void distanceSubCallback(const std_msgs::Float32::ConstPtr& msg);
   void liveVideoCallback(const sensor_msgs::ImageConstPtr &msg);
