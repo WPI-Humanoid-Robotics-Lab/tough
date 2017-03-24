@@ -20,6 +20,16 @@
             <size>0.057 1.905 0.51</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="trailer_left_top">
@@ -29,6 +39,16 @@
             <size>0.125 1.905 0.074</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="trailer_left_handle">
@@ -38,6 +58,16 @@
             <size>0.220321 0.375 0.074</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="trailer_left_handle_edge_1">
@@ -47,6 +77,16 @@
             <size>0.1 0.2155 0.074</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="trailer_left_handle_edge_2">
@@ -56,6 +96,16 @@
             <size>0.1 0.2155 0.074</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="trailer_right">
@@ -65,6 +115,16 @@
             <size>0.057 1.915 0.51</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="trailer_right_top">
@@ -74,6 +134,16 @@
             <size>0.125 1.905 0.074</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="trailer_right_handle">
@@ -83,6 +153,16 @@
             <size>0.220321 0.375 0.074</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="trailer_right_handle_edge_1">
@@ -92,6 +172,16 @@
             <size>0.1 0.2155 0.074</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="trailer_right_handle_edge_2">
@@ -101,6 +191,16 @@
             <size>0.1 0.2155 0.074</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="trailer_bottom">
@@ -110,6 +210,16 @@
             <size>1.16 1.905 0.065</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="trailer_back">
@@ -119,6 +229,16 @@
             <size>1.160 0.066 0.51</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="wheel_right_back">
@@ -129,6 +249,16 @@
             <length>0.49</length>
           </cylinder>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="wheel_left_back">
@@ -139,6 +269,16 @@
             <length>0.49</length>
           </cylinder>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="wheel_right_center">
@@ -149,6 +289,16 @@
             <length>0.63</length>
           </cylinder>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="wheel_left_center">
@@ -159,6 +309,16 @@
             <length>0.63</length>
           </cylinder>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="wheel_right_front">
@@ -169,6 +329,16 @@
             <length>0.63</length>
           </cylinder>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="wheel_left_front">
@@ -179,6 +349,16 @@
             <length>0.63</length>
           </cylinder>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
       <collision name="chassis">
@@ -188,6 +368,16 @@
             <size>2.332756 6.825834 2.262449</size>
           </box>
         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
       </collision>
 
     </link>
