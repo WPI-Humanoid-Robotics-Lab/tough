@@ -20,6 +20,9 @@ python $DIR/rossleep.py 2
 echo -e "\e[32mINIT:\e[0m Detach from harness"
 rostopic pub -1 /valkyrie/harness/detach std_msgs/Bool true &
 
+echo -e "\e[32mINIT:\e[0m Starting gripper controllers"
+roslaunch val_grasping val_grasping.launch &
+
 if [ $1 = "true" ]; then
   echo -e "\e[32mINIT:\e[0m Start walking"
   rosrun srcsim walk_test.py
