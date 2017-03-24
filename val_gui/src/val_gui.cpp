@@ -80,7 +80,7 @@ void ValkyrieGUI::initVariables()
     footstepTopic_ = QString::fromStdString(configfile.currentTopics["footstepTopic"]);
     //    moveBaseCmdPub  = nh_.advertise<geometry_msgs::Twist>(velocityTopic_.toStdString(),1);
     //    baseSensorStatus = nh_.subscribe(baseSensorTopic_.toStdString(),1,&FallRiskGUI::baseStatusCheck,this);
-    liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ValkyrieGUI::liveVideoCallback,this,image_transport::TransportHints("raw"));
+    liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ValkyrieGUI::liveVideoCallback,this,image_transport::TransportHints("compressed"));
 
     jointStateSub_ = nh_.subscribe("/joint_states",1, &ValkyrieGUI::jointStateCallBack, this);
 
