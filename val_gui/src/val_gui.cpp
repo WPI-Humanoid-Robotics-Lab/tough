@@ -137,7 +137,7 @@ void ValkyrieGUI::initActionsConnections()
 
     // neck control
     connect(ui->sliderUpperNeckPitch,    SIGNAL(sliderReleased()),    this, SLOT(moveHeadJoints()));
-    //connect(ui->sliderLowerNeckPitch,    SIGNAL(sliderReleased()),    this, SLOT(moveChestJoints(int)));
+    connect(ui->sliderLowerNeckPitch,    SIGNAL(sliderReleased()),    this, SLOT(moveHeadJoints()));
     connect(ui->sliderNeckYaw,           SIGNAL(sliderReleased()),    this, SLOT(moveHeadJoints()));
 
     //walk
@@ -636,10 +636,10 @@ void ValkyrieGUI::setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr, bool is_
     int height = liveVideoLabel->height()-1;
     int width  = liveVideoLabel->width()-1;
 
-    if(liveVideoLabel->height()-1 >= (liveVideoLabel->width()-1)*544/1024)
-        height = (liveVideoLabel->width()-1)*544/1024;
+    if(liveVideoLabel->height()-1 >= (liveVideoLabel->width()-1)*IMAGE_HEIGHT/IMAGE_WIDTH)
+        height = (liveVideoLabel->width()-1)*IMAGE_HEIGHT/IMAGE_WIDTH;
     else
-        width  = (liveVideoLabel->height()-1)*1024/544;
+        width  = (liveVideoLabel->height()-1)*IMAGE_WIDTH/IMAGE_HEIGHT;
     if (is_RGB){
         RGBImg = cv_ptr->image;
     }
@@ -843,10 +843,10 @@ void ValkyrieGUI::moveChestJoints()
 void ValkyrieGUI::moveHeadJoints()
 {
     float upperNeckPitchSliderValue = ui->sliderUpperNeckPitch->value()*(UPPER_NECK_PITCH_MAX-UPPER_NECK_PITCH_MIN)/100+UPPER_NECK_PITCH_MIN;
-    //float lowerNeckPitchSliderValue = ui->sliderLowerNeckPitch->value()*(LOWER_NECK_PITCH_MAX-LOWER_NECK_PITCH_MIN)/100+LOWER_NECK_PITCH_MIN;
+    float lowerNeckPitchSliderValue = ui->sliderLowerNeckPitch->value()*(LOWER_NECK_PITCH_MAX-LOWER_NECK_PITCH_MIN)/100+LOWER_NECK_PITCH_MIN;
     float neckYawSliderValue =  -1*(ui->sliderNeckYaw->value()*(NECK_YAW_MAX-NECK_YAW_MIN)/100 + CHEST_YAW_MIN);
     if(headController_ != nullptr){
-        headController_->moveHead(0.0f, upperNeckPitchSliderValue, neckYawSliderValue);
+        headController_->moveHead(lowerNeckPitchSliderValue, upperNeckPitchSliderValue, neckYawSliderValue);
         ros::spinOnce();
     }
 }

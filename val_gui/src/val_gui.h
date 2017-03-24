@@ -108,6 +108,9 @@
 #define RIGHT_ELBOW_MAX 124.61
 #define RIGHT_ELBOW_MIN -6.87
 
+#define IMAGE_HEIGHT 544
+#define IMAGE_WIDTH 1024
+
 namespace Ui {
 class ValkyrieGUI;
 }
