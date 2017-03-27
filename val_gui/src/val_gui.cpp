@@ -1,10 +1,10 @@
-#include "val_gui.h"
+#include "val_gui/val_gui.h"
 #include "ui_val_gui.h"
 #include <iostream>
 #include "rviz/view_manager.h"
 #include "rviz/tool_manager.h"
 #include "rviz/properties/property_tree_model.h"
-#include "configurationreader.h"
+#include "val_gui/configurationreader.h"
 #include "ros/package.h"
 #include "val_common/val_common_defines.h"
 

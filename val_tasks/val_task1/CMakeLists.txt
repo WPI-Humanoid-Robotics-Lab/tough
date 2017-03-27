@@ -3,7 +3,9 @@ project(val_task1)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
-
+if(NOT WIN32)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-sign-compare -Wno-ignored-qualifiers -Wno-unused-function")
+endif()
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -12,6 +14,32 @@ find_package(catkin REQUIRED COMPONENTS
   decision_making_parser
   roscpp
   rospy
+  geometry_msgs
+
+  val_moveit_config
+  moveit_commander
+  moveit_core
+  moveit_fake_controller_manager
+  moveit_msgs
+  moveit_planners_ompl
+  moveit_ros_benchmarks
+  moveit_ros_benchmarks_gui
+  moveit_ros_control_interface
+  moveit_ros_manipulation
+  moveit_ros_move_group
+  moveit_ros_perception
+  moveit_ros_planning
+  moveit_ros_planning_interface
+  moveit_ros_robot_interaction
+  moveit_ros_visualization
+  moveit_ros_warehouse
+  moveit_simple_controller_manager
+  trac_ik_examples
+  trac_ik_kinematics_plugin
+  trac_ik_lib
+  val_control
+
+  val_gui
 )
 
 ## System dependencies are found with CMake's conventions
@@ -139,6 +167,17 @@ include_directories(
             src/val_task1SM.cpp
 )
 
+
+add_executable(val_circle src/val_circle.cpp)
+
+add_dependencies(val_circle
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(val_circle
+   ${catkin_LIBRARIES}
+   val_marker
+ )
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use

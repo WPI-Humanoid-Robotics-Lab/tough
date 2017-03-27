@@ -241,7 +241,7 @@ void armTrajectory::moveArmTrajectory(const armSide side, const trajectory_msgs:
     for(auto i=traj.points.begin(); i < traj.points.end(); i++){
         appendTrajectoryPoint(arm_traj, *i);
     }
-
+    ROS_INFO("Publishing Arm Trajectory");
     armTrajectoryPublisher.publish(arm_traj);
 }
 

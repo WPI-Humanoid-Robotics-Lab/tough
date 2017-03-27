@@ -19,9 +19,9 @@ int main(int argc, char** argv){
      *************************************/
     ros::AsyncSpinner spinner(1);
     spinner.start();
-
     moveit::planning_interface::MoveGroup group("rightArm");
 
+    ROS_INFO("set to state");
     // set the start state to the current state of the robot
     group.setStartStateToCurrentState();
 
@@ -48,15 +48,15 @@ int main(int argc, char** argv){
     target_pose.position.z = 1.0;
     group.setPoseTarget(target_pose);
 
-
+    ROS_INFO("Planning now.");
     moveit::planning_interface::MoveGroup::Plan my_plan;
     bool success = group.plan((my_plan));
     if (success)
     {
-        std::cout<<"sucessfully planned the trajectory"<<std::endl;
+        ROS_INFO("sucessfully planned the trajectory");
         std::vector<trajectory_msgs::JointTrajectoryPoint>::iterator itp;
 
-        std::cout << "joint names" << std::endl;
+        ROS_INFO("joint names");
         for (it = my_plan.trajectory_.joint_trajectory.joint_names.begin(); it < my_plan.trajectory_.joint_trajectory.joint_names.end(); it++)
             std::cout << *it << std::endl;
         std::cout << "joint trajectories" << std::endl;

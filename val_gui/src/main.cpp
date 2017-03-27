@@ -36,9 +36,8 @@
 #include <QApplication>
 #include <ros/ros.h>
 
-#include "val_gui.h"
-
-#include "configurationreader.h"
+#include "val_gui/val_gui.h"
+#include "val_gui/configurationreader.h"
 
 int main(int argc, char **argv)
 {
