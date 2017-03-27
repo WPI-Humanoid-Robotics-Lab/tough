@@ -24,9 +24,9 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Here we specify which header files need to be run through "moc",
 ## Qt's meta-object compiler.
-set(HEADER_FILES 
-  src/val_gui.h
-  src/configurationreader.h
+set(HEADER_FILES
+  include/${PROJECT_NAME}/val_gui.h
+  include/${PROJECT_NAME}/configurationreader.h
 )
 
 set(SOURCE_FILES
@@ -37,7 +37,7 @@ set(SOURCE_FILES
 )
 
 
-set(FORM_FILES 
+set(FORM_FILES
   src/val_gui.ui
 )
 
@@ -46,110 +46,24 @@ QT4_WRAP_CPP(MOC_SRC_H
   ${HEADER_FILES}
 )
 
-QT4_WRAP_UI(MOC_GUI_H 
+QT4_WRAP_UI(MOC_GUI_H
   ${FORM_FILES}
 )
 
+include_directories(include)
+add_library(val_marker
+  src/val_marker.cpp
+)
+
+target_link_libraries(val_marker
+  ${catkin_LIBRARIES}
+)
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-## Add support for C++11, supported in ROS Kinetic and newer
-# add_definitions(-std=c++11)
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
-
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
-
-################################################
-## Declare ROS messages, services and actions ##
-################################################
-
-## To declare and build messages, services or actions from within this
-## package, follow these steps:
-## * Let MSG_DEP_SET be the set of packages whose message types you use in
-##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
-## * In the file package.xml:
-##   * add a build_depend tag for "message_generation"
-##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
-##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
-##     but can be declared for certainty nonetheless:
-##     * add a run_depend tag for "message_runtime"
-## * In this file (CMakeLists.txt):
-##   * add "message_generation" and every package in MSG_DEP_SET to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * add "message_runtime" and every package in MSG_DEP_SET to
-##     catkin_package(CATKIN_DEPENDS ...)
-##   * uncomment the add_*_files sections below as needed
-##     and list every .msg/.srv/.action file to be processed
-##   * uncomment the generate_messages entry below
-##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
-
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
-
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
-
-## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
-
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   sensor_msgs#   std_msgs
-# )
-
-################################################
-## Declare ROS dynamic reconfigure parameters ##
-################################################
-
-## To declare and build dynamic reconfigure parameters within this
-## package, follow these steps:
-## * In the file package.xml:
-##   * add a build_depend and a run_depend tag for "dynamic_reconfigure"
-## * In this file (CMakeLists.txt):
-##   * add "dynamic_reconfigure" to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * uncomment the "generate_dynamic_reconfigure_options" section below
-##     and list every .cfg file to be processed
-
-## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
-
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if you package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS 
-  LIBRARIES val_gui
+  INCLUDE_DIRS include
+  LIBRARIES val_marker
   CATKIN_DEPENDS roscpp rviz sensor_msgs std_msgs val_control val_footstep
   DEPENDS system_lib
 )

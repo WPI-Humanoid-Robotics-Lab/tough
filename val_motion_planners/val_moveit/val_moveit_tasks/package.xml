@@ -4,7 +4,7 @@
   <version>0.0.0</version>
   <description>The val_moveit_tasks package</description>
 
-  <!-- One maintainer tag required, multiple allowed, one person per tag --> 
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
   <maintainer email="samyuktha@todo.todo">samyuktha</maintainer>
@@ -62,6 +62,12 @@
   <build_depend>trac_ik_kinematics_plugin</build_depend>
   <build_depend>trac_ik_lib</build_depend>
   <build_depend>val_control</build_depend>
+  <!--<build_depend>descartes_core</build_depend>
+  <build_depend>descartes_moveit</build_depend>
+  <build_depend>descartes_planner</build_depend>
+  <build_depend>descartes_trajectory</build_depend>
+  <build_depend>descartes_utilities</build_depend>-->
+  <build_depend>geometry_msgs</build_depend>
   <run_depend>moveit_commander</run_depend>
   <run_depend>moveit_config_trac_ik</run_depend>
   <run_depend>moveit_core</run_depend>
@@ -84,6 +90,11 @@
   <run_depend>trac_ik_kinematics_plugin</run_depend>
   <run_depend>trac_ik_lib</run_depend>
   <run_depend>val_control</run_depend>
+  <!--<run_depend>descartes_core</run_depend>
+  <run_depend>descartes_moveit</run_depend>
+  <run_depend>descartes_planner</run_depend>
+  <run_depend>descartes_trajectory</run_depend>
+  <run_depend>descartes_utilities</run_depend>-->
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

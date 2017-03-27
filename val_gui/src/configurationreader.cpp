@@ -1,4 +1,4 @@
-#include "configurationreader.h"
+#include "val_gui/configurationreader.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
