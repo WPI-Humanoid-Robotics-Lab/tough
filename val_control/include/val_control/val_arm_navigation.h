@@ -128,7 +128,8 @@ private:
     static int arm_id;
 
     const std::vector<float> ZERO_POSE;
-    const std::vector<float> DEFAULT_POSE;
+    const std::vector<float> DEFAULT_RIGHT_POSE;
+    const std::vector<float> DEFAULT_LEFT_POSE;
     const int NUM_ARM_JOINTS;
     ros::NodeHandle nh_;
     ros::Publisher  armTrajectoryPublisher;

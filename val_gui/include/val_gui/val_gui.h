@@ -165,6 +165,8 @@ private Q_SLOTS:
     void updateArmSide(int btnID);
     void resetChestOrientation();
     void updateDisplay(int tabID);
+    void resetArm();
+    void resetRobot();
 
 private:
   rviz::VisualizationManager* manager_;

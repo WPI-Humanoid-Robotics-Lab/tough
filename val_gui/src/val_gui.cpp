@@ -128,6 +128,7 @@ void ValkyrieGUI::initActionsConnections()
     connect(ui->sliderWristPitch,        SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
     connect(ui->sliderWristYaw,          SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
     connect(ui->sliderElbow,             SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
+    connect(ui->btnResetArm,             SIGNAL(clicked()),            this, SLOT(resetArm()));
 
     // chest control
     connect(ui->sliderChestRoll,         SIGNAL(sliderReleased()),    this, SLOT(moveChestJoints()));
@@ -144,6 +145,8 @@ void ValkyrieGUI::initActionsConnections()
     connect(ui->btnWalk,                 SIGNAL(clicked()),            this, SLOT(walkSteps()));
     connect(ui->sliderPelvisHeight,      SIGNAL(sliderReleased()),     this, SLOT(changePelvisHeight()));
 
+    //reset robot
+    connect(ui->btnResetRobot,           SIGNAL(clicked()),            this,SLOT(resetRobot()));
 
 }
 
@@ -550,6 +553,22 @@ void ValkyrieGUI::updateArmSide(int btnID)
 void ValkyrieGUI::resetChestOrientation()
 {
     chestController_->controlChest(0.0f, 0.0f, 0.0f);
+}
+
+void ValkyrieGUI::resetArm()
+{
+    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    armJointController_->moveToDefaultPose(side);
+    getArmState();
+}
+
+void ValkyrieGUI::resetRobot()
+{
+    resetChestOrientation();
+    armJointController_->moveToDefaultPose(LEFT);
+    ros::Duration(0.2).sleep();
+    armJointController_->moveToDefaultPose(RIGHT);
+    getArmState();
 }
 
 void ValkyrieGUI::updateDisplay(int tabID)
