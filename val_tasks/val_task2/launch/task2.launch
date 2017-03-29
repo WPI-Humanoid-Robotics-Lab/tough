@@ -1,0 +1,12 @@
+<launch>
+    <arg name="events" default="true" />
+    <arg name="gui" default="true" />
+
+    <!-- task2 node -->
+    <node name="task2" pkg="val_task2" type="val_task2_node" output="screen"/>
+
+    <!-- state transition visualisation on rviz -->
+    <node
+    if="$(arg gui)"
+    name="rqt" pkg="rqt_gui" type="rqt_gui" args="-s rqt_decision_graph" output="screen" />
+</launch>
