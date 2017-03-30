@@ -218,10 +218,9 @@ private:
   HeadTrajectory   *headController_;
   gripperControl   *gripperController_;
 
-  std::vector<std::string>        jointNames_;
-  std::vector<double>             jointValues_;
   std::mutex                      mtx_;
   std::map<std::string, QLabel*>  jointLabelMap_;
+  std::map<std::string, double>    jointStateMap_;
 
   void distanceSubCallback(const std_msgs::Float32::ConstPtr& msg);
   void liveVideoCallback(const sensor_msgs::ImageConstPtr &msg);
@@ -241,6 +240,7 @@ private:
   QString robotType_;
   QString goalTopic_;
   QString footstepTopic_;
+  QString jointStatesTopic_;
   QLabel* status_label_;
 
 };
