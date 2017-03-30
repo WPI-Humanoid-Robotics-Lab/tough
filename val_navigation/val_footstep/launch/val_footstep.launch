@@ -1,7 +1,7 @@
 <launch>
 
   <!--  <node name="map_server" pkg="map_server" type="map_server" args="$(find val_footstep)/maps/qual2.yaml" />-->
-   <include file="$(find navigation_common)/launch/octomap.launch" />
+<!--   <include file="$(find val_perception_bringup)/launch/octomap.launch" />-->
    
     <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find val_footstep)/config/rviz_footstep_planning.rviz" /> -->
   

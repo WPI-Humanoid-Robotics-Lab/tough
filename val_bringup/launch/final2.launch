@@ -9,10 +9,10 @@
       <arg name="use_local_build" value="$(arg use_local_build)" />
    </include>
 
-
+  <node pkg="val_bringup" type="init.py" name="initalize_robot"/>
    <!-- Start spinning the lidar. Lidar speed is in rad/s. periodic snapshotter is set at 6s. To get a complete 360 pointcloud
    we need pi/6 rad/s speed. it is set slightly higher than that to allow for little overlap-->
-   <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 0.55"/>
+  <!-- <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 0.55"/> -->
 
    <!-- Start stereo_image_proc to pusblish disparity image -->
 <!--   <node ns="/multisense/camera" name="stereo_proc" pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" output="log">
@@ -38,7 +38,8 @@
             fullDP = false-->
             <!-- remap from="/multisense/camera/disparity" to="/multisense/left/disparity" / -->
 <!--        <remap from="/multisense/camera/points2" to="/multisense/image_points2" />
-    </node>-->
-    <include file="$(find val_laser2point_cloud)/launch/laser_assembler.launch"/>
-    <include file="$(find val_footstep)/launch/val_footstep.launch"/>
+    </node>-
+    <include file="$(find val_perception_bringup)/launch/laser_assembler.launch"/>
+    <include file="$(find val_perception_bringup)/launch/octomap.launch"/>
+  <include file="$(find val_footstep)/launch/val_footstep.launch"/> -->
 </launch>
