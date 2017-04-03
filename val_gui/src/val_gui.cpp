@@ -182,13 +182,14 @@ void ValkyrieGUI::initDisplayWidgets()
 
     mapViewManager_     = mapManager_->getViewManager();
     mapViewManager_->setCurrentViewControllerType("rviz/TopDownOrtho");
+
     mapViewController_  = mapViewManager_->getCurrent();
 
     //Set parameters of the view controller to show map correctly
-    mapViewController_->subProp("X")->setValue(0);
+    mapViewController_->subProp("X")->setValue(4.52);
     mapViewController_->subProp("Y")->setValue(0);
     mapViewController_->subProp("Angle")->setValue(0);
-    mapViewController_->subProp("Scale")->setValue(20);
+    mapViewController_->subProp("Scale")->setValue(100);
 
     // Create a map display
     mapDisplay_ = mapManager_->createDisplay( "rviz/Map", "2D Map view", true );
