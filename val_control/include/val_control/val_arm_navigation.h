@@ -122,11 +122,13 @@ public:
      */
     void moveArmTrajectory(const armSide side, const trajectory_msgs::JointTrajectory &traj);
 
+    void nudgeArm(const armSide side, const direction drct);
 
 private:
 
     static int arm_id;
 
+    const float NUDGE_STEP;
     const std::vector<float> ZERO_POSE;
     const std::vector<float> DEFAULT_RIGHT_POSE;
     const std::vector<float> DEFAULT_LEFT_POSE;
