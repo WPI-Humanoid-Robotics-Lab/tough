@@ -197,7 +197,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tabArm">
           <attribute name="title">
@@ -210,61 +210,7 @@
               <property name="horizontalSpacing">
                <number>3</number>
               </property>
-              <item row="0" column="3">
-               <widget class="QPushButton" name="btnOpenHand">
-                <property name="text">
-                 <string>Open Hand</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1" colspan="3">
-               <widget class="QSlider" name="sliderElbow">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0" colspan="2">
-               <widget class="QWidget" name="btnGrpArmSide" native="true">
-                <layout class="QHBoxLayout" name="horizontalLayout_7">
-                 <item>
-                  <widget class="QRadioButton" name="radioArmSideLeft">
-                   <property name="text">
-                    <string>Left</string>
-                   </property>
-                   <attribute name="buttonGroup">
-                    <string notr="true">btnGroupArm</string>
-                   </attribute>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QRadioButton" name="radioArmSideRight">
-                   <property name="text">
-                    <string>Right</string>
-                   </property>
-                   <attribute name="buttonGroup">
-                    <string notr="true">btnGroupArm</string>
-                   </attribute>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_18">
-                <property name="text">
-                 <string>Elbow</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="QPushButton" name="btnCloseHand">
-                <property name="text">
-                 <string>Close Hand</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0" colspan="4">
+              <item row="1" column="0" colspan="7">
                <widget class="QToolBox" name="tabArmControl">
                 <property name="minimumSize">
                  <size>
@@ -295,7 +241,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>127</width>
+                   <width>437</width>
                    <height>87</height>
                   </rect>
                  </property>
@@ -367,7 +313,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>104</width>
+                   <width>437</width>
                    <height>87</height>
                   </rect>
                  </property>
@@ -419,6 +365,67 @@
                   </item>
                  </layout>
                 </widget>
+               </widget>
+              </item>
+              <item row="2" column="1" colspan="6">
+               <widget class="QSlider" name="sliderElbow">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" colspan="2">
+               <widget class="QWidget" name="btnGrpArmSide" native="true">
+                <layout class="QHBoxLayout" name="horizontalLayout_7">
+                 <item>
+                  <widget class="QRadioButton" name="radioArmSideLeft">
+                   <property name="text">
+                    <string>Left</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">btnGroupArm</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioArmSideRight">
+                   <property name="text">
+                    <string>Right</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">btnGroupArm</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QPushButton" name="btnCloseHand">
+                <property name="text">
+                 <string>Close Hand</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="5">
+               <widget class="QPushButton" name="btnResetArm">
+                <property name="text">
+                 <string>Reset Arm</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_18">
+                <property name="text">
+                 <string>Elbow</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="4">
+               <widget class="QPushButton" name="btnOpenHand">
+                <property name="text">
+                 <string>Open Hand</string>
+                </property>
                </widget>
               </item>
              </layout>
@@ -881,7 +888,65 @@ p, li { white-space: pre-wrap; }
        <item>
         <widget class="QWidget" name="widget_8" native="true">
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="0">
+          <item row="0" column="1">
+           <widget class="QGroupBox" name="groupBox_4">
+            <property name="title">
+             <string>Robot Position</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_13">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>World X:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="lblRobotPositionX">
+               <property name="text">
+                <string>0.0</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>World Y:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLabel" name="lblRobotPositionY">
+               <property name="text">
+                <string>0.0</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;World &amp;#952;:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLabel" name="lblRobotPositionTheta">
+               <property name="text">
+                <string>0.0</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="btnResetRobot">
+            <property name="text">
+             <string>Reset Robot</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" rowspan="2">
            <widget class="QWidget" name="widget_4" native="true">
             <layout class="QVBoxLayout" name="verticalLayout_3">
              <item>
@@ -947,57 +1012,6 @@ p, li { white-space: pre-wrap; }
             </layout>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QGroupBox" name="groupBox_4">
-            <property name="title">
-             <string>Robot Position</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_13">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_7">
-               <property name="text">
-                <string>World X:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLabel" name="lblRobotPositionX">
-               <property name="text">
-                <string>0.0</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_6">
-               <property name="text">
-                <string>World Y:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLabel" name="lblRobotPositionY">
-               <property name="text">
-                <string>0.0</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_8">
-               <property name="text">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;World &amp;#952;:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLabel" name="lblRobotPositionTheta">
-               <property name="text">
-                <string>0.0</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -1021,9 +1035,9 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="btnGroupRvizTools"/>
   <buttongroup name="btnGroupFeet"/>
   <buttongroup name="btnGroupDisplays"/>
   <buttongroup name="btnGroupArm"/>
+  <buttongroup name="btnGroupRvizTools"/>
  </buttongroups>
 </ui>

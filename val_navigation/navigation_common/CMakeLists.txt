@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   tf
-)
+  )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -91,6 +91,7 @@ find_package(catkin REQUIRED COMPONENTS
 #   cfg/DynReconf2.cfg
 # )
 
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -113,7 +114,7 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+#include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )

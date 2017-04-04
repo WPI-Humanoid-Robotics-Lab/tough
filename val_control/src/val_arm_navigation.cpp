@@ -6,7 +6,8 @@ int armTrajectory::arm_id = -1;
 //add default pose for both arms. the values of joints are different.
 armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
     ZERO_POSE{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-    DEFAULT_POSE{-0.2f, 1.2f, 0.7222f, 1.5101f, 0.0f, 0.0f, 0.0f},
+    DEFAULT_RIGHT_POSE{-0.2f, 1.2f, 0.7222f, 1.5101f, 0.0f, 0.0f, 0.0f},
+    DEFAULT_LEFT_POSE{-0.2f, -1.2f, 0.7222f, -1.5101f, 0.0f, 0.0f, 0.0f},
     NUM_ARM_JOINTS(7){
 
     armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/arm_trajectory", 1,true);
@@ -49,8 +50,10 @@ void armTrajectory::moveToDefaultPose(armSide side)
     arm_traj.robot_side = side;
     armTrajectory::arm_id--;
     arm_traj.unique_id = armTrajectory::arm_id;
-
-    appendTrajectoryPoint(arm_traj, 3, DEFAULT_POSE);
+    if(side == RIGHT)
+        appendTrajectoryPoint(arm_traj, 1, DEFAULT_RIGHT_POSE);
+    else
+        appendTrajectoryPoint(arm_traj, 1, DEFAULT_LEFT_POSE);
 
     armTrajectoryPublisher.publish(arm_traj);
 
@@ -241,7 +244,7 @@ void armTrajectory::moveArmTrajectory(const armSide side, const trajectory_msgs:
     for(auto i=traj.points.begin(); i < traj.points.end(); i++){
         appendTrajectoryPoint(arm_traj, *i);
     }
-
+    ROS_INFO("Publishing Arm Trajectory");
     armTrajectoryPublisher.publish(arm_traj);
 }
 

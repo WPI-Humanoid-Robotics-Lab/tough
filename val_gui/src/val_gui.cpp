@@ -1,10 +1,10 @@
-#include "val_gui.h"
+#include "val_gui/val_gui.h"
 #include "ui_val_gui.h"
 #include <iostream>
 #include "rviz/view_manager.h"
 #include "rviz/tool_manager.h"
 #include "rviz/properties/property_tree_model.h"
-#include "configurationreader.h"
+#include "val_gui/configurationreader.h"
 #include "ros/package.h"
 #include "val_common/val_common_defines.h"
 
@@ -128,6 +128,7 @@ void ValkyrieGUI::initActionsConnections()
     connect(ui->sliderWristPitch,        SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
     connect(ui->sliderWristYaw,          SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
     connect(ui->sliderElbow,             SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
+    connect(ui->btnResetArm,             SIGNAL(clicked()),            this, SLOT(resetArm()));
 
     // chest control
     connect(ui->sliderChestRoll,         SIGNAL(sliderReleased()),    this, SLOT(moveChestJoints()));
@@ -144,6 +145,8 @@ void ValkyrieGUI::initActionsConnections()
     connect(ui->btnWalk,                 SIGNAL(clicked()),            this, SLOT(walkSteps()));
     connect(ui->sliderPelvisHeight,      SIGNAL(sliderReleased()),     this, SLOT(changePelvisHeight()));
 
+    //reset robot
+    connect(ui->btnResetRobot,           SIGNAL(clicked()),            this,SLOT(resetRobot()));
 
 }
 
@@ -176,13 +179,14 @@ void ValkyrieGUI::initDisplayWidgets()
 
     mapViewManager_     = mapManager_->getViewManager();
     mapViewManager_->setCurrentViewControllerType("rviz/TopDownOrtho");
+
     mapViewController_  = mapViewManager_->getCurrent();
 
     //Set parameters of the view controller to show map correctly
-    mapViewController_->subProp("X")->setValue(0);
+    mapViewController_->subProp("X")->setValue(4.52);
     mapViewController_->subProp("Y")->setValue(0);
     mapViewController_->subProp("Angle")->setValue(0);
-    mapViewController_->subProp("Scale")->setValue(20);
+    mapViewController_->subProp("Scale")->setValue(100);
 
     // Create a map display
     mapDisplay_ = mapManager_->createDisplay( "rviz/Map", "2D Map view", true );
@@ -550,6 +554,22 @@ void ValkyrieGUI::updateArmSide(int btnID)
 void ValkyrieGUI::resetChestOrientation()
 {
     chestController_->controlChest(0.0f, 0.0f, 0.0f);
+}
+
+void ValkyrieGUI::resetArm()
+{
+    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    armJointController_->moveToDefaultPose(side);
+    getArmState();
+}
+
+void ValkyrieGUI::resetRobot()
+{
+    resetChestOrientation();
+    armJointController_->moveToDefaultPose(LEFT);
+    ros::Duration(0.2).sleep();
+    armJointController_->moveToDefaultPose(RIGHT);
+    getArmState();
 }
 
 void ValkyrieGUI::updateDisplay(int tabID)

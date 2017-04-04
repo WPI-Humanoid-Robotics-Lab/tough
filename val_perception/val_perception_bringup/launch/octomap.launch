@@ -10,7 +10,7 @@
                 <param name="filter_speckles" type="bool" value="true" />
 		
 		<!-- maximum range to integrate (speedup!) -->
-                <param name="sensor_model/max_range" value="30" />
+                <param name="sensor_model/max_range" value="10" />
                 <param name="sensor_model/hit" value="0.85" />
                 <param name="sensor_model/miss" value="0.45" />
                 <param name="sensor_model/min" value="0.1" />
@@ -20,15 +20,15 @@
                 <param name="base_frame_id" value="world" />
 
                 <!-- filter the ground plane. \todo: tune these parameters -->
-                <param name="filter_ground" value="true" />
-                <param name="ground_filter/distance" value="0.04"/>
-                <param name="ground_filter/plane_distance" value="0.05"/>
-                <param name="pointcloud_min_z" value="0"/>
-                <param name="occupancy_min_z" value="0"/>
-                <param name="occupancy_max_z" value="0.4"/>
+                <param name="filter_ground" value="false" />
+                <!--<param name="ground_filter/distance" value="0.04"/>-->
+                <!--<param name="ground_filter/plane_distance" value="0.05"/>-->
+                <!--<param name="pointcloud_min_z" value="0"/>-->
+                <!--<param name="occupancy_min_z" value="0"/>
+                <param name="occupancy_max_z" value="0.4"/>-->
 
                 <!-- data source to integrate (PointCloud2) -->
-                <remap from="cloud_in" to="/filtered_cloud2" />
+                <remap from="cloud_in" to="/walkway_filtered_points2" />
 
                 <!--remap the 2D map topic. There's a bug in octomap server which causes z value of the origin to be nan. 
 		    This is fixed in a node in perception_common publish_corrected_map node. Do not use the following line, 

@@ -8,10 +8,12 @@
         <rosparam param="self_see_links">[leftForearmLink, leftWristRollLink, leftPalm, leftThumbRollLink, leftThumbPitch1Link,
                                           leftThumbPitch2Link, leftThumbPitch3Link,leftShoulderPitchLink, leftShoulderRollLink, leftShoulderYawLink,
                                           leftElbowPitchLink, leftIndexFingerPitch1Link, leftMiddleFingerPitch1Link,leftPinkyPitch1Link,
+                                          leftHipPitchLink, leftKneePitchLink,
                                           upperNeckPitchLink, torso,
                                           rightForearmLink, rightWristRollLink, rightPalm, rightThumbRollLink, rightThumbPitch1Link,
                                           rightThumbPitch2Link, rightThumbPitch3Link,rightShoulderPitchLink, rightShoulderRollLink, rightShoulderYawLink,
-                                          rightElbowPitchLink, rightIndexFingerPitch1Link, rightMiddleFingerPitch1Link,rightPinkyPitch1Link ]
+                                          rightElbowPitchLink, rightIndexFingerPitch1Link, rightMiddleFingerPitch1Link,rightPinkyPitch1Link,
+                                          rightHipPitchLink, rightKneePitchLink]
         </rosparam>
     </node>
 
@@ -24,5 +26,6 @@
     </node>
 
     <node type="periodic_snapshotter" pkg="perception_common" name="val_laser_assembler_node"/>
+    <node type="val_walkway_filter" pkg="val_filters" name="val_walkway_filter"/>
   
 </launch>

@@ -14,13 +14,13 @@ find_package(catkin REQUIRED COMPONENTS
 #   std_msgs
 
 catkin_package(
-  INCLUDE_DIRS include LIBRARIES val_control CATKIN_DEPENDS geometry_msgs ihmc_msgs roscpp std_msgs tf val_common DEPENDS system_lib val_common val_footstep
+  INCLUDE_DIRS include
+  LIBRARIES val_control
+  CATKIN_DEPENDS geometry_msgs ihmc_msgs roscpp std_msgs tf val_common
+  DEPENDS system_lib val_common val_footstep
 )
 
-include_directories(include)
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
+include_directories(${catkin_INCLUDE_DIRS} include)
 
  add_library(val_control
    src/val_arm_navigation.cpp

@@ -1,49 +1,16 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(val_task1)
+project(val_perception_bringup)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
-if(NOT WIN32)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-sign-compare -Wno-ignored-qualifiers -Wno-unused-function")
-endif()
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  decision_making
-  decision_making_parser
-  roscpp
-  rospy
-  geometry_msgs
-
-  val_moveit_config
-  moveit_commander
-  moveit_core
-  moveit_fake_controller_manager
-  moveit_msgs
-  moveit_planners_ompl
-  moveit_ros_benchmarks
-  moveit_ros_benchmarks_gui
-  moveit_ros_control_interface
-  moveit_ros_manipulation
-  moveit_ros_move_group
-  moveit_ros_perception
-  moveit_ros_planning
-  moveit_ros_planning_interface
-  moveit_ros_robot_interaction
-  moveit_ros_visualization
-  moveit_ros_warehouse
-  moveit_simple_controller_manager
-  trac_ik_examples
-  trac_ik_kinematics_plugin
-  trac_ik_lib
-  val_control
-
-  val_gui
-)
+find_package(catkin REQUIRED)
 
 ## System dependencies are found with CMake's conventions
- find_package(Boost REQUIRED COMPONENTS system)
+# find_package(Boost REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -132,9 +99,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES val_task1
-  CATKIN_DEPENDS roscpp rospy
+#  INCLUDE_DIRS include
+#  LIBRARIES val_perception_bringup
+#  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
 
@@ -144,14 +111,11 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(include)
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
+# include_directories(include)
 
-# Declare a C++ library
+## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/val_task1SM.cpp
+#   src/${PROJECT_NAME}/val_perception_bringup.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -162,22 +126,8 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
- add_executable(val_task1_node
-            src/val_task1.cpp
-            src/val_task1SM.cpp
-)
+# add_executable(${PROJECT_NAME}_node src/val_perception_bringup_node.cpp)
 
-
-add_executable(val_circle src/val_circle.cpp)
-
-add_dependencies(val_circle
- ${${PROJECT_NAME}_EXPORTED_TARGETS}
- ${catkin_EXPORTED_TARGETS})
-
-target_link_libraries(val_circle
-   ${catkin_LIBRARIES}
-   val_marker
- )
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -186,16 +136,12 @@ target_link_libraries(val_circle
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(val_task1_node
- ${${PROJECT_NAME}_EXPORTED_TARGETS}
- ${catkin_EXPORTED_TARGETS})
+# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(val_task1_node
-   ${catkin_LIBRARIES}
- )
-
-decision_making_parsing(src/val_task1SM.cpp)
+# target_link_libraries(${PROJECT_NAME}_node
+#   ${catkin_LIBRARIES}
+# )
 
 #############
 ## Install ##
@@ -237,7 +183,7 @@ decision_making_parsing(src/val_task1SM.cpp)
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_val_task1.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_val_perception_bringup.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
