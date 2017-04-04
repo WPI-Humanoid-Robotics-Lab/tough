@@ -8,7 +8,8 @@ armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
     ZERO_POSE{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
     DEFAULT_RIGHT_POSE{-0.2f, 1.2f, 0.7222f, 1.5101f, 0.0f, 0.0f, 0.0f},
     DEFAULT_LEFT_POSE{-0.2f, -1.2f, 0.7222f, -1.5101f, 0.0f, 0.0f, 0.0f},
-    NUM_ARM_JOINTS(7){
+    NUM_ARM_JOINTS(7),
+    NUDGE_STEP(0.1){
 
     armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/arm_trajectory", 1,true);
     handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>("/ihmc_ros/valkyrie/control/hand_desired_configuration", 1,true);
@@ -102,6 +103,7 @@ void armTrajectory::moveArmJoints(std::vector<armJointData> &arm_data){
 
     arm_traj_r.joint_trajectory_messages.clear();
     arm_traj_r.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
+
 
     armTrajectory::arm_id--;
     arm_traj_r.unique_id = armTrajectory::arm_id;
@@ -246,6 +248,11 @@ void armTrajectory::moveArmTrajectory(const armSide side, const trajectory_msgs:
     }
     ROS_INFO("Publishing Arm Trajectory");
     armTrajectoryPublisher.publish(arm_traj);
+}
+
+void armTrajectory::nudgeArm(const armSide side, const direction drct)
+{
+
 }
 
 
