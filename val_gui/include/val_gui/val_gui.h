@@ -34,6 +34,7 @@
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Pose.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
@@ -149,6 +150,7 @@ private:
     void getPelvisState();
     void getNeckState();
     void getGripperState();
+    void getClickedPoint(const geometry_msgs::PointStamped::Ptr msg);
 
 private Q_SLOTS:
     void closeGrippers();
@@ -167,6 +169,7 @@ private Q_SLOTS:
     void updateDisplay(int tabID);
     void resetArm();
     void resetRobot();
+    void moveToPoint();
 
 private:
   rviz::VisualizationManager* manager_;
@@ -205,7 +208,7 @@ private:
 //  ros::Subscriber baseSensorStatus;
   ros::Subscriber rviz2DNavGoalSub;
   ros::Subscriber jointStateSub_;
-
+  ros::Subscriber clickedPointSub_;
   tf::TransformListener listener_;
 
   image_transport::ImageTransport it_;
@@ -217,6 +220,9 @@ private:
   ValkyrieWalker   *walkingController_;
   HeadTrajectory   *headController_;
   gripperControl   *gripperController_;
+
+  geometry_msgs::Pose   *clickedPoint_;
+  bool                  moveArmCommand_;
 
   std::mutex                      mtx_;
   std::map<std::string, QLabel*>  jointLabelMap_;

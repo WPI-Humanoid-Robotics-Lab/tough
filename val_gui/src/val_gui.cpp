@@ -30,6 +30,9 @@ ValkyrieGUI::ValkyrieGUI(QWidget *parent) :
     headController_         = nullptr;
     gripperController_      = nullptr;
 
+    //clickedpoint is used for moving arm in taskspace
+    clickedPoint_           = nullptr;
+
     //initialize everything
     initVariables();
     initDisplayWidgets();
@@ -52,6 +55,7 @@ ValkyrieGUI::~ValkyrieGUI()
     delete armJointController_;
     delete headController_;
     delete gripperController_;
+    delete clickedPoint_;
 }
 
 void ValkyrieGUI::initVariables()
@@ -79,12 +83,11 @@ void ValkyrieGUI::initVariables()
     goalTopic_        = QString::fromStdString(configfile.currentTopics["goalTopic"]);
     footstepTopic_    = QString::fromStdString(configfile.currentTopics["footstepTopic"]);
     jointStatesTopic_ = QString::fromStdString(configfile.currentTopics["jointStatesTopic"]);
-    //    moveBaseCmdPub  = nh_.advertise<geometry_msgs::Twist>(velocityTopic_.toStdString(),1);
-    //    baseSensorStatus = nh_.subscribe(baseSensorTopic_.toStdString(),1,&FallRiskGUI::baseStatusCheck,this);
-    liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ValkyrieGUI::liveVideoCallback,this,image_transport::TransportHints("compressed"));
 
-    jointStateSub_ = nh_.subscribe(jointStatesTopic_.toStdString(),1, &ValkyrieGUI::jointStateCallBack, this);
-    ROS_INFO("Listening to %s topic for joint states", jointStatesTopic_.toStdString().c_str());
+    //subscribers
+    liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ValkyrieGUI::liveVideoCallback,this,image_transport::TransportHints("compressed"));
+    jointStateSub_  = nh_.subscribe(jointStatesTopic_.toStdString(),1, &ValkyrieGUI::jointStateCallBack, this);
+    clickedPointSub_= nh_.subscribe("clicked_point",1, &ValkyrieGUI::getClickedPoint, this);
 
     //initialize a onetime map to lookup for joint values
     std::vector<std::string> joints = {"leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch",
@@ -99,6 +102,9 @@ void ValkyrieGUI::initVariables()
     for(size_t i = 0; i< joints.size(); ++i){
         jointLabelMap_[joints[i]] = jointLabels[i];
     }
+
+    //moveArmCommand is a flag used to check if user intends to move arm or just publish a point
+    moveArmCommand_ = false;
 }
 
 void ValkyrieGUI::initActionsConnections()
@@ -119,6 +125,9 @@ void ValkyrieGUI::initActionsConnections()
     connect(ui->btnGroupDisplays,        SIGNAL(buttonClicked(int)),   this, SLOT(displayPointcloud(int)));
     connect(ui->controlTabs,             SIGNAL(currentChanged(int)),  this, SLOT(updateJointStateSub(int)));
     connect(ui->tab_display,             SIGNAL(currentChanged(int)),  this, SLOT(updateDisplay(int)));
+
+    //nudge
+    connect(ui->btnMoveToPoint,          SIGNAL(clicked()),            this, SLOT(moveToPoint()));
 
     //arm control
     connect(ui->btnGroupArm,             SIGNAL(buttonClicked(int)),   this, SLOT(updateArmSide(int)));
@@ -199,10 +208,7 @@ void ValkyrieGUI::initDisplayWidgets()
     mapManager_->createDisplay( "rviz/RobotModel", robotType_, true );
     mapManager_->createDisplay("rviz/Path","Global path",true)->subProp( "Topic" )->setValue(pathTopic_);
     mapManager_->createDisplay( "rviz/Grid", "Grid", true );
-    //footsteps should be added to manager before it is initialized
-    //    mapManager_->createDisplay("rviz/MarkerArray", "Footsteps", true)->subProp("Marker Topic")->setValue(footstepTopic_);
-
-
+    mapManager_->createDisplay("rviz/MarkerArray", "Footstep markers", true)->subProp("Marker Topic")->setValue(footstepTopic_);
 
     // Initialize GUI elements for main panel
     renderPanel_ = new rviz::RenderPanel();
@@ -234,23 +240,28 @@ void ValkyrieGUI::initDisplayWidgets()
 
     octomapDisplay_->subProp("Marker Topic")->setValue(octomapTopic_);
 
+    footstepMarkersDisplay_ = manager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
+    ROS_ASSERT(footstepMarkersDisplay_ != NULL);
+
+    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
+    footstepMarkersDisplay_->setEnabled(true);
+
     //Assign Target Frame to the existing viewmanager of the visualization manager
     rviz::ViewManager*    viewManager_    = manager_->getViewManager();
     rviz::ViewController* viewController_ = viewManager_->getCurrent();
     viewController_->subProp("Target Frame")->setValue(targetFrame_);
     manager_->createDisplay("rviz/Path","Global path",true)->subProp( "Topic" )->setValue(pathTopic_);
-    //fix things that cannot be changed in UI
-    //    ui->tabArmControlPage1->setObjectName("Shoulder");
-    //    ui->tabArmControlPage2->setObjectName("Wrist");
 
-    footstepMarkersDisplay_ = mapManager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
-    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
-    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
-    //    footstepMarkersDisplay_->subProp("Namespaces")->setValue("");
-    footstepMarkersDisplay_ = manager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
-    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
-    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
-    //    footstepMarkersDisplay_->subProp("Namespaces")->setValue("");
+//    footstepMarkersDisplay_ = mapManager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
+//    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
+//    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
+//    footstepMarkersDisplay_->subProp("Namespaces")->setValue("valkyrie");
+//    footstepMarkersDisplay_ = manager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
+//    ROS_ASSERT(footstepMarkersDisplay_ != NULL);
+
+//    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
+//    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
+//    footstepMarkersDisplay_->subProp("Namespaces")->setValue("valkyrie");
 
     ui->sliderLowerNeckPitch->setEnabled(false);
     QImage qImage("../resources/coordinates.png");
@@ -276,6 +287,7 @@ void ValkyrieGUI::initTools(){
     // Find the entry in propertytreemodel and set the value for Topic
     setGoalTool_->getPropertyContainer()->subProp("Topic")->setValue(goalTopic_);
     setMapGoalTool_->getPropertyContainer()->subProp("Topic")->setValue(goalTopic_);
+
 }
 
 void ValkyrieGUI::initDefaultValues() {
@@ -304,7 +316,7 @@ void ValkyrieGUI::initDefaultValues() {
 
     //Neck control . Replace these defaults with actual values from robot
     float zeroUpperPitch = fabs(UPPER_NECK_PITCH_MIN/((UPPER_NECK_PITCH_MAX - UPPER_NECK_PITCH_MIN)/100.0));
-//    float zeroLowerPitch = fabs(LOWER_NECK_PITCH_MIN/((LOWER_NECK_PITCH_MAX - LOWER_NECK_PITCH_MIN)/100.0));
+    //    float zeroLowerPitch = fabs(LOWER_NECK_PITCH_MIN/((LOWER_NECK_PITCH_MAX - LOWER_NECK_PITCH_MIN)/100.0));
     zeroYaw   = fabs(NECK_YAW_MIN/((NECK_YAW_MAX - NECK_YAW_MIN)/100.0));
     ui->sliderUpperNeckPitch->setValue(zeroUpperPitch);
     //ui->sliderLowerNeckPitch->setValue(zeroLowerPitch);
@@ -457,6 +469,24 @@ void ValkyrieGUI::getGripperState()
 
 }
 
+void ValkyrieGUI::getClickedPoint(const geometry_msgs::PointStamped::Ptr msg)
+{
+    if (!moveArmCommand_)
+        return;
+
+    if (clickedPoint_ != nullptr)
+        delete clickedPoint_;
+    ROS_INFO("Creating new point");
+    clickedPoint_ = new geometry_msgs::Pose();
+    clickedPoint_->orientation.w = 1.0;
+    clickedPoint_->position = msg->point;
+
+    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    ROS_INFO("Moving arm");
+    armJointController_->moveArmInTaskSpace(side, *clickedPoint_, 3.0f);
+    moveArmCommand_ = false;
+}
+
 void ValkyrieGUI::jointStateCallBack(const sensor_msgs::JointStatePtr &state)
 {
     static short count = 0;
@@ -543,6 +573,16 @@ void ValkyrieGUI::resetRobot()
     ros::Duration(0.2).sleep();
     armJointController_->moveToDefaultPose(RIGHT);
     getArmState();
+}
+
+void ValkyrieGUI::moveToPoint()
+{
+    toolManager_->setCurrentTool(pointTool_);
+    moveArmCommand_ = true;
+    //    pointTool_->getPropertyContainer()->subProp("Topic")->setValue("clicked_point");
+    //    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    //    armJointController_->moveArmInTaskSpace(side, *clickedPoint_);
+
 }
 
 void ValkyrieGUI::updateDisplay(int tabID)
