@@ -153,23 +153,30 @@ private:
     void getClickedPoint(const geometry_msgs::PointStamped::Ptr msg);
 
 private Q_SLOTS:
-    void closeGrippers();
-    void openGrippers();
     void keyPressEvent(QKeyEvent *event);
+
     void setCurrentTool(int btnID);
     void displayPointcloud(int btnID);
+    void updateDisplay(int tabID);
+
+    void changePelvisHeight();
+    void walkSteps();
     void moveChestJoints();
     void moveHeadJoints();
-    void walkSteps();
-    void changePelvisHeight();
     void moveArmJoints();
+    void moveToPoint();
+    void nudgeArm(int btnID);
+
+    void closeGrippers();
+    void openGrippers();
+
     void updateJointStateSub(int tabID);
     void updateArmSide(int btnID);
+
     void resetChestOrientation();
-    void updateDisplay(int tabID);
     void resetArm();
     void resetRobot();
-    void moveToPoint();
+
 
 private:
   rviz::VisualizationManager* manager_;

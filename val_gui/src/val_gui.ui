@@ -188,7 +188,7 @@
        </size>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="1" column="0">
+       <item row="0" column="0">
         <widget class="QTabWidget" name="controlTabs">
          <property name="maximumSize">
           <size>
@@ -205,10 +205,36 @@
           </attribute>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
-            <widget class="QPushButton" name="btnMoveToPoint">
-             <property name="text">
-              <string>Move to Point</string>
-             </property>
+            <widget class="QWidget" name="widget_2" native="true">
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QWidget" name="widget_8" native="true">
+                <layout class="QHBoxLayout" name="horizontalLayout_15">
+                 <item>
+                  <widget class="QRadioButton" name="radioNudgeSideLeft">
+                   <property name="text">
+                    <string>Left</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioNudgeSideRight">
+                   <property name="text">
+                    <string>Right</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnMoveToPoint">
+                <property name="text">
+                 <string>Move to Point</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </item>
            <item>
@@ -232,6 +258,9 @@
                 <property name="text">
                  <string>Down</string>
                 </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">btnGroupNudge</string>
+                </attribute>
                </widget>
               </item>
               <item row="0" column="4" colspan="2">
@@ -239,6 +268,9 @@
                 <property name="text">
                  <string>Up</string>
                 </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">btnGroupNudge</string>
+                </attribute>
                </widget>
               </item>
               <item row="1" column="2" rowspan="5" colspan="6">
@@ -259,6 +291,9 @@
                 <property name="text">
                  <string>Back</string>
                 </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">btnGroupNudge</string>
+                </attribute>
                </widget>
               </item>
               <item row="2" column="0" colspan="2">
@@ -266,6 +301,9 @@
                 <property name="text">
                  <string>Left</string>
                 </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">btnGroupNudge</string>
+                </attribute>
                </widget>
               </item>
               <item row="4" column="8" colspan="2">
@@ -273,6 +311,9 @@
                 <property name="text">
                  <string>Right</string>
                 </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">btnGroupNudge</string>
+                </attribute>
                </widget>
               </item>
               <item row="2" column="8" colspan="2">
@@ -280,6 +321,9 @@
                 <property name="text">
                  <string>Front</string>
                 </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">btnGroupNudge</string>
+                </attribute>
                </widget>
               </item>
              </layout>
@@ -401,7 +445,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>437</width>
+                   <width>104</width>
                    <height>87</height>
                   </rect>
                  </property>
@@ -1106,6 +1150,11 @@ p, li { white-space: pre-wrap; }
       </layout>
      </widget>
     </item>
+    <item row="5" column="4">
+     <widget class="QWidget" name="btnGrpArmSide_2" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout_11"/>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -1123,9 +1172,10 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="btnGroupRvizTools"/>
-  <buttongroup name="btnGroupArm"/>
   <buttongroup name="btnGroupFeet"/>
+  <buttongroup name="btnGroupArm"/>
   <buttongroup name="btnGroupDisplays"/>
+  <buttongroup name="btnGroupRvizTools"/>
+  <buttongroup name="btnGroupNudge"/>
  </buttongroups>
 </ui>

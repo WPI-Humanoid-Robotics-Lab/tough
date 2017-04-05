@@ -128,6 +128,7 @@ void ValkyrieGUI::initActionsConnections()
 
     //nudge
     connect(ui->btnMoveToPoint,          SIGNAL(clicked()),            this, SLOT(moveToPoint()));
+    connect(ui->btnGroupNudge,           SIGNAL(buttonClicked(int)),   this, SLOT(nudgeArm(int)));
 
     //arm control
     connect(ui->btnGroupArm,             SIGNAL(buttonClicked(int)),   this, SLOT(updateArmSide(int)));
@@ -264,7 +265,9 @@ void ValkyrieGUI::initDisplayWidgets()
 //    footstepMarkersDisplay_->subProp("Namespaces")->setValue("valkyrie");
 
     ui->sliderLowerNeckPitch->setEnabled(false);
-    QImage qImage("../resources/coordinates.png");
+
+    QString imagePath = QString::fromStdString(ros::package::getPath("val_gui") + "/resources/coordinates.png");
+    QImage qImage(imagePath);
     ui->lblAxes->setPixmap(QPixmap::fromImage(qImage));
 }
 
@@ -296,6 +299,7 @@ void ValkyrieGUI::initDefaultValues() {
 
     //Arms select left arm by default
     ui->radioArmSideLeft->setChecked(true);
+    ui->radioNudgeSideLeft->setChecked(true);
 
     //Set the default values for the offset
     ui->lineEditNumSteps->setText("2");
@@ -481,7 +485,7 @@ void ValkyrieGUI::getClickedPoint(const geometry_msgs::PointStamped::Ptr msg)
     clickedPoint_->orientation.w = 1.0;
     clickedPoint_->position = msg->point;
 
-    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    armSide side = ui->radioNudgeSideLeft->isChecked() ? LEFT : RIGHT;
     ROS_INFO("Moving arm");
     armJointController_->moveArmInTaskSpace(side, *clickedPoint_, 3.0f);
     moveArmCommand_ = false;
@@ -582,6 +586,40 @@ void ValkyrieGUI::moveToPoint()
     //    pointTool_->getPropertyContainer()->subProp("Topic")->setValue("clicked_point");
     //    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
     //    armJointController_->moveArmInTaskSpace(side, *clickedPoint_);
+
+}
+
+void ValkyrieGUI::nudgeArm(int btnID)
+{
+    //    down -2
+    //    up  -3
+    //    back  -4
+    //    front -7
+    //    left  -5
+    //    right -6
+    armSide side = ui->radioNudgeSideLeft->isChecked() ? LEFT : RIGHT;
+    switch (btnID) {
+    case -2: //down
+        armJointController_->nudgeArm(side, direction::DOWN);
+        break;
+    case -3: //up
+        armJointController_->nudgeArm(side, direction::UP);
+        break;
+    case -4: //back
+        armJointController_->nudgeArm(side, direction::BACK);
+        break;
+    case -7: //front
+        armJointController_->nudgeArm(side, direction::FRONT);
+        break;
+    case -5: //left
+        armJointController_->nudgeArm(side, direction::LEFT);
+        break;
+    case -6: //right
+        armJointController_->nudgeArm(side, direction::RIGHT);
+        break;
+    default:
+        break;
+    }
 
 }
 
