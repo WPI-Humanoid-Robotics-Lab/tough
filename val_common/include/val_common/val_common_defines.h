@@ -9,9 +9,9 @@ enum armSide
 
 enum class direction{
     LEFT = 0,  //Positive Y
-    RIGHT,     //Negetive Y
+    RIGHT,     //Negative Y
     UP,        //Positive Z
-    DOWN,      //Negetive Z
+    DOWN,      //Negative Z
     FRONT,     //Positive X
-    BACK       //Negetive X
+    BACK       //Negative X
 };

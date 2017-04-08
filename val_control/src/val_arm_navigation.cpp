@@ -1,5 +1,6 @@
 #include<val_control/val_arm_navigation.h>
 #include<stdlib.h>
+#include<visualization_msgs/Marker.h>
 
 int armTrajectory::arm_id = -1;
 
@@ -8,16 +9,19 @@ armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
     ZERO_POSE{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
     DEFAULT_RIGHT_POSE{-0.2f, 1.2f, 0.7222f, 1.5101f, 0.0f, 0.0f, 0.0f},
     DEFAULT_LEFT_POSE{-0.2f, -1.2f, 0.7222f, -1.5101f, 0.0f, 0.0f, 0.0f},
-    NUM_ARM_JOINTS(7),
-    NUDGE_STEP(0.1){
-
+    NUM_ARM_JOINTS(7){
+    //tf_listener_ = new tf2_ros::TransformListener(this->tf_buffer_);
     armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/arm_trajectory", 1,true);
     handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>("/ihmc_ros/valkyrie/control/hand_desired_configuration", 1,true);
     taskSpaceTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/hand_trajectory", 1, true);
+    markerPub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
+
+    //this->armTrajectorySunscriber = nh_.subscribe("/ihmc_ros/valkyrie/output/ha", 20,&ValkyrieWalker::footstepStatusCB, this);
+
 }
 
 armTrajectory::~armTrajectory(){
-
+    //delete tf_listener_;
 }
 
 
@@ -88,7 +92,7 @@ void armTrajectory::moveArmJoints(const armSide side, const std::vector<std::vec
     arm_traj.unique_id = armTrajectory::arm_id;
     for(auto i=arm_pose.begin(); i != arm_pose.end(); i++){
            if(i->size() != NUM_ARM_JOINTS)
-           ROS_ERROR("Check number of trajectory points");
+           ROS_WARN("Check number of trajectory points");
         appendTrajectoryPoint(arm_traj, time/arm_pose.size(), *i);
     }
 
@@ -250,17 +254,61 @@ void armTrajectory::moveArmTrajectory(const armSide side, const trajectory_msgs:
     armTrajectoryPublisher.publish(arm_traj);
 }
 
-void armTrajectory::nudgeArm(const armSide side, const direction drct)
-{
+bool armTrajectory::nudgeArm(const armSide side, const direction drct, float nudgeStep){
 
+    geometry_msgs::PoseStamped      world_values;
+    geometry_msgs::PoseStamped      palm_values;
+
+    world_values.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
+
+    std::string target_frame = side == LEFT ? "/leftMiddleFingerPitch1Link" : "/rightMiddleFingerPitch1Link";
+
+    try{
+        tf::StampedTransform            tf_palm_values;
+        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,target_frame, ros::Time(0),ros::Duration(2));
+        tf_listener_.lookupTransform(VAL_COMMON_NAMES::PELVIS_TF, target_frame, ros::Time(0),tf_palm_values);
+
+        tf::pointTFToMsg(tf_palm_values.getOrigin(), palm_values.pose.position);
+        tf::quaternionTFToMsg(tf_palm_values.getRotation(), palm_values.pose.orientation);
+        palm_values.header.frame_id=VAL_COMMON_NAMES::PELVIS_TF;
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+    if     (drct == direction::LEFT)     palm_values.pose.position.y += nudgeStep;
+    else if(drct == direction::RIGHT)    palm_values.pose.position.y -= nudgeStep;
+    else if(drct == direction::UP)       palm_values.pose.position.z += nudgeStep;
+    else if(drct == direction::DOWN)     palm_values.pose.position.z -= nudgeStep;
+    else if(drct == direction::FRONT)    palm_values.pose.position.x += nudgeStep;
+    else if(drct == direction::BACK)     palm_values.pose.position.x -= nudgeStep;
+
+    try{
+        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        tf_listener_.transformPose(VAL_COMMON_NAMES::WORLD_TF,palm_values,world_values);
+    }
+    catch (tf::TransformException ex) {
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+    moveArmInTaskSpace(side,world_values.pose, 0.0f);
+    return true;
 }
+
 
 
 void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point)
 {
 
-    if(point.positions.size() != NUM_ARM_JOINTS)
-    ROS_ERROR("Check number of trajectory points");
+    if(point.positions.size() != NUM_ARM_JOINTS) {
+        ROS_WARN("Check number of trajectory points");
+        return;
+    }
 
     for (int i=0;i<NUM_ARM_JOINTS;i++)
     {
@@ -275,3 +323,5 @@ void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &ms
 
     return;
 }
+
+
