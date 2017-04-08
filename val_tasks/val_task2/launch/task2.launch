@@ -2,6 +2,9 @@
     <arg name="events" default="true" />
     <arg name="gui" default="true" />
 
+    <!-- load the task 2 parameters on the server -->
+    <rosparam command="load" file="$(find val_task2)/config/task2_params.yaml" />
+
     <!-- task2 node -->
     <node name="task2" pkg="val_task2" type="val_task2_node" output="screen"/>
 

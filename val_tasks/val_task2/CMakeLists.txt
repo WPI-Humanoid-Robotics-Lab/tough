@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(val_task2)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
-# add_definitions(-std=c++11)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -121,9 +121,10 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/fsm_task2.cpp
-# )
+ add_library(${PROJECT_NAME}
+            src/val_task2.cpp
+            src/val_task2SM.cpp
+ )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -134,8 +135,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
  add_executable(val_task2_node
-            src/val_task2.cpp
-            src/val_task2SM.cpp
+            src/val_task2_node.cpp
 )
 
 ## Rename C++ executable without prefix
@@ -153,6 +153,7 @@ add_dependencies(val_task2_node
 ## Specify libraries to link a library or executable target against
  target_link_libraries(val_task2_node
    ${catkin_LIBRARIES}
+   ${PROJECT_NAME}
  )
 
 decision_making_parsing(src/val_task2SM.cpp)
