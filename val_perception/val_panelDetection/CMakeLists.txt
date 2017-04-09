@@ -12,17 +12,22 @@ SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
 
-find_package( OpenCV REQUIRED )
+find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
+find_package(Boost REQUIRED COMPONENTS system)
+find_package(PCL REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
+  geometry_msgs
   pcl_conversions
   pcl_ros
   perception_common
   roscpp
   sensor_msgs
   std_msgs
+  tf
+  tf_conversions
 )
 
 ## System dependencies are found with CMake's conventions
@@ -138,7 +143,7 @@ include_directories(perception_common
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/val_panelDetection.cpp
+#   src/val_panelDetection/sdc_pointcloud.h
 # )
 
 ## Add cmake target dependencies of the library
@@ -150,8 +155,8 @@ include_directories(perception_common
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 
- add_executable(panelDetector_node src/panelDetector_node.cpp)
-
+# add_executable(panelDetector_node src/panelDetector_node.cpp)
+ add_executable(panel_detection src/sdc_pointcloud.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -163,7 +168,8 @@ include_directories(perception_common
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(panelDetector_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+#target_link_libraries(panelDetector_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+ target_link_libraries(panel_detection ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
 
 #############
 ## Install ##
