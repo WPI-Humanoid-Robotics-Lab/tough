@@ -27,9 +27,12 @@ namespace VAL_COMMON_NAMES
     /* valkyrie Left Foot*/
     static const std::string L_FOOT_TF = "/leftFoot";
 
-
     /* world frame*/
     static const std::string WORLD_TF = "/world";
+
+    /* Topics*/
+    static const std::string RECTIFIED_IMAGE_TOPIC = "/multisense/camera/left/image_rect_color";
+
 }
 
 #endif
