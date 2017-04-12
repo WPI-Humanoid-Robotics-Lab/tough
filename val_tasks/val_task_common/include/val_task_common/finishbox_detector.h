@@ -6,16 +6,15 @@
 
 class finishbox_detector{
 public:
-    finishbox_detector(ros::NodeHandle nh);
+    finishbox_detector(ros::NodeHandle &nh);
     ~finishbox_detector();
 
 private:
-    ros::NodeHandle nh_;
-    image_transport::ImageTransport it_;
-    image_transport::Subscriber imageSub_;
-    image_transport::Publisher  imagePub_;
 
-    void imageCallback(sensor_msgs::ImageConstPtr &in_img);
+    ros::Subscriber imageSub_;
+    ros::Publisher  imagePub_;
+
+    void imageCallback(const sensor_msgs::Image &in_img);
     void detectFinishBox(sensor_msgs::Image &img);
 
 };

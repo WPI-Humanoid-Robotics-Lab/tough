@@ -50,7 +50,6 @@ QT4_WRAP_UI(MOC_GUI_H
   ${FORM_FILES}
 )
 
-include_directories(include)
 add_library(val_marker
   src/val_marker.cpp
 )

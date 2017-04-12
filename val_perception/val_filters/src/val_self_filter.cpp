@@ -56,8 +56,8 @@ public:
     {
         id_          = 1;
         vmPub_       = nodeHandle_.advertise<visualization_msgs::Marker>("visualization_marker", 10240);
-        vmOutputPub_ = nodeHandle_.advertise<sensor_msgs::PointCloud>("filtered_cloud", 1);
-        vmOutputPub2_= nodeHandle_.advertise<sensor_msgs::PointCloud2>("filtered_cloud2", 1);
+        vmOutputPub_ = nodeHandle_.advertise<sensor_msgs::PointCloud>(PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_FILTERED_CLOUD_TOPIC, 1);
+        vmOutputPub2_= nodeHandle_.advertise<sensor_msgs::PointCloud2>(PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_FILTERED_CLOUD_TOPIC2, 1);
         vmSub_       = nodeHandle_.subscribe(PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_CLOUD_TOPIC,100, &val_self_filter::run, this);
 
         std::vector<robot_self_filter::LinkInfo> links;

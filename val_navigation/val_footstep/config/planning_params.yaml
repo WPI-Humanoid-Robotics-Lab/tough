@@ -19,7 +19,7 @@ heuristic_type: EuclStepCostHeuristic
 planner_type: ARAPlanner
 
 # search until a specific time limit is reached or first solution is found
-search_until_first_solution: False
+search_until_first_solution: True
 
 # the maximum search time if search_until_first_solution is set to False
 allocated_time: 7.0
