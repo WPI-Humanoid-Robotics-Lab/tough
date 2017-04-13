@@ -11,7 +11,7 @@ def callback(data):
       pub = rospy.Publisher('/multisense/set_spindle_speed', Float64, queue_size=10)
       time.sleep(1)
       subprocess.Popen(["roslaunch", "val_grasping", "val_grasping.launch"])
-      pub.publish(1.5)
+      pub.publish(0.8)
       subprocess.Popen(["roslaunch", "val_perception_bringup", "laser_assembler.launch"])
       subprocess.Popen(["roslaunch", "val_perception_bringup", "octomap.launch"])
       subprocess.Popen(["roslaunch", "val_footstep", "val_footstep.launch"])

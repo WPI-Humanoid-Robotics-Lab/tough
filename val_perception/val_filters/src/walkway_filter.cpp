@@ -11,11 +11,12 @@
 #include <pcl/range_image/range_image_planar.h>
 #include <val_common/val_common_names.h>
 #include <val_filters/walkway_filter.h>
+#include <perception_common/perception_common_names.h>
 
 WalkwayFilter::WalkwayFilter(ros::NodeHandle &n):nh_(n)
 {
     pointcloudPub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ> >("walkway_filtered_points2",1);
-    pointcloudSub_ = nh_.subscribe("assembled_cloud2", 1,  &WalkwayFilter::generateMap, this);
+    pointcloudSub_ = nh_.subscribe(PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_FILTERED_CLOUD_TOPIC2, 1,  &WalkwayFilter::generateMap, this);
 }
 
 WalkwayFilter::~WalkwayFilter()
