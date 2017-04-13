@@ -199,6 +199,138 @@
          <property name="currentIndex">
           <number>0</number>
          </property>
+         <widget class="QWidget" name="tab">
+          <attribute name="title">
+           <string>Nudge</string>
+          </attribute>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QWidget" name="widget_2" native="true">
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QWidget" name="widget_8" native="true">
+                <layout class="QHBoxLayout" name="horizontalLayout_15">
+                 <item>
+                  <widget class="QRadioButton" name="radioNudgeSideLeft">
+                   <property name="text">
+                    <string>Left</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioNudgeSideRight">
+                   <property name="text">
+                    <string>Right</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnMoveToPoint">
+                <property name="text">
+                 <string>Move to Point</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QWidget" name="widget_2" native="true">
+             <layout class="QGridLayout" name="gridLayout_15">
+              <item row="6" column="4" colspan="2">
+               <widget class="QPushButton" name="btnDown">
+                <property name="text">
+                 <string>Down</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">btnGroupNudge</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="0" column="4" colspan="2">
+               <widget class="QPushButton" name="btnUp">
+                <property name="text">
+                 <string>Up</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">btnGroupNudge</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="1" column="2" rowspan="5" colspan="6">
+               <widget class="QLabel" name="lblAxes">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="scaledContents">
+                 <bool>true</bool>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0" colspan="2">
+               <widget class="QPushButton" name="btnBack">
+                <property name="text">
+                 <string>Back</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">btnGroupNudge</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="2" column="0" colspan="2">
+               <widget class="QPushButton" name="btnLeft">
+                <property name="text">
+                 <string>Left</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">btnGroupNudge</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="4" column="8" colspan="2">
+               <widget class="QPushButton" name="btnRight">
+                <property name="text">
+                 <string>Right</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">btnGroupNudge</string>
+                </attribute>
+               </widget>
+              </item>
+              <item row="2" column="8" colspan="2">
+               <widget class="QPushButton" name="btnFront">
+                <property name="text">
+                 <string>Front</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">btnGroupNudge</string>
+                </attribute>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
          <widget class="QWidget" name="tabArm">
           <attribute name="title">
            <string>Arm</string>
@@ -313,7 +445,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>437</width>
+                   <width>104</width>
                    <height>87</height>
                   </rect>
                  </property>
@@ -719,7 +851,7 @@ p, li { white-space: pre-wrap; }
       </layout>
      </widget>
     </item>
-    <item row="4" column="3">
+    <item row="4" column="4">
      <widget class="QGroupBox" name="groupBox">
       <property name="maximumSize">
        <size>
@@ -1018,6 +1150,11 @@ p, li { white-space: pre-wrap; }
       </layout>
      </widget>
     </item>
+    <item row="5" column="4">
+     <widget class="QWidget" name="btnGrpArmSide_2" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout_11"/>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -1036,8 +1173,9 @@ p, li { white-space: pre-wrap; }
  <connections/>
  <buttongroups>
   <buttongroup name="btnGroupFeet"/>
-  <buttongroup name="btnGroupDisplays"/>
   <buttongroup name="btnGroupArm"/>
+  <buttongroup name="btnGroupDisplays"/>
   <buttongroup name="btnGroupRvizTools"/>
+  <buttongroup name="btnGroupNudge"/>
  </buttongroups>
 </ui>

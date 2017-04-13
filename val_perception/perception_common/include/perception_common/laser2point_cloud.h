@@ -78,7 +78,7 @@ public:
      * @param baseFrame an std::string specifying the frame that is to be used as a reference for creating pointcloud
      * @param pointCloudTopic an std::string specifying the topic name on which pointcloud2 data will be published
      */
-    Laser2PointCloud(ros::NodeHandle n, const std::string laserScanTopic, const std::string baseFrame, const std::string pointCloudTopic);
+    Laser2PointCloud(ros::NodeHandle n, const std::string laserScanTopic, const std::string baseFrame, const std::string pointCloudTopic, const std::string pointCloud2Topic);
 
 
 };

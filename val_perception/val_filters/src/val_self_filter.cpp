@@ -56,13 +56,16 @@ public:
     {
         id_          = 1;
         vmPub_       = nodeHandle_.advertise<visualization_msgs::Marker>("visualization_marker", 10240);
-        vmOutputPub_ = nodeHandle_.advertise<sensor_msgs::PointCloud>("filtered_cloud", 1);
-        vmOutputPub2_= nodeHandle_.advertise<sensor_msgs::PointCloud2>("filtered_cloud2", 1);
+        vmOutputPub_ = nodeHandle_.advertise<sensor_msgs::PointCloud>(PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_FILTERED_CLOUD_TOPIC, 1);
+        vmOutputPub2_= nodeHandle_.advertise<sensor_msgs::PointCloud2>(PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_FILTERED_CLOUD_TOPIC2, 1);
         vmSub_       = nodeHandle_.subscribe(PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_CLOUD_TOPIC,100, &val_self_filter::run, this);
 
         std::vector<robot_self_filter::LinkInfo> links;
         std::string ns = nodeHandle_.getNamespace();
-        if (!nodeHandle_.hasParam("robot_self_filter/self_see_links")){
+        //namespace has 2 forward slashes in front of it, I'll look into it if I have enough time
+        ns = ns.substr(1, ns.length()-1);
+
+        if (!nodeHandle_.hasParam(ns+"/robot_self_filter/self_see_links")){
             robot_self_filter::LinkInfo li;
             li.name="base_link";
             li.padding = .05f;
@@ -72,12 +75,11 @@ public:
         else {
             //get the links to filter out
             std::vector<std::string> ssl_vals;
-            nodeHandle_.getParam("robot_self_filter/self_see_links", ssl_vals);
+            nodeHandle_.getParam(ns+"/robot_self_filter/self_see_links", ssl_vals);
 
             if(ssl_vals.size() == 0) {
                 ROS_WARN("Self see links need to be an array with size >=1");
             }
-
             for(int i = 0; i < ssl_vals.size(); i++) {
                 robot_self_filter::LinkInfo li;
                 li.name = ssl_vals.at(i);
@@ -88,6 +90,7 @@ public:
         }
 
         sf_ = new robot_self_filter::SelfMask<pcl::PointXYZ>(tf_, links);
+
     }
 
     ~val_self_filter(void)
@@ -142,7 +145,7 @@ public:
             sensor_msgs::PointCloud  cloud;
             sensor_msgs::convertPointCloud2ToPointCloud(cloud2,cloud);
             cloud.header = msg_in->header;
-            ROS_DEBUG("Took %0.4f seconds for filtering",(ros::WallTime::now() - start).toSec());
+//            ROS_INFO("Took %0.4f seconds for filtering",(ros::WallTime::now() - start).toSec());
             vmOutputPub_.publish(cloud);
 
             isFiltering = false;

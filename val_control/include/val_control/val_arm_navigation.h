@@ -11,6 +11,9 @@
 #include <ihmc_msgs/SE3TrajectoryPointRosMessage.h>
 #include <geometry_msgs/Pose.h>
 #include <trajectory_msgs/JointTrajectory.h>
+#include <tf/transform_listener.h>
+#include <tf/tf.h>
+#include <val_common/val_common_names.h>
 
 /**
  * @brief The armTrajectory class provides ability to move arms of valkyrie. Current implementation provides joint level without collision detection.
@@ -123,10 +126,18 @@ public:
     void moveArmTrajectory(const armSide side, const trajectory_msgs::JointTrajectory &traj);
 
 
+    /**
+     * @brief nudgeArm Nudges the Arm in the desired direction by a given nudge step
+     * @param side     Side of the Robot. it can be LEFT or RIGHT
+     * @param drct     Which side we want to nudge. UP, DOWN, LEFT, RIGHT, FRONT or BACK
+     * @param nudgeStep The step length to nudge. Default is 5cm (~6/32")
+     * @return
+     */
+    bool nudgeArm(const armSide side, const direction drct, float nudgeStep = 0.05);
+
 private:
 
     static int arm_id;
-
     const std::vector<float> ZERO_POSE;
     const std::vector<float> DEFAULT_RIGHT_POSE;
     const std::vector<float> DEFAULT_LEFT_POSE;
@@ -135,7 +146,9 @@ private:
     ros::Publisher  armTrajectoryPublisher;
     ros::Publisher  handTrajectoryPublisher;
     ros::Publisher  taskSpaceTrajectoryPublisher;
+    ros::Publisher  markerPub_;
     ros::Subscriber armTrajectorySunscriber;
+    tf::TransformListener tf_listener_;
     void poseToSE3TrajectoryPoint(const geometry_msgs::Pose &pose, ihmc_msgs::SE3TrajectoryPointRosMessage &point);
     void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos);
     void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point);

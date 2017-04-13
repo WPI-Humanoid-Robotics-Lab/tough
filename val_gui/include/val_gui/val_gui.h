@@ -34,6 +34,7 @@
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Pose.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
@@ -149,24 +150,33 @@ private:
     void getPelvisState();
     void getNeckState();
     void getGripperState();
+    void getClickedPoint(const geometry_msgs::PointStamped::Ptr msg);
 
 private Q_SLOTS:
-    void closeGrippers();
-    void openGrippers();
     void keyPressEvent(QKeyEvent *event);
+
     void setCurrentTool(int btnID);
     void displayPointcloud(int btnID);
+    void updateDisplay(int tabID);
+
+    void changePelvisHeight();
+    void walkSteps();
     void moveChestJoints();
     void moveHeadJoints();
-    void walkSteps();
-    void changePelvisHeight();
     void moveArmJoints();
+    void moveToPoint();
+    void nudgeArm(int btnID);
+
+    void closeGrippers();
+    void openGrippers();
+
     void updateJointStateSub(int tabID);
     void updateArmSide(int btnID);
+
     void resetChestOrientation();
-    void updateDisplay(int tabID);
     void resetArm();
     void resetRobot();
+
 
 private:
   rviz::VisualizationManager* manager_;
@@ -205,7 +215,7 @@ private:
 //  ros::Subscriber baseSensorStatus;
   ros::Subscriber rviz2DNavGoalSub;
   ros::Subscriber jointStateSub_;
-
+  ros::Subscriber clickedPointSub_;
   tf::TransformListener listener_;
 
   image_transport::ImageTransport it_;
@@ -218,10 +228,12 @@ private:
   HeadTrajectory   *headController_;
   gripperControl   *gripperController_;
 
-  std::vector<std::string>        jointNames_;
-  std::vector<double>             jointValues_;
+  geometry_msgs::Pose   *clickedPoint_;
+  bool                  moveArmCommand_;
+
   std::mutex                      mtx_;
   std::map<std::string, QLabel*>  jointLabelMap_;
+  std::map<std::string, double>    jointStateMap_;
 
   void distanceSubCallback(const std_msgs::Float32::ConstPtr& msg);
   void liveVideoCallback(const sensor_msgs::ImageConstPtr &msg);
@@ -241,6 +253,7 @@ private:
   QString robotType_;
   QString goalTopic_;
   QString footstepTopic_;
+  QString jointStatesTopic_;
   QLabel* status_label_;
 
 };

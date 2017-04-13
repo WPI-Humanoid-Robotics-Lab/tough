@@ -271,10 +271,11 @@ void PeriodicSnapshotter::pairAlign (const pcl::PointCloud<pcl::PointXYZ>::Ptr c
 
 void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
     sensor_msgs::PointCloud2::Ptr merged_cloud(new sensor_msgs::PointCloud2());
+    sensor_msgs::PointCloud2::Ptr merged_downsampled_cloud(new sensor_msgs::PointCloud2());
     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_msg(new pcl::PointCloud<pcl::PointXYZ>);
     convertROStoPCL(msg, pcl_msg);
 
-    if (prev_msg_->data.empty()){
+    if (prev_msg_->row_step > 10000000 || prev_msg_->data.empty()){
         merged_cloud = msg;
     }
     else {
@@ -298,14 +299,21 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
         //update the global transform
         GlobalTransform = GlobalTransform * pairTransform;
 
-        convertPCLtoROS(result,merged_cloud);
+        float leafsize = 0.05;
+        pcl::PointCloud<pcl::PointXYZ>::Ptr tgt (new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::VoxelGrid<PointT> grid;
+        grid.setLeafSize (leafsize, leafsize, leafsize);
+        grid.setInputCloud (result);
+        grid.filter (*tgt);
+
+        convertPCLtoROS(tgt,merged_cloud);
         // publish the merged message
 
     }
 
     prev_msg_ = merged_cloud;
-
     registered_pointcloud_pub_.publish(merged_cloud);
+
 }
 
 int main(int argc, char **argv)

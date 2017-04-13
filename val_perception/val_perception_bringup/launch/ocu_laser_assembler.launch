@@ -2,9 +2,9 @@
 <launch>
 
     <!-- Start val_laser2point_cloud_node to publish pointcloud2 data -->
-    <node pkg="val_laser2point_cloud" type="val_laser2point_cloud_node" name="val_laser2point_cloud_node"/>
+    <!-- node pkg="val_laser2point_cloud" type="val_laser2point_cloud_node" name="val_laser2point_cloud_node" ns="ocu" />
 
-    <node pkg="val_filters" type="val_self_filter" name="robot_self_filter">
+    <node pkg="val_filters" type="val_self_filter" name="robot_self_filter"  ns="ocu">
         <rosparam param="self_see_links">[leftForearmLink, leftWristRollLink, leftPalm, leftThumbRollLink, leftThumbPitch1Link,
                                           leftThumbPitch2Link, leftThumbPitch3Link,leftShoulderPitchLink, leftShoulderRollLink, leftShoulderYawLink,
                                           leftElbowPitchLink, leftIndexFingerPitch1Link, leftMiddleFingerPitch1Link,leftPinkyPitch1Link,
@@ -15,17 +15,20 @@
                                           rightElbowPitchLink, rightIndexFingerPitch1Link, rightMiddleFingerPitch1Link,rightPinkyPitch1Link,
                                           rightHipPitchLink, rightKneePitchLink]
         </rosparam>
-    </node>
+        <remap from="robot_description" to="/robot_description"/>
+    </node -->
 
     <node type="point_cloud_assembler" pkg="laser_assembler"
-            name="val_laser_assembler_svc" output="screen">
-        <remap from="cloud" to="/filtered_cloud"/>
+            name="val_laser_assembler_svc" output="screen"  ns="ocu">
+        <remap from="cloud" to="/field/filtered_cloud"/>
         <param name="max_clouds" type="int" value="400" />
         <param name="fixed_frame" type="string" value="world" />
-        <param name="laser_snapshot_timeout" type="double" value="6.0"/>
+        <param name="laser_snapshot_timeout" type="double" value="4.0"/>
     </node>
 
-    <node type="periodic_snapshotter" pkg="perception_common" name="val_laser_assembler_node"/>
-    <node type="val_walkway_filter" pkg="val_filters" name="val_walkway_filter"/>
+    <node type="periodic_snapshotter" pkg="perception_common" name="val_laser_assembler_node"  ns="ocu"/>
+    <node type="val_walkway_filter" pkg="val_filters" name="val_walkway_filter"  ns="ocu">
+      <remap from="filtered_cloud2" to="/field/filtered_cloud2"/>
+    </node>
   
 </launch>

@@ -67,9 +67,10 @@ void* input_thread_func(void *input_ptr)
   center_pose = center_start_pose;
   //this waits until both center pose received and user presses enter
   input =std::cin.get();
-  center_pub->publish(transform_pose_simple(&center_pose,center_pose.header.frame_id));
+  //man, this is pretty stupid
+  center_pub->publish(transform_pose_simple(&center_pose,VAL_COMMON_NAMES::R_PALM_TF));
 
-
+// std::cout << "pub pose: " <<center_pose.pose.position.x<<" "<<center_pose.pose.position.y<< '\n';
 
   // edge_start_pose = center_pose;
   // edge_start_pose.pose.position.y = edge_start_pose.pose.position.y +.25;
