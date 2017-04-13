@@ -1,20 +1,53 @@
-#include <iostream>
-#include <time.h>
-#include <numeric>
-#include <boost/bind.hpp>
-#include <boost/thread.hpp>
-#include <boost/foreach.hpp>
-#include <boost/lambda/lambda.hpp>
-#include <boost/date_time.hpp>
-#include <ros/ros.h>
-#include<functional>
-#include <sensor_msgs/LaserScan.h>
-#include <geometry_msgs/Twist.h>
-#include <val_task2/val_task2.h>
+#include <val_task2/val_task2_node.h>
 
 using namespace std;
 
 #define foreach BOOST_FOREACH
+
+
+task2Node::task2Node(ros::NodeHandle nh):
+    nh_(nh)
+{
+    task2_ = new valTask2(nh);
+}
+
+task2Node::~task2Node()
+{
+
+}
+
+void task2Node::registerStateMethods(void)
+{
+    // Register all the functions
+    LocalTasks::registrate("STATE_INIT", &valTask2::initTask);
+    LocalTasks::registrate("STATE_DETECT_ROVER", &valTask2::detectRoverTask);
+    LocalTasks::registrate("STATE_WALK_TO_ROVER", &valTask2::walkToRoverTask);
+    LocalTasks::registrate("STATE_DETECT_SOLAR_PANEL",&valTask2::detectPanelTask);
+    LocalTasks::registrate("STATE_ORIENT_TO_SOLAR_PANEL",&valTask2::orientPanelTask);
+    LocalTasks::registrate("STATE_PICK_SOLAR_PANEL",&valTask2::pickPanelTask);
+    LocalTasks::registrate("STATE_DETECT_SOLAR_ARRAY", &valTask2::detectSolarArrayTask);
+    LocalTasks::registrate("STATE_WALK_TO_SOLAR_ARRAY", &valTask2::walkSolarArrayTask);
+    LocalTasks::registrate("STATE_PLACE_SOLAR_PANEL_ON_GROUND", &valTask2::placePanelTask);
+    LocalTasks::registrate("STATE_DETECT_DEPLOY_PANEL_BUTTON", &valTask2::detectButtonTask);
+    LocalTasks::registrate("STATE_DEPLOY_SOLAR_PANEL", &valTask2::deployPanelTask);
+    LocalTasks::registrate("STATE_DETECT_POWER_CABLE", &valTask2::dtectCableTask);
+    LocalTasks::registrate("STATE_PICKUP_POWER_CABLE", &valTask2::pickCableTask);
+    LocalTasks::registrate("STATE_PLUGIN_POWER_CABLE", &valTask2::plugCableTask);
+    LocalTasks::registrate("STATE_DETECT_FINISH", &valTask2::detectfinishBoxTask);
+    LocalTasks::registrate("STATE_WALK_TO_FINISH", &valTask2::walkToFinishTask);
+    LocalTasks::registrate("STATE_END", &valTask2::endTask);
+    LocalTasks::registrate("STATE_ERROR", &valTask2::errorTask);
+}
+
+void task2Node::initDynamicReconfParams(void)
+{
+    // handle dynamic reconfiguration of the parameters
+    dynamic_reconfigure::Server<val_task2::task2_parametersConfig> service;
+    dynamic_reconfigure::Server<val_task2::task2_parametersConfig>::CallbackType callback_type;
+    callback_type = boost::bind(&task2Node::paramUpdateCallback, this, _1, _2);
+    service.setCallback(callback_type);
+}
+
 
 int main(int argc, char** argv)
 {
@@ -23,29 +56,20 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
     RosEventQueue*q = new RosEventQueue();
 
-    // task2 object
-    valTask2 task2(nh); // = new valTask2(nh);
+    task2Node task2node(nh);
+
     ROS_INFO("Preparing task2...");
 
-    // Register all the functions
-    LocalTasks::registrate("STATE_INIT", std::bind(&valTask2::initTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_DETECT_ROVER", std::bind(&valTask2::detectRoverTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_WALK_TO_ROVER", std::bind(&valTask2::walkToRoverTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_DETECT_SOLAR_PANEL",std::bind(&valTask2::detectPanelTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_ORIENT_TO_SOLAR_PANEL",std::bind(&valTask2::orientPanelTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_PICK_SOLAR_PANEL",std::bind(&valTask2::pickPanelTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_DETECT_SOLAR_ARRAY", std::bind(&valTask2::detectSolarArrayTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_WALK_TO_SOLAR_ARRAY", std::bind(&valTask2::walkSolarArrayTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_PLACE_SOLAR_PANEL_ON_GROUND", std::bind(&valTask2::placePanelTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_DETECT_DEPLOY_PANEL_BUTTON", std::bind(&valTask2::detectButtonTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_DEPLOY_SOLAR_PANEL", std::bind(&valTask2::deployPanelTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_DETECT_POWER_CABLE", std::bind(&valTask2::dtectCableTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_PICKUP_POWER_CABLE", std::bind(&valTask2::pickCableTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_PLUGIN_POWER_CABLE", std::bind(&valTask2::plugCableTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_DETECT_FINISH", std::bind(&valTask2::detectfinishBoxTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_WALK_TO_FINISH", std::bind(&valTask2::walkToFinishTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_END", std::bind(&valTask2::endTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_ERROR", std::bind(&valTask2::errorTask, task2, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    // register the state execution methods
+    task2node.registerStateMethods();
+
+    // init synamic reconfigure of the parameters
+    //task2node.initDynamicReconfParams();
+
+    dynamic_reconfigure::Server<val_task2::task2_parametersConfig> service;
+    dynamic_reconfigure::Server<val_task2::task2_parametersConfig>::CallbackType callback_type;
+    callback_type = boost::bind(&task2Node::paramUpdateCallback, task2node, _1, _2);
+    service.setCallback(callback_type);
 
     ros::AsyncSpinner spinner(1);
     spinner.start();
