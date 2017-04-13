@@ -39,15 +39,17 @@ void task2Node::registerStateMethods(void)
     LocalTasks::registrate("STATE_ERROR", &valTask2::errorTask);
 }
 
-void task2Node::initDynamicReconfParams(void)
+void task2Node::paramUpdateCallback(val_task2::task2_parametersConfig &config, uint32_t level)
 {
-    // handle dynamic reconfiguration of the parameters
-    dynamic_reconfigure::Server<val_task2::task2_parametersConfig> service;
-    dynamic_reconfigure::Server<val_task2::task2_parametersConfig>::CallbackType callback_type;
-    callback_type = boost::bind(&task2Node::paramUpdateCallback, this, _1, _2);
-    service.setCallback(callback_type);
-}
+    ROS_INFO("update the goal, x: %f, y: %f, theta: %f",  config.groups.panelwalkpose.x,  config.groups.panelwalkpose.y,  config.groups.panelwalkpose.theta);
 
+    geometry_msgs::Pose2D goal;
+    goal.x = config.groups.panelwalkpose.x;
+    goal.y = config.groups.panelwalkpose.y;
+    goal.theta = config.groups.panelwalkpose.theta;
+    //update the walk goal location
+    task2_->setPanelWalkGoal(goal);
+}
 
 int main(int argc, char** argv)
 {

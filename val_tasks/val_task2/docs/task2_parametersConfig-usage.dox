@@ -1,10 +1,6 @@
 \subsubsection usage Usage
 \verbatim
 <node name="dynamic_reconfigure_node" pkg="val_task2" type="dynamic_reconfigure_node">
-  <param name="cluster" type="int" value="1" />
-  <param name="skip" type="int" value="0" />
-  <param name="port" type="str" value="/dev/ttyACM0" />
-  <param name="calibrate_time" type="bool" value="True" />
   <param name="x" type="double" value="3.619" />
   <param name="y" type="double" value="-0.014" />
   <param name="theta" type="double" value="-1.559" />

@@ -1,9 +1,7 @@
 <launch>
     <arg name="events" default="true" />
     <arg name="gui" default="true" />
-
-    <!-- load the task 2 parameters on the server -->
-    <rosparam command="load" file="$(find val_task2)/config/task2_params.yaml" />
+    <arg name="reconf_gui" default="true" />
 
     <!-- task2 node -->
     <node name="task2" pkg="val_task2" type="val_task2_node" output="screen"/>
@@ -12,4 +10,14 @@
     <node
     if="$(arg gui)"
     name="rqt" pkg="rqt_gui" type="rqt_gui" args="-s rqt_decision_graph" output="screen" />
+
+    <!-- Start up the dynamic reconfigure GUI. -->
+    <node 
+    if="$(arg reconf_gui)"
+    pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure"/>
+
+    <!-- Start up rqt_console -->
+    <!--node 
+    if="$(arg reconf_gui)"
+    pkg="rqt_console" type="rqt_console" name="rqt_console"/-->
 </launch>

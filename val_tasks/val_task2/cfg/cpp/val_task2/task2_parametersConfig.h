@@ -226,17 +226,11 @@ class DEFAULT
         boost::any val;
         (*_i)->getValue(config, val);
 
-        if("cluster"==(*_i)->name){cluster = boost::any_cast<int>(val);}
-        if("skip"==(*_i)->name){skip = boost::any_cast<int>(val);}
-        if("port"==(*_i)->name){port = boost::any_cast<std::string>(val);}
-        if("calibrate_time"==(*_i)->name){calibrate_time = boost::any_cast<bool>(val);}
+
       }
     }
 
-    int cluster;
-int skip;
-std::string port;
-bool calibrate_time;
+    
 
     bool state;
     std::string name;
@@ -277,14 +271,6 @@ double theta;
 
 
 
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      int cluster;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      int skip;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      std::string port;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      bool calibrate_time;
 //#line 14 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task2/cfg/task2_parameters.cfg"
       double x;
 //#line 15 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task2/cfg/task2_parameters.cfg"
@@ -426,46 +412,6 @@ double theta;
     task2_parametersConfigStatics()
     {
 task2_parametersConfig::GroupDescription<task2_parametersConfig::DEFAULT, task2_parametersConfig> Default("Default", "", 0, 0, true, &task2_parametersConfig::groups);
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __min__.cluster = 0;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __max__.cluster = 99;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __default__.cluster = 1;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      Default.abstract_parameters.push_back(task2_parametersConfig::AbstractParamDescriptionConstPtr(new task2_parametersConfig::ParamDescription<int>("cluster", "int", 0, "The number of adjacent range measurements to cluster into a single reading", "", &task2_parametersConfig::cluster)));
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __param_descriptions__.push_back(task2_parametersConfig::AbstractParamDescriptionConstPtr(new task2_parametersConfig::ParamDescription<int>("cluster", "int", 0, "The number of adjacent range measurements to cluster into a single reading", "", &task2_parametersConfig::cluster)));
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __min__.skip = 0;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __max__.skip = 9;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __default__.skip = 0;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      Default.abstract_parameters.push_back(task2_parametersConfig::AbstractParamDescriptionConstPtr(new task2_parametersConfig::ParamDescription<int>("skip", "int", 0, "The number of scans to skip between each measured scan", "", &task2_parametersConfig::skip)));
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __param_descriptions__.push_back(task2_parametersConfig::AbstractParamDescriptionConstPtr(new task2_parametersConfig::ParamDescription<int>("skip", "int", 0, "The number of scans to skip between each measured scan", "", &task2_parametersConfig::skip)));
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __min__.port = "";
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __max__.port = "";
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __default__.port = "/dev/ttyACM0";
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      Default.abstract_parameters.push_back(task2_parametersConfig::AbstractParamDescriptionConstPtr(new task2_parametersConfig::ParamDescription<std::string>("port", "str", 0, "The serial port where the hokuyo device can be found", "", &task2_parametersConfig::port)));
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __param_descriptions__.push_back(task2_parametersConfig::AbstractParamDescriptionConstPtr(new task2_parametersConfig::ParamDescription<std::string>("port", "str", 0, "The serial port where the hokuyo device can be found", "", &task2_parametersConfig::port)));
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __min__.calibrate_time = 0;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __max__.calibrate_time = 1;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __default__.calibrate_time = 1;
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      Default.abstract_parameters.push_back(task2_parametersConfig::AbstractParamDescriptionConstPtr(new task2_parametersConfig::ParamDescription<bool>("calibrate_time", "bool", 0, "Whether the node should calibrate the hokuyo's time offset", "", &task2_parametersConfig::calibrate_time)));
-//#line 259 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __param_descriptions__.push_back(task2_parametersConfig::AbstractParamDescriptionConstPtr(new task2_parametersConfig::ParamDescription<bool>("calibrate_time", "bool", 0, "Whether the node should calibrate the hokuyo's time offset", "", &task2_parametersConfig::calibrate_time)));
 task2_parametersConfig::GroupDescription<task2_parametersConfig::DEFAULT::PANELWALKPOSE, task2_parametersConfig::DEFAULT> panelWalkPose("panelWalkPose", "", 0, 1, true, &task2_parametersConfig::DEFAULT::panelwalkpose);
 //#line 14 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task2/cfg/task2_parameters.cfg"
       __min__.x = 0.0;
