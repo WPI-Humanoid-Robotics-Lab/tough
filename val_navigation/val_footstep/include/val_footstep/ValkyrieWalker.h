@@ -44,7 +44,7 @@ public:
      * @param goal  pose2d message giving position and orientation of goal point.
      * @return true if footstep planning is successful else false
      */
-    bool walkToGoal( geometry_msgs::Pose2D &goal);
+    bool walkToGoal(geometry_msgs::Pose2D &goal, bool waitForSteps=true);
 
     /**
      * @brief walkNSteps Makes the robot walk given number of steps.

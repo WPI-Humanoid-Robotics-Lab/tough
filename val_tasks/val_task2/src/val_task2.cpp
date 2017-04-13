@@ -78,9 +78,17 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
 
     // walk to the goal location
     // the goal can be updated on the run time
-    if (walker_->walkToGoal(panel_walk_goal_))
+    ret = walker_->walkToGoal(panel_walk_goal_, false);
+
+    // if executing stay in the same state
+    if (ret == MOVE_EXECUTING)
     {
-        eventQueue.riseEvent("/REACHED_ROVER");
+         eventQueue.riseEvent("/WALK_EXECUTING");
+    }
+    // if finished sucessfully
+    else if (ret == MOVE_SUCESS)
+    {
+       eventQueue.riseEvent("/REACHED_ROVER");
     }
     // if failed for more than 5 times, go to error state
     else if (fail_count > 5)
@@ -90,11 +98,17 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
         eventQueue.riseEvent("/WALK_FAILED");
     }
     // if failed retry detecting the panel and then walk
+    // also handles MOVE_FAILED
     else
     {
         // increment the fail count
         fail_count++;
         eventQueue.riseEvent("/WALK_RETRY");
+    }
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
     }
 
     return TaskResult::SUCCESS();

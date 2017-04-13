@@ -67,6 +67,7 @@ FSM(val_task2)
             {
                 FSM_ON_EVENT("/WALK_FAILED", FSM_NEXT(STATE_ERROR))
                 FSM_ON_EVENT("/WALK_RETRY", FSM_NEXT(STATE_DETECT_ROVER))
+                FSM_ON_EVENT("/WALK_EXECUTING", FSM_NEXT(STATE_WALK_TO_ROVER))
                 FSM_ON_EVENT("/REACHED_ROVER", FSM_NEXT(STATE_DETECT_SOLAR_PANEL))
             }
         }

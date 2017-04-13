@@ -65,9 +65,6 @@ int main(int argc, char** argv)
     // register the state execution methods
     task2node.registerStateMethods();
 
-    // init synamic reconfigure of the parameters
-    //task2node.initDynamicReconfParams();
-
     dynamic_reconfigure::Server<val_task2::task2_parametersConfig> service;
     dynamic_reconfigure::Server<val_task2::task2_parametersConfig>::CallbackType callback_type;
     callback_type = boost::bind(&task2Node::paramUpdateCallback, task2node, _1, _2);

@@ -1,6 +1,6 @@
 <launch>
     <arg name="events" default="true" />
-    <arg name="gui" default="true" />
+    <arg name="sm_gui" default="true" />
     <arg name="reconf_gui" default="true" />
 
     <!-- task2 node -->
@@ -8,7 +8,7 @@
 
     <!-- state transition visualisation on rviz -->
     <node
-    if="$(arg gui)"
+    if="$(arg sm_gui)"
     name="rqt" pkg="rqt_gui" type="rqt_gui" args="-s rqt_decision_graph" output="screen" />
 
     <!-- Start up the dynamic reconfigure GUI. -->
