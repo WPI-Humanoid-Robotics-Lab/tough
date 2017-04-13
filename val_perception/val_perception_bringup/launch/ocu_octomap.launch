@@ -1,5 +1,5 @@
 <launch>
-	<node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+        <node pkg="octomap_server" type="octomap_server_node" name="octomap_server"  ns="ocu">
                 <!--set the resolution to 5cm. this can be modified using dynamic parameter-->
                 <param name="resolution" value="0.05" />
 		
@@ -28,18 +28,27 @@
                 <param name="occupancy_max_z" value="0.4"/>-->
 
                 <!-- data source to integrate (PointCloud2) -->
-                <remap from="cloud_in" to="/walkway_filtered_points2" />
+                <remap from="cloud_in" to="walkway_filtered_points2" />
 
                 <!--remap the 2D map topic. There's a bug in octomap server which causes z value of the origin to be nan. 
 		    This is fixed in a node in perception_common publish_corrected_map node. Do not use the following line, 
 	 	    instead run the mentioned node and it will publish 2D map.-->
                 <!-- remap from="projected_map" to="map"/ -->
+                <!-- remap from="projected_map" to="/projected_map"/ -->
 	</node>
-
+        
+	<!--Not required on OCU as the tf is already corrected on field-->
         <!--Add a static map frame at world origin-->
-        <node name="MapTransform" pkg="navigation_common" type="MapTransform" />
-        <!-- This node listens to /projected_map and publishes the corrected map on /map-->
-        <node pkg="navigation_common" type="publish_corrected_map" name="corrected_map_publisher" />
+        <!-- node name="MapTransform" pkg="navigation_common" type="MapTransform" ns="field">
+            <remap from="map" to="/map"/>
+        </node -->
+        
+	<!-- This node listens to /projected_map and publishes the corrected map on /map-->
+        <node pkg="navigation_common" type="publish_corrected_map" name="corrected_map_publisher" ns="ocu">
+	  <!-- No need to remap on ocu. create a separate map and use it for display purposes in GUI-->
+	    <!--remap from="map" to="/map"/>
+            <remap from="projected_map" to="/projected_map"/ -->
+        </node>
 
 
 </launch>
