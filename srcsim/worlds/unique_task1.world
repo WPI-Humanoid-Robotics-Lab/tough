@@ -41,7 +41,7 @@
     <!-- A global light source -->
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
-      <pose>0 0 1000 -0.5809136300395572 -1.2292031043028233 0</pose>
+      <pose>0 0 1000 0.13354950705196278 -1.5478276144208802 0</pose>
       <diffuse>0.8 0.8 0.8 1</diffuse>
       <specular>0.2 0.2 0.2 1</specular>
       <attenuation>
@@ -64,44 +64,44 @@
     <include>
       <name>walkway_1</name>
       <pose>
-      -0.3
+      0.09
       0
       -0.052151
       0
       0
-      -1.5707963267948968
+      3.141592653589793
       </pose>
-      <uri>model://walkway_metal_straight</uri>
+      <uri>model://walkway_finish_opposite</uri>
     </include>
 
 
     <!-- Bling -->
     <include>
-      <name>mars_crate_long_1</name>
+      <name>mars_rock_2_1</name>
       <pose>
-      0.4619999999999998
-      -1.5620000000000003
+      0.0900000000000003
+      2.024
       0
       0
       0
-      -2.3561944901923453
+      -2.4492935982947064e-16
       </pose>
-      <uri>model://mars_crate_long</uri>
+      <uri>model://mars_rock_2</uri>
     </include>
 
 
     <!-- Bling -->
     <include>
-      <name>mars_crate_long_2</name>
+      <name>mars_rock_1_2</name>
       <pose>
-      0.46200000000000035
-      1.5619999999999998
+      0.08999999999999976
+      -1.924
       0
       0
       0
-      0.785398163397448
+      3.141592653589793
       </pose>
-      <uri>model://mars_crate_long</uri>
+      <uri>model://mars_rock_1</uri>
     </include>
 
 
@@ -109,12 +109,29 @@
 
     <!-- TASK 1 -->
 
+    <!-- Task 1 start - Box plugin -->
+    
+
+    <plugin name="boxT1Start" filename="libBoxContainsPlugin.so">
+      <entity>valkyrie</entity>
+      <namespace>task1/start</namespace>
+      <pose>
+        2.114
+        -2.784846821261081e-16
+        2.5
+        0
+        0
+        -1.5707963267948968
+      </pose>
+      <size>1.524 1 5.0</size>
+    </plugin>
+
     <!-- Walkway -->
     <include>
       <name>walkway_2</name>
       <pose>
-      1.224
-      -2.7995425828508494e-16
+      1.614
+      -1.8663617219005663e-16
       -0.052151
       0
       0
@@ -132,12 +149,12 @@
 <model name="satellite_dish">
 
   <pose>
-    1.9860000000000007
-    2.7619999999999996
+    4.384573562373095
+    2.0238135623730944
     0
     0
     0
-    -2.4492935982947064e-16
+    -0.7853981633974485
   </pose>
 
   <link name="base">
@@ -156,20 +173,22 @@
     <collision name="collision">
       <geometry>
         <mesh>
-          <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+          <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
           <submesh>
             <name>Base</name>
           </submesh>
+          <scale>0.001 0.001 0.001</scale>
         </mesh>
       </geometry>
     </collision>
     <visual name="visual">
       <geometry>
         <mesh>
-          <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+          <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
           <submesh>
             <name>Base</name>
           </submesh>
+          <scale>0.001 0.001 0.001</scale>
         </mesh>
       </geometry>
     </visual>
@@ -192,10 +211,11 @@
       <pose>0 0 -1.595 0 0 0</pose>
       <geometry>
         <mesh>
-          <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+          <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
           <submesh>
             <name>Pivot</name>
           </submesh>
+          <scale>0.001 0.001 0.001</scale>
         </mesh>
       </geometry>
     </collision>
@@ -203,10 +223,11 @@
       <pose>0 0 -1.595 0 0 0</pose>
       <geometry>
         <mesh>
-          <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+          <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
           <submesh>
             <name>Pivot</name>
           </submesh>
+          <scale>0.001 0.001 0.001</scale>
         </mesh>
       </geometry>
     </visual>
@@ -230,10 +251,11 @@
       <pose>0 -0.6519041 -1.451541 -0.43 0 0</pose>
       <geometry>
         <mesh>
-          <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+          <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
           <submesh>
             <name>Dish</name>
           </submesh>
+          <scale>0.001 0.001 0.001</scale>
         </mesh>
       </geometry>
     </collision>
@@ -241,10 +263,11 @@
       <pose>0 -0.6519041 -1.451541 -0.43 0 0</pose>
       <geometry>
         <mesh>
-          <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+          <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
           <submesh>
             <name>Dish</name>
           </submesh>
+          <scale>0.001 0.001 0.001</scale>
         </mesh>
       </geometry>
     </visual>
@@ -267,10 +290,11 @@
       <pose>0.2 1.060 -1.64 -0.52 0 0</pose>
       <geometry>
         <mesh>
-          <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+          <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
           <submesh>
             <name>Wheel_01</name>
           </submesh>
+          <scale>0.001 0.001 0.001</scale>
         </mesh>
       </geometry>
     </collision>
@@ -295,10 +319,11 @@
       <pose>0.2 1.060 -1.64 -0.52 0 0</pose>
       <geometry>
         <mesh>
-          <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+          <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
           <submesh>
             <name>Wheel_01</name>
           </submesh>
+          <scale>0.001 0.001 0.001</scale>
         </mesh>
       </geometry>
     </visual>
@@ -321,10 +346,11 @@
       <pose>-0.2 1.060 -1.64 -0.52 0 0</pose>
       <geometry>
         <mesh>
-          <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+          <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
           <submesh>
             <name>Wheel_02</name>
           </submesh>
+          <scale>0.001 0.001 0.001</scale>
         </mesh>
       </geometry>
     </collision>
@@ -349,10 +375,11 @@
       <pose>-0.2 1.060 -1.64 -0.52 0 0</pose>
       <geometry>
         <mesh>
-          <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+          <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
           <submesh>
             <name>Wheel_02</name>
           </submesh>
+          <scale>0.001 0.001 0.001</scale>
         </mesh>
       </geometry>
     </visual>
@@ -362,7 +389,7 @@
     <parent>base</parent>
     <child>pivot</child>
     <axis>
-      <xyz>0 0 1</xyz>
+      <xyz>0 0 -1</xyz>
       <dynamics>
         <damping>1000</damping>
       </dynamics>
@@ -388,9 +415,9 @@
     <parent>base</parent>
     <child>wheel_yaw</child>
     <axis>
-      <xyz>0 0 1</xyz>
+      <xyz>0 0 -1</xyz>
       <dynamics>
-        <friction>2.2618064333568513</friction>
+        <friction>2.2025260686828436</friction>
       </dynamics>
     </axis>
   </joint>
@@ -399,9 +426,9 @@
     <parent>base</parent>
     <child>wheel_pitch</child>
     <axis>
-      <xyz>0 0 1</xyz>
+      <xyz>0 0 -1</xyz>
       <dynamics>
-        <friction>2.77376274704849</friction>
+        <friction>2.9510399395121487</friction>
       </dynamics>
     </axis>
   </joint>
@@ -415,11 +442,11 @@
 
     <yaw_ratio>0.1</yaw_ratio>
     <yaw_pid>1000 0 10</yaw_pid>
-    <yaw_target>1.3007454099008449</yaw_target>
+    <yaw_target>-1.3327347452859146</yaw_target>
 
     <pitch_ratio>0.1</pitch_ratio>
     <pitch_pid>1000 100 10</pitch_pid>
-    <pitch_target>0.25769432798063546</pitch_target>
+    <pitch_target>0.26677445925687693</pitch_target>
 
     <!-- Tolerance in degrees -->
     <tolerance>5</tolerance>
@@ -439,30 +466,29 @@
     
 
     <plugin name="boxT1CP1" filename="libBoxContainsPlugin.so">
-      <frequency>100</frequency>
       <entity>valkyrie</entity>
       <namespace>task1/checkpoint1</namespace>
       <pose>
-        1.9860000000000002
-        0.5619999999999994
+        2.687517287525381
+        0.3267572875253808
         2.5
         0
         0
-        1.5707963267948963
+        0.7853981633974481
       </pose>
-      <size>1 1 5</size>
+      <size>1 1 5.0</size>
     </plugin>
 
     <!-- Bling -->
     <include>
       <name>mars_rock_3_3</name>
       <pose>
-      3.3581774593052027
-      1.3874174593052016
+      2.376000000000001
+      1.8619999999999997
       0
       0
       0
-      -0.7853981633974485
+      -2.4492935982947064e-16
       </pose>
       <uri>model://mars_rock_3</uri>
     </include>
@@ -472,14 +498,14 @@
     <include>
       <name>walkway_3</name>
       <pose>
-      3.8259547922204336
-      -1.0777649636193727
+      2.914734
+      -0.5394700920000004
       -0.052151
       0
       0
-      1.5707963267948966
+      -2.356194490192345
       </pose>
-      <uri>model://walkway_metal_45</uri>
+      <uri>model://walkway_metal_straight</uri>
     </include>
 
 
@@ -487,12 +513,12 @@
     <include>
       <name>mars_crate_long_4</name>
       <pose>
-      1.9039093672711953
-      -2.253050388568611
+      4.558050159477537
+      0.026215332949237502
       0
       0
       0
-      3.141592653589793
+      -2.220446049250313e-16
       </pose>
       <uri>model://mars_crate_long</uri>
     </include>
@@ -500,16 +526,16 @@
 
     <!-- Bling -->
     <include>
-      <name>mars_rock_1_5</name>
+      <name>mars_rock_3_5</name>
       <pose>
-      3.0639547922204335
-      -2.239764963619373
+      2.1369165406947976
+      -2.394918285833501
       0
       0
       0
-      3.141592653589793
+      2.356194490192345
       </pose>
-      <uri>model://mars_rock_1</uri>
+      <uri>model://mars_rock_3</uri>
     </include>
 
 
@@ -517,43 +543,42 @@
     <include>
       <name>walkway_4</name>
       <pose>
-      5.349954792220434
-      -1.077764963619373
+      5.069995469056597
+      -2.6947315610565976
       -0.052151
       0
       0
-      3.141592653589793
+      0.7853981633974481
       </pose>
-      <uri>model://walkway_finish_opposite</uri>
+      <uri>model://walkway_finish_adjacent</uri>
     </include>
 
 
     <!-- Checkpoint 3 - Box plugin -->
     <plugin name="boxT1CP3" filename="libBoxContainsPlugin.so">
-      <frequency>100</frequency>
       <entity>valkyrie</entity>
       <namespace>task1/checkpoint3</namespace>
       <pose>
-        5.349954792220434
-        -1.077764963619373
+        5.069995469056597
+        -2.6947315610565976
         2.5
         0
         0
-        3.141592653589793
+        0.7853981633974481
       </pose>
-      <size>3.048 3.048 5</size>
+      <size>3.048 3.048 5.0</size>
     </plugin>
 
     <!-- Bling -->
     <include>
       <name>mars_crate_long_6</name>
       <pose>
-      5.349954792220434
-      1.2462350363806272
+      6.713311628534133
+      -4.338047720534135
       0
       0
       0
-      0.7853981633974481
+      -1.570796326794897
       </pose>
       <uri>model://mars_crate_long</uri>
     </include>
@@ -561,18 +586,20 @@
 
     <!-- Bling -->
     <include>
-      <name>mars_rock_2_7</name>
+      <name>mars_crate_long_7</name>
       <pose>
-      5.349954792220434
-      -3.101764963619373
+      3.4266793095790598
+      -4.338047720534134
       0
       0
       0
       3.141592653589793
       </pose>
-      <uri>model://mars_rock_2</uri>
+      <uri>model://mars_crate_long</uri>
     </include>
 
+
+    
 
     <!-- /TASK 1 -->
     
@@ -585,25 +612,42 @@
     <plugin name="finals" filename="libFinalsPlugin.so">
 
       
-        <task_1_timeout>180</task_1_timeout>
+        <task1>
+          <timeout>1800</timeout>
 
-        <task_1_checkpoint_2_pose>
-          1.9860000000000002
-          0.5619999999999994
-          1.1
-          0
-          0
-          1.5707963267948963
-        </task_1_checkpoint_2_pose>
+          <checkpoint1>
+            <skip_robot_pose>
+              2.687517287525381
+              0.3267572875253808
+              1.1
+              0
+              0
+              0.7853981633974481
+            </skip_robot_pose>
+          </checkpoint1>
 
-        <task_1_checkpoint_3_pose>
-          1.9860000000000002
-          0.5619999999999994
-          1.1
-          0
-          0
-          1.5707963267948963
-        </task_1_checkpoint_3_pose>
+          <checkpoint2>
+            <skip_robot_pose>
+              2.687517287525381
+              0.3267572875253808
+              1.1
+              0
+              0
+              0.7853981633974481
+            </skip_robot_pose>
+          </checkpoint2>
+
+          <checkpoint3>
+            <skip_robot_pose>
+              5.069995469056597
+              -2.6947315610565976
+              1.1
+              0
+              0
+              0.7853981633974481
+            </skip_robot_pose>
+          </checkpoint3>
+        </task1>
       
 
       

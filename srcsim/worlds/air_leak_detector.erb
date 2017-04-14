@@ -36,8 +36,8 @@
   com_z = 1.338 * scale
 
   # Inertia box dimensions
-  inertia_x = 3.311 * scale
-  inertia_y = 9.437 * scale
+  inertia_x = 9.437 * scale
+  inertia_y = 3.311 * scale
   inertia_z = 2.673 * scale
 
   offset_z = 4.724 * scale
@@ -49,16 +49,19 @@
     <%= $air_leak_detector_frame[0, 2] %>
     <%= $air_leak_detector_frame[1, 2] %>
     <%= $table_top_z + offset_z %>
-    <%= Math::PI * 0.5 %>
     0
-    <%= Math::atan2($air_leak_detector_frame[1, 0], $air_leak_detector_frame[0, 0]) %>
+    0
+    <%= Math::atan2($air_leak_detector_frame[1, 0], $air_leak_detector_frame[0, 0]) + Math::PI * 0.5 %>
   </pose>
 
   <link name="base">
 
-    <%= printInertialBox(com_x, com_y, com_z, mass, inertia_x, inertia_y, inertia_z) %>
+    <%= printInertialBox(com_x, com_y, 0, mass, inertia_x, inertia_y, inertia_z) %>
 
     <collision name="collision">
+
+      <pose>0 0 <%= -com_z %> 0 0 <%= -Math::PI * 0.5 %></pose>
+
       <geometry>
         <mesh>
           <scale><%= scale %> <%= scale %> <%= scale %></scale>
@@ -78,6 +81,9 @@
     </collision>
 
     <visual name="visual">
+
+      <pose>0 0 <%= -com_z %> 0 0 <%= -Math::PI * 0.5 %></pose>
+
       <geometry>
         <mesh>
           <scale><%= scale %> <%= scale %> <%= scale %></scale>
@@ -85,6 +91,21 @@
         </mesh>
       </geometry>
     </visual>
+
+    <sensor name="logical_camera" type="logical_camera">
+
+      <logical_camera>
+        <near>0.1</near>
+        <far>0.5</far>
+        <horizontal_fov><%= Math::PI / 6 %></horizontal_fov>
+        <aspect_ratio>1</aspect_ratio>
+      </logical_camera>
+
+      <visualize>true</visualize>
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+
+    </sensor>
 
   </link>
 
