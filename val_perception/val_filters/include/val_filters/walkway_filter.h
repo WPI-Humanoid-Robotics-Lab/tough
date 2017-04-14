@@ -1,13 +1,20 @@
 #ifndef WALKWAY_FILTER_H
 #define WALKWAY_FILTER_H
 
+//#define LOWER_THRESHOLD -0.05f
 #define LOWER_THRESHOLD -0.05f
 #define UPPER_THRESHOLD  0.09f
+#define GROUND_THRESHOLD (UPPER_THRESHOLD - LOWER_THRESHOLD)
+#define FOOT_GROUND_THRESHOLD 0.01
+
 #include <ros/ros.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl/filters/passthrough.h>
+#include <tf/transform_listener.h>
+#include <pcl/ModelCoefficients.h>
+#include <pcl/segmentation/sac_segmentation.h>
 
 class WalkwayFilter{
 public:
@@ -20,6 +27,9 @@ private:
     ros::Publisher pointcloudPub_;
     ros::Subscriber pointcloudSub_;
     ros::NodeHandle nh_;
+    tf::TransformListener       tf_listener_;
+
+    double getCurrentFootPose(void);
 };
 
 #endif // WALKWAY_FILTER_H

@@ -32,14 +32,45 @@ void WalkwayFilter::generateMap(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 
     pcl::PointIndices::Ptr outliers(new pcl::PointIndices());
     outliers->header = cloud->header;
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    //    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    //    // Create the segmentation object
+    //    pcl::SACSegmentation<pcl::PointXYZ> seg;
+    //    // Optional
+    //    seg.setOptimizeCoefficients (true);
+    //    // Mandatory
+    //    seg.setModelType (pcl::SACMODEL_LINE);
+    //    seg.setMethodType (pcl::SAC_RANSAC);
+    //    seg.setDistanceThreshold (UPPER_THRESHOLD - LOWER_THRESHOLD);
+    //    seg.setInputCloud (cloud);
+    //    seg.segment (*inliers, *coefficients);
+
+    float foot_height = getCurrentFootPose();
+    std::cout<<  foot_height << std::endl;
 
     for (size_t i = 0; i< cloud->size(); ++i){
-        if( cloud->at(i).z > LOWER_THRESHOLD && cloud->at(i).z < UPPER_THRESHOLD){
-             outliers->indices.insert(outliers->indices.end(),i);
+        if( cloud->at(i).z < foot_height - FOOT_GROUND_THRESHOLD
+                && cloud->at(i).z > foot_height- FOOT_GROUND_THRESHOLD - (GROUND_THRESHOLD)){
+            outliers->indices.insert(outliers->indices.end(),i);
         }
     }
-    subtractPointClouds(cloud, outliers);
+    subtractPointClouds(cloud,outliers);
     pointcloudPub_.publish(cloud);
+}
+
+double WalkwayFilter::getCurrentFootPose(void)
+{
+    double height_foot;
+
+    tf::StampedTransform transformStamped;
+    tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::L_FOOT_TF, ros::Time(0),transformStamped);
+    height_foot = transformStamped.getOrigin().getZ();
+
+    tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::R_FOOT_TF, ros::Time(0),transformStamped);
+
+    height_foot = height_foot > transformStamped.getOrigin().getZ() ? transformStamped.getOrigin().getZ() : height_foot;
+
+    return height_foot;
 }
 
 void WalkwayFilter::subtractPointClouds(pcl::PointCloud<pcl::PointXYZ>::Ptr full_cloud, const pcl::PointIndices::Ptr outliers){
