@@ -11,12 +11,11 @@
 #include "ihmc_msgs/FootstepDataListRosMessage.h"
 #include "ihmc_msgs/FootstepDataRosMessage.h"
 #include "ihmc_msgs/FootstepStatusRosMessage.h"
-#include <tf2_ros/transform_listener.h>
-#include"tf2_ros/buffer.h"
 #include <geometry_msgs/TransformStamped.h>
 #include "std_msgs/String.h"
 #include "ros/time.h"
 #include "tf/tf.h"
+#include <tf/transform_listener.h>
 #include <val_common/val_common_defines.h>
 
 /**
@@ -102,6 +101,7 @@ public:
     {
         swing_height = value;
     }
+    bool turn(armSide side);
 
 private:
     static int id ;
@@ -113,9 +113,7 @@ private:
     ros::Publisher      footsteps_pub_ ;
     ros::Subscriber     footstep_status_ ;
     ros::ServiceClient  footstep_client_ ;
-
-    tf2_ros::Buffer             tf_buffer_;
-    tf2_ros::TransformListener* tf_listener_;
+    tf::TransformListener       tf_listener_;
 
     std_msgs::String right_foot_frame_,left_foot_frame_;
 

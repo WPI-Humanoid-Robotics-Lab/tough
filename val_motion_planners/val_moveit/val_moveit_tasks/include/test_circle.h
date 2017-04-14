@@ -1,7 +1,6 @@
 #ifndef val_test_circle_h
 #define val_test_circle_h
 
-
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
 

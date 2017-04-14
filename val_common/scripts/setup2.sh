@@ -75,7 +75,7 @@ git checkout 0.9.0
 
 echo "$(tput setaf 1)checking and installing and missing ros dependecies$(tput sgr0)"
 # TODO:this shoould be done with rosdep
-sudo apt-get install ruby ros-indigo-pcl-ros ros-indigo-pcl-conversions ros-indigo-moveit ros-indigo-trac-ik ros-indigo-footstep-planner ros-indigo-humanoid-localization ros-indigo-multisense-ros  ros-indigo-laser-assembler ros-indigo-robot-self-filter ros-indigo-tf2-geometry-msgs ros-indigo-joint-state-publisher ros-indigo-octomap-server
+sudo apt-get install ruby ros-indigo-pcl-ros ros-indigo-pcl-conversions ros-indigo-moveit ros-indigo-trac-ik ros-indigo-footstep-planner ros-indigo-humanoid-localization ros-indigo-multisense-ros  ros-indigo-laser-assembler ros-indigo-robot-self-filter ros-indigo-tf2-geometry-msgs ros-indigo-joint-state-publisher ros-indigo-octomap-server ros-indigo-octomap ros-indigo-octomap-server ros-indigo-joint-trajectory-controller ros-indigo-joint-controller ros-indigo-joint-state-controller ros-indigo-position-controllers
 
 #TODO: this to account for the fix in humanoid navigation package
 #so, we clone the fixed repo

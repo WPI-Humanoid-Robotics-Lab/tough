@@ -69,7 +69,7 @@ public:
     void mergeClouds(const sensor_msgs::PointCloud2::Ptr msg);
 
     void pairAlign (const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_src, const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_tgt,
-                    pcl::PointCloud<pcl::PointXYZ>::Ptr output, Eigen::Matrix4f &final_transform, bool downsample_ = false);
+                    pcl::PointCloud<pcl::PointXYZ>::Ptr output, Eigen::Matrix4f &final_transform, bool downsample_ = true);
 
     /**
      * @brief getNearestPoint returns the K-nearest neighbours of a specified point. This is a
@@ -123,7 +123,7 @@ bool PeriodicSnapshotter::getNearestPoint(geometry_msgs::PointStamped &point, in
             listener.transformPoint(VAL_COMMON_NAMES::WORLD_TF,point, point);
         }
         catch(tf::TransformException ex){
-            ROS_ERROR("%s",ex.what());
+            ROS_WARN("%s",ex.what());
             return false;
         }
     }
@@ -179,7 +179,7 @@ bool PeriodicSnapshotter::getNearestPoint(geometry_msgs::PointStamped &point, in
             listener.transformPoint(originalFrame, point, point);
         }
         catch(tf::TransformException ex){
-            ROS_ERROR("%s",ex.what());
+            ROS_WARN("%s",ex.what());
             return false;
         }
     }
