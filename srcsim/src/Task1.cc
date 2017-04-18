@@ -20,20 +20,34 @@
 using namespace gazebo;
 
 /////////////////////////////////////////////////
-Task1::Task1(const common::Time &_timeout,
-    const std::vector<ignition::math::Pose3d> _poses)
-    : Task(_timeout)
+Task1::Task1(const sdf::ElementPtr &_sdf) : Task(_sdf)
 {
+  gzmsg << "Creating Task [1] ... ";
+
+  // Get SDF for each checkpoint
+  sdf::ElementPtr cp1Elem, cp2Elem, cp3Elem;
+  if (_sdf)
+  {
+    if (_sdf->HasElement("checkpoint1"))
+      cp1Elem = _sdf->GetElement("checkpoint1");
+
+    if (_sdf->HasElement("checkpoint2"))
+      cp2Elem = _sdf->GetElement("checkpoint2");
+
+    if (_sdf->HasElement("checkpoint3"))
+      cp3Elem = _sdf->GetElement("checkpoint3");
+  }
+
   // Checkpoint 1: Walk to satellite dish
-  std::unique_ptr<Task1CP1> cp1(new Task1CP1(ignition::math::Pose3d::Zero));
+  std::unique_ptr<Task1CP1> cp1(new Task1CP1(cp1Elem));
   this->checkpoints.push_back(std::move(cp1));
 
   // Checkpoints 2: Correct pitch / yaw
-  std::unique_ptr<Task1CP2> cp2(new Task1CP2(_poses[0]));
+  std::unique_ptr<Task1CP2> cp2(new Task1CP2(cp2Elem));
   this->checkpoints.push_back(std::move(cp2));
 
   // Checkpoints 3: Walk to final box
-  std::unique_ptr<Task1CP3> cp3(new Task1CP3(_poses[1]));
+  std::unique_ptr<Task1CP3> cp3(new Task1CP3(cp3Elem));
   this->checkpoints.push_back(std::move(cp3));
 
   gzmsg << "Task [1] created" << std::endl;
@@ -76,7 +90,7 @@ bool Task1CP2::Check()
     this->gzNode->Init();
 
     auto togglePub = this->gzNode->Advertise<msgs::Int>(
-        "/task1/checkpoint2/toggle"); 
+        "/task1/checkpoint2/toggle");
 
     msgs::Int msg;
     msg.set_data(0);
@@ -85,7 +99,7 @@ bool Task1CP2::Check()
     this->rosNode.reset();
   }
 
-  return this->satelliteDone; 
+  return this->satelliteDone;
 }
 
 /////////////////////////////////////////////////

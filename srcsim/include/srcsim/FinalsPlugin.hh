@@ -73,5 +73,8 @@ namespace gazebo
 
     /// \brief Ros task subscriber
     private: ros::Subscriber taskRosSub;
+
+    /// \brief Product used to know which tasks are in the world
+    private: int product;
   };
 }

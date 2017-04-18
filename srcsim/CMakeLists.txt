@@ -5,6 +5,11 @@ if(NOT WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
 endif()
 
+include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
+pkg_check_modules(OGRE OGRE)
+include_directories( ${OGRE_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS}/Paging/)    
+link_directories( ${OGRE_LIBRARY_DIRS} )
+
 find_package(catkin REQUIRED COMPONENTS
   gazebo_plugins
   gazebo_ros
@@ -12,11 +17,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
 )
-
-include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
-pkg_check_modules(OGRE OGRE)
-include_directories( ${OGRE_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS}/Paging/)    
-link_directories( ${OGRE_LIBRARY_DIRS} )
 
 set (SRCSIM_MAJOR_VERSION 0)
 set (SRCSIM_MINOR_VERSION 3)
@@ -68,15 +68,15 @@ link_directories(
 
 # Create the libSRCMultisensPlugin.so library.
 set(src_multisense_sl_plugin_name SRCMultiSenseSLPlugin)
-#add_library(${src_multisense_sl_plugin_name} src/SRCMultiSenseSLPlugin.cc)
-#target_link_libraries(${src_multisense_sl_plugin_name}
-#  ${GAZEBO_LIBRARIES}
-#  ${roscpp_LIBRARIES}
-#)
-#install(TARGETS ${src_multisense_sl_plugin_name}
-#  ARCHIVE DESTINATION lib
-#  LIBRARY DESTINATION lib
-#  RUNTIME DESTINATION bin)
+add_library(${src_multisense_sl_plugin_name} src/SRCMultiSenseSLPlugin.cc)
+target_link_libraries(${src_multisense_sl_plugin_name}
+  ${GAZEBO_LIBRARIES}
+  ${roscpp_LIBRARIES}
+)
+install(TARGETS ${src_multisense_sl_plugin_name}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 
 ##########################
 ## Qualification task 1 ##
@@ -208,13 +208,17 @@ install(TARGETS ${solar_panel_plugin_name}
 ## Install ##
 #############
 
-# Install all the world files
-install(DIRECTORY worlds/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/worlds)
+# Install all the config files
+install(DIRECTORY config/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config)
 
 # Install all the launch files
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+
+# Install all the world files
+install(DIRECTORY worlds/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/worlds)
 
 # Install Misc. Scripts
 install(PROGRAMS scripts/init_robot.sh scripts/walk_test.py scripts/rossleep.py

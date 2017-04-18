@@ -1,0 +1,55 @@
+<%
+  # Template for leak model for SRC finals world
+
+  # TODO: Add logic to randomly place it on habitat wall
+  # once we have the final habitat
+
+  # placeholder position
+  x = $current_frame[0, 2]
+  y = $current_frame[1, 2]
+  z = 0.87
+
+%>
+
+<model name="leak">
+  <static>true</static>
+
+  <pose><%= x %> <%= y %> <%= z %> 0 0 0</pose>
+
+  <link name="base">
+
+    <visual name="visual">
+
+      <geometry>
+        <sphere>
+          <radius>0.05</radius>
+        </sphere>
+      </geometry>
+
+      <material>
+        <ambient>1 0 0 1</ambient>
+        <emissive>1 0 0 1</emissive>
+        <diffuse>1 0 0 1</diffuse>
+        <specular>1 1 1 1</specular>
+      </material>
+
+      <meta>
+        <layer>1</layer>
+      </meta>
+
+    </visual>
+
+    <collision name="collision">
+
+      <geometry>
+        <sphere>
+          <radius>0.05</radius>
+        </sphere>
+      </geometry>
+
+    </collision>
+
+  </link>
+
+</model>
+
