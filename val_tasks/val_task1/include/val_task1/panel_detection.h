@@ -1,3 +1,6 @@
+#ifndef PANEL_DETECTION_H
+#define PANEL_DETECTION_H
+
 #include <iostream>
 
 #include <ros/ros.h>
@@ -36,33 +39,28 @@
 
 #include <visualization_msgs/MarkerArray.h>
 
-class sdc{
+class panel_detector{
 private:
 
-  ros::Subscriber pcl_sub;
+  ros::Subscriber pcl_sub_;
 
-  ros::Publisher pcl_filtered_pub;
-  ros::Publisher vis_pub;
-  ros::Publisher vis_plane_pub;
+  ros::Publisher pcl_filtered_pub_;
+  ros::Publisher vis_pub_;
+  ros::Publisher vis_plane_pub_;
 
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
 
   void passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
-  void panelRemoval(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+  void panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
   void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
   void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
 
 public:
   // Constructor
 
-  sdc(ros::NodeHandle nh)
-  {
-    pcl_sub =  nh.subscribe("/assembled_cloud2", 10, &sdc::cloudCB, this);
-    pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_filter/filteredPointCloud", 1);
-
-    vis_pub = nh.advertise<visualization_msgs::Marker>( "/sdc/visualization_marker", 1 );
-    vis_plane_pub = nh.advertise<visualization_msgs::Marker>( "/sdc/visualization_plane_vector", 1 );
-  }
-
+  panel_detector(ros::NodeHandle &nh);
+  static short num_of_detections_;
 };
+
+#endif //PANEL_DETECTION_H

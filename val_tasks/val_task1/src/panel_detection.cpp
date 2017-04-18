@@ -1,6 +1,18 @@
-#include "val_panelDetection/sdc_pointcloud.h"
+#include "val_task1/panel_detection.h"
+#include "val_common/val_common_names.h"
 
-void sdc::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
+short panel_detector::num_of_detections_ = 0;
+panel_detector::panel_detector(ros::NodeHandle &nh)
+{
+  pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &panel_detector::cloudCB, this);
+  pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_filter/filteredPointCloud", 1);
+
+  vis_pub_ = nh.advertise<visualization_msgs::Marker>( "visualization_marker", 1 );
+  vis_plane_pub_ = nh.advertise<visualization_msgs::Marker>( "visualization_plane_vector", 1 );
+}
+
+
+void panel_detector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
   ros::Time startTime = ros::Time::now();
 
@@ -11,7 +23,7 @@ void sdc::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
   pcl::fromROSMsg(*input, *cloud);
 
   passThroughFilter(cloud);
-  panelRemoval(cloud);
+  panelSegmentation(cloud);
   segmentation(cloud);
 
 
@@ -20,17 +32,18 @@ void sdc::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
   ros::Time endTime = ros::Time::now();
 
-  std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
+//  std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
 
   pcl::toROSMsg(*cloud, output);
 
-  output.header.frame_id = "world";
+  output.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
 
-  pcl_filtered_pub.publish(output);
+  pcl_filtered_pub_.publish(output);
 
+  ++num_of_detections_;
 }
 
-void sdc::passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+void panel_detector::passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
   pcl::PassThrough<pcl::PointXYZ> pass_x;
   pass_x.setInputCloud(cloud);
@@ -54,7 +67,7 @@ void sdc::passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
 }
 
-void sdc::panelRemoval(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+void panel_detector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
   pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
@@ -79,7 +92,7 @@ void sdc::panelRemoval(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
 }
 
-void sdc::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose){
+void panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose){
 
     Eigen::Vector4f centroid;
 //  Calculating the Centroid of the Panel Point cloud
@@ -178,13 +191,13 @@ void sdc::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs:
     marker.color.b = 0.0;
     marker.lifetime = ros::Duration(5);
 
-    vis_pub.publish(marker);
+    vis_pub_.publish(marker);
 
 
 }
 
 
-void sdc::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+void panel_detector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out (new pcl::PointCloud<pcl::PointXYZ>);
 
@@ -237,14 +250,15 @@ void sdc::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 }
 
 int main(int argc, char** argv){
-  ros::init(argc, argv, "sdc_pointcloud");
+  ros::init(argc, argv, "panel_detector");
   ros::NodeHandle nh;
 
-  sdc obj(nh);
+  panel_detector obj(nh);
 
-  while(ros::ok()){
+  while(ros::ok() && panel_detector::num_of_detections_ < 6){
 
     ros::spinOnce();
   }
+  ROS_INFO("Exiting panel detector node");
   return 0;
 }
