@@ -1,11 +1,10 @@
 #ifndef WALKWAY_FILTER_H
 #define WALKWAY_FILTER_H
 
-//#define LOWER_THRESHOLD -0.05f
-#define LOWER_THRESHOLD -0.05f
-#define UPPER_THRESHOLD  0.09f
+#define LOWER_THRESHOLD -0.00f
+#define UPPER_THRESHOLD  0.07f
 #define GROUND_THRESHOLD (UPPER_THRESHOLD - LOWER_THRESHOLD)
-#define FOOT_GROUND_THRESHOLD 0.01
+#define FOOT_GROUND_THRESHOLD 0.05
 
 #include <ros/ros.h>
 #include <pcl/filters/extract_indices.h>
@@ -22,6 +21,7 @@ public:
     ~WalkwayFilter();
     void generateMap(pcl::PointCloud<pcl::PointXYZ>::Ptr msg);
     void subtractPointClouds(pcl::PointCloud<pcl::PointXYZ>::Ptr full_cloud, const pcl::PointIndices::Ptr outliers);
+
 private:
     ros::Publisher mapPub_;
     ros::Publisher pointcloudPub_;

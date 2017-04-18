@@ -32,25 +32,13 @@ void WalkwayFilter::generateMap(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 
     pcl::PointIndices::Ptr outliers(new pcl::PointIndices());
     outliers->header = cloud->header;
-    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-    //    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-    //    // Create the segmentation object
-    //    pcl::SACSegmentation<pcl::PointXYZ> seg;
-    //    // Optional
-    //    seg.setOptimizeCoefficients (true);
-    //    // Mandatory
-    //    seg.setModelType (pcl::SACMODEL_LINE);
-    //    seg.setMethodType (pcl::SAC_RANSAC);
-    //    seg.setDistanceThreshold (UPPER_THRESHOLD - LOWER_THRESHOLD);
-    //    seg.setInputCloud (cloud);
-    //    seg.segment (*inliers, *coefficients);
 
     float foot_height = getCurrentFootPose();
     std::cout<<  foot_height << std::endl;
 
     for (size_t i = 0; i< cloud->size(); ++i){
         if( cloud->at(i).z < foot_height - FOOT_GROUND_THRESHOLD
-                && cloud->at(i).z > foot_height- FOOT_GROUND_THRESHOLD - (GROUND_THRESHOLD)){
+                && cloud->at(i).z > foot_height - FOOT_GROUND_THRESHOLD - (GROUND_THRESHOLD)){
             outliers->indices.insert(outliers->indices.end(),i);
         }
     }
@@ -81,6 +69,7 @@ void WalkwayFilter::subtractPointClouds(pcl::PointCloud<pcl::PointXYZ>::Ptr full
     extract.filter (*full_cloud);
     return;
 }
+
 int main(int argc, char** argv){
     ros::init(argc, argv, "walkway_filter");
     ROS_INFO("Starting walkway filter node");
