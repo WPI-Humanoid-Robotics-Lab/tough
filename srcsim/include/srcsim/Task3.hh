@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Open Source Robotics Foundation
+ * Copyright (C) 2017 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,8 @@ namespace gazebo
   class Task3 : public Task
   {
     /// \brief Constructor
-    /// \param[in] _timeout Timeout for this task
-    /// \param[in] _poses Vector of starting poses for checkpoints.
-    public: Task3(const common::Time &_timeout,
-        const std::vector<ignition::math::Pose3d> _poses);
+    /// \param[in] _sdf Pointer to SDF element for this task.
+    public: Task3(const sdf::ElementPtr &_sdf);
 
     // Documentation inherited
     public: size_t Number() const;

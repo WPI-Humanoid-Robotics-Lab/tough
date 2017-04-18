@@ -8,6 +8,8 @@
        to automatically walk forward after harness detach. -->
   <arg name="debug" default="false" />
   <arg name="extra_gazebo_args" default=""/>
+  <arg name="grasping_init" default="false"/>
+  <arg name="grasping_init_wait_time" default="20"/>
   <arg name="init" default="false" />
   <arg name="paused" default="false" />
   <arg name="use_local_build" default="false" />
@@ -29,6 +31,10 @@
 
   <include file="$(find ihmc_valkyrie_ros)/launch/val_wholebody_control_gazebo.launch"/>
 
+  <group if="$(arg grasping_init)">
+    <node name="$(anon grasping_init)" pkg="val_deploy" type="delayed_roslaunch.sh" required="true" args="$(arg grasping_init_wait_time) srcsim grasping_init.launch" output="screen"/>
+  </group>
+
   <group if="$(arg init)">
     <node name="startup_robot" pkg="srcsim" type="init_robot.sh" args="$(arg walk_test)" output="screen"/>
   </group>
@@ -39,12 +45,11 @@
   </include>
   -->
 
-  <!-- Stereo image processing 
+  <!-- Stereo image processing -->
   <node ns="multisense/camera" name="stereo_proc" pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" output="log">
     <param name="disparity_range" type="int" value="128"/>
     <param name="approximate_sync" type="bool" value="false"/>
   </node>
--->
 
   <!-- relay for multisense sl simulation topics
        sim publishes to /multisense/camera/points2 (from stereo_proc node), while

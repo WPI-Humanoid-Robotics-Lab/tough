@@ -15,7 +15,6 @@
  *
 */
 
-#include <gazebo/physics/Model.hh>
 #include <gazebo/physics/PhysicsIface.hh>
 #include <gazebo/physics/World.hh>
 #include <srcsim/Task.h>
@@ -26,8 +25,19 @@
 using namespace gazebo;
 
 /////////////////////////////////////////////////
-Task::Task(const common::Time &_timeout) : timeout(_timeout)
+Task::Task(const sdf::ElementPtr &_sdf)
 {
+  // Get timeout
+  if (_sdf && _sdf->HasElement("timeout"))
+  {
+    this->timeout = _sdf->Get<double>("timeout");
+  }
+  else
+  {
+    gzwarn << "Timeout not specified, using default value ["
+           << this->timeout << "]" << std::endl;
+  }
+
   // ROS transport
   this->rosNode.reset(new ros::NodeHandle());
 
@@ -36,8 +46,7 @@ Task::Task(const common::Time &_timeout) : timeout(_timeout)
 }
 
 /////////////////////////////////////////////////
-void Task::Start(const common::Time &_time, const size_t _checkpoint,
-    bool _skipped)
+void Task::Start(const common::Time &_time, const size_t _checkpoint)
 {
   // Double-check that we're not going back to a previous checkpoint
   if (_checkpoint <= this->current)
@@ -46,6 +55,38 @@ void Task::Start(const common::Time &_time, const size_t _checkpoint,
         "] checkpoint [" << unsigned(_checkpoint) <<
         "], and current checkpoint is [" << unsigned(this->current) << "]. " <<
         "It's not possible to go back to a previous checkpoint." << std::endl;
+    return;
+  }
+
+  // First checkpoint officially starts when entering start box
+  if (_checkpoint == 1 && !this->startBox)
+  {
+    // Already waiting
+    if (this->gzNode)
+      return;
+
+    // Initialize node
+    this->gzNode = transport::NodePtr(new transport::Node());
+    this->gzNode->Init();
+
+    // Setup contains subscriber
+    this->boxSub = this->gzNode->Subscribe(
+        "/task" + std::to_string(this->Number()) + "/start/box/contains",
+        &Task::OnStartBox, this);
+
+    // Setup toggle publisher
+    this->togglePub = this->gzNode->Advertise<msgs::Int>(
+        "/task" + std::to_string(this->Number()) + "/start/box/toggle");
+
+    // Toggle box plugin on
+    msgs::Int msg;
+    msg.set_data(1);
+    this->togglePub->Publish(msg);
+
+    gzmsg << "Task [" << this->Number()
+          << "] - Started: time will start counting as you leave the box."
+          << std::endl;
+
     return;
   }
 
@@ -58,11 +99,11 @@ void Task::Start(const common::Time &_time, const size_t _checkpoint,
   {
     if (this->current > 0)
     {
+      this->checkpoints[this->current - 1]->Skip();
+
       gzmsg << "Task [" << this->Number() << "] - Checkpoint ["
             << this->current << "] - Skipped (" << _time << ")" << std::endl;
       this->checkpointsCompletion.push_back(common::Time::Zero);
-
-      _skipped = true;
     }
 
     this->current++;
@@ -71,27 +112,6 @@ void Task::Start(const common::Time &_time, const size_t _checkpoint,
   // Checkpoint
   this->current = _checkpoint;
 
-  // Teleport robot if tasks / checkpoints are being skipped
-  // TODO: Reset joints
-  if (_skipped)
-  {
-    auto world = physics::get_world();
-    if (!world)
-    {
-      gzerr << "Failed to get world pointer, robot won't be teleported." 
-          << std::endl;
-      return;
-    }
-    auto robot = world->GetModel("valkyrie");
-    if (!robot)
-    {
-      gzerr << "Failed to get model pointer, robot won't be teleported." 
-          << std::endl;
-      return;
-    }
-    robot->SetWorldPose(this->checkpoints[this->current - 1]->startPose);
-  }
-
   gzmsg << "Task [" << this->Number() << "] - Checkpoint [" << this->current
         << "] - Started (" << _time << ")" << std::endl;
 }
@@ -99,6 +119,18 @@ void Task::Start(const common::Time &_time, const size_t _checkpoint,
 /////////////////////////////////////////////////
 void Task::Update(const common::Time &_time)
 {
+  if (this->current == 0)
+    return;
+
+  // Terminate start transport
+  if (this->gzNode)
+  {
+    this->boxSub.reset();
+    this->togglePub.reset();
+    this->gzNode->Fini();
+    this->gzNode.reset();
+  }
+
   // Timeout
   auto elapsed = _time - this->startTime;
   this->timedOut = !this->finished && elapsed > this->timeout;
@@ -135,6 +167,10 @@ void Task::Update(const common::Time &_time)
         gzmsg << "Task [" << this->Number() << "] - Checkpoint ["
               << this->current << "] - Started (" << _time << ")" << std::endl;
       }
+      else
+      {
+        this->current = 0;
+      }
     }
   }
 
@@ -157,6 +193,13 @@ void Task::Update(const common::Time &_time)
 }
 
 /////////////////////////////////////////////////
+void Task::Skip()
+{
+  // Trigger skip on last checkpoint
+  this->checkpoints.back()->Skip();
+}
+
+/////////////////////////////////////////////////
 size_t Task::CheckpointCount() const
 {
   return this->checkpoints.size();
@@ -166,5 +209,22 @@ size_t Task::CheckpointCount() const
 size_t Task::CurrentCheckpointId() const
 {
   return this->current;
+}
+
+//////////////////////////////////////////////////
+void Task::OnStartBox(ConstIntPtr &_msg)
+{
+  this->startBox = _msg->data() == 0 ? false : true;
+
+  auto world = physics::get_world();
+  if (!world)
+  {
+    gzerr << "Failed to get world pointer, can't start task."
+        << std::endl;
+    return;
+  }
+
+  // Now the checkpoint starts
+  this->Start(world->GetSimTime(), 1);
 }
 

@@ -1,0 +1,12 @@
+<launch>
+
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find srcsim)/config/val_grasping.yaml" command="load"/>
+
+  <!-- load the controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" args="hands_joint_state_controller left_hand_position_controller right_hand_position_controller"/>
+
+  <node name="hand_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+
+</launch>

@@ -18,20 +18,22 @@
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+            <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
             <submesh>
               <name>Base</name>
             </submesh>
+            <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
       </collision>
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+            <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
             <submesh>
               <name>Base</name>
             </submesh>
+            <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
       </visual>
@@ -54,10 +56,11 @@
         <pose>0 0 -1.595 0 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+            <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
             <submesh>
               <name>Pivot</name>
             </submesh>
+            <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
       </collision>
@@ -65,10 +68,11 @@
         <pose>0 0 -1.595 0 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+            <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
             <submesh>
               <name>Pivot</name>
             </submesh>
+            <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
       </visual>
@@ -92,10 +96,11 @@
         <pose>0 -0.6519041 -1.451541 -0.43 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+            <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
             <submesh>
               <name>Dish</name>
             </submesh>
+            <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
       </collision>
@@ -103,10 +108,11 @@
         <pose>0 -0.6519041 -1.451541 -0.43 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+            <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
             <submesh>
               <name>Dish</name>
             </submesh>
+            <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
       </visual>
@@ -129,10 +135,11 @@
         <pose>0.2 1.060 -1.64 -0.52 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+            <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
             <submesh>
               <name>Wheel_01</name>
             </submesh>
+            <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
       </collision>
@@ -157,10 +164,11 @@
         <pose>0.2 1.060 -1.64 -0.52 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+            <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
             <submesh>
               <name>Wheel_01</name>
             </submesh>
+            <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
       </visual>
@@ -183,10 +191,11 @@
         <pose>-0.2 1.060 -1.64 -0.52 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+            <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
             <submesh>
               <name>Wheel_02</name>
             </submesh>
+            <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
       </collision>
@@ -211,10 +220,11 @@
         <pose>-0.2 1.060 -1.64 -0.52 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://satellite_dish/meshes/satellite_dish.dae</uri>
+            <uri>model://satellite_dish/meshes/satellite_dish.obj</uri>
             <submesh>
               <name>Wheel_02</name>
             </submesh>
+            <scale>0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
       </visual>
@@ -224,7 +234,7 @@
       <parent>base</parent>
       <child>pivot</child>
       <axis>
-        <xyz>0 0 1</xyz>
+        <xyz>0 0 -1</xyz>
         <dynamics>
           <damping>1000</damping>
         </dynamics>
@@ -250,7 +260,7 @@
       <parent>base</parent>
       <child>wheel_yaw</child>
       <axis>
-        <xyz>0 0 1</xyz>
+        <xyz>0 0 -1</xyz>
         <dynamics>
           <friction>2.5</friction>
         </dynamics>
@@ -261,7 +271,7 @@
       <parent>base</parent>
       <child>wheel_pitch</child>
       <axis>
-        <xyz>0 0 1</xyz>
+        <xyz>0 0 -1</xyz>
         <dynamics>
           <friction>2.5</friction>
         </dynamics>
