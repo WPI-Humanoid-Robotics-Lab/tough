@@ -29,7 +29,7 @@ private:
     ros::NodeHandle nh_;
     tf::TransformListener       tf_listener_;
 
-    double getCurrentFootPose(void);
+    double getCurrentFootHeight(void);
 };
 
 #endif // WALKWAY_FILTER_H

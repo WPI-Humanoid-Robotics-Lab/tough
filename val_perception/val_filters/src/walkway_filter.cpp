@@ -21,7 +21,7 @@ WalkwayFilter::WalkwayFilter(ros::NodeHandle &n):nh_(n)
 
 WalkwayFilter::~WalkwayFilter()
 {
-    mapPub_.shutdown();
+    pointcloudPub_.shutdown();
     pointcloudSub_.shutdown();
 }
 
@@ -33,7 +33,7 @@ void WalkwayFilter::generateMap(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
     pcl::PointIndices::Ptr outliers(new pcl::PointIndices());
     outliers->header = cloud->header;
 
-    float foot_height = getCurrentFootPose();
+    float foot_height = getCurrentFootHeight();
     std::cout<<  foot_height << std::endl;
 
     for (size_t i = 0; i< cloud->size(); ++i){
@@ -46,7 +46,7 @@ void WalkwayFilter::generateMap(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
     pointcloudPub_.publish(cloud);
 }
 
-double WalkwayFilter::getCurrentFootPose(void)
+double WalkwayFilter::getCurrentFootHeight(void)
 {
     double height_foot;
 
