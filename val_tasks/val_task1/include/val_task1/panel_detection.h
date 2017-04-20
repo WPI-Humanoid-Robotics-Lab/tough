@@ -39,6 +39,16 @@
 
 #include <visualization_msgs/MarkerArray.h>
 
+
+//bool geometry_msgs::Pose::operator < (geometry_msgs::Pose const& lhs, geometry_msgs::Pose const& rhs)
+//{
+//    tf::Pose tf_lhs, tf_rhs;
+//    tf::poseMsgToTF(lhs, tf_lhs);
+//    tf::poseMsgToTF(rhs, tf_rhs);
+//    return tf_lhs.getOrigin() < tf_rhs.getOrigin();
+
+//}
+
 class panel_detector{
 private:
 
@@ -47,6 +57,8 @@ private:
   ros::Publisher pcl_filtered_pub_;
   ros::Publisher vis_pub_;
   ros::Publisher vis_plane_pub_;
+  std::vector<geometry_msgs::Pose> detections;
+  short num_of_detections_;
 
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
 
@@ -60,7 +72,21 @@ public:
   // Constructor
 
   panel_detector(ros::NodeHandle &nh);
-  static short num_of_detections_;
+
+
+  void getDetections(std::vector<geometry_msgs::Pose> &ret_val);
+
+  short getNumOfDetections();
+
 };
+
+bool poseComparator (geometry_msgs::Pose const& lhs, geometry_msgs::Pose const& rhs)
+{
+    tf::Pose tf_lhs, tf_rhs;
+    tf::poseMsgToTF(lhs, tf_lhs);
+    tf::poseMsgToTF(rhs, tf_rhs);
+    return tf_lhs.getOrigin() < tf_rhs.getOrigin();
+
+}
 
 #endif //PANEL_DETECTION_H

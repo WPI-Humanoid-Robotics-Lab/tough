@@ -1,7 +1,6 @@
 #include "val_task1/panel_detection.h"
 #include "val_common/val_common_names.h"
 
-short panel_detector::num_of_detections_ = 0;
 panel_detector::panel_detector(ros::NodeHandle &nh)
 {
   pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &panel_detector::cloudCB, this);
@@ -9,14 +8,25 @@ panel_detector::panel_detector(ros::NodeHandle &nh)
 
   vis_pub_ = nh.advertise<visualization_msgs::Marker>( "visualization_marker", 1 );
   vis_plane_pub_ = nh.advertise<visualization_msgs::Marker>( "visualization_plane_vector", 1 );
+
+  num_of_detections_ = 0;
+}
+short panel_detector::getNumOfDetections()
+{
+    return num_of_detections_;
+}
+
+void panel_detector::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
+{
+    ret_val = detections;
 }
 
 
 void panel_detector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
-  ros::Time startTime = ros::Time::now();
+    ros::Time startTime = ros::Time::now();
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
   sensor_msgs::PointCloud2 output;
 
@@ -29,7 +39,7 @@ void panel_detector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
   geometry_msgs::Pose pose;
   getPosition(cloud, pose);
-
+  detections.push_back(pose);
   ros::Time endTime = ros::Time::now();
 
 //  std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
@@ -252,13 +262,28 @@ void panel_detector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 int main(int argc, char** argv){
   ros::init(argc, argv, "panel_detector");
   ros::NodeHandle nh;
-
+  ros::Publisher goalPub = nh.advertise<geometry_msgs::PoseStamped>("/valkyrie/goal",1);
   panel_detector obj(nh);
+  int NUM_SAMPLES = 4;
 
-  while(ros::ok() && panel_detector::num_of_detections_ < 6){
-
+  while(ros::ok() && obj.getNumOfDetections() < NUM_SAMPLES){
     ros::spinOnce();
   }
+
+  std::vector<geometry_msgs::Pose> poses;
+  obj.getDetections(poses);
+
+  std::sort(poses.begin(),poses .end(), poseComparator);
+
+  geometry_msgs::PoseStamped goal;
+  goal.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+  goal.pose = poses[NUM_SAMPLES/2 -1];
+  goalPub.publish(goal);
+
+  ros::Duration(1).sleep();
   ROS_INFO("Exiting panel detector node");
+
   return 0;
+
+
 }
