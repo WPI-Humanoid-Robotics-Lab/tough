@@ -23,8 +23,12 @@
 
 #include <ros/ros.h>
 
+#include <sdf/sdf.hh>
+
 #include <gazebo/common/Console.hh>
 #include <gazebo/common/Time.hh>
+
+#include <gazebo/transport/transport.hh>
 
 #include "Checkpoint.hh"
 
@@ -34,19 +38,20 @@ namespace gazebo
   class Task
   {
     /// \brief Constructor
-    /// \param[in] _timeout Timeout for this task
-    public: Task(const common::Time &_timeout);
+    /// \param[in] _sdf SDF element for this task.
+    public: Task(const sdf::ElementPtr &_sdf);
 
     /// \brief Start this task at a specific checkpoint
     /// \param[in] _time Start time
     /// \param[in] _checkpoint Checkpoint Id
-    /// \param[in] _skipped True if another task was skipped before this one.
-    public: void Start(const common::Time &_time, const size_t _checkpoint,
-        bool _skipped = false);
+    public: void Start(const common::Time &_time, const size_t _checkpoint);
 
     /// \brief Update this task
     /// \param[in] _time Current time
     public: void Update(const common::Time &_time);
+
+    /// \brief Skip this task
+    public: void Skip();
 
     /// \brief Return the number of checkpoints in this task.
     /// \return Number of checkpoints.
@@ -59,6 +64,10 @@ namespace gazebo
     /// \brief Return this task's number.
     /// \return Task number.
     public: virtual size_t Number() const = 0;
+
+    /// \brief Callback when messages are received from the BoxContainsPlugin.
+    /// \param[in] _msg 1 if robot is inside box, 0 otherwise.
+    private: void OnStartBox(ConstIntPtr &_msg);
 
     /// \brief Vector of checkpoints for this task.
     protected: std::vector<std::unique_ptr<Checkpoint> > checkpoints;
@@ -74,7 +83,7 @@ namespace gazebo
     private: common::Time startTime;
 
     /// \brief Total time allowed for the task.
-    private: common::Time timeout;
+    private: common::Time timeout = 300;
 
     /// \brief True if task has been completed before timeout.
     private: bool finished = false;
@@ -87,6 +96,18 @@ namespace gazebo
 
     /// \brief Ros publisher which publishes the task's status.
     private: ros::Publisher taskRosPub;
+
+    /// \brief Gazebo transport node for communication.
+    protected: transport::NodePtr gzNode;
+
+    /// \brief Gazebo subscriber of box contains messages.
+    private: transport::SubscriberPtr boxSub;
+
+    /// \brief Gazebo publisher of toggle messages.
+    private: transport::PublisherPtr togglePub;
+
+    /// \brief Flag to indicate whether the robot has reached the start box.
+    private: bool startBox = false;
   };
 }
 #endif

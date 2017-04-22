@@ -8,6 +8,8 @@
        to automatically walk forward after harness detach. -->
   <arg name="debug" default="false" />
   <arg name="extra_gazebo_args" default=""/>
+  <arg name="grasping_init" default="true"/>
+  <arg name="grasping_init_wait_time" default="20"/>
   <arg name="init" default="false" />
   <arg name="paused" default="false" />
   <arg name="use_local_build" default="false" />
@@ -31,6 +33,10 @@
   <include file="$(find ihmc_valkyrie_ros)/launch/valkyrie_ros_api.launch" pass_all_args="false">
     <arg name="use_local_build" value="$(arg use_local_build)" />
   </include>
+
+  <group if="$(arg grasping_init)">
+    <node name="$(anon grasping_init)" pkg="val_deploy" type="delayed_roslaunch.sh" required="true" args="$(arg grasping_init_wait_time) srcsim grasping_init.launch" output="screen"/>
+  </group>
 
   <include file="$(find ihmc_valkyrie_ros)/launch/val_wholebody_control_gazebo.launch"/>
 

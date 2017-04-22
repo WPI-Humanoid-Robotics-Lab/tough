@@ -13,9 +13,6 @@ from ihmc_msgs.msg import FootstepStatusRosMessage
 from ihmc_msgs.msg import FootstepDataListRosMessage
 from ihmc_msgs.msg import FootstepDataRosMessage
 
-LEFT = 0
-RIGHT = 1
-
 ROBOT_NAME = None
 LEFT_FOOT_FRAME_NAME = None
 RIGHT_FOOT_FRAME_NAME = None
@@ -28,18 +25,18 @@ def walkTest():
     msg.unique_id = -1
 
     # walk forward starting LEFT
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [0.2, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [0.4, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [0.6, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [0.8, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.0, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [1.2, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.4, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [1.6, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [1.8, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [2.0, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(LEFT, [2.2, 0.0, 0.0]))
-    msg.footstep_data_list.append(createFootStepOffset(RIGHT, [2.4, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(FootstepDataRosMessage.LEFT, [0.2, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(FootstepDataRosMessage.RIGHT, [0.4, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(FootstepDataRosMessage.LEFT, [0.6, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(FootstepDataRosMessage.RIGHT, [0.8, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(FootstepDataRosMessage.LEFT, [1.0, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(FootstepDataRosMessage.RIGHT, [1.2, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(FootstepDataRosMessage.LEFT, [1.4, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(FootstepDataRosMessage.RIGHT, [1.6, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(FootstepDataRosMessage.LEFT, [1.8, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(FootstepDataRosMessage.RIGHT, [2.0, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(FootstepDataRosMessage.LEFT, [2.2, 0.0, 0.0]))
+    msg.footstep_data_list.append(createFootStepOffset(FootstepDataRosMessage.RIGHT, [2.4, 0.0, 0.0]))
 
     footStepListPublisher.publish(msg)
     rospy.loginfo('walk forward...')
@@ -50,7 +47,7 @@ def createFootStepInPlace(stepSide):
     footstep = FootstepDataRosMessage()
     footstep.robot_side = stepSide
 
-    if stepSide == LEFT:
+    if stepSide == FootstepDataRosMessage.LEFT:
         foot_frame = LEFT_FOOT_FRAME_NAME
     else:
         foot_frame = RIGHT_FOOT_FRAME_NAME

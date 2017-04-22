@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
         # make sure the simulation is running otherwise wait
         if armTrajectoryPublisher.get_num_connections() == 0:
-            rospy.loginfo('waiting for subsciber...')
+            rospy.loginfo('waiting for subscriber...')
             while armTrajectoryPublisher.get_num_connections() == 0:
                 rate.sleep()
 

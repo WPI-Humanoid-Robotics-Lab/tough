@@ -1,0 +1,23 @@
+# Publish all joint states -----------------------------------
+hands_joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 50
+
+# Position Controllers ---------------------------------------
+left_hand_position_controller:
+  type: position_controllers/JointGroupPositionController
+  joints:
+    - leftThumbRoll
+    - leftThumbPitch1
+    - leftIndexFingerPitch1
+    - leftMiddleFingerPitch1
+    - leftPinkyPitch1
+right_hand_position_controller:
+  type: position_controllers/JointGroupPositionController
+  joints:
+    - rightThumbRoll
+    - rightThumbPitch1
+    - rightIndexFingerPitch1
+    - rightMiddleFingerPitch1
+    - rightPinkyPitch1
+

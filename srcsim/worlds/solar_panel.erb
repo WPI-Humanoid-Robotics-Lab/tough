@@ -1,0 +1,678 @@
+<%
+  # Template for solar panel model for SRC finals world
+
+  # Requires the following global variables:
+  # $solar_panel_frame
+  # $solar_panel_pos_z
+
+  # Print inertial element based on a box
+  def printInertialBox(_com_x, _com_y, _com_z, _mass, _len_x, _len_y, _len_z)
+    "<inertial>\n"\
+    "      <pose>\n"\
+    "      " + _com_x.to_s() + "\n"\
+    "      " + _com_y.to_s() + "\n"\
+    "      " + _com_z.to_s() + "\n"\
+    "      " + 0.to_s() + "\n"\
+    "      " + 0.to_s() + "\n"\
+    "      " + 0.to_s() + "\n"\
+    "      </pose>\n"\
+    "      <inertia>\n"\
+    "        <ixx>" + (_mass / 12 * (_len_y*_len_y + _len_z*_len_z)).to_s() + "</ixx>\n"\
+    "        <iyy>" + (_mass / 12 * (_len_x*_len_x + _len_z*_len_z)).to_s() + "</iyy>\n"\
+    "        <izz>" + (_mass / 12 * (_len_x*_len_x + _len_y*_len_y)).to_s() + "</izz>\n"\
+    "      </inertia>\n"\
+    "      <mass>" + _mass.to_s() + "</mass>\n"\
+    "    </inertial>\n"\
+  end
+
+  # Masses in kg
+  total_mass = 5
+
+  # Most of the mass is in the base, so the model is stable when open
+  base_mass = total_mass * 0.8
+
+  # 2 large panels
+  large_panel_mass = total_mass * 0.1 * 0.5
+
+  # 4 small panels
+  small_panel_mass = total_mass * 0.08 * 0.25
+
+  # button
+  button_mass = total_mass * 0.02
+
+  # CoM offsets
+  large_panel_com_x = 0
+  large_panel_com_y = 0.05
+  large_panel_com_z = 0.24
+
+  small_panel_com_x = 0.1
+  small_panel_com_y = 0.015
+  small_panel_com_z = 0.005
+
+  # Inertia box dimensions
+  large_panel_inertia_x = 0.406
+  large_panel_inertia_y = 0.030
+  large_panel_inertia_z = 0.336
+
+  small_panel_inertia_x = 0.2
+  small_panel_inertia_y = 0.025
+  small_panel_inertia_z = 0.24
+%>
+
+<model name="solar_panel">
+
+  <pose>
+    <%= $solar_panel_frame[0, 2] %>
+    <%= $solar_panel_frame[1, 2] %>
+    <%= $solar_panel_pos_z %>
+    0
+    0
+    <%= Math::atan2($solar_panel_frame[1, 0], $solar_panel_frame[0, 0]) %>
+  </pose>
+
+  <link name="base">
+
+    <%= printInertialBox(0, 0, 0.04, base_mass, 0.406, 0.1, 0.05) %>
+
+    <collision name="collision">
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Base</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Base</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+    </visual>
+
+    <sensor name="base_sensor" type="contact">
+      <contact>
+        <collision>collision</collision>
+      </contact>
+    </sensor>
+
+  </link>
+
+  <link name="panel_01">
+
+    <%=
+      printInertialBox(
+          large_panel_com_x,
+          large_panel_com_y,
+          large_panel_com_z,
+          large_panel_mass,
+          large_panel_inertia_x,
+          large_panel_inertia_y,
+          large_panel_inertia_z)
+    %>
+
+    <collision name="panel_collision">
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Panel_Large_01</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="panel_visual">
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Panel_Large_01</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+    </visual>
+    <collision name="button_housing_collision">
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>ButtonHousing</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="button_housing_visual">
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>ButtonHousing</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+    </visual>
+
+    <sensor name="panel1_sensor" type="contact">
+      <contact>
+        <collision>panel_collision</collision>
+      </contact>
+    </sensor>
+
+  </link>
+
+
+  <link name="panel_02">
+
+    <%= printInertialBox(
+          large_panel_com_x,
+          -large_panel_com_y,
+          large_panel_com_z,
+          large_panel_mass,
+          large_panel_inertia_x,
+          large_panel_inertia_y,
+          large_panel_inertia_z)
+    %>
+
+    <collision name="collision">
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Panel_Large_02</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Panel_Large_02</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+    </visual>
+
+    <collision name="outlet">
+      <pose>0.13675 0 0.369 <%= Math::PI / 2.0 %> 0 0</pose>
+      <geometry>
+        <cylinder>
+          <length>0.003222</length>
+          <radius>0.018693</radius>
+        </cylinder>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+
+    <sensor name="panel2_sensor" type="contact">
+      <contact>
+        <collision>collision</collision>
+      </contact>
+    </sensor>
+
+    <sensor name="outlet_sensor" type="contact">
+      <contact>
+        <collision>outlet</collision>
+      </contact>
+    </sensor>
+
+  </link>
+
+  <link name="panel_small_01">
+
+    <pose>0.2 0.03 0.2 0 0 0</pose>
+
+    <%= printInertialBox(
+          -small_panel_com_x,
+          -small_panel_com_y,
+          small_panel_com_z,
+          small_panel_mass,
+          small_panel_inertia_x,
+          small_panel_inertia_y,
+          small_panel_inertia_z)
+    %>
+
+    <collision name="collision">
+      <pose>-0.2 -0.03 -0.2 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Panel_Small_01</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="visual">
+      <pose>-0.2 -0.03 -0.2 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Panel_Small_01</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="panel_small_02">
+
+    <pose>0.2 -0.03 0.2 0 0 0</pose>
+
+    <%= printInertialBox(
+          -small_panel_com_x,
+          small_panel_com_y,
+          small_panel_com_z,
+          small_panel_mass,
+          small_panel_inertia_x,
+          small_panel_inertia_y,
+          small_panel_inertia_z)
+    %>
+
+    <collision name="collision">
+      <pose>-0.2 0.03 -0.2 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Panel_Small_02</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="visual">
+      <pose>-0.2 0.03 -0.2 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Panel_Small_02</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="panel_small_03">
+
+    <pose>-0.2 0.03 0.2 0 0 0</pose>
+
+    <%= printInertialBox(
+          small_panel_com_x,
+          -small_panel_com_y,
+          small_panel_com_z,
+          small_panel_mass,
+          small_panel_inertia_x,
+          small_panel_inertia_y,
+          small_panel_inertia_z)
+    %>
+
+    <collision name="collision">
+      <pose>0.2 -0.03 -0.2 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Panel_Small_03</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="visual">
+      <pose>0.2 -0.03 -0.2 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Panel_Small_03</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="panel_small_04">
+
+    <pose>-0.2 -0.03 0.2 0 0 0</pose>
+
+    <%= printInertialBox(
+          small_panel_com_x,
+          small_panel_com_y,
+          small_panel_com_z,
+          small_panel_mass,
+          small_panel_inertia_x,
+          small_panel_inertia_y,
+          small_panel_inertia_z)
+    %>
+
+    <collision name="collision">
+      <pose>0.2 0.03 -0.2 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Panel_Small_04</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="visual">
+      <pose>0.2 0.03 -0.2 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Panel_Small_04</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+    </visual>
+  </link>
+
+
+  <link name="button">
+
+    <pose>-0.155 0 0.4 0 0 0</pose>
+
+    <%= printInertialBox(0, 0, 0.017, button_mass, 0.07, 0.07, 0.03) %>
+
+    <collision name="collision">
+      <pose>0.155 0 -0.4 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Button</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="visual">
+      <pose>0.155 0 -0.4 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://solar_panel/meshes/solar_panel.obj</uri>
+          <submesh>
+            <name>Button</name>
+          </submesh>
+          <scale>0.001 0.001 0.001</scale>
+        </mesh>
+      </geometry>
+    </visual>
+
+    <sensor name="button_contact" type="contact">
+      <contact>
+        <collision>collision</collision>
+      </contact>
+    </sensor>
+
+  </link>
+
+  <%
+    panel_joint_damping = 0.1
+  %>
+
+  <joint name="base_panel_01" type="revolute">
+    <pose>0 0.0455 0.095 0 0 0</pose>
+    <parent>base</parent>
+    <child>panel_01</child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+       <lower><%= -Math::PI * 0.5 %></lower>
+       <upper>0</upper>
+      </limit>
+      <dynamics>
+        <damping><%= panel_joint_damping %></damping>
+      </dynamics>
+    </axis>
+  </joint>
+
+  <joint name="base_panel_02" type="revolute">
+    <pose>0 -0.0455 0.095 0 0 0</pose>
+    <parent>base</parent>
+    <child>panel_02</child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+       <lower>0</lower>
+       <upper><%= Math::PI * 0.5 %></upper>
+      </limit>
+      <dynamics>
+        <damping><%= panel_joint_damping %></damping>
+      </dynamics>
+    </axis>
+  </joint>
+
+  <joint name="panel_01_panel_small_01" type="revolute">
+    <parent>panel_01</parent>
+    <child>panel_small_01</child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+       <lower>0</lower>
+       <upper><%= Math::PI %></upper>
+      </limit>
+      <dynamics>
+        <damping><%= panel_joint_damping %></damping>
+      </dynamics>
+    </axis>
+  </joint>
+
+  <joint name="panel_02_panel_small_02" type="revolute">
+    <parent>panel_02</parent>
+    <child>panel_small_02</child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+       <lower><%= -Math::PI %></lower>
+       <upper>0</upper>
+      </limit>
+      <dynamics>
+        <damping><%= panel_joint_damping %></damping>
+      </dynamics>
+    </axis>
+  </joint>
+
+  <joint name="panel_01_panel_small_03" type="revolute">
+    <parent>panel_01</parent>
+    <child>panel_small_03</child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+       <lower><%= -Math::PI %></lower>
+       <upper>0</upper>
+      </limit>
+      <dynamics>
+        <damping><%= panel_joint_damping %></damping>
+      </dynamics>
+    </axis>
+  </joint>
+
+  <joint name="panel_02_panel_small_04" type="revolute">
+    <parent>panel_02</parent>
+    <child>panel_small_04</child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+       <lower>0</lower>
+       <upper><%= Math::PI %></upper>
+      </limit>
+      <dynamics>
+        <damping><%= panel_joint_damping %></damping>
+      </dynamics>
+    </axis>
+  </joint>
+
+  <%
+    button_z_pos = 0.005
+  %>
+  <joint name="button" type="prismatic">
+    <pose>0 0 <%= button_z_pos %> 0 0 0</pose>
+    <parent>panel_01</parent>
+    <child>button</child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+       <lower><%= -button_z_pos %></lower>
+       <upper>0</upper>
+      </limit>
+      <dynamics>
+        <damping>10</damping>
+        <spring_stiffness>1000</spring_stiffness>
+        <spring_reference>0</spring_reference>
+      </dynamics>
+    </axis>
+  </joint>
+
+  <joint name="lock_1" type="fixed">
+    <parent>panel_01</parent>
+    <child>panel_02</child>
+  </joint>
+
+  <joint name="lock_2" type="fixed">
+    <parent>panel_small_01</parent>
+    <child>panel_small_03</child>
+  </joint>
+
+  <joint name="lock_3" type="fixed">
+    <parent>panel_small_02</parent>
+    <child>panel_small_04</child>
+  </joint>
+
+  <plugin name="solar_panel_plugin" filename="libSolarPanelPlugin.so">
+  </plugin>
+
+  <plugin name="touch_valkyrie_panel" filename="libTouchPlugin.so">
+    <sensor>base_sensor</sensor>
+    <sensor>panel1_sensor</sensor>
+    <sensor>panel2_sensor</sensor>
+    <target>valkyrie</target>
+    <time>0.5</time>
+    <namespace>task2/checkpoint1</namespace>
+  </plugin>
+
+</model>
