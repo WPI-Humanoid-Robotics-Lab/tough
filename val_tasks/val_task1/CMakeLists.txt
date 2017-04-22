@@ -1,26 +1,37 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(val_task1)
 
-## Add support for C++11, supported in ROS Kinetic and newer
-# add_definitions(-std=c++11)
-if(NOT WIN32)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-sign-compare -Wno-ignored-qualifiers -Wno-unused-function")
-endif()
+SET(CMAKE_BUILD_TYPE RelWithDebInfo)
+
+set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  decision_making
-  decision_making_parser
   roscpp
   rospy
+  decision_making
+  decision_making_parser
+
   geometry_msgs
+  sensor_msgs
+  std_msgs
+  moveit_msgs
+
+  cv_bridge
+  image_transport
+  pcl_conversions
+  pcl_ros
+  perception_common
+
+  tf
+  tf_conversions
 
   val_moveit_config
   moveit_commander
   moveit_core
   moveit_fake_controller_manager
-  moveit_msgs
   moveit_planners_ompl
   moveit_ros_benchmarks
   moveit_ros_benchmarks_gui
@@ -37,13 +48,23 @@ find_package(catkin REQUIRED COMPONENTS
   trac_ik_examples
   trac_ik_kinematics_plugin
   trac_ik_lib
+
   val_control
 
   val_gui
 )
 
 ## System dependencies are found with CMake's conventions
- find_package(Boost REQUIRED COMPONENTS system)
+
+find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
+find_package(Boost REQUIRED COMPONENTS system)
+find_package(PCL 1.7 REQUIRED)
+
+
+ include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+
+ link_directories(${PCL_LIBRARY_DIRS})
+ add_definitions(${PCL_DEFINITIONS})
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -134,8 +155,8 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES val_task1
-  CATKIN_DEPENDS roscpp rospy
-#  DEPENDS system_lib
+  CATKIN_DEPENDS roscpp rospy perception_common 
+  DEPENDS system_lib
 )
 
 ###########
@@ -144,9 +165,9 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  include
 )
 
 # Declare a C++ library
@@ -167,7 +188,15 @@ include_directories(
             src/val_task1SM.cpp
 )
 
+add_dependencies(val_task1_node
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS})
 
+## Specify libraries to link a library or executable target against
+ target_link_libraries(val_task1_node
+   ${catkin_LIBRARIES}
+ )
+ 
 add_executable(val_circle src/val_circle.cpp)
 
 add_dependencies(val_circle
@@ -178,6 +207,13 @@ target_link_libraries(val_circle
    ${catkin_LIBRARIES}
    val_marker
  )
+ 
+add_executable(panel_detection src/panel_detection.cpp)
+add_dependencies(panel_detection
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(panel_detection ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -186,14 +222,7 @@ target_link_libraries(val_circle
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(val_task1_node
- ${${PROJECT_NAME}_EXPORTED_TARGETS}
- ${catkin_EXPORTED_TARGETS})
 
-## Specify libraries to link a library or executable target against
- target_link_libraries(val_task1_node
-   ${catkin_LIBRARIES}
- )
 
 decision_making_parsing(src/val_task1SM.cpp)
 
