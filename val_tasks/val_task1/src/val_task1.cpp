@@ -80,7 +80,8 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
     // if executing stay in the same state
     if (ret == MOVE_EXECUTING)
     {
-        eventQueue.riseEvent("/WALK_EXECUTING");
+        // no state change
+        //eventQueue.riseEvent("/WALK_EXECUTING");
     }
     // if finished sucessfully
     else if (ret == MOVE_SUCESS)
