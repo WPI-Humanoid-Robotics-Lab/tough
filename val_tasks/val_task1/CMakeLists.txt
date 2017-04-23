@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   decision_making
   decision_making_parser
+  dynamic_reconfigure
 
   geometry_msgs
   sensor_msgs
@@ -52,6 +53,7 @@ find_package(catkin REQUIRED COMPONENTS
   val_control
 
   val_gui
+  val_footstep
 )
 
 ## System dependencies are found with CMake's conventions
@@ -143,6 +145,12 @@ find_package(PCL 1.7 REQUIRED)
 #   cfg/DynReconf2.cfg
 # )
 
+## Generate dynamic reconfigure parameters in the 'cfg' folder
+generate_dynamic_reconfigure_options(
+  cfg/task1_parameters.cfg
+ )
+
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -155,7 +163,7 @@ find_package(PCL 1.7 REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES val_task1
-  CATKIN_DEPENDS roscpp rospy perception_common 
+  CATKIN_DEPENDS roscpp rospy perception_common dynamic_reconfigure val_footstep
   DEPENDS system_lib
 )
 
@@ -165,36 +173,41 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
+include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
-  include
+  ${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake
 )
 
 # Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/val_task1SM.cpp
-# )
+ add_library(${PROJECT_NAME}
+         src/val_task1.cpp
+         src/val_task1SM.cpp
+ )
+
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
  add_executable(val_task1_node
-            src/val_task1.cpp
-            src/val_task1SM.cpp
+            src/val_task1_node.cpp
 )
 
 add_dependencies(val_task1_node
  ${${PROJECT_NAME}_EXPORTED_TARGETS}
- ${catkin_EXPORTED_TARGETS})
+ ${catkin_EXPORTED_TARGETS}_gencfg)
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(val_task1_node
    ${catkin_LIBRARIES}
+   ${PROJECT_NAME}
  )
  
 add_executable(val_circle src/val_circle.cpp)

@@ -16,7 +16,23 @@ using namespace std;
 
 #define foreach BOOST_FOREACH
 
-bool preemptiveWait(double ms, decision_making::EventQueue& queue) {
+ValkyrieWalker *valTask1::walker_ = NULL;
+geometry_msgs::Pose2D valTask1::panel_walk_goal_;
+
+// constructor and destrcutor
+valTask1::valTask1(ros::NodeHandle nh):
+    nh_(nh)
+{
+    // object for the valkyrie walker
+    walker_ = new ValkyrieWalker(nh_, 0.5, 0.5, 0, 0.18);
+}
+
+// destructor
+valTask1::~valTask1(){
+
+}
+
+bool valTask1::preemptiveWait(double ms, decision_making::EventQueue& queue) {
   for (int i = 0; i < 100 && !queue.isTerminated(); i++)
     boost::this_thread::sleep(boost::posix_time::milliseconds(ms / 100.0));
 
@@ -24,7 +40,7 @@ bool preemptiveWait(double ms, decision_making::EventQueue& queue) {
 }
 
 // state machine state executions
-decision_making::TaskResult initTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("executing " << name);
 
@@ -42,7 +58,7 @@ decision_making::TaskResult initTask(string name, const FSMCallContext& context,
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("executing " << name);
 
@@ -53,7 +69,7 @@ decision_making::TaskResult detectPanelTask(string name, const FSMCallContext& c
 }
 
 
-decision_making::TaskResult walkToControlPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("executing " << name);
 
@@ -61,7 +77,7 @@ decision_making::TaskResult walkToControlPanelTask(string name, const FSMCallCon
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("executing " << name);
 
@@ -71,7 +87,7 @@ decision_making::TaskResult detectHandleCenterTask(string name, const FSMCallCon
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("executing " << name);
 
@@ -81,7 +97,7 @@ decision_making::TaskResult adjustArmTask(string name, const FSMCallContext& con
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult controlPitchTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("executing " << name);
 
@@ -89,7 +105,7 @@ decision_making::TaskResult controlPitchTask(string name, const FSMCallContext& 
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult controlYawTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("executing " << name);
 
@@ -97,7 +113,7 @@ decision_making::TaskResult controlYawTask(string name, const FSMCallContext& co
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult detectfinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("executing " << name);
 
@@ -107,7 +123,7 @@ decision_making::TaskResult detectfinishBoxTask(string name, const FSMCallContex
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("executing " << name);
 
@@ -115,7 +131,7 @@ decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& 
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::endTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("executing " << name);
 
@@ -123,7 +139,7 @@ decision_making::TaskResult endTask(string name, const FSMCallContext& context, 
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("executing " << name);
 
@@ -133,34 +149,16 @@ decision_making::TaskResult errorTask(string name, const FSMCallContext& context
   return TaskResult::SUCCESS();
 }
 
-int main(int argc, char** argv)
+// setter and getter methods
+geometry_msgs::Pose2D valTask1::getPanelWalkGoal()
 {
-  ros::init(argc, argv, "task1");
-  ros_decision_making_init(argc, argv);
-  ros::NodeHandle nh;
-  RosEventQueue* q = new RosEventQueue();
-
-  ROS_INFO("Preparing Task1...");
-
-  // register the api's for states
-  LocalTasks::registrate("STATE_INIT", initTask);
-  LocalTasks::registrate("STATE_DETECT_PANEL", detectPanelTask);
-  LocalTasks::registrate("STATE_WALK_TO_CONTROL", walkToControlPanelTask);
-  LocalTasks::registrate("STATE_DETECT_HANDLE_CENTER", detectHandleCenterTask);
-  LocalTasks::registrate("STATE_ADJUST_ARMS", adjustArmTask);
-  LocalTasks::registrate("STATE_CORRECT_PITCH", controlPitchTask);
-  LocalTasks::registrate("STATE_CORRECT_YAW", controlYawTask);
-  LocalTasks::registrate("STATE_DETECT_FINISH", detectfinishBoxTask);
-  LocalTasks::registrate("STATE_WALK_TO_FINISH", walkToFinishTask);
-  LocalTasks::registrate("END_STATE", endTask);
-  LocalTasks::registrate("STATE_ERROR", errorTask);
-
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-  ROS_INFO("Starting Task1");
-  Fsmval_task1(NULL, q, "val_task1");
-
-  spinner.stop();
-
-  return 0;
+    return panel_walk_goal_;
 }
+
+void valTask1::setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal)
+{
+    panel_walk_goal_ = panel_walk_goal;
+}
+
+
+

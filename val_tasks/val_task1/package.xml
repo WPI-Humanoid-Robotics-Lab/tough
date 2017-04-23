@@ -42,12 +42,16 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>decision_making</build_depend>
   <build_depend>decision_making_parser</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
+  <build_depend>val_footstep</build_depend>
   <run_depend>decision_making</run_depend>
   <run_depend>decision_making_parser</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
+  <run_depend>val_footstep</run_depend>
 
   <build_depend>moveit_commander</build_depend>
   <build_depend>moveit_config_trac_ik</build_depend>
