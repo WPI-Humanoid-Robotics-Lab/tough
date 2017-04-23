@@ -10,11 +10,15 @@ private:
 
 
 public:
-    walkTracking(ros::NodeHandle nh): nh_(nh), track_pelvis(nh_, "pelvis", "world"),
-        track_leftFoot(nh_, "rightFoot", "pelvis"),track_rightFoot(nh_, "leftFoot", "pelvis"){
+    walkTracking(ros::NodeHandle nh): nh_(nh),
+        track_pelvis(nh_, "pelvis", "world"),          // compare pelvis with world
+        track_leftFoot(nh_, "rightFoot", "pelvis"),    // comapre right foot with pelvis
+        track_rightFoot(nh_, "leftFoot", "pelvis")     // compare left foot with pelvis
+    {
 
     }
 
+    // determines if robot is waliking, returns True if walking
     bool isWalking(void);
 };
 
@@ -23,32 +27,44 @@ bool walkTracking::isWalking(void)
     bool ret = false;
     static int debounce_count = 0;
 
-
-    std::cout << debounce_count << std::endl;
+    //std::cout << debounce_count << std::endl;
 
     // if the robot is walking
     if(track_pelvis.isInMotion() == frame_track_status::FRAME_IN_MOTION ||
-            track_leftFoot.isInMotion() == frame_track_status::FRAME_IN_MOTION ||
-            track_rightFoot.isInMotion() == frame_track_status::FRAME_IN_MOTION)
+        track_leftFoot.isInMotion() == frame_track_status::FRAME_IN_MOTION ||
+        track_rightFoot.isInMotion() == frame_track_status::FRAME_IN_MOTION)
     {
+        // robot is walking
         ret = true;
-        std::cout << "motion"<< std::endl;
-    }
-    // simple up down debounce for the transition from motion status to stationary status
-    else if (debounce_count <= DEBOUNCE_COUNT)
-    {
+
         // increment the debounce count
         debounce_count++;
-        // consider robot still in motion
+
+        // wrap the debounce count
+        debounce_count = ((debounce_count > DEBOUNCE_COUNT) ? DEBOUNCE_COUNT : debounce_count);
+
+        //std::cout << "motion"<< std::endl;
+    }
+    // simple up down debounce for the transition from motion status to stationary status
+    else if (debounce_count > 0)
+    {
+        // decrement the debounce count
+        debounce_count--;
+
+        // consider robot still in walking (in the debounce period)
         ret = true;
-        std::cout << "debounce motion"<< std::endl;
+
+        //std::cout << "debounce motion"<< std::endl;
     }
     else
     {
         // reset the debounce count
         debounce_count = 0;
+
+        // robot is not walking, its static
         ret = false;
-        std::cout << "static" <<std::endl;
+
+        //std::cout << "static" <<std::endl;
     }
 
     return ret;
@@ -68,12 +84,12 @@ int main(int argc, char **argv)
     {
         if(track.isWalking())
         {
-            // std::cout << "motion"<< std::endl;
+            std::cout << "walking"<< std::endl;
         }
         else
         {
 
-            //std::cout << "static" <<std::endl;
+            std::cout << "stationary" <<std::endl;
         }
 
         rate.sleep();
