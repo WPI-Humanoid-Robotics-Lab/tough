@@ -106,11 +106,13 @@ public:
 
 PeriodicSnapshotter::PeriodicSnapshotter()
 {
-    snapshot_pub_ = n_.advertise<sensor_msgs::PointCloud2> ("snapshot_cloud2", 1);
+    snapshot_pub_              = n_.advertise<sensor_msgs::PointCloud2> ("snapshot_cloud2", 1);
     registered_pointcloud_pub_ = n_.advertise<sensor_msgs::PointCloud2>("assembled_cloud2",10, true);
+    resetPointcloudSub_        = n_.subscribe("reset_pointcloud", 10, &PeriodicSnapshotter::resetPointcloudCB, this);
+    pausePointcloudSub_        = n_.subscribe("pause_pointcloud", 10, &PeriodicSnapshotter::pausePointcloudCB, this);
 
     // Create the service client for calling the assembler
-    client_ = n_.serviceClient<AssembleScans2>("assemble_scans2");
+    client_       = n_.serviceClient<AssembleScans2>("assemble_scans2");
     snapshot_sub_ = n_.subscribe("snapshot_cloud2",10, &PeriodicSnapshotter::mergeClouds, this);
 
     // Start the timer that will trigger the processing loop (timerCallback)
@@ -121,22 +123,22 @@ PeriodicSnapshotter::PeriodicSnapshotter()
 
     // Need to track if we've called the timerCallback at least once
     first_time_ = true;
-    /****************************************************
-     *downsample registered pointcloud after 4 iterations
-     ****************************************************/
     downsample_ = true;
 
     sensor_msgs::PointCloud2::Ptr temp(new sensor_msgs::PointCloud2);
-    prev_msg_ = temp;
+    prev_msg_        = temp;
+    resetPointcloud_ = true;
+
 }
 
 void PeriodicSnapshotter::timerCallback(const ros::TimerEvent& e)
 {
 
-    // We don't want to build a cloud the first callback, since we we
+    // We don't want to build a cloud the first callback, since we
     //   don't have a start and end time yet
     if (first_time_)
     {
+        ROS_INFO("Ignoring current snapshot");
         first_time_ = false;
         return;
     }
@@ -162,8 +164,8 @@ void PeriodicSnapshotter::timerCallback(const ros::TimerEvent& e)
     }
 }
 
-void PeriodicSnapshotter::pairAlign (const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_src, const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_tgt, pcl::PointCloud<pcl::PointXYZ>::Ptr output, Eigen::Matrix4f &final_transform, bool downsample)
-{
+void PeriodicSnapshotter::pairAlign (const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_src, const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_tgt,
+                                     pcl::PointCloud<pcl::PointXYZ>::Ptr output, Eigen::Matrix4f &final_transform) {
 
     //
     // Downsample for consistency and speed
@@ -171,20 +173,12 @@ void PeriodicSnapshotter::pairAlign (const pcl::PointCloud<pcl::PointXYZ>::Ptr c
     pcl::PointCloud<pcl::PointXYZ>::Ptr src (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr tgt (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::VoxelGrid<PointT> grid;
-    if (downsample)
-    {
-        grid.setLeafSize (0.05, 0.05, 0.05);
-        grid.setInputCloud (cloud_src);
-        grid.filter (*src);
+    grid.setLeafSize (0.05, 0.05, 0.05);
+    grid.setInputCloud (cloud_src);
+    grid.filter (*src);
 
-        grid.setInputCloud (cloud_tgt);
-        grid.filter (*tgt);
-    }
-    else
-    {
-        src = cloud_src;
-        tgt = cloud_tgt;
-    }
+    grid.setInputCloud (cloud_tgt);
+    grid.filter (*tgt);
 
 
     // Compute surface normals and curvature
@@ -269,14 +263,44 @@ void PeriodicSnapshotter::pairAlign (const pcl::PointCloud<pcl::PointXYZ>::Ptr c
     final_transform = targetToSource;
 }
 
+void PeriodicSnapshotter::resetPointcloud(bool resetPointcloud)
+{
+    //reset the assembler
+    state_request = PCL_STATE_CONTROL::RESET;
+}
+
+void PeriodicSnapshotter::resetPointcloudCB(const std_msgs::Empty &msg)
+{
+    state_request = PCL_STATE_CONTROL::RESET;
+}
+
+void PeriodicSnapshotter::pausePointcloud(bool pausePointcloud)
+{
+    state_request = pausePointcloud ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESET;
+}
+
+void PeriodicSnapshotter::pausePointcloudCB(const std_msgs::Bool &msg)
+{
+    //reset will make sure that older scans are discarded
+    state_request = msg.data ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESET;
+}
+
+
 void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
+
+    if (state_request == PCL_STATE_CONTROL::PAUSE){
+        ROS_INFO("Laser assembling paused");
+        return;
+    }
+
     sensor_msgs::PointCloud2::Ptr merged_cloud(new sensor_msgs::PointCloud2());
-    sensor_msgs::PointCloud2::Ptr merged_downsampled_cloud(new sensor_msgs::PointCloud2());
     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_msg(new pcl::PointCloud<pcl::PointXYZ>);
     convertROStoPCL(msg, pcl_msg);
 
-    if (prev_msg_->row_step > 10000000 || prev_msg_->data.empty()){
+    if (state_request == PCL_STATE_CONTROL::RESET || prev_msg_->row_step > 10000000 || prev_msg_->data.empty()){
+        ROS_INFO("Resetting Pointcloud");
         merged_cloud = msg;
+        state_request = PCL_STATE_CONTROL::RESUME;
     }
     else {
         // merge the current msg with previous messages published till now
@@ -291,7 +315,7 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
         target = pcl_prev_msg;
         PointCloud::Ptr temp (new PointCloud);
         // check if the cloud size is growing exceptionally high. if yes, downsample the pointcloud without impacting objects and features
-        pairAlign (source, target, temp, pairTransform, downsample_);
+        pairAlign (source, target, temp, pairTransform);
 
         //transform current pair into the global transform
         pcl::transformPointCloud (*temp, *result, GlobalTransform);
@@ -299,7 +323,7 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
         //update the global transform
         GlobalTransform = GlobalTransform * pairTransform;
 
-        float leafsize = 0.05;
+        float leafsize  = 0.05;
         pcl::PointCloud<pcl::PointXYZ>::Ptr tgt (new pcl::PointCloud<pcl::PointXYZ>);
         pcl::VoxelGrid<PointT> grid;
         grid.setLeafSize (leafsize, leafsize, leafsize);
@@ -308,12 +332,10 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
 
         convertPCLtoROS(tgt,merged_cloud);
         // publish the merged message
-
     }
 
     prev_msg_ = merged_cloud;
     registered_pointcloud_pub_.publish(merged_cloud);
-
 }
 
 int main(int argc, char **argv)
@@ -324,7 +346,7 @@ int main(int argc, char **argv)
     ros::service::waitForService("build_cloud");
     ROS_INFO("Found build_cloud! Starting the snapshotter");
     PeriodicSnapshotter snapshotter;
-    ros::Rate looprate(1);
+    ros::Rate looprate(2);
     while(ros::ok())
     {
         ros::spinOnce();
