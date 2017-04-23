@@ -12,7 +12,7 @@ static const float GROUND_THRESHOLD      = 0.07f;
 static const float FOOT_GROUND_THRESHOLD = 0.05f;
 
 WalkwaySeedPointGenerator::WalkwaySeedPointGenerator(ros::NodeHandle &n){
-    pointcloudPub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ> >("testCloud",1);
+    pointcloudPub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ> >("walkway",1);
     ROS_INFO("Subscribing to %s", PERCEPTION_COMMON_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC.c_str());
     pointcloudSub_ = nh_.subscribe(PERCEPTION_COMMON_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC, 1,  &WalkwaySeedPointGenerator::generateSeedPoints, this);
 }
@@ -37,22 +37,22 @@ void WalkwaySeedPointGenerator::generateSeedPoints(const pcl::PointCloud<pcl::Po
     if(getLargestCluster(cloud_filtered)) {
         cloud_filtered->header = cloud->header;
 
-        float leafsize = 0.25;
-        pcl::VoxelGrid<pcl::PointXYZ> grid;
-        grid.setLeafSize (leafsize, leafsize, leafsize);
-        grid.setInputCloud (cloud_filtered);
-        grid.filter (*cloud_filtered);
+//        float leafsize = 0.25;
+//        pcl::VoxelGrid<pcl::PointXYZ> grid;
+//        grid.setLeafSize (leafsize, leafsize, leafsize);
+//        grid.setInputCloud (cloud_filtered);
+//        grid.filter (*cloud_filtered);
 
-        ROS_INFO("Cloud size after voxel grid filter : %d", (int)cloud_filtered->size());
-        pcl::RadiusOutlierRemoval<pcl::PointXYZ> outrem;
-        // build the filter
-        outrem.setInputCloud(cloud_filtered);
-        outrem.setRadiusSearch(1.5);
-        outrem.setMinNeighborsInRadius (205);
-        // apply filter
-        outrem.filter (*cloud_filtered);
+//        ROS_INFO("Cloud size after voxel grid filter : %d", (int)cloud_filtered->size());
+//        pcl::RadiusOutlierRemoval<pcl::PointXYZ> outrem;
+//        // build the filter
+//        outrem.setInputCloud(cloud_filtered);
+//        outrem.setRadiusSearch(1.5);
+//        outrem.setMinNeighborsInRadius (205);
+//        // apply filter
+//        outrem.filter (*cloud_filtered);
 
-        ROS_INFO("Cloud size after outlier filter : %d", (int)cloud_filtered->size());
+//        ROS_INFO("Cloud size after outlier filter : %d", (int)cloud_filtered->size());
 
         pointcloudPub_.publish(cloud_filtered);
     }

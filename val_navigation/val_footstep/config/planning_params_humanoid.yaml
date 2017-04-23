@@ -1,7 +1,7 @@
 ### Planning parameterization for a large humanoid, similar to ASIMO or HRP-2 ##
 
 # cost to perform one footstep (in addition to distance costs, corresponds to 'meters')
-step_cost: 0.8
+step_cost: 1.0
 
 # cost to estimate the difference between the current orientation and the goal
 # orientation; used in the heuristic it can easily overestimate the true path
@@ -15,6 +15,6 @@ accuracy:
   # - 2 (circumcircle and incircle recursivly checked for the whole foot)
   collision_check: 2
 
-  cell_size: 0.01
+  cell_size: 0.05
 
   num_angle_bins: 64

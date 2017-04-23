@@ -323,14 +323,16 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
         //update the global transform
         GlobalTransform = GlobalTransform * pairTransform;
 
+        /*  Disabling voxel filter
         float leafsize  = 0.05;
         pcl::PointCloud<pcl::PointXYZ>::Ptr tgt (new pcl::PointCloud<pcl::PointXYZ>);
         pcl::VoxelGrid<PointT> grid;
         grid.setLeafSize (leafsize, leafsize, leafsize);
         grid.setInputCloud (result);
         grid.filter (*tgt);
+        */
 
-        convertPCLtoROS(tgt,merged_cloud);
+        convertPCLtoROS(result,merged_cloud);
         // publish the merged message
     }
 
@@ -346,7 +348,7 @@ int main(int argc, char **argv)
     ros::service::waitForService("build_cloud");
     ROS_INFO("Found build_cloud! Starting the snapshotter");
     PeriodicSnapshotter snapshotter;
-    ros::Rate looprate(2);
+    ros::Rate looprate(5);
     while(ros::ok())
     {
         ros::spinOnce();
