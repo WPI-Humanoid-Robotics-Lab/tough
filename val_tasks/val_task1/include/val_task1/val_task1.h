@@ -10,6 +10,8 @@
 #include <decision_making/DecisionMaking.h>
 #include <geometry_msgs/Pose2D.h>
 #include <val_footstep/ValkyrieWalker.h>
+#include <val_task_common/val_walk_tracker.h>
+//#include <val_task1/panel_detection.h>
 
 using namespace std;
 using namespace decision_making;
@@ -25,6 +27,12 @@ class valTask1 {
 
     // object for the walker api
     static ValkyrieWalker* walker_;
+
+    // object for tracking robot walk
+    static walkTracking* walk_track_;
+
+    // panel detection object
+    // static panel_detector* panel_detector_;
 
     public:
 

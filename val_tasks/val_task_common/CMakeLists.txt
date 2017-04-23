@@ -113,8 +113,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES val_task_common
-  CATKIN_DEPENDS perception_common roscpp val_control
+  LIBRARIES val_task_common
+  CATKIN_DEPENDS perception_common roscpp val_control navigation_common
 #  DEPENDS system_lib
 )
 
@@ -124,26 +124,29 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
-include
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/val_task_common.cpp
-# )
+ add_library(${PROJECT_NAME}
+   src/val_walk_tracker.cpp
+ )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ target_link_libraries(val_task_common
+   ${catkin_LIBRARIES}
+   ${PROJECT_NAME}
+)
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
- add_executable(walk_track src/walk_track.cpp)
+add_executable(val_walk_tracker_node src/val_walk_tracker_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -153,15 +156,15 @@ include
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
- add_dependencies(walk_track ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ add_dependencies(val_walk_tracker_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(walk_track
-   ${catkin_LIBRARIES}
+target_link_libraries(val_walk_tracker_node
+   ${catkin_LIBRARIES} ${PROJECT_NAME}
  )
 
  add_executable(walkway_point_generator src/val_walkway_seed_point_generator.cpp)
-# add_dependencies(walkway_point_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ add_dependencies(walkway_point_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
  target_link_libraries(walkway_point_generator
    ${catkin_LIBRARIES} ${PCL_LIBRARIES}
  )

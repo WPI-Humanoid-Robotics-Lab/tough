@@ -418,7 +418,7 @@ task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELW
 //#line 14 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.x = 10.0;
 //#line 14 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __default__.x = 3.619;
+      __default__.x = 2.828;
 //#line 14 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x", "double", 0, "x of goal location", "", &task1_parametersConfig::x)));
 //#line 14 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
@@ -428,7 +428,7 @@ task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELW
 //#line 15 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.y = 1.0;
 //#line 15 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __default__.y = -0.014;
+      __default__.y = 0.292;
 //#line 15 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y", "double", 0, "y of goal location", "", &task1_parametersConfig::y)));
 //#line 15 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
@@ -438,7 +438,7 @@ task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELW
 //#line 16 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.theta = 1.57;
 //#line 16 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __default__.theta = -1.559;
+      __default__.theta = 0.82;
 //#line 16 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta)));
 //#line 16 "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"

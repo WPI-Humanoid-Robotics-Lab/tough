@@ -54,6 +54,7 @@ find_package(catkin REQUIRED COMPONENTS
 
   val_gui
   val_footstep
+  val_task_common
 )
 
 ## System dependencies are found with CMake's conventions
@@ -202,7 +203,8 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 
 add_dependencies(val_task1_node
  ${${PROJECT_NAME}_EXPORTED_TARGETS}
- ${catkin_EXPORTED_TARGETS}_gencfg)
+ ${catkin_EXPORTED_TARGETS}_gencfg
+ ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(val_task1_node
