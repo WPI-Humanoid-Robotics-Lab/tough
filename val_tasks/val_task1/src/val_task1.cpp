@@ -33,120 +33,154 @@ valTask1::~valTask1(){
 }
 
 bool valTask1::preemptiveWait(double ms, decision_making::EventQueue& queue) {
-  for (int i = 0; i < 100 && !queue.isTerminated(); i++)
-    boost::this_thread::sleep(boost::posix_time::milliseconds(ms / 100.0));
+    for (int i = 0; i < 100 && !queue.isTerminated(); i++)
+        boost::this_thread::sleep(boost::posix_time::milliseconds(ms / 100.0));
 
-  return queue.isTerminated();
+    return queue.isTerminated();
 }
 
 // state machine state executions
 decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-  ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("executing " << name);
 
-  // the state transition can happen from an event externally or can be geenerated here
-  //!!!!! depends on the developer and use case
+    // the state transition can happen from an event externally or can be geenerated here
+    //!!!!! depends on the developer and use case
 
-  // generate the event
-  //eventQueue.riseEvent("/INIT_SUCESSUFL");
+    // generate the event
+    eventQueue.riseEvent("/INIT_SUCESSUFL");
 
-  // wait infinetly until an external even occurs
-  while(!preemptiveWait(1000, eventQueue)){
-     ROS_INFO("waiting for transition");
-  }
+    // wait infinetly until an external even occurs
+    // while(!preemptiveWait(1000, eventQueue)){
+    //    ROS_INFO("waiting for transition");
+    // }
 
-  return TaskResult::SUCCESS();
+    return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-  ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("executing " << name);
 
-  // generate the event
-  //eventQueue.riseEvent("/INIT_SUCESSUFL");
+    // generate the event
+    eventQueue.riseEvent("/INIT_SUCESSUFL");
 
-  return TaskResult::SUCCESS();
+    return TaskResult::SUCCESS();
 }
 
 
 decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-  ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("executing " << name);
 
-  eventQueue.riseEvent("/REACHED_PANEL");
-  return TaskResult::SUCCESS();
+    // walk to the goal location
+    // the goal can be updated on the run time
+    ret = walker_->walkToGoal(panel_walk_goal_, false);
+
+    // if executing stay in the same state
+    if (ret == MOVE_EXECUTING)
+    {
+        eventQueue.riseEvent("/WALK_EXECUTING");
+    }
+    // if finished sucessfully
+    else if (ret == MOVE_SUCESS)
+    {
+        eventQueue.riseEvent("/REACHED_PANEL");
+    }
+    // if failed for more than 5 times, go to error state
+    else if (fail_count > 5)
+    {
+        // reset the fail count
+        fail_count = 0;
+        eventQueue.riseEvent("/WALK_FAILED");
+    }
+    // if failed retry detecting the panel and then walk
+    // also handles MOVE_FAILED
+    else
+    {
+        // increment the fail count
+        fail_count++;
+        eventQueue.riseEvent("/WALK_RETRY");
+    }
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
+
+    return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-  ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("executing " << name);
 
-  // generate the event
-  //eventQueue.riseEvent("/INIT_SUCESSUFL");
+    // generate the event
+    //eventQueue.riseEvent("/INIT_SUCESSUFL");
 
-  return TaskResult::SUCCESS();
+    return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask1::adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-  ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("executing " << name);
 
-  // generate the event
-  //eventQueue.riseEvent("/INIT_SUCESSUFL");
+    // generate the event
+    //eventQueue.riseEvent("/INIT_SUCESSUFL");
 
-  return TaskResult::SUCCESS();
+    return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-  ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("executing " << name);
 
-  eventQueue.riseEvent("/PITCH_CORRECTION_SUCESSFUL");
-  return TaskResult::SUCCESS();
+    eventQueue.riseEvent("/PITCH_CORRECTION_SUCESSFUL");
+    return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-  ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("executing " << name);
 
-  eventQueue.riseEvent("/YAW_CORRECTION_SUCESSFUL");
-  return TaskResult::SUCCESS();
+    eventQueue.riseEvent("/YAW_CORRECTION_SUCESSFUL");
+    return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-  ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("executing " << name);
 
-  // generate the event
-  //eventQueue.riseEvent("/INIT_SUCESSUFL");
+    // generate the event
+    //eventQueue.riseEvent("/INIT_SUCESSUFL");
 
-  return TaskResult::SUCCESS();
+    return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-  ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("executing " << name);
 
-  eventQueue.riseEvent("/WALK_TO_END");
-  return TaskResult::SUCCESS();
+    eventQueue.riseEvent("/WALK_TO_END");
+    return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask1::endTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-  ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("executing " << name);
 
-  eventQueue.riseEvent("/STOP_TIMEOUT");
-  return TaskResult::SUCCESS();
+    eventQueue.riseEvent("/STOP_TIMEOUT");
+    return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask1::errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-  ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("executing " << name);
 
-  // generate the event
-  //eventQueue.riseEvent("/INIT_SUCESSUFL");
+    // generate the event
+    //eventQueue.riseEvent("/INIT_SUCESSUFL");
 
-  return TaskResult::SUCCESS();
+    return TaskResult::SUCCESS();
 }
 
 // setter and getter methods
