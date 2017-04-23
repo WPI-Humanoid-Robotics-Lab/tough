@@ -27,10 +27,8 @@ void ValkyrieWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage 
 }
 
 // creates and send footsteps to  val to reach goal position
-
-bool ValkyrieWalker::walkToGoal( geometry_msgs::Pose2D &goal)
-{
-
+bool ValkyrieWalker::walkToGoal( geometry_msgs::Pose2D &goal, bool waitForSteps)
+{    
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.default_transfer_time = transfer_time;
     list.default_swing_time= swing_time;
@@ -41,7 +39,11 @@ bool ValkyrieWalker::walkToGoal( geometry_msgs::Pose2D &goal)
     {
         this->footsteps_pub_.publish(list);
         ValkyrieWalker::id--;
-        this->waitForSteps(list.footstep_data_list.size());
+
+        if (waitForSteps)
+        {
+            this->waitForSteps(list.footstep_data_list.size());
+        }
         return true;
     }
     return false;
@@ -458,26 +460,3 @@ void ValkyrieWalker::waitForSteps(int n)
     step_counter = 0;
     return;
 }
-
-//int main(int argc, char **argv)
-
-//{
-//    ros::init(argc, argv, "test_walking");
-//    ros::NodeHandle nh;
-//    ValkyrieWalker agent(nh,1,1,0);
-//    float transferTime, swingTime, swingHeight, stepLength;
-//    if ( argc != 5 ) // argc should be 2 for correct execution
-//        std::cout<<"usage: "<< argv[0] <<" transferTime swingTime swingHeight stepLengtho\n";
-//    else {
-//        transferTime = std::atof(argv[1]);
-//        swingTime = std::atof(argv[2]);
-//        swingHeight = std::atof(argv[3]);
-//        stepLength = std::atof(argv[4]);
-//    }
-
-//    agent.setWalkParms(transferTime, swingTime, 0);
-//    agent.setSwing_height(swingHeight);
-//    agent.WalkNSteps(5,stepLength);
-
-//    return 0;
-//}

@@ -1,115 +1,139 @@
 #include "val_task1/panel_detection.h"
 #include "val_common/val_common_names.h"
 
-short panel_detector::num_of_detections_ = 0;
 panel_detector::panel_detector(ros::NodeHandle &nh)
 {
-  pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &panel_detector::cloudCB, this);
-  pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_filter/filteredPointCloud", 1);
+    pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &panel_detector::cloudCB, this);
+    pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_filter/filteredPointCloud", 1);
 
-  vis_pub_ = nh.advertise<visualization_msgs::Marker>( "visualization_marker", 1 );
-  vis_plane_pub_ = nh.advertise<visualization_msgs::Marker>( "visualization_plane_vector", 1 );
+    vis_pub_ = nh.advertise<visualization_msgs::Marker>( "visualization_marker", 1 );
+    vis_plane_pub_ = nh.advertise<visualization_msgs::Marker>( "visualization_plane_vector", 1 );
+    detection_tries_ = 0;
+}
+
+void panel_detector::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
+{
+    ret_val = detections_;
 }
 
 
+int panel_detector::getDetectionTries() const
+{
+    return detection_tries_;
+}
+
+void panel_detector::setDetectionTries(int detection_tries)
+{
+    detection_tries_ = detection_tries;
+}
+
 void panel_detector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
-  ros::Time startTime = ros::Time::now();
+    if (input->data.empty())
+        return;
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    ++detection_tries_;
+    ros::Time startTime = ros::Time::now();
 
-  sensor_msgs::PointCloud2 output;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
-  pcl::fromROSMsg(*input, *cloud);
+    sensor_msgs::PointCloud2 output;
 
-  passThroughFilter(cloud);
-  panelSegmentation(cloud);
-  segmentation(cloud);
+    pcl::fromROSMsg(*input, *cloud);
+
+    passThroughFilter(cloud);
+    panelSegmentation(cloud);
+    segmentation(cloud);
 
 
-  geometry_msgs::Pose pose;
-  getPosition(cloud, pose);
+    geometry_msgs::Pose pose;
+    if(getPosition(cloud, pose))
+        detections_.push_back(pose);
+    ros::Time endTime = ros::Time::now();
 
-  ros::Time endTime = ros::Time::now();
+    //  std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
 
-//  std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
+    pcl::toROSMsg(*cloud, output);
 
-  pcl::toROSMsg(*cloud, output);
+    output.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
 
-  output.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
-
-  pcl_filtered_pub_.publish(output);
-
-  ++num_of_detections_;
+    pcl_filtered_pub_.publish(output);
 }
 
 void panel_detector::passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
-  pcl::PassThrough<pcl::PointXYZ> pass_x;
-  pass_x.setInputCloud(cloud);
-  pass_x.setFilterFieldName("x");
-  pass_x.setFilterLimits(1,4);
-  pass_x.filter(*cloud);
+    pcl::PassThrough<pcl::PointXYZ> pass_x;
+    pass_x.setInputCloud(cloud);
+    pass_x.setFilterFieldName("x");
+    pass_x.setFilterLimits(1,4);
+    pass_x.filter(*cloud);
 
-  pcl::PassThrough<pcl::PointXYZ> pass_y;
-  pass_y.setInputCloud(cloud);
-  pass_y.setFilterFieldName("y");
-  pass_y.setFilterLimits(-2,2);
-  pass_y.filter(*cloud);
+    pcl::PassThrough<pcl::PointXYZ> pass_y;
+    pass_y.setInputCloud(cloud);
+    pass_y.setFilterFieldName("y");
+    pass_y.setFilterLimits(-2,2);
+    pass_y.filter(*cloud);
 
-  pcl::PassThrough<pcl::PointXYZ> pass_z;
-  pass_z.setInputCloud(cloud);
-  pass_z.setFilterFieldName("z");
-  pass_z.setFilterLimits(0.7,0.87);
-  pass_z.filter(*cloud);
-
-
-
+    pcl::PassThrough<pcl::PointXYZ> pass_z;
+    pass_z.setInputCloud(cloud);
+    pass_z.setFilterFieldName("z");
+    pass_z.setFilterLimits(0.7,0.87);
+    pass_z.filter(*cloud);
 }
 
 void panel_detector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
-  pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-  pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-  pcl::SACSegmentation<pcl::PointXYZ> seg;
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
 
-  seg.setOptimizeCoefficients (true);
-  seg.setModelType (pcl::SACMODEL_PLANE);
-  seg.setMethodType (pcl::SAC_RANSAC);
-  seg.setMaxIterations (100);
-  seg.setDistanceThreshold (0.008);
-  seg.setInputCloud (cloud);
-  seg.segment (*inliers, *coefficients);
+    seg.setOptimizeCoefficients (true);
+    seg.setModelType (pcl::SACMODEL_PLANE);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setMaxIterations (100);
+    seg.setDistanceThreshold (0.008);
+    seg.setInputCloud (cloud);
+    seg.segment (*inliers, *coefficients);
 
-  pcl::ExtractIndices<pcl::PointXYZ> extract;
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    extract.setInputCloud (cloud);
+    extract.setIndices (inliers);
+    extract.setNegative (false);
+    extract.filter (*cloud);
 
-  extract.setInputCloud (cloud);
-  extract.setIndices (inliers);
-  extract.setNegative (false);
-  extract.filter (*cloud);
-
-//  ROS_INFO("Point cloud representing the planar component = %d", (int)cloud->points.size());
+    //  ROS_INFO("Point cloud representing the planar component = %d", (int)cloud->points.size());
 
 }
 
-void panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose){
+bool panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose){
 
     Eigen::Vector4f centroid;
-//  Calculating the Centroid of the Panel Point cloud
+    //  Calculating the Centroid of the Panel Point cloud
     pcl::compute3DCentroid(*cloud, centroid);
     pose.position.x = centroid(0);
     pose.position.y = centroid(1);
     pose.position.z = centroid(2);
 
-//  Using Priciple Component Analysis for computing the Orientation of the Panel
+    //  Using Priciple Component Analysis for computing the Orientation of the Panel
     Eigen::Matrix3f covarianceMatrix;
     pcl::computeCovarianceMatrix(*cloud, centroid, covarianceMatrix);
     Eigen::Matrix3f eigenVectors;
     Eigen::Vector3f eigenValues;
     pcl::eigen33(covarianceMatrix, eigenVectors, eigenValues);
 
-//    std::cout<<"The EigenValues are : " << eigenValues << std::endl;
-//    std::cout<<"The EigenVectors are : " << eigenVectors << std::endl;
+    double OFFSET = 0.7;
+    if(pose.position.z > 0.80 && pose.position.z < 0.83){
+        ROS_INFO("Upper plane detected");
+        OFFSET += 0.1;
+    }
+    else if(pose.position.z > 0.75){
+        ROS_INFO("Lower Plane Detected");
+        //        OFFSET = 0.6;
+    }
+    else{
+        ROS_INFO("WTF");
+        return false;
+    }
 
     ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
 
@@ -156,9 +180,9 @@ void panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geo
 
     ROS_INFO("The Orientation is given by := %0.2f", theta);
 
-    double offset = 1.0;
-    pose.position.x = pose.position.x - (offset*cos(theta));
-    pose.position.y = pose.position.y - (offset*sin(theta));
+    //    double offset = 1.0;
+    pose.position.x = pose.position.x - (OFFSET*cos(theta));
+    pose.position.y = pose.position.y - (OFFSET*sin(theta));
     pose.position.z = 0.0;
 
     ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
@@ -169,7 +193,7 @@ void panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geo
 
     visualization_msgs::Marker marker;
 
-    marker.header.frame_id = "world";
+    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
     marker.header.stamp = ros::Time();
     marker.ns = "Center of the Panel";
     marker.id = 0;
@@ -193,56 +217,55 @@ void panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geo
 
     vis_pub_.publish(marker);
 
-
+    return true;
 }
 
 
 void panel_detector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out (new pcl::PointCloud<pcl::PointXYZ>);
 
-  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
-  tree->setInputCloud (cloud);
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+    tree->setInputCloud (cloud);
 
-  int cloudSize = (int)cloud->points.size();
+    int cloudSize = (int)cloud->points.size();
 
-//  ROS_INFO("Minimum Size = %d", (int)(0.2*cloudSize));
-//  ROS_INFO("Maximum Size = %d", cloudSize);
+    //  ROS_INFO("Minimum Size = %d", (int)(0.2*cloudSize));
+    //  ROS_INFO("Maximum Size = %d", cloudSize);
 
-  std::vector<pcl::PointIndices> cluster_indices;
-  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-  ec.setClusterTolerance (0.1);
-  ec.setMinClusterSize ((int)(0.3*cloudSize));
-  ec.setMaxClusterSize (cloudSize);
-  ec.setSearchMethod (tree);
-  ec.setInputCloud (cloud);
-  ec.extract (cluster_indices);
+    std::vector<pcl::PointIndices> cluster_indices;
+    pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+    ec.setClusterTolerance (0.1);
+    ec.setMinClusterSize ((int)(0.3*cloudSize));
+    ec.setMaxClusterSize (cloudSize);
+    ec.setSearchMethod (tree);
+    ec.setInputCloud (cloud);
+    ec.extract (cluster_indices);
 
-  int numClusters = cluster_indices.size();
+    int numClusters = cluster_indices.size();
 
-//  ROS_INFO("Number of Clusters  = %d", numClusters);
+    //  ROS_INFO("Number of Clusters  = %d", numClusters);
 
-  std::vector<pcl::PointIndices>::const_iterator it;
-  std::vector<int>::const_iterator pit;
+    std::vector<pcl::PointIndices>::const_iterator it;
+    std::vector<int>::const_iterator pit;
 
-  int index = 0;
-  double x = 0;
-  double y = 0;
-  double z = 0;
+    int index = 0;
+    double x = 0;
+    double y = 0;
+    double z = 0;
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr centroid_points (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr centroid_points (new pcl::PointCloud<pcl::PointXYZ>);
 
-  for(it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
+    for(it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
-      for(pit = it->indices.begin(); pit != it->indices.end(); pit++) {
-      cloud_cluster->points.push_back(cloud->points[*pit]);
-      }
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
+        for(pit = it->indices.begin(); pit != it->indices.end(); pit++) {
+            cloud_cluster->points.push_back(cloud->points[*pit]);
+        }
 
-//      ROS_INFO("Number of Points in the Cluster = %d", (int)cloud_cluster->points.size());
+        //      ROS_INFO("Number of Points in the Cluster = %d", (int)cloud_cluster->points.size());
 
-      *cloud = *cloud_cluster;
-
+        *cloud = *cloud_cluster;
     }
 
     // ROS_WARN(" %d ", (int)centroid_points->points.size());
@@ -250,15 +273,35 @@ void panel_detector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 }
 
 int main(int argc, char** argv){
-  ros::init(argc, argv, "panel_detector");
-  ros::NodeHandle nh;
 
-  panel_detector obj(nh);
+    ros::init(argc, argv, "panel_detector");
+    ros::NodeHandle nh;
+    ros::Publisher goalPub = nh.advertise<geometry_msgs::PoseStamped>("/valkyrie/goal",1);
+    panel_detector obj(nh);
+    int NUM_SAMPLES = 1;
+    std::vector<geometry_msgs::Pose> detections;
+    int trials;
+    while(ros::ok() && detections.size() < NUM_SAMPLES){
+        ros::spinOnce();
+        obj.getDetections(detections);
+        trials = obj.getDetectionTries();
+    }
 
-  while(ros::ok() && panel_detector::num_of_detections_ < 6){
+    std::vector<geometry_msgs::Pose> poses;
+    obj.getDetections(poses);
 
-    ros::spinOnce();
-  }
-  ROS_INFO("Exiting panel detector node");
-  return 0;
+    ROS_INFO("Tried %d time and succeeded %d times", trials, (int)poses.size());
+
+    //this can be used if we need to find median/mode
+    std::sort(poses.begin(),poses .end(), poseComparator);
+
+    geometry_msgs::PoseStamped goal;
+    goal.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+    goal.pose = poses[NUM_SAMPLES -1];
+    goalPub.publish(goal);
+
+    ros::Duration(1).sleep();
+    ROS_INFO("Exiting panel detector node");
+
+    return 0;
 }

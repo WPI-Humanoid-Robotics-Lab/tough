@@ -48,19 +48,37 @@ private:
   ros::Publisher vis_pub_;
   ros::Publisher vis_plane_pub_;
 
+  std::vector<geometry_msgs::Pose> detections_;
+
+  int detection_tries_;
+
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
 
   void passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
   void panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
   void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-  void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
+
+  bool getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
 
 public:
   // Constructor
 
   panel_detector(ros::NodeHandle &nh);
-  static short num_of_detections_;
+
+  void getDetections(std::vector<geometry_msgs::Pose> &ret_val);
+
+  int getDetectionTries() const;
+  void setDetectionTries(int getDetectionTries);
 };
+
+bool poseComparator (geometry_msgs::Pose const& lhs, geometry_msgs::Pose const& rhs)
+{
+    tf::Pose tf_lhs, tf_rhs;
+    tf::poseMsgToTF(lhs, tf_lhs);
+    tf::poseMsgToTF(rhs, tf_rhs);
+    return tf_lhs.getOrigin() < tf_rhs.getOrigin();
+
+}
 
 #endif //PANEL_DETECTION_H

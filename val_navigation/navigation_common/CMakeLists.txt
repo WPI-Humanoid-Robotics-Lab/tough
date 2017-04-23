@@ -7,11 +7,14 @@ add_definitions(-std=c++11)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+
 find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   roscpp
   std_msgs
+  sensor_msgs
   tf
+  val_common
   )
 
 ## System dependencies are found with CMake's conventions
@@ -120,6 +123,7 @@ catkin_package(
 include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  include
 )
 
 ## Declare a C++ library
@@ -141,6 +145,9 @@ target_link_libraries(publish_corrected_map  ${catkin_LIBRARIES})
 
 add_executable(MapTransform src/MapTransform.cpp)
 target_link_libraries(MapTransform  ${catkin_LIBRARIES})
+
+add_executable(map_generator src/map_generator.cpp)
+target_link_libraries(map_generator  ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above

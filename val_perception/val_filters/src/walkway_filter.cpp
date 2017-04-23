@@ -21,7 +21,7 @@ WalkwayFilter::WalkwayFilter(ros::NodeHandle &n):nh_(n)
 
 WalkwayFilter::~WalkwayFilter()
 {
-    mapPub_.shutdown();
+    pointcloudPub_.shutdown();
     pointcloudSub_.shutdown();
 }
 
@@ -33,13 +33,32 @@ void WalkwayFilter::generateMap(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
     pcl::PointIndices::Ptr outliers(new pcl::PointIndices());
     outliers->header = cloud->header;
 
+    float foot_height = getCurrentFootHeight();
+    std::cout<<  foot_height << std::endl;
+
     for (size_t i = 0; i< cloud->size(); ++i){
-        if( cloud->at(i).z > LOWER_THRESHOLD && cloud->at(i).z < UPPER_THRESHOLD){
-             outliers->indices.insert(outliers->indices.end(),i);
+        if( cloud->at(i).z < foot_height - FOOT_GROUND_THRESHOLD
+                && cloud->at(i).z > foot_height - FOOT_GROUND_THRESHOLD - (GROUND_THRESHOLD)){
+            outliers->indices.insert(outliers->indices.end(),i);
         }
     }
-    subtractPointClouds(cloud, outliers);
+    subtractPointClouds(cloud,outliers);
     pointcloudPub_.publish(cloud);
+}
+
+double WalkwayFilter::getCurrentFootHeight(void)
+{
+    double height_foot;
+
+    tf::StampedTransform transformStamped;
+    tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::L_FOOT_TF, ros::Time(0),transformStamped);
+    height_foot = transformStamped.getOrigin().getZ();
+
+    tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::R_FOOT_TF, ros::Time(0),transformStamped);
+
+    height_foot = height_foot > transformStamped.getOrigin().getZ() ? transformStamped.getOrigin().getZ() : height_foot;
+
+    return height_foot;
 }
 
 void WalkwayFilter::subtractPointClouds(pcl::PointCloud<pcl::PointXYZ>::Ptr full_cloud, const pcl::PointIndices::Ptr outliers){
@@ -50,6 +69,7 @@ void WalkwayFilter::subtractPointClouds(pcl::PointCloud<pcl::PointXYZ>::Ptr full
     extract.filter (*full_cloud);
     return;
 }
+
 int main(int argc, char** argv){
     ros::init(argc, argv, "walkway_filter");
     ROS_INFO("Starting walkway filter node");

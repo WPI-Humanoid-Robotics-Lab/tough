@@ -11,7 +11,6 @@
 #include <geometry_msgs/Twist.h>
 #include <val_task1/val_task1.h>
 
-
 using namespace std;
 
 #define foreach BOOST_FOREACH
