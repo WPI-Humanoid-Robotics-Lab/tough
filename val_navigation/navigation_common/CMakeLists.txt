@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(navigation_common)
 
+## Add support for C++11, supported in ROS Kinetic and newer
+add_definitions(-std=c++11)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -102,8 +105,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES navigation_common
+  INCLUDE_DIRS include
+  LIBRARIES navigation_common
   CATKIN_DEPENDS nav_msgs roscpp std_msgs
   DEPENDS system_lib
 )
@@ -114,20 +117,21 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-#include_directories(include)
+include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(navigation_common
-#   src/${PROJECT_NAME}/navigation_common.cpp
-# )
+ add_library(navigation_common
+   src/frame_tracking.cpp
+ )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(navigation_common ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 
 ## Declare a C++ executable
 # add_executable(navigation_common_node src/navigation_common_node.cpp)
