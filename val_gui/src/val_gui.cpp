@@ -264,7 +264,7 @@ void ValkyrieGUI::initDisplayWidgets()
 //    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
 //    footstepMarkersDisplay_->subProp("Namespaces")->setValue("valkyrie");
 
-    ui->sliderLowerNeckPitch->setEnabled(false);
+//    ui->sliderLowerNeckPitch->setEnabled(false);
 
     QString imagePath = QString::fromStdString(ros::package::getPath("val_gui") + "/resources/coordinates.png");
     QImage qImage(imagePath);
@@ -320,10 +320,10 @@ void ValkyrieGUI::initDefaultValues() {
 
     //Neck control . Replace these defaults with actual values from robot
     float zeroUpperPitch = fabs(UPPER_NECK_PITCH_MIN/((UPPER_NECK_PITCH_MAX - UPPER_NECK_PITCH_MIN)/100.0));
-    //    float zeroLowerPitch = fabs(LOWER_NECK_PITCH_MIN/((LOWER_NECK_PITCH_MAX - LOWER_NECK_PITCH_MIN)/100.0));
+    float zeroLowerPitch = fabs(LOWER_NECK_PITCH_MIN/((LOWER_NECK_PITCH_MAX - LOWER_NECK_PITCH_MIN)/100.0));
     zeroYaw   = fabs(NECK_YAW_MIN/((NECK_YAW_MAX - NECK_YAW_MIN)/100.0));
     ui->sliderUpperNeckPitch->setValue(zeroUpperPitch);
-    //ui->sliderLowerNeckPitch->setValue(zeroLowerPitch);
+    ui->sliderLowerNeckPitch->setValue(zeroLowerPitch);
     ui->sliderNeckYaw->setValue(zeroYaw);
 
     //PelvisHeight . Replace these defaults with actual values from robot
