@@ -75,34 +75,34 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
 
     // walk to the goal location
     // the goal can be updated on the run time
-    ret = walker_->walkToGoal(panel_walk_goal_, false);
+//    ret = walker_->walkToGoal(panel_walk_goal_, false);
 
-    // if executing stay in the same state
-    if (ret == MOVE_EXECUTING)
-    {
-        // no state change
-        //eventQueue.riseEvent("/WALK_EXECUTING");
-    }
-    // if finished sucessfully
-    else if (ret == MOVE_SUCESS)
-    {
-        eventQueue.riseEvent("/REACHED_PANEL");
-    }
-    // if failed for more than 5 times, go to error state
-    else if (fail_count > 5)
-    {
-        // reset the fail count
-        fail_count = 0;
-        eventQueue.riseEvent("/WALK_FAILED");
-    }
-    // if failed retry detecting the panel and then walk
-    // also handles MOVE_FAILED
-    else
-    {
-        // increment the fail count
-        fail_count++;
-        eventQueue.riseEvent("/WALK_RETRY");
-    }
+//    // if executing stay in the same state
+//    if (ret == MOVE_EXECUTING)
+//    {
+//        // no state change
+//        //eventQueue.riseEvent("/WALK_EXECUTING");
+//    }
+//    // if finished sucessfully
+//    else if (ret == MOVE_SUCESS)
+//    {
+//        eventQueue.riseEvent("/REACHED_PANEL");
+//    }
+//    // if failed for more than 5 times, go to error state
+//    else if (fail_count > 5)
+//    {
+//        // reset the fail count
+//        fail_count = 0;
+//        eventQueue.riseEvent("/WALK_FAILED");
+//    }
+//    // if failed retry detecting the panel and then walk
+//    // also handles MOVE_FAILED
+//    else
+//    {
+//        // increment the fail count
+//        fail_count++;
+//        eventQueue.riseEvent("/WALK_RETRY");
+//    }
 
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
