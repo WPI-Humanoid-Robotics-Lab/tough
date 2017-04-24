@@ -1,9 +1,6 @@
 #include <val_task1/val_task1_node.h>
 
-using namespace std;
-
 #define foreach BOOST_FOREACH
-
 
 task1Node::task1Node(ros::NodeHandle nh):
     nh_(nh)

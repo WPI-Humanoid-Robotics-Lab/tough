@@ -38,6 +38,8 @@
 #include <pcl/sample_consensus/ransac.h>
 
 #include <visualization_msgs/MarkerArray.h>
+#include "val_common/val_common_names.h"
+#include<iostream>
 
 class panel_detector{
 private:

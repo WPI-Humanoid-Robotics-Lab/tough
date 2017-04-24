@@ -1,7 +1,7 @@
 #include <navigation_common/frame_tracking.h>
 
 
-#define DEBOUNCE_COUNT 5 // debounces the motion to stationary transition (its a up dopwn debounce logic)
+#define DEBOUNCE_COUNT 10 // debounces the motion to stationary transition (its a up dopwn debounce logic)
 
 class walkTracking{
 private:

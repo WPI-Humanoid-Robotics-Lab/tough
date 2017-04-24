@@ -1,5 +1,4 @@
 #include <val_circle.h>
-using namespace std;
 
 int main(int argc, char** argv)
 {

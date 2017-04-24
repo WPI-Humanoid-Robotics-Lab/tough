@@ -184,6 +184,7 @@ include_directories(
  add_library(${PROJECT_NAME}
          src/val_task1.cpp
          src/val_task1SM.cpp
+         src/panel_detection.cpp
  )
 
 
@@ -191,8 +192,8 @@ include_directories(
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
+target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
@@ -209,6 +210,7 @@ add_dependencies(val_task1_node
 ## Specify libraries to link a library or executable target against
  target_link_libraries(val_task1_node
    ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES} ${PCL_LIBRARIES}
    ${PROJECT_NAME}
  )
  
@@ -223,12 +225,12 @@ target_link_libraries(val_circle
    val_marker
  )
  
-add_executable(panel_detection src/panel_detection.cpp)
-add_dependencies(panel_detection
+add_executable(panel_detection_node src/panel_detection_node.cpp)
+add_dependencies(panel_detection_node
  ${${PROJECT_NAME}_EXPORTED_TARGETS}
  ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(panel_detection ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(panel_detection_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} ${PROJECT_NAME})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use

@@ -13,7 +13,6 @@
 #include <val_task_common/val_walk_tracker.h>
 //#include <val_task1/panel_detection.h>
 
-using namespace std;
 using namespace decision_making;
 
 #define foreach BOOST_FOREACH
@@ -32,7 +31,9 @@ class valTask1 {
     static walkTracking* walk_track_;
 
     // panel detection object
-    // static panel_detector* panel_detector_;
+    //static panel_detector* panel_detector_;
+
+    static bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
 
     public:
 
@@ -56,6 +57,6 @@ class valTask1 {
     static decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     static decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
 
-    geometry_msgs::Pose2D getPanelWalkGoal();
-    void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal_);
+    static geometry_msgs::Pose2D getPanelWalkGoal();
+    static void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal_);
 };
