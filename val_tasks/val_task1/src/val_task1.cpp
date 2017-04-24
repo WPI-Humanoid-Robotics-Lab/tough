@@ -15,7 +15,7 @@
 
 ValkyrieWalker *valTask1::walker_ = NULL;
 walkTracking *valTask1::walk_track_ = NULL;
-//panel_detector *valTask1::panel_detector_ = NULL;
+panel_detector *valTask1::panel_detector_ = NULL;
 geometry_msgs::Pose2D valTask1::panel_walk_goal_;
 
 // constructor and destrcutor
@@ -29,7 +29,7 @@ valTask1::valTask1(ros::NodeHandle nh):
     walk_track_ = new walkTracking(nh);
 
     // panel detection
-    //panel_detector_ = new panel_detector(nh);
+    panel_detector_ = new panel_detector(nh);
 }
 
 // destructor
@@ -53,7 +53,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
     //!!!!! depends on the developer and use case
 
     // generate the event
-    eventQueue.riseEvent("/INIT_SUCESSFUL");
+    //eventQueue.riseEvent("/INIT_SUCESSFUL");
 
     return TaskResult::SUCCESS();
 }
@@ -66,24 +66,32 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
 
     // detect panel
     std::vector<geometry_msgs::Pose> poses;
-    // panel_detector_->getDetections(poses);
+    panel_detector_->getDetections(poses);
 
     // if we get atleast one detection
     if (poses.size() > 1)
     {
         // update the pose
-        //        geometry_msgs::Pose2D pose2D;
-        //        pose2D.x = poses[0].position.x;
-        //        pose2D.y = poses[0].position.y;
+        geometry_msgs::Pose2D pose2D;
+        // get the last detected pose
+        int idx = poses.size() -1 ;
+        pose2D.x = poses[idx].position.x;
+        pose2D.y = poses[idx].position.y;
 
-        //        // get the theta
-        //        tfScalar yaw, pitch, roll;
-        //        tf::Matrix3x3 mat(poses[0].orientation);
-        //        mat.getEulerYPR(&yaw, &pitch, &roll);
-        //        pose2D.theta = yaw;
-        //        setPanelWalkGoal(pose2D);
+        std::cout << "x " << pose2D.x << " y " << pose2D.y << std::endl;
 
-        //        eventQueue.riseEvent("/DETECTED_PANEL");
+        // get the theta
+        tfScalar yaw, pitch, roll;
+        tf::Matrix3x3 mat(tf::Quaternion(poses[idx].orientation.x, poses[idx].orientation.y, poses[idx].orientation.z, poses[idx].orientation.w));
+        //mat.setValue(poses[idx].orientation.x, poses[idx].orientation.y, poses[idx].orientation.z, poses[idx].orientation.w);
+        mat.getEulerYPR(yaw, pitch, roll);
+        pose2D.theta = yaw;
+        setPanelWalkGoal(pose2D);
+
+        std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
+        std::cout << "yaw: " << yaw << " pitch " << pitch << " roll " << roll << std::endl;
+
+        //eventQueue.riseEvent("/DETECTED_PANEL");
     }
     // if failed for more than 5 times, go to error state
     else if (fail_count > 5)
@@ -116,19 +124,19 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
 
     // walk to the goal location
     // the goal can be updated on the run time
-
     static geometry_msgs::Pose2D pose_prev;
 
+    // check if the pose is started
     if (isPoseChanged(pose_prev, panel_walk_goal_))
     {
         ROS_INFO("pose chaned");
         walker_->walkToGoal(panel_walk_goal_, false);
-        sleep(15);
+        // sleep so that the walk starts
+        sleep(10);
 
         // update the previous pose
         pose_prev = panel_walk_goal_;
     }
-
 
     // if walking stay in the same state
     if (walk_track_->isWalking())
@@ -141,6 +149,8 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
     else if (!walk_track_->isWalking())
     {
         ROS_INFO("reached panel");
+
+        // TODO: check if robot rechead the panel
         eventQueue.riseEvent("/REACHED_PANEL");
     }
     // if failed for more than 5 times, go to error state
@@ -235,8 +245,10 @@ decision_making::TaskResult valTask1::errorTask(string name, const FSMCallContex
 {
     ROS_INFO_STREAM("executing " << name);
 
-    // generate the event
-    //eventQueue.riseEvent("/INIT_SUCESSUFL");
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
 
     return TaskResult::SUCCESS();
 }

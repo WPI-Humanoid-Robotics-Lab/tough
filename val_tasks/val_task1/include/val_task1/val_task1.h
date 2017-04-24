@@ -1,5 +1,8 @@
 #pragma once
 
+// !!!!! important other wise created collision with std
+#define DISABLE_DECISION_MAKING_LOG true
+
 #include <iostream>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
@@ -11,7 +14,7 @@
 #include <geometry_msgs/Pose2D.h>
 #include <val_footstep/ValkyrieWalker.h>
 #include <val_task_common/val_walk_tracker.h>
-//#include <val_task1/panel_detection.h>
+#include <val_task1/panel_detection.h>
 
 using namespace decision_making;
 
@@ -31,9 +34,10 @@ class valTask1 {
     static walkTracking* walk_track_;
 
     // panel detection object
-    //static panel_detector* panel_detector_;
+    static panel_detector* panel_detector_;
 
     static bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
+
 
     public:
 

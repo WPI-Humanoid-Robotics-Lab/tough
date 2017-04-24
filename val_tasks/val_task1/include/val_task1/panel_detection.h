@@ -39,48 +39,47 @@
 
 #include <visualization_msgs/MarkerArray.h>
 #include "val_common/val_common_names.h"
-#include<iostream>
 
 class panel_detector{
 private:
 
-  ros::Subscriber pcl_sub_;
+    ros::Subscriber pcl_sub_;
 
-  ros::Publisher pcl_filtered_pub_;
-  ros::Publisher vis_pub_;
-  ros::Publisher vis_plane_pub_;
+    ros::Publisher pcl_filtered_pub_;
+    ros::Publisher vis_pub_;
+    ros::Publisher vis_plane_pub_;
 
-  std::vector<geometry_msgs::Pose> detections_;
+    std::vector<geometry_msgs::Pose> detections_;
 
-  int detection_tries_;
+    int detection_tries_;
 
-  void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
+    void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
 
-  void passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+    void passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
-  void panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-  void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+    void panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+    void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
-  bool getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
+    bool getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
 
 public:
-  // Constructor
+    // Constructor
 
-  panel_detector(ros::NodeHandle &nh);
+    panel_detector(ros::NodeHandle &nh);
 
-  void getDetections(std::vector<geometry_msgs::Pose> &ret_val);
+    void getDetections(std::vector<geometry_msgs::Pose> &ret_val);
 
-  int getDetectionTries() const;
-  void setDetectionTries(int getDetectionTries);
+    int getDetectionTries() const;
+    void setDetectionTries(int getDetectionTries);
 };
 
-bool poseComparator (geometry_msgs::Pose const& lhs, geometry_msgs::Pose const& rhs)
-{
-    tf::Pose tf_lhs, tf_rhs;
-    tf::poseMsgToTF(lhs, tf_lhs);
-    tf::poseMsgToTF(rhs, tf_rhs);
-    return tf_lhs.getOrigin() < tf_rhs.getOrigin();
+//bool poseComparator (geometry_msgs::Pose const& lhs, geometry_msgs::Pose const& rhs)
+//{
+//    tf::Pose tf_lhs, tf_rhs;
+//    tf::poseMsgToTF(lhs, tf_lhs);
+//    tf::poseMsgToTF(rhs, tf_rhs);
+//    return tf_lhs.getOrigin() < tf_rhs.getOrigin();
 
-}
+//}
 
 #endif //PANEL_DETECTION_H

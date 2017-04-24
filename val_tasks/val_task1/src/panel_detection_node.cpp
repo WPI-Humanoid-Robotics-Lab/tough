@@ -21,7 +21,7 @@ int main(int argc, char** argv){
     ROS_INFO("Tried %d time and succeeded %d times", trials, (int)poses.size());
 
     //this can be used if we need to find median/mode
-    std::sort(poses.begin(),poses .end(), poseComparator);
+    // std::sort(poses.begin(),poses .end(), poseComparator);
 
     geometry_msgs::PoseStamped goal;
     goal.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
