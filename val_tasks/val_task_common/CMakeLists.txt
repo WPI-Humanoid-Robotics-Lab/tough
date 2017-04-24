@@ -2,7 +2,14 @@ cmake_minimum_required(VERSION 2.8.3)
 project(val_task_common)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
-add_definitions(-std=c++11)
+SET(CMAKE_BUILD_TYPE RelWithDebInfo)
+
+set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
+
+find_package(PCL 1.7 REQUIRED)
+include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -152,6 +159,12 @@ target_link_libraries(frame_tracking
    ${catkin_LIBRARIES}
  )
 
+
+ add_executable(walkway_point_generator src/val_walkway_seed_point_generator.cpp)
+# add_dependencies(walkway_point_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ target_link_libraries(walkway_point_generator
+   ${catkin_LIBRARIES} ${PCL_LIBRARIES}
+ )
 
 #############
 ## Install ##
