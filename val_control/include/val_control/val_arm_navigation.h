@@ -135,6 +135,12 @@ public:
      */
     bool nudgeArm(const armSide side, const direction drct, float nudgeStep = 0.05);
 
+    bool nudgeArmLocal(const armSide side, const direction drct, float nudgeStep = 0.05);
+
+    bool generate_task_space_data(std::vector<geometry_msgs::PoseStamped>& input_poses, armSide input_side, float desired_time, std::vector<armTaskSpaceData> &arm_data_vector);
+
+
+
 private:
 
     static int arm_id;

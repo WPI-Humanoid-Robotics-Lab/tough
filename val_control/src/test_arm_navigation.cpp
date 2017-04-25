@@ -11,23 +11,37 @@ int main(int argc, char **argv)
 
 
   if(argc == 5){
-    int arm_side = std::atoi(argv[1]);
-    float x = std::atof(argv[2]);
-    float y = std::atof(argv[3]);
-    float z = std::atof(argv[4]);
     geometry_msgs::Pose pt;
-    pt.position.x = x;
-    pt.position.y = y;
-    pt.position.z = z;
+    pt.position.x = std::atof(argv[2]);
+    pt.position.y = std::atof(argv[3]);
+    pt.position.z = std::atof(argv[4]);
     pt.orientation.w = 1.0;
     armSide side;
-    if(arm_side == 0){
+    if(std::atoi(argv[1]) == 0){
       side = LEFT;
     } else {
       side = RIGHT;
     }
     armTraj.moveArmInTaskSpace(side, pt, 3.0);
-  } else {
+  } else if(argc == 9){
+
+      geometry_msgs::Pose pt;
+      pt.position.x = std::atof(argv[2]);
+      pt.position.y = std::atof(argv[3]);
+      pt.position.z = std::atof(argv[4]);
+      pt.orientation.x = std::atof(argv[5]);
+      pt.orientation.y = std::atof(argv[6]);
+      pt.orientation.z = std::atof(argv[7]);
+      pt.orientation.w = std::atof(argv[8]);
+
+      armSide side;
+      if(std::atoi(argv[1]) == 0){
+        side = LEFT;
+      } else {
+        side = RIGHT;
+      }
+      armTraj.moveArmInTaskSpace(side, pt, 3.0);
+  } else{
     // Set the pose of the left arm to extend it to the front
     armTrajectory::armJointData l;
     l.side = LEFT;

@@ -59,7 +59,6 @@ private:
 
     void panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
     void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-
     bool getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
 
 public:

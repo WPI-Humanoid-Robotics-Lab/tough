@@ -1,6 +1,4 @@
 #include "val_task1/panel_detection.h"
-
-
 panel_detector::panel_detector(ros::NodeHandle &nh)
 {
     pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &panel_detector::cloudCB, this);
@@ -133,7 +131,6 @@ bool panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geo
         ROS_INFO("WTF");
         return false;
     }
-
     ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
 
     geometry_msgs::Point point1;
@@ -223,15 +220,11 @@ bool panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geo
 void panel_detector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out (new pcl::PointCloud<pcl::PointXYZ>);
-
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
     tree->setInputCloud (cloud);
-
     int cloudSize = (int)cloud->points.size();
-
     //  ROS_INFO("Minimum Size = %d", (int)(0.2*cloudSize));
     //  ROS_INFO("Maximum Size = %d", cloudSize);
-
     std::vector<pcl::PointIndices> cluster_indices;
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
     ec.setClusterTolerance (0.1);
@@ -240,30 +233,21 @@ void panel_detector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
     ec.setSearchMethod (tree);
     ec.setInputCloud (cloud);
     ec.extract (cluster_indices);
-
     int numClusters = cluster_indices.size();
-
     //  ROS_INFO("Number of Clusters  = %d", numClusters);
-
     std::vector<pcl::PointIndices>::const_iterator it;
     std::vector<int>::const_iterator pit;
-
     int index = 0;
     double x = 0;
     double y = 0;
     double z = 0;
-
     pcl::PointCloud<pcl::PointXYZ>::Ptr centroid_points (new pcl::PointCloud<pcl::PointXYZ>);
-
     for(it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
-
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
         for(pit = it->indices.begin(); pit != it->indices.end(); pit++) {
             cloud_cluster->points.push_back(cloud->points[*pit]);
         }
-
         //      ROS_INFO("Number of Points in the Cluster = %d", (int)cloud_cluster->points.size());
-
         *cloud = *cloud_cluster;
     }
 

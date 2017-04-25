@@ -301,6 +301,38 @@ bool armTrajectory::nudgeArm(const armSide side, const direction drct, float nud
 }
 
 
+bool armTrajectory::nudgeArmLocal(const armSide side, const direction drct, float nudgeStep){
+
+    geometry_msgs::PoseStamped      world_values;
+    world_values.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
+
+    std::string target_frame = side == LEFT ? "/leftMiddleFingerPitch1Link" : "/rightMiddleFingerPitch1Link";
+    int signInverter = side == LEFT ? 1 : -1;
+
+    geometry_msgs::PoseStamped palm_values;
+    palm_values.header.frame_id = target_frame;
+    palm_values.pose.orientation.w = 1.0f;
+
+    if     (drct == direction::FRONT)     palm_values.pose.position.y += nudgeStep * signInverter;
+    else if(drct == direction::BACK)      palm_values.pose.position.y -= nudgeStep * signInverter;
+    else if(drct == direction::LEFT)      palm_values.pose.position.z += nudgeStep;
+    else if(drct == direction::RIGHT)     palm_values.pose.position.z -= nudgeStep;
+    else if(drct == direction::UP)        palm_values.pose.position.x += nudgeStep;
+    else if(drct == direction::DOWN)      palm_values.pose.position.x -= nudgeStep;
+
+    try{
+        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        tf_listener_.transformPose(VAL_COMMON_NAMES::WORLD_TF,palm_values,world_values);
+    }
+    catch (tf::TransformException ex) {
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+    moveArmInTaskSpace(side,world_values.pose, 0.0f);
+    return true;
+}
 
 void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point)
 {
@@ -325,3 +357,25 @@ void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &ms
 }
 
 
+//caution, allocates task_space_data that needs to be freed eventually!
+//armside is used to determine which side to use.
+//transforms the poses to the worldframe regardless.
+//POSES MUST BE IN WORLD FRAME;
+//Add conversion of posestamped to world frame if it not already in world frame
+bool armTrajectory::generate_task_space_data(std::vector<geometry_msgs::PoseStamped>& input_poses, armSide input_side, float desired_time, std::vector<armTrajectory::armTaskSpaceData> &arm_data_vector)
+{
+
+  // for(auto input_pose : *input_poses)
+  float time_delta = desired_time/input_poses.size();
+  for(int i=0 ; i < input_poses.size(); i++)
+  {
+    geometry_msgs::PoseStamped input_pose=input_poses.at(i);
+    armTrajectory::armTaskSpaceData task_space_data;
+    task_space_data.side = input_side;
+    task_space_data.pose = input_pose.pose;
+    task_space_data.time = time_delta;
+
+    arm_data_vector.push_back(task_space_data);
+  }
+  return true;
+}
