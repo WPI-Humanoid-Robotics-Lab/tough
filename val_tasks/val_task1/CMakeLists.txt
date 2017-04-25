@@ -178,6 +178,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake
   include
+  cfg/cpp
 )
 
 # Declare a C++ library
