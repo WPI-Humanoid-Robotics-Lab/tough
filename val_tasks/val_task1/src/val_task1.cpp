@@ -13,10 +13,17 @@
 
 #define foreach BOOST_FOREACH
 
-ValkyrieWalker *valTask1::walker_ = NULL;
-walkTracking *valTask1::walk_track_ = NULL;
-panel_detector *valTask1::panel_detector_ = NULL;
-geometry_msgs::Pose2D valTask1::panel_walk_goal_;
+valTask1 *valTask1::currentObject = nullptr;
+
+valTask1* valTask1::getValTask1(ros::NodeHandle nh){
+    if(currentObject == nullptr){
+        currentObject = new valTask1(nh);
+        return currentObject;
+    }
+    ROS_ERROR("Object already exists");
+    assert(false && "Object already exists");
+
+}
 
 // constructor and destrcutor
 valTask1::valTask1(ros::NodeHandle nh):
@@ -53,7 +60,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
     //!!!!! depends on the developer and use case
 
     // generate the event
-    //eventQueue.riseEvent("/INIT_SUCESSFUL");
+    eventQueue.riseEvent("/INIT_SUCESSFUL");
 
     return TaskResult::SUCCESS();
 }
@@ -63,6 +70,7 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
     ROS_INFO_STREAM("executing " << name);
 
     static int fail_count = 0;
+    static int retry_count = 0;
 
     // detect panel
     std::vector<geometry_msgs::Pose> poses;
@@ -91,14 +99,22 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
         std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
         std::cout << "yaw: " << yaw << " pitch " << pitch << " roll " << roll << std::endl;
 
-        //eventQueue.riseEvent("/DETECTED_PANEL");
+        eventQueue.riseEvent("/DETECTED_PANEL");
     }
+
+    else if(retry_count < 5) {
+        ROS_INFO("sleep for 3 seconds for panel detection");
+        ++retry_count;
+        ros::Duration(3).sleep();
+        eventQueue.riseEvent("/DETECT_PANEL_RETRY");
+    }
+
     // if failed for more than 5 times, go to error state
     else if (fail_count > 5)
     {
         // reset the fail count
         fail_count = 0;
-        //eventQueue.riseEvent("DETECT_PANEL_FAILED");
+        eventQueue.riseEvent("DETECT_PANEL_FAILED");
     }
     // if failed retry detecting the panel
     else

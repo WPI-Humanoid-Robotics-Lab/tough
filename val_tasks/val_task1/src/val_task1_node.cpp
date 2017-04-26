@@ -5,7 +5,7 @@
 task1Node::task1Node(ros::NodeHandle nh):
     nh_(nh)
 {
-    task1_ = new valTask1(nh);
+    task1_ = valTask1::getValTask1(nh);
 }
 
 task1Node::~task1Node()
@@ -17,17 +17,17 @@ void task1Node::registerStateMethods(void)
 {
     // Register all the functions
     // register the api's for states
-    LocalTasks::registrate("STATE_INIT", &valTask1::initTask);
-    LocalTasks::registrate("STATE_DETECT_PANEL",  &valTask1::detectPanelTask);
-    LocalTasks::registrate("STATE_WALK_TO_CONTROL",  &valTask1::walkToControlPanelTask);
-    LocalTasks::registrate("STATE_DETECT_HANDLE_CENTER",  &valTask1::detectHandleCenterTask);
-    LocalTasks::registrate("STATE_ADJUST_ARMS",  &valTask1::adjustArmTask);
-    LocalTasks::registrate("STATE_CORRECT_PITCH",  &valTask1::controlPitchTask);
-    LocalTasks::registrate("STATE_CORRECT_YAW",  &valTask1::controlYawTask);
-    LocalTasks::registrate("STATE_DETECT_FINISH",  &valTask1::detectfinishBoxTask);
-    LocalTasks::registrate("STATE_WALK_TO_FINISH",  &valTask1::walkToFinishTask);
-    LocalTasks::registrate("END_STATE",  &valTask1::endTask);
-    LocalTasks::registrate("STATE_ERROR",  &valTask1::errorTask);
+    LocalTasks::registrate("STATE_INIT",                std::bind(&valTask1::initTask,              task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_DETECT_PANEL",        std::bind(&valTask1::detectPanelTask,       task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_WALK_TO_CONTROL",     std::bind(&valTask1::walkToControlPanelTask,task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_DETECT_HANDLE_CENTER",std::bind(&valTask1::detectHandleCenterTask,task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_ADJUST_ARMS",         std::bind(&valTask1::adjustArmTask,         task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_CORRECT_PITCH",       std::bind(&valTask1::controlPitchTask,      task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_CORRECT_YAW",         std::bind(&valTask1::controlYawTask,        task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_DETECT_FINISH",       std::bind(&valTask1::detectfinishBoxTask,   task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_WALK_TO_FINISH",      std::bind(&valTask1::walkToFinishTask,      task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("END_STATE",                 std::bind(&valTask1::endTask,               task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_ERROR",               std::bind(&valTask1::errorTask,             task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 void task1Node::paramUpdateCallback(val_task1::task1_parametersConfig &config, uint32_t level)

@@ -26,41 +26,42 @@ class valTask1 {
 
     private:
     ros::NodeHandle nh_;
-
+    valTask1(ros::NodeHandle nh);
     // object for the walker api
-    static ValkyrieWalker* walker_;
+    ValkyrieWalker* walker_;
 
     // object for tracking robot walk
-    static walkTracking* walk_track_;
+    walkTracking* walk_track_;
 
     // panel detection object
-    static panel_detector* panel_detector_;
+    panel_detector* panel_detector_;
 
-    static bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
+    bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
 
+    static valTask1 *currentObject;
 
     public:
 
     // goal location for the panel
-    static geometry_msgs::Pose2D panel_walk_goal_;
+    geometry_msgs::Pose2D panel_walk_goal_;
 
     // default constructor and destructor
-    valTask1(ros::NodeHandle nh);
+    static valTask1* getValTask1(ros::NodeHandle nh);
     ~valTask1();
 
-    static bool preemptiveWait(double ms, decision_making::EventQueue& queue);
-    static decision_making::TaskResult initTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    static decision_making::TaskResult detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    static decision_making::TaskResult walkToControlPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    static decision_making::TaskResult detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    static decision_making::TaskResult adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    static decision_making::TaskResult controlPitchTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    static decision_making::TaskResult controlYawTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    static decision_making::TaskResult detectfinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    static decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    static decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    static decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    bool preemptiveWait(double ms, decision_making::EventQueue& queue);
+    decision_making::TaskResult initTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToControlPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult controlPitchTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult controlYawTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectfinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
 
-    static geometry_msgs::Pose2D getPanelWalkGoal();
-    static void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal_);
+    geometry_msgs::Pose2D getPanelWalkGoal();
+    void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal_);
 };
