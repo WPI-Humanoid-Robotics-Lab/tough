@@ -102,6 +102,7 @@ private:
     ros::NodeHandle n_;
     ros::Publisher snapshot_pub_;
     ros::Publisher registered_pointcloud_pub_;
+    ros::Publisher pointcloud_for_octomap_pub_;
     ros::Subscriber snapshot_sub_;
     ros::Subscriber resetPointcloudSub_;
     ros::Subscriber pausePointcloudSub_;

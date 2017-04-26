@@ -16,7 +16,7 @@
 WalkwayFilter::WalkwayFilter(ros::NodeHandle &n):nh_(n)
 {
     pointcloudPub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ> >("walkway_filtered_points2",1);
-    pointcloudSub_ = nh_.subscribe(PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_FILTERED_CLOUD_TOPIC2, 1,  &WalkwayFilter::generateMap, this);
+    pointcloudSub_ = nh_.subscribe(PERCEPTION_COMMON_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC_FOR_OCTOMAP, 1,  &WalkwayFilter::generateMap, this);
 }
 
 WalkwayFilter::~WalkwayFilter()

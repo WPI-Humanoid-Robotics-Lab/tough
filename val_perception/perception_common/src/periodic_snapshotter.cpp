@@ -108,6 +108,7 @@ PeriodicSnapshotter::PeriodicSnapshotter()
 {
     snapshot_pub_              = n_.advertise<sensor_msgs::PointCloud2> ("snapshot_cloud2", 1);
     registered_pointcloud_pub_ = n_.advertise<sensor_msgs::PointCloud2>("assembled_cloud2",10, true);
+    pointcloud_for_octomap_pub_= n_.advertise<sensor_msgs::PointCloud2>("assembled_octomap_cloud2",10, true);
     resetPointcloudSub_        = n_.subscribe("reset_pointcloud", 10, &PeriodicSnapshotter::resetPointcloudCB, this);
     pausePointcloudSub_        = n_.subscribe("pause_pointcloud", 10, &PeriodicSnapshotter::pausePointcloudCB, this);
 
@@ -300,6 +301,7 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
     if (state_request == PCL_STATE_CONTROL::RESET || prev_msg_->row_step > 10000000 || prev_msg_->data.empty()){
         ROS_INFO("Resetting Pointcloud");
         merged_cloud = msg;
+        pointcloud_for_octomap_pub_.publish(prev_msg_->data.empty() ? msg : prev_msg_);
         state_request = PCL_STATE_CONTROL::RESUME;
     }
     else {
