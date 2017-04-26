@@ -34,18 +34,18 @@
 		    This is fixed in a node in perception_common publish_corrected_map node. Do not use the following line, 
 	 	    instead run the mentioned node and it will publish 2D map.-->
                 <!-- remap from="projected_map" to="map"/ -->
-                <remap from="projected_map" to="/projected_map"/>
+                <!-- remap from="projected_map" to="/projected_map"/ -->
 	</node>
 
         <!--Add a static map frame at world origin-->
-        <node name="MapTransform" pkg="navigation_common" type="MapTransform" ns="field">
+        <!-- node name="MapTransform" pkg="navigation_common" type="MapTransform" ns="field">
             <remap from="map" to="/map"/>
-        </node>
+        </node -->
         <!-- This node listens to /projected_map and publishes the corrected map on /map-->
-        <node pkg="navigation_common" type="publish_corrected_map" name="corrected_map_publisher" ns="field">
+        <!-- node pkg="navigation_common" type="publish_corrected_map" name="corrected_map_publisher" ns="field">
             <remap from="map" to="/map"/>
             <remap from="projected_map" to="/projected_map"/>
-        </node>
+        </node -->
 
 
 </launch>
