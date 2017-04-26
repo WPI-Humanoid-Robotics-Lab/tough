@@ -54,9 +54,10 @@ bool findRoi (cv::Mat src_gray, char c)
 
     for( int i = 0; i < contours.size(); i++ )
      {
-       cv::approxPolyDP( cv::Mat(contours[i]), contours_poly[i], 3, true );
+        cv::convexHull( cv::Mat(contours[i]), hull[i], false );
+        cv::approxPolyDP( cv::Mat(hull[i]), contours_poly[i], 3, true );
        boundRect[i] = cv::boundingRect( cv::Mat(contours_poly[i]) );
-       cv::convexHull( cv::Mat(contours[i]), hull[i], false );
+
      }
 
     int largest_area=0;
@@ -75,7 +76,6 @@ bool findRoi (cv::Mat src_gray, char c)
               largest_area = area;
               largest_contour_index = i;               //Store the index of largest contour
            }
-           drawContours( drawing, hull, i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
          }
 
         cv::drawContours( drawing, contours, largest_contour_index, color, 2, 8, hierarchy, 0, cv::Point() );
@@ -92,11 +92,11 @@ bool findRoi (cv::Mat src_gray, char c)
         for( int i = 0; i< contours.size(); i++ )
          {
             std::cout << contours.size() << std::endl;
-            double area = contourArea( contours[i] );
-            if (area < 10.0)
-            {
-                continue;
-            }
+//            double area = contourArea( contours[i] );
+//            if (area < 10.0)
+//            {
+//                continue;
+//            }
             cv::Scalar color = cv::Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
             cv::drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, cv::Point() );
             cv::rectangle( drawing, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
@@ -135,14 +135,15 @@ void getHandleLocation(ros::NodeHandle &nh)
     cv::cvtColor( img, imgHSV, cv::COLOR_BGR2HSV);
     cv::GaussianBlur( imgHSV, imgHSV, cv::Size(9, 9), 2, 2 );
 
-    imgSegRectangle = colorSegment(imgHSV, hsvOrange);
+    imgSegRectangle = colorSegment(imgHSV, hsvBlue);
     imgSegRectangle = doMorphology(imgSegRectangle);
     showImage(imgSegRectangle);
-    flag = findRoi(imgSegRectangle, 'G'); // stores result in global variable roi
-    imgSegRectangle = colorSegment(imgHSV, hsvOrange);
-    imgSegRectangle = doMorphology(imgSegRectangle);
-    showImage(imgSegRectangle);
-    flag = findRoi(imgSegRectangle, 'P');
+    flag = findRoi(imgSegRectangle, 'P'); // stores result in global variable roi
+    reducedImageHSV = imgHSV(roi);
+    grayArea = colorSegment(reducedImageHSV, hsvGray);
+    showImage(grayArea);
+    findRoi(grayArea, 'G');
+
 //    reducedImageHSV = imgHSV(roi);
 //    grayArea = colorSegment(reducedImageHSV, hsvGray);
 //    flag = findRoi(grayArea, 'G');
