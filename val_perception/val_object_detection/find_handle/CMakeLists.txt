@@ -134,8 +134,8 @@ include_directories(perception_common
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(find_handle src/find_handle.cpp)
-
+# add_executable(find_handle src/find_handle.cpp)
+add_executable(find_handle_detector src/find_handle_detector.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -150,7 +150,7 @@ add_executable(find_handle src/find_handle.cpp)
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(find_handle ${catkin_LIBRARIES})
+target_link_libraries(find_handle_detector ${catkin_LIBRARIES})
 #############
 ## Install ##
 #############

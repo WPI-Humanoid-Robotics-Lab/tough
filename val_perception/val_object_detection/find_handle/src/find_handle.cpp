@@ -1,8 +1,4 @@
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <perception_common/MultisenseImage.h>
-#include <iostream>
-#include <vector>
+#include <find_handle.h>
 
 cv::Mat img;
 cv::Rect roi;
@@ -135,10 +131,10 @@ void getHandleLocation(ros::NodeHandle &nh)
     cv::cvtColor( img, imgHSV, cv::COLOR_BGR2HSV);
     cv::GaussianBlur( imgHSV, imgHSV, cv::Size(9, 9), 2, 2 );
 
-    imgSegRectangle = colorSegment(imgHSV, hsvBlue);
+    imgSegRectangle = colorSegment(imgHSV, hsvOrange);
     imgSegRectangle = doMorphology(imgSegRectangle);
     showImage(imgSegRectangle);
-    flag = findRoi(imgSegRectangle, 'P'); // stores result in global variable roi
+    flag = findRoi(imgSegRectangle, 'G'); // stores result in global variable roi
     reducedImageHSV = imgHSV(roi);
     grayArea = colorSegment(reducedImageHSV, hsvGray);
     showImage(grayArea);
