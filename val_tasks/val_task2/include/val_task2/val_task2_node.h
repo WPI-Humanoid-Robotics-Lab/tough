@@ -14,7 +14,7 @@
 #include <geometry_msgs/Twist.h>
 #include <val_task2/val_task2.h>
 #include <dynamic_reconfigure/server.h>
-#include "/home/sumanth/indigo_ws/src/space_robotics_challenge/val_tasks/val_task2/cfg/cpp/val_task2/task2_parametersConfig.h"
+#include "val_task2/task2_parametersConfig.h"
 
 
 class task2Node {

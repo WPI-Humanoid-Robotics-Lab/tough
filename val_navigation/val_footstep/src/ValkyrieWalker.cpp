@@ -32,7 +32,7 @@ bool ValkyrieWalker::walkToGoal( geometry_msgs::Pose2D &goal, bool waitForSteps)
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.default_transfer_time = transfer_time;
     list.default_swing_time= swing_time;
-    list.execution_mode = exe_mode;
+    list.execution_mode = execution_mode;
     list.unique_id = ValkyrieWalker::id;
 
     if(this->getFootstep(goal,list))
@@ -55,7 +55,7 @@ bool ValkyrieWalker::walkNSteps(int n, float x_offset, float y_offset, bool cont
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.default_transfer_time = transfer_time;
     list.default_swing_time = swing_time;
-    list.execution_mode = exe_mode;
+    list.execution_mode = execution_mode;
 
     list.unique_id = ValkyrieWalker::id ;
 
@@ -86,7 +86,7 @@ bool ValkyrieWalker::walkPreComputedSteps(const std::vector<float> x_offset, con
     ihmc_msgs::FootstepDataListRosMessage list;
     list.default_transfer_time= transfer_time;
     list.default_swing_time = swing_time;
-    list.execution_mode = exe_mode;
+    list.execution_mode = execution_mode;
     list.unique_id = ValkyrieWalker::id;
 
     if (x_offset.size() != y_offset.size())
@@ -128,7 +128,7 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
     // get start from robot position
 
-    ihmc_msgs::FootstepDataRosMessage* startstep = new ihmc_msgs::FootstepDataRosMessage() ;
+    ihmc_msgs::FootstepDataRosMessage::Ptr startstep(new ihmc_msgs::FootstepDataRosMessage());
     this->getCurrentStep(0,*startstep);
 
 
@@ -137,9 +137,6 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
     //    std::cout<< "Start Position  x = " << start.x << "  y = " << start.y<<std::endl;
 
     start.theta = tf::getYaw(startstep->orientation);
-
-    delete startstep;
-
 
     srv.request.start = start;
     srv.request.goal = goal;
@@ -150,8 +147,7 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
         for(int i=0; i <srv.response.footsteps.size();i++)
         {
 
-            ///\ todo shared pointer implementation
-            ihmc_msgs::FootstepDataRosMessage* step = new ihmc_msgs::FootstepDataRosMessage() ;
+            ihmc_msgs::FootstepDataRosMessage::Ptr step(new ihmc_msgs::FootstepDataRosMessage());
             bool side = bool(srv.response.footsteps.at(i).leg);
 
             side = !side;
@@ -172,7 +168,6 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
             step->orientation.y = t.y();
             step->orientation.z = t.z();
             
-
             list.footstep_data_list.push_back(*step);
         }
         return true;
@@ -196,14 +191,13 @@ ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double 
     this->footsteps_pub_   = nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/valkyrie/control/footstep_list",1,true);
     this->footstep_status_ = nh_.subscribe("/ihmc_ros/valkyrie/output/footstep_status", 20,&ValkyrieWalker::footstepStatusCB, this);
 
-    transfer_time = InTransferTime;
-    swing_time = InSwingTime;
-    exe_mode = InMode;
-    swing_height = swingHeight;
+    transfer_time  = InTransferTime;
+    swing_time     = InSwingTime;
+    execution_mode = InMode;
+    swing_height   = swingHeight;
 
     ros::Duration(0.5).sleep();
     step_counter = 0;
-    ValkyrieWalker::id = -1;
 
     //start timer
     cbTime_=ros::Time::now();
@@ -231,33 +225,30 @@ ValkyrieWalker::~ValkyrieWalker(){
 void ValkyrieWalker::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage & foot)
 {
 
-    std_msgs::String foot_frame;
-    if (side == LEFT)
-    {
-        foot_frame = this->left_foot_frame_;
-    }
-    else
-    {
-        foot_frame = this->right_foot_frame_;
-    }
+    std_msgs::String foot_frame =  side == LEFT ? left_foot_frame_ : right_foot_frame_;
 
     tf::StampedTransform transformStamped;
+
+    /// \todo Use a try catch block here. It needs modification of function
+    /// signature to return bool and all functions in the heirarchy would be changed accordingly.
+    //    tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, foot_frame,ros::Time(0), ros::Duration(2.0));
     tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF,foot_frame.data,ros::Time(0),transformStamped);
+
     tf::quaternionTFToMsg(transformStamped.getRotation(),foot.orientation);
     foot.location.x = transformStamped.getOrigin().getX();
     foot.location.y = transformStamped.getOrigin().getY();
     foot.location.z = transformStamped.getOrigin().getZ();
     foot.robot_side = side;
-    foot.trajectory_type = 0;
+    foot.trajectory_type = ihmc_msgs::FootstepDataRosMessage::DEFAULT;
     return;
 }
 
 // gives footstep which are offset from current step (only for straight line)
 
-ihmc_msgs::FootstepDataRosMessage* ValkyrieWalker::getOffsetStep(int side , float x, float y)
+ihmc_msgs::FootstepDataRosMessage::Ptr ValkyrieWalker::getOffsetStep(int side , float x, float y)
 {
-    ///\ todo shared pointer implementation
-    ihmc_msgs::FootstepDataRosMessage *next = new ihmc_msgs::FootstepDataRosMessage();
+
+    ihmc_msgs::FootstepDataRosMessage::Ptr next(new ihmc_msgs::FootstepDataRosMessage());
 
     this->getCurrentStep(side, *next);
     next->location.x+=x;
@@ -271,17 +262,18 @@ bool ValkyrieWalker::turn(armSide side)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.default_transfer_time = transfer_time;
-    list.default_swing_time= swing_time;
-    list.execution_mode = exe_mode;
-    list.unique_id = ValkyrieWalker::id;
+    list.default_swing_time    = swing_time;
+    list.execution_mode        = execution_mode;
+    list.unique_id             = ValkyrieWalker::id;
+
     ihmc_msgs::FootstepDataRosMessage step;
 
     geometry_msgs::Vector3Stamped world_values;
     geometry_msgs::QuaternionStamped world_quat;
 
-    std::vector<geometry_msgs::Vector3Stamped> pelvis_valuesL;
+    std::vector<geometry_msgs::Vector3Stamped>    pelvis_valuesL;
     std::vector<geometry_msgs::QuaternionStamped> pelvis_quatL;
-    std::vector<geometry_msgs::Vector3Stamped> pelvis_valuesR;
+    std::vector<geometry_msgs::Vector3Stamped>    pelvis_valuesR;
     std::vector<geometry_msgs::QuaternionStamped> pelvis_quatR;
 
     // resizing vector based on number of footsteps

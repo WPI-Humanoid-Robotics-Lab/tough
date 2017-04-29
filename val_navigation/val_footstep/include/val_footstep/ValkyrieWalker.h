@@ -84,7 +84,7 @@ public:
     {
         this->transfer_time = InTransferTime;
         this->swing_time = InSwingTime;
-        this->exe_mode = InMode;
+        this->execution_mode = InMode;
     }
 
     /**
@@ -106,7 +106,7 @@ public:
 private:
     static int id ;
     double transfer_time,swing_time, swing_height;
-    int exe_mode;
+    int execution_mode;
     int step_counter;
     ros::NodeHandle     nh_;
     ros::Time           cbTime_;
@@ -121,7 +121,7 @@ private:
     void getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage& foot);
     void waitForSteps( int n);
     bool getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list);
-    ihmc_msgs::FootstepDataRosMessage* getOffsetStep(int side, float x, float y);
+    ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStep(int side, float x, float y);
 
 };
 
