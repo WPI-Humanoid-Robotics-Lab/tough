@@ -156,6 +156,7 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
             step->location.x = srv.response.footsteps.at(i).pose.x;
             step->location.y = srv.response.footsteps.at(i).pose.y;
+            step->location.z = startstep->location.z;
 
 
             tf::Quaternion t = tf::createQuaternionFromYaw(srv.response.footsteps.at(i).pose.theta);

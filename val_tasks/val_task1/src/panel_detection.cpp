@@ -118,7 +118,7 @@ bool panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geo
     Eigen::Vector3f eigenValues;
     pcl::eigen33(covarianceMatrix, eigenVectors, eigenValues);
 
-    double OFFSET = 0.7;
+    double OFFSET = 1.1;
     if(pose.position.z > 0.80 && pose.position.z < 0.83){
         ROS_INFO("Upper plane detected");
         OFFSET += 0.1;

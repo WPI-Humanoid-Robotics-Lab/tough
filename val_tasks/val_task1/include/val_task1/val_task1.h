@@ -15,6 +15,9 @@
 #include <val_footstep/ValkyrieWalker.h>
 #include <val_task_common/val_walk_tracker.h>
 #include <val_task1/panel_detection.h>
+#include <val_control/val_chest_navigation.h>
+#include <val_control/val_pelvis_navigation.h>
+#include <nav_msgs/OccupancyGrid.h>
 
 using namespace decision_making;
 
@@ -23,21 +26,30 @@ using namespace decision_making;
 FSM_HEADER(val_task1)
 
 class valTask1 {
-
     private:
     ros::NodeHandle nh_;
+    //private contructor. use getValTask1() to create an object
     valTask1(ros::NodeHandle nh);
+
     // object for the walker api
     ValkyrieWalker* walker_;
-
     // object for tracking robot walk
     walkTracking* walk_track_;
-
     // panel detection object
     panel_detector* panel_detector_;
+    // chest controller
+    chestTrajectory* chest_controller_;
+    //pelvis controller
+    pelvisTrajectory* pelvis_controller_;
 
     bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
 
+    //required for initialization. Move out init state only if map is updated twice.
+    ros::Subscriber occupancy_grid_sub_;
+    unsigned int map_update_count_;
+    void occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg);
+
+    // this pointer is to ensure that only 1 object of this task is created.
     static valTask1 *currentObject;
 
     public:

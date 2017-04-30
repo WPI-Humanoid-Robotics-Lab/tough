@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     ros::NodeHandle nh_;
 //    ros::Publisher temp = nh_.advertise<visualization_msgs::MarkerArray>("/valkyrie/footstep_markers",10);
 //    footstep_marker_pub = &temp;
-    walk = new ValkyrieWalker(nh_);
+    walk = new ValkyrieWalker(nh_, 0.8f, 0.8f, 0, 0.18);
     ros::Subscriber nav_goal_sub    = nh_.subscribe("/valkyrie/goal", 1, &nav_goal_cb);
 //    ros::Subscriber footstep_points = nh_.subscribe("/footstep_planner/footsteps_array", 1,&republish_footsteps);
     footstep_planner::FootstepPlannerNode planner;

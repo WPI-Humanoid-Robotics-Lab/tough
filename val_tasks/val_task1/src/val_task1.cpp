@@ -10,6 +10,7 @@
 #include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/Twist.h>
 #include <val_task1/val_task1.h>
+#include <navigation_common/map_generator.h>
 
 #define foreach BOOST_FOREACH
 
@@ -36,12 +37,25 @@ valTask1::valTask1(ros::NodeHandle nh):
     walk_track_ = new walkTracking(nh);
 
     // panel detection
-    panel_detector_ = new panel_detector(nh);
+    panel_detector_    = nullptr;
+    chest_controller_  = nullptr;
+    pelvis_controller_ = nullptr;
+
+    map_update_count_ = 0;
+    occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask1::occupancy_grid_cb, this);
 }
 
 // destructor
 valTask1::~valTask1(){
 
+    delete walker_;
+    delete walk_track_;
+    delete panel_detector_;
+
+}
+
+void valTask1::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
+    ++map_update_count_;
 }
 
 bool valTask1::preemptiveWait(double ms, decision_making::EventQueue& queue) {
@@ -55,19 +69,45 @@ bool valTask1::preemptiveWait(double ms, decision_making::EventQueue& queue) {
 decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
-
+    static int retry_count = 0;
     // the state transition can happen from an event externally or can be geenerated here
     //!!!!! depends on the developer and use case
+    ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
 
-    // generate the event
-    eventQueue.riseEvent("/INIT_SUCESSFUL");
+    if (map_update_count_ < 2 && retry_count++ < 10) {
+        ROS_INFO("Wait for occupancy grid to be updated with atleast 2 messages");
+        ros::Duration(4.0).sleep();
+        eventQueue.riseEvent("/INIT_RETRY");
+    }
+    else if(retry_count > 9){
+        ROS_INFO("Failed to initialize");
+        eventQueue.riseEvent("/INIT_FAILED");
+    }
+    else{
+        pelvis_controller_ = new pelvisTrajectory(nh_);
+        pelvis_controller_->controlPelvisHeight(0.9);
 
+        chest_controller_ = new chestTrajectory(nh_);
+        chest_controller_->controlChest(0.0f, 19.0f, 0.0f);
+        ros::Duration(1.0f).sleep();
+
+        delete pelvis_controller_;
+        delete chest_controller_;
+        pelvis_controller_ = nullptr;
+        chest_controller_  = nullptr;
+        // generate the event
+        eventQueue.riseEvent("/INIT_SUCESSFUL");
+    }
     return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+
+    if(panel_detector_ == nullptr) {
+        panel_detector_ = new panel_detector(nh_);
+    }
 
     static int fail_count = 0;
     static int retry_count = 0;
@@ -100,6 +140,8 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
         std::cout << "yaw: " << yaw << " pitch " << pitch << " roll " << roll << std::endl;
 
         eventQueue.riseEvent("/DETECTED_PANEL");
+        delete panel_detector_;
+        panel_detector_ = nullptr;
     }
 
     else if(retry_count < 5) {
@@ -115,6 +157,8 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
         // reset the fail count
         fail_count = 0;
         eventQueue.riseEvent("DETECT_PANEL_FAILED");
+        delete panel_detector_;
+        panel_detector_ = nullptr;
     }
     // if failed retry detecting the panel
     else
