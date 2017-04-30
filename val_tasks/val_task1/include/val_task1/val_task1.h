@@ -7,17 +7,21 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <boost/foreach.hpp>
-#include <ros/ros.h>
+
 #include <decision_making/FSM.h>
 #include <decision_making/ROSTask.h>
 #include <decision_making/DecisionMaking.h>
+
+#include <ros/ros.h>
 #include <geometry_msgs/Pose2D.h>
-#include <val_footstep/ValkyrieWalker.h>
-#include <val_task_common/val_walk_tracker.h>
-#include <val_task1/panel_detection.h>
-#include <val_control/val_chest_navigation.h>
-#include <val_control/val_pelvis_navigation.h>
 #include <nav_msgs/OccupancyGrid.h>
+
+#include "val_footstep/ValkyrieWalker.h"
+#include "val_task_common/val_walk_tracker.h"
+#include "val_task1/panel_detection.h"
+#include "val_control/val_chest_navigation.h"
+#include "val_control/val_pelvis_navigation.h"
+
 
 using namespace decision_making;
 

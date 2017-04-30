@@ -6,11 +6,14 @@
 #include <boost/foreach.hpp>
 #include <boost/lambda/lambda.hpp>
 #include <boost/date_time.hpp>
+
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/Twist.h>
-#include <val_task1/val_task1.h>
-#include <navigation_common/map_generator.h>
+
+#include "val_task1/val_task1.h"
+#include "navigation_common/map_generator.h"
+#include "srcsim/StartTask.h"
 
 #define foreach BOOST_FOREACH
 
@@ -91,10 +94,23 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
         chest_controller_->controlChest(0.0f, 19.0f, 0.0f);
         ros::Duration(1.0f).sleep();
 
-        delete pelvis_controller_;
-        delete chest_controller_;
+        delete    pelvis_controller_;
+        delete     chest_controller_;
         pelvis_controller_ = nullptr;
         chest_controller_  = nullptr;
+
+        // start the task. debug pending
+        ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
+        srcsim::StartTask   srv;
+
+        srv.request.checkpoint_id = 1;
+        srv.request.task_id       = 1;
+
+        if(client.call(srv)) {
+            //what do we do if this call fails or succeeds?
+            ROS_INFO("Service call status : %d",srv.response.success);
+        }
+
         // generate the event
         eventQueue.riseEvent("/INIT_SUCESSFUL");
     }
