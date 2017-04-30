@@ -26,25 +26,24 @@ do
   echo -e "\e[32mINFO:\e[0m Launching simulation"
   roslaunch val_bringup field_bringup.launch &
 
-  sleep 10
-  roslaunch val_footstep val_footstep.launch --screen > $data_log &
   sleep 350
+  roslaunch val_footstep val_footstep.launch --screen > $data_log &
+  sleep 10
 
   echo -e "\e[32mINFO:\e[0m Start Gazebo Log"
   gz log -d 1
   echo -e "\e[32mINFO:\e[0m Launching panel detector"
   rosrun val_task1 panel_detection_node &
 
-  sleep 600
+  sleep 500
 
   echo -e "\e[32mINFO:\e[0m Stop Gazebo Log"
   gz log -d 0
   echo -e "\e[32mINFO:\e[0m Killing qual1"
   killall roslaunch gzserver rosrun rostopic
+  sleep 10
+
   echo -e "\e[32mINFO:\e[0m Copying log files"
-  
-
-
   dir=`find ~/.gazebo/ -name state.log`
   state_log='state_'$current_time'.log'
   filt_log='panel_detection_'$current_time'.log'
