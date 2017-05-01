@@ -9,8 +9,20 @@ int main(int argc, char **argv)
   ROS_INFO("Moving the arms");
   armTrajectory armTraj(nh);
 
+  if (argc == 4){
 
-  if(argc == 5){
+      int   jointNumber = std::atoi(argv[2]);
+      float jointAngle = std::atof(argv[3]);
+
+      armSide side;
+      if(std::atoi(argv[1]) == 0){
+        side = LEFT;
+      } else {
+        side = RIGHT;
+      }
+      armTraj.moveArmJoint(side, jointNumber,jointAngle);
+  }
+  else if(argc == 5){
     geometry_msgs::Pose pt;
     pt.position.x = std::atof(argv[2]);
     pt.position.y = std::atof(argv[3]);

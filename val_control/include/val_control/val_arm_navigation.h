@@ -14,6 +14,7 @@
 #include <tf/transform_listener.h>
 #include <tf/tf.h>
 #include <val_common/val_common_names.h>
+#include "val_control/robot_state.h"
 
 /**
  * @brief The armTrajectory class provides ability to move arms of valkyrie. Current implementation provides joint level without collision detection.
@@ -139,7 +140,7 @@ public:
 
     bool generate_task_space_data(std::vector<geometry_msgs::PoseStamped>& input_poses, armSide input_side, float desired_time, std::vector<armTaskSpaceData> &arm_data_vector);
 
-
+    bool moveArmJoint(const armSide side, int jointNumber, const float targetAngle);
 
 private:
 
@@ -158,6 +159,7 @@ private:
     void poseToSE3TrajectoryPoint(const geometry_msgs::Pose &pose, ihmc_msgs::SE3TrajectoryPointRosMessage &point);
     void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos);
     void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point);
+    RobotStateInformer *stateInformer_;
 
 };
 

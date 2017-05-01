@@ -15,6 +15,7 @@ RobotStateInformer* RobotStateInformer::getRobotStateInformer(ros::NodeHandle nh
 RobotStateInformer::RobotStateInformer(ros::NodeHandle nh):nh_(nh){
     ROS_INFO("Object Created");
     jointStateSub_ = nh_.subscribe("/joint_states", 1, &RobotStateInformer::jointStateCB, this);
+    ros::Duration(0.2).sleep();
 }
 
 RobotStateInformer::~RobotStateInformer(){

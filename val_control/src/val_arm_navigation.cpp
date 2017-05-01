@@ -15,7 +15,7 @@ armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
     handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>("/ihmc_ros/valkyrie/control/hand_desired_configuration", 1,true);
     taskSpaceTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/hand_trajectory", 1, true);
     markerPub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
-
+    stateInformer_ = RobotStateInformer::getRobotStateInformer(nh_);
     //this->armTrajectorySunscriber = nh_.subscribe("/ihmc_ros/valkyrie/output/ha", 20,&ValkyrieWalker::footstepStatusCB, this);
 
 }
@@ -378,4 +378,32 @@ bool armTrajectory::generate_task_space_data(std::vector<geometry_msgs::PoseStam
     arm_data_vector.push_back(task_space_data);
   }
   return true;
+}
+
+bool armTrajectory::moveArmJoint(const armSide side, int jointNumber, const float targetAngle) {
+
+    ros::spinOnce(); //ensure that the joints are updated
+    std::string param = side == LEFT ? "left_arm" : "right_arm";
+
+    std::vector<float> positions;
+    if (stateInformer_->getJointPositions(param, positions)){
+
+        for (auto i : positions){
+            std::cout<<i<<" ";
+        }
+        std::cout<<std::endl;
+
+        positions[jointNumber] = targetAngle;
+
+        for (auto i : positions){
+            std::cout<<i<<" ";
+        }
+        std::cout<<std::endl;
+
+        std::vector<std::vector<float>> trajectory;
+        trajectory.push_back(positions);
+        moveArmJoints(side,trajectory,1.0f );
+        return true;
+    }
+    return false;
 }
