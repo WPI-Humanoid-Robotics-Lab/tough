@@ -91,7 +91,7 @@ void panel_detector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& clou
     seg.setDistanceThreshold (0.008);
     seg.setInputCloud (cloud);
     seg.segment (*inliers, *coefficients);
-
+    ROS_INFO("a : %0.4f, b : %0.4f, c : %0.4f, d: %.4f",coefficients->values[0], coefficients->values[1], coefficients->values[2], coefficients->values[3]);
     pcl::ExtractIndices<pcl::PointXYZ> extract;
     extract.setInputCloud (cloud);
     extract.setIndices (inliers);
