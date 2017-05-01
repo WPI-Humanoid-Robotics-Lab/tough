@@ -28,12 +28,17 @@ include_directories(${catkin_INCLUDE_DIRS} include)
    src/val_chest_navigation.cpp
    src/val_head_navigation.cpp
    src/val_gripper_control.cpp
+   src/robot_state.cpp
 )
 
  target_link_libraries(val_control
    ${catkin_LIBRARIES}
 )
 
+
+add_executable(test_jointState src/test_robot_state.cpp)
+add_dependencies(test_jointState  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_jointState   ${catkin_LIBRARIES} val_control)
 
 add_executable(test_arm src/test_arm_navigation.cpp)
 add_dependencies(test_arm ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
