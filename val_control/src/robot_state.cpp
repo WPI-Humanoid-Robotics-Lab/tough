@@ -47,8 +47,19 @@ void RobotStateInformer::getJointPositions(std::vector<float> &positions){
 bool RobotStateInformer::getJointPositions(const std::string &paramName, std::vector<float> &positions){
     positions.clear();
     std::vector<std::string> jointNames;
+    std::string parameter;
+    if(paramName == "left_arm_joint_names" || paramName == "left_arm"){
+        parameter.assign("/ihmc_ros/valkyrie/left_arm_joint_names");
+    }
+    else if (paramName == "right_arm_joint_names"  || paramName == "right_arm"){
+        parameter.assign("/ihmc_ros/valkyrie/right_arm_joint_names");
+    }
+    else{
+        parameter.assign(paramName);
+    }
+
     std::lock_guard<std::mutex> guard(currentStateMutex_);
-    if (nh_.getParam(paramName, jointNames)){
+    if (nh_.getParam(parameter, jointNames)){
         for (auto joint : jointNames){
             positions.push_back((currentState_[joint]).position);
         }
@@ -69,8 +80,19 @@ void RobotStateInformer::getJointVelocities(std::vector<float> &velocities){
 bool RobotStateInformer::getJointVelocities(const std::string &paramName, std::vector<float> &velocities){
     velocities.clear();
     std::vector<std::string> jointNames;
+    std::string parameter;
+    if(paramName == "left_arm_joint_names" || paramName == "left_arm"){
+        parameter.assign("/ihmc_ros/valkyrie/left_arm_joint_names");
+    }
+    else if (paramName == "right_arm_joint_names"  || paramName == "right_arm"){
+        parameter.assign("/ihmc_ros/valkyrie/right_arm_joint_names");
+    }
+    else{
+        parameter.assign(paramName);
+    }
+
     std::lock_guard<std::mutex> guard(currentStateMutex_);
-    if (nh_.getParam(paramName, jointNames)){
+    if (nh_.getParam(parameter, jointNames)){
         for (auto joint : jointNames){
             velocities.push_back((currentState_[joint]).velocity);
         }
@@ -92,8 +114,19 @@ void RobotStateInformer::getJointEfforts(std::vector<float> &efforts){
 bool RobotStateInformer::getJointEfforts(const std::string &paramName, std::vector<float> &efforts){
     efforts.clear();
     std::vector<std::string> jointNames;
+    std::string parameter;
+    if(paramName == "left_arm_joint_names" || paramName == "left_arm"){
+        parameter.assign("/ihmc_ros/valkyrie/left_arm_joint_names");
+    }
+    else if (paramName == "right_arm_joint_names"  || paramName == "right_arm"){
+        parameter.assign("/ihmc_ros/valkyrie/right_arm_joint_names");
+    }
+    else{
+        parameter.assign(paramName);
+    }
+
     std::lock_guard<std::mutex> guard(currentStateMutex_);
-    if (nh_.getParam(paramName, jointNames)){
+    if (nh_.getParam(parameter, jointNames)){
         for (auto joint : jointNames){
             efforts.push_back((currentState_[joint]).effort);
         }

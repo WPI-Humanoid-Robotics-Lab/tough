@@ -38,14 +38,14 @@ int main(int argc, char** argv){
         std::cout<<std::endl;
 
         std::cout<<"Velocities of left arm: ";
-        obj->getJointVelocities("/ihmc_ros/valkyrie/left_arm_joint_names", positions);
+        obj->getJointVelocities("left_arm_joint_names", positions);
         for (auto i : positions){
             std::cout<<i<<" ";
         }
         std::cout<<std::endl;
 
         std::cout<<"Efforts of left arm: ";
-        obj->getJointEfforts("/ihmc_ros/valkyrie/left_arm_joint_names", positions);
+        obj->getJointEfforts("left_arm", positions);
         for (auto i : positions){
             std::cout<<i<<" ";
         }
