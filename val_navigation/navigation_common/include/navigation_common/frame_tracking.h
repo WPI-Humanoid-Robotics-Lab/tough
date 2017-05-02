@@ -24,7 +24,6 @@ private:
     std::string frame_, base_frame_;
     frame_track_status motion_status_;
     std::thread track_thread_;
-    std::mutex mtx_;
 
     void trackFrame(void);
     bool isTranformChanging (tf::StampedTransform transform_curr, tf::StampedTransform transform_prev);
