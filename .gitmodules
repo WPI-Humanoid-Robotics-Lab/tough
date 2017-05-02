@@ -1,6 +1,3 @@
 [submodule "external/decision_making"]
 	path = external/decision_making
 	url = https://github.com/cogniteam/decision_making.git
-[submodule "external/val_grasping"]
-	path = external/val_grasping
-	url = https://github.com/scpeters/val_grasping.git
