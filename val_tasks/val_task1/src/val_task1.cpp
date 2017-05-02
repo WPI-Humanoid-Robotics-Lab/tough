@@ -137,11 +137,11 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
         std::cout << "x " << pose2D.x << " y " << pose2D.y << std::endl;
 
         // get the theta
-        pose2D.theta = tf::getYaw(poses[idx].orientation.orientation);
+        pose2D.theta = tf::getYaw(poses[idx].orientation);
         setPanelWalkGoal(pose2D);
 
         std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
-        std::cout << "yaw: " << yaw << " pitch " << pitch << " roll " << roll << std::endl;
+        std::cout << "yaw: " << pose2D.theta  <<std::endl;
 
         eventQueue.riseEvent("/DETECTED_PANEL");
         delete panel_detector_;
@@ -196,7 +196,7 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
         ROS_INFO("pose chaned");
         walker_->walkToGoal(panel_walk_goal_, false);
         // sleep so that the walk starts
-        sleep(10);
+        ros::Duration(4).sleep();
 
         // update the previous pose
         pose_prev = panel_walk_goal_;
@@ -246,7 +246,7 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
 decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
-//    head_controller_->moveHead(0.0f, 30.0f, 0.0f);
+    head_controller_->moveHead(0.0f, 30.0f, 0.0f);
 
     //run Srishti's code here
     //have multiple conditions to check if the handles are detected. if not, move the robot and retry
