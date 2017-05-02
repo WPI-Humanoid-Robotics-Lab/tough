@@ -21,7 +21,7 @@
 #include "val_task1/panel_detection.h"
 #include "val_control/val_chest_navigation.h"
 #include "val_control/val_pelvis_navigation.h"
-
+#include "val_control/val_head_navigation.h"
 
 using namespace decision_making;
 
@@ -45,6 +45,8 @@ class valTask1 {
     chestTrajectory* chest_controller_;
     //pelvis controller
     pelvisTrajectory* pelvis_controller_;
+    //head controller
+    HeadTrajectory* head_controller_;
 
     bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
 

@@ -40,9 +40,10 @@ valTask1::valTask1(ros::NodeHandle nh):
     walk_track_ = new walkTracking(nh);
 
     // panel detection
-    panel_detector_    = nullptr;
-    chest_controller_  = nullptr;
-    pelvis_controller_ = nullptr;
+    panel_detector_     = nullptr;
+    chest_controller_   = new chestTrajectory(nh_);
+    pelvis_controller_  = new pelvisTrajectory(nh_);
+    head_controller_    = new HeadTrajectory(nh_);
 
     map_update_count_ = 0;
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask1::occupancy_grid_cb, this);
@@ -87,28 +88,19 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
         eventQueue.riseEvent("/INIT_FAILED");
     }
     else{
-        pelvis_controller_ = new pelvisTrajectory(nh_);
+        // move to a configuration that is robust while walking
         pelvis_controller_->controlPelvisHeight(0.9);
-
-        chest_controller_ = new chestTrajectory(nh_);
         chest_controller_->controlChest(0.0f, 19.0f, 0.0f);
         ros::Duration(1.0f).sleep();
 
-        delete    pelvis_controller_;
-        delete     chest_controller_;
-        pelvis_controller_ = nullptr;
-        chest_controller_  = nullptr;
 
-        // start the task. debug pending
+        // start the task
         ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
         srcsim::StartTask   srv;
-
         srv.request.checkpoint_id = 1;
         srv.request.task_id       = 1;
-
         if(client.call(srv)) {
             //what do we do if this call fails or succeeds?
-            ROS_INFO("Service call status : %d",srv.response.success);
         }
 
         // generate the event
@@ -145,11 +137,7 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
         std::cout << "x " << pose2D.x << " y " << pose2D.y << std::endl;
 
         // get the theta
-        tfScalar yaw, pitch, roll;
-        tf::Matrix3x3 mat(tf::Quaternion(poses[idx].orientation.x, poses[idx].orientation.y, poses[idx].orientation.z, poses[idx].orientation.w));
-        //mat.setValue(poses[idx].orientation.x, poses[idx].orientation.y, poses[idx].orientation.z, poses[idx].orientation.w);
-        mat.getEulerYPR(yaw, pitch, roll);
-        pose2D.theta = yaw;
+        pose2D.theta = tf::getYaw(poses[idx].orientation.orientation);
         setPanelWalkGoal(pose2D);
 
         std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
@@ -258,6 +246,10 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
 decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+//    head_controller_->moveHead(0.0f, 30.0f, 0.0f);
+
+    //run Srishti's code here
+    //have multiple conditions to check if the handles are detected. if not, move the robot and retry
 
     // generate the event
     //eventQueue.riseEvent("/INIT_SUCESSUFL");
