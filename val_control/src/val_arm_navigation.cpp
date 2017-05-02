@@ -357,16 +357,14 @@ void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &ms
 }
 
 
-//caution, allocates task_space_data that needs to be freed eventually!
 //armside is used to determine which side to use.
 //transforms the poses to the worldframe regardless.
 //POSES MUST BE IN WORLD FRAME;
 //Add conversion of posestamped to world frame if it not already in world frame
-bool armTrajectory::generate_task_space_data(std::vector<geometry_msgs::PoseStamped>& input_poses, armSide input_side, float desired_time, std::vector<armTrajectory::armTaskSpaceData> &arm_data_vector)
+bool armTrajectory::generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const armSide input_side,const float desired_time, std::vector<armTrajectory::armTaskSpaceData> &arm_data_vector)
 {
 
-  // for(auto input_pose : *input_poses)
-  float time_delta = desired_time/input_poses.size();
+  float time_delta = desired_time == 0 ? 0 : desired_time/input_poses.size();
   for(int i=0 ; i < input_poses.size(); i++)
   {
     geometry_msgs::PoseStamped input_pose=input_poses.at(i);

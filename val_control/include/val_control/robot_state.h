@@ -4,7 +4,9 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <map>
+#include <tf/transform_listener.h>
 #include <mutex>
+#include "val_common/val_common_names.h"
 
 struct RobotState{
     std::string name;
@@ -18,6 +20,7 @@ private:
     // private constructor to disable user from creating objects
     RobotStateInformer(ros::NodeHandle nh);
     ros::NodeHandle nh_;
+    tf::TransformListener listener_;
     static RobotStateInformer* currentObject_;
 
     ros::Subscriber jointStateSub_;
@@ -44,6 +47,7 @@ public:
 
     void getJointNames(std::vector<std::string> &jointNames);
 
+    bool getCurrentPose(const std::string &frameName, geometry_msgs::Pose &pose, const std::string &baseFrame=VAL_COMMON_NAMES::WORLD_TF);
 
     ~RobotStateInformer();
 

@@ -163,3 +163,25 @@ void RobotStateInformer::getJointNames(std::vector<std::string> &jointNames)
         jointNames.push_back(i.first);
     }
 }
+
+bool RobotStateInformer::getCurrentPose(const std::string &frameName, geometry_msgs::Pose &pose, const std::string &baseFrame)
+{
+    tf::StampedTransform origin;
+
+    try {
+
+        listener_.waitForTransform(baseFrame, frameName, ros::Time(0), ros::Duration(2));
+        listener_.lookupTransform(baseFrame, frameName, ros::Time(0),origin);
+    }
+    catch (tf::TransformException ex) {
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+    tf::pointTFToMsg(origin.getOrigin(), pose.position);
+    tf::quaternionTFToMsg(origin.getRotation(), pose.orientation);
+
+    return true;
+}
+
