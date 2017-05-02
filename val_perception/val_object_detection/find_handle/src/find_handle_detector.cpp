@@ -1,55 +1,9 @@
 #include <find_handle.h>
 #include <visualization_msgs/Marker.h>
 
-ros::Publisher marker_pub;
-
-void visualize_point(pcl::PointXYZRGB goal){
-
-//    std::cout<< "goal origin :\n"<< goal.position << std::endl;
-//    std::cout<< "goal orientation :\n"<< goal.orientation << std::endl;
-
-
-    visualization_msgs::Marker marker;
-    // Set the frame ID and timestamp.  See the TF tutorials for information on these.
-    marker.header.frame_id = "world";
-    marker.header.stamp = ros::Time::now();
-
-    // Set the namespace and id for this marker.  This serves to create a unique ID
-    // Any marker sent with the same namespace and id will overwrite the old one
-    marker.ns = "test_object_detector";
-    marker.id = 0;
-
-    // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
-    marker.type = visualization_msgs::Marker::CUBE;
-
-    // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
-    marker.action = visualization_msgs::Marker::ADD;
-
-    // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
-    marker.pose.position.x = goal.x;
-    marker.pose.position.y = goal.y;
-    marker.pose.position.z = goal.z;
-    marker.pose.orientation.x = 0.0;
-    marker.pose.orientation.y = 0.0;
-    marker.pose.orientation.z = 0.0;
-    marker.pose.orientation.w = 1.0;
-
-    marker.scale.x = 3;
-    marker.scale.y = 3;
-    marker.scale.z = 3;
-    marker.color.a = 1.0; // Don't forget to set the alpha!
-    marker.color.r = 0.0;
-    marker.color.g = 1.0;
-    marker.color.b = 0.0;
-
-    marker_pub.publish(marker);
-}
-
-
-
-
 void handle_detector::showImage(cv::Mat image)
 {
+    return;
     cv::namedWindow( "Handle Detection", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Handle Detection", image);
     cv::waitKey(0);
@@ -161,22 +115,13 @@ bool handle_detector::findAllContours (cv::Mat image)
      }
      showImage(drawing);
 
-    if(!contours.empty()) //avoid seg fault at runtime by checking that the contours exist
-    {
-        getHandleLocation(contours);
-        return true;
-    }
-
     return false;
 }
 
-bool handle_detector::getHandleLocation(std::vector<std::vector<cv::Point>> contours)
+bool handle_detector::getHandleLocation()
 {
 
     bool foundButton = false;
-    cv::Point2f point;
-    std::vector<cv::Moments> moment(contours.size());
-    geometry_msgs::Point tempButtonCenter;
     pcl::PointXYZRGB pclPoint;
     src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
     src_perception::PointCloudHelper::generateOrganizedRGBDCloud(disp_, mi_, qMatrix_, organizedCloud);
@@ -185,7 +130,6 @@ bool handle_detector::getHandleLocation(std::vector<std::vector<cv::Point>> cont
     tf::Quaternion q;
     static tf::TransformBroadcaster br;
 
-    std::string frame = "handleFrame";
 
     try
     {
@@ -199,38 +143,35 @@ bool handle_detector::getHandleLocation(std::vector<std::vector<cv::Point>> cont
     }
 
 
-//     Obtaining a stereo point cloud for Z position and RGB values
 
-    for(int i=0; i<contours.size(); i++)
+    for(int i=0; i<rectCenter.size(); i++)
     {
-        moment[i] = cv::moments((cv::Mat)contours[i]);
-        if (moment[i].m00)
+
+        for(int k = -10; k<10; k++)
         {
-            point = cv::Point2f(moment[i].m10/moment[i].m00,moment[i].m01/moment[i].m00);
-
-            ROS_DEBUG("m00:%.2f, m10:%.2f, m01:%.2f",moment[i].m00, moment[i].m10, moment[i].m01);
-            ROS_DEBUG("x:%d, y:%d", int(point.x), int(point.y));
-
-
-            //assign the button center
-            tempButtonCenter.x = int (point.x);
-            tempButtonCenter.y = int (point.y);
-
-            pclPoint = organizedCloud->at(tempButtonCenter.x, tempButtonCenter.y);
-
-            transform.setOrigin( tf::Vector3(pclPoint.x , pclPoint.y, pclPoint.z));
-            q.setRPY(0, 0, 0);
-            transform.setRotation(q);
-            br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "left_camera_optical_frame", frame));
-
-            buttonCenters_.push_back(pclPoint);
-            visualize_point(buttonCenters_[i]);
-    
-            std::cout<<"Handle "<< i << " at " << buttonCenters_[i].x << " " << buttonCenters_[i].y << std::endl;
-            foundButton = true;
+            pclPoint = organizedCloud->at(rectCenter[i].x, rectCenter[i].y);
+            if (pclPoint.z<0)
+            {
+                rectCenter[i].x+=k;
+                rectCenter[i].y+=abs(k);
+            }
         }
-    }
 
+
+        std::stringstream ss;
+        ss << side_ << "HandleFrame" << frameID_;
+
+        transform.setOrigin( tf::Vector3(pclPoint.x , pclPoint.y, pclPoint.z));
+        q.setRPY(0, 0, 0);
+        transform.setRotation(q);
+        br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "left_camera_optical_frame", ss.str()));
+
+        frameID_++;
+        buttonCenters_.push_back(pclPoint);
+
+        std::cout<<"Handle "<< i << " at " << buttonCenters_[i].x << " " << buttonCenters_[i].y << " " << buttonCenters_[i].z << std::endl;
+        foundButton = true;
+    }
 
 
 
@@ -254,6 +195,8 @@ bool handle_detector::findHandles(ros::NodeHandle &nh, std::vector<geometry_msgs
     mi.giveDisparityImage(disp_);
     mi.giveQMatrix(qMatrix_);
 
+    side_ = "left"; // used for naming frames. Left = red;
+
     imRed_ = colorSegment(imgHSV_, hsvRed_);
     imRed_ = doMorphology(imRed_);
     showImage(imRed_);
@@ -261,16 +204,38 @@ bool handle_detector::findHandles(ros::NodeHandle &nh, std::vector<geometry_msgs
     imRedReduced_= cv::Mat::zeros(imgHSV_.size(), imgHSV_.type());
 
     cv::Mat mask = cv::Mat::zeros(imgHSV_.size(), imgHSV_.type());
-    cv::rectangle(imRedReduced_, cv::Point(roiRed_.x, roiRed_.y), cv::Point(roiRed_.x+roiRed_.width, roiRed_.y+roiRed_.height),cv::Scalar(255, 255, 255), -1, 8, 0);
+    cv::rectangle(mask, cv::Point(roiRed_.x, roiRed_.y), cv::Point(roiRed_.x+roiRed_.width, roiRed_.y+roiRed_.height),cv::Scalar(255, 255, 255), -1, 8, 0);
+    showImage(mask);
+    imgHSV_.copyTo(imRedReduced_,mask);
 
-//    imgHSV_.copyTo(imRedReduced_,mask);
-    cv::bitwise_or(mask, imgHSV_, imRedReduced_);
     showImage(imRedReduced_);
-//    imGray_ = colorSegment(imRedReduced_, hsvGray_);
-//    showImage(imGray_);
-
+    imGray_ = colorSegment(imRedReduced_, hsvGray_);
+    showImage(imGray_);
+    showImage(disp_);
     bool val=false;
-//    val = findAllContours(imGray_);
+    val = findAllContours(imGray_);
+
+
+    side_ = "right"; // used for naming frames;
+
+    imBlue_ = colorSegment(imgHSV_, hsvBlue_);
+    imBlue_ = doMorphology(imBlue_);
+    showImage(imBlue_);
+    roiBlue_ = findMaxContour(imBlue_);
+    imBlueReduced_= cv::Mat::zeros(imgHSV_.size(), imgHSV_.type());
+
+    cv::Mat maskBlue = cv::Mat::zeros(imgHSV_.size(), imgHSV_.type());
+    cv::rectangle(maskBlue, cv::Point(roiBlue_.x, roiBlue_.y), cv::Point(roiBlue_.x+roiBlue_.width, roiBlue_.y+roiBlue_.height),cv::Scalar(255, 255, 255), -1, 8, 0);
+    showImage(maskBlue);
+    imgHSV_.copyTo(imBlueReduced_,maskBlue);
+
+    showImage(imBlueReduced_);
+    imGray_ = colorSegment(imBlueReduced_, hsvGray_);
+    showImage(imGray_);
+    showImage(disp_);
+    val = findAllContours(imGray_);
+    getHandleLocation();
+
     return false;
 }
 
@@ -283,7 +248,6 @@ int main(int argc, char** argv)
     std::vector<geometry_msgs::Point> handleLocs;
     handle_detector h1;
 
-    marker_pub = nh.advertise<visualization_msgs::Marker>("/field/visualization_marker", 1);
     while (!foundButton && numIterations <1)
     {
         foundButton = h1.findHandles(nh, handleLocs);
@@ -291,14 +255,34 @@ int main(int argc, char** argv)
     }
 
 }
+//     Obtaining a stereo point cloud for Z position and RGB values
+
+//    for(int i=0; i<contours.size(); i++)
+//    {
+//        moment[i] = cv::moments((cv::Mat)contours[i]);
+//        if (moment[i].m00)
+//        {
+//            point = cv::Point2f(moment[i].m10/moment[i].m00,moment[i].m01/moment[i].m00);
+
+//            ROS_DEBUG("m00:%.2f, m10:%.2f, m01:%.2f",moment[i].m00, moment[i].m10, moment[i].m01);
+//            ROS_DEBUG("x:%d, y:%d", int(point.x), int(point.y));
 
 
-//    imGray_ = colorSegment(imgHSV_, hsvGray_);
-//    imOrange_ = colorSegment(imgHSV_, hsvOrange_);
-//    cv::erode(imOrange_, imOrange_, cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(15,15)));
-//    roiOrange_ = findMaxContour(imOrange_);
-//    imOrange_ = cv::Mat::zeros(imOrange_.size(),CV_8U);
-//    imOrange_(roiOrange_) = cv::Mat::ones(roiOrange_.height, roiOrange_.width,CV_8U);
-//    cv::bitwise_and(imGray_, imOrange_, imGray_);
-//    showImage(imGray_);
-//    showImage(imOrange_);
+//            //assign the button center
+//            tempButtonCenter.x = int (point.x);
+//            tempButtonCenter.y = int (point.y);
+
+//            pclPoint = organizedCloud->at(tempButtonCenter.x, tempButtonCenter.y);
+
+//            transform.setOrigin( tf::Vector3(pclPoint.x , pclPoint.y, pclPoint.z));
+//            q.setRPY(0, 0, 0);
+//            transform.setRotation(q);
+//            br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "left_camera_optical_frame", frame));
+
+//            buttonCenters_.push_back(pclPoint);
+//            visualize_point(buttonCenters_[i]);
+
+//            std::cout<<"Handle "<< i << " at " << buttonCenters_[i].x << " " << buttonCenters_[i].y << std::endl;
+//            foundButton = true;
+//        }
+//    }
