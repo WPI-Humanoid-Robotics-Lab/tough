@@ -24,38 +24,18 @@ void rover::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
   pcl::fromROSMsg(*input, *cloud);
 
-  // cylinderPassThroughFilter(cloud);
-  // removeWalkWay(cloud, true);
-  // pcl::ModelCoefficients::Ptr coefficients_cylinder (new pcl::ModelCoefficients);
-  // coefficients_cylinder = getCylinderCoefficients(cloud);
-  //
-  // std::cerr << "Cylinder coefficients: " << *coefficients_cylinder << std::endl;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr lowerBoxCloud (new pcl::PointCloud<pcl::PointXYZ>(*cloud));
+  pcl::PointCloud<pcl::PointXYZ>::Ptr upperBoxCloud (new pcl::PointCloud<pcl::PointXYZ>(*cloud));
 
-  // lowerBoxPassThroughFilter(cloud);
-  // segmentation(cloud);
-  
-//  upperBoxPassThroughFilter(cloud);
-//  planeDetection(cloud);
-//  segmentation(cloud);
+  lowerBoxPassThroughFilter(lowerBoxCloud);
+  segmentation(lowerBoxCloud);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr lowerBoxCloud (new pcl::PointCloud<pcl::PointXYZ>(*cloud));
-    pcl::PointCloud<pcl::PointXYZ>::Ptr upperBoxCloud (new pcl::PointCloud<pcl::PointXYZ>(*cloud));
+  upperBoxPassThroughFilter(upperBoxCloud);
+  planeDetection(upperBoxCloud);
+  segmentation(upperBoxCloud);
 
-    lowerBoxPassThroughFilter(lowerBoxCloud);
-    segmentation(lowerBoxCloud);
-
-    upperBoxPassThroughFilter(upperBoxCloud);
-    planeDetection(upperBoxCloud);
-    segmentation(upperBoxCloud);
-
-    geometry_msgs::Pose pose;
-    getPosition(lowerBoxCloud, upperBoxCloud, pose );
-
-  // geometry_msgs::Pose pose;
-  // getPosition(cloud, pose);
-
-
-
+  geometry_msgs::Pose pose;
+  getPosition(lowerBoxCloud, upperBoxCloud, pose );
 
   ros::Time endTime = ros::Time::now();
 
@@ -85,7 +65,7 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
     upperBoxPosition.y = upperBoxCentroid(1);
     upperBoxPosition.z = upperBoxCentroid(2);
 
-    ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", upperBoxPosition.x, upperBoxPosition.y, upperBoxPosition.z);
+//    ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", upperBoxPosition.x, upperBoxPosition.y, upperBoxPosition.z);
 
 //  Using Priciple Component Analysis for computing the Orientation of the Panel
     Eigen::Matrix3f covarianceMatrix;
@@ -125,17 +105,11 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
 
     bool noSlope = (fabs((upperBoxPosition.y - point1.y) < 0.01));
 
-    ROS_INFO(" ---- magic value --------  = %0.2f", upperBoxPosition.y - point1.y);
-
     double xySlope = 0.0;
 
     if(!noSlope){
         xySlope = (upperBoxPosition.x - point1.x)/(upperBoxPosition.y - point1.y);
     }
-
-    ROS_INFO("YZ -- Slope  = %0.2f", yzSlope);
-
-    ROS_INFO("XY -- Slope  = %0.2f", xySlope);
 
     if(yzSlope > 0){
        if(!noSlope){
@@ -143,7 +117,6 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
                 theta = atan2(sinTheta, cosTheta);
             }
             else if(xySlope > 0){
-                std::cout << "I am here"<<std::endl;
                 theta = atan2(sinTheta, cosTheta)  + 1.5708;
             }
        }
@@ -152,7 +125,6 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
             }
     }
     else{
-
         if(!noSlope){
              if(xySlope > 0){
                  theta = atan2(sinTheta, cosTheta) * -1.0 ;
@@ -166,19 +138,15 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
              }
     }
 
-    ROS_INFO("The Orientation is given by := %0.2f", theta);
+//    ROS_INFO("The Orientation is given by := %0.2f", theta);
 
     double offset = 6.5;
 
-        pose.position.x = upperBoxPosition.x - (offset*cos(theta));
-        pose.position.y = upperBoxPosition.y - (offset*sin(theta));
-        pose.position.z = 0.0;
+    pose.position.x = upperBoxPosition.x - (offset*cos(theta));
+    pose.position.y = upperBoxPosition.y - (offset*sin(theta));
+    pose.position.z = 0.0;
 
-//        pose.position.x = upperBoxPosition.x ;
-//        pose.position.y = upperBoxPosition.y ;
-//        pose.position.z = 0.0;
-
-    ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
+//    ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
 
     geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
 
@@ -188,22 +156,10 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
 
     marker.header.frame_id = "world";
     marker.header.stamp = ros::Time();
-    marker.ns = "Center of the Panel";
+    marker.ns = "Rover Position";
     marker.id = 0;
     marker.type = visualization_msgs::Marker::ARROW;
     marker.action = visualization_msgs::Marker::ADD;
-/*
-    geometry_msgs::Point p1;
-    p1.x = upperBoxPosition.x;
-    p1.y = upperBoxPosition.y;
-    p1.z = upperBoxPosition.z;
-    marker.points.push_back(p1);
-
-    geometry_msgs::Point p2;
-    p2.x = point1.x;
-    p2.y = point1.y;
-    p2.z = point1.z;
-    marker.points.push_back(p2)*/;
 
     marker.pose.position.x = pose.position.x;
     marker.pose.position.y = pose.position.y;
@@ -301,32 +257,6 @@ void rover::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
 
 
-void rover::removeWalkWay(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool setneg){
-
-  pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-  pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-  pcl::SACSegmentation<pcl::PointXYZ> seg;
-
-  seg.setOptimizeCoefficients (true);
-  seg.setModelType (pcl::SACMODEL_PLANE);
-  seg.setMethodType (pcl::SAC_RANSAC);
-  seg.setMaxIterations (100);
-  seg.setDistanceThreshold (0.02);
-  seg.setInputCloud (cloud);
-  seg.segment (*inliers, *coefficients);
-
-  pcl::ExtractIndices<pcl::PointXYZ> extract;
-
-  extract.setInputCloud (cloud);
-  extract.setIndices (inliers);
-  extract.setNegative (setneg);
-  extract.filter (*cloud);
-
-//  ROS_INFO("Point cloud representing the planar component = %d", (int)cloud->points.size());
-
-}
-
-
 void rover::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out (new pcl::PointCloud<pcl::PointXYZ>);
@@ -379,57 +309,10 @@ void rover::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
 }
 
-
-
-
-
-pcl::ModelCoefficients::Ptr rover::getCylinderCoefficients(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
-
-  pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
-  pcl::SACSegmentationFromNormals<pcl::PointXYZ, pcl::Normal> seg;
-  pcl::ExtractIndices<pcl::PointXYZ> extract;
-  pcl::ExtractIndices<pcl::Normal> extract_normals;
-  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
-
-  pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
-  pcl::ModelCoefficients::Ptr coefficients_cylinder (new pcl::ModelCoefficients);
-  pcl::PointIndices::Ptr inliers_cylinder (new pcl::PointIndices);
-
-  ne.setSearchMethod (tree);
-  ne.setInputCloud (cloud);
-  ne.setKSearch (50);
-  ne.compute (*cloud_normals);
-
-  seg.setOptimizeCoefficients (true);
-  seg.setModelType (pcl::SACMODEL_CYLINDER);
-  seg.setMethodType (pcl::SAC_RANSAC);
-  seg.setNormalDistanceWeight (0.1);
-  seg.setMaxIterations (1000);
-  seg.setDistanceThreshold (0.1);
-  //  Do not Change the Radius Values --- Leads to False Detections
-  seg.setRadiusLimits (0, 0.5);
-  seg.setInputCloud (cloud);
-  seg.setInputNormals (cloud_normals);
-
-  seg.segment (*inliers_cylinder, *coefficients_cylinder);
-
-  // std::cerr << "Cylinder coefficients: " << *coefficients_cylinder << std::endl;
-
-  extract.setInputCloud (cloud);
-  extract.setIndices (inliers_cylinder);
-  extract.setNegative (false);
-  extract.filter (*cloud);
-
-  if (cloud->points.empty ()){
-      std::cerr << "Can't find the cylindrical component." << std::endl;
-  }
-
-  return coefficients_cylinder;
-
-}
-
 int main(int argc, char** argv){
-  ros::init(argc, argv, "sdc_pointcloud");
+
+  ros::init(argc, argv, "rover_detection");
+
   ros::NodeHandle nh;
 
   rover obj(nh);

@@ -41,7 +41,9 @@ private:
   ros::Subscriber pcl_sub;
 
   ros::Publisher pcl_filtered_pub;
+
   ros::Publisher vis_pub;
+
   ros::Publisher vis_plane_pub;
 
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
@@ -54,16 +56,10 @@ private:
 
   void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
-  void removeWalkWay(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool setneg = false);
-
-  pcl::ModelCoefficients::Ptr getCylinderCoefficients(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-
   void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl::PointCloud<pcl::PointXYZ>::Ptr& upperBoxCloud, geometry_msgs::Pose& pose);
 
-  // void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-  // void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
-
 public:
+
   // Constructor
 
   rover(ros::NodeHandle nh)
@@ -71,8 +67,7 @@ public:
     pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &rover::cloudCB, this);
     pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_rover/cloud2", 1);
 
-     vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_rover/visualization_marker", 1 );
-    // vis_plane_pub = nh.advertise<visualization_msgs::Marker>( "/sdc/visualization_plane_vector", 1 );
+    vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_rover/Position", 1 );
   }
 
 };
