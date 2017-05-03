@@ -1,5 +1,5 @@
-#ifndef FIND_HANDLE_H
-#define FIND_HANDLE_H
+#ifndef HANDLE_DETECTOR_H
+#define HANDLE_DETECTOR_H
 
 #include <geometry_msgs/Point.h>
 #include <opencv2/highgui/highgui.hpp>
@@ -19,7 +19,7 @@
 
 class handle_detector
 {
-    cv::Mat mi_, imgHSV_, disp_, qMatrix_;
+    cv::Mat current_image_, current_image_HSV_, current_disparity_, qMatrix_;
     cv::Mat imRed_, imBlue_, imGray_, imOrange_;
     cv::Mat imRedReduced_, imBlueReduced_;
     cv::Rect roiRed_, roiBlue_, roiOrange_;
@@ -36,20 +36,24 @@ class handle_detector
     int frameID_ = 0;
     std::string side_;
 
+    ros::NodeHandle nh_;
+    src_perception::MultisenseImage ms_sensor_;
+
 public:
 
     void showImage(cv::Mat);
-    cv::Mat colorSegment(cv::Mat, const int[]);
-    cv::Mat doMorphology (cv::Mat);
-    cv::Rect findMaxContour (cv::Mat);
-    bool findAllContours (cv::Mat);
-    bool getHandleLocation();
-    cv::Mat getReducedImage (cv::Mat, cv::Rect);
-    bool findHandles(ros::NodeHandle&, std::vector<geometry_msgs::Point>&);
+    void colorSegment(const cv::Mat &imgHSV, const int[], cv::Mat &outImg);
+    void doMorphology(cv::Mat &image);
+    void findMaxContour(const cv::Mat, cv::Rect &roi);
+    bool findAllContours (const cv::Mat &);
+    bool getHandleLocation(std::vector<geometry_msgs::Point> &handleLocs);
+    void getReducedImage(cv::Mat &, const cv::Rect &);
+    bool findHandles(std::vector<geometry_msgs::Point>&);
+    handle_detector(ros::NodeHandle nh);
 
 };
 
-#endif // FIND_HANDLE_H
+#endif // HANDLE_DETECTOR_H
 
 
 

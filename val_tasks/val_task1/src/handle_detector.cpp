@@ -1,5 +1,6 @@
-#include <val_task1/find_handle.h>
+#include <val_task1/handle_detector.h>
 #include <visualization_msgs/Marker.h>
+#include "val_common/val_common_names.h"
 
 #define SHOWIMAGE true
 
@@ -13,27 +14,23 @@ void handle_detector::showImage(cv::Mat image)
     cv::waitKey(0);
 }
 
-cv::Mat handle_detector::colorSegment(cv::Mat imgHSV, const int hsv[6])
+void handle_detector::colorSegment(const cv::Mat &imgHSV, const int hsv[6], cv::Mat &outImg)
 {
-    cv::Mat Image;
-    cv::inRange(imgHSV,cv::Scalar(hsv[0],hsv[2],hsv[4]), cv::Scalar(hsv[1],hsv[3],hsv[5]),Image);
-    return Image;
+    cv::inRange(imgHSV,cv::Scalar(hsv[0],hsv[2],hsv[4]), cv::Scalar(hsv[1],hsv[3],hsv[5]),outImg);
 }
 
-cv::Mat handle_detector::doMorphology (cv::Mat image)
+void handle_detector::doMorphology (cv::Mat &image)
 {
     cv::dilate(image, image, cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(15,15)));
     cv::dilate(image, image, cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(10,10)));
-    return image;
 }
 
 
-cv::Rect handle_detector::findMaxContour (cv::Mat image)
+void handle_detector::findMaxContour(const cv::Mat image, cv::Rect &roi)
 {
     cv::Mat canny_output;
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
-    cv::Rect roi;
 
     // Detect edges using canny
     cv::Canny(image, canny_output, thresh_, thresh_*2, 3);
@@ -73,10 +70,9 @@ cv::Rect handle_detector::findMaxContour (cv::Mat image)
     cv::rectangle( drawing, boundRect[largest_contour_index].tl(), boundRect[largest_contour_index].br(), color, 2, 8, 0 );
     showImage(drawing);
     roi = boundRect[largest_contour_index];
-    return roi;
 }
 
-bool handle_detector::findAllContours (cv::Mat image)
+bool handle_detector::findAllContours (const cv::Mat &image)
 {
     cv::Mat canny_output;
     std::vector<std::vector<cv::Point>> contours;
@@ -122,22 +118,21 @@ bool handle_detector::findAllContours (cv::Mat image)
     return false;
 }
 
-bool handle_detector::getHandleLocation()
+bool handle_detector::getHandleLocation(std::vector<geometry_msgs::Point>& handleLocs)
 {
 
     bool foundButton = false;
     pcl::PointXYZRGB pclPoint;
     src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
-    src_perception::PointCloudHelper::generateOrganizedRGBDCloud(disp_, mi_, qMatrix_, organizedCloud);
+    src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
     tf::TransformListener listener;
     tf::Transform transform;
     tf::Quaternion q;
     static tf::TransformBroadcaster br;
 
-
     try
     {
-        listener.waitForTransform("/world", "/left_camera_optical_frame", ros::Time(0), ros::Duration(3.0));
+        listener.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, ros::Time(0), ros::Duration(3.0));
     }
     catch (tf::TransformException ex)
     {
@@ -146,14 +141,12 @@ bool handle_detector::getHandleLocation()
         return false;
     }
 
-
-
     for(int i=0; i<rectCenter.size(); i++)
     {
-
         for(int k = -10; k<10; k++)
         {
             pclPoint = organizedCloud->at(rectCenter[i].x, rectCenter[i].y);
+            //wtf
             if (pclPoint.z<0)
             {
                 rectCenter[i].x+=k;
@@ -161,101 +154,93 @@ bool handle_detector::getHandleLocation()
             }
         }
 
-
         std::stringstream ss;
         ss << side_ << "HandleFrame" << frameID_;
 
         transform.setOrigin( tf::Vector3(pclPoint.x , pclPoint.y, pclPoint.z));
         q.setRPY(0, 0, 0);
         transform.setRotation(q);
-        br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "left_camera_optical_frame", ss.str()));
+        br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, ss.str()));
 
         frameID_++;
         buttonCenters_.push_back(pclPoint);
 
         std::cout<<"Handle "<< i << " at " << buttonCenters_[i].x << " " << buttonCenters_[i].y << " " << buttonCenters_[i].z << std::endl;
-        foundButton = true;
+        geometry_msgs::Point geom_point;
+        geom_point.x = pclPoint.x;
+        geom_point.y = pclPoint.y;
+        geom_point.z = pclPoint.z;
+
+        //ignore points with z less than 0.6m
+        if(geom_point.z > 0.6){
+            handleLocs.push_back(geom_point);
+        }
+
+        // return true only if there are 4 points in handleLocs
+        foundButton = handleLocs.size() == 4;
+
     }
-
-
 
     return foundButton;
 
 }
 
-cv::Mat handle_detector::getReducedImage(cv::Mat image, cv::Rect roi)
+void handle_detector::getReducedImage(cv::Mat &image, const cv::Rect &roi)
 {
     image = image(roi);
-    return image;
 }
 
-bool handle_detector::findHandles(ros::NodeHandle &nh, std::vector<geometry_msgs::Point>& handleLocs)
+bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
 {
-    src_perception::MultisenseImage mi(nh); // subscribe to image_rect
-    mi.giveImage(mi_);
-    cv::cvtColor(mi_, imgHSV_, cv::COLOR_BGR2HSV);
-    cv::GaussianBlur(imgHSV_, imgHSV_, cv::Size(9, 9), 2, 2);
 
-    mi.giveDisparityImage(disp_);
-    mi.giveQMatrix(qMatrix_);
+    ms_sensor_.giveImage(current_image_);
+    ms_sensor_.giveDisparityImage(current_disparity_);
+
+    cv::cvtColor(current_image_, current_image_HSV_, cv::COLOR_BGR2HSV);
+    cv::GaussianBlur(current_image_HSV_, current_image_HSV_, cv::Size(9, 9), 2, 2);
 
     side_ = "left"; // used for naming frames. Left = red;
 
-    imRed_ = colorSegment(imgHSV_, hsvRed_);
-    imRed_ = doMorphology(imRed_);
+    colorSegment(current_image_HSV_, hsvRed_, imRed_);
+    doMorphology(imRed_);
     showImage(imRed_);
-    roiRed_ = findMaxContour(imRed_);
-    imRedReduced_= cv::Mat::zeros(imgHSV_.size(), imgHSV_.type());
+    findMaxContour(imRed_, roiRed_);
+    imRedReduced_= cv::Mat::zeros(current_image_HSV_.size(), current_image_HSV_.type());
 
-    cv::Mat mask = cv::Mat::zeros(imgHSV_.size(), imgHSV_.type());
+    cv::Mat mask = cv::Mat::zeros(current_image_HSV_.size(), current_image_HSV_.type());
     cv::rectangle(mask, cv::Point(roiRed_.x, roiRed_.y), cv::Point(roiRed_.x+roiRed_.width, roiRed_.y+roiRed_.height),cv::Scalar(255, 255, 255), -1, 8, 0);
     showImage(mask);
-    imgHSV_.copyTo(imRedReduced_,mask);
+    current_image_HSV_.copyTo(imRedReduced_,mask);
 
     showImage(imRedReduced_);
-    imGray_ = colorSegment(imRedReduced_, hsvGray_);
+    colorSegment(imRedReduced_, hsvGray_, imGray_);
     showImage(imGray_);
-    showImage(disp_);
-    bool val=false;
-    val = findAllContours(imGray_);
-
+    showImage(current_disparity_);
+    bool val = findAllContours(imGray_);
 
     side_ = "right"; // used for naming frames;
 
-    imBlue_ = colorSegment(imgHSV_, hsvBlue_);
-    imBlue_ = doMorphology(imBlue_);
+    colorSegment(current_image_HSV_, hsvBlue_, imBlue_);
+    doMorphology(imBlue_);
     showImage(imBlue_);
-    roiBlue_ = findMaxContour(imBlue_);
-    imBlueReduced_= cv::Mat::zeros(imgHSV_.size(), imgHSV_.type());
+    findMaxContour(imBlue_, roiBlue_);
+    imBlueReduced_= cv::Mat::zeros(current_image_HSV_.size(), current_image_HSV_.type());
 
-    cv::Mat maskBlue = cv::Mat::zeros(imgHSV_.size(), imgHSV_.type());
+    cv::Mat maskBlue = cv::Mat::zeros(current_image_HSV_.size(), current_image_HSV_.type());
     cv::rectangle(maskBlue, cv::Point(roiBlue_.x, roiBlue_.y), cv::Point(roiBlue_.x+roiBlue_.width, roiBlue_.y+roiBlue_.height),cv::Scalar(255, 255, 255), -1, 8, 0);
     showImage(maskBlue);
-    imgHSV_.copyTo(imBlueReduced_,maskBlue);
+    current_image_HSV_.copyTo(imBlueReduced_,maskBlue);
 
     showImage(imBlueReduced_);
-    imGray_ = colorSegment(imBlueReduced_, hsvGray_);
+    colorSegment(imBlueReduced_, hsvGray_, imGray_);
     showImage(imGray_);
-    showImage(disp_);
+    showImage(current_disparity_);
     val = findAllContours(imGray_);
-    getHandleLocation();
 
-    return false;
+    return getHandleLocation(handleLocs);
 }
 
-int main(int argc, char** argv)
+handle_detector::handle_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_)
 {
-    ros::init (argc,argv,"findHandleDetector");
-    ros::NodeHandle nh;
-    int numIterations = 0;
-    bool foundButton = false;
-    std::vector<geometry_msgs::Point> handleLocs;
-    handle_detector h1;
-
-    while (!foundButton && numIterations <1)
-    {
-        foundButton = h1.findHandles(nh, handleLocs);
-        numIterations++;
-    }
-
+    ms_sensor_.giveQMatrix(qMatrix_);
 }

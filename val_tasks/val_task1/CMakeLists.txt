@@ -186,6 +186,7 @@ include_directories(
          src/val_task1.cpp
          src/val_task1SM.cpp
          src/panel_detection.cpp
+         src/handle_detector.cpp
  )
 
 
@@ -216,7 +217,7 @@ add_dependencies(val_task1_node
  )
 
 add_executable(handle_detector_node
-            src/find_handle_detector.cpp
+            src/handle_detector_node.cpp
 )
 
 add_dependencies(handle_detector_node
