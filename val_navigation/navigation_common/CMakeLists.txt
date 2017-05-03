@@ -129,6 +129,7 @@ include_directories(
 ## Declare a C++ library
  add_library(navigation_common
    src/frame_tracking.cpp
+   src/fall_detector.cpp
  )
 
 ## Add cmake target dependencies of the library
@@ -148,6 +149,9 @@ target_link_libraries(MapTransform  ${catkin_LIBRARIES})
 
 add_executable(map_generator src/map_generator.cpp)
 target_link_libraries(map_generator  ${catkin_LIBRARIES})
+
+add_executable(fall_detector src/fall_detector_node.cpp)
+target_link_libraries(fall_detector  ${PROJECT_NAME} ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above

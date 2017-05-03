@@ -193,7 +193,7 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
     // the goal can be updated on the run time
     static geometry_msgs::Pose2D pose_prev;
 
-    // check if the pose is started
+    // check if the pose is changed
     if (isPoseChanged(pose_prev, panel_walk_goal_))
     {
         ROS_INFO("pose chaned");
