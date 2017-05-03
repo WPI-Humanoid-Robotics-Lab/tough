@@ -186,6 +186,7 @@ include_directories(
          src/val_task1.cpp
          src/val_task1SM.cpp
          src/panel_detection.cpp
+         src/handle_detector.cpp
  )
 
 
@@ -214,7 +215,24 @@ add_dependencies(val_task1_node
    ${OpenCV_LIBRARIES} ${PCL_LIBRARIES}
    ${PROJECT_NAME}
  )
- 
+
+add_executable(handle_detector_node
+            src/handle_detector_node.cpp
+)
+
+add_dependencies(handle_detector_node
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS}_gencfg
+ ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link a library or executable target against
+ target_link_libraries(handle_detector_node
+   ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+   ${PROJECT_NAME}
+ )
+
+
 add_executable(val_circle src/val_circle.cpp)
 
 add_dependencies(val_circle

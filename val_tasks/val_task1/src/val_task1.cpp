@@ -41,6 +41,9 @@ valTask1::valTask1(ros::NodeHandle nh):
 
     // panel detection
     panel_detector_     = nullptr;
+    handle_detector_    = new handle_detector(nh_);
+
+    // controllers
     chest_controller_   = new chestTrajectory(nh_);
     pelvis_controller_  = new pelvisTrajectory(nh_);
     head_controller_    = new HeadTrajectory(nh_);
@@ -246,10 +249,21 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
 decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
-    head_controller_->moveHead(0.0f, 30.0f, 0.0f);
+    head_controller_->moveHead(0.0f, 30.0f, 0.0f, 2.0f);
 
-    //run Srishti's code here
-    //have multiple conditions to check if the handles are detected. if not, move the robot and retry
+    //wait for head to be in position
+    ros::Duration(3).sleep();
+
+    //detect handles
+    std::vector<geometry_msgs::Point> handleLocs;
+    if( handle_detector_->findHandles(handleLocs)){
+
+        ROS_INFO("Handles detected");
+
+        //walk 0.4m forward
+    }
+
+
 
     // generate the event
     //eventQueue.riseEvent("/INIT_SUCESSUFL");
