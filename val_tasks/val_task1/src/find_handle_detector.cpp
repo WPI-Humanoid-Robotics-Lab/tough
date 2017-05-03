@@ -1,9 +1,13 @@
-#include <find_handle.h>
+#include <val_task1/find_handle.h>
 #include <visualization_msgs/Marker.h>
+
+#define SHOWIMAGE true
 
 void handle_detector::showImage(cv::Mat image)
 {
+#ifdef SHOWIMAGE
     return;
+#endif
     cv::namedWindow( "Handle Detection", cv::WINDOW_AUTOSIZE );
     cv::imshow( "Handle Detection", image);
     cv::waitKey(0);
@@ -255,34 +259,3 @@ int main(int argc, char** argv)
     }
 
 }
-//     Obtaining a stereo point cloud for Z position and RGB values
-
-//    for(int i=0; i<contours.size(); i++)
-//    {
-//        moment[i] = cv::moments((cv::Mat)contours[i]);
-//        if (moment[i].m00)
-//        {
-//            point = cv::Point2f(moment[i].m10/moment[i].m00,moment[i].m01/moment[i].m00);
-
-//            ROS_DEBUG("m00:%.2f, m10:%.2f, m01:%.2f",moment[i].m00, moment[i].m10, moment[i].m01);
-//            ROS_DEBUG("x:%d, y:%d", int(point.x), int(point.y));
-
-
-//            //assign the button center
-//            tempButtonCenter.x = int (point.x);
-//            tempButtonCenter.y = int (point.y);
-
-//            pclPoint = organizedCloud->at(tempButtonCenter.x, tempButtonCenter.y);
-
-//            transform.setOrigin( tf::Vector3(pclPoint.x , pclPoint.y, pclPoint.z));
-//            q.setRPY(0, 0, 0);
-//            transform.setRotation(q);
-//            br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "left_camera_optical_frame", frame));
-
-//            buttonCenters_.push_back(pclPoint);
-//            visualize_point(buttonCenters_[i]);
-
-//            std::cout<<"Handle "<< i << " at " << buttonCenters_[i].x << " " << buttonCenters_[i].y << std::endl;
-//            foundButton = true;
-//        }
-//    }
