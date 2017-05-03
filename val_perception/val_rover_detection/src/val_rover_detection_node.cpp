@@ -123,7 +123,9 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
 
     double yzSlope = (upperBoxPosition.z - lowerBoxPosition.z)/(upperBoxPosition.y - lowerBoxPosition.y);
 
-    bool noSlope = ((upperBoxPosition.y - point1.y) == 0);
+    bool noSlope = (fabs((upperBoxPosition.y - point1.y) < 0.01));
+
+    ROS_INFO(" ---- magic value --------  = %0.2f", upperBoxPosition.y - point1.y);
 
     double xySlope = 0.0;
 
