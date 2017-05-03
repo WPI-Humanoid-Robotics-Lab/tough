@@ -61,6 +61,8 @@ private:
     void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
     bool getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
 
+    std::vector<float> panel_plane_model_;
+
 public:
     // Constructor
 
@@ -70,6 +72,7 @@ public:
 
     int getDetectionTries() const;
     void setDetectionTries(int getDetectionTries);
+    std::vector<float>  getPanelPlaneModel(void);
 };
 
 //bool poseComparator (geometry_msgs::Pose const& lhs, geometry_msgs::Pose const& rhs)

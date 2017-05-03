@@ -53,7 +53,7 @@ class valTask1 {
     //head controller
     HeadTrajectory* head_controller_;
 
-    bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
+    ros::Publisher array_pub_;
 
     //required for initialization. Move out init state only if map is updated twice.
     ros::Subscriber occupancy_grid_sub_;
@@ -62,6 +62,9 @@ class valTask1 {
 
     // this pointer is to ensure that only 1 object of this task is created.
     static valTask1 *currentObject;
+
+    // handle pos and center
+    std::vector<geometry_msgs::Point> handle_loc_;
 
     public:
 
@@ -86,5 +89,8 @@ class valTask1 {
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
 
     geometry_msgs::Pose2D getPanelWalkGoal();
+
+    bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
     void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal_);
+    void createHandleWayPoints(const geometry_msgs::Point &center, std::vector<geometry_msgs::PoseStamped> &points);
 };

@@ -50,6 +50,9 @@ valTask1::valTask1(ros::NodeHandle nh):
 
     map_update_count_ = 0;
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask1::occupancy_grid_cb, this);
+
+    // TODO: just for vis remove later
+    array_pub_    = nh.advertise<visualization_msgs::MarkerArray>( "Circle_Array", 0 );
 }
 
 // destructor
@@ -255,18 +258,16 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
     ros::Duration(3).sleep();
 
     //detect handles
-    std::vector<geometry_msgs::Point> handleLocs;
-    if( handle_detector_->findHandles(handleLocs)){
+    if( handle_detector_->findHandles(handle_loc_)){
 
-        ROS_INFO("Handles detected");
+        ROS_INFO_STREAM("Handles detected at "<<handle_loc_[0]<< " : "<<handle_loc_[1]);
 
         //walk 0.4m forward
+        walker_->walkNSteps(1, 0.0, 0.4, false);
+
+        // generate the event
+        eventQueue.riseEvent("/DETECTED_HANDLE");
     }
-
-
-
-    // generate the event
-    //eventQueue.riseEvent("/INIT_SUCESSUFL");
 
     return TaskResult::SUCCESS();
 }
@@ -275,8 +276,11 @@ decision_making::TaskResult valTask1::adjustArmTask(string name, const FSMCallCo
 {
     ROS_INFO_STREAM("executing " << name);
 
+    // generate the way points to move the handle
+    std::vector<geometry_msgs::PoseStamped> waypoints;
+    createHandleWayPoints(handle_loc_[0], waypoints);
     // generate the event
-    //eventQueue.riseEvent("/INIT_SUCESSUFL");
+    eventQueue.riseEvent("/ADJUST_ARMS_RETRY");
 
     return TaskResult::SUCCESS();
 }
@@ -351,11 +355,11 @@ bool valTask1::isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose
 {
     bool ret = false;
 
-    ROS_INFO("%f", pose_new.x);
-    ROS_INFO("%f", pose_new.y);
-    ROS_INFO("%f", pose_old.x);
-    ROS_INFO("%f", pose_old.y);
-    ROS_INFO("%f", sqrt(pow((pose_new.y - pose_old.y),2) + pow((pose_new.x - pose_old.x),2)));
+//    ROS_INFO("%f", pose_new.x);
+//    ROS_INFO("%f", pose_new.y);
+//    ROS_INFO("%f", pose_old.x);
+//    ROS_INFO("%f", pose_old.y);
+//    ROS_INFO("%f", sqrt(pow((pose_new.y - pose_old.y),2) + pow((pose_new.x - pose_old.x),2)));
 
     if (sqrt(pow((pose_new.y - pose_old.y),2) + pow((pose_new.x - pose_old.x),2)) > 0.02) // > 2cm
     {
@@ -367,4 +371,51 @@ bool valTask1::isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose
     }
 
     return ret;
+}
+
+// !!!! make sure this is called after panel is detected and handels are detected
+void valTask1::createHandleWayPoints(const geometry_msgs::Point &center, std::vector<geometry_msgs::PoseStamped> &points)
+{
+  float radius = 0.13, num_steps = 20;
+  points.clear();
+
+  ROS_INFO_STREAM("loc1 "<<handle_loc_[1] << " loc0 " <<handle_loc_[0]);
+  ROS_INFO("radius %f",sqrt(pow(handle_loc_[1].x - handle_loc_[0].x, 2) + pow(handle_loc_[1].y - handle_loc_[0].y,2)));
+
+  for (int i=0; i<num_steps; i++)
+  {
+    // circle parametric equation
+    geometry_msgs::PoseStamped point;
+    point.pose.position.x = center.x + (radius * cos((float)i*(2*M_PI/num_steps)));
+    point.pose.position.y = center.y + (radius * sin((float)i*(2*M_PI/num_steps)));
+
+    // get the z from the plane equation
+    // z = -ax - by - d/c
+    point.pose.position.z = ((-panel_detector_->getPanelPlaneModel()[0] * point.pose.position.x) - (panel_detector_->getPanelPlaneModel()[1] * point.pose.position.y) - panel_detector_->getPanelPlaneModel()[3])/panel_detector_->getPanelPlaneModel()[2];
+    points.push_back(point);
+  }
+
+  // TODO: should be rmoved
+  // visulation of the circle
+  visualization_msgs::MarkerArray circle = visualization_msgs::MarkerArray();
+  for (int i = 0; i < num_steps; i++) {
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+    marker.header.stamp = ros::Time();
+    marker.ns = "circle";
+    marker.id = i;
+    marker.type = visualization_msgs::Marker::ARROW;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose = points[i].pose;
+    marker.scale.x = 0.01;
+    marker.scale.y = 0.01;
+    marker.scale.z = 0.01;
+    marker.color.a = 0.6;
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
+    circle.markers.push_back(marker);
+  }
+
+  array_pub_.publish( circle );
 }
