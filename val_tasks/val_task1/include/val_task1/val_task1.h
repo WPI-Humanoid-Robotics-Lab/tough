@@ -22,6 +22,7 @@
 #include "val_control/val_chest_navigation.h"
 #include "val_control/val_pelvis_navigation.h"
 #include "val_control/val_head_navigation.h"
+#include "val_task1/handle_detector.h"
 
 using namespace decision_making;
 
@@ -39,8 +40,12 @@ class valTask1 {
     ValkyrieWalker* walker_;
     // object for tracking robot walk
     walkTracking* walk_track_;
+
     // panel detection object
     panel_detector* panel_detector_;
+    //handle detector
+    handle_detector* handle_detector_;
+
     // chest controller
     chestTrajectory* chest_controller_;
     //pelvis controller
