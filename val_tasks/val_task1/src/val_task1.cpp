@@ -86,7 +86,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
 
     // TODO
     // if the map does not update fast enought and this is called greater then 10 time it will break
-    // It is depenent on the timer timer right now. 
+    // It is depenent on the timer timer right now.
     if (map_update_count_ < 2 && retry_count++ < 10) {
         ROS_INFO("Wait for occupancy grid to be updated with atleast 2 messages");
         ros::Duration(4.0).sleep();
@@ -121,9 +121,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
 
 decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    
-    
-    
+
     ROS_INFO_STREAM("executing " << name);
 
     if(panel_detector_ == nullptr) {
@@ -225,7 +223,7 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
         eventQueue.riseEvent("/WALK_EXECUTING");
     }
     // if walk finished
-    // TODO change to see if we are at the goal 
+    // TODO change to see if we are at the goal
     else if (!walk_track_->isWalking())
     {
         ROS_INFO("reached panel");
@@ -263,7 +261,7 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
 {
     ROS_INFO_STREAM("executing " << name);
     head_controller_->moveHead(0.0f, 30.0f, 0.0f, 2.0f);
-
+    static int retry_count = 0;
     //wait for head to be in position
     ros::Duration(3).sleep();
 
@@ -277,6 +275,15 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
 
         // generate the event
         eventQueue.riseEvent("/DETECTED_HANDLE");
+    }
+    else if( retry_count++ > 10){
+      ROS_INFO("Did not detect handle, retrying");
+      eventQueue.riseEvent("/DETECTED_HANDLE_RETRY");
+    }
+    else{
+      ROS_INFO("Did not detect handle, retrying");
+      eventQueue.riseEvent("/STATE_ERROR");
+      retry_count = 0;
     }
 
     return TaskResult::SUCCESS();
