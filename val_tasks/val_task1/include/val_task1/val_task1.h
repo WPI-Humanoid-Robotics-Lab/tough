@@ -66,6 +66,9 @@ class valTask1 {
     // handle pos and center
     std::vector<geometry_msgs::Point> handle_loc_;
 
+    // panel plane coeffecients
+    std::vector<float> panel_coeff_;
+
     public:
 
     // goal location for the panel
@@ -92,5 +95,6 @@ class valTask1 {
 
     bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
     void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal_);
-    void createHandleWayPoints(const geometry_msgs::Point &center, std::vector<geometry_msgs::PoseStamped> &points);
+    void createHandleWayPoints(const geometry_msgs::Point &center, std::vector<geometry_msgs::Pose> &points);
+    void setPanelCoeff(const std::vector<float> &panel_coeff);
 };

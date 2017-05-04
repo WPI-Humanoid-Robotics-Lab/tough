@@ -176,7 +176,7 @@ void execute_callback(const std_msgs::Int16& msg)
 //poses must be stampeed with the armside to use. default left.
 vector<geometry_msgs::PoseStamped*>* generate_circle_poses(geometry_msgs::PoseStamped& center, int angle)
 {
-  float radius = .1,num_steps = 31,x,y,sub_angle; //planar distance between center and edge (meters?)
+  float radius = .12,num_steps = 20,x,y,sub_angle; //planar distance between center and edge (meters?)
   float x_values[(int) num_steps],y_values[(int) num_steps];
   std::vector<geometry_msgs::PoseStamped*> *return_arc_poses;
   return_arc_poses = new std::vector<geometry_msgs::PoseStamped*>();
@@ -185,11 +185,11 @@ vector<geometry_msgs::PoseStamped*>* generate_circle_poses(geometry_msgs::PoseSt
   // start_pose = new geometry_msgs::PoseStamped();
 
   //I believe this is the SLD between the current gripper pose and the center of the arc.
-  radius = std::sqrt(center.pose.position.x * center.pose.position.x + center.pose.position.y * center.pose.position.y);
+  //radius = std::sqrt(center.pose.position.x * center.pose.position.x + center.pose.position.y * center.pose.position.y);
 
   //these two are the start point of the arc
-  x = 0;//center.pose.position.x;
-  y = 0;//center.pose.position.y;
+  x = center.pose.position.x;
+  y = center.pose.position.y;
   std::cout << "center: " <<x<<" "<<y<< '\n';
   std::cout << "radius: " <<radius<< '\n';
 
