@@ -84,17 +84,21 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
     //!!!!! depends on the developer and use case
     ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
 
+    // TODO
+    // if the map does not update fast enought and this is called greater then 10 time it will break
+    // It is depenent on the timer timer right now. 
     if (map_update_count_ < 2 && retry_count++ < 10) {
         ROS_INFO("Wait for occupancy grid to be updated with atleast 2 messages");
         ros::Duration(4.0).sleep();
         eventQueue.riseEvent("/INIT_RETRY");
     }
-    else if(retry_count > 9){
+    else if(retry_count > 10){
         ROS_INFO("Failed to initialize");
         eventQueue.riseEvent("/INIT_FAILED");
     }
     else{
         // move to a configuration that is robust while walking
+        retry_count = 0;
         pelvis_controller_->controlPelvisHeight(0.9);
         chest_controller_->controlChest(0.0f, 19.0f, 0.0f);
         ros::Duration(1.0f).sleep();
@@ -117,6 +121,9 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
 
 decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
+    
+    
+    
     ROS_INFO_STREAM("executing " << name);
 
     if(panel_detector_ == nullptr) {
@@ -148,7 +155,7 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
 
         std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
         std::cout << "yaw: " << pose2D.theta  <<std::endl;
-
+        retry_count = 0;
         eventQueue.riseEvent("/DETECTED_PANEL");
         delete panel_detector_;
         panel_detector_ = nullptr;
@@ -162,6 +169,8 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
     }
 
     // if failed for more than 5 times, go to error state
+
+
     else if (fail_count > 5)
     {
         // reset the fail count
@@ -216,6 +225,7 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
         eventQueue.riseEvent("/WALK_EXECUTING");
     }
     // if walk finished
+    // TODO change to see if we are at the goal 
     else if (!walk_track_->isWalking())
     {
         ROS_INFO("reached panel");
