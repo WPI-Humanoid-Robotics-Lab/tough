@@ -4,12 +4,11 @@
 
 #define DISABLE_DRAWINGS true
 
-
 handle_detector::handle_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_)
 {
     ms_sensor_.giveQMatrix(qMatrix_);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_handles",1);
 }
-
 
 void handle_detector::showImage(cv::Mat image)
 {
@@ -136,21 +135,6 @@ bool handle_detector::getHandleLocation(std::vector<geometry_msgs::Point>& handl
     src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
     src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
     tf::TransformListener listener;
-    tf::Transform transform;
-    tf::Quaternion q;
-    static tf::TransformBroadcaster br;
-
-    try
-    {
-        listener.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, ros::Time(0), ros::Duration(3.0));
-    }
-    catch (tf::TransformException ex)
-    {
-        ROS_ERROR("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
-
 
     float MAX_Z = 0.5f;
 
@@ -180,30 +164,35 @@ bool handle_detector::getHandleLocation(std::vector<geometry_msgs::Point>& handl
             continue;
         }
 
-        std::stringstream ss;
-        ss << side_ << "HandleFrame" << frameID_;
-
-        transform.setOrigin( tf::Vector3(pclPoint.x , pclPoint.y, pclPoint.z));
-        q.setRPY(0, 0, 0);
-        transform.setRotation(q);
-        br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, ss.str()));
-
         frameID_++;
         buttonCenters_.push_back(pclPoint);
 
         std::cout<<"Handle "<< i << " at " << buttonCenters_[i].x << " " << buttonCenters_[i].y << " " << buttonCenters_[i].z << std::endl;
-        geometry_msgs::Point geom_point;
-        geom_point.x = pclPoint.x;
-        geom_point.y = pclPoint.y;
-        geom_point.z = pclPoint.z;
+        geometry_msgs::PointStamped geom_point;
+        geom_point.point.x = pclPoint.x;
+        geom_point.point.y = pclPoint.y;
+        geom_point.point.z = pclPoint.z;
+        geom_point.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
 
-        handleLocs.push_back(geom_point);
+        try
+        {
+            listener.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, ros::Time(0), ros::Duration(3.0));
+            listener.transformPoint(VAL_COMMON_NAMES::WORLD_TF, geom_point, geom_point);
+        }
+        catch (tf::TransformException ex)
+        {
+            ROS_ERROR("%s",ex.what());
+            ros::spinOnce();
+            return false;
+        }
 
+        handleLocs.push_back(geom_point.point);
+        visualize_point(geom_point.point);
         // return true only if there are 4 points in handleLocs
         foundButton = handleLocs.size() == 4;
 
     }
-
+    marker_pub_.publish(markers_);
     return foundButton;
 
 }
@@ -219,6 +208,7 @@ bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
     rectCenter_.clear();
     convexHulls_.clear();
     handleLocs.clear();
+    markers_.markers.clear();
 
     ms_sensor_.giveImage(current_image_);
     ms_sensor_.giveDisparityImage(current_disparity_);
@@ -265,5 +255,40 @@ bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
     val = findAllContours(imGray_);
 
     return getHandleLocation(handleLocs);
+}
+
+void handle_detector::visualize_point(geometry_msgs::Point point){
+
+    std::cout<< "goal origin :\n"<< point << std::endl;
+    static int id = 0;
+    visualization_msgs::Marker marker;
+    // Set the frame ID and timestamp.  See the TF tutorials for information on these.
+    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+    marker.header.stamp = ros::Time::now();
+
+    // Set the namespace and id for this marker.  This serves to create a unique ID
+    // Any marker sent with the same namespace and id will overwrite the old one
+    marker.ns = std::to_string(frameID_);
+    marker.id = id++;
+
+    // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
+    marker.type = visualization_msgs::Marker::CUBE;
+
+    // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
+    marker.action = visualization_msgs::Marker::ADD;
+
+    // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
+    marker.pose.position = point;
+    marker.pose.orientation.w = 1.0f;
+
+    marker.scale.x = 0.01;
+    marker.scale.y = 0.01;
+    marker.scale.z = 0.01;
+    marker.color.a = 1.0; // Don't forget to set the alpha!
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
+
+    markers_.markers.push_back(marker);
 }
 
