@@ -2,11 +2,18 @@
 #include <visualization_msgs/Marker.h>
 #include "val_common/val_common_names.h"
 
-#define SHOWIMAGE true
+#define DISABLE_DRAWINGS true
+
+
+handle_detector::handle_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_)
+{
+    ms_sensor_.giveQMatrix(qMatrix_);
+}
+
 
 void handle_detector::showImage(cv::Mat image)
 {
-#ifdef SHOWIMAGE
+#ifdef DISABLE_DRAWINGS
     return;
 #endif
     cv::namedWindow( "Handle Detection", cv::WINDOW_AUTOSIZE );
@@ -14,7 +21,7 @@ void handle_detector::showImage(cv::Mat image)
     cv::waitKey(0);
 }
 
-void handle_detector::colorSegment(const cv::Mat &imgHSV, const int hsv[6], cv::Mat &outImg)
+inline void handle_detector::colorSegment(const cv::Mat &imgHSV, const int hsv[6], cv::Mat &outImg)
 {
     cv::inRange(imgHSV,cv::Scalar(hsv[0],hsv[2],hsv[4]), cv::Scalar(hsv[1],hsv[3],hsv[5]),outImg);
 }
@@ -45,30 +52,31 @@ void handle_detector::findMaxContour(const cv::Mat image, cv::Rect &roi)
 
     for(int i = 0; i < contours.size(); i++)
     {
-       cv::convexHull(cv::Mat(contours[i]), hull[i], false);
-       cv::approxPolyDP(cv::Mat(hull[i]), contours_poly[i], 3, true);
-       boundRect[i] = cv::boundingRect(cv::Mat(contours_poly[i]));
+        cv::convexHull(cv::Mat(contours[i]), hull[i], false);
+        cv::approxPolyDP(cv::Mat(hull[i]), contours_poly[i], 3, true);
+        boundRect[i] = cv::boundingRect(cv::Mat(contours_poly[i]));
     }
 
     int largest_area=0;
     int largest_contour_index=0;
     cv::RNG rng(12345);
-    cv::Mat drawing = cv::Mat::zeros( canny_output.size(), CV_8UC3 );
 
+    cv::Mat drawing = cv::Mat::zeros( canny_output.size(), CV_8UC3 );
     cv::Scalar color = cv::Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
     for( int i = 0; i< contours.size(); i++ )
-     {
-       double area = contourArea( hull[i] );  //  Find the area of contour
-       if( area > largest_area )
-       {
-          largest_area = area;
-          largest_contour_index = i;               //Store the index of largest contour
-       }
-     }
-
+    {
+        double area = contourArea( hull[i] );  //  Find the area of contour
+        if( area > largest_area )
+        {
+            largest_area = area;
+            largest_contour_index = i;               //Store the index of largest contour
+        }
+    }
+#ifndef DISABLE_DRAWINGS
     cv::drawContours( drawing, contours, largest_contour_index, color, 2, 8, hierarchy, 0, cv::Point() );
     cv::rectangle( drawing, boundRect[largest_contour_index].tl(), boundRect[largest_contour_index].br(), color, 2, 8, 0 );
     showImage(drawing);
+#endif
     roi = boundRect[largest_contour_index];
 }
 
@@ -95,25 +103,27 @@ bool handle_detector::findAllContours (const cv::Mat &image)
 
     for(int i = 0; i < contours.size(); i++)
     {
-       cv::convexHull(cv::Mat(contours[i]), hull[i], false);
-       cv::approxPolyDP(cv::Mat(hull[i]), contours_poly[i], 3, true);
-       boundRect[i] = cv::boundingRect(cv::Mat(contours_poly[i]));
+        cv::convexHull(cv::Mat(contours[i]), hull[i], false);
+        cv::approxPolyDP(cv::Mat(hull[i]), contours_poly[i], 3, true);
+        boundRect[i] = cv::boundingRect(cv::Mat(contours_poly[i]));
     }
 
     cv::Point prev_point;
     for( int i = 0; i< contours.size(); i++ )
-     {
+    {
         cv::Scalar color = cv::Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         cv::drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, cv::Point() );
         cv::rectangle( drawing, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
         cv::Point currentPoint = cv::Point((boundRect[i].x + boundRect[i].width*0.5), (boundRect[i].y + boundRect[i].height*0.5));
         if(abs(currentPoint.x - prev_point.x) < 6 && abs(currentPoint.y - prev_point.y) < 6)
             continue;
-        rectCenter.push_back(currentPoint);
-        std::cout<<rectCenter.back().x<<" "<<rectCenter.back().y<<std::endl;
+        rectCenter_.push_back(currentPoint);
+        convexHulls_.push_back(hull[i]);
+
+        std::cout<<rectCenter_.back().x<<" "<<rectCenter_.back().y<<std::endl;
         prev_point = currentPoint;
-     }
-     showImage(drawing);
+    }
+    showImage(drawing);
 
     return false;
 }
@@ -141,17 +151,33 @@ bool handle_detector::getHandleLocation(std::vector<geometry_msgs::Point>& handl
         return false;
     }
 
-    for(int i=0; i<rectCenter.size(); i++)
+
+    float MAX_Z = 0.5f;
+
+    for(int i=0; i<rectCenter_.size(); i++)
     {
-        for(int k = -10; k<10; k++)
-        {
-            pclPoint = organizedCloud->at(rectCenter[i].x, rectCenter[i].y);
-            //wtf
-            if (pclPoint.z<0)
+        cv::Mat hullPoints = cv::Mat::zeros(current_image_.size(), CV_8UC1);
+        cv::fillConvexPoly(hullPoints, convexHulls_[i],cv::Scalar(255));
+        showImage(hullPoints);
+
+        cv::Mat nonZeroCoordinates;
+        cv::erode(hullPoints, hullPoints, cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(5,5)));
+        cv::findNonZero(hullPoints, nonZeroCoordinates);
+
+        MAX_Z = 0.5f;
+        pclPoint = pcl::PointXYZRGB();
+
+        for (int k = 0; k < nonZeroCoordinates.total(); k++ ) {
+            pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
+            if (temp_pclPoint.z > MAX_Z)
             {
-                rectCenter[i].x+=k;
-                rectCenter[i].y+=abs(k);
+                pclPoint = temp_pclPoint;
+                MAX_Z = pclPoint.z;
             }
+        }
+
+        if(pclPoint.z < MAX_Z ){
+            continue;
         }
 
         std::stringstream ss;
@@ -171,10 +197,7 @@ bool handle_detector::getHandleLocation(std::vector<geometry_msgs::Point>& handl
         geom_point.y = pclPoint.y;
         geom_point.z = pclPoint.z;
 
-        //ignore points with z less than 0.6m
-        if(geom_point.z > 0.6){
-            handleLocs.push_back(geom_point);
-        }
+        handleLocs.push_back(geom_point);
 
         // return true only if there are 4 points in handleLocs
         foundButton = handleLocs.size() == 4;
@@ -192,6 +215,10 @@ void handle_detector::getReducedImage(cv::Mat &image, const cv::Rect &roi)
 
 bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
 {
+    buttonCenters_.clear();
+    rectCenter_.clear();
+    convexHulls_.clear();
+    handleLocs.clear();
 
     ms_sensor_.giveImage(current_image_);
     ms_sensor_.giveDisparityImage(current_disparity_);
@@ -240,7 +267,3 @@ bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
     return getHandleLocation(handleLocs);
 }
 
-handle_detector::handle_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_)
-{
-    ms_sensor_.giveQMatrix(qMatrix_);
-}

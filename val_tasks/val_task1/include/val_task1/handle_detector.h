@@ -24,7 +24,8 @@ class handle_detector
     cv::Mat imRedReduced_, imBlueReduced_;
     cv::Rect roiRed_, roiBlue_, roiOrange_;
 
-    std::vector<cv::Point> rectCenter;
+    std::vector<cv::Point> rectCenter_;
+    std::vector<std::vector<cv::Point>> convexHulls_;
     std::vector< pcl::PointXYZRGB> buttonCenters_;
 
     int thresh_ = 100;
@@ -42,7 +43,7 @@ class handle_detector
 public:
 
     void showImage(cv::Mat);
-    void colorSegment(const cv::Mat &imgHSV, const int[], cv::Mat &outImg);
+    inline void colorSegment(const cv::Mat &imgHSV, const int[], cv::Mat &outImg);
     void doMorphology(cv::Mat &image);
     void findMaxContour(const cv::Mat, cv::Rect &roi);
     bool findAllContours (const cv::Mat &);
