@@ -13,10 +13,24 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   roscpp
   val_footstep
+  perception_common
+  pcl_conversions
+  pcl_ros
+  cv_bridge
+  image_transport
+  sensor_msgs
+  std_msgs
+
+
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
+
+include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -106,7 +120,8 @@ generate_dynamic_reconfigure_options(
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES val_task2
- CATKIN_DEPENDS roscpp decision_making decision_making_parser dynamic_reconfigure val_footstep
+ CATKIN_DEPENDS roscpp decision_making decision_making_parser dynamic_reconfigure val_footstep cv_bridge image_transport pcl_conversions pcl_ros sensor_msgs std_msgs
+ DEPENDS system_lib
  #DEPENDS system_lib
 )
 
@@ -117,7 +132,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(include)
-include_directories(
+include_directories(perception_common
   ${catkin_INCLUDE_DIRS}
   ${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake
  cfg/cpp
@@ -140,7 +155,12 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
- add_executable(val_task2_node
+add_executable(val_button_detection_node src/val_button_detection_node.cpp)
+target_link_libraries(val_button_detection_node ${catkin_LIBRARIES})
+
+
+
+add_executable(val_task2_node
             src/val_task2_node.cpp
 )
 
