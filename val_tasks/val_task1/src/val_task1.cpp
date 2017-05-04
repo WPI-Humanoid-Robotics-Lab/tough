@@ -208,10 +208,11 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
     // the goal can be updated on the run time
     static geometry_msgs::Pose2D pose_prev;
 
-    geometry_msgs::Pose pose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pose);
+    geometry_msgs::Pose current_pelvis_pose;
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
 
     // check if the pose is changed
+    ///@todo: what if pose has not changed but robot did not reach the goal and is not walking?
     if (isPoseChanged(pose_prev, panel_walk_goal_))
     {
         ROS_INFO("pose chaned");
@@ -232,7 +233,7 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
     }
     // if walk finished
     // TODO change to see if we are at the goal
-    else if ( fabs(panel_walk_goal_.x - pose.position.x) < 0.05 && fabs(panel_walk_goal_.y - pose.position.y) < 0.05 )
+    else if ( fabs(panel_walk_goal_.x - current_pelvis_pose.position.x) < 0.05 && fabs(panel_walk_goal_.y - current_pelvis_pose.position.y) < 0.05 )
     {
 
         ROS_INFO("reached panel");
@@ -269,6 +270,7 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
 decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+    //tilt head downwards to see the panel
     head_controller_->moveHead(0.0f, 30.0f, 0.0f, 2.0f);
     static int retry_count = 0;
     //wait for head to be in position
@@ -285,7 +287,7 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
         // generate the event
         eventQueue.riseEvent("/DETECTED_HANDLE");
     }
-    else if( retry_count++ > 10){
+    else if( retry_count++ < 10){
       ROS_INFO("Did not detect handle, retrying");
       eventQueue.riseEvent("/DETECT_HANDLE_RETRY");
     }
