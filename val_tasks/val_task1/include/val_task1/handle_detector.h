@@ -11,8 +11,9 @@
 
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PointStamped.h>
+#include <visualization_msgs/MarkerArray.h>
 
-#include <tf/transform_broadcaster.h>//
+#include <tf/transform_broadcaster.h>
 
 #include <iostream>
 #include <vector>
@@ -40,6 +41,9 @@ class handle_detector
     ros::NodeHandle nh_;
     src_perception::MultisenseImage ms_sensor_;
 
+    ros::Publisher marker_pub_;
+    visualization_msgs::MarkerArray markers_;
+    void visualize_point(geometry_msgs::Point point);
 public:
 
     void showImage(cv::Mat);
