@@ -23,6 +23,8 @@
 #include "val_control/val_pelvis_navigation.h"
 #include "val_control/val_head_navigation.h"
 #include "val_task1/handle_detector.h"
+#include "val_task1/handle_grabber.h"
+#include "val_control/robot_state.h"
 
 using namespace decision_making;
 
@@ -45,6 +47,8 @@ class valTask1 {
     panel_detector* panel_detector_;
     //handle detector
     handle_detector* handle_detector_;
+    // Object to use for grasping handles
+    handle_grabber* handle_grabber_;
 
     // chest controller
     chestTrajectory* chest_controller_;
@@ -52,6 +56,8 @@ class valTask1 {
     pelvisTrajectory* pelvis_controller_;
     //head controller
     HeadTrajectory* head_controller_;
+    //robot state informer
+    RobotStateInformer* robot_state_;
 
     ros::Publisher array_pub_;
 

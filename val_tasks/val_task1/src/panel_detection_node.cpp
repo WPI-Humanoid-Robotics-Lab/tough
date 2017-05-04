@@ -26,7 +26,7 @@ int main(int argc, char** argv){
     geometry_msgs::PoseStamped goal;
     goal.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
     goal.pose = poses[NUM_SAMPLES -1];
-//    goalPub.publish(goal);
+    goalPub.publish(goal);
 
     ros::Duration(1).sleep();
     ROS_INFO("Exiting panel detector node");

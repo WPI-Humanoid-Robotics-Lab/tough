@@ -43,12 +43,14 @@ valTask1::valTask1(ros::NodeHandle nh):
     // panel detection
     panel_detector_     = nullptr;
     handle_detector_    = new handle_detector(nh_);
-
+    handle_grabber_     = new handle_grabber(nh_);
     // controllers
     chest_controller_   = new chestTrajectory(nh_);
     pelvis_controller_  = new pelvisTrajectory(nh_);
     head_controller_    = new HeadTrajectory(nh_);
 
+    //state informer
+    robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     map_update_count_ = 0;
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask1::occupancy_grid_cb, this);
 
@@ -81,25 +83,18 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
 {
     ROS_INFO_STREAM("executing " << name);
     static int retry_count = 0;
-    // the state transition can happen from an event externally or can be geenerated here
-    //!!!!! depends on the developer and use case
-    ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
 
-    if (map_update_count_ < 2 && retry_count++ < 10) {
-        ROS_INFO("Wait for occupancy grid to be updated with atleast 2 messages");
-        ros::Duration(4.0).sleep();
-        eventQueue.riseEvent("/INIT_RETRY");
+    if(retry_count == 0){
+        map_update_count_ = 0;
     }
-    else if(retry_count > 9){
-        ROS_INFO("Failed to initialize");
-        eventQueue.riseEvent("/INIT_FAILED");
-    }
-    else{
+
+    // the state transition can happen from an event externally or can be geenerated here
+    ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
+    if (map_update_count_ > 1) {
         // move to a configuration that is robust while walking
         pelvis_controller_->controlPelvisHeight(0.9);
-        chest_controller_->controlChest(0.0f, 19.0f, 0.0f);
+        chest_controller_->controlChest(0.0f, 10.0f, 0.0f);
         ros::Duration(1.0f).sleep();
-
 
         // start the task
         ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
@@ -109,9 +104,19 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
         if(client.call(srv)) {
             //what do we do if this call fails or succeeds?
         }
-
         // generate the event
         eventQueue.riseEvent("/INIT_SUCESSFUL");
+
+    }
+    else if (map_update_count_ < 2 && retry_count++ < 40) {
+        ROS_INFO("Wait for occupancy grid to be updated with atleast 2 messages");
+        ros::Duration(2.0).sleep();
+        eventQueue.riseEvent("/INIT_RETRY");
+    }
+    else {
+        retry_count = 0;
+        ROS_INFO("Failed to initialize");
+        eventQueue.riseEvent("/INIT_FAILED");
     }
     return TaskResult::SUCCESS();
 }
@@ -200,6 +205,9 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
     // the goal can be updated on the run time
     static geometry_msgs::Pose2D pose_prev;
 
+    geometry_msgs::Pose pose;
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pose);
+
     // check if the pose is changed
     if (isPoseChanged(pose_prev, panel_walk_goal_))
     {
@@ -220,8 +228,9 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
         eventQueue.riseEvent("/WALK_EXECUTING");
     }
     // if walk finished
-    else if (!walk_track_->isWalking())
+    else if ( fabs(panel_walk_goal_.x - pose.position.x) < 0.05 && fabs(panel_walk_goal_.y - pose.position.y) < 0.05 )
     {
+
         ROS_INFO("reached panel");
 
         // TODO: check if robot rechead the panel
@@ -272,6 +281,9 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
         // generate the event
         eventQueue.riseEvent("/DETECTED_HANDLE");
     }
+    else {
+        eventQueue.riseEvent("/DETECT_HANDLE_RETRY");
+    }
 
     return TaskResult::SUCCESS();
 }
@@ -279,6 +291,14 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
 decision_making::TaskResult valTask1::adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+    //1 - left
+    //3 - right
+    ROS_INFO("resetting pose");
+    chest_controller_->controlChest(0.0f, 0.0f, 0.0f);
+    ros::Duration(3).sleep();
+
+    ROS_INFO("Grasp left handle");
+    handle_grabber_->grab_handle(armSide::LEFT, handle_loc_[1]);
 
     // generate the way points to move the handle
     std::vector<geometry_msgs::Pose> waypoints;
@@ -376,11 +396,11 @@ bool valTask1::isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose
 {
     bool ret = false;
 
-//    ROS_INFO("%f", pose_new.x);
-//    ROS_INFO("%f", pose_new.y);
-//    ROS_INFO("%f", pose_old.x);
-//    ROS_INFO("%f", pose_old.y);
-//    ROS_INFO("%f", sqrt(pow((pose_new.y - pose_old.y),2) + pow((pose_new.x - pose_old.x),2)));
+    //    ROS_INFO("%f", pose_new.x);
+    //    ROS_INFO("%f", pose_new.y);
+    //    ROS_INFO("%f", pose_old.x);
+    //    ROS_INFO("%f", pose_old.y);
+    //    ROS_INFO("%f", sqrt(pow((pose_new.y - pose_old.y),2) + pow((pose_new.x - pose_old.x),2)));
 
     if (sqrt(pow((pose_new.y - pose_old.y),2) + pow((pose_new.x - pose_old.x),2)) > 0.02) // > 2cm
     {
@@ -446,4 +466,5 @@ void valTask1::createHandleWayPoints(const geometry_msgs::Point &center, std::ve
   }
 
   array_pub_.publish( circle );
+
 }

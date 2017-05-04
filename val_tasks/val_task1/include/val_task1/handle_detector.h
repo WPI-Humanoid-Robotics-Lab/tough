@@ -11,8 +11,9 @@
 
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PointStamped.h>
+#include <visualization_msgs/MarkerArray.h>
 
-#include <tf/transform_broadcaster.h>//
+#include <tf/transform_broadcaster.h>
 
 #include <iostream>
 #include <vector>
@@ -24,7 +25,8 @@ class handle_detector
     cv::Mat imRedReduced_, imBlueReduced_;
     cv::Rect roiRed_, roiBlue_, roiOrange_;
 
-    std::vector<cv::Point> rectCenter;
+    std::vector<cv::Point> rectCenter_;
+    std::vector<std::vector<cv::Point>> convexHulls_;
     std::vector< pcl::PointXYZRGB> buttonCenters_;
 
     int thresh_ = 100;
@@ -39,10 +41,13 @@ class handle_detector
     ros::NodeHandle nh_;
     src_perception::MultisenseImage ms_sensor_;
 
+    ros::Publisher marker_pub_;
+    visualization_msgs::MarkerArray markers_;
+    void visualize_point(geometry_msgs::Point point);
 public:
 
     void showImage(cv::Mat);
-    void colorSegment(const cv::Mat &imgHSV, const int[], cv::Mat &outImg);
+    inline void colorSegment(const cv::Mat &imgHSV, const int[], cv::Mat &outImg);
     void doMorphology(cv::Mat &image);
     void findMaxContour(const cv::Mat, cv::Rect &roi);
     bool findAllContours (const cv::Mat &);

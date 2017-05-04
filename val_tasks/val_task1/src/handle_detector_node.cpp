@@ -9,9 +9,10 @@ int main(int argc, char** argv)
     std::vector<geometry_msgs::Point> handleLocs;
     handle_detector h1(nh);
 
-    while (!foundButton && numIterations <1)
+    while (!foundButton && numIterations <20)
     {
         foundButton = h1.findHandles(handleLocs);
+        ROS_INFO(foundButton ? "***** handles detected" : "xxxxx handles not detected");
         numIterations++;
     }
 

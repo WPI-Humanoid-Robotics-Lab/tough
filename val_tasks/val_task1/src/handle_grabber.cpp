@@ -87,13 +87,14 @@ void handle_grabber::grab_handle(const armSide side, const geometry_msgs::Point 
   pt.orientation = temp.quaternion;
 
   armTraj_.moveArmInTaskSpace(side, pt, executionTime);
-  ros::Duration(executionTime*3).sleep();
+  ros::Duration(executionTime*2).sleep();
 
-  //move arm to final position with known orientation
+    //move arm to final position with known orientation
   ROS_INFO("Moving towards goal");
   pt.position = goal;
   armTraj_.moveArmInTaskSpace(side, pt, executionTime);
-  ros::Duration(executionTime*3).sleep();
+  ros::Duration(executionTime*2).sleep();
+
 
   ROS_INFO("Nudge forward to align palm");
   armTraj_.nudgeArmLocal(side, direction::FRONT);
@@ -107,36 +108,3 @@ void handle_grabber::grab_handle(const armSide side, const geometry_msgs::Point 
   gripper_.closeGripper(side);
 
 }
-
-
-
-int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "handle_grabber");
-  ros::NodeHandle nh;
-  handle_grabber hg(nh);
-  ROS_INFO("Starting handle grabber");
-
-  if(argc == 5){
-    geometry_msgs::Point pt;
-    pt.x = std::atof(argv[2]);
-    pt.y = std::atof(argv[3]);
-    pt.z = std::atof(argv[4]);
-
-    armSide side;
-    if(std::atoi(argv[1]) == 0){
-      side = LEFT;
-    } else {
-      side = RIGHT;
-    }
-
-    hg.grab_handle(side, pt);
-  } else{
-    ROS_INFO("Usage : %s <side> <goal_x> <goal_y> <goal_z>\n side = 0 or 1");
-    return -1;
-  }
-
-  ros::spin();
-  return 0;
-}
-
