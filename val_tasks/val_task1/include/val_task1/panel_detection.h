@@ -72,7 +72,7 @@ public:
 
     int getDetectionTries() const;
     void setDetectionTries(int getDetectionTries);
-    std::vector<float>  getPanelPlaneModel(void);
+    std::vector<float> getPanelPlaneModel() const;
 };
 
 //bool poseComparator (geometry_msgs::Pose const& lhs, geometry_msgs::Pose const& rhs)

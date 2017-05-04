@@ -14,6 +14,7 @@
 #include "val_task1/val_task1.h"
 #include "navigation_common/map_generator.h"
 #include "srcsim/StartTask.h"
+#include <val_control/robot_state.h>
 
 #define foreach BOOST_FOREACH
 
@@ -71,8 +72,8 @@ void valTask1::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
 }
 
 bool valTask1::preemptiveWait(double ms, decision_making::EventQueue& queue) {
-    for (int i = 0; i < 100 && !queue.isTerminated(); i++)
-        boost::this_thread::sleep(boost::posix_time::milliseconds(ms / 100.0));
+  for (int i = 0; i < 100 && !queue.isTerminated(); i++)
+    boost::this_thread::sleep(boost::posix_time::milliseconds(ms / 100.0));
 
     return queue.isTerminated();
 }
@@ -154,6 +155,9 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
         std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
         std::cout << "yaw: " << pose2D.theta  <<std::endl;
 
+        // update the plane coeffecients
+        setPanelCoeff(panel_detector_->getPanelPlaneModel());
+
         eventQueue.riseEvent("/DETECTED_PANEL");
         delete panel_detector_;
         panel_detector_ = nullptr;
@@ -208,9 +212,9 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
     if (isPoseChanged(pose_prev, panel_walk_goal_))
     {
         ROS_INFO("pose chaned");
-        walker_->walkToGoal(panel_walk_goal_, false);
+        //walker_->walkToGoal(panel_walk_goal_, false);
         // sleep so that the walk starts
-        ros::Duration(4).sleep();
+        //ros::Duration(4).sleep();
 
         // update the previous pose
         pose_prev = panel_walk_goal_;
@@ -271,8 +275,8 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
 
         ROS_INFO_STREAM("Handles detected at "<<handle_loc_[0]<< " : "<<handle_loc_[1]);
 
-        //walk 0.4m forward
-        walker_->walkNSteps(1, 0.0, 0.4, false);
+        // walk 0.4m forward
+        // walker_->walkNSteps(1, 0.0, 0.4, false);
 
         // generate the event
         eventQueue.riseEvent("/DETECTED_HANDLE");
@@ -297,10 +301,23 @@ decision_making::TaskResult valTask1::adjustArmTask(string name, const FSMCallCo
     handle_grabber_->grab_handle(armSide::LEFT, handle_loc_[1]);
 
     // generate the way points to move the handle
-    //    std::vector<geometry_msgs::PoseStamped> waypoints;
-    //    createHandleWayPoints(handle_loc_[0], waypoints);
+    std::vector<geometry_msgs::Pose> waypoints;
+    RobotStateInformer* transformer = RobotStateInformer::getRobotStateInformer(nh_);
+    geometry_msgs::Pose point;
+    point.position.x = handle_loc_[0].x;
+    point.position.y = handle_loc_[0].y;
+    point.position.z = handle_loc_[0].z;
+    transformer->getCurrentPose(VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, point);
+
+    handle_loc_[0].x = point.position.x;
+    handle_loc_[0].y = point.position.y;
+    handle_loc_[0].z = point.position.z;
+    createHandleWayPoints(handle_loc_[0], waypoints);
+
     // generate the event
+    while(!preemptiveWait(1000, eventQueue)){
     eventQueue.riseEvent("/ADJUST_ARMS_RETRY");
+    }
 
     return TaskResult::SUCCESS();
 }
@@ -370,6 +387,10 @@ void valTask1::setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal)
     panel_walk_goal_ = panel_walk_goal;
 }
 
+void valTask1::setPanelCoeff(const std::vector<float> &panel_coeff)
+{
+  panel_coeff_ = panel_coeff;
+}
 
 bool valTask1::isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new)
 {
@@ -394,48 +415,56 @@ bool valTask1::isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose
 }
 
 // !!!! make sure this is called after panel is detected and handels are detected
-void valTask1::createHandleWayPoints(const geometry_msgs::Point &center, std::vector<geometry_msgs::PoseStamped> &points)
+void valTask1::createHandleWayPoints(const geometry_msgs::Point &center, std::vector<geometry_msgs::Pose> &points)
 {
-    float radius = 0.13, num_steps = 20;
-    points.clear();
+  float radius = 0.13;
+  int num_steps = 20;
 
-    ROS_INFO_STREAM("loc1 "<<handle_loc_[1] << " loc0 " <<handle_loc_[0]);
-    ROS_INFO("radius %f",sqrt(pow(handle_loc_[1].x - handle_loc_[0].x, 2) + pow(handle_loc_[1].y - handle_loc_[0].y,2)));
+  // clear the points
+  points.clear();
 
-    for (int i=0; i<num_steps; i++)
-    {
-        // circle parametric equation
-        geometry_msgs::PoseStamped point;
-        point.pose.position.x = center.x + (radius * cos((float)i*(2*M_PI/num_steps)));
-        point.pose.position.y = center.y + (radius * sin((float)i*(2*M_PI/num_steps)));
+  ROS_INFO_STREAM("loc1 "<<handle_loc_[1] << " loc0 " <<handle_loc_[0]);
+  ROS_INFO_STREAM("center "<< center);
+  ROS_INFO("radius %f",sqrt(pow(handle_loc_[1].x - handle_loc_[0].x, 2) + pow(handle_loc_[1].y - handle_loc_[0].y,2)));
+  //RobotStateInformer* transformer = RobotStateInformer::getRobotStateInformer(nh_);
 
-        // get the z from the plane equation
-        // z = -ax - by - d/c
-        point.pose.position.z = ((-panel_detector_->getPanelPlaneModel()[0] * point.pose.position.x) - (panel_detector_->getPanelPlaneModel()[1] * point.pose.position.y) - panel_detector_->getPanelPlaneModel()[3])/panel_detector_->getPanelPlaneModel()[2];
-        points.push_back(point);
-    }
+  for (int i=0; i<num_steps; i++)
+  {
+    // circle parametric equation
+    //geometry_msgs::PoseStamped point;
+    geometry_msgs::Pose point;
+    point.position.x = center.x + (radius * cos((float)i*(2*M_PI/num_steps)));
+    point.position.y = center.y + (radius * sin((float)i*(2*M_PI/num_steps)));
+    // get the z from the plane equation
+    // z = -ax - by - d/c
+    point.position.z = ((-panel_coeff_[0] * point.position.x) - (panel_coeff_[1] * point.position.y) - panel_coeff_[3])/panel_coeff_[2];
+    //transformer->getCurrentPose(VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, point);
+    points.push_back(point);
+  }
 
-    // TODO: should be rmoved
-    // visulation of the circle
-    visualization_msgs::MarkerArray circle = visualization_msgs::MarkerArray();
-    for (int i = 0; i < num_steps; i++) {
-        visualization_msgs::Marker marker;
-        marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
-        marker.header.stamp = ros::Time();
-        marker.ns = "circle";
-        marker.id = i;
-        marker.type = visualization_msgs::Marker::ARROW;
-        marker.action = visualization_msgs::Marker::ADD;
-        marker.pose = points[i].pose;
-        marker.scale.x = 0.01;
-        marker.scale.y = 0.01;
-        marker.scale.z = 0.01;
-        marker.color.a = 0.6;
-        marker.color.r = 0.0;
-        marker.color.g = 1.0;
-        marker.color.b = 0.0;
-        circle.markers.push_back(marker);
-    }
+  // TODO: should be rmoved
+  // visulation of the circle
+  visualization_msgs::MarkerArray circle = visualization_msgs::MarkerArray();
+  for (int i = 0; i < num_steps; i++) {
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+    marker.header.stamp = ros::Time();
+    marker.ns = "circle";
+    marker.id = i;
+    marker.type = visualization_msgs::Marker::ARROW;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.position = points[i].position;
+    marker.pose.orientation.w = 1.0;
+    marker.scale.x = 0.01;
+    marker.scale.y = 0.01;
+    marker.scale.z = 0.01;
+    marker.color.a = 0.6;
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
+    circle.markers.push_back(marker);
+  }
 
-    array_pub_.publish( circle );
+  array_pub_.publish( circle );
+
 }

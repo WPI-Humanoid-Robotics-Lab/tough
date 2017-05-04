@@ -291,4 +291,3 @@ void handle_detector::visualize_point(geometry_msgs::Point point){
 
     markers_.markers.push_back(marker);
 }
-
