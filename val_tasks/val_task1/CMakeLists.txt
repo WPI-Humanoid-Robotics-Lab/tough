@@ -188,6 +188,7 @@ include_directories(
          src/panel_detection.cpp
          src/handle_detector.cpp
          src/handle_grabber.cpp
+         src/turn_handle.cpp
  )
 
 
@@ -219,6 +220,13 @@ add_dependencies(val_task1_node
 
 add_executable(handle_detector_node
             src/handle_detector_node.cpp
+
+)
+
+
+add_executable(turn_handle
+            src/turn_handle.cpp
+
 )
 
 add_dependencies(handle_detector_node
@@ -244,7 +252,7 @@ target_link_libraries(val_circle
    ${catkin_LIBRARIES}
    val_marker
  )
- 
+
 add_executable(panel_detection_node src/panel_detection_node.cpp)
 add_dependencies(panel_detection_node
  ${${PROJECT_NAME}_EXPORTED_TARGETS}

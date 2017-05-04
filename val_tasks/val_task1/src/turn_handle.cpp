@@ -43,35 +43,33 @@ int main(int argc, char** argv){
 
 
 
-//      visualization_msgs::MarkerArray circle = visualization_msgs::MarkerArray();
-//      for (int i = 0; i < num_steps; i++) {
-//          visualization_msgs::Marker marker;
-//          marker.header.frame_id = VAL_COMMON_NAMES::R_PALM_TF;
-//          marker.header.stamp = ros::Time();
-//          marker.ns = "circle";
-//          marker.id = i;
-//          marker.type = visualization_msgs::Marker::SPHERE;
-//          marker.action = visualization_msgs::Marker::ADD;
-//          marker.pose = return_arc_poses->at(i)->pose;
-//          marker.scale.x = .01;
-//          marker.scale.y = 0.01;
-//          marker.scale.z = 0.01;
-//          marker.color.a = .6; // Don't forget to set the alpha!
-//          marker.color.r = 0.0;
-//          marker.color.g = 1.0;
-//          marker.color.b = 0.0;
-//          //only if using a MESH_RESOURCE marker type:
-//          // marker.mesh_resource = "package://pr2_description/meshes/base_v0/base.dae";
-//          circle.markers.push_back(marker);
-//          // std::cout << marker.pose.position << '\n';
-//        }
+     visualization_msgs::MarkerArray circle = visualization_msgs::MarkerArray();
+     for (int i = 0; i < num_steps; i++) {
+         visualization_msgs::Marker marker;
+         marker.header.frame_id = VAL_COMMON_NAMES::R_PALM_TF;
+         marker.header.stamp = ros::Time();
+         marker.ns = "circle";
+         marker.id = i;
+         marker.type = visualization_msgs::Marker::SPHERE;
+         marker.action = visualization_msgs::Marker::ADD;
+         marker.pose = return_arc_poses->at(i)->pose;
+         marker.scale.x = .01;
+         marker.scale.y = 0.01;
+         marker.scale.z = 0.01;
+         marker.color.a = .6; // Don't forget to set the alpha!
+         marker.color.r = 0.0;
+         marker.color.g = 1.0;
+         marker.color.b = 0.0;
+         //only if using a MESH_RESOURCE marker type:
+         // marker.mesh_resource = "package://pr2_description/meshes/base_v0/base.dae";
+         circle.markers.push_back(marker);
+         // std::cout << marker.pose.position << '\n';
+       }
 
-//      array_pub.publish( circle );
+     array_pub.publish( circle );
 
 
     //populate marker
 
     //publish marker
 }
-
-
