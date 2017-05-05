@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   roscpp
   val_footstep
+  val_control
   perception_common
   pcl_conversions
   pcl_ros
@@ -122,7 +123,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES val_task2
- CATKIN_DEPENDS roscpp decision_making decision_making_parser dynamic_reconfigure val_footstep cv_bridge image_transport pcl_conversions pcl_ros sensor_msgs std_msgs
+ CATKIN_DEPENDS roscpp decision_making decision_making_parser dynamic_reconfigure val_footstep cv_bridge image_transport pcl_conversions pcl_ros sensor_msgs std_msgs val_control
  DEPENDS system_lib
  #DEPENDS system_lib
 )
@@ -145,6 +146,7 @@ include_directories(perception_common
             src/val_task2.cpp
             src/val_task2SM.cpp
 	    src/button_detector.cpp
+            src/button_press.cpp
  )
 
 ## Add cmake target dependencies of the library
@@ -163,6 +165,15 @@ add_executable(button_detector_node
 )
 
 target_link_libraries(button_detector_node ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+   ${PROJECT_NAME}
+)
+
+add_executable(button_press_node
+        src/button_press_node.cpp
+)
+
+target_link_libraries(button_press_node ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
    ${PROJECT_NAME}
 )
