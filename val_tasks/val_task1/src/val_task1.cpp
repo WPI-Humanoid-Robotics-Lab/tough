@@ -306,6 +306,153 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
     return TaskResult::SUCCESS();
 }
 
+decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+
+    ROS_INFO_STREAM("executing " << name);
+
+    if(panel_detector_ == nullptr) {
+        panel_detector_ = new panel_detector(nh_, DETECTOR_TYPE::HANDLE_PANEL_FINE);
+        ros::Duration(0.2).sleep();
+    }
+
+    static int fail_count = 0;
+    static int retry_count = 0;
+
+    // detect panel
+    std::vector<geometry_msgs::Pose> poses;
+    panel_detector_->getDetections(poses);
+
+    // if we get atleast one detection
+    if (poses.size() > 1)
+    {
+        // update the pose
+        geometry_msgs::Pose2D pose2D;
+        // get the last detected pose
+        int idx = poses.size() -1 ;
+        pose2D.x = poses[idx].position.x;
+        pose2D.y = poses[idx].position.y;
+
+        std::cout << "x " << pose2D.x << " y " << pose2D.y << std::endl;
+
+        // get the theta
+        pose2D.theta = tf::getYaw(poses[idx].orientation);
+        setPanelWalkGoal(pose2D);
+
+        std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
+        std::cout << "yaw: " << pose2D.theta  <<std::endl;
+        retry_count = 0;
+        // update the plane coeffecients
+        setPanelCoeff(panel_detector_->getPanelPlaneModel());
+
+        eventQueue.riseEvent("/DETECTED_PANEL_FINE");
+        delete panel_detector_;
+        panel_detector_ = nullptr;
+    }
+
+    else if(retry_count < 5) {
+        ROS_INFO("sleep for 3 seconds for panel detection");
+        ++retry_count;
+        ros::Duration(3).sleep();
+        eventQueue.riseEvent("/DETECT_PANEL_FINE_RETRY");
+    }
+
+    // if failed for more than 5 times, go to error state
+
+
+    else if (fail_count > 5)
+    {
+        // reset the fail count
+        fail_count = 0;
+        eventQueue.riseEvent("DETECT_PANEL_FINE_FAILED");
+        delete panel_detector_;
+        panel_detector_ = nullptr;
+    }
+    // if failed retry detecting the panel
+    else
+    {
+        // increment the fail count
+        fail_count++;
+        eventQueue.riseEvent("/DETECT_PANEL_FINE_RETRY");
+    }
+
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
+
+    return TaskResult::SUCCESS();
+}
+
+decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+    ROS_INFO_STREAM("executing " << name);
+
+       static int fail_count = 0;
+
+       // walk to the goal location
+       // the goal can be updated on the run time
+       static geometry_msgs::Pose2D pose_prev;
+
+       geometry_msgs::Pose current_pelvis_pose;
+       robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+
+       // check if the pose is changed
+       ///@todo: what if pose has not changed but robot did not reach the goal and is not walking?
+       if (isPoseChanged(pose_prev, panel_walk_goal_))
+       {
+           ROS_INFO("pose chaned");
+           walker_->walkToGoal(panel_walk_goal_, false);
+           // sleep so that the walk starts
+           ros::Duration(1).sleep();
+
+           // update the previous pose
+           pose_prev = panel_walk_goal_;
+       }
+
+       // if walking stay in the same state
+       if (walk_track_->isWalking())
+       {
+           // no state change
+           ROS_INFO("walking");
+           eventQueue.riseEvent("/WALK_TO_PANEL_EXECUTING");
+       }
+       // if walk finished
+       // TODO change to see if we are at the goal
+       else if ( fabs(panel_walk_goal_.x - current_pelvis_pose.position.x) < 0.05 && fabs(panel_walk_goal_.y - current_pelvis_pose.position.y) < 0.05 )
+       {
+
+           ROS_INFO("reached panel");
+
+           // TODO: check if robot rechead the panel
+           eventQueue.riseEvent("/REACHED_PANEL");
+       }
+       // if failed for more than 5 times, go to error state
+       else if (fail_count > 5)
+       {
+           // reset the fail count
+           fail_count = 0;
+           ROS_INFO("walk failed");
+           eventQueue.riseEvent("/WALK_TO_PANEL_FAILED");
+       }
+       // if failed retry detecting the panel and then walk
+       // also handles MOVE_FAILED
+       else
+       {
+           // increment the fail count
+           fail_count++;
+           ROS_INFO("walk retry");
+           eventQueue.riseEvent("/WALK_TO_PANEL_RETRY");
+       }
+
+       // wait infinetly until an external even occurs
+       while(!preemptiveWait(1000, eventQueue)){
+           ROS_INFO("waiting for transition");
+       }
+
+       return TaskResult::SUCCESS();
+
+}
+
 decision_making::TaskResult valTask1::adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);

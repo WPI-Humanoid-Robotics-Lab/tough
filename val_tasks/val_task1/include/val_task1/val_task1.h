@@ -89,6 +89,8 @@ class valTask1 {
     decision_making::TaskResult detectPanelCoarseTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult walkToSeePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectPanelFineTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToPanel(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult controlPitchTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult controlYawTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
