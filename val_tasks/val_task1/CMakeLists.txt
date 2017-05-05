@@ -57,6 +57,7 @@ find_package(catkin REQUIRED COMPONENTS
   val_task_common
 )
 
+
 ## System dependencies are found with CMake's conventions
 
 find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
@@ -188,7 +189,9 @@ include_directories(
          src/panel_detection.cpp
          src/handle_detector.cpp
          src/handle_grabber.cpp
-         src/turn_handle.cpp
+         src/move_handle.cpp
+
+
  )
 
 
@@ -224,10 +227,6 @@ add_executable(handle_detector_node
 )
 
 
-add_executable(turn_handle
-            src/turn_handle.cpp
-
-)
 
 add_dependencies(handle_detector_node
  ${${PROJECT_NAME}_EXPORTED_TARGETS}
@@ -264,15 +263,8 @@ add_executable(handle_grabber_node src/handle_grabber_node.cpp)
 add_dependencies(handle_grabber_node
  ${${PROJECT_NAME}_EXPORTED_TARGETS}
  ${catkin_EXPORTED_TARGETS})
+
 target_link_libraries(handle_grabber_node ${catkin_LIBRARIES} ${PROJECT_NAME})
-
-add_executable(move_handle src/move_handle.cpp)
-add_dependencies(move_handle
- ${${PROJECT_NAME}_EXPORTED_TARGETS}
- ${catkin_EXPORTED_TARGETS})
-
-target_link_libraries(move_handle ${catkin_LIBRARIES})
-
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -332,3 +324,7 @@ decision_making_parsing(src/val_task1SM.cpp)
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+
+add_executable(test_handle src/test_handle.cpp)
+target_link_libraries(test_handle ${catkin_LIBRARIES} ${PROJECT_NAME})
