@@ -28,16 +28,16 @@ int main(int argc, char** argv){
     //   z: -0.237831410495
     //   w: 0.93603491255
 
-    center_start_pose.pose.position.x     = 0.0361732393617;
-    center_start_pose.pose.position.y     = -0.161804376091;
-    center_start_pose.pose.position.z     = 0.0806415066177;
-    center_start_pose.pose.orientation.x  = -0.257522648502;
-    center_start_pose.pose.orientation.y  = -0.0309345790064;
-    center_start_pose.pose.orientation.z  = -0.237831410495;
-    center_start_pose.pose.orientation.w  =  0.93603491255;
+    center_start_pose.pose.position.x     = 3.12; //0.0361732393617;
+    center_start_pose.pose.position.y     = 0.814; //-0.161804376091;
+    center_start_pose.pose.position.z     = 0.84; //0.0806415066177;
+    center_start_pose.pose.orientation.x  = 0; //-0.257522648502;
+    center_start_pose.pose.orientation.y  = 0; //-0.0309345790064;
+    center_start_pose.pose.orientation.z  = 0; //-0.237831410495;
+    center_start_pose.pose.orientation.w  = 1; // 0.93603491255;
     center_start_pose.header.seq          = 1;
     center_start_pose.header.stamp        = ros::Time::now();
-    center_start_pose.header.frame_id     = VAL_COMMON_NAMES::R_PALM_TF;
+    center_start_pose.header.frame_id     = VAL_COMMON_NAMES::WORLD_TF;
 
     ROS_INFO("Test Circle Node Started");
     // pthread_create(&input_thread, NULL, input_thread_func, NULL);
@@ -68,7 +68,7 @@ void* input_thread_func(void *input_ptr)
   //this waits until both center pose received and user presses enter
   input =std::cin.get();
   //man, this is pretty stupid
-  center_pub->publish(transform_pose_simple(&center_pose,VAL_COMMON_NAMES::R_PALM_TF));
+  center_pub->publish(transform_pose_simple(&center_pose,VAL_COMMON_NAMES::WORLD_TF));
 
 // std::cout << "pub pose: " <<center_pose.pose.position.x<<" "<<center_pose.pose.position.y<< '\n';
 
