@@ -20,6 +20,8 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   sensor_msgs
   std_msgs
+  tf
+  tf_conversions
 
 
 )
@@ -142,6 +144,7 @@ include_directories(perception_common
  add_library(${PROJECT_NAME}
             src/val_task2.cpp
             src/val_task2SM.cpp
+	    src/button_detector.cpp
  )
 
 ## Add cmake target dependencies of the library
@@ -155,8 +158,14 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(val_button_detection_node src/val_button_detection_node.cpp)
-target_link_libraries(val_button_detection_node ${catkin_LIBRARIES})
+add_executable(button_detector_node 
+	src/button_detector_node.cpp
+)
+
+target_link_libraries(button_detector_node ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+   ${PROJECT_NAME}
+)
 
 
 
