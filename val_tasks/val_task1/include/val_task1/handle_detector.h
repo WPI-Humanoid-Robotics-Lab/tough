@@ -46,7 +46,7 @@ class handle_detector
     void visualize_point(geometry_msgs::Point point);
 public:
 
-    void showImage(cv::Mat);
+    void showImage(cv::Mat, std::string caption="Handle Detection");
     inline void colorSegment(const cv::Mat &imgHSV, const int[], cv::Mat &outImg);
     void doMorphology(cv::Mat &image);
     void findMaxContour(const cv::Mat, cv::Rect &roi);

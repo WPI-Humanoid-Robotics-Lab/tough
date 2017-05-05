@@ -1,12 +1,13 @@
-#include <val_task1/panel_detection.h>
+#include <val_task_common/panel_detection.h>
 
 int main(int argc, char** argv){
 
     ros::init(argc, argv, "panel_detector");
     ros::NodeHandle nh;
     ros::Publisher goalPub = nh.advertise<geometry_msgs::PoseStamped>("/valkyrie/goal",1);
-    panel_detector obj(nh);
-    int NUM_SAMPLES = 1;
+
+    panel_detector obj(nh, DETECTOR_TYPE::HANDLE_PANEL_COARSE);
+    int NUM_SAMPLES = 10;
     std::vector<geometry_msgs::Pose> detections;
     int trials;
     while(ros::ok() && detections.size() < NUM_SAMPLES){

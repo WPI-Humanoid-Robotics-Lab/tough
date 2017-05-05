@@ -10,13 +10,13 @@ handle_detector::handle_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_)
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_handles",1);
 }
 
-void handle_detector::showImage(cv::Mat image)
+void handle_detector::showImage(cv::Mat image, std::string caption)
 {
 #ifdef DISABLE_DRAWINGS
     return;
 #endif
-    cv::namedWindow( "Handle Detection", cv::WINDOW_AUTOSIZE );
-    cv::imshow( "Handle Detection", image);
+    cv::namedWindow( caption, cv::WINDOW_AUTOSIZE );
+    cv::imshow( caption, image);
     cv::waitKey(0);
 }
 
@@ -89,6 +89,7 @@ bool handle_detector::findAllContours (const cv::Mat &image)
     // Detect edges using canny
     cv::Canny(image, canny_output, thresh_, thresh_*2, 3);
 
+
     // Find contours
     cv::findContours(canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
@@ -160,9 +161,7 @@ bool handle_detector::getHandleLocation(std::vector<geometry_msgs::Point>& handl
             }
         }
 
-        if(pclPoint.z < MAX_Z ){
-            continue;
-        }
+
 
         frameID_++;
         buttonCenters_.push_back(pclPoint);
@@ -185,7 +184,9 @@ bool handle_detector::getHandleLocation(std::vector<geometry_msgs::Point>& handl
             ros::spinOnce();
             return false;
         }
-
+        if(geom_point.point.z < 0.5f ){
+            continue;
+        }
         handleLocs.push_back(geom_point.point);
         visualize_point(geom_point.point);
         // return true only if there are 4 points in handleLocs
@@ -213,18 +214,21 @@ bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
     ms_sensor_.giveImage(current_image_);
     ms_sensor_.giveDisparityImage(current_disparity_);
 
+    cv::inRange(current_image_, cv::Scalar(73, 0, 0), cv::Scalar(255, 20, 20), imRed_);
+    showImage(imRed_);
+
     cv::cvtColor(current_image_, current_image_HSV_, cv::COLOR_BGR2HSV);
     cv::GaussianBlur(current_image_HSV_, current_image_HSV_, cv::Size(9, 9), 2, 2);
 
     side_ = "left"; // used for naming frames. Left = red;
 
-    colorSegment(current_image_HSV_, hsvRed_, imRed_);
+//    colorSegment(current_image_HSV_, hsvRed_, imRed_);
     doMorphology(imRed_);
     showImage(imRed_);
     findMaxContour(imRed_, roiRed_);
     imRedReduced_= cv::Mat::zeros(current_image_HSV_.size(), current_image_HSV_.type());
 
-    cv::Mat mask = cv::Mat::zeros(current_image_HSV_.size(), current_image_HSV_.type());
+    cv::Mat mask = cv::Mat::zeros(current_image_.size(), current_image_.type());
     cv::rectangle(mask, cv::Point(roiRed_.x, roiRed_.y), cv::Point(roiRed_.x+roiRed_.width, roiRed_.y+roiRed_.height),cv::Scalar(255, 255, 255), -1, 8, 0);
     showImage(mask);
     current_image_HSV_.copyTo(imRedReduced_,mask);
@@ -237,13 +241,15 @@ bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
 
     side_ = "right"; // used for naming frames;
 
-    colorSegment(current_image_HSV_, hsvBlue_, imBlue_);
+    cv::inRange(current_image_, cv::Scalar(0, 0, 70), cv::Scalar(20, 20, 255), imBlue_);
+    showImage(imBlue_);
+//    colorSegment(current_image_HSV_, hsvBlue_, imBlue_);
     doMorphology(imBlue_);
     showImage(imBlue_);
     findMaxContour(imBlue_, roiBlue_);
     imBlueReduced_= cv::Mat::zeros(current_image_HSV_.size(), current_image_HSV_.type());
 
-    cv::Mat maskBlue = cv::Mat::zeros(current_image_HSV_.size(), current_image_HSV_.type());
+    cv::Mat maskBlue = cv::Mat::zeros(current_image_.size(), current_image_.type());
     cv::rectangle(maskBlue, cv::Point(roiBlue_.x, roiBlue_.y), cv::Point(roiBlue_.x+roiBlue_.width, roiBlue_.y+roiBlue_.height),cv::Scalar(255, 255, 255), -1, 8, 0);
     showImage(maskBlue);
     current_image_HSV_.copyTo(imBlueReduced_,maskBlue);
@@ -255,6 +261,7 @@ bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
     val = findAllContours(imGray_);
 
     return getHandleLocation(handleLocs);
+
 }
 
 void handle_detector::visualize_point(geometry_msgs::Point point){
@@ -291,4 +298,3 @@ void handle_detector::visualize_point(geometry_msgs::Point point){
 
     markers_.markers.push_back(marker);
 }
-
