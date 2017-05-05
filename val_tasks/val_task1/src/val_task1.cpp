@@ -84,14 +84,18 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
     ROS_INFO_STREAM("executing " << name);
     static int retry_count = 0;
 
+    // TODO
+    // if the map does not update fast enought and this is called greater then 10 time it will break
     if(retry_count == 0){
         map_update_count_ = 0;
     }
+    // It is depenent on the timer timer right now.
 
     // the state transition can happen from an event externally or can be geenerated here
     ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
     if (map_update_count_ > 1) {
         // move to a configuration that is robust while walking
+        retry_count = 0;
         pelvis_controller_->controlPelvisHeight(0.9);
         chest_controller_->controlChest(0.0f, 10.0f, 0.0f);
         ros::Duration(1.0f).sleep();
@@ -123,6 +127,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
 
 decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
+
     ROS_INFO_STREAM("executing " << name);
 
     if(panel_detector_ == nullptr) {
@@ -154,7 +159,7 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
 
         std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
         std::cout << "yaw: " << pose2D.theta  <<std::endl;
-
+        retry_count = 0;
         // update the plane coeffecients
         setPanelCoeff(panel_detector_->getPanelPlaneModel());
 
@@ -171,6 +176,8 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
     }
 
     // if failed for more than 5 times, go to error state
+
+
     else if (fail_count > 5)
     {
         // reset the fail count
@@ -205,10 +212,11 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
     // the goal can be updated on the run time
     static geometry_msgs::Pose2D pose_prev;
 
-    geometry_msgs::Pose pose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pose);
+    geometry_msgs::Pose current_pelvis_pose;
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
 
     // check if the pose is changed
+    ///@todo: what if pose has not changed but robot did not reach the goal and is not walking?
     if (isPoseChanged(pose_prev, panel_walk_goal_))
     {
         ROS_INFO("pose chaned");
@@ -228,7 +236,8 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
         eventQueue.riseEvent("/WALK_EXECUTING");
     }
     // if walk finished
-    else if ( fabs(panel_walk_goal_.x - pose.position.x) < 0.05 && fabs(panel_walk_goal_.y - pose.position.y) < 0.05 )
+    // TODO change to see if we are at the goal
+    else if ( fabs(panel_walk_goal_.x - current_pelvis_pose.position.x) < 0.05 && fabs(panel_walk_goal_.y - current_pelvis_pose.position.y) < 0.05 )
     {
 
         ROS_INFO("reached panel");
@@ -265,8 +274,9 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
 decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+    //tilt head downwards to see the panel
     head_controller_->moveHead(0.0f, 30.0f, 0.0f, 2.0f);
-
+    static int retry_count = 0;
     //wait for head to be in position
     ros::Duration(3).sleep();
 
@@ -281,9 +291,16 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
         // generate the event
         eventQueue.riseEvent("/DETECTED_HANDLE");
     }
-    else {
-        eventQueue.riseEvent("/DETECT_HANDLE_RETRY");
+    else if( retry_count++ < 10){
+      ROS_INFO("Did not detect handle, retrying");
+      eventQueue.riseEvent("/DETECT_HANDLE_RETRY");
     }
+    else{
+      ROS_INFO("Did not detect handle, failed");
+      eventQueue.riseEvent("/DETECT_HANDLE_FAILED");
+      retry_count = 0;
+    }
+
 
     return TaskResult::SUCCESS();
 }
