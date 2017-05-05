@@ -18,7 +18,7 @@ void task1Node::registerStateMethods(void)
     // Register all the functions
     // register the api's for states
     LocalTasks::registrate("STATE_INIT",                std::bind(&valTask1::initTask,              task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_DETECT_PANEL",        std::bind(&valTask1::detectPanelTask,       task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_DETECT_PANEL_COARSE", std::bind(&valTask1::detectPanelTask,       task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_WALK_TO_CONTROL",     std::bind(&valTask1::walkToControlPanelTask,task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_DETECT_HANDLE_CENTER",std::bind(&valTask1::detectHandleCenterTask,task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_ADJUST_ARMS",         std::bind(&valTask1::adjustArmTask,         task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));

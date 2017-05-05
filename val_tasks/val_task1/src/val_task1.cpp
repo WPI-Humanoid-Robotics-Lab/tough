@@ -131,7 +131,8 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
     ROS_INFO_STREAM("executing " << name);
 
     if(panel_detector_ == nullptr) {
-        panel_detector_ = new panel_detector(nh_);
+        panel_detector_ = new panel_detector(nh_, DETECTOR_TYPE::HANDLE_PANEL_COARSE);
+        ros::Duration(0.2).sleep();
     }
 
     static int fail_count = 0;
@@ -220,9 +221,9 @@ decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const 
     if (isPoseChanged(pose_prev, panel_walk_goal_))
     {
         ROS_INFO("pose chaned");
-        //walker_->walkToGoal(panel_walk_goal_, false);
+        walker_->walkToGoal(panel_walk_goal_, false);
         // sleep so that the walk starts
-        //ros::Duration(4).sleep();
+        ros::Duration(4).sleep();
 
         // update the previous pose
         pose_prev = panel_walk_goal_;

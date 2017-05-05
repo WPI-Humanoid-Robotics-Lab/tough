@@ -18,7 +18,7 @@
 
 #include "val_footstep/ValkyrieWalker.h"
 #include "val_task_common/val_walk_tracker.h"
-#include "val_task1/panel_detection.h"
+#include "val_task_common/panel_detection.h"
 #include "val_control/val_chest_navigation.h"
 #include "val_control/val_pelvis_navigation.h"
 #include "val_control/val_head_navigation.h"

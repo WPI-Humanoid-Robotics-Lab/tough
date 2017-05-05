@@ -7,7 +7,7 @@ FSM(val_task1)
   FSM_STATES
   {
     STATE_INIT, // fails --> error
-    STATE_DETECT_PANEL, // fails --> indicate error and stay transition to error
+    STATE_DETECT_PANEL_COARSE, // fails --> indicate error and stay transition to error
     STATE_WALK_TO_CONTROL, // fails --> go back, error,
     STATE_DETECT_HANDLE_CENTER, // indicate error and stay
     STATE_ADJUST_ARMS, // fails --> go back , error
@@ -35,19 +35,19 @@ FSM(val_task1)
       {
         // transitions
         FSM_ON_EVENT("/INIT_RETRY", FSM_NEXT(STATE_INIT))
-        FSM_ON_EVENT("/INIT_SUCESSFUL", FSM_NEXT(STATE_DETECT_PANEL))
+        FSM_ON_EVENT("/INIT_SUCESSFUL", FSM_NEXT(STATE_DETECT_PANEL_COARSE))
         FSM_ON_EVENT("/INIT_FAILED", FSM_NEXT(STATE_ERROR))
 
         // or on condition or next state directly
       }
     }
-    FSM_STATE(STATE_DETECT_PANEL)
+    FSM_STATE(STATE_DETECT_PANEL_COARSE)
     {
-      FSM_CALL_TASK(STATE_DETECT_PANEL)
+      FSM_CALL_TASK(STATE_DETECT_PANEL_COARSE)
 
       FSM_TRANSITIONS
       {
-        FSM_ON_EVENT("/DETECT_PANEL_RETRY", FSM_NEXT(STATE_DETECT_PANEL))
+        FSM_ON_EVENT("/DETECT_PANEL_RETRY", FSM_NEXT(STATE_DETECT_PANEL_COARSE))
         FSM_ON_EVENT("/DETECTED_PANEL", FSM_NEXT(STATE_WALK_TO_CONTROL))
         FSM_ON_EVENT("/DETECT_PANEL_FAILED", FSM_NEXT(STATE_ERROR))
       }
@@ -60,7 +60,7 @@ FSM(val_task1)
       {
         FSM_ON_EVENT("/WALK_FAILED", FSM_NEXT(STATE_ERROR))
         FSM_ON_EVENT("/WALK_EXECUTING", FSM_NEXT(STATE_WALK_TO_CONTROL))
-        FSM_ON_EVENT("/WALK_RETRY", FSM_NEXT(STATE_DETECT_PANEL))
+        FSM_ON_EVENT("/WALK_RETRY", FSM_NEXT(STATE_DETECT_PANEL_COARSE))
         FSM_ON_EVENT("/REACHED_PANEL", FSM_NEXT(STATE_DETECT_HANDLE_CENTER))
       }
     }
