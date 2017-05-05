@@ -125,7 +125,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
     return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
 
     ROS_INFO_STREAM("executing " << name);
@@ -203,7 +203,7 @@ decision_making::TaskResult valTask1::detectPanelTask(string name, const FSMCall
 }
 
 
-decision_making::TaskResult valTask1::walkToControlPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
 
