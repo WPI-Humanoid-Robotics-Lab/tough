@@ -26,7 +26,7 @@ int main(int argc, char** argv){
     y = 1.04;//center.pose.position.y;
     std::cout << "center: " <<x<<" "<<y<< '\n';
     std::cout << "radius: " <<radius<< '\n';
-
+    int angle = 45;
     num_steps = num_steps*(angle/360.0);
     for (int i=0;i<num_steps;i++)
     {
