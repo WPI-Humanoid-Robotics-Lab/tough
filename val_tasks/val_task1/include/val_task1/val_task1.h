@@ -18,7 +18,7 @@
 
 #include "val_footstep/ValkyrieWalker.h"
 #include "val_task_common/val_walk_tracker.h"
-#include "val_task1/panel_detection.h"
+#include "val_task_common/panel_detection.h"
 #include "val_control/val_chest_navigation.h"
 #include "val_control/val_pelvis_navigation.h"
 #include "val_control/val_head_navigation.h"
@@ -86,9 +86,11 @@ class valTask1 {
 
     bool preemptiveWait(double ms, decision_making::EventQueue& queue);
     decision_making::TaskResult initTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    decision_making::TaskResult detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    decision_making::TaskResult walkToControlPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectPanelCoarseTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToSeePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectPanelFineTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToPanel(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult controlPitchTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult controlYawTask(string name, const FSMCallContext& context, EventQueue& eventQueue);

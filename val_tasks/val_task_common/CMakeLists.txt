@@ -132,6 +132,7 @@ include_directories(
 ## Declare a C++ library
  add_library(${PROJECT_NAME}
    src/val_walk_tracker.cpp
+   src/panel_detection.cpp
  )
 
 ## Add cmake target dependencies of the library
@@ -169,6 +170,12 @@ target_link_libraries(val_walk_tracker_node
    ${catkin_LIBRARIES} ${PCL_LIBRARIES}
  )
 
+add_executable(panel_detection_node src/panel_detection_node.cpp)
+add_dependencies(panel_detection_node
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(panel_detection_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} ${PROJECT_NAME})
 #############
 ## Install ##
 #############
