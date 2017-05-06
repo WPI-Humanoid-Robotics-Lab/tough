@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(val_task3)
 
+SET(CMAKE_BUILD_TYPE RelWithDebInfo)
+
+set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -8,11 +12,17 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+
+  perception_commonq
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
 
+find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
+find_package(Boost REQUIRED COMPONENTS system)
+find_package(PCL 1.7 REQUIRED)
+
+include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -100,10 +110,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES val_task3
-#  CATKIN_DEPENDS roscpp rospy std_msgs
-#  DEPENDS system_lib
+  INCLUDE_DIRS include
+  LIBRARIES val_task3
+  CATKIN_DEPENDS roscpp rospy perception_common dynamic_reconfigure
+  DEPENDS system_lib
 )
 
 ###########
@@ -115,28 +125,37 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  include
 )
 
 ## Declare a C++ library
-# add_library(val_task3
-#   src/${PROJECT_NAME}/val_task3.cpp
-# )
-
+add_library(${PROJECT_NAME}
+         #src/val_task3.cpp
+         src/table_detector.cpp
+         src/table_detector_node.cpp
+)
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(val_task3 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
+target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
 
-## Declare a C++ executable
-add_executable(val_task3_node src/val_task3.cpp)
+add_executable(table_detector_node
+            src/table_detector_node.cpp
 
-## Add cmake target dependencies of the executable
-## same as for the library above
- add_dependencies(val_task3_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+)
+
+add_dependencies(table_detector_node
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS}_gencfg
+ ${catkin_EXPORTED_TARGETS})
+
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(val_task3_node
+ target_link_libraries(table_detector_node
    ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+   ${PROJECT_NAME}
  )
 
 #############
