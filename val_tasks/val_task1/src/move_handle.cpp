@@ -1,4 +1,3 @@
-
 #include <val_task1/move_handle.h>
 
 
@@ -9,11 +8,27 @@ move_handle::move_handle(ros::NodeHandle n) : nh_(n) {
 }
 
 
-void move_handle::createCircle(geometry_msgs::PoseStamped center, int side, float a, float b, float c, float d)
+void move_handle::createCircle(geometry_msgs::Point center, int side, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points)
 {
+
   float radius = .12,num_steps = 20;
-  float hand_z_plane = 0;
+  //float hand_z_plane = 0;
   float dist = 0;
+
+  if (planeCoeffs.size() != 4){
+      ROS_INFO("Please check the plane coefficiants");
+  }
+
+  float a = planeCoeffs.at(0);
+  float b = planeCoeffs.at(1);
+  float c = planeCoeffs.at(2);
+  float d = planeCoeffs.at(3);
+
+  geometry_msgs::Pose cen;
+  cen.position.x = center.x;
+  cen.position.y = center.y;
+  cen.position.z = center.z;
+
 
   geometry_msgs::Pose current_hand_pose;
 
@@ -29,22 +44,24 @@ void move_handle::createCircle(geometry_msgs::PoseStamped center, int side, floa
   dist = fabs( a*current_hand_pose.position.x  + b*current_hand_pose.position.y + c*current_hand_pose.position.z  + d )/sqrt( pow(a,2) + pow(b,2) + pow(c,2) );
   ROS_INFO("%f\n",dist);
   ROS_INFO_STREAM(current_hand_pose.position);
-  std::vector<geometry_msgs::PoseStamped> points;
-  for (int i=0; i<num_steps; i++)
+
+  for (int i=0; i<num_steps; ++i)
   {
     // circle parametric equation
-    geometry_msgs::PoseStamped point;
-    point.pose.position.x = center.pose.position.x + (radius * cos((float)i*(2*M_PI/num_steps)));
-    point.pose.position.y = center.pose.position.y + (radius * sin((float)i*(2*M_PI/num_steps)));
+    geometry_msgs::Pose point;
+    point.position.x = cen.position.x + (radius * cos((float)i*(2*M_PI/num_steps)));
+    point.position.y = cen.position.y + (radius * sin((float)i*(2*M_PI/num_steps)));
+    point.position.z = -(a*point.position.x  + b* point.position.y + (d - dist) )/c   ;
 
-    point.pose.position.z = -(a*point.pose.position.x  + b* point.pose.position.y + (d - dist) )/c   ;
     points.push_back(point);
   }
+
   visulatize(points);
+  ros::Duration(3).sleep();
 }
 
 
-void move_handle::visulatize(std::vector<geometry_msgs::PoseStamped> &points)
+void move_handle::visulatize(std::vector<geometry_msgs::Pose> &points)
 {
   // visulation of the circle
   visualization_msgs::MarkerArray circle = visualization_msgs::MarkerArray();
@@ -56,7 +73,7 @@ void move_handle::visulatize(std::vector<geometry_msgs::PoseStamped> &points)
     marker.id = i;
     marker.type = visualization_msgs::Marker::ARROW;
     marker.action = visualization_msgs::Marker::ADD;
-    marker.pose = points[i].pose;
+    marker.pose = points[i];
     marker.scale.x = 0.01;
     marker.scale.y = 0.01;
     marker.scale.z = 0.01;
