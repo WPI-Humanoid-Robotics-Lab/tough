@@ -17,8 +17,8 @@ int main(int argc, char** argv){
   ros::Rate loop_rate(10);
 
   geometry_msgs::PoseStamped center;
-  center.pose.position.x = 3.12;
-  center.pose.position.y = 0.814;
+  center.pose.position.x = 3.10;
+  center.pose.position.y = .9;
   center.pose.position.z = 0.84;
   center.pose.orientation.x  = 0;
   center.pose.orientation.y  = 0;
@@ -27,10 +27,10 @@ int main(int argc, char** argv){
 
   std::vector<geometry_msgs::PoseStamped> points;
 
-
+ handle.createCircle(center, 0, -0.3028,-0.3481,0.8872,0.5768 );
   while(ros::ok())
   {
-    handle.createCircle(center, 0.324,0.3308,0.5863,0.8293 );
+
     ros::spinOnce();
     loop_rate.sleep();
   }

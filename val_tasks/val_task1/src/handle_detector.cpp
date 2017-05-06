@@ -1,10 +1,12 @@
 #include <val_task1/handle_detector.h>
 #include <visualization_msgs/Marker.h>
 #include "val_common/val_common_names.h"
+#include <pcl/common/centroid.h>
+#include <thread>
 
 #define DISABLE_DRAWINGS true
 
-handle_detector::handle_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_)
+handle_detector::handle_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
     ms_sensor_.giveQMatrix(qMatrix_);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_handles",1);
@@ -48,8 +50,8 @@ void handle_detector::findMaxContour(const cv::Mat image, cv::Rect &roi)
     std::vector<std::vector<cv::Point>> contours_poly(contours.size());
     std::vector<cv::Rect> boundRect(contours.size());
     std::vector<std::vector<cv::Point>> hull(contours.size());
-
     for(int i = 0; i < contours.size(); i++)
+
     {
         cv::convexHull(cv::Mat(contours[i]), hull[i], false);
         cv::approxPolyDP(cv::Mat(hull[i]), contours_poly[i], 3, true);
@@ -71,11 +73,15 @@ void handle_detector::findMaxContour(const cv::Mat image, cv::Rect &roi)
             largest_contour_index = i;               //Store the index of largest contour
         }
     }
+    if (boundRect.empty()){
+        return;
+    }
 #ifndef DISABLE_DRAWINGS
-    cv::drawContours( drawing, contours, largest_contour_index, color, 2, 8, hierarchy, 0, cv::Point() );
-    cv::rectangle( drawing, boundRect[largest_contour_index].tl(), boundRect[largest_contour_index].br(), color, 2, 8, 0 );
-    showImage(drawing);
+        cv::drawContours( drawing, contours, largest_contour_index, color, 2, 8, hierarchy, 0, cv::Point() );
+        cv::rectangle( drawing, boundRect[largest_contour_index].tl(), boundRect[largest_contour_index].br(), color, 2, 8, 0 );
+        showImage(drawing);
 #endif
+
     roi = boundRect[largest_contour_index];
 }
 
@@ -133,11 +139,19 @@ bool handle_detector::getHandleLocation(std::vector<geometry_msgs::Point>& handl
 
     bool foundButton = false;
     pcl::PointXYZRGB pclPoint;
-    src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
-    src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
+
+//    pcl::removeNaNFromPointCloud(organizedCloud);
     tf::TransformListener listener;
 
-    float MAX_Z = 0.5f;
+    int threadWaitCounter = 0;
+
+    while(organizedCloud_->empty() && threadWaitCounter++ < 40){
+        ros::Duration(0.1).sleep();
+    }
+
+    if(organizedCloud_->empty()){
+        return false;
+    }
 
     for(int i=0; i<rectCenter_.size(); i++)
     {
@@ -148,29 +162,33 @@ bool handle_detector::getHandleLocation(std::vector<geometry_msgs::Point>& handl
         cv::Mat nonZeroCoordinates;
         cv::erode(hullPoints, hullPoints, cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(5,5)));
         cv::findNonZero(hullPoints, nonZeroCoordinates);
-
-        MAX_Z = 0.5f;
-        pclPoint = pcl::PointXYZRGB();
+        if (nonZeroCoordinates.total() < 10){
+            continue;
+        }
+        pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
 
         for (int k = 0; k < nonZeroCoordinates.total(); k++ ) {
-            pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
-            if (temp_pclPoint.z > MAX_Z)
+            pcl::PointXYZRGB temp_pclPoint = organizedCloud_->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
+
+            if (temp_pclPoint.z > -2.0)
             {
-                pclPoint = temp_pclPoint;
-                MAX_Z = pclPoint.z;
+                currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
+
             }
         }
 
-
+        Eigen::Vector4f cloudCentroid;
+        //  Calculating the Centroid of the handle Point cloud
+        pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
 
         frameID_++;
-        buttonCenters_.push_back(pclPoint);
+        buttonCenters_.push_back(pcl::PointXYZ(cloudCentroid(0), cloudCentroid(1), cloudCentroid(2)));
 
         std::cout<<"Handle "<< i << " at " << buttonCenters_[i].x << " " << buttonCenters_[i].y << " " << buttonCenters_[i].z << std::endl;
         geometry_msgs::PointStamped geom_point;
-        geom_point.point.x = pclPoint.x;
-        geom_point.point.y = pclPoint.y;
-        geom_point.point.z = pclPoint.z;
+        geom_point.point.x = cloudCentroid(0);
+        geom_point.point.y = cloudCentroid(1);
+        geom_point.point.z = cloudCentroid(2);
         geom_point.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
 
         try
@@ -213,19 +231,40 @@ bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
 
     ms_sensor_.giveImage(current_image_);
     ms_sensor_.giveDisparityImage(current_disparity_);
+    organizedCloud_->clear();
+
+    //    Starting a thread with lambda as debugging normal thread call was taking longer. [&] is because we are calling a static function
+    std::thread t1([&](){
+                src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud_);
+            });
+    t1.detach();
 
     cv::inRange(current_image_, cv::Scalar(73, 0, 0), cv::Scalar(255, 20, 20), imRed_);
     showImage(imRed_);
+
+    cv::inRange(current_image_, cv::Scalar(0, 0, 70), cv::Scalar(20, 20, 255), imBlue_);
+    showImage(imBlue_);
 
     cv::cvtColor(current_image_, current_image_HSV_, cv::COLOR_BGR2HSV);
     cv::GaussianBlur(current_image_HSV_, current_image_HSV_, cv::Size(9, 9), 2, 2);
 
     side_ = "left"; // used for naming frames. Left = red;
 
-//    colorSegment(current_image_HSV_, hsvRed_, imRed_);
+    //    colorSegment(current_image_HSV_, hsvRed_, imRed_);
     doMorphology(imRed_);
     showImage(imRed_);
     findMaxContour(imRed_, roiRed_);
+    if(roiRed_.height == 0 || roiRed_.width == 0){
+        return false;
+    }
+
+    doMorphology(imBlue_);
+    showImage(imBlue_);
+    findMaxContour(imBlue_, roiBlue_);
+    if(roiBlue_.height == 0 || roiBlue_.width == 0){
+        return false;
+    }
+
     imRedReduced_= cv::Mat::zeros(current_image_HSV_.size(), current_image_HSV_.type());
 
     cv::Mat mask = cv::Mat::zeros(current_image_.size(), current_image_.type());
@@ -241,12 +280,8 @@ bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
 
     side_ = "right"; // used for naming frames;
 
-    cv::inRange(current_image_, cv::Scalar(0, 0, 70), cv::Scalar(20, 20, 255), imBlue_);
-    showImage(imBlue_);
-//    colorSegment(current_image_HSV_, hsvBlue_, imBlue_);
-    doMorphology(imBlue_);
-    showImage(imBlue_);
-    findMaxContour(imBlue_, roiBlue_);
+    //    colorSegment(current_image_HSV_, hsvBlue_, imBlue_);
+
     imBlueReduced_= cv::Mat::zeros(current_image_HSV_.size(), current_image_HSV_.type());
 
     cv::Mat maskBlue = cv::Mat::zeros(current_image_.size(), current_image_.type());
@@ -258,6 +293,7 @@ bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
     colorSegment(imBlueReduced_, hsvGray_, imGray_);
     showImage(imGray_);
     showImage(current_disparity_);
+
     val = findAllContours(imGray_);
 
     return getHandleLocation(handleLocs);

@@ -424,7 +424,7 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
            ROS_INFO("reached panel");
 
            // TODO: check if robot rechead the panel
-           eventQueue.riseEvent("/REACHED_PANEL");
+           eventQueue.riseEvent("/REACHED_PANEL_FINE");
        }
        // if failed for more than 5 times, go to error state
        else if (fail_count > 5)
@@ -463,7 +463,7 @@ decision_making::TaskResult valTask1::adjustArmTask(string name, const FSMCallCo
     ros::Duration(3).sleep();
 
     ROS_INFO("Grasp left handle");
-    handle_grabber_->grab_handle(armSide::LEFT, handle_loc_[1]);
+    handle_grabber_->grab_handle(armSide::LEFT, handle_loc_[3]);
 
     // generate the way points to move the handle
     std::vector<geometry_msgs::Pose> waypoints;
