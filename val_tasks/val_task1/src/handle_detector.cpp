@@ -1,10 +1,12 @@
 #include <val_task1/handle_detector.h>
 #include <visualization_msgs/Marker.h>
 #include "val_common/val_common_names.h"
+#include <pcl/common/centroid.h>
+#include <thread>
 
 #define DISABLE_DRAWINGS true
 
-handle_detector::handle_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_)
+handle_detector::handle_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
     ms_sensor_.giveQMatrix(qMatrix_);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_handles",1);
@@ -48,8 +50,8 @@ void handle_detector::findMaxContour(const cv::Mat image, cv::Rect &roi)
     std::vector<std::vector<cv::Point>> contours_poly(contours.size());
     std::vector<cv::Rect> boundRect(contours.size());
     std::vector<std::vector<cv::Point>> hull(contours.size());
-
     for(int i = 0; i < contours.size(); i++)
+
     {
         cv::convexHull(cv::Mat(contours[i]), hull[i], false);
         cv::approxPolyDP(cv::Mat(hull[i]), contours_poly[i], 3, true);
@@ -137,10 +139,19 @@ bool handle_detector::getHandleLocation(std::vector<geometry_msgs::Point>& handl
 
     bool foundButton = false;
     pcl::PointXYZRGB pclPoint;
-    src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
-    src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
+
 //    pcl::removeNaNFromPointCloud(organizedCloud);
     tf::TransformListener listener;
+
+    int threadWaitCounter = 0;
+
+    while(organizedCloud_->empty() && threadWaitCounter++ < 40){
+        ros::Duration(0.1).sleep();
+    }
+
+    if(organizedCloud_->empty()){
+        return false;
+    }
 
     for(int i=0; i<rectCenter_.size(); i++)
     {
@@ -154,36 +165,30 @@ bool handle_detector::getHandleLocation(std::vector<geometry_msgs::Point>& handl
         if (nonZeroCoordinates.total() < 10){
             continue;
         }
+        pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
 
-        pclPoint = pcl::PointXYZRGB();
-
-//        int x_val   = 0, y_val   = 0, z_val   = 0;
-//        int count = 0;
         for (int k = 0; k < nonZeroCoordinates.total(); k++ ) {
-            pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
-            if (temp_pclPoint.r > 90 && temp_pclPoint.g > 90 && temp_pclPoint.b > 90 )
+            pcl::PointXYZRGB temp_pclPoint = organizedCloud_->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
+
+            if (temp_pclPoint.z > -2.0)
             {
-                pclPoint = temp_pclPoint;
-                break;
-//                x_val += temp_pclPoint.x;
-//                y_val += temp_pclPoint.y;
-//                z_val += temp_pclPoint.z;
-//                ++count;
+                currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
+
             }
         }
-//        pclPoint.x = x_val/count;
-//        pclPoint.y = y_val/count;
-//        pclPoint.z = z_val/count;
 
+        Eigen::Vector4f cloudCentroid;
+        //  Calculating the Centroid of the handle Point cloud
+        pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
 
         frameID_++;
-        buttonCenters_.push_back(pclPoint);
+        buttonCenters_.push_back(pcl::PointXYZ(cloudCentroid(0), cloudCentroid(1), cloudCentroid(2)));
 
         std::cout<<"Handle "<< i << " at " << buttonCenters_[i].x << " " << buttonCenters_[i].y << " " << buttonCenters_[i].z << std::endl;
         geometry_msgs::PointStamped geom_point;
-        geom_point.point.x = pclPoint.x;
-        geom_point.point.y = pclPoint.y;
-        geom_point.point.z = pclPoint.z;
+        geom_point.point.x = cloudCentroid(0);
+        geom_point.point.y = cloudCentroid(1);
+        geom_point.point.z = cloudCentroid(2);
         geom_point.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
 
         try
@@ -226,6 +231,13 @@ bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
 
     ms_sensor_.giveImage(current_image_);
     ms_sensor_.giveDisparityImage(current_disparity_);
+    organizedCloud_->clear();
+
+    //    Starting a thread with lambda as debugging normal thread call was taking longer. [&] is because we are calling a static function
+    std::thread t1([&](){
+                src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud_);
+            });
+    t1.detach();
 
     cv::inRange(current_image_, cv::Scalar(73, 0, 0), cv::Scalar(255, 20, 20), imRed_);
     showImage(imRed_);
@@ -281,6 +293,7 @@ bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
     colorSegment(imBlueReduced_, hsvGray_, imGray_);
     showImage(imGray_);
     showImage(current_disparity_);
+
     val = findAllContours(imGray_);
 
     return getHandleLocation(handleLocs);

@@ -26,8 +26,8 @@ class handle_detector
     cv::Rect roiRed_, roiBlue_, roiOrange_;
 
     std::vector<cv::Point> rectCenter_;
-    std::vector<std::vector<cv::Point>> convexHulls_;
-    std::vector< pcl::PointXYZRGB> buttonCenters_;
+    std::vector<std::vector<cv::Point> > convexHulls_;
+    std::vector< pcl::PointXYZ> buttonCenters_;
 
     int thresh_ = 100;
     const int hsvGray_[6] = {0, 255, 0, 20, 8, 140}; // lh, hh, ls, hs, lv, hv
@@ -39,9 +39,9 @@ class handle_detector
     std::string side_;
 
     ros::NodeHandle nh_;
-    src_perception::MultisenseImage ms_sensor_;
-
     ros::Publisher marker_pub_;
+    src_perception::MultisenseImage ms_sensor_;
+    src_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
     void visualize_point(geometry_msgs::Point point);
 public:
