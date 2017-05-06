@@ -27,10 +27,10 @@ int main(int argc, char** argv){
 
   std::vector<geometry_msgs::PoseStamped> points;
 
-
+ handle.createCircle(center, 0, -0.3028,-0.3481,0.8872,0.5768 );
   while(ros::ok())
   {
-    handle.createCircle(center, 0, -0.3028,-0.3481,0.8872,0.5768 );
+
     ros::spinOnce();
     loop_rate.sleep();
   }

@@ -4,8 +4,13 @@
 
 
 move_handle::move_handle(ros::NodeHandle n) : nh_(n) {
+    right_armTraj = new armTrajectory(nh_);
+    left_armTraj = new armTrajectory(nh_);
     array_pub = nh_.advertise<visualization_msgs::MarkerArray>( "handle_path", 0 );
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+
+
+
 }
 
 
@@ -40,9 +45,32 @@ void move_handle::createCircle(geometry_msgs::PoseStamped center, int side, floa
     point.pose.position.z = -(a*point.pose.position.x  + b* point.pose.position.y + (d - dist) )/c   ;
     points.push_back(point);
   }
-  visulatize(points);
+  //visulatize(points);
+  follow_path(points, armSide::LEFT,current_hand_pose);
 }
 
+void move_handle::follow_path(std::vector<geometry_msgs::PoseStamped>& points, armSide input_side, geometry_msgs::Pose hand)
+{
+
+    std::vector<armTrajectory::armTaskSpaceData> *arm_data_vector = new std::vector<armTrajectory::armTaskSpaceData>();
+     // for(auto input_pose : *input_poses)
+    float desired_time = 30.0;
+    int num_poses = points.size();
+    for(int i=0;i<num_poses;i++)
+    {
+        auto input_pose = points.at(i);
+        armTrajectory::armTaskSpaceData* task_space_data = new armTrajectory::armTaskSpaceData();
+        task_space_data->side = input_side;
+        task_space_data->pose.position = input_pose.pose.position;
+        task_space_data->pose.orientation = hand.orientation;
+        task_space_data->time = (float)((float)i/(float)num_poses)*(float)desired_time; //what xyzzy
+        arm_data_vector->push_back(*task_space_data);
+        ROS_INFO_STREAM(task_space_data->pose);
+    }
+    left_armTraj->moveArmInTaskSpace(*arm_data_vector);
+    ROS_INFO("done");
+
+}
 
 void move_handle::visulatize(std::vector<geometry_msgs::PoseStamped> &points)
 {
@@ -69,6 +97,8 @@ void move_handle::visulatize(std::vector<geometry_msgs::PoseStamped> &points)
 
   array_pub.publish( circle );
 }
+
+
 
 
 
