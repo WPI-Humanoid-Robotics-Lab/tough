@@ -169,6 +169,13 @@ target_link_libraries(val_walk_tracker_node
    ${catkin_LIBRARIES} ${PCL_LIBRARIES}
  )
 
+ add_executable(FinishBoxDetector src/finish_box_detector.cpp)
+ add_dependencies(FinishBoxDetector ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ target_link_libraries(FinishBoxDetector
+   ${catkin_LIBRARIES} ${PCL_LIBRARIES}
+ )
+
+
 #############
 ## Install ##
 #############
