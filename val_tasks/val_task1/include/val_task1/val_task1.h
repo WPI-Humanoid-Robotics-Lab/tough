@@ -25,6 +25,7 @@
 #include "val_task1/handle_detector.h"
 #include "val_task1/handle_grabber.h"
 #include "val_control/robot_state.h"
+#include "val_task1/move_handle.h"
 
 using namespace decision_making;
 
@@ -47,6 +48,8 @@ class valTask1 {
     panel_detector* panel_detector_;
     //handle detector
     handle_detector* handle_detector_;
+    //moving handle
+    move_handle* move_handle_;
     // Object to use for grasping handles
     handle_grabber* handle_grabber_;
 
@@ -79,6 +82,7 @@ class valTask1 {
 
     // goal location for the panel
     geometry_msgs::Pose2D panel_walk_goal_;
+
 
     // default constructor and destructor
     static valTask1* getValTask1(ros::NodeHandle nh);
