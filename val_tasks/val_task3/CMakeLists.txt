@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
 
-  perception_commonq
+  perception_common
 )
 
 ## System dependencies are found with CMake's conventions
@@ -130,33 +130,13 @@ include_directories(
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
-         #src/val_task3.cpp
-         src/table_detector.cpp
-         src/table_detector_node.cpp
+         src/val_task3.cpp
 )
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
-
-add_executable(table_detector_node
-            src/table_detector_node.cpp
-
-)
-
-add_dependencies(table_detector_node
- ${${PROJECT_NAME}_EXPORTED_TARGETS}
- ${catkin_EXPORTED_TARGETS}_gencfg
- ${catkin_EXPORTED_TARGETS})
-
-
-## Specify libraries to link a library or executable target against
- target_link_libraries(table_detector_node
-   ${catkin_LIBRARIES}
-   ${OpenCV_LIBRARIES}
-   ${PROJECT_NAME}
- )
 
 #############
 ## Install ##
