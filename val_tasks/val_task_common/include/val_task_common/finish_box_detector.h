@@ -15,12 +15,12 @@ struct Point2D{
 };
 
 inline bool operator == (const Point2D& lhs, const Point2D& rhs){
- return (abs(lhs.x - rhs.x) < 5 || abs(lhs.y - rhs.y) < 5);
+    return (abs(lhs.x - rhs.x) < 5 || abs(lhs.y - rhs.y) < 5);
 }
 
 inline bool operator<(const Point2D& lhs, const Point2D& rhs)
 {
-  return lhs.x < rhs.x || lhs.y < rhs.y;
+    return lhs.x < rhs.x || lhs.y < rhs.y;
 }
 
 class FinishBoxDetector{
@@ -31,10 +31,7 @@ public:
 
 private:
     void detectFinishBox(const nav_msgs::OccupancyGrid::Ptr msg);
-    void trimTo2DecimalPlaces(float &x, float &y);
-    int calcDistance(int fromX, int fromY, int toX, int toY);
-    int calcDistance(const Point2D &pt1, const Point2D &pt2);
-    size_t getIndex(float x, float y);
+    void showImage(cv::Mat, std::string caption="FinishBoxDetection");
     ros::NodeHandle nh_;
     ros::Subscriber pointcloudSub_;
     ros::Publisher  mapPub_;
