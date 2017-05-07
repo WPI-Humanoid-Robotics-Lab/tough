@@ -6,15 +6,16 @@
 
 class button_press
 {
+    geometry_msgs::Point point_;
     armTrajectory armTraj_;
     ros::NodeHandle nh_;
     button_detector bd_;
-    geometry_msgs::Pose pt;
 
 public:
 
     button_press(ros::NodeHandle&);
-    bool pressButton(geometry_msgs::Pose&);
+    bool pressButton(geometry_msgs::Point&);
+    bool getPressButton();
 };
 
 #endif // BUTTON_PRESS_H

@@ -129,6 +129,9 @@ bool button_detector::getButtonLocation(geometry_msgs::Point& buttonLoc)
             return false;
         }
     }
+    //buttonLoc.x = double (geom_point.point.x);
+    //buttonLoc.y = double (geom_point.point.y);
+    //buttonLoc.z = double (geom_point.point.z);
 
     visualize_point(geom_point.point);
 
