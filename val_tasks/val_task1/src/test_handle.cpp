@@ -17,9 +17,9 @@ int main(int argc, char** argv){
   ros::Rate loop_rate(10);
 
   geometry_msgs::PoseStamped center;
-  center.pose.position.x = 3.10;
-  center.pose.position.y = .9;
-  center.pose.position.z = 0.84;
+  center.pose.position.x = 3.12;
+  center.pose.position.y = 0.923;
+  center.pose.position.z = 0.845;
   center.pose.orientation.x  = 0;
   center.pose.orientation.y  = 0;
   center.pose.orientation.z  = 0;

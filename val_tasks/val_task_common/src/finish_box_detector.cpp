@@ -11,28 +11,14 @@
 using namespace cv;
 
 FinishBoxDetector::FinishBoxDetector(ros::NodeHandle &n):nh_(n) {
-    
+
     pointcloudSub_ = nh_.subscribe("/map", 10, &FinishBoxDetector::detectFinishBox, this);
-    //    mapPub_        = nh_.advertise<nav_msgs::OccupancyGrid>("/map", 10, true);
 }
 
 FinishBoxDetector::~FinishBoxDetector()
 {
-    
-}
 
-int FinishBoxDetector::calcDistance(int fromX, int fromY, int toX, int toY)
-{
-    int x=pow(fromX-toX,2)+pow(fromY-toY,2);
-    //    std::cout<<"dist:   "<<x<<std::endl;
-    return x;
 }
-
-int FinishBoxDetector::calcDistance(const Point2D &pt1, const Point2D &pt2)
-{
-    return calcDistance(pt1.x, pt1.y, pt2.x, pt2.y);
-}
-
 
 void FinishBoxDetector::detectFinishBox(const nav_msgs::OccupancyGrid::Ptr msg) {
     MAP_X_OFFSET = msg->info.origin.position.x;
@@ -40,159 +26,81 @@ void FinishBoxDetector::detectFinishBox(const nav_msgs::OccupancyGrid::Ptr msg) 
     MAP_RESOLUTION = msg->info.resolution;
     MAP_WIDTH   = msg->info.width;
     MAP_HEIGHT  = msg->info.height;
-    
+    vector<vector<Point> > contours;
+    RNG rng(12345);
+
     uchar pv[msg->data.size()];
     for(unsigned int i = 0; i < msg->data.size(); i++) {
         pv[i] = (uchar) msg->data.at(i);
     }
-    
+
     map_image_ = cv::Mat(cv::Size(MAP_WIDTH, MAP_HEIGHT), CV_8UC1);
     memcpy(map_image_.data, &pv, msg->data.size());
-    
-    Mat dst, dst_norm, dst_norm_scaled;
-    dst = Mat::zeros( map_image_.size(), CV_32FC1 );
-    
-    /// Detector parameters
-    int blockSize = 2;
-    int apertureSize = 3;
-    double k = 0.04;
-    int thresh = 90;
-    
-    /// Detecting corners
-    cornerHarris( map_image_, dst, blockSize, apertureSize, k, BORDER_DEFAULT );
-    std::set<Point2D> corners;
-    /// Normalizing
-    normalize( dst, dst_norm, 0, 255, NORM_MINMAX, CV_32FC1, Mat() );
-    convertScaleAbs( dst_norm, dst_norm_scaled );
-    /// Drawing a circle around corners
-    for( int j = 0; j < dst_norm.rows ; j++ )
-    { for( int i = 0; i < dst_norm.cols; i++ )
-        {
-            if( (int) dst_norm.at<float>(j,i) > thresh )
-            {
-                Point2D pt;
-                pt.x = i;
-                pt.y = j;
-                //   circle( map_image_, Point(pt.x, pt.y ), 5,  Scalar(255), 2, 8, 0 );
-                corners.insert(pt);
-            }
-        }
+
+    cv::threshold(map_image_, map_image_,50, 255, CV_THRESH_BINARY);
+    findContours( map_image_, contours, RETR_CCOMP, CHAIN_APPROX_SIMPLE ); // Find the contours in the image
+
+    vector<vector<Point> > contours_poly( contours.size() );
+    vector<Rect> boundRect( contours.size() );
+
+
+    for( int i = 0; i < contours.size(); i++ )
+    { approxPolyDP( Mat(contours[i]), contours_poly[i], 3, true );
+        boundRect[i] = boundingRect( Mat(contours_poly[i]) );
     }
-    //    std::cout<<"*******************"<<std::endl;
-    //    for (auto i : corners){
-    //        std::cout<<i.x<<" "<<i.y<<std::endl;
-    //    }
-    //    std::cout<<"*******************"<<std::endl;
-    //    //  std::set<Point2D> filteredCorners;
-    //    // second stage filter
-
-
-    auto it = corners.begin();
-    while(it != corners.end()){
-        auto next = std::next(it, 1);
-        if (next != corners.end() && (*it == *(next))){
-            corners.erase(next);
-        }
-        else{
-            ++it;
-        }
-    }
-
-    for( auto i : corners)
+    int xMin,xMax,yMin,yMax;
+    /// Draw polygonal contour + bonding rects + circles
+    for( int i = 0; i< contours.size(); i++ )
     {
-        std::cout<<"x:  "<<i.x<<"   "<<"y:"<<i.y<<std::endl;
-        circle( map_image_, Point(i.x, i.y ), 5,  Scalar(150), 2, 8, 0 );
-
-    }
-//    circle( map_image_, Point(168,467), 5,  Scalar(255), 2, 8, 0 );
-//    circle( map_image_, Point(213,510), 5,  Scalar(255), 2, 8, 0 );
-//    circle( map_image_, Point(212,422), 5,  Scalar(255), 2, 8, 0 );
-//    circle( map_image_, Point(256,466), 5,  Scalar(255), 2, 8, 0 );
-
-
-
-    //    int dist2=pow(3/0.05,2);
-    //    int diag2=pow(3*1.41/0.05,2);
-    int dist2=3850;
-    int diag2=7150;
-    int countdist=0;
-    int countdiag=0;
-    std::vector<Point2D> cornerPoints;
-
-    for (int i = 0; i < corners.size(); ++i) {
-        for (int j = 0; j < corners.size(); ++j) {
-            if (i==j){
-                continue;
-            }
-            if(fabs(calcDistance(*std::next(corners.begin(), i),*std::next(corners.begin(), j)) - dist2) < 300)
-            {
-                ROS_INFO("dist criteria matched");
-                countdist++;
-            }
-            if(fabs(calcDistance(*std::next(corners.begin(), i), *std::next(corners.begin(), j)) - diag2) < 300)
-            {
-                ROS_INFO("diagonal criteria matched");
-                countdiag++;
-            }
-        }
-        if(countdist>2 && countdiag>1)
+        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+        //drawContours( map_image_, contours_poly, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
+        if(contourArea( contours[i] )>150) // 150 chosen at random
         {
-            cornerPoints.push_back(*std::next(corners.begin(), i));
-            ROS_INFO("found a point");
-            countdist=0;
-            countdiag=0;
+            rectangle( map_image_, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
+            if(boundRect[i].tl().x>1 && boundRect[i].br().x<999) // To avoid largest bounding box which encompasses the entire image
+            {
+                xMin=boundRect[i].tl().x; xMax=boundRect[i].br().x;
+                yMin=boundRect[i].tl().y; yMax=boundRect[i].br().y;
+                //std::cout<<"pt1:    "<<boundRect[i].tl()<<"    pt2:    "<<boundRect[i].br()<<std::endl;
+                break;
+            }
+
         }
-        else
-        {
-            ROS_INFO("Condition NOT Met");
-            countdist=0;
-            countdiag=0;
+
+    }
+    //    showImage(map_image_);
+
+    float radius=1.5/MAP_RESOLUTION; // side of square is 3 meters
+
+    cv::Mat circleMask,reducedImage,newMap;
+    for (int i = xMin; i < xMax; ++i) {
+        for (int j = yMin; j < yMax; ++j) {
+            circleMask = cv::Mat::zeros(map_image_.size(), CV_8UC1);
+            cv::circle(circleMask, cv::Point(i, j),radius,cv::Scalar(255),-1);
+            reducedImage=cv::Mat::zeros(map_image_.size(), CV_8UC1);
+            map_image_.copyTo(reducedImage, circleMask);
+            newMap=cv::Mat::ones(map_image_.size(), map_image_.type());
+            findNonZero(reducedImage,newMap);
+            if(newMap.total()<10) // 10 used to keep some threshold
+            {
+                //                std::cout<<"BOX found"<<std::endl;
+                //                std::cout<<"Image CenterX:    "<<i<<"    Image CenterY:    "<<j<<std::endl;
+                std::cout<<"World CenterX:    "<<i*MAP_RESOLUTION+MAP_X_OFFSET<<"    World CenterY:    "<<j*MAP_RESOLUTION+MAP_Y_OFFSET<<std::endl;
+                circle( map_image_, Point(i, j), 5,  Scalar(255), 2, 8, 0 );
+                //                showImage(map_image_);
+                exit(0);
+            }
         }
     }
-    Mat plotimage = Mat::zeros( map_image_.size(), CV_8UC1 );
-    std::cout<<cornerPoints.size()<<std::endl;
-    for (auto i:cornerPoints) {
-        std::cout<<i.x<<"   "<<i.y<<std::endl;
-        circle( plotimage, Point(i.x,i.y), 5,  Scalar(255), 2, 8, 0 );
-    }
-
-    //     Showing the result
-    namedWindow( "plotimage", CV_WINDOW_AUTOSIZE );
-    imshow( "plotimage", plotimage);
-    namedWindow( "real image", CV_WINDOW_AUTOSIZE );
-    imshow( "real image",map_image_ );
-    waitKey(0);
-
-
 
 }
+void FinishBoxDetector::showImage(cv::Mat image, std::string caption)
+{
 
-
-size_t FinishBoxDetector::getIndex(float x, float y){
-
-    trimTo2DecimalPlaces(x, y);
-
-    x -= MAP_X_OFFSET;
-    y -= MAP_Y_OFFSET;
-
-    int index_x = x/MAP_RESOLUTION;
-    int index_y = y/MAP_RESOLUTION;
-
-    size_t index = index_y*MAP_WIDTH + index_x;
-
-    return index;
+    cv::namedWindow( caption, cv::WINDOW_AUTOSIZE );
+    cv::imshow( caption, image);
+    cv::waitKey(0);
 }
-
-void FinishBoxDetector::trimTo2DecimalPlaces(float &x, float &y) {
-    int temp = round(x*(10/MAP_RESOLUTION));
-    x        = floor(temp/(10.0/MAP_RESOLUTION)*100.0)/100.0;
-
-    temp     = round(y*(10/MAP_RESOLUTION));
-    y        = floor(temp/(10.0/MAP_RESOLUTION)*100.0)/100.0;
-
-    return;
-}
-
 
 
 int main(int argc, char** argv) {
