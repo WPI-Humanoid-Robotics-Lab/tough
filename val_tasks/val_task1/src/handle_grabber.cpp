@@ -6,9 +6,9 @@
 handle_grabber::handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-
     leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
     /* Top Grip */
+
     leftHandOrientation_.quaternion.x = 0.604;
     leftHandOrientation_.quaternion.y = 0.434;
     leftHandOrientation_.quaternion.z = -0.583;
@@ -20,13 +20,19 @@ handle_grabber::handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper
 //    leftHandOrientation_.quaternion.z = -0.696;
 //    leftHandOrientation_.quaternion.w = 0.699;
 
+    //    /* Side Grip */
+//    rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+//    rightHandOrientation_.quaternion.x = -0.094;
+//    rightHandOrientation_.quaternion.y = -0.027;
+//    rightHandOrientation_.quaternion.z = 0.973;
+//    rightHandOrientation_.quaternion.w = -0.209;
+
     /* Top Grip */
     rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
     rightHandOrientation_.quaternion.x = -0.576;
     rightHandOrientation_.quaternion.y = 0.397;
     rightHandOrientation_.quaternion.z = 0.632;
     rightHandOrientation_.quaternion.w = 0.332;
-
 }
 
 handle_grabber::~handle_grabber()
