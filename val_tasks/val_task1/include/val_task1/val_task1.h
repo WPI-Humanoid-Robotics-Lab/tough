@@ -18,10 +18,15 @@
 
 #include "val_footstep/ValkyrieWalker.h"
 #include "val_task_common/val_walk_tracker.h"
-#include "val_task1/panel_detection.h"
+#include "val_task_common/panel_detection.h"
 #include "val_control/val_chest_navigation.h"
 #include "val_control/val_pelvis_navigation.h"
-
+#include "val_control/val_head_navigation.h"
+#include "val_control/val_gripper_control.h"
+#include "val_task1/handle_detector.h"
+#include "val_task1/handle_grabber.h"
+#include "val_control/robot_state.h"
+#include "val_task1/move_handle.h"
 
 using namespace decision_making;
 
@@ -39,14 +44,28 @@ class valTask1 {
     ValkyrieWalker* walker_;
     // object for tracking robot walk
     walkTracking* walk_track_;
+
     // panel detection object
     panel_detector* panel_detector_;
+    //handle detector
+    handle_detector* handle_detector_;
+    //moving handle
+    move_handle* move_handle_;
+    // Object to use for grasping handles
+    handle_grabber* handle_grabber_;
+
     // chest controller
     chestTrajectory* chest_controller_;
     //pelvis controller
     pelvisTrajectory* pelvis_controller_;
+    //head controller
+    HeadTrajectory* head_controller_;
+    //grippers
+    gripperControl* gripper_controller_;
+    //robot state informer
+    RobotStateInformer* robot_state_;
 
-    bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
+    ros::Publisher array_pub_;
 
     //required for initialization. Move out init state only if map is updated twice.
     ros::Subscriber occupancy_grid_sub_;
@@ -56,10 +75,17 @@ class valTask1 {
     // this pointer is to ensure that only 1 object of this task is created.
     static valTask1 *currentObject;
 
+    // handle pos and center
+    std::vector<geometry_msgs::Point> handle_loc_;
+
+    // panel plane coeffecients
+    std::vector<float> panel_coeff_;
+
     public:
 
     // goal location for the panel
     geometry_msgs::Pose2D panel_walk_goal_;
+
 
     // default constructor and destructor
     static valTask1* getValTask1(ros::NodeHandle nh);
@@ -67,9 +93,11 @@ class valTask1 {
 
     bool preemptiveWait(double ms, decision_making::EventQueue& queue);
     decision_making::TaskResult initTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    decision_making::TaskResult detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    decision_making::TaskResult walkToControlPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectPanelCoarseTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToSeePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectPanelFineTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToPanel(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult controlPitchTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult controlYawTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
@@ -79,5 +107,9 @@ class valTask1 {
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
 
     geometry_msgs::Pose2D getPanelWalkGoal();
+
+    bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
     void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal_);
+    void createHandleWayPoints(const geometry_msgs::Point &center, std::vector<geometry_msgs::Pose> &points);
+    void setPanelCoeff(const std::vector<float> &panel_coeff);
 };

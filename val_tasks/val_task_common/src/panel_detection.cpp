@@ -1,5 +1,6 @@
-#include "val_task1/panel_detection.h"
-panel_detector::panel_detector(ros::NodeHandle &nh)
+#include "val_task_common/panel_detection.h"
+
+panel_detector::panel_detector(ros::NodeHandle &nh, DETECTOR_TYPE detector_type)
 {
     pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &panel_detector::cloudCB, this);
     pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_filter/filteredPointCloud", 1);
@@ -7,6 +8,13 @@ panel_detector::panel_detector(ros::NodeHandle &nh)
     vis_pub_ = nh.advertise<visualization_msgs::Marker>( "visualization_marker", 1 );
     vis_plane_pub_ = nh.advertise<visualization_msgs::Marker>( "visualization_plane_vector", 1 );
     detection_tries_ = 0;
+    //set the presets
+    setPresetConfigs();
+
+    currentSettings_ = &preset_configs_[detector_type];
+
+    // resize plane model vector
+    panel_plane_model_.resize(4);
 }
 
 void panel_detector::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
@@ -62,19 +70,19 @@ void panel_detector::passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& clou
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
     pass_x.setFilterFieldName("x");
-    pass_x.setFilterLimits(1,4);
+    pass_x.setFilterLimits(currentSettings_->x_min_limit,currentSettings_->x_max_limit);
     pass_x.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> pass_y;
     pass_y.setInputCloud(cloud);
     pass_y.setFilterFieldName("y");
-    pass_y.setFilterLimits(-2,2);
+    pass_y.setFilterLimits(currentSettings_->y_min_limit, currentSettings_->y_max_limit);
     pass_y.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> pass_z;
     pass_z.setInputCloud(cloud);
     pass_z.setFilterFieldName("z");
-    pass_z.setFilterLimits(0.7,0.87);
+    pass_z.setFilterLimits(currentSettings_->z_min_limit,currentSettings_->z_max_limit);
     pass_z.filter(*cloud);
 }
 
@@ -91,6 +99,13 @@ void panel_detector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& clou
     seg.setDistanceThreshold (0.008);
     seg.setInputCloud (cloud);
     seg.segment (*inliers, *coefficients);
+    ROS_INFO("a : %0.4f, b : %0.4f, c : %0.4f, d: %.4f",coefficients->values[0], coefficients->values[1], coefficients->values[2], coefficients->values[3]);
+
+    //update the plane model
+    panel_plane_model_[0] = coefficients->values[0]; // a
+    panel_plane_model_[1] = coefficients->values[1]; // b
+    panel_plane_model_[2] = coefficients->values[2]; // c
+    panel_plane_model_[3] = coefficients->values[3]; // d
 
     pcl::ExtractIndices<pcl::PointXYZ> extract;
     extract.setInputCloud (cloud);
@@ -118,18 +133,20 @@ bool panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geo
     Eigen::Vector3f eigenValues;
     pcl::eigen33(covarianceMatrix, eigenVectors, eigenValues);
 
-    double OFFSET = 1.1;
-    if(pose.position.z > 0.80 && pose.position.z < 0.83){
-        ROS_INFO("Upper plane detected");
-        OFFSET += 0.1;
-    }
-    else if(pose.position.z > 0.75){
-        ROS_INFO("Lower Plane Detected");
-        //        OFFSET = 0.6;
-    }
-    else{
-        ROS_INFO("WTF");
-        return false;
+    double OFFSET = currentSettings_->OFFSET;
+    if (currentSettings_->settingName == "HANDLE_PANEL_COARSE" || currentSettings_->settingName == "HANDLE_PANEL_FINE"){
+        if(pose.position.z > 0.80 && pose.position.z < 0.83){
+            ROS_INFO("Upper plane detected");
+            OFFSET += 0.1;
+        }
+        else if(pose.position.z > 0.75){
+            ROS_INFO("Lower Plane Detected");
+            //        OFFSET = 0.6;
+        }
+        else{
+            ROS_INFO("WTF");
+            return false;
+        }
     }
     ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
 
@@ -138,52 +155,74 @@ bool panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geo
     point1.y = eigenVectors.col(2)[1] + pose.position.y;
     point1.z = eigenVectors.col(2)[2] + pose.position.z;
 
-    geometry_msgs::Point maxPoint;
-    geometry_msgs::Point minPoint;
 
-    maxPoint.x = std::max(pose.position.x, point1.x);
-    maxPoint.y = std::max(pose.position.y, point1.y);
-    maxPoint.z = std::max(pose.position.z, point1.z);
+    geometry_msgs::Point maxPoint1;
+    geometry_msgs::Point minPoint1;
 
-    minPoint.x = std::min(pose.position.x, point1.x);
-    minPoint.y = std::min(pose.position.y, point1.y);
-    minPoint.z = std::min(pose.position.z, point1.z);
+    maxPoint1.x = std::max(pose.position.x, point1.x);
+    maxPoint1.y = std::max(pose.position.y, point1.y);
+    maxPoint1.z = std::max(pose.position.z, point1.z);
+
+    minPoint1.x = std::min(pose.position.x, point1.x);
+    minPoint1.y = std::min(pose.position.y, point1.y);
+    minPoint1.z = std::min(pose.position.z, point1.z);
 
     geometry_msgs::Point point2;
     point2.x = eigenVectors.col(0)[0] + pose.position.x;
     point2.y = eigenVectors.col(0)[1] + pose.position.y;
     point2.z = eigenVectors.col(0)[2] + pose.position.z;
 
+
+    geometry_msgs::Point maxPoint2;
+    geometry_msgs::Point minPoint2;
+
+    maxPoint2.x = std::max(pose.position.x, point2.x);
+    maxPoint2.y = std::max(pose.position.y, point2.y);
+    maxPoint2.z = std::max(pose.position.z, point2.z);
+
+    minPoint2.x = std::min(pose.position.x, point2.x);
+    minPoint2.y = std::min(pose.position.y, point2.y);
+    minPoint2.z = std::min(pose.position.z, point2.z);
+
     double slope = (pose.position.z - point2.z)/(pose.position.y - point2.y);
 
-    float theta = 0;
-    float cosTheta = 0;
-    float sinTheta = 0;
+    float theta1 = 0;
+    float cosTheta1 = 0;
+    float sinTheta1 = 0;
 
-    cosTheta = (maxPoint.y - minPoint.y)/(sqrt(pow((maxPoint.x - minPoint.x),2) + pow((maxPoint.y - minPoint.y),2) + pow((maxPoint.z - minPoint.z),2)));
-    sinTheta = sqrt(1 - (pow(cosTheta, 2)));
-    double value = sinTheta/cosTheta;
+    cosTheta1 = (maxPoint1.y - minPoint1.y)/(sqrt(pow((maxPoint1.x - minPoint1.x),2) + pow((maxPoint1.y - minPoint1.y),2) + pow((maxPoint1.z - minPoint1.z),2)));
+    sinTheta1 = sqrt(1 - (pow(cosTheta1, 2)));
+
     if(slope > 0){
 
-        theta = atan2(sinTheta, cosTheta) * -1.0;
+        theta1 = atan2(sinTheta1, cosTheta1) * -1.0;
 
     }
     else{
 
-        theta = atan2(sinTheta, cosTheta);
+        theta1 = atan2(sinTheta1, cosTheta1);
 
     }
 
-    ROS_INFO("The Orientation is given by := %0.2f", theta);
+    ROS_INFO("The Orientation is given by := %0.2f", theta1);
 
+    float theta2 = 0;
+    float cosTheta2 = 0;
+    float sinTheta2 = 0;
+
+    cosTheta2 = -1*(maxPoint2.y - minPoint2.y)/(sqrt(pow((maxPoint2.x - minPoint2.x),2) + pow((maxPoint2.y - minPoint2.y),2) + pow((maxPoint2.z - minPoint2.z),2)));
+    sinTheta2 = sqrt(1 - (pow(cosTheta2, 2)));
+    theta2 = atan2(sinTheta2, cosTheta2);
+
+    ROS_INFO("Magic angle is given by := %0.2f tanin %f slope %f", theta2, atan(slope), slope);
     //    double offset = 1.0;
-    pose.position.x = pose.position.x - (OFFSET*cos(theta));
-    pose.position.y = pose.position.y - (OFFSET*sin(theta));
+    pose.position.x = pose.position.x - (OFFSET*cos(theta1));
+    pose.position.y = pose.position.y - (OFFSET*sin(theta1));
     pose.position.z = 0.0;
 
     ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
 
-    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
+    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta1);
 
     pose.orientation = quaternion;
 
@@ -216,6 +255,35 @@ bool panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geo
     return true;
 }
 
+void panel_detector::setPresetConfigs()
+{
+    //Handle panel coarse setting
+    PanelSettings handle_panel_coarse;
+    handle_panel_coarse.settingName = "HANDLE_PANEL_COARSE";
+
+    handle_panel_coarse.x_min_limit = 1.0f;
+    handle_panel_coarse.x_max_limit = 4.0f;
+
+    handle_panel_coarse.y_min_limit = -2.0f;
+    handle_panel_coarse.y_max_limit = 2.0f;
+
+    handle_panel_coarse.z_min_limit = 0.7f;
+    handle_panel_coarse.z_max_limit = 0.87f;
+
+    handle_panel_coarse.OFFSET = 1.1f;
+
+    preset_configs_[DETECTOR_TYPE::HANDLE_PANEL_COARSE] = handle_panel_coarse;
+
+    //Handle panel fine setting
+    PanelSettings handle_panel_fine = handle_panel_coarse;
+
+    handle_panel_fine.settingName = "HANDLE_PANEL_FINE";
+    handle_panel_fine.OFFSET = 0.7f;
+
+    preset_configs_[DETECTOR_TYPE::HANDLE_PANEL_FINE] = handle_panel_fine;
+
+
+}
 
 void panel_detector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
@@ -255,3 +323,9 @@ void panel_detector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
 }
 
+bool panel_detector::getPanelPlaneModel(std::vector<float> &panelPlaneModel) const
+{
+    ROS_INFO("a : %0.4f, b : %0.4f, c : %0.4f, d: %.4f",panel_plane_model_[0], panel_plane_model_[1], panel_plane_model_[2], panel_plane_model_[3]);
+    panelPlaneModel = panel_plane_model_;
+    return panelPlaneModel.size() == 4;
+}

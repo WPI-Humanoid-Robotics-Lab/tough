@@ -40,6 +40,26 @@
 #include <visualization_msgs/MarkerArray.h>
 #include "val_common/val_common_names.h"
 
+struct PanelSettings{
+
+    std::string settingName;
+    float x_max_limit;
+    float x_min_limit;
+
+    float y_max_limit;
+    float y_min_limit;
+
+    float z_max_limit;
+    float z_min_limit;
+
+    float OFFSET;
+};
+
+enum class DETECTOR_TYPE{
+    HANDLE_PANEL_COARSE = 0,
+    HANDLE_PANEL_FINE
+};
+
 class panel_detector{
 private:
 
@@ -61,15 +81,21 @@ private:
     void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
     bool getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
 
+    std::vector<float> panel_plane_model_;
+    std::map<DETECTOR_TYPE, PanelSettings> preset_configs_;
+    void setPresetConfigs();
+    PanelSettings* currentSettings_;
+
 public:
     // Constructor
 
-    panel_detector(ros::NodeHandle &nh);
+    panel_detector(ros::NodeHandle &nh, DETECTOR_TYPE detector_type);
 
     void getDetections(std::vector<geometry_msgs::Pose> &ret_val);
 
     int getDetectionTries() const;
     void setDetectionTries(int getDetectionTries);
+    bool getPanelPlaneModel(std::vector<float> &panelPlaneModel) const;
 };
 
 //bool poseComparator (geometry_msgs::Pose const& lhs, geometry_msgs::Pose const& rhs)
