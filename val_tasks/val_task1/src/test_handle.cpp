@@ -17,12 +17,13 @@ int main(int argc, char** argv){
   ros::Rate loop_rate(10);
 
   geometry_msgs::Point center;
-  center.x = 2.62;
-  center.y = -1.21;
-  center.z = 0.771;
+  center.x = 3.12;
+  center.y = 0.923;
+  center.z = 0.845;
 
   std::vector<geometry_msgs::Pose> points;
-  std::vector<float> panelCoeffs {0.0075,0.4200,0.9075,-0.1875};
+  std::vector<float> panelCoeffs {-0.3028,-0.3481,0.8872,0.5768};
+
 
   while(ros::ok())
   {
