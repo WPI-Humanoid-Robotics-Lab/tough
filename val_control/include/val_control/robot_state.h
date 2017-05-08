@@ -49,6 +49,10 @@ public:
 
     bool getCurrentPose(const std::string &frameName, geometry_msgs::Pose &pose, const std::string &baseFrame=VAL_COMMON_NAMES::WORLD_TF);
 
+    bool transformQuaternion(const geometry_msgs::QuaternionStamped &qt_in, geometry_msgs::QuaternionStamped &qt_out,const std::string target_frame=VAL_COMMON_NAMES::WORLD_TF);
+    bool transformPoint(const geometry_msgs::PointStamped &pt_in, geometry_msgs::PointStamped &pt_out,const std::string target_frame=VAL_COMMON_NAMES::WORLD_TF);
+    bool transformPoint(const geometry_msgs::Point &pt_in, geometry_msgs::Point &pt_out,const std::string &from_frame, const std::string &to_frame=VAL_COMMON_NAMES::WORLD_TF);
+
     ~RobotStateInformer();
 
 };

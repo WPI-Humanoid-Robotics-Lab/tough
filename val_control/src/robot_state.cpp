@@ -185,3 +185,56 @@ bool RobotStateInformer::getCurrentPose(const std::string &frameName, geometry_m
     return true;
 }
 
+
+bool RobotStateInformer::transformQuaternion(const geometry_msgs::QuaternionStamped &qt_in, geometry_msgs::QuaternionStamped &qt_out,const std::string target_frame)
+{
+    try{
+
+        listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        listener_.transformQuaternion(target_frame, qt_in, qt_out);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+    return true;
+}
+
+bool RobotStateInformer::transformPoint(const geometry_msgs::PointStamped &pt_in, geometry_msgs::PointStamped &pt_out,const std::string target_frame)
+{
+    try{
+
+        listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        listener_.transformPoint(target_frame, pt_in, pt_out);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+    return true;
+}
+
+bool RobotStateInformer::transformPoint(const geometry_msgs::Point &pt_in, geometry_msgs::Point &pt_out,const std::string &from_frame, const std::string &to_frame)
+{
+    geometry_msgs::PointStamped stmp_pt_in, stmp_pt_out;
+    stmp_pt_in.header.frame_id = from_frame;
+    stmp_pt_in.point = pt_in;
+
+    try{
+
+        listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        listener_.transformPoint(to_frame, stmp_pt_in, stmp_pt_out);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+    pt_out = stmp_pt_out.point;
+    return true;
+}
