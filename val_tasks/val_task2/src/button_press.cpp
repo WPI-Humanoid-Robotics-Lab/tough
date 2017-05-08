@@ -60,11 +60,19 @@ void button_press::grasp_button(const armSide side, geometry_msgs::Point &goal, 
 
     // closing grippers
     ROS_INFO("closing grippers");
-    gripper_.closeGripper(side);
+    gripper_.controlGripper(side, side == armSide::LEFT ?  leftGripperSeed_ : rightGripperSeed_);
+
+    //inorder to avoid collision of other arm with panel
+    ROS_INFO_STREAM("Setting Shoulder Roll for " << (side == armSide::LEFT ? RIGHT : LEFT) << " Side");
+    std::vector< std::vector<float> > armData;
+    armData.push_back(side == armSide::LEFT ?  rightShoulderSeed_ : leftShoulderSeed_);
+
+    armTraj_.moveArmJoints(side == armSide::LEFT ? RIGHT : LEFT, armData, executionTime);
+    ros::Duration(executionTime*1.5).sleep();
+    armData.clear();
 
     //move shoulder roll outwards
     ROS_INFO("Setting shoulder roll");
-    std::vector< std::vector<float> > armData;
     armData.push_back(side == armSide::LEFT ? leftShoulderSeed_ : rightShoulderSeed_);
 
     armTraj_.moveArmJoints(side, armData, executionTime);
@@ -92,13 +100,12 @@ void button_press::grasp_button(const armSide side, geometry_msgs::Point &goal, 
 
     ROS_INFO("Moving at an intermidate point after goal");
     pt.position = goal;
-    pt.position.z += 0.1;
+    pt.position.z += 0.2;
 
     current_state_->transformQuaternion(temp, temp);
     pt.orientation = temp.quaternion;
-
-    armTraj_.moveArmInTaskSpace(side, pt, executionTime);
-    ros::Duration(executionTime*1.4).sleep();
+    armTraj_.moveArmInTaskSpace(side, pt, 0);
+    ros::Duration(executionTime).sleep();
 
     //move shoulder roll outwards
     ROS_INFO("Setting shoulder roll");
@@ -109,6 +116,14 @@ void button_press::grasp_button(const armSide side, geometry_msgs::Point &goal, 
 
     ROS_INFO("Opening grippers");
     gripper_.openGripper(side);
+    ros::Duration(executionTime*1.5).sleep();
+
+    ROS_INFO_STREAM("Default " << side << " Side");
+    armTraj_.moveToDefaultPose(side);
+    ros::Duration(executionTime*1.5).sleep();
+
+    ROS_INFO_STREAM("Default " << (side == armSide::LEFT ? RIGHT : LEFT) << " Side");
+    armTraj_.moveToDefaultPose(side == armSide::LEFT ? RIGHT : LEFT);
     ros::Duration(executionTime*1.5).sleep();
 
 }

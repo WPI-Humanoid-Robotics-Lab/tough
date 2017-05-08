@@ -23,6 +23,10 @@ class button_press
  //   const std::vector<float> leftShoulderSeed_ = {-0.04, -0.24, 0.49, -1.30, 0.71, 0.61, -0.24};
     const std::vector<float> rightShoulderSeed_ = {-0.23, 0.72, 0.65, 1.51, 2.77, 0.0, 0.0};
 
+    const std::vector<double> leftGripperSeed_ = {0.0, 0.0, -1.1, -0.9, -1.0};
+
+    const std::vector<double> rightGripperSeed_ = {0.0, 0.0, 1.1, 0.9, 1.0};
+
 
 public:
 

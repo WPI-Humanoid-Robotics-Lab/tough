@@ -75,19 +75,8 @@ bool button_detector::getButtonLocation(geometry_msgs::Point& buttonLoc)
 
     if(!contours.empty()) //avoid seg fault at runtime by checking that the contours exist
     {
-        cv::Moments moment = cv::moments((cv::Mat)contours[findMaxContour(contours)]);
-
-        if (moment.m00)
-        {
-            cv::Point2f point = cv::Point2f(moment.m10/moment.m00,moment.m01/moment.m00);
-
-            ROS_DEBUG("m00:%.2f, m10:%.2f, m01:%.2f",moment.m00, moment.m10, moment.m01);
-            ROS_DEBUG("x:%d, y:%d", int(point.x), int(point.y));
-
-            buttonLoc.x = int (point.x);
-            buttonLoc.y = int (point.y);
-            foundButton = true;
-        }
+        findMaxContour(contours);
+        foundButton = true;
     }
 
     cv::Mat hullPoints = cv::Mat::zeros(current_image_.size(), CV_8UC1);
