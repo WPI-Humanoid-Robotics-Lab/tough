@@ -129,9 +129,10 @@ bool button_detector::getButtonLocation(geometry_msgs::Point& buttonLoc)
             return false;
         }
     }
-    //buttonLoc.x = double (geom_point.point.x);
-    //buttonLoc.y = double (geom_point.point.y);
-    //buttonLoc.z = double (geom_point.point.z);
+    buttonLoc.x = double (geom_point.point.x);
+    buttonLoc.y = double (geom_point.point.y);
+    buttonLoc.z = double (geom_point.point.z);
+    //ROS_INFO_STREAM(buttonLoc.x<<"\t"<<buttonLoc.y<<"\t"<<buttonLoc.z<<std::endl);
 
     visualize_point(geom_point.point);
 
