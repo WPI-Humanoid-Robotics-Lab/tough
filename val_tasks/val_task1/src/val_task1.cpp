@@ -50,6 +50,7 @@ valTask1::valTask1(ros::NodeHandle nh):
     chest_controller_   = new chestTrajectory(nh_);
     pelvis_controller_  = new pelvisTrajectory(nh_);
     head_controller_    = new HeadTrajectory(nh_);
+    gripper_controller_ = new gripperControl(nh_);
 
     //state informer
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
@@ -66,7 +67,13 @@ valTask1::~valTask1(){
     delete walker_;
     delete walk_track_;
     delete panel_detector_;
-
+    delete handle_detector_;
+    delete move_handle_;
+    delete chest_controller_;
+    delete pelvis_controller_;
+    delete head_controller_;
+    delete gripper_controller_;
+    delete robot_state_;
 }
 
 void valTask1::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
@@ -133,7 +140,6 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
 
     if(panel_detector_ == nullptr) {
         panel_detector_ = new panel_detector(nh_, DETECTOR_TYPE::HANDLE_PANEL_COARSE);
-        ros::Duration(0.2).sleep();
     }
 
     static int fail_count = 0;
@@ -163,17 +169,21 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
         std::cout << "yaw: " << pose2D.theta  <<std::endl;
         retry_count = 0;
         // update the plane coeffecients
-        setPanelCoeff(panel_detector_->getPanelPlaneModel());
-
-        eventQueue.riseEvent("/DETECTED_PANEL");
-        delete panel_detector_;
-        panel_detector_ = nullptr;
+        if(panel_detector_->getPanelPlaneModel(panel_coeff_)){
+            eventQueue.riseEvent("/DETECTED_PANEL");
+            delete panel_detector_;
+            panel_detector_ = nullptr;
+        }
+        else{
+            ROS_INFO("Could not query plane equation");
+            ++retry_count;
+            eventQueue.riseEvent("/DETECT_PANEL_RETRY");
+        }
     }
-
     else if(retry_count < 5) {
         ROS_INFO("sleep for 3 seconds for panel detection");
         ++retry_count;
-        ros::Duration(3).sleep();
+        ros::Duration(1).sleep();
         eventQueue.riseEvent("/DETECT_PANEL_RETRY");
     }
 
@@ -287,9 +297,6 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
 
         ROS_INFO_STREAM("Handles detected at "<<handle_loc_[0]<< " : "<<handle_loc_[1]);
 
-        // walk 0.4m forward
-        // walker_->walkNSteps(1, 0.0, 0.4, false);
-
         // generate the event
         eventQueue.riseEvent("/DETECTED_HANDLE");
     }
@@ -344,11 +351,18 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
         std::cout << "yaw: " << pose2D.theta  <<std::endl;
         retry_count = 0;
         // update the plane coeffecients
-        setPanelCoeff(panel_detector_->getPanelPlaneModel());
+        if(panel_detector_->getPanelPlaneModel(panel_coeff_)){
+            eventQueue.riseEvent("/DETECTED_PANEL_FINE");
+            delete panel_detector_;
+            panel_detector_ = nullptr;
+        }
+        else{
+            ROS_INFO("Could not query plane equation");
+            ++retry_count;
+            eventQueue.riseEvent("/DETECT_PANEL_FINE_RETRY");
+        }
 
-        eventQueue.riseEvent("/DETECTED_PANEL_FINE");
-        delete panel_detector_;
-        panel_detector_ = nullptr;
+
     }
 
     else if(retry_count < 5) {
@@ -402,6 +416,8 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
        if (isPoseChanged(pose_prev, panel_walk_goal_))
        {
            ROS_INFO("pose chaned");
+           //reset chest before moving close to panel
+           chest_controller_->controlChest(0, 0, 0);
            walker_->walkToGoal(panel_walk_goal_, false);
            // sleep so that the walk starts
            ros::Duration(1).sleep();
@@ -457,28 +473,31 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
 decision_making::TaskResult valTask1::adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
-    //1 - left
-    //3 - right
-    ROS_INFO("resetting pose");
-    chest_controller_->controlChest(0.0f, 0.0f, 0.0f);
-    ros::Duration(3).sleep();
+    //1 - right
+    //3 - left
+    static bool isPoseSet = false;
 
-    ROS_INFO("Grasp left handle");
-    handle_grabber_->grab_handle(armSide::LEFT, handle_loc_[3]);
+    geometry_msgs::Pose pose;
+    robot_state_->getCurrentPose("/leftPalm", pose);
 
-    // generate the way points to move the handle
-    std::vector<geometry_msgs::Pose> leftWaypoints;
-    std::vector<geometry_msgs::Pose> rightWaypoints;
+        ROS_INFO("Grasp left handle");
 
-    if(move_handle_ == nullptr) {
-        move_handle_ = new move_handle(nh_);
-    }
-    move_handle_->createCircle(handle_loc_[2], 0, panel_coeff_, leftWaypoints);
-    move_handle_->createCircle(handle_loc_[0], 1, panel_coeff_, rightWaypoints);
+        //blocking call, takes about 10sec
+        handle_grabber_->grasp_handles(armSide::LEFT, handle_loc_[3]);
+
+        if(move_handle_ == nullptr) {
+            move_handle_ = new move_handle(nh_);
+        }
+        std::vector<geometry_msgs::Pose> leftWaypoints;
+        std::vector<geometry_msgs::Pose> rightWaypoints;
+
+        move_handle_->createCircle(handle_loc_[2], 0, panel_coeff_, leftWaypoints);
+        move_handle_->createCircle(handle_loc_[0], 1, panel_coeff_, rightWaypoints);
+
 
     // generate the event
     while(!preemptiveWait(1000, eventQueue)){
-    eventQueue.riseEvent("/ADJUST_ARMS_RETRY");
+        eventQueue.riseEvent("/ADJUST_ARMS_SUCESSFUL");
     }
 
     delete move_handle_;

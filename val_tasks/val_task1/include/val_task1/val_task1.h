@@ -22,6 +22,7 @@
 #include "val_control/val_chest_navigation.h"
 #include "val_control/val_pelvis_navigation.h"
 #include "val_control/val_head_navigation.h"
+#include "val_control/val_gripper_control.h"
 #include "val_task1/handle_detector.h"
 #include "val_task1/handle_grabber.h"
 #include "val_control/robot_state.h"
@@ -59,6 +60,8 @@ class valTask1 {
     pelvisTrajectory* pelvis_controller_;
     //head controller
     HeadTrajectory* head_controller_;
+    //grippers
+    gripperControl* gripper_controller_;
     //robot state informer
     RobotStateInformer* robot_state_;
 

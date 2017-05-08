@@ -1,4 +1,5 @@
 #include <val_control/robot_state.h>
+#include <val_control/val_arm_navigation.h>
 
 int main(int argc, char** argv)
 {

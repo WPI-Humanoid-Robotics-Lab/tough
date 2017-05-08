@@ -8,6 +8,21 @@
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include <opencv/cv.h>
 
+struct Point2D{
+    int x;
+    int y;
+
+};
+
+inline bool operator == (const Point2D& lhs, const Point2D& rhs){
+    return (abs(lhs.x - rhs.x) < 5 || abs(lhs.y - rhs.y) < 5);
+}
+
+inline bool operator<(const Point2D& lhs, const Point2D& rhs)
+{
+    return lhs.x < rhs.x || lhs.y < rhs.y;
+}
+
 class FinishBoxDetector{
 
 public:
@@ -15,10 +30,8 @@ public:
     ~FinishBoxDetector();
 
 private:
-
     void detectFinishBox(const nav_msgs::OccupancyGrid::Ptr msg);
-    void trimTo2DecimalPlaces(float &x, float &y);
-    size_t getIndex(float x, float y);
+    void showImage(cv::Mat, std::string caption="FinishBoxDetection");
     ros::NodeHandle nh_;
     ros::Subscriber pointcloudSub_;
     ros::Publisher  mapPub_;
