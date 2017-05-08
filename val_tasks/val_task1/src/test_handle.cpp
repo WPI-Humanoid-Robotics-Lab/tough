@@ -16,21 +16,19 @@ int main(int argc, char** argv){
   move_handle handle(nh);
   ros::Rate loop_rate(10);
 
-  geometry_msgs::PoseStamped center;
-  center.pose.position.x = 3.12;
-  center.pose.position.y = 0.923;
-  center.pose.position.z = 0.845;
-  center.pose.orientation.x  = 0;
-  center.pose.orientation.y  = 0;
-  center.pose.orientation.z  = 0;
-  center.pose.orientation.w  = 1;
+  geometry_msgs::Point center;
+  center.x = 3.12;
+  center.y = 0.923;
+  center.z = 0.845;
 
-  std::vector<geometry_msgs::PoseStamped> points;
+  std::vector<geometry_msgs::Pose> points;
+  std::vector<float> panelCoeffs {-0.3028,-0.3481,0.8872,0.5768};
 
- handle.createCircle(center, 0, -0.3028,-0.3481,0.8872,0.5768 );
+
   while(ros::ok())
   {
-
+    handle.createCircle(center, 0,panelCoeffs, points);
+//    handle.follow_path();
     ros::spinOnce();
     loop_rate.sleep();
   }

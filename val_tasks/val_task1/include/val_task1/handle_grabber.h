@@ -6,6 +6,7 @@
 #include <tf/transform_listener.h>
 #include <val_control/val_arm_navigation.h>
 #include <val_control/val_gripper_control.h>
+#include <val_control/robot_state.h>
 
 #define Y_OFFSET 0.05
 
@@ -13,7 +14,8 @@ class handle_grabber{
 public:
     handle_grabber(ros::NodeHandle n);
     ~handle_grabber();
-   void grab_handle(const armSide side, const geometry_msgs::Point &goal, float executionTime=2.0f);
+   void grasp_handles(const armSide side, const geometry_msgs::Point &goal, float executionTime=2.0f);
+   void adjust_pose(const armSide side, const geometry_msgs::Point &goal, float executionTime=1.0f);
 
    geometry_msgs::QuaternionStamped leftHandOrientation() const;
    void setLeftHandOrientation(const geometry_msgs::QuaternionStamped &leftHandOrientation);
@@ -21,18 +23,19 @@ public:
    geometry_msgs::QuaternionStamped rightHandOrientation() const;
    void setRightHandOrientation(const geometry_msgs::QuaternionStamped &rightHandOrientation);
 
-   bool transformQuaternionToWorld(const geometry_msgs::QuaternionStamped &qt_in, geometry_msgs::QuaternionStamped &qt_out, std::string target_frame=VAL_COMMON_NAMES::WORLD_TF);
-
 private:
    ros::NodeHandle nh_;
    tf::TransformListener listener_;
    armTrajectory armTraj_;
    gripperControl gripper_;
-
+   RobotStateInformer *current_state_;
    geometry_msgs::QuaternionStamped leftHandOrientation_ ;
    geometry_msgs::QuaternionStamped rightHandOrientation_;
 
+   /*Top Grip*/
    const std::vector<float> leftShoulderSeed_ = {-0.23, -0.72, 0.65, -1.51, 2.77, 0.0, 0.0};
+   /*Side Grip*/
+//   const std::vector<float> leftShoulderSeed_ = {-0.04, -0.24, 0.49, -1.30, 0.71, 0.61, -0.24};
    const std::vector<float> rightShoulderSeed_ = {-0.23, 0.72, 0.65, 1.51, 2.77, 0.0, 0.0};
 
 };

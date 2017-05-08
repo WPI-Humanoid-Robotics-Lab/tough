@@ -1,7 +1,4 @@
-
 #include <val_task1/move_handle.h>
-
-
 
 move_handle::move_handle(ros::NodeHandle n) : nh_(n) {
     right_armTraj = new armTrajectory(nh_);
@@ -10,58 +7,77 @@ move_handle::move_handle(ros::NodeHandle n) : nh_(n) {
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 }
 
-
-void move_handle::createCircle(geometry_msgs::PoseStamped center, int side, float a, float b, float c, float d)
+void move_handle::createCircle(geometry_msgs::Point center, int side, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points)
 {
-    float radius = .12,num_steps = 10;
-    float hand_z_plane = 0;
-    float dist = 0;
-    armSide input_side;
+  float radius = .20,num_steps = 4;
+  float hand_z_plane = 0;
+  float dist = 0;
+  float spin = M_PI/4; //temp
+  float hand_angle;
+  std::vector<double> path;
+  armSide input_side;
 
-    geometry_msgs::Pose finger_pose;
-    geometry_msgs::Pose hand_pose;
+  if (planeCoeffs.size() != 4){
+      ROS_INFO("Please check the plane coefficiants");
+  }
 
-    // get the hand frame
-    if (side){
-        robot_state_->getCurrentPose("rightMiddleFingerPitch1Link",finger_pose);
-        robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF,hand_pose);
-        input_side = armSide::RIGHT;
-    }
-    else{
-        robot_state_->getCurrentPose("leftMiddleFingerPitch1Link",finger_pose);
-        robot_state_->getCurrentPose(VAL_COMMON_NAMES::L_PALM_TF,hand_pose);
-        input_side = armSide::LEFT;
-    }
+  float a = planeCoeffs.at(0);
+  float b = planeCoeffs.at(1);
+  float c = planeCoeffs.at(2);
+  float d = planeCoeffs.at(3);
 
-    //hand_z_plane = (a*current_hand_pose.position.x  + b*current_hand_pose.position.y - d)/c ;
-    //hand_z_plane = current_hand_pose.position.z - hand_z_plane;
+  geometry_msgs::Pose cen;
+  cen.position.x = center.x;
+  cen.position.y = center.y;
+  cen.position.z = center.z;
 
-    dist = fabs( a*finger_pose.position.x  + b*finger_pose.position.y + c*finger_pose.position.z  + d )/sqrt( pow(a,2) + pow(b,2) + pow(c,2) );
-    ROS_INFO("%f\n",dist);
-    std::vector<geometry_msgs::PoseStamped> points;
-    float dir;
-    for (int i=0; i<num_steps; i++)
-    {
-        // circle parametric equation
-        geometry_msgs::PoseStamped point;
-        point.pose.position.x = center.pose.position.x + (radius * cos((float)i*(2*M_PI/num_steps) - .7*M_PI ));
-        point.pose.position.y = center.pose.position.y + (radius * sin((float)i*(2*M_PI/num_steps) - .7*M_PI ));
 
-        dir=atan2(sin((float)i*(2*M_PI/num_steps) - .7*M_PI ),cos((float)i*(2*M_PI/num_steps) - .7*M_PI ))+M_PI_2;
-        tf::Quaternion t =tf::createQuaternionFromYaw(dir);
-        point.pose.orientation.w=t.w();
-        point.pose.orientation.x=t.x();
-        point.pose.orientation.y=t.y();
-        point.pose.orientation.z=t.z();
-        std::cout<<"direction:  "<<dir<<std::endl;
-        point.pose.position.z = -(a*point.pose.position.x  + b* point.pose.position.y + (d - dist+.05) )/c   ;
-        points.push_back(point);
-    }
-    visualize(points);
-    //    follow_path(points, input_side,finger_pose);
+  geometry_msgs::Pose current_hand_pose;
+  geometry_msgs::Pose finger_pose;
+
+  // get the hand frame
+  if (side){
+    robot_state_->getCurrentPose("rightMiddleFingerPitch1Link",finger_pose);
+    input_side = armSide::RIGHT;
+  }
+  else{
+    robot_state_->getCurrentPose("leftMiddleFingerPitch1Link",finger_pose);
+    input_side = armSide::LEFT;
+   }
+
+  //starting angle
+  hand_angle = M_PI + atan2(cen.position.y - finger_pose.position.y,cen.position.x - finger_pose.position.x );
+  //geterate a traj from start angle to the finish angle
+  path = linspace(hand_angle,spin, num_steps);
+
+  dist = fabs( a*finger_pose.position.x  + b*finger_pose.position.y + c*finger_pose.position.z  + d )/sqrt( pow(a,2) + pow(b,2) + pow(c,2) );
+
+
+//  std::vector<geometry_msgs::Pose> points;
+  for (int i=0; i<path.size(); i++)
+  {
+    // circle parametric equation
+    geometry_msgs::Pose point;
+    point.position.x = center.x + (radius * cos( path[i] ));
+    point.position.y = center.y + (radius * sin( path[i] ));
+
+    float dir=atan2(sin((float)i*(2*M_PI/num_steps)),cos((float)i*(2*M_PI/num_steps)))+M_PI_2;
+    tf::Quaternion t =tf::createQuaternionFromYaw(dir);
+    point.orientation.w=t.w();
+    point.orientation.x=t.x();
+    point.orientation.y=t.y();
+    point.orientation.z=t.z();
+    std::cout<<"direction:  "<<dir<<std::endl;
+
+    point.position.z = -(a*point.position.x  + b* point.position.y + (d - dist+.05) )/c   ;
+    points.push_back(point);
+  }
+  visulatize(points);
+//  follow_path(points, input_side,finger_pose);
+
 }
 
-void move_handle::follow_path(std::vector<geometry_msgs::PoseStamped>& points, armSide input_side, geometry_msgs::Pose hand)
+void move_handle::follow_path(std::vector<geometry_msgs::Pose>& points, armSide input_side, geometry_msgs::Pose hand)
 {
 
     std::vector<armTrajectory::armTaskSpaceData> *arm_data_vector = new std::vector<armTrajectory::armTaskSpaceData>();
@@ -70,11 +86,12 @@ void move_handle::follow_path(std::vector<geometry_msgs::PoseStamped>& points, a
     int num_poses = points.size();
     for(int i=0;i<num_poses;i++)
     {
-        auto input_pose = points.at(i);
+        geometry_msgs::Pose input_pose = points.at(i);
         armTrajectory::armTaskSpaceData* task_space_data = new armTrajectory::armTaskSpaceData();
         task_space_data->side = input_side;
-        task_space_data->pose.position = input_pose.pose.position;
-        task_space_data->pose.orientation = input_pose.pose.orientation;
+        task_space_data->pose.position = input_pose.position;
+        task_space_data->pose.orientation = hand.orientation;
+
         task_space_data->time = (i/num_poses)*desired_time; //what xyzzy
         arm_data_vector->push_back(*task_space_data);
         ROS_INFO_STREAM(task_space_data->pose);
@@ -87,29 +104,44 @@ void move_handle::follow_path(std::vector<geometry_msgs::PoseStamped>& points, a
     ROS_INFO("Moved Handle");
 
 }
-
-void move_handle::visualize(std::vector<geometry_msgs::PoseStamped> &points)
+//create a linespace vector 
+std::vector<double> move_handle::linspace(double min, double max, int n)
 {
-    // visulation of the circle
-    visualization_msgs::MarkerArray circle = visualization_msgs::MarkerArray();
-    visualization_msgs::Marker marker;
-    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
-    marker.header.stamp = ros::Time();
-    marker.ns = "circle";
-    marker.id = 0;
-    marker.type = visualization_msgs::Marker::ARROW;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.pose = points[0].pose;
-    marker.scale.x = 0.1;
-    marker.scale.y = 0.01;
-    marker.scale.z = 0.01;
-    marker.color.a = 0.6;
-    marker.color.r = 1.0;
-    marker.color.g = 0.0;
-    marker.color.b = 0.0;
-    marker.lifetime = ros::Duration(0);
-    circle.markers.push_back(marker);
+    std::vector<double> result;
+    int iterator = 0;
 
+    for (int i = 0; i <= n-2; i++)
+    {
+     double temp = min + i*(max-min)/(floor((double)n) - 1);
+     result.insert(result.begin() + iterator, temp);
+     iterator += 1;
+    }
+
+    result.insert(result.begin() + iterator, max);
+    return result;
+}
+void move_handle::visulatize(std::vector<geometry_msgs::Pose> &points)
+{
+  // visulation of the circle
+  visualization_msgs::MarkerArray circle = visualization_msgs::MarkerArray();
+
+  visualization_msgs::Marker marker;
+  marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+  marker.header.stamp = ros::Time();
+  marker.ns = "circle";
+  marker.id = 0;
+  marker.type = visualization_msgs::Marker::CUBE;
+  marker.action = visualization_msgs::Marker::ADD;
+  marker.pose = points[0];
+  marker.scale.x = 0.1;
+  marker.scale.y = 0.1;
+  marker.scale.z = 0.1;
+  marker.color.a = 0.6;
+  marker.color.r = 1.0;
+  marker.color.g = 0.0;
+  marker.color.b = 0.0;
+  marker.lifetime = ros::Duration(0);
+  circle.markers.push_back(marker);
 
     for (int i = 1; i < points.size(); i++) {
         visualization_msgs::Marker marker;
@@ -119,9 +151,9 @@ void move_handle::visualize(std::vector<geometry_msgs::PoseStamped> &points)
         marker.id = i;
         marker.type = visualization_msgs::Marker::ARROW;
         marker.action = visualization_msgs::Marker::ADD;
-        marker.pose = points[i].pose;
+        marker.pose = points[i];
 
-        ROS_INFO_STREAM(i<<"pose"<<points[i].pose.position);
+        ROS_INFO_STREAM(i<<"pose"<<points[i].position);
         marker.scale.x = 0.1;
         marker.scale.y = 0.01;
         marker.scale.z = 0.01;
@@ -137,36 +169,3 @@ void move_handle::visualize(std::vector<geometry_msgs::PoseStamped> &points)
     ros::Duration(0.2).sleep();
     ROS_INFO("vis");
 }
-
-
-
-
-
-// int main(int argc, char** argv){
-//
-//   ros::init(argc, argv, "panel_detector");
-//   ros::NodeHandle nh;
-//   array_pub    = nh.advertise<visualization_msgs::MarkerArray>( "Circle_Array", 0 );
-//
-//   ros::Rate loop_rate(10);
-//
-//   geometry_msgs::PoseStamped center;
-//   center.pose.position.x = 3.12;
-//   center.pose.position.y = 0.814;
-//   center.pose.position.z = 0.84;
-//   center.pose.orientation.x  = 0;
-//   center.pose.orientation.y  = 0;
-//   center.pose.orientation.z  = 0;
-//   center.pose.orientation.w  = 1;
-//
-//   std::vector<geometry_msgs::PoseStamped> points;
-//
-//   while(ros::ok())
-//   {
-//     createCircle(center, points);
-//
-//     ros::spinOnce();
-//     loop_rate.sleep();
-//   }
-//   return 0;
-// }
