@@ -54,6 +54,7 @@ void gripperControl::openGripper(const armSide side)
     std_msgs::Float64MultiArray msg;
     msg.data.clear();
     msg.data.resize(5);
+    msg.data[0] = 1.4;
     if (side == LEFT){
         leftGripperContPublisher.publish(msg);
     }

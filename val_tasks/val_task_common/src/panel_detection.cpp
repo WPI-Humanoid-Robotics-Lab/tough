@@ -323,8 +323,9 @@ void panel_detector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
 }
 
-std::vector<float> panel_detector::getPanelPlaneModel() const
+bool panel_detector::getPanelPlaneModel(std::vector<float> &panelPlaneModel) const
 {
     ROS_INFO("a : %0.4f, b : %0.4f, c : %0.4f, d: %.4f",panel_plane_model_[0], panel_plane_model_[1], panel_plane_model_[2], panel_plane_model_[3]);
-    return panel_plane_model_;
+    panelPlaneModel = panel_plane_model_;
+    return panelPlaneModel.size() == 4;
 }

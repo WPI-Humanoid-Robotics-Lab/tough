@@ -1,11 +1,12 @@
 #include "val_task1/handle_grabber.h"
-
+#include "val_control/val_gripper_control.h"
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "handle_grabber");
     ros::NodeHandle nh;
     handle_grabber hg(nh);
     ROS_INFO("Starting handle grabber");
+    gripperControl gc(nh);
 
     if(argc == 5){
         geometry_msgs::Point pt;
@@ -19,8 +20,8 @@ int main(int argc, char **argv)
         } else {
             side = RIGHT;
         }
-
-        hg.grab_handle(side, pt);
+        gc.openGripper(side);
+        hg.grasp_handles(side, pt);
     } else{
         ROS_INFO("Usage : %s <side> <goal_x> <goal_y> <goal_z>\n side = 0 or 1");
         return -1;
