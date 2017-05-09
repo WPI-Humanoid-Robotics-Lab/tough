@@ -12,7 +12,7 @@ void move_handle::createCircle(geometry_msgs::Point center, int side, const std:
   float radius = .20,num_steps = 10;
   float hand_z_plane = 0;
   float dist = 0;
-  float spin = M_PI/4; //temp
+  float spin = M_PI/4; //
   float hand_angle;
   std::vector<double> path;
   armSide input_side;
@@ -122,6 +122,7 @@ std::vector<double> move_handle::linspace(double min, double max, int n)
     result.insert(result.begin() + iterator, max);
     return result;
 }
+
 void move_handle::visulatize(std::vector<geometry_msgs::Pose> &points)
 {
   // visulation of the circle
