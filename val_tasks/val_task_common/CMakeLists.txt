@@ -133,6 +133,7 @@ include_directories(
  add_library(${PROJECT_NAME}
    src/val_walk_tracker.cpp
    src/panel_detection.cpp
+   src/val_task_common_utils.cpp
  )
 
 ## Add cmake target dependencies of the library

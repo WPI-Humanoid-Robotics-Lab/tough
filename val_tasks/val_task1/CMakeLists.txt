@@ -189,8 +189,7 @@ include_directories(
          src/handle_detector.cpp
          src/handle_grabber.cpp
          src/move_handle.cpp
-
-
+         src/val_task1_utils.cpp
  )
 
 
@@ -320,3 +319,6 @@ decision_making_parsing(src/val_task1SM.cpp)
 
 add_executable(test_handle src/test_handle.cpp)
 target_link_libraries(test_handle ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(test_move_handle src/test_move_handle.cpp)
+target_link_libraries(test_move_handle ${catkin_LIBRARIES} ${PROJECT_NAME})
