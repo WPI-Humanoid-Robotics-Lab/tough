@@ -189,8 +189,7 @@ include_directories(
          src/handle_detector.cpp
          src/handle_grabber.cpp
          src/move_handle.cpp
-
-
+         src/val_task1_utils.cpp
  )
 
 

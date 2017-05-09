@@ -27,6 +27,7 @@
 #include "val_task1/handle_grabber.h"
 #include "val_control/robot_state.h"
 #include "val_task1/move_handle.h"
+#include <val_task_common/val_task_common_utils.h>
 
 using namespace decision_making;
 
@@ -107,9 +108,6 @@ class valTask1 {
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
 
     geometry_msgs::Pose2D getPanelWalkGoal();
-
-    bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
     void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal_);
-    void createHandleWayPoints(const geometry_msgs::Point &center, std::vector<geometry_msgs::Pose> &points);
     void setPanelCoeff(const std::vector<float> &panel_coeff);
 };
