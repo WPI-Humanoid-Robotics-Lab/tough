@@ -2,11 +2,13 @@
     <arg name="init" default="true"/>
     <arg name="extra_gazebo_args" default="" />
     <arg name="use_local_build" default="false" />
+    <arg name="grasping_init_wait_time" default="20" />
 
    <include file="$(find srcsim)/launch/unique_task2.launch">
       <arg name="init" value="$(arg init)" />
       <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)" />
       <arg name="use_local_build" value="$(arg use_local_build)" />
+      <arg name="grasping_init_wait_time" value="$(arg grasping_init_wait_time)" />
    </include>
 
   <node pkg="val_bringup" type="init.py" name="initalize_robot"/>
