@@ -3,6 +3,9 @@
 #include <val_task2/button_detector.h>
 #include <val_control/val_arm_navigation.h>
 #include <val_control/val_gripper_control.h>
+#include <val_footstep/ValkyrieWalker.h>
+#include <val_common/val_common_defines.h>
+#include <val_common/val_common_names.h>
 
 
 class button_press
@@ -13,6 +16,7 @@ class button_press
     tf::TransformListener listener_;
     gripperControl gripper_;
     RobotStateInformer *current_state_;
+    ValkyrieWalker walk_;
     geometry_msgs::QuaternionStamped leftHandOrientation_ ;
     geometry_msgs::QuaternionStamped rightHandOrientation_;
 
@@ -30,7 +34,7 @@ class button_press
 
 public:
 
-    void grasp_button(const armSide side, geometry_msgs::Point &goal, float executionTime=2.0f);
+    bool grasp_button(const armSide side, geometry_msgs::Point &goal, float executionTime=2.0f);
 
     geometry_msgs::QuaternionStamped leftHandOrientation() const;
     void setLeftHandOrientation(const geometry_msgs::QuaternionStamped &leftHandOrientation);
@@ -38,7 +42,11 @@ public:
     geometry_msgs::QuaternionStamped rightHandOrientation() const;
     void setRightHandOrientation(const geometry_msgs::QuaternionStamped &rightHandOrientation);
 
-    button_press(ros::NodeHandle&);
+    void getButton( geometry_msgs::Point &goal);
+
+    void orientRobot();
+
+    button_press(ros::NodeHandle &);
     ~button_press();
 
 };
