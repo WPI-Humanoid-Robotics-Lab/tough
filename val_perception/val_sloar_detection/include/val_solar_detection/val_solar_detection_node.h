@@ -32,8 +32,9 @@
 
 #include <pcl/sample_consensus/sac_model_sphere.h>
 #include <pcl/sample_consensus/ransac.h>
-
+#include "val_control/robot_state.h"
 #include <visualization_msgs/MarkerArray.h>
+//#include "octomap_server/"
 
 class plane{
 private:
@@ -41,15 +42,19 @@ private:
   ros::Subscriber pcl_sub;
 
   ros::Publisher pcl_filtered_pub;
-  ros::Publisher vis_pub;
-  ros::Publisher vis_plane_pub;
 
+
+  ros::Publisher vis_pub;
+
+  RobotStateInformer* current_state_;
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
 
   void PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
-  /*void planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+  void planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+  void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
 
+  /*
   void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
   void removeWalkWay(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool setneg = false);
@@ -66,9 +71,14 @@ public:
 
   plane(ros::NodeHandle nh)
   {
-    pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &plane::cloudCB, this);
+
+
+    current_state_ = RobotStateInformer::getRobotStateInformer(nh);
+//    pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &plane::cloudCB, this);
+    pcl_sub =  nh.subscribe("/field/octomap_point_cloud_centers", 10, &plane::cloudCB, this);
     pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_plane/cloud2", 1);
-     vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_solar/visualization_marker", 1 );
+    vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_solar/visualization_marker", 1 );
+
   }
 
 };

@@ -27,6 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   tf_conversions
+val_control
 )
 
 ## System dependencies are found with CMake's conventions
