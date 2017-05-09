@@ -153,12 +153,13 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
 
 //    ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
     geometry_msgs::Quaternion quaternion;
-    ROS_INFO("slopeyz %.2f",yzSlope);
+    ROS_INFO("slopeyz %.2f, theta %.2f",yzSlope,theta);
+
+
     if(yzSlope>0)  //rover on the left
         quaternion = tf::createQuaternionMsgFromYaw(theta-1.5708);
     else //rover on the right
         quaternion = tf::createQuaternionMsgFromYaw(theta+1.5708);
-
 
     pose.orientation = quaternion;
 

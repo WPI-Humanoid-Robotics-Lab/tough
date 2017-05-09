@@ -11,15 +11,52 @@ void plane::cloudCB(const sensor_msgs::PointCloud2ConstPtr &input)
 
     pcl::fromROSMsg(*input, *cloud);
 
-
+    roverremove(cloud);
     PassThroughFilter(cloud);
-//    planeDetection(cloud);
-//    getPosition(cloud,location);
 
+    ROS_INFO("pub %d",(int)cloud->points.size());
+
+    planeDetection(cloud);
+    getPosition(cloud,location);
     pcl::toROSMsg(*cloud,output);
     output.header.frame_id="world";
     pcl_filtered_pub.publish(output);
 
+
+
+}
+void plane::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+{
+    Eigen::Vector4f minPoint;
+    Eigen::Vector4f maxPoint;
+    minPoint[0]=0;
+    minPoint[1]=-2;
+    minPoint[2]=0;
+
+    maxPoint[0]=9;
+    maxPoint[1]=+2;
+    maxPoint[2]=3;
+    Eigen::Vector3f boxTranslatation;
+         boxTranslatation[0]=3.37;
+         boxTranslatation[1]=1.18;
+         boxTranslatation[2]=0;
+    Eigen::Vector3f boxRotation;
+         boxRotation[0]=0;  // rotation around x-axis
+         boxRotation[1]=0;  // rotation around y-axis
+         boxRotation[2]=-0.785;  //in radians rotation around z-axis. this rotates your cube 45deg around z-axis.
+
+
+    pcl::CropBox<pcl::PointXYZ> box_filter;
+    std::vector<int> indices;
+    indices.clear();
+    box_filter.setInputCloud(cloud);
+    box_filter.setMin(minPoint);
+    box_filter.setMax(maxPoint);
+    box_filter.setTranslation(boxTranslatation);
+    box_filter.setRotation(boxRotation);
+    box_filter.setNegative(true);
+    box_filter.filter(*cloud);
+//    box_filter.filter(indices);
 
 
 }
