@@ -44,6 +44,11 @@ int main(int argc, char** argv){
     {
         cout<<"************ ************ ************ \n";
         cout<<"enter choice \n";
+        cout<<"q - exit code \n";
+        cout<<"s - stop trajectoris \n";
+        cout<<"t - status \n";
+        cout<<"c - configure position \n";
+
         cin>>input;
         if(input=='q')
         {
@@ -55,7 +60,7 @@ int main(int argc, char** argv){
             stopTraj.publish(stopMsg);
             cout<<"Stopped All Trajectories \n";
         }
-        else if(input =='s')
+        else if(input =='t')
         {
             cout<<"Enter side (Left-0) (Right-1) \n";
             cin>>hand;
