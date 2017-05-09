@@ -6,7 +6,7 @@ int main(int argc, char** argv){
     ros::NodeHandle nh;
     ros::Publisher goalPub = nh.advertise<geometry_msgs::PoseStamped>("/valkyrie/goal",1);
 
-    panel_detector obj(nh, DETECTOR_TYPE::HANDLE_PANEL_FINE);
+    panel_detector obj(nh, DETECTOR_TYPE::HANDLE_PANEL_COARSE);
     int NUM_SAMPLES = 1;
     std::vector<geometry_msgs::Pose> detections;
     int trials;

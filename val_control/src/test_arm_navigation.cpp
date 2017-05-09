@@ -53,7 +53,7 @@ int main(int argc, char **argv)
         side = RIGHT;
       }
       armTraj.moveArmInTaskSpace(side, pt, 3.0);
-  } else{
+  } else if(false){
     // Set the pose of the left arm to extend it to the front
     armTrajectory::armJointData l;
     l.side = LEFT;
