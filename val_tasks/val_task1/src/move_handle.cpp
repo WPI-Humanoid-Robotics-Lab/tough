@@ -65,7 +65,7 @@ void move_handle::createCircle(geometry_msgs::Point center, int side, const std:
     points.push_back(point);
   }
   visulatize(points);
-//  follow_path(points, input_side,finger_pose);
+  //follow_path(points, input_side,finger_pose);
 }
 
 void move_handle::follow_path(std::vector<geometry_msgs::Pose>& points, armSide input_side, geometry_msgs::Pose hand)
@@ -94,7 +94,7 @@ void move_handle::follow_path(std::vector<geometry_msgs::Pose>& points, armSide 
     ROS_INFO("Moved Handle");
 
 }
-//create a linespace vector 
+//create a linespace vector
 std::vector<double> move_handle::linspace(double min, double max, int n)
 {
     std::vector<double> result;
@@ -110,6 +110,7 @@ std::vector<double> move_handle::linspace(double min, double max, int n)
     result.insert(result.begin() + iterator, max);
     return result;
 }
+
 void move_handle::visulatize(std::vector<geometry_msgs::Pose> &points)
 {
   // visulation of the circle
