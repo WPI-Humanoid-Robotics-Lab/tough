@@ -31,7 +31,7 @@ bool FinishBoxDetector::getFinishBoxCenters(std::vector<geometry_msgs::Point> &c
     for(auto it = finish_box_centers_.begin(); it != finish_box_centers_.end(); ++it) {
        geometry_msgs::Point pt;
        pt.x = it->x*MAP_RESOLUTION+MAP_X_OFFSET;
-       pt.y = it->y*MAP_RESOLUTION+MAP_X_OFFSET;
+       pt.y = it->y*MAP_RESOLUTION+MAP_Y_OFFSET;
        centers.push_back(pt);
    }
 
