@@ -1,9 +1,9 @@
-#include <val_task1/handle_grabber.h>
+#include <val_task2/solar_panel_grasp.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 
-handle_grabber::handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
+solar_panel_handle_grabber::solar_panel_handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
@@ -35,33 +35,33 @@ handle_grabber::handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper
     rightHandOrientation_.quaternion.w = 0.332;
 }
 
-handle_grabber::~handle_grabber()
+solar_panel_handle_grabber::~solar_panel_handle_grabber()
 {
 
 }
 
 
-geometry_msgs::QuaternionStamped handle_grabber::leftHandOrientation() const
+geometry_msgs::QuaternionStamped solar_panel_handle_grabber::leftHandOrientation() const
 {
     return leftHandOrientation_;
 }
 
-void handle_grabber::setLeftHandOrientation(const geometry_msgs::QuaternionStamped &leftHandOrientation)
+void solar_panel_handle_grabber::setLeftHandOrientation(const geometry_msgs::QuaternionStamped &leftHandOrientation)
 {
     leftHandOrientation_ = leftHandOrientation;
 }
-geometry_msgs::QuaternionStamped handle_grabber::rightHandOrientation() const
+geometry_msgs::QuaternionStamped solar_panel_handle_grabber::rightHandOrientation() const
 {
     return rightHandOrientation_;
 }
 
-void handle_grabber::setRightHandOrientation(const geometry_msgs::QuaternionStamped &rightHandOrientation)
+void solar_panel_handle_grabber::setRightHandOrientation(const geometry_msgs::QuaternionStamped &rightHandOrientation)
 {
     rightHandOrientation_ = rightHandOrientation;
 }
 
 
-void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Point &goal, float executionTime)
+void solar_panel_handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Point &goal, float executionTime)
 {
 
     // opening grippers

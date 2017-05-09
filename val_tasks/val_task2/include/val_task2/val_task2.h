@@ -1,5 +1,8 @@
 #pragma once
 
+// !!!!! important other wise created collision with std
+#define DISABLE_DECISION_MAKING_LOG true
+
 #include <iostream>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
@@ -9,6 +12,17 @@
 #include <decision_making/ROSTask.h>
 #include <decision_making/DecisionMaking.h>
 #include <val_footstep/ValkyrieWalker.h>
+#include <nav_msgs/OccupancyGrid.h>
+
+#include "val_footstep/ValkyrieWalker.h"
+#include "val_task_common/val_walk_tracker.h"
+#include "val_task_common/panel_detection.h"
+#include "val_control/val_chest_navigation.h"
+#include "val_control/val_pelvis_navigation.h"
+#include "val_control/val_head_navigation.h"
+#include "val_control/val_gripper_control.h"
+//#include "val_task1/handle_grabber.h"
+#include "val_control/robot_state.h"
 
 using namespace decision_making;
 
@@ -20,19 +34,38 @@ class valTask2 {
 
     private:
     ros::NodeHandle nh_;
+    // default constructor
+    valTask2(ros::NodeHandle nh);
 
     // object for the walker api
     ValkyrieWalker* walker_;
+    // object for tracking robot walk
+    walkTracking* walk_track_;
+    // panel detection object
+    panel_detector* panel_detector_;
 
-    static valTask2 *currentObject;
+    // chest controller
+    chestTrajectory* chest_controller_;
+    //pelvis controller
+    pelvisTrajectory* pelvis_controller_;
+    //head controller
+    HeadTrajectory* head_controller_;
+    //grippers
+    gripperControl* gripper_controller_;
+    //robot state informer
+    RobotStateInformer* robot_state_;
 
+    ros::Subscriber occupancy_grid_sub_;
+    unsigned int map_update_count_;
+    void occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg);
+
+    static valTask2* currentObject;
     public:
 
     // goal location for the panel
     geometry_msgs::Pose2D panel_walk_goal_;
 
-    // default constructor and destructor
-    valTask2(ros::NodeHandle nh);
+    // default destructor
     ~valTask2();
     static valTask2* getValTask2(ros::NodeHandle nh);
     bool preemptiveWait(double ms, decision_making::EventQueue& queue);

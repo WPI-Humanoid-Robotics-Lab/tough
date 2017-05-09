@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   tf_conversions
-
+  val_task_common
 
 )
 
@@ -145,6 +145,7 @@ include_directories(perception_common
             src/val_task2.cpp
             src/val_task2SM.cpp
 	    src/button_detector.cpp
+            src/solar_panel_grasp.cpp
  )
 
 ## Add cmake target dependencies of the library
@@ -175,6 +176,10 @@ add_executable(val_task2_node
 
 add_executable(path_subtraction src/path_subtraction.cpp)
 target_link_libraries(path_subtraction  ${catkin_LIBRARIES})
+
+add_executable(solar_panel_grasp_node src/solar_panel_grasp_node.cpp)
+target_link_libraries(solar_panel_grasp_node  ${catkin_LIBRARIES} ${PROJECT_NAME})
+
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
