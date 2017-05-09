@@ -15,8 +15,17 @@ using namespace std;
 
 #define foreach BOOST_FOREACH
 
-ValkyrieWalker *valTask2::walker_ = NULL;
-geometry_msgs::Pose2D valTask2::panel_walk_goal_;
+valTask2 *valTask2::currentObject = nullptr;
+
+valTask2* valTask2::getValTask2(ros::NodeHandle nh){
+    if(currentObject == nullptr){
+        currentObject = new valTask2(nh);
+        return currentObject;
+    }
+    ROS_ERROR("Object already exists");
+    assert(false && "Object already exists");
+}
+
 
 // constructor and destrcutor
 valTask2::valTask2(ros::NodeHandle nh):
@@ -28,7 +37,7 @@ valTask2::valTask2(ros::NodeHandle nh):
 
 // destructor
 valTask2::~valTask2(){
-
+    delete walker_;
 }
 
 bool valTask2::preemptiveWait(double ms, decision_making::EventQueue& queue) {
@@ -78,33 +87,33 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
 
     // walk to the goal location
     // the goal can be updated on the run time
-//    ret = walker_->walkToGoal(panel_walk_goal_, false);
+    //    ret = walker_->walkToGoal(panel_walk_goal_, false);
 
-//    // if executing stay in the same state
-//    if (ret == MOVE_EXECUTING)
-//    {
-//         eventQueue.riseEvent("/WALK_EXECUTING");
-//    }
-//    // if finished sucessfully
-//    else if (ret == MOVE_SUCESS)
-//    {
-//       eventQueue.riseEvent("/REACHED_ROVER");
-//    }
-//    // if failed for more than 5 times, go to error state
-//    else if (fail_count > 5)
-//    {
-//        // reset the fail count
-//        fail_count = 0;
-//        eventQueue.riseEvent("/WALK_FAILED");
-//    }
-//    // if failed retry detecting the panel and then walk
-//    // also handles MOVE_FAILED
-//    else
-//    {
-//        // increment the fail count
-//        fail_count++;
-//        eventQueue.riseEvent("/WALK_RETRY");
-//    }
+    //    // if executing stay in the same state
+    //    if (ret == MOVE_EXECUTING)
+    //    {
+    //         eventQueue.riseEvent("/WALK_EXECUTING");
+    //    }
+    //    // if finished sucessfully
+    //    else if (ret == MOVE_SUCESS)
+    //    {
+    //       eventQueue.riseEvent("/REACHED_ROVER");
+    //    }
+    //    // if failed for more than 5 times, go to error state
+    //    else if (fail_count > 5)
+    //    {
+    //        // reset the fail count
+    //        fail_count = 0;
+    //        eventQueue.riseEvent("/WALK_FAILED");
+    //    }
+    //    // if failed retry detecting the panel and then walk
+    //    // also handles MOVE_FAILED
+    //    else
+    //    {
+    //        // increment the fail count
+    //        fail_count++;
+    //        eventQueue.riseEvent("/WALK_RETRY");
+    //    }
 
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
