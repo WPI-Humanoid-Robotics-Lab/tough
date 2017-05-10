@@ -412,7 +412,6 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
     ///@todo: what if pose has not changed but robot did not reach the goal and is not walking?
     if (taskCommonUtils::isPoseChanged(pose_prev, panel_walk_goal_))
     {
-        panel_walk_goal_.x = panel_walk_goal_.x-0.2;
         ROS_INFO("pose chaned");
         //reset chest before moving close to panel
         chest_controller_->controlChest(0, 0, 0);
