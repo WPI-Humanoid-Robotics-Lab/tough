@@ -147,6 +147,7 @@ include_directories(perception_common
             src/val_task2SM.cpp
 	    src/button_detector.cpp
             src/button_press.cpp
+	    src/cable_detector.cpp
  )
 
 ## Add cmake target dependencies of the library
@@ -178,7 +179,14 @@ target_link_libraries(button_press_node ${catkin_LIBRARIES}
    ${PROJECT_NAME}
 )
 
+add_executable(cable_detector_node
+        src/cable_detector_node.cpp
+)
 
+target_link_libraries(cable_detector_node ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+   ${PROJECT_NAME}
+)
 
 add_executable(val_task2_node
             src/val_task2_node.cpp
