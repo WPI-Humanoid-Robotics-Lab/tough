@@ -51,10 +51,10 @@ find_package(catkin REQUIRED COMPONENTS
   trac_ik_lib
 
   val_control
-
   val_gui
   val_footstep
   val_task_common
+  navigation_common
 )
 
 
@@ -165,7 +165,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES val_task1
-  CATKIN_DEPENDS roscpp rospy perception_common dynamic_reconfigure val_footstep
+  CATKIN_DEPENDS roscpp rospy perception_common dynamic_reconfigure val_footstep navigation_common
   DEPENDS system_lib
 )
 

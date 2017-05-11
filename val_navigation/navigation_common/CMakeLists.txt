@@ -34,6 +34,7 @@ include_directories(
  add_library(navigation_common
    src/frame_tracking.cpp
    src/fall_detector.cpp
+   src/map_generator.cpp
  )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -47,9 +48,9 @@ target_link_libraries(publish_corrected_map  ${catkin_LIBRARIES})
 
 add_executable(MapTransform src/MapTransform.cpp)
 target_link_libraries(MapTransform  ${catkin_LIBRARIES})
-add_executable(map_generator src/map_generator.cpp)
 
-target_link_libraries(map_generator  ${catkin_LIBRARIES})
+add_executable(map_generator src/map_generator_node.cpp)
+target_link_libraries(map_generator  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(fall_detector src/fall_detector_node.cpp)
 target_link_libraries(fall_detector  ${PROJECT_NAME} ${catkin_LIBRARIES})
