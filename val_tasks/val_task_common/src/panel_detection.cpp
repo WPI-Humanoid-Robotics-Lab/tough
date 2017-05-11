@@ -11,10 +11,16 @@ panel_detector::panel_detector(ros::NodeHandle &nh, DETECTOR_TYPE detector_type)
     //set the presets
     setPresetConfigs();
 
-    currentSettings_ = &preset_configs_[detector_type];
-
+//    currentSettings_ = &preset_configs_[detector_type];
+    currentDetector = detector_type;
     // resize plane model vector
     panel_plane_model_.resize(4);
+}
+
+panel_detector::~panel_detector()
+{
+    pcl_sub_.shutdown();
+
 }
 
 void panel_detector::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
@@ -47,9 +53,14 @@ void panel_detector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
     pcl::fromROSMsg(*input, *cloud);
 
     passThroughFilter(cloud);
+    if(cloud->empty())
+        return;
     panelSegmentation(cloud);
+    if(cloud->empty())
+        return;
     segmentation(cloud);
-
+    if(cloud->empty())
+        return;
 
     geometry_msgs::Pose pose;
     if(getPosition(cloud, pose))
@@ -70,19 +81,19 @@ void panel_detector::passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& clou
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
     pass_x.setFilterFieldName("x");
-    pass_x.setFilterLimits(currentSettings_->x_min_limit,currentSettings_->x_max_limit);
+    pass_x.setFilterLimits(preset_configs_[currentDetector].x_min_limit,preset_configs_[currentDetector].x_max_limit);
     pass_x.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> pass_y;
     pass_y.setInputCloud(cloud);
     pass_y.setFilterFieldName("y");
-    pass_y.setFilterLimits(currentSettings_->y_min_limit, currentSettings_->y_max_limit);
+    pass_y.setFilterLimits(preset_configs_[currentDetector].y_min_limit, preset_configs_[currentDetector].y_max_limit);
     pass_y.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> pass_z;
     pass_z.setInputCloud(cloud);
     pass_z.setFilterFieldName("z");
-    pass_z.setFilterLimits(currentSettings_->z_min_limit,currentSettings_->z_max_limit);
+    pass_z.setFilterLimits(preset_configs_[currentDetector].z_min_limit,preset_configs_[currentDetector].z_max_limit);
     pass_z.filter(*cloud);
 }
 
@@ -133,8 +144,8 @@ bool panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geo
     Eigen::Vector3f eigenValues;
     pcl::eigen33(covarianceMatrix, eigenVectors, eigenValues);
 
-    double OFFSET = currentSettings_->OFFSET;
-    if (currentSettings_->settingName == "HANDLE_PANEL_COARSE" || currentSettings_->settingName == "HANDLE_PANEL_FINE"){
+    double OFFSET = preset_configs_[currentDetector].OFFSET;
+    if (preset_configs_[currentDetector].settingName == "HANDLE_PANEL_COARSE" || preset_configs_[currentDetector].settingName == "HANDLE_PANEL_FINE"){
         if(pose.position.z > 0.80 && pose.position.z < 0.83){
             ROS_INFO("Upper plane detected");
             OFFSET += 0.1;

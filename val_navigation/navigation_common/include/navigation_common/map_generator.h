@@ -19,12 +19,14 @@ public:
     MapGenerator(ros::NodeHandle &n);
     ~MapGenerator();
 
+    static void trimTo2DecimalPlaces(float &x, float &y);
+    static size_t getIndex(float x, float y);
+
 private:
     void resetMap(const std_msgs::Empty &msg);
     void convertToOccupancyGrid(const sensor_msgs::PointCloud2Ptr msg);
-    void trimTo2DecimalPlaces(float &x, float &y);
     void timerCallback(const ros::TimerEvent& e);
-    size_t getIndex(float x, float y);
+
     ros::NodeHandle nh_;
     ros::Subscriber pointcloudSub_;
     ros::Subscriber resetMapSub_;
