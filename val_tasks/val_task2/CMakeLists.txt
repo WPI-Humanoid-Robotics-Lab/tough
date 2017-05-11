@@ -146,6 +146,7 @@ include_directories(perception_common
             src/val_task2.cpp
             src/val_task2SM.cpp
 	    src/button_detector.cpp
+            src/button_press.cpp
             src/solar_panel_grasp.cpp
 	    src/cable_detector.cpp
  )
