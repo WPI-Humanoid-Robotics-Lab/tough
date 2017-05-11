@@ -14,6 +14,11 @@
 #define upperBox_pass_z_min  2.5
 #define upperBox_pass_z_max  3.0
 
+/*
+ * NOTE: Applying voxel to the input cloud (refer periodic_snapshotter.cpp)is resulting in the incorrect rover position
+ *
+ * */
+
 void rover::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
   ros::Time startTime = ros::Time::now();
@@ -140,15 +145,21 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
 
 //    ROS_INFO("The Orientation is given by := %0.2f", theta);
 
-    double offset = 6.5;
+    double offset = 6.3;
 
     pose.position.x = upperBoxPosition.x - (offset*cos(theta));
     pose.position.y = upperBoxPosition.y - (offset*sin(theta));
     pose.position.z = 0.0;
 
 //    ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
+    geometry_msgs::Quaternion quaternion;
+    ROS_INFO("slopeyz %.2f, theta %.2f",yzSlope,theta);
 
-    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
+
+    if(yzSlope>0)  //rover on the left
+        quaternion = tf::createQuaternionMsgFromYaw(theta-1.5708);
+    else //rover on the right
+        quaternion = tf::createQuaternionMsgFromYaw(theta+1.5708);
 
     pose.orientation = quaternion;
 
