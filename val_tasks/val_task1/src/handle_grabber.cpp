@@ -148,36 +148,46 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
 
 
     //move arm to given point with known orientation and higher z
+    geometry_msgs::Pose finalGoal, intermGoal;
+    geometry_msgs::Point finalPoint, intermPoint;
+
+    current_state_->transformPoint(goal,intermPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    intermPoint.x += 0.2;
+    intermPoint.z += 0.1;
+
+    //transform that point back to world frame
+    current_state_->transformPoint(intermPoint, intermPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+
     ROS_INFO("Moving at an intermidate point before goal");
-    geometry_msgs::Pose pt;
-    pt.position = goal;
-    pt.position.z += 0.1;
+    intermGoal.position = intermPoint;
     geometry_msgs::QuaternionStamped temp  = side == armSide::LEFT ? leftHandOrientation_ : rightHandOrientation_;
 
     current_state_->transformQuaternion(temp, temp);
-    pt.orientation = temp.quaternion;
+    intermGoal.orientation = temp.quaternion;
 
-    armTraj_.moveArmInTaskSpace(side, pt, executionTime);
-    ros::Duration(executionTime*1.4).sleep();
+    armTraj_.moveArmInTaskSpace(side, intermGoal, executionTime*2);
+    ros::Duration(executionTime*2).sleep();
 
     //move arm to final position with known orientation
-    geometry_msgs::Pose finalGoal;
-    geometry_msgs::Point finalPoint;
+
 
     current_state_->transformPoint(goal,finalPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-    finalPoint.x += 0.1;
-    finalPoint.z -= 0.1;
+    finalPoint.x += 0.2;
+    finalPoint.z -= 0.15;
 
     //transform that point back to world frame
     current_state_->transformPoint(finalPoint, finalPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-    finalGoal.position = finalPoint;
 
     ROS_INFO("Moving towards goal");
-    pt.position = finalPoint;
+    finalGoal.position = finalPoint;
+    finalGoal.orientation = temp.quaternion;
 
-    armTraj_.moveArmInTaskSpace(side, pt, executionTime);
-    ros::Duration(executionTime).sleep();
+    armTraj_.moveArmInTaskSpace(side, finalGoal, executionTime*2);
+    ros::Duration(executionTime*2).sleep();
 
+    geometry_msgs::Pose handPose;
+    current_state_->getCurrentPose("rightMiddleFingerPitch1Link", handPose);
+    ROS_INFO_STREAM("Hand Position :"<<handPose.position);
     ROS_INFO("Closing grippers");
     gripper_.closeGripper(side);
 
