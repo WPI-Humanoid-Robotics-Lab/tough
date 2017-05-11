@@ -147,6 +147,7 @@ include_directories(perception_common
             src/val_task2SM.cpp
 	    src/button_detector.cpp
             src/button_press.cpp
+            src/map_filter.cpp
             src/solar_panel_grasp.cpp
 	    src/cable_detector.cpp
  )
@@ -185,6 +186,15 @@ add_executable(cable_detector_node
 )
 
 target_link_libraries(cable_detector_node ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+   ${PROJECT_NAME}
+)
+
+add_executable(map_filter_node
+        src/map_filter_node.cpp
+)
+
+target_link_libraries(map_filter_node ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
    ${PROJECT_NAME}
 )
