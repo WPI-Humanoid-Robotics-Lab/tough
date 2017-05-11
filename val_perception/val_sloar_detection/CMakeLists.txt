@@ -1,39 +1,42 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(val_task2)
+project(val_solar_detection)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+# add_definitions(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+SET(CMAKE_BUILD_TYPE RelWithDebInfo)
+
+set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
+
+find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
+find_package(Boost REQUIRED COMPONENTS system)
+find_package(PCL REQUIRED)
+
 find_package(catkin REQUIRED COMPONENTS
-  decision_making
-  decision_making_parser
-  dynamic_reconfigure
-  roscpp
-  val_footstep
-  val_control
-  perception_common
-  pcl_conversions
-  pcl_ros
   cv_bridge
   image_transport
+  geometry_msgs
+  pcl_conversions
+  pcl_ros
+  perception_common
+  roscpp
   sensor_msgs
   std_msgs
   tf
   tf_conversions
-  val_task_common
-
+val_control
 )
 
 ## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED COMPONENTS system)
+# find_package(Boost REQUIRED COMPONENTS system)
+ find_package(Boost REQUIRED COMPONENTS system)
+ include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
-include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
-
-link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
+ link_directories(${PCL_LIBRARY_DIRS})
+ add_definitions(${PCL_DEFINITIONS})
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -89,7 +92,7 @@ add_definitions(${PCL_DEFINITIONS})
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
+#   geometry_msgs#   sensor_msgs#   std_msgs
 # )
 
 ################################################
@@ -107,9 +110,10 @@ add_definitions(${PCL_DEFINITIONS})
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-generate_dynamic_reconfigure_options(
-  cfg/task2_parameters.cfg
- )
+# generate_dynamic_reconfigure_options(
+#   cfg/DynReconf1.cfg
+#   cfg/DynReconf2.cfg
+# )
 
 ###################################
 ## catkin specific configuration ##
@@ -121,11 +125,10 @@ generate_dynamic_reconfigure_options(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
- INCLUDE_DIRS include
- LIBRARIES val_task2
- CATKIN_DEPENDS roscpp decision_making decision_making_parser dynamic_reconfigure val_footstep cv_bridge image_transport pcl_conversions pcl_ros sensor_msgs std_msgs val_control
- DEPENDS system_lib
- #DEPENDS system_lib
+  INCLUDE_DIRS include
+  LIBRARIES val_rover_detection
+  CATKIN_DEPENDS cv_bridge geometry_msgs image_transport pcl_conversions pcl_ros perception_common roscpp sensor_msgs std_msgs
+  DEPENDS system_lib
 )
 
 ###########
@@ -135,69 +138,24 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(include)
-include_directories(perception_common
+include_directories(
   ${catkin_INCLUDE_DIRS}
-  ${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake
- cfg/cpp
 )
 
 ## Declare a C++ library
- add_library(${PROJECT_NAME}
-            src/val_task2.cpp
-            src/val_task2SM.cpp
-	    src/button_detector.cpp
-            src/solar_panel_grasp.cpp
-	    src/cable_detector.cpp
- )
+# add_library(${PROJECT_NAME}
+#   src/${PROJECT_NAME}/val_rover_detection.cpp
+# )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
-
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(button_detector_node 
-	src/button_detector_node.cpp
-)
-
-target_link_libraries(button_detector_node ${catkin_LIBRARIES}
-   ${OpenCV_LIBRARIES}
-   ${PROJECT_NAME}
-)
-
-add_executable(button_press_node
-        src/button_press_node.cpp
-)
-
-target_link_libraries(button_press_node ${catkin_LIBRARIES}
-   ${OpenCV_LIBRARIES}
-   ${PROJECT_NAME}
-)
-
-add_executable(cable_detector_node
-        src/cable_detector_node.cpp
-)
-
-target_link_libraries(cable_detector_node ${catkin_LIBRARIES}
-   ${OpenCV_LIBRARIES}
-   ${PROJECT_NAME}
-)
-
-add_executable(val_task2_node
-            src/val_task2_node.cpp
-)
-
-add_executable(path_subtraction src/path_subtraction.cpp)
-target_link_libraries(path_subtraction  ${catkin_LIBRARIES})
-
-add_executable(solar_panel_grasp_node src/solar_panel_grasp_node.cpp)
-target_link_libraries(solar_panel_grasp_node  ${catkin_LIBRARIES} ${PROJECT_NAME})
-
+ add_executable(${PROJECT_NAME}_node src/val_solar_detection_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -207,18 +165,14 @@ target_link_libraries(solar_panel_grasp_node  ${catkin_LIBRARIES} ${PROJECT_NAME
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(val_task2_node
- ${${PROJECT_NAME}_EXPORTED_TARGETS}
- ${catkin_EXPORTED_TARGETS}_gencfg)
+# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(val_task2_node
+ target_link_libraries(${PROJECT_NAME}_node
    ${catkin_LIBRARIES}
-   ${PROJECT_NAME}
+   ${OpenCV_LIBRARIES}
+   ${PCL_LIBRARIES}
  )
-
-decision_making_parsing(src/val_task2SM.cpp)
-
 #############
 ## Install ##
 #############
@@ -234,18 +188,18 @@ decision_making_parsing(src/val_task2SM.cpp)
 # )
 
 ## Mark executables and/or libraries for installation
- install(TARGETS  ${PROJECT_NAME}_node
-   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
+# install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
+#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
 
 ## Mark cpp header files for installation
- install(DIRECTORY include/${PROJECT_NAME}/
-   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-   FILES_MATCHING PATTERN "*.h"
-   PATTERN ".svn" EXCLUDE
- )
+# install(DIRECTORY include/${PROJECT_NAME}/
+#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+#   FILES_MATCHING PATTERN "*.h"
+#   PATTERN ".svn" EXCLUDE
+# )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
@@ -259,7 +213,7 @@ decision_making_parsing(src/val_task2SM.cpp)
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_fsm_task2.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_val_rover_detection.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
