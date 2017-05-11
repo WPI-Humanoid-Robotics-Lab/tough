@@ -133,6 +133,8 @@ include_directories(
  add_library(${PROJECT_NAME}
    src/val_walk_tracker.cpp
    src/panel_detection.cpp
+   src/val_task_common_utils.cpp
+   src/finish_box_detector.cpp
  )
 
 ## Add cmake target dependencies of the library
@@ -170,10 +172,10 @@ target_link_libraries(val_walk_tracker_node
    ${catkin_LIBRARIES} ${PCL_LIBRARIES}
  )
 
- add_executable(FinishBoxDetector src/finish_box_detector.cpp)
+ add_executable(FinishBoxDetector src/finish_box_detector_node.cpp)
  add_dependencies(FinishBoxDetector ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
  target_link_libraries(FinishBoxDetector
-   ${catkin_LIBRARIES} ${PCL_LIBRARIES}
+   ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${PROJECT_NAME}
  )
 
 

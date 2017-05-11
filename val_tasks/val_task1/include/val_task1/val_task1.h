@@ -27,6 +27,8 @@
 #include "val_task1/handle_grabber.h"
 #include "val_control/robot_state.h"
 #include "val_task1/move_handle.h"
+#include "val_task_common/val_task_common_utils.h"
+#include "val_task_common/finish_box_detector.h"
 
 using namespace decision_making;
 
@@ -53,6 +55,8 @@ class valTask1 {
     move_handle* move_handle_;
     // Object to use for grasping handles
     handle_grabber* handle_grabber_;
+    //Finish box detector
+    FinishBoxDetector* finish_box_detector_;
 
     // chest controller
     chestTrajectory* chest_controller_;
@@ -81,11 +85,17 @@ class valTask1 {
     // panel plane coeffecients
     std::vector<float> panel_coeff_;
 
+    // Visited map
+    ros::Subscriber visited_map_sub_;
+    void visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg);
+    nav_msgs::OccupancyGrid visited_map_;
+
+    geometry_msgs::Pose2D next_finishbox_center_;
     public:
 
     // goal location for the panel
-    geometry_msgs::Pose2D panel_walk_goal_;
-
+    geometry_msgs::Pose2D panel_walk_goal_coarse_;
+    geometry_msgs::Pose2D panel_walk_goal_fine_;
 
     // default constructor and destructor
     static valTask1* getValTask1(ros::NodeHandle nh);
@@ -107,9 +117,7 @@ class valTask1 {
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
 
     geometry_msgs::Pose2D getPanelWalkGoal();
-
-    bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
-    void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal_);
-    void createHandleWayPoints(const geometry_msgs::Point &center, std::vector<geometry_msgs::Pose> &points);
+    void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal_coarse_);
+    void setPanelWalkGoalFine(const geometry_msgs::Pose2D &panel_walk_goal);
     void setPanelCoeff(const std::vector<float> &panel_coeff);
 };

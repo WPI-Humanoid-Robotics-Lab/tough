@@ -42,6 +42,7 @@ valTask1::valTask1(ros::NodeHandle nh):
 
     // panel detection
     panel_detector_     = nullptr;
+    finish_box_detector_= nullptr;
     handle_detector_    = new handle_detector(nh_);
     handle_grabber_     = new handle_grabber(nh_);
     move_handle_        = new move_handle(nh_);
@@ -56,33 +57,36 @@ valTask1::valTask1(ros::NodeHandle nh):
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     map_update_count_ = 0;
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask1::occupancy_grid_cb, this);
-
-    // TODO: just for vis remove later
-   // array_pub_    = nh.advertise<visualization_msgs::MarkerArray>( "Circle_Array", 0 );
+    visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask1::visited_map_cb, this);
 }
 
 // destructor
 valTask1::~valTask1(){
 
-    delete walker_;
-    delete walk_track_;
-    delete panel_detector_;
-    delete handle_detector_;
-    delete move_handle_;
-    delete chest_controller_;
-    delete pelvis_controller_;
-    delete head_controller_;
-    delete gripper_controller_;
-    delete robot_state_;
+    if(walker_ != nullptr)              delete walker_;
+    if(walk_track_ != nullptr)          delete walk_track_;
+    if(panel_detector_ != nullptr)      delete panel_detector_;
+    if(handle_detector_ != nullptr)     delete handle_detector_;
+    if(move_handle_ != nullptr)         delete move_handle_;
+    if(chest_controller_ != nullptr)    delete chest_controller_;
+    if(pelvis_controller_ != nullptr)   delete pelvis_controller_;
+    if(head_controller_ != nullptr)     delete head_controller_;
+    if(gripper_controller_ != nullptr)  delete gripper_controller_;
+    if(robot_state_ != nullptr)         delete robot_state_;
 }
 
 void valTask1::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
     ++map_update_count_;
 }
 
+void valTask1::visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg)
+{
+    visited_map_ = *msg;
+}
+
 bool valTask1::preemptiveWait(double ms, decision_making::EventQueue& queue) {
-  for (int i = 0; i < 100 && !queue.isTerminated(); i++)
-    boost::this_thread::sleep(boost::posix_time::milliseconds(ms / 100.0));
+    for (int i = 0; i < 100 && !queue.isTerminated(); i++)
+        boost::this_thread::sleep(boost::posix_time::milliseconds(ms / 100.0));
 
     return queue.isTerminated();
 }
@@ -148,8 +152,8 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
     // detect panel
     std::vector<geometry_msgs::Pose> poses;
     panel_detector_->getDetections(poses);
-
-    // if we get atleast one detection
+    ROS_INFO("Size of poses : %d", (int)poses.size());
+    // if we get atleast one detection, LOL
     if (poses.size() > 1)
     {
         // update the pose
@@ -171,7 +175,9 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
         // update the plane coeffecients
         if(panel_detector_->getPanelPlaneModel(panel_coeff_)){
             eventQueue.riseEvent("/DETECTED_PANEL");
-            delete panel_detector_;
+            ROS_INFO("detected panel");
+            if(panel_detector_ != nullptr) delete panel_detector_;
+            ROS_INFO("I'm still alive");
             panel_detector_ = nullptr;
         }
         else{
@@ -194,8 +200,8 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
     {
         // reset the fail count
         fail_count = 0;
-        eventQueue.riseEvent("DETECT_PANEL_FAILED");
-        delete panel_detector_;
+        eventQueue.riseEvent("/DETECT_PANEL_FAILED");
+        if(panel_detector_ != nullptr) delete panel_detector_;
         panel_detector_ = nullptr;
     }
     // if failed retry detecting the panel
@@ -229,27 +235,28 @@ decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMC
 
     // check if the pose is changed
     ///@todo: what if pose has not changed but robot did not reach the goal and is not walking?
-    if (isPoseChanged(pose_prev, panel_walk_goal_))
+    if (taskCommonUtils::isPoseChanged(pose_prev, panel_walk_goal_coarse_))
     {
-        ROS_INFO("pose chaned");
-        walker_->walkToGoal(panel_walk_goal_, false);
+        ROS_INFO_STREAM("pose chaned to "<<panel_walk_goal_coarse_);
+        walker_->walkToGoal(panel_walk_goal_coarse_, false);
         // sleep so that the walk starts
+        ROS_INFO("Footsteps should be generated now");
         ros::Duration(4).sleep();
 
         // update the previous pose
-        pose_prev = panel_walk_goal_;
+        pose_prev = panel_walk_goal_coarse_;
     }
 
     // if walking stay in the same state
     if (walk_track_->isWalking())
     {
         // no state change
-        ROS_INFO("walking");
+        ROS_INFO_THROTTLE(2, "walking");
         eventQueue.riseEvent("/WALK_EXECUTING");
     }
     // if walk finished
     // TODO change to see if we are at the goal
-    else if ( fabs(panel_walk_goal_.x - current_pelvis_pose.position.x) < 0.05 && fabs(panel_walk_goal_.y - current_pelvis_pose.position.y) < 0.05 )
+    else if ( fabs(panel_walk_goal_coarse_.x - current_pelvis_pose.position.x) < 0.05 && fabs(panel_walk_goal_coarse_.y - current_pelvis_pose.position.y) < 0.05 )
     {
 
         ROS_INFO("reached panel");
@@ -295,19 +302,19 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
     //detect handles
     if( handle_detector_->findHandles(handle_loc_)){
 
-        ROS_INFO_STREAM("Handles detected at "<<handle_loc_[0]<< " : "<<handle_loc_[1]);
+        ROS_INFO_STREAM("Handles detected at "<<handle_loc_[0]<< " : "<<handle_loc_[2]);
 
         // generate the event
         eventQueue.riseEvent("/DETECTED_HANDLE");
     }
     else if( retry_count++ < 10){
-      ROS_INFO("Did not detect handle, retrying");
-      eventQueue.riseEvent("/DETECT_HANDLE_RETRY");
+        ROS_INFO("Did not detect handle, retrying");
+        eventQueue.riseEvent("/DETECT_HANDLE_RETRY");
     }
     else{
-      ROS_INFO("Did not detect handle, failed");
-      eventQueue.riseEvent("/DETECT_HANDLE_FAILED");
-      retry_count = 0;
+        ROS_INFO("Did not detect handle, failed");
+        eventQueue.riseEvent("/DETECT_HANDLE_FAILED");
+        retry_count = 0;
     }
 
 
@@ -345,7 +352,7 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
 
         // get the theta
         pose2D.theta = tf::getYaw(poses[idx].orientation);
-        setPanelWalkGoal(pose2D);
+        setPanelWalkGoalFine(pose2D);
 
         std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
         std::cout << "yaw: " << pose2D.theta  <<std::endl;
@@ -353,7 +360,7 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
         // update the plane coeffecients
         if(panel_detector_->getPanelPlaneModel(panel_coeff_)){
             eventQueue.riseEvent("/DETECTED_PANEL_FINE");
-            delete panel_detector_;
+            if(panel_detector_ != nullptr) delete panel_detector_;
             panel_detector_ = nullptr;
         }
         else{
@@ -368,8 +375,8 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
     else if(retry_count < 5) {
         ROS_INFO("sleep for 3 seconds for panel detection");
         ++retry_count;
-        ros::Duration(3).sleep();
         eventQueue.riseEvent("/DETECT_PANEL_FINE_RETRY");
+        ros::Duration(3).sleep();
     }
 
     // if failed for more than 5 times, go to error state
@@ -379,8 +386,8 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
     {
         // reset the fail count
         fail_count = 0;
-        eventQueue.riseEvent("DETECT_PANEL_FINE_FAILED");
-        delete panel_detector_;
+        eventQueue.riseEvent("/DETECT_PANEL_FINE_FAILED");
+        if(panel_detector_ != nullptr) delete panel_detector_;
         panel_detector_ = nullptr;
     }
     // if failed retry detecting the panel
@@ -402,71 +409,73 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
 {
     ROS_INFO_STREAM("executing " << name);
 
-       static int fail_count = 0;
+    static int fail_count = 0;
 
-       // walk to the goal location
-       // the goal can be updated on the run time
-       static geometry_msgs::Pose2D pose_prev;
+    // walk to the goal location
+    // the goal can be updated on the run time
+    static geometry_msgs::Pose2D pose_prev;
 
-       geometry_msgs::Pose current_pelvis_pose;
-       robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+    geometry_msgs::Pose current_pelvis_pose;
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
 
-       // check if the pose is changed
-       ///@todo: what if pose has not changed but robot did not reach the goal and is not walking?
-       if (isPoseChanged(pose_prev, panel_walk_goal_))
-       {
-           ROS_INFO("pose chaned");
-           //reset chest before moving close to panel
-           chest_controller_->controlChest(0, 0, 0);
-           walker_->walkToGoal(panel_walk_goal_, false);
-           // sleep so that the walk starts
-           ros::Duration(1).sleep();
+    // check if the pose is changed
+    ///@todo: what if pose has not changed but robot did not reach the goal and is not walking?
+    if (taskCommonUtils::isPoseChanged(pose_prev, panel_walk_goal_fine_))
+    {
+        ROS_INFO("pose chaned");
+        //reset chest before moving close to panel
+        chest_controller_->controlChest(0, 0, 0);
+        ROS_INFO("Adjusted Chest");
+        walker_->walkToGoal(panel_walk_goal_fine_, false);
+        ROS_INFO("Footsteps should be published now");
+        // sleep so that the walk starts
+        ros::Duration(2).sleep();
 
-           // update the previous pose
-           pose_prev = panel_walk_goal_;
-       }
+        // update the previous pose
+        pose_prev = panel_walk_goal_fine_;
+    }
 
-       // if walking stay in the same state
-       if (walk_track_->isWalking())
-       {
-           // no state change
-           ROS_INFO("walking");
-           eventQueue.riseEvent("/WALK_TO_PANEL_EXECUTING");
-       }
-       // if walk finished
-       // TODO change to see if we are at the goal
-       else if ( fabs(panel_walk_goal_.x - current_pelvis_pose.position.x) < 0.05 && fabs(panel_walk_goal_.y - current_pelvis_pose.position.y) < 0.05 )
-       {
+    // if walking stay in the same state
+    if (walk_track_->isWalking())
+    {
+        // no state change
+        ROS_INFO_THROTTLE(2, "walking");
+        eventQueue.riseEvent("/WALK_TO_PANEL_EXECUTING");
+    }
+    // if walk finished
+    // TODO change to see if we are at the goal
+    else if ( fabs(panel_walk_goal_fine_.x - current_pelvis_pose.position.x) < 0.05 && fabs(panel_walk_goal_fine_.y - current_pelvis_pose.position.y) < 0.05 )
+    {
 
-           ROS_INFO("reached panel");
+        ROS_INFO("reached panel");
 
-           // TODO: check if robot rechead the panel
-           eventQueue.riseEvent("/REACHED_PANEL_FINE");
-       }
-       // if failed for more than 5 times, go to error state
-       else if (fail_count > 5)
-       {
-           // reset the fail count
-           fail_count = 0;
-           ROS_INFO("walk failed");
-           eventQueue.riseEvent("/WALK_TO_PANEL_FAILED");
-       }
-       // if failed retry detecting the panel and then walk
-       // also handles MOVE_FAILED
-       else
-       {
-           // increment the fail count
-           fail_count++;
-           ROS_INFO("walk retry");
-           eventQueue.riseEvent("/WALK_TO_PANEL_RETRY");
-       }
+        // TODO: check if robot rechead the panel
+        eventQueue.riseEvent("/REACHED_PANEL_FINE");
+    }
+    // if failed for more than 5 times, go to error state
+    else if (fail_count > 5)
+    {
+        // reset the fail count
+        fail_count = 0;
+        ROS_INFO("walk failed");
+        eventQueue.riseEvent("/WALK_TO_PANEL_FAILED");
+    }
+    // if failed retry detecting the panel and then walk
+    // also handles MOVE_FAILED
+    else
+    {
+        // increment the fail count
+        fail_count++;
+        ROS_INFO("walk retry");
+        eventQueue.riseEvent("/WALK_TO_PANEL_RETRY");
+    }
 
-       // wait infinetly until an external even occurs
-       while(!preemptiveWait(1000, eventQueue)){
-           ROS_INFO("waiting for transition");
-       }
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
 
-       return TaskResult::SUCCESS();
+    return TaskResult::SUCCESS();
 
 }
 
@@ -477,32 +486,21 @@ decision_making::TaskResult valTask1::adjustArmTask(string name, const FSMCallCo
     //3 - left
     static bool isPoseSet = false;
 
-    geometry_msgs::Pose pose;
-    robot_state_->getCurrentPose("/leftPalm", pose);
+    //    geometry_msgs::Pose pose;
+    //    robot_state_->getCurrentPose("/leftPalm", pose);
 
-        ROS_INFO("Grasp left handle");
+    ROS_INFO("Grasp left handle");
 
-        //blocking call, takes about 10sec
-        handle_grabber_->grasp_handles(armSide::LEFT, handle_loc_[3]);
+    //blocking call, takes about 10sec
+    //   handle_grabber_->grasp_handles(armSide::LEFT, handle_loc_[3]);
 
-        if(move_handle_ == nullptr) {
-            move_handle_ = new move_handle(nh_);
-        }
-        std::vector<geometry_msgs::Pose> leftWaypoints;
-        std::vector<geometry_msgs::Pose> rightWaypoints;
-
-        move_handle_->createCircle(handle_loc_[2], 0, panel_coeff_, leftWaypoints);
-        move_handle_->createCircle(handle_loc_[0], 1, panel_coeff_, rightWaypoints);
-
+    ///@todo: decide how do we confirm grabbning sucessful
+    eventQueue.riseEvent("/ADJUST_ARMS_SUCESSFUL");
 
     // generate the event
     while(!preemptiveWait(1000, eventQueue)){
         eventQueue.riseEvent("/ADJUST_ARMS_SUCESSFUL");
     }
-
-    delete move_handle_;
-    move_handle_ = nullptr;
-
     return TaskResult::SUCCESS();
 }
 
@@ -510,13 +508,49 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 {
     ROS_INFO_STREAM("executing " << name);
 
+    geometry_msgs::Pose pose;
+    robot_state_->getCurrentPose("/leftPalm", pose);
+    handle_grabber_->grasp_handles(armSide::LEFT , handle_loc_[3]);
+    ros::Duration(1).sleep();
+
+    //    std::vector<geometry_msgs::Pose> rightWaypoints;
+    //    if(move_handle_ == nullptr) {
+    //        move_handle_ = new move_handle(nh_);
+    //    }
+
+    //    ros::Duration(1).sleep();
+    //    move_handle_->createCircle(handle_loc_[0], 1, panel_coeff_, rightWaypoints);
+
+    if(move_handle_ != nullptr) delete move_handle_;
+    move_handle_ = nullptr;
+
     eventQueue.riseEvent("/PITCH_CORRECTION_SUCESSFUL");
+    gripper_controller_->openGripper(armSide::LEFT);
+    ros::Duration(0.2).sleep();
+
     return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
+
     ROS_INFO_STREAM("executing " << name);
+
+    //    geometry_msgs::Pose pose;
+    //    robot_state_->getCurrentPose("/leftPalm", pose);
+    //    handle_grabber_->grasp_handles(armSide::LEFT, handle_loc_[3]);
+    //    ros::Duration(1).sleep();
+
+    //    std::vector<geometry_msgs::Pose> leftWaypoints;
+    //    if(move_handle_ == nullptr) {
+    //        move_handle_ = new move_handle(nh_);
+    //    }
+
+    //    ros::Duration(1).sleep();
+    //    move_handle_->createCircle(handle_loc_[2], 0, panel_coeff_, leftWaypoints);
+
+    //    if(move_handle_ != nullptr) delete move_handle_;
+    //    move_handle_ = nullptr;
 
     eventQueue.riseEvent("/YAW_CORRECTION_SUCESSFUL");
     return TaskResult::SUCCESS();
@@ -525,9 +559,57 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
-
+    static int retry_count = 0;
     // generate the event
-    //eventQueue.riseEvent("/INIT_SUCESSUFL");
+    if (finish_box_detector_ == nullptr){
+        finish_box_detector_ = new FinishBoxDetector(nh_);
+        ros::Duration(2).sleep();
+    }
+
+    std::vector<geometry_msgs::Point> detections;
+    if(visited_map_.data.empty()){
+        retry_count++;
+        ROS_INFO("visited map is empty");
+        ros::Duration(3).sleep();
+        eventQueue.riseEvent("/DETECT_FINISH_RETRY");
+    } else  if(finish_box_detector_->getFinishBoxCenters(detections)){
+        for(size_t i = 0; i < detections.size(); ++i){
+            size_t index = MapGenerator::getIndex(detections[i].x, detections[i].y);
+            ROS_INFO("Index in map %d and size of visited map is %d", (int)index, (int)visited_map_.data.size());
+            if(visited_map_.data.at(index) == 50){
+                continue;
+            }
+
+            next_finishbox_center_.x = detections[i].x;
+            next_finishbox_center_.y = detections[i].y;
+            next_finishbox_center_.theta = atan2(next_finishbox_center_.y, next_finishbox_center_.x);
+            ROS_INFO("Successful");
+            eventQueue.riseEvent("/DETECT_FINISH_SUCESSFUL");
+            if(finish_box_detector_ != nullptr) delete finish_box_detector_;
+            finish_box_detector_ = nullptr;
+
+            break;
+        }
+
+        retry_count++;
+        ros::Duration(3).sleep();
+        eventQueue.riseEvent("/DETECT_FINISH_RETRY");
+
+    }
+    else if(retry_count++ < 5){
+        ros::Duration(3).sleep();
+        eventQueue.riseEvent("/DETECT_FINISH_RETRY");
+    }
+    else{
+        eventQueue.riseEvent("/DETECT_FINISH_FAILED");
+        if(finish_box_detector_ != nullptr) delete finish_box_detector_;
+        finish_box_detector_ = nullptr;
+    }
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
 
     return TaskResult::SUCCESS();
 }
@@ -536,7 +618,72 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
 {
     ROS_INFO_STREAM("executing " << name);
 
-    eventQueue.riseEvent("/WALK_TO_END");
+    static int fail_count = 0;
+
+    // walk to the goal location
+    // the goal can be updated on the run time
+    static geometry_msgs::Pose2D pose_prev;
+
+    geometry_msgs::Pose current_pelvis_pose;
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+
+    // check if the pose is changed
+    ///@todo: what if pose has not changed but robot did not reach the goal and is not walking?
+    if (taskCommonUtils::isPoseChanged(pose_prev, next_finishbox_center_))
+    {
+        ROS_INFO("pose chaned");
+        //reset chest before moving close to panel
+        chest_controller_->controlChest(0, 0, 0);
+        ROS_INFO("Adjusted Chest");
+        walker_->walkToGoal(next_finishbox_center_, false);
+        ROS_INFO("Footsteps should be published now");
+        // sleep so that the walk starts
+        ros::Duration(2).sleep();
+
+        // update the previous pose
+        pose_prev = next_finishbox_center_;
+    }
+
+    // if walking stay in the same state
+    if (walk_track_->isWalking())
+    {
+        // no state change
+        ROS_INFO_THROTTLE(2, "walking");
+        eventQueue.riseEvent("/WALK_TO_FINISH_RETRY");
+    }
+    // if walk finished
+    // TODO change to see if we are at the goal
+    else if ( fabs(next_finishbox_center_.x - current_pelvis_pose.position.x) < 0.05 && fabs(next_finishbox_center_.y - current_pelvis_pose.position.y) < 0.05 )
+    {
+
+        ROS_INFO("reached panel");
+
+        // TODO: check if robot rechead the panel
+        eventQueue.riseEvent("/WALK_TO_FINISH_SUCESSFUL");
+    }
+    // if failed for more than 5 times, go to error state
+    else if (fail_count > 5)
+    {
+        // reset the fail count
+        fail_count = 0;
+        ROS_INFO("walk failed");
+        eventQueue.riseEvent("/WALK_TO_FINISH_ERROR");
+    }
+    // if failed retry detecting the panel and then walk
+    // also handles MOVE_FAILED
+    else
+    {
+        // increment the fail count
+        fail_count++;
+        ROS_INFO("walk retry");
+        eventQueue.riseEvent("/WALK_TO_FINISH_RETRY");
+    }
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
+
     return TaskResult::SUCCESS();
 }
 
@@ -563,92 +710,21 @@ decision_making::TaskResult valTask1::errorTask(string name, const FSMCallContex
 // setter and getter methods
 geometry_msgs::Pose2D valTask1::getPanelWalkGoal()
 {
-    return panel_walk_goal_;
+    return panel_walk_goal_coarse_;
 }
 
 void valTask1::setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal)
 {
-    panel_walk_goal_ = panel_walk_goal;
+    panel_walk_goal_coarse_ = panel_walk_goal;
 }
 
+void valTask1::setPanelWalkGoalFine(const geometry_msgs::Pose2D &panel_walk_goal)
+{
+    panel_walk_goal_fine_ = panel_walk_goal;
+}
 void valTask1::setPanelCoeff(const std::vector<float> &panel_coeff)
 {
-  panel_coeff_ = panel_coeff;
+    panel_coeff_ = panel_coeff;
 }
 
-bool valTask1::isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new)
-{
-    bool ret = false;
 
-    //    ROS_INFO("%f", pose_new.x);
-    //    ROS_INFO("%f", pose_new.y);
-    //    ROS_INFO("%f", pose_old.x);
-    //    ROS_INFO("%f", pose_old.y);
-    //    ROS_INFO("%f", sqrt(pow((pose_new.y - pose_old.y),2) + pow((pose_new.x - pose_old.x),2)));
-
-    if (sqrt(pow((pose_new.y - pose_old.y),2) + pow((pose_new.x - pose_old.x),2)) > 0.02) // > 2cm
-    {
-        ret = true;
-    }
-    else if (fabs(fmod(pose_new.theta,(2*M_PI)) - fmod(pose_new.theta,(2*M_PI))) > 0.0174533) //1 degree
-    {
-        ret = true;
-    }
-
-    return ret;
-}
-
-// !!!! make sure this is called after panel is detected and handels are detected
-//void valTask1::createHandleWayPoints(const geometry_msgs::Point &center, std::vector<geometry_msgs::Pose> &points)
-//{
-//  float radius = 0.13;
-//  int num_steps = 20;
-
-//  // clear the points
-//  points.clear();
-
-//  ROS_INFO_STREAM("loc1 "<<handle_loc_[1] << " loc0 " <<handle_loc_[0]);
-//  ROS_INFO_STREAM("center "<< center);
-//  ROS_INFO("radius %f",sqrt(pow(handle_loc_[1].x - handle_loc_[0].x, 2) + pow(handle_loc_[1].y - handle_loc_[0].y,2)));
-//  //RobotStateInformer* transformer = RobotStateInformer::getRobotStateInformer(nh_);
-
-//  for (int i=0; i<num_steps; i++)
-//  {
-//    // circle parametric equation
-//    //geometry_msgs::PoseStamped point;
-//    geometry_msgs::Pose point;
-//    point.position.x = center.x + (radius * cos((float)i*(2*M_PI/num_steps)));
-//    point.position.y = center.y + (radius * sin((float)i*(2*M_PI/num_steps)));
-//    // get the z from the plane equation
-//    // z = -ax - by - d/c
-//    point.position.z = ((-panel_coeff_[0] * point.position.x) - (panel_coeff_[1] * point.position.y) - panel_coeff_[3])/panel_coeff_[2];
-//    //transformer->getCurrentPose(VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, point);
-//    points.push_back(point);
-//  }
-
-//  // TODO: should be rmoved
-//  // visulation of the circle
-//  visualization_msgs::MarkerArray circle = visualization_msgs::MarkerArray();
-//  for (int i = 0; i < num_steps; i++) {
-//    visualization_msgs::Marker marker;
-//    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
-//    marker.header.stamp = ros::Time();
-//    marker.ns = "circle";
-//    marker.id = i;
-//    marker.type = visualization_msgs::Marker::ARROW;
-//    marker.action = visualization_msgs::Marker::ADD;
-//    marker.pose.position = points[i].position;
-//    marker.pose.orientation.w = 1.0;
-//    marker.scale.x = 0.01;
-//    marker.scale.y = 0.01;
-//    marker.scale.z = 0.01;
-//    marker.color.a = 0.6;
-//    marker.color.r = 0.0;
-//    marker.color.g = 1.0;
-//    marker.color.b = 0.0;
-//    circle.markers.push_back(marker);
-//  }
-
-//  array_pub_.publish( circle );
-
-//}

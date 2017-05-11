@@ -8,7 +8,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   val_common
-  val_footstep
 )
 
 #   std_msgs
