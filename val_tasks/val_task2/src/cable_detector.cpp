@@ -4,7 +4,7 @@
 #include <pcl/common/centroid.h>
 #include <thread>
 
-//#define DISABLE_DRAWINGS true
+#define DISABLE_DRAWINGS true
 #define DISABLE_TRACKBAR true
 
 cable_detector::cable_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
@@ -54,8 +54,6 @@ size_t cable_detector::findMaxContour(const std::vector<std::vector<cv::Point> >
         }
     }
 
-    convexHulls_ = hull[largest_contour_index];
-
     return largest_contour_index;
 }
 
@@ -84,13 +82,30 @@ bool cable_detector::getCableLocation(geometry_msgs::Point& cableLoc)
         point = getOrientation(contours[findMaxContour(contours)], outImg);
     }
 
-    pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(point.x, point.y);
+    pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
+
+    for (size_t k = 0; k < 10; k++ )
+    {
+        for (size_t l = 0; l < 10; l++ )
+        {
+            pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(point.x + k, point.y + l);
+
+            if (temp_pclPoint.z > -2.0 && temp_pclPoint.z < 2.0 )
+            {
+                currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
+            }
+        }
+    }
+
+    Eigen::Vector4f cloudCentroid;
+    //  Calculating the Centroid of the handle Point cloud
+    pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
 
     if( foundCable )
     {
-        geom_point.point.x = temp_pclPoint.x;
-        geom_point.point.y = temp_pclPoint.y;
-        geom_point.point.z = temp_pclPoint.z;
+        geom_point.point.x = cloudCentroid(0);
+        geom_point.point.y = cloudCentroid(1);
+        geom_point.point.z = cloudCentroid(2);
         geom_point.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
         try
         {
@@ -141,21 +156,23 @@ cv::Point cable_detector::getOrientation(const std::vector<cv::Point> &contourPt
         pca_analysis.eigenvectors.at<double>(i, 1));
         eigen_val[i] = pca_analysis.eigenvalues.at<double>(0, i);
     }
-    ROS_INFO_STREAM(cntr << std::endl);
+    //ROS_INFO_STREAM(cntr << std::endl);
     // Draw the principal components
     cv::circle(current_image_, cntr, 3, cv::Scalar(255, 0, 255), 2);
     cv::Point p1 = cntr + 0.02 * cv::Point(static_cast<int>(eigen_vecs[0].x * eigen_val[0]), static_cast<int>(eigen_vecs[0].y * eigen_val[0]));
-    cv::Point p2 = cntr + 0.02 * cv::Point(static_cast<int>(eigen_vecs[1].x * eigen_val[1]), static_cast<int>(eigen_vecs[1].y * eigen_val[1]));
-    drawAxis(current_image_, cntr, p1, cv::Scalar(0, 255, 0), 1);
-    drawAxis(current_image_, cntr, p2, cv::Scalar(255, 255, 0), 5);
-    ROS_INFO_STREAM(p2 << std::endl);
+    cv::Point p2 = cntr + 7.0 * cv::Point(static_cast<int>(eigen_vecs[1].x * eigen_val[1]), static_cast<int>(eigen_vecs[1].y * eigen_val[1]));
+
+    //VISUALIZATION - Uncomment this line
+    //drawAxis(current_image_, cntr, p1, cv::Scalar(0, 255, 0), 1);
+    //drawAxis(current_image_, cntr, p2, cv::Scalar(255, 255, 0), 1);
+    //ROS_INFO_STREAM(p2 << std::endl);
     showImage(current_image_);
     return p2;
 }
 
 bool cable_detector::findCable(geometry_msgs::Point& cableLoc)
 {
-    ros::spinOnce();
+    //VISUALIZATION - include a spinOnce here to visualize the eigenvectors
     markers_.markers.clear();
     if(ms_sensor_.giveImage(current_image_))
     {
@@ -241,4 +258,9 @@ void cable_detector::visualize_point(geometry_msgs::Point point){
     marker.color.b = 0.0;
 
     markers_.markers.push_back(marker);
+}
+
+cable_detector::~cable_detector()
+{
+
 }

@@ -21,15 +21,8 @@
 class cable_detector
 {
     cv::Mat current_image_, current_image_HSV_, current_disparity_, qMatrix_;
-    cv::Mat imBlue_;
-    cv::Mat imBlueReduced_;
-
-    std::vector<cv::Point> rectCenter_;
-    std::vector<cv::Point> convexHulls_;
-    std::vector< pcl::PointXYZ> buttonCenters_;
 
     int thresh_ = 100;
-    const int hsvBlue_[6] = {114, 125, 100, 255, 0, 255};
 
                     // lh, uh, ls, us, lv, uv
     // Blue Range    - 114, 125, 100, 255, 0, 255
@@ -57,6 +50,7 @@ public:
     cv::Point getOrientation(const std::vector<cv::Point> &, cv::Mat &);
     void drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale = 0.2);
     bool findCable(geometry_msgs::Point &);
+    ~cable_detector();
 
 };
 

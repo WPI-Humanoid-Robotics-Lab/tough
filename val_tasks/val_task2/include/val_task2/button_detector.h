@@ -48,6 +48,7 @@ public:
     bool getButtonLocation(geometry_msgs::Point &buttonLoc);
     bool findButtons(geometry_msgs::Point&);
     button_detector(ros::NodeHandle nh);
+    ~button_detector();
 
 };
 

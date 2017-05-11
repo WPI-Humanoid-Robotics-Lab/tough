@@ -178,3 +178,8 @@ void button_detector::visualize_point(const geometry_msgs::Point &point){
 
     markers_.markers.push_back(marker);
 }
+
+button_detector::~button_detector()
+{
+
+}

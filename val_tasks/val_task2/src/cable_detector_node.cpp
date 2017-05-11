@@ -5,16 +5,15 @@ int main(int argc, char** argv)
     ros::init (argc,argv,"findCableDetector");
     ros::NodeHandle nh;
     int numIterations = 0;
-    bool foundButton = false;
+    bool foundCable = false;
     geometry_msgs::Point CableLoc;
     cable_detector c1(nh);
 
-    while(ros::ok())
-    //while (!foundButton && numIterations < 20)
+    //while(ros::ok())
+    while (!foundCable && numIterations < 20)
     {
-        c1.findCable(CableLoc);
-        //foundButton = b1.findButtons(ButtonLoc);
-        //ROS_INFO(foundButton ? "***** Button detected" : "xxxxx button not detected");
+        foundCable = c1.findCable(CableLoc);
+        ROS_INFO(foundCable ? "***** Cable detected" : "xxxxx Cable not detected");
         numIterations++;
     }
 
