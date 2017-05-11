@@ -30,12 +30,10 @@ find_package(catkin REQUIRED COMPONENTS
   FILES
    StepTargetArray.msg
   )
-## Generate added messages and services with any dependencies listed here
+### Generate added messages and services with any dependencies listed here
  generate_messages(
    DEPENDENCIES
-
    humanoid_nav_msgs
-
  )
 
 

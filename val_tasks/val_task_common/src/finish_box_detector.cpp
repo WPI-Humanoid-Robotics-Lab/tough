@@ -130,12 +130,3 @@ void FinishBoxDetector::showImage(cv::Mat image, std::string caption)
     cv::imshow( caption, image);
     cv::waitKey(0);
 }
-
-
-int main(int argc, char** argv) {
-    ros::init(argc, argv, "FinishBoxDetector");
-    ros::NodeHandle n;
-    FinishBoxDetector mg(n);
-    ros::spin();
-    return 0;
-}

@@ -14,20 +14,57 @@ MapGenerator::MapGenerator(ros::NodeHandle &n):nh_(n) {
 
     occGrid_.data.resize(MAP_HEIGHT*MAP_WIDTH);
     std::fill(occGrid_.data.begin(), occGrid_.data.end(), 100);
-
+    visitedOccGrid_ = occGrid_;
     for(float x = -0.5f; x < 1.5f; x += MAP_RESOLUTION/10 ){
-        for(float y = -0.7f; y < 0.7f; y += MAP_RESOLUTION/10 ){
+        for(float y = -0.5f; y < 0.5f; y += MAP_RESOLUTION/10 ){
             occGrid_.data.at(getIndex(x, y)) = 0;
+            visitedOccGrid_.data.at(getIndex(x, y)) = 0;
         }
     }
 
+    currentState_ = RobotStateInformer::getRobotStateInformer(nh_);
+
     pointcloudSub_ = nh_.subscribe("walkway", 10, &MapGenerator::convertToOccupancyGrid, this);
+    resetMapSub_   = nh_.subscribe("reset_map", 10, &MapGenerator::resetMap, this);
     mapPub_        = nh_.advertise<nav_msgs::OccupancyGrid>("/map", 10, true);
+    ROS_INFO("Creating visited map publisher");
+    visitedMapPub_ = nh_.advertise<nav_msgs::OccupancyGrid>("/visited_map", 10, true);
+    timer_         = nh_.createTimer(ros::Duration(2), &MapGenerator::timerCallback, this);
+
 }
 
 MapGenerator::~MapGenerator()
 {
 
+}
+
+void MapGenerator::resetMap(const std_msgs::Empty &msg)
+{
+    std::fill(occGrid_.data.begin(), occGrid_.data.end(), 100);
+    visitedOccGrid_ = occGrid_;
+    for(float x = -0.5f; x < 0.5f; x += MAP_RESOLUTION/10 ){
+        for(float y = -0.5f; y < 0.5f; y += MAP_RESOLUTION/10 ){
+            occGrid_.data.at(getIndex(x, y)) = 0;
+            visitedOccGrid_.data.at(getIndex(x, y)) = 0;
+        }
+    }
+    mapPub_.publish(occGrid_);
+    visitedMapPub_.publish(visitedOccGrid_);
+}
+
+void MapGenerator::timerCallback(const ros::TimerEvent& e){
+    //update visited map
+    geometry_msgs::Pose pelvisPose;
+    currentState_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pelvisPose);
+
+    // mark a box of 0.5m X 0.5 m around robot as visited area
+    for (float x = -0.25f; x < 0.25f; x += MAP_RESOLUTION/10){
+        for (float y = -0.25f; y < 0.25f; y += MAP_RESOLUTION/10){
+            visitedOccGrid_.data.at(getIndex(pelvisPose.position.x + x, pelvisPose.position.y +y)) = 50;
+        }
+    }
+
+    visitedMapPub_.publish(visitedOccGrid_);
 }
 
 void MapGenerator::convertToOccupancyGrid(const sensor_msgs::PointCloud2Ptr msg) {
@@ -39,6 +76,10 @@ void MapGenerator::convertToOccupancyGrid(const sensor_msgs::PointCloud2Ptr msg)
         float x = *iter_x;
         float y = *iter_y;
         occGrid_.data.at(getIndex(x, y)) = 0;
+        //update visited map only if it is completely occupied. value = 50 means visited in that map
+        if(visitedOccGrid_.data.at(getIndex(x,y)) == 100){
+            visitedOccGrid_.data.at(getIndex(x, y)) = 0;
+        }
     }
     mapPub_.publish(occGrid_);
 
@@ -74,7 +115,9 @@ void MapGenerator::trimTo2DecimalPlaces(float &x, float &y) {
 int main(int argc, char** argv) {
     ros::init(argc, argv, "map_generator");
     ros::NodeHandle n;
+    ROS_INFO("Creating map generator object");
     MapGenerator mg(n);
+    ROS_INFO("Created map generator object");
     ros::spin();
     return 0;
 }
