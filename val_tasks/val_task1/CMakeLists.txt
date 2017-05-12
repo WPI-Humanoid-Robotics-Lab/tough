@@ -51,10 +51,10 @@ find_package(catkin REQUIRED COMPONENTS
   trac_ik_lib
 
   val_control
-
   val_gui
   val_footstep
   val_task_common
+  navigation_common
 )
 
 
@@ -165,7 +165,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES val_task1
-  CATKIN_DEPENDS roscpp rospy perception_common dynamic_reconfigure val_footstep
+  CATKIN_DEPENDS roscpp rospy perception_common dynamic_reconfigure val_footstep navigation_common
   DEPENDS system_lib
 )
 
@@ -190,6 +190,7 @@ include_directories(
          src/handle_grabber.cpp
          src/move_handle.cpp
          src/pcl_handle_detector.cpp
+         src/val_task1_utils.cpp
  )
 
 
@@ -334,3 +335,6 @@ decision_making_parsing(src/val_task1SM.cpp)
 
 add_executable(test_handle src/test_handle.cpp)
 target_link_libraries(test_handle ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(test_move_handle src/test_move_handle.cpp)
+target_link_libraries(test_move_handle ${catkin_LIBRARIES} ${PROJECT_NAME})

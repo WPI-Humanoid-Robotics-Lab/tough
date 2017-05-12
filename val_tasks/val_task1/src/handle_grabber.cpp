@@ -14,18 +14,18 @@ handle_grabber::handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper
     leftHandOrientation_.quaternion.z = -0.583;
     leftHandOrientation_.quaternion.w = 0.326;
 
-//    /* Side Grip */
-//    leftHandOrientation_.quaternion.x = 0.155;
-//    leftHandOrientation_.quaternion.y = -0.061;
-//    leftHandOrientation_.quaternion.z = -0.696;
-//    leftHandOrientation_.quaternion.w = 0.699;
+    //    /* Side Grip */
+    //    leftHandOrientation_.quaternion.x = 0.155;
+    //    leftHandOrientation_.quaternion.y = -0.061;
+    //    leftHandOrientation_.quaternion.z = -0.696;
+    //    leftHandOrientation_.quaternion.w = 0.699;
 
     //    /* Side Grip */
-//    rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-//    rightHandOrientation_.quaternion.x = -0.094;
-//    rightHandOrientation_.quaternion.y = -0.027;
-//    rightHandOrientation_.quaternion.z = 0.973;
-//    rightHandOrientation_.quaternion.w = -0.209;
+    //    rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    //    rightHandOrientation_.quaternion.x = -0.094;
+    //    rightHandOrientation_.quaternion.y = -0.027;
+    //    rightHandOrientation_.quaternion.z = 0.973;
+    //    rightHandOrientation_.quaternion.w = -0.209;
 
     /* Top Grip */
     rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
@@ -98,87 +98,148 @@ void handle_grabber::adjust_pose(const armSide side, const geometry_msgs::Point 
 void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Point &goal, float executionTime)
 {
 
-    // opening grippers
-    ROS_INFO("opening grippers");
-    gripper_.openGripper(side);
+    //    geometry_msgs::Pose intermediateGoal, finalGoal;
+    //    geometry_msgs::Point intermediatePoint, finalPoint;
 
-    //move shoulder roll outwards
-    ROS_INFO("Setting shoulder roll");
-    std::vector< std::vector<float> > armData;
-    armData.push_back(side == armSide::LEFT ? leftShoulderSeed_ : rightShoulderSeed_);
+    //    // create intermediate point in pelvis frame that is on the side of the handle and slightly lower
+    //    current_state_->transformPoint(goal,intermediatePoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    //    intermediatePoint.x += 0.05;
+    //    intermediatePoint.y += 0.05;
+    //    intermediatePoint.z -= 0.05;
 
-    armTraj_.moveArmJoints(side, armData, executionTime);
-    ros::Duration(executionTime*2).sleep();
+    //    //transform that point back to world frame
+    //    current_state_->transformPoint(intermediatePoint, intermediatePoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    //    intermediateGoal.position = intermediatePoint;
 
-//    geometry_msgs::Pose intermediateGoal, finalGoal;
-//    geometry_msgs::Point intermediatePoint, finalPoint;
+    //    //get quaternion in world frame. constructor defines these orientations in pelvis frame.
+    //    geometry_msgs::QuaternionStamped temp  = side == armSide::LEFT ? leftHandOrientation_ : rightHandOrientation_;
+    //    current_state_->transformQuaternion(temp, temp);
+    //    intermediateGoal.orientation = temp.quaternion;
 
-//    // create intermediate point in pelvis frame that is on the side of the handle and slightly lower
-//    current_state_->transformPoint(goal,intermediatePoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-//    intermediatePoint.x += 0.05;
-//    intermediatePoint.y += 0.05;
-//    intermediatePoint.z -= 0.05;
+    //    ROS_INFO_STREAM("Moving at an intermidate point before goal"<<intermediatePoint<<intermediateGoal.orientation);
+    //    armTraj_.moveArmInTaskSpace(side, intermediateGoal, executionTime);
+    //    ros::Duration(executionTime*1.4).sleep();
 
-//    //transform that point back to world frame
-//    current_state_->transformPoint(intermediatePoint, intermediatePoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-//    intermediateGoal.position = intermediatePoint;
+    //    current_state_->transformPoint(goal,finalPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    //    finalPoint.x += 0.05;
+    //    finalPoint.z -= 0.01;
 
-//    //get quaternion in world frame. constructor defines these orientations in pelvis frame.
-//    geometry_msgs::QuaternionStamped temp  = side == armSide::LEFT ? leftHandOrientation_ : rightHandOrientation_;
-//    current_state_->transformQuaternion(temp, temp);
-//    intermediateGoal.orientation = temp.quaternion;
-
-//    ROS_INFO_STREAM("Moving at an intermidate point before goal"<<intermediatePoint<<intermediateGoal.orientation);
-//    armTraj_.moveArmInTaskSpace(side, intermediateGoal, executionTime);
-//    ros::Duration(executionTime*1.4).sleep();
-
-//    current_state_->transformPoint(goal,finalPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-//    finalPoint.x += 0.05;
-//    finalPoint.z -= 0.01;
-
-//    //transform that point back to world frame
-//    current_state_->transformPoint(finalPoint, finalPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-//    finalGoal.position = finalPoint;
+    //    //transform that point back to world frame
+    //    current_state_->transformPoint(finalPoint, finalPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    //    finalGoal.position = finalPoint;
 
 
-//    finalGoal.orientation = temp.quaternion;
-//    ROS_INFO_STREAM("Moving towards goal"<<finalPoint<<finalGoal.orientation);
-//    armTraj_.moveArmInTaskSpace(side, finalGoal, executionTime);
-//    ros::Duration(executionTime*1.4).sleep();
+    //    finalGoal.orientation = temp.quaternion;
+    //    ROS_INFO_STREAM("Moving towards goal"<<finalPoint<<finalGoal.orientation);
+    //    armTraj_.moveArmInTaskSpace(side, finalGoal, executionTime);
+    //    ros::Duration(executionTime*1.4).sleep();
 
 
     //move arm to given point with known orientation and higher z
-    ROS_INFO("Moving at an intermidate point before goal");
-    geometry_msgs::Pose pt;
-    pt.position = goal;
-    pt.position.z += 0.1;
-    geometry_msgs::QuaternionStamped temp  = side == armSide::LEFT ? leftHandOrientation_ : rightHandOrientation_;
+    if(side == armSide::LEFT){
 
-    current_state_->transformQuaternion(temp, temp);
-    pt.orientation = temp.quaternion;
+        // opening grippers
+        ROS_INFO("opening grippers");
+        gripper_.openGripper(side);
 
-    armTraj_.moveArmInTaskSpace(side, pt, executionTime);
-    ros::Duration(executionTime*1.4).sleep();
+        //move shoulder roll outwards
+        ROS_INFO("Setting shoulder roll");
+        std::vector< std::vector<float> > armData;
+        armData.push_back(leftShoulderSeed_);
 
-    //move arm to final position with known orientation
-    geometry_msgs::Pose finalGoal;
-    geometry_msgs::Point finalPoint;
+        armTraj_.moveArmJoints(side, armData, executionTime);
+        ros::Duration(executionTime*2).sleep();
+        ROS_INFO("Moving at an intermidate point before goal");
+        geometry_msgs::Pose pt;
+        pt.position = goal;
+        pt.position.z += 0.1;
+        geometry_msgs::QuaternionStamped temp  = leftHandOrientation_ ;
 
-    current_state_->transformPoint(goal,finalPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-    finalPoint.x += 0.1;
-    finalPoint.z -= 0.1;
+        current_state_->transformQuaternion(temp, temp);
+        pt.orientation = temp.quaternion;
 
-    //transform that point back to world frame
-    current_state_->transformPoint(finalPoint, finalPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-    finalGoal.position = finalPoint;
+        armTraj_.moveArmInTaskSpace(side, pt, executionTime);
+        ros::Duration(executionTime*1.4).sleep();
 
-    ROS_INFO("Moving towards goal");
-    pt.position = finalPoint;
+        //move arm to final position with known orientation
+        geometry_msgs::Pose finalGoal;
+        geometry_msgs::Point finalPoint;
 
-    armTraj_.moveArmInTaskSpace(side, pt, executionTime);
-    ros::Duration(executionTime).sleep();
+        current_state_->transformPoint(goal,finalPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+        finalPoint.x += 0.1;
+        finalPoint.z -= 0.1;
 
-    ROS_INFO("Closing grippers");
-    gripper_.closeGripper(side);
+        //transform that point back to world frame
+        current_state_->transformPoint(finalPoint, finalPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+        finalGoal.position = finalPoint;
+
+        ROS_INFO("Moving towards goal");
+        pt.position = finalPoint;
+
+        armTraj_.moveArmInTaskSpace(side, pt, executionTime);
+        ros::Duration(executionTime).sleep();
+
+        ROS_INFO("Closing grippers");
+        gripper_.closeGripper(side);
+    }
+    else{
+        // opening grippers
+        ROS_INFO("opening grippers");
+        gripper_.openGripper(side);
+
+        //move shoulder roll outwards
+        ROS_INFO("Setting shoulder roll");
+        std::vector< std::vector<float> > armData;
+        armData.push_back(rightShoulderSeed_);
+
+        armTraj_.moveArmJoints(side, armData, executionTime);
+        ros::Duration(executionTime*2).sleep();
+
+
+        //move arm to given point with known orientation and higher z
+        geometry_msgs::Pose finalGoal, intermGoal;
+        geometry_msgs::Point finalPoint, intermPoint;
+
+        current_state_->transformPoint(goal,intermPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+        intermPoint.x += 0.2;
+        intermPoint.z += 0.1;
+
+        //transform that point back to world frame
+        current_state_->transformPoint(intermPoint, intermPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+
+        ROS_INFO("Moving at an intermidate point before goal");
+        intermGoal.position = intermPoint;
+        geometry_msgs::QuaternionStamped temp  = rightHandOrientation_;
+
+        current_state_->transformQuaternion(temp, temp);
+        intermGoal.orientation = temp.quaternion;
+
+        armTraj_.moveArmInTaskSpace(side, intermGoal, executionTime*2);
+        ros::Duration(executionTime*2).sleep();
+
+        //move arm to final position with known orientation
+
+
+        current_state_->transformPoint(goal,finalPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+        finalPoint.x += 0.2;
+        finalPoint.z -= 0.15;
+
+        //transform that point back to world frame
+        current_state_->transformPoint(finalPoint, finalPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+
+        ROS_INFO("Moving towards goal");
+        finalGoal.position = finalPoint;
+        finalGoal.orientation = temp.quaternion;
+
+        armTraj_.moveArmInTaskSpace(side, finalGoal, executionTime*2);
+        ros::Duration(executionTime*2).sleep();
+
+        geometry_msgs::Pose handPose;
+        current_state_->getCurrentPose("rightMiddleFingerPitch1Link", handPose);
+        ROS_INFO_STREAM("Hand Position :"<<handPose.position);
+        ROS_INFO("Closing grippers");
+        gripper_.closeGripper(side);
+
+    }
 
 }

@@ -84,12 +84,14 @@ private:
     std::vector<float> panel_plane_model_;
     std::map<DETECTOR_TYPE, PanelSettings> preset_configs_;
     void setPresetConfigs();
-    PanelSettings* currentSettings_;
+//    PanelSettings* currentSettings_;
+    DETECTOR_TYPE currentDetector;
 
 public:
     // Constructor
 
     panel_detector(ros::NodeHandle &nh, DETECTOR_TYPE detector_type);
+    ~panel_detector();
 
     void getDetections(std::vector<geometry_msgs::Pose> &ret_val);
 

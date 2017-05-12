@@ -28,6 +28,7 @@ class FinishBoxDetector{
 public:
     FinishBoxDetector(ros::NodeHandle &n);
     ~FinishBoxDetector();
+    bool getFinishBoxCenters(std::vector<geometry_msgs::Point> &centers);
 
 private:
     void detectFinishBox(const nav_msgs::OccupancyGrid::Ptr msg);
@@ -37,6 +38,7 @@ private:
     ros::Publisher  mapPub_;
     nav_msgs::OccupancyGrid occGrid_;
     cv::Mat map_image_;
+    std::set<Point2D> finish_box_centers_;
 
     float MAP_RESOLUTION;
     float MAP_HEIGHT;
