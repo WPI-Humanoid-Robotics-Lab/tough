@@ -29,7 +29,7 @@ public:
     map_filter(ros::NodeHandle& );
     ~map_filter();
     //bool getFinishBoxCenters(std::vector<geometry_msgs::Point> &centers);
-    void convertMap(nav_msgs::OccupancyGrid::Ptr msg);
+    void convertMap(nav_msgs::OccupancyGrid::Ptr msg, uint);
 
 private:
     void mapCB(const nav_msgs::OccupancyGrid::Ptr msg);

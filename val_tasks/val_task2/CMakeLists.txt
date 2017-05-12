@@ -150,6 +150,7 @@ include_directories(perception_common
             src/map_filter.cpp
             src/solar_panel_grasp.cpp
 	    src/cable_detector.cpp
+            src/plug_detector.cpp
  )
 
 ## Add cmake target dependencies of the library
@@ -186,6 +187,15 @@ add_executable(cable_detector_node
 )
 
 target_link_libraries(cable_detector_node ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+   ${PROJECT_NAME}
+)
+
+add_executable(plug_detector_node
+        src/plug_detector_node.cpp
+)
+
+target_link_libraries(plug_detector_node ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
    ${PROJECT_NAME}
 )
