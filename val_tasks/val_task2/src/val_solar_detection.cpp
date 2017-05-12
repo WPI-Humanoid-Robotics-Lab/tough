@@ -1,4 +1,16 @@
 #include "val_task2/val_solar_detection.h"
+#define solar_pass_x_min -10.0
+#define solar_pass_x_max  10.0
+#define solar_pass_y_min -10.0
+#define solar_pass_y_max  10.0
+#define solar_pass_z_min  1.0
+#define solar_pass_z_max  1.68
+
+/* x axis : -10 to 10
+ * y axis : -10 to 10
+ * z axis : 1 to 1.68
+ * */
+
 
 plane::plane(ros::NodeHandle nh, geometry_msgs::Pose rover_loc)
 {
@@ -12,9 +24,10 @@ plane::plane(ros::NodeHandle nh, geometry_msgs::Pose rover_loc)
 //    pcl_sub =  nh.subscribe("/field/octomap_point_cloud_centers", 10, &plane::cloudCB, this);
   pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_plane/cloud2", 1);
   vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_solar/visualization_marker", 1 );
-  rover_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_task2/rover_cloud",1);
+  rover_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/block_map",1);
 
   rover_loc_ = rover_loc;
+  current_state_ = RobotStateInformer::getRobotStateInformer(nh);
 
 }
 
@@ -30,11 +43,11 @@ void plane::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
     pcl::fromROSMsg(*input, *cloud);
 
    roverremove(cloud);
-    //PassThroughFilter(cloud);
+   PassThroughFilter(cloud);
 
     ROS_INFO("pub %d",(int)cloud->points.size());
 
-    //planeDetection(cloud);
+    planeDetection(cloud);
     //getPosition(cloud,location);
     pcl::toROSMsg(*cloud,output);
     output.header.frame_id="world";
@@ -91,7 +104,7 @@ void plane::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     box_filter.setNegative(false);
     box_filter.filter(rover_cloud);
 
-    // brute force
+    // brute force projecting the points into xy plane(z=0)
     for (auto i = rover_cloud.points.begin() ;i!=rover_cloud.points.end();++i)
     {
         (i)->z = 0;
@@ -118,24 +131,46 @@ void plane::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
 
 
-    // need to use robot_stateinformer
+    float min_x,min_y,max_x,max_y;
+    geometry_msgs::Point pt_in,pt_out;
+    pt_in.x = solar_pass_x_min;
+    pt_in.y =  0;
+    pt_in.z =  0;
+    current_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
+    min_x = pt_out.x;
+    pt_in.x = solar_pass_x_max;
+    pt_in.y =  0;
+    pt_in.z =  0;
+    current_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
+    max_x = pt_out.x;
+    pt_in.x =  0;
+    pt_in.y = solar_pass_y_min;
+    pt_in.z =  0;
+    current_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
+    min_y = pt_out.y;
+    pt_in.x =  0;
+    pt_in.y = solar_pass_y_max;
+    pt_in.z =  0;
+    current_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
+    max_y = pt_out.y;
+
 
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
     pass_x.setFilterFieldName("x");
-    pass_x.setFilterLimits(-2,10);
+    pass_x.setFilterLimits(min_x,max_x);
     pass_x.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> pass_y;
     pass_y.setInputCloud(cloud);
     pass_y.setFilterFieldName("y");
-    pass_y.setFilterLimits(-10,10);
+    pass_y.setFilterLimits(min_y,max_y);
     pass_y.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> pass_z;
     pass_z.setInputCloud(cloud);
     pass_z.setFilterFieldName("z");
-    pass_z.setFilterLimits(1,1.68);
+    pass_z.setFilterLimits(solar_pass_z_min,solar_pass_z_max);
     pass_z.filter(*cloud);
 
 }
