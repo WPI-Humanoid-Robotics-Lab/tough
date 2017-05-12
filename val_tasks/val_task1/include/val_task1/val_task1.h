@@ -50,7 +50,7 @@ class valTask1 {
     // panel detection object
     PanelDetector* panel_detector_;
     //handle detector
-    handle_detector* handle_detector_;
+    HandleDetector* handle_detector_;
     //moving handle
     move_handle* move_handle_;
     // Object to use for grasping handles
