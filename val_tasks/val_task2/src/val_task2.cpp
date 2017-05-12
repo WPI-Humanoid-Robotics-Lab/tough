@@ -10,25 +10,48 @@
 #include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/Twist.h>
 #include <val_task2/val_task2.h>
+#include <srcsim/StartTask.h>
+#include "val_task_common/val_task_common_utils.h"
 
 using namespace std;
 
 #define foreach BOOST_FOREACH
 
-ValkyrieWalker *valTask2::walker_ = NULL;
-geometry_msgs::Pose2D valTask2::panel_walk_goal_;
+valTask2 *valTask2::currentObject = nullptr;
+
+valTask2* valTask2::getValTask2(ros::NodeHandle nh){
+    if(currentObject == nullptr){
+        currentObject = new valTask2(nh);
+        return currentObject;
+    }
+    ROS_ERROR("Object already exists");
+    assert(false && "Object already exists");
+}
+
 
 // constructor and destrcutor
 valTask2::valTask2(ros::NodeHandle nh):
     nh_(nh)
 {
     // object for the valkyrie walker
-    walker_ = new ValkyrieWalker(nh_, 0.5, 0.5, 0, 0.18);
+    walker_ = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
+    pelvis_controller_ = new pelvisTrajectory(nh_);
+
+    //initialize all detection pointers
+    rover_detector_ = nullptr;
+
+    robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    map_update_count_ = 0;
+    occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask2::occupancy_grid_cb, this);
 }
 
 // destructor
 valTask2::~valTask2(){
+    delete walker_;
+}
 
+void valTask2::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
+    ++map_update_count_;
 }
 
 bool valTask2::preemptiveWait(double ms, decision_making::EventQueue& queue) {
@@ -42,25 +65,115 @@ bool valTask2::preemptiveWait(double ms, decision_making::EventQueue& queue) {
 // when ever a action is published one of these functions will be called
 decision_making::TaskResult valTask2::initTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
+
     ROS_INFO_STREAM("executing " << name);
+    static int retry_count = 0;
+
+    // if the map does not update fast enought and this is called greater then 10 time it will break
+    if(retry_count == 0){
+        map_update_count_ = 0;
+    }
+    // It is depenent on the timer timer right now.
 
     // the state transition can happen from an event externally or can be geenerated here
-    //!!!!! depends on the developer and use case
+    ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
+    if (map_update_count_ > 1) {
+        // move to a configuration that is robust while walking
+        retry_count = 0;
+        pelvis_controller_->controlPelvisHeight(0.9);
+        ros::Duration(1.0f).sleep();
 
-    // generate the event
-    eventQueue.riseEvent("/INIT_SUCESSFUL");
+        // start the task
+        ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
+        srcsim::StartTask   srv;
+        srv.request.checkpoint_id = 1;
+        srv.request.task_id       = 2;
+        if(client.call(srv)) {
+            //what do we do if this call fails or succeeds?
+        }
+        // generate the event
+        eventQueue.riseEvent("/INIT_SUCESSFUL");
 
-    // wait infinetly until an external even occurs
-    //    while(!preemptiveWait(1000, eventQueue)){
-    //           ROS_INFO("waiting for transition");
-    //    }
-
+    }
+    else if (map_update_count_ < 2 && retry_count++ < 40) {
+        ROS_INFO("Wait for occupancy grid to be updated with atleast 2 messages");
+        ros::Duration(2.0).sleep();
+        eventQueue.riseEvent("/INIT_RETRY");
+    }
+    else {
+        retry_count = 0;
+        ROS_INFO("Failed to initialize");
+        eventQueue.riseEvent("/INIT_FAILED");
+    }
     return TaskResult::SUCCESS();
+
 }
 
 decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+
+    if(rover_detector_ == nullptr){
+        rover_detector_ = new RoverDetector(nh_);
+    }
+
+    static int fail_count = 0;
+    static int retry_count = 0;
+    std::vector<geometry_msgs::Pose> poses;
+    rover_detector_->getDetections(poses);
+
+    ROS_INFO("Size of poses : %d", (int)poses.size());
+    //    // if we get atleast one detection, LOL
+    if (poses.size() > 1) {
+        // update the pose
+        geometry_msgs::Pose2D pose2D;
+        // get the last detected pose
+        int idx = poses.size() -1 ;
+        pose2D.x = poses[idx].position.x;
+        pose2D.y = poses[idx].position.y;
+
+        std::cout << "x " << pose2D.x << " y " << pose2D.y << std::endl;
+
+        // get the theta
+        pose2D.theta = tf::getYaw(poses[idx].orientation);
+        setRoverWalkGoal(pose2D);
+
+        std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
+        std::cout << "yaw: " << pose2D.theta  <<std::endl;
+        retry_count = 0;
+        // update the plane coeffecients
+        eventQueue.riseEvent("/DETECTED_ROVER");
+        ROS_INFO("detected rover");
+        if(rover_detector_ != nullptr) delete rover_detector_;
+        rover_detector_ = nullptr;
+    }
+    else if(retry_count < 5) {
+        ROS_INFO("sleep for 3 seconds for panel detection");
+        ++retry_count;
+        ros::Duration(2).sleep();
+        eventQueue.riseEvent("/DETECT_ROVER_RETRY");
+    }
+
+    // if failed for more than 5 times, go to error state
+    else if (fail_count > 5) {
+        // reset the fail count
+        fail_count = 0;
+        eventQueue.riseEvent("/DETECT_ROVER_FAILED");
+        if(rover_detector_ != nullptr) delete rover_detector_;
+        rover_detector_ = nullptr;
+    }
+    // if failed retry detecting the panel
+    else
+    {
+        // increment the fail count
+        fail_count++;
+        eventQueue.riseEvent("/DETECT_ROVER_RETRY");
+    }
+
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
+
 
     // generate the event
     eventQueue.riseEvent("/DETECTED_ROVER");
@@ -68,43 +181,63 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
     return TaskResult::SUCCESS();
 }
 
-
 decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
 
-    // for storing the fail count
     static int fail_count = 0;
 
     // walk to the goal location
     // the goal can be updated on the run time
-//    ret = walker_->walkToGoal(panel_walk_goal_, false);
+    static geometry_msgs::Pose2D pose_prev;
 
-//    // if executing stay in the same state
-//    if (ret == MOVE_EXECUTING)
-//    {
-//         eventQueue.riseEvent("/WALK_EXECUTING");
-//    }
-//    // if finished sucessfully
-//    else if (ret == MOVE_SUCESS)
-//    {
-//       eventQueue.riseEvent("/REACHED_ROVER");
-//    }
-//    // if failed for more than 5 times, go to error state
-//    else if (fail_count > 5)
-//    {
-//        // reset the fail count
-//        fail_count = 0;
-//        eventQueue.riseEvent("/WALK_FAILED");
-//    }
-//    // if failed retry detecting the panel and then walk
-//    // also handles MOVE_FAILED
-//    else
-//    {
-//        // increment the fail count
-//        fail_count++;
-//        eventQueue.riseEvent("/WALK_RETRY");
-//    }
+    geometry_msgs::Pose current_pelvis_pose;
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+    ROS_INFO("fetched robot's current position");
+    // check if the pose is changed
+    ///@todo: what if pose has not changed but robot did not reach the goal and is not walking?
+    if (taskCommonUtils::isPoseChanged(pose_prev, rover_walk_goal_)) {
+        ROS_INFO_STREAM("pose chaned to "<<rover_walk_goal_);
+        walker_->walkToGoal(rover_walk_goal_, false);
+        // sleep so that the walk starts
+        ROS_INFO("Footsteps should be generated now");
+        ros::Duration(4).sleep();
+        // update the previous pose
+        pose_prev = rover_walk_goal_;
+    }
+
+    // if walking stay in the same state
+    if (walk_track_->isWalking())
+    {
+        // no state change
+        ROS_INFO_THROTTLE(2, "walking");
+        eventQueue.riseEvent("/WALK_EXECUTING");
+    }
+    // if walk finished
+    // TODO change to see if we are at the goal
+    else if ( fabs(rover_walk_goal_.x - current_pelvis_pose.position.x) < 0.05 && fabs(rover_walk_goal_.y - current_pelvis_pose.position.y) < 0.05 ) {
+        ROS_INFO("reached panel");
+
+        // TODO: check if robot rechead the panel
+        eventQueue.riseEvent("/REACHED_ROVER");
+    }
+    // if failed for more than 5 times, go to error state
+    else if (fail_count > 5)
+    {
+        // reset the fail count
+        fail_count = 0;
+        ROS_INFO("walk failed");
+        eventQueue.riseEvent("/WALK_FAILED");
+    }
+    // if failed retry detecting the panel and then walk
+    // also handles MOVE_FAILED
+    else
+    {
+        // increment the fail count
+        fail_count++;
+        ROS_INFO("walk retry");
+        eventQueue.riseEvent("/WALK_RETRY");
+    }
 
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
@@ -270,4 +403,9 @@ geometry_msgs::Pose2D valTask2::getPanelWalkGoal()
 void valTask2::setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal)
 {
     panel_walk_goal_ = panel_walk_goal;
+}
+
+void valTask2::setRoverWalkGoal(const geometry_msgs::Pose2D &rover_walk_goal)
+{
+    rover_walk_goal_ = rover_walk_goal;
 }

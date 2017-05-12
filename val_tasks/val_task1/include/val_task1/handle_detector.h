@@ -18,7 +18,7 @@
 #include <iostream>
 #include <vector>
 
-class handle_detector
+class HandleDetector
 {
     cv::Mat current_image_, current_image_HSV_, current_disparity_, qMatrix_;
     cv::Mat imRed_, imBlue_, imGray_, imOrange_;
@@ -54,7 +54,7 @@ public:
     bool getHandleLocation(std::vector<geometry_msgs::Point> &handleLocs);
     void getReducedImage(cv::Mat &, const cv::Rect &);
     bool findHandles(std::vector<geometry_msgs::Point>&);
-    handle_detector(ros::NodeHandle nh);
+    HandleDetector(ros::NodeHandle nh);
 
 };
 

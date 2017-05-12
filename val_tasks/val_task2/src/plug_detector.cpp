@@ -1,35 +1,42 @@
-#include <val_task2/button_detector.h>
+#include "val_task2/plug_detector.h"
 #include <visualization_msgs/Marker.h>
-#include <pcl/common/centroid.h>
 #include "val_common/val_common_names.h"
+#include <pcl/common/centroid.h>
+#include <thread>
 
 #define DISABLE_DRAWINGS true
+#define DISABLE_TRACKBAR true
 
-button_detector::button_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_)
+plug_detector::plug_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_buttons",1);
     ms_sensor_.giveQMatrix(qMatrix_);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_plug",1);
 }
 
-void button_detector::showImage(cv::Mat image, std::string caption)
+void plug_detector::showImage(cv::Mat image, std::string caption)
 {
 #ifdef DISABLE_DRAWINGS
     return;
 #endif
     cv::namedWindow( caption, cv::WINDOW_AUTOSIZE );
     cv::imshow( caption, image);
-    cv::waitKey(0);
+    cv::waitKey(3);
 }
 
-inline void button_detector::colorSegment(const cv::Mat &imgHSV, const int hsvl[6], const int hsvu[6], cv::Mat &outImg)
+void plug_detector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
 {
-    cv::Mat mask1, mask2;
-    cv::inRange(imgHSV,cv::Scalar(hsvl[0],hsvl[2],hsvl[4]), cv::Scalar(hsvl[1],hsvl[3],hsvl[5]),mask1);
-    cv::inRange(imgHSV,cv::Scalar(hsvu[0],hsvu[2],hsvu[4]), cv::Scalar(hsvu[1],hsvu[3],hsvu[5]),mask2);
-    outImg = mask1 | mask2;
+    cv::inRange(imgHSV, cv::Scalar(hsv_[0], hsv_[2], hsv_[6]), cv::Scalar(hsv_[1], hsv_[3], hsv_[5]), outImg);
+    cv::morphologyEx(outImg, outImg, cv::MORPH_OPEN, getStructuringElement( cv::MORPH_ELLIPSE,cv::Size(3,3)));
+    cv::dilate(outImg, outImg, getStructuringElement( cv::MORPH_ELLIPSE, cv::Size(5,5)));
+#ifdef DISABLE_TRACKBAR
+    return;
+#endif
+    setTrackbar();
+    cv::imshow("binary thresholding", outImg);
+    cv::waitKey(3);
 }
 
-size_t button_detector::findMaxContour(const std::vector<std::vector<cv::Point> >& contours)
+size_t plug_detector::findMaxContour(const std::vector<std::vector<cv::Point> >& contours)
 {
     int largest_area = 0;
     int largest_contour_index = 0;
@@ -54,10 +61,9 @@ size_t button_detector::findMaxContour(const std::vector<std::vector<cv::Point> 
     return largest_contour_index;
 }
 
-bool button_detector::getButtonLocation(geometry_msgs::Point& buttonLoc)
+bool plug_detector::getPlugLocation(geometry_msgs::Point& plugLoc)
 {
-
-    bool foundButton = false;
+    bool foundPlug = false;
     src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
     src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
     tf::TransformListener listener;
@@ -65,9 +71,10 @@ bool button_detector::getButtonLocation(geometry_msgs::Point& buttonLoc)
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
     cv::Mat imgHSV, outImg;
+    //cv::Point point;
 
     cv::cvtColor(current_image_, imgHSV, cv::COLOR_BGR2HSV);
-    colorSegment(imgHSV, hsvLowRed_, hsvHighRed_, outImg);
+    colorSegment(imgHSV, outImg);
 
     // Find contours
     cv::findContours(outImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
@@ -76,13 +83,12 @@ bool button_detector::getButtonLocation(geometry_msgs::Point& buttonLoc)
     if(!contours.empty()) //avoid seg fault at runtime by checking that the contours exist
     {
         findMaxContour(contours);
-        foundButton = true;
+        foundPlug = true;
     }
 
     cv::Mat hullPoints = cv::Mat::zeros(current_image_.size(), CV_8UC1);
     cv::fillConvexPoly(hullPoints, convexHulls_,cv::Scalar(255));
     cv::Mat nonZeroCoordinates;
-    cv::erode(hullPoints, hullPoints, cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(5,5)));
     cv::findNonZero(hullPoints, nonZeroCoordinates);
     if (nonZeroCoordinates.total() < 10){
         return false;
@@ -99,10 +105,12 @@ bool button_detector::getButtonLocation(geometry_msgs::Point& buttonLoc)
 
         }
     }
+
     Eigen::Vector4f cloudCentroid;
     //  Calculating the Centroid of the handle Point cloud
     pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
-    if( foundButton )
+
+    if( foundPlug )
     {
         geom_point.point.x = cloudCentroid(0);
         geom_point.point.y = cloudCentroid(1);
@@ -118,33 +126,54 @@ bool button_detector::getButtonLocation(geometry_msgs::Point& buttonLoc)
             return false;
         }
     }
-    buttonLoc.x = double (geom_point.point.x);
-    buttonLoc.y = double (geom_point.point.y);
-    buttonLoc.z = double (geom_point.point.z);
-    //ROS_INFO_STREAM(buttonLoc.x<<"\t"<<buttonLoc.y<<"\t"<<buttonLoc.z<<std::endl);
+    plugLoc.x = double (geom_point.point.x);
+    plugLoc.y = double (geom_point.point.y);
+    plugLoc.z = double (geom_point.point.z);
 
     visualize_point(geom_point.point);
 
     marker_pub_.publish(markers_);
-    return foundButton;
 
+    return foundPlug;
 }
 
-bool button_detector::findButtons(geometry_msgs::Point &buttonLoc)
-{
-    markers_.markers.clear();
 
+
+bool plug_detector::findPlug(geometry_msgs::Point& plugLoc)
+{
+    //VISUALIZATION - include ros::spinOnce();
+    //ros::spinOnce();
+    markers_.markers.clear();
     if(ms_sensor_.giveImage(current_image_))
     {
         if( ms_sensor_.giveDisparityImage(current_disparity_))
         {
-            return getButtonLocation(buttonLoc);
+            return getPlugLocation(plugLoc);
         }
     }
     return 0;
 }
 
-void button_detector::visualize_point(const geometry_msgs::Point &point){
+
+void plug_detector::setTrackbar()
+{
+    cv::namedWindow("binary thresholding");
+    cv::createTrackbar("hl", "binary thresholding", &hsv_[0], 180);
+    cv::createTrackbar("hu", "binary thresholding", &hsv_[1], 180);
+    cv::createTrackbar("sl", "binary thresholding", &hsv_[2], 255);
+    cv::createTrackbar("su", "binary thresholding", &hsv_[3], 255);
+    cv::createTrackbar("vl", "binary thresholding", &hsv_[4], 255);
+    cv::createTrackbar("vu", "binary thresholding", &hsv_[5], 255);
+
+    cv::getTrackbarPos("hl", "binary thresholding");
+    cv::getTrackbarPos("hu", "binary thresholding");
+    cv::getTrackbarPos("sl", "binary thresholding");
+    cv::getTrackbarPos("su", "binary thresholding");
+    cv::getTrackbarPos("vl", "binary thresholding");
+    cv::getTrackbarPos("vu", "binary thresholding");
+}
+
+void plug_detector::visualize_point(geometry_msgs::Point point){
 
     std::cout<< "goal origin :\n"<< point << std::endl;
     static int id = 0;
@@ -179,7 +208,7 @@ void button_detector::visualize_point(const geometry_msgs::Point &point){
     markers_.markers.push_back(marker);
 }
 
-button_detector::~button_detector()
+plug_detector::~plug_detector()
 {
 
 }
