@@ -189,8 +189,7 @@ include_directories(
          src/handle_detector.cpp
          src/handle_grabber.cpp
          src/move_handle.cpp
-
-
+         src/pcl_handle_detector.cpp
  )
 
 
@@ -239,6 +238,21 @@ add_dependencies(handle_detector_node
    ${PROJECT_NAME}
  )
 
+ add_executable(pcl_handle_detector_node
+            src/pcl_handle_detector_node.cpp
+)
+
+add_dependencies(pcl_handle_detector_node
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS}_gencfg
+ ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link a library or executable target against
+ target_link_libraries(pcl_handle_detector_node
+   ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
+   ${PROJECT_NAME}
+ )
 
 add_executable(val_circle src/val_circle.cpp)
 
