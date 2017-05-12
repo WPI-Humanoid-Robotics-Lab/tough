@@ -60,7 +60,7 @@ enum class DETECTOR_TYPE{
     HANDLE_PANEL_FINE
 };
 
-class panel_detector{
+class PanelDetector{
 private:
 
     ros::Subscriber pcl_sub_;
@@ -90,8 +90,8 @@ private:
 public:
     // Constructor
 
-    panel_detector(ros::NodeHandle &nh, DETECTOR_TYPE detector_type);
-    ~panel_detector();
+    PanelDetector(ros::NodeHandle &nh, DETECTOR_TYPE detector_type);
+    ~PanelDetector();
 
     void getDetections(std::vector<geometry_msgs::Pose> &ret_val);
 

@@ -1,8 +1,8 @@
 #include "val_task_common/panel_detection.h"
 
-panel_detector::panel_detector(ros::NodeHandle &nh, DETECTOR_TYPE detector_type)
+PanelDetector::PanelDetector(ros::NodeHandle &nh, DETECTOR_TYPE detector_type)
 {
-    pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &panel_detector::cloudCB, this);
+    pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &PanelDetector::cloudCB, this);
     pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_filter/filteredPointCloud", 1);
 
     vis_pub_ = nh.advertise<visualization_msgs::Marker>( "visualization_marker", 1 );
@@ -17,28 +17,28 @@ panel_detector::panel_detector(ros::NodeHandle &nh, DETECTOR_TYPE detector_type)
     panel_plane_model_.resize(4);
 }
 
-panel_detector::~panel_detector()
+PanelDetector::~PanelDetector()
 {
     pcl_sub_.shutdown();
 
 }
 
-void panel_detector::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
+void PanelDetector::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
 {
     ret_val = detections_;
 }
 
-int panel_detector::getDetectionTries() const
+int PanelDetector::getDetectionTries() const
 {
     return detection_tries_;
 }
 
-void panel_detector::setDetectionTries(int detection_tries)
+void PanelDetector::setDetectionTries(int detection_tries)
 {
     detection_tries_ = detection_tries;
 }
 
-void panel_detector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
+void PanelDetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
     if (input->data.empty())
         return;
@@ -76,7 +76,7 @@ void panel_detector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
     pcl_filtered_pub_.publish(output);
 }
 
-void panel_detector::passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+void PanelDetector::passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
@@ -97,7 +97,7 @@ void panel_detector::passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& clou
     pass_z.filter(*cloud);
 }
 
-void panel_detector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+void PanelDetector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
@@ -128,7 +128,7 @@ void panel_detector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& clou
 
 }
 
-bool panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose){
+bool PanelDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose){
 
     Eigen::Vector4f centroid;
     //  Calculating the Centroid of the Panel Point cloud
@@ -266,7 +266,7 @@ bool panel_detector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geo
     return true;
 }
 
-void panel_detector::setPresetConfigs()
+void PanelDetector::setPresetConfigs()
 {
     //Handle panel coarse setting
     PanelSettings handle_panel_coarse;
@@ -296,7 +296,7 @@ void panel_detector::setPresetConfigs()
 
 }
 
-void panel_detector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+void PanelDetector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
@@ -334,7 +334,7 @@ void panel_detector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
 }
 
-bool panel_detector::getPanelPlaneModel(std::vector<float> &panelPlaneModel) const
+bool PanelDetector::getPanelPlaneModel(std::vector<float> &panelPlaneModel) const
 {
     ROS_INFO("a : %0.4f, b : %0.4f, c : %0.4f, d: %.4f",panel_plane_model_[0], panel_plane_model_[1], panel_plane_model_[2], panel_plane_model_[3]);
     panelPlaneModel = panel_plane_model_;
