@@ -325,7 +325,7 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
         //update the global transform
         GlobalTransform = GlobalTransform * pairTransform;
 
-        /*  Disabling voxel filter
+        /*  Disabling voxel filter -- enabling this will impact rover detection
         float leafsize  = 0.05;
         pcl::PointCloud<pcl::PointXYZ>::Ptr tgt (new pcl::PointCloud<pcl::PointXYZ>);
         pcl::VoxelGrid<PointT> grid;

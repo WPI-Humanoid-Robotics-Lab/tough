@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(val_task2)
 
-## Add support for C++11, supported in ROS Kinetic and newer
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+SET(CMAKE_BUILD_TYPE RelWithDebInfo)
+
+set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -70,7 +71,7 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 
 
 add_executable(rover_detection_node       src/val_rover_detection_node.cpp)
-target_link_libraries(rover_detection_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PROJECT_NAME} ${PCL_LIBRARY_DIRS})
+target_link_libraries(rover_detection_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PROJECT_NAME} ${PCL_LIBRARY_DIRS} ${PROJECT_NAME})
 
 add_executable(button_detector_node  src/button_detector_node.cpp)
 

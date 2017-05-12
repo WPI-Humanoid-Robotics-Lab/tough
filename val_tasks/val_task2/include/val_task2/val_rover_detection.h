@@ -46,6 +46,10 @@ private:
 
   ros::Publisher vis_plane_pub;
 
+  std::vector<geometry_msgs::Pose> detections_;
+
+  int detection_tries_;
+
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
 
   void lowerBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
@@ -69,5 +73,9 @@ public:
 
     vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_rover/Position", 1 );
   }
+
+  bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
+
+  int getDetectionTries() const;
 
 };

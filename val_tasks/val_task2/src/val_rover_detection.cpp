@@ -21,36 +21,58 @@
 
 void rover::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
-  ros::Time startTime = ros::Time::now();
+    if (input->data.empty()){
+        return;
+    }
+    ++detection_tries_;
+    detections_.clear();
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    ros::Time startTime = ros::Time::now();
 
-  sensor_msgs::PointCloud2 output;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
-  pcl::fromROSMsg(*input, *cloud);
+    sensor_msgs::PointCloud2 output;
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr lowerBoxCloud (new pcl::PointCloud<pcl::PointXYZ>(*cloud));
-  pcl::PointCloud<pcl::PointXYZ>::Ptr upperBoxCloud (new pcl::PointCloud<pcl::PointXYZ>(*cloud));
+    pcl::fromROSMsg(*input, *cloud);
 
-  lowerBoxPassThroughFilter(lowerBoxCloud);
-  segmentation(lowerBoxCloud);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr lowerBoxCloud (new pcl::PointCloud<pcl::PointXYZ>(*cloud));
+    pcl::PointCloud<pcl::PointXYZ>::Ptr upperBoxCloud (new pcl::PointCloud<pcl::PointXYZ>(*cloud));
 
-  upperBoxPassThroughFilter(upperBoxCloud);
-  planeDetection(upperBoxCloud);
-  segmentation(upperBoxCloud);
+    lowerBoxPassThroughFilter(lowerBoxCloud);
+    if (lowerBoxCloud->empty()){
+        return;
+    }
+    segmentation(lowerBoxCloud);
+    if (lowerBoxCloud->empty()){
+        return;
+    }
 
-  geometry_msgs::Pose pose;
-  getPosition(lowerBoxCloud, upperBoxCloud, pose );
+    upperBoxPassThroughFilter(upperBoxCloud);
+    if (upperBoxCloud->empty()){
+        return;
+    }
+    planeDetection(upperBoxCloud);
+    if (upperBoxCloud->empty()){
+        return;
+    }
+    segmentation(upperBoxCloud);
+    if (upperBoxCloud->empty()){
+        return;
+    }
 
-  ros::Time endTime = ros::Time::now();
+    geometry_msgs::Pose pose;
+    getPosition(lowerBoxCloud, upperBoxCloud, pose );
+    detections_.push_back(pose);
 
-  std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
+    ros::Time endTime = ros::Time::now();
 
-  pcl::toROSMsg(*upperBoxCloud, output);
+    std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
 
-  output.header.frame_id = "world";
+    pcl::toROSMsg(*upperBoxCloud, output);
 
-  pcl_filtered_pub.publish(output);
+    output.header.frame_id = "world";
+
+    pcl_filtered_pub.publish(output);
 
 }
 
@@ -70,17 +92,17 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
     upperBoxPosition.y = upperBoxCentroid(1);
     upperBoxPosition.z = upperBoxCentroid(2);
 
-//    ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", upperBoxPosition.x, upperBoxPosition.y, upperBoxPosition.z);
+    //    ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", upperBoxPosition.x, upperBoxPosition.y, upperBoxPosition.z);
 
-//  Using Priciple Component Analysis for computing the Orientation of the Panel
+    //  Using Priciple Component Analysis for computing the Orientation of the Panel
     Eigen::Matrix3f covarianceMatrix;
     pcl::computeCovarianceMatrix(*upperBoxCloud, upperBoxCentroid, covarianceMatrix);
     Eigen::Matrix3f eigenVectors;
     Eigen::Vector3f eigenValues;
     pcl::eigen33(covarianceMatrix, eigenVectors, eigenValues);
 
-//    std::cout<<"The EigenValues are : " << eigenValues << std::endl;
-//    std::cout<<"The EigenVectors are : " << eigenVectors << std::endl;
+    //    std::cout<<"The EigenValues are : " << eigenValues << std::endl;
+    //    std::cout<<"The EigenVectors are : " << eigenVectors << std::endl;
 
 
     geometry_msgs::Point point1;
@@ -117,33 +139,33 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
     }
 
     if(yzSlope > 0){
-       if(!noSlope){
+        if(!noSlope){
             if(xySlope < 0){
                 theta = atan2(sinTheta, cosTheta);
             }
             else if(xySlope > 0){
                 theta = atan2(sinTheta, cosTheta)  + 1.5708;
             }
-       }
-       else if (xySlope == 0){
-           theta = atan2(sinTheta, cosTheta);
-            }
+        }
+        else if (xySlope == 0){
+            theta = atan2(sinTheta, cosTheta);
+        }
     }
     else{
         if(!noSlope){
-             if(xySlope > 0){
-                 theta = atan2(sinTheta, cosTheta) * -1.0 ;
-             }
-             else if(xySlope < 0){
-                 theta = atan2(sinTheta, cosTheta) * -1.0 - 1.5708;
-             }
+            if(xySlope > 0){
+                theta = atan2(sinTheta, cosTheta) * -1.0 ;
+            }
+            else if(xySlope < 0){
+                theta = atan2(sinTheta, cosTheta) * -1.0 - 1.5708;
+            }
         }
         else if (xySlope == 0){
             theta = atan2(sinTheta, cosTheta) * -1.0;
-             }
+        }
     }
 
-//    ROS_INFO("The Orientation is given by := %0.2f", theta);
+    //    ROS_INFO("The Orientation is given by := %0.2f", theta);
 
     double offset = 6.3;
 
@@ -151,7 +173,7 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
     pose.position.y = upperBoxPosition.y - (offset*sin(theta));
     pose.position.z = 0.0;
 
-//    ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
+    //    ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
     geometry_msgs::Quaternion quaternion;
     ROS_INFO("slopeyz %.2f, theta %.2f",yzSlope,theta);
 
@@ -194,74 +216,88 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
 
 }
 
+bool rover::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
+{
+    ret_val.clear();
+    ret_val = detections_;
+    return !ret_val.empty();
+
+}
+
+int rover::getDetectionTries() const
+{
+    return detection_tries_;
+
+}
+
 void rover::lowerBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
-  pcl::PassThrough<pcl::PointXYZ> pass_x;
-  pass_x.setInputCloud(cloud);
-  pass_x.setFilterFieldName("x");
-  pass_x.setFilterLimits(lowerBox_pass_x_min,lowerBox_pass_x_max);
-  pass_x.filter(*cloud);
+    pcl::PassThrough<pcl::PointXYZ> pass_x;
+    pass_x.setInputCloud(cloud);
+    pass_x.setFilterFieldName("x");
+    pass_x.setFilterLimits(lowerBox_pass_x_min,lowerBox_pass_x_max);
+    pass_x.filter(*cloud);
 
-  pcl::PassThrough<pcl::PointXYZ> pass_y;
-  pass_y.setInputCloud(cloud);
-  pass_y.setFilterFieldName("y");
-  pass_y.setFilterLimits(lowerBox_pass_y_min,lowerBox_pass_y_max);
-  pass_y.filter(*cloud);
+    pcl::PassThrough<pcl::PointXYZ> pass_y;
+    pass_y.setInputCloud(cloud);
+    pass_y.setFilterFieldName("y");
+    pass_y.setFilterLimits(lowerBox_pass_y_min,lowerBox_pass_y_max);
+    pass_y.filter(*cloud);
 
-  pcl::PassThrough<pcl::PointXYZ> pass_z;
-  pass_z.setInputCloud(cloud);
-  pass_z.setFilterFieldName("z");
-  pass_z.setFilterLimits(lowerBox_pass_z_min,lowerBox_pass_z_max);
-  pass_z.filter(*cloud);
+    pcl::PassThrough<pcl::PointXYZ> pass_z;
+    pass_z.setInputCloud(cloud);
+    pass_z.setFilterFieldName("z");
+    pass_z.setFilterLimits(lowerBox_pass_z_min,lowerBox_pass_z_max);
+    pass_z.filter(*cloud);
 
 
 }
 
 void rover::upperBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
-  pcl::PassThrough<pcl::PointXYZ> pass_x;
-  pass_x.setInputCloud(cloud);
-  pass_x.setFilterFieldName("x");
-  pass_x.setFilterLimits(upperBox_pass_x_min,upperBox_pass_x_max);
-  pass_x.filter(*cloud);
+    pcl::PassThrough<pcl::PointXYZ> pass_x;
+    pass_x.setInputCloud(cloud);
+    pass_x.setFilterFieldName("x");
+    pass_x.setFilterLimits(upperBox_pass_x_min,upperBox_pass_x_max);
+    pass_x.filter(*cloud);
 
-  pcl::PassThrough<pcl::PointXYZ> pass_y;
-  pass_y.setInputCloud(cloud);
-  pass_y.setFilterFieldName("y");
-  pass_y.setFilterLimits(upperBox_pass_y_min,upperBox_pass_y_max);
-  pass_y.filter(*cloud);
+    pcl::PassThrough<pcl::PointXYZ> pass_y;
+    pass_y.setInputCloud(cloud);
+    pass_y.setFilterFieldName("y");
+    pass_y.setFilterLimits(upperBox_pass_y_min,upperBox_pass_y_max);
+    pass_y.filter(*cloud);
 
-  pcl::PassThrough<pcl::PointXYZ> pass_z;
-  pass_z.setInputCloud(cloud);
-  pass_z.setFilterFieldName("z");
-  pass_z.setFilterLimits(upperBox_pass_z_min,upperBox_pass_z_max);
-  pass_z.filter(*cloud);
+    pcl::PassThrough<pcl::PointXYZ> pass_z;
+    pass_z.setInputCloud(cloud);
+    pass_z.setFilterFieldName("z");
+    pass_z.setFilterLimits(upperBox_pass_z_min,upperBox_pass_z_max);
+    pass_z.filter(*cloud);
 
 
 }
 
 void rover::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
-  pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-  pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-  pcl::SACSegmentation<pcl::PointXYZ> seg;
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
 
-  seg.setOptimizeCoefficients (true);
-  seg.setModelType (pcl::SACMODEL_PLANE);
-  seg.setMethodType (pcl::SAC_RANSAC);
-  seg.setMaxIterations (100);
-  seg.setDistanceThreshold (0.01);
-  seg.setInputCloud (cloud);
-  seg.segment (*inliers, *coefficients);
+    seg.setOptimizeCoefficients (true);
+    seg.setModelType (pcl::SACMODEL_PLANE);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setMaxIterations (100);
+    seg.setDistanceThreshold (0.01);
+    seg.setInputCloud (cloud);
+    seg.segment (*inliers, *coefficients);
 
-  pcl::ExtractIndices<pcl::PointXYZ> extract;
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
 
-  extract.setInputCloud (cloud);
-  extract.setIndices (inliers);
-  extract.setNegative (false);
-  extract.filter (*cloud);
+    extract.setInputCloud (cloud);
+    extract.setIndices (inliers);
+    extract.setNegative (false);
+    extract.filter (*cloud);
 
-//  ROS_INFO("Point cloud representing the planar component = %d", (int)cloud->points.size());
+    //  ROS_INFO("Point cloud representing the planar component = %d", (int)cloud->points.size());
 
 }
 
@@ -270,49 +306,49 @@ void rover::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
 void rover::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out (new pcl::PointCloud<pcl::PointXYZ>);
 
-  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
-  tree->setInputCloud (cloud);
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+    tree->setInputCloud (cloud);
 
-  int cloudSize = (int)cloud->points.size();
+    int cloudSize = (int)cloud->points.size();
 
-//  ROS_INFO("Minimum Size = %d", (int)(0.2*cloudSize));
-//  ROS_INFO("Maximum Size = %d", cloudSize);
+    //  ROS_INFO("Minimum Size = %d", (int)(0.2*cloudSize));
+    //  ROS_INFO("Maximum Size = %d", cloudSize);
 
-  std::vector<pcl::PointIndices> cluster_indices;
-  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-  ec.setClusterTolerance (0.1);
-  ec.setMinClusterSize ((int)(0.3*cloudSize));
-  ec.setMaxClusterSize (cloudSize);
-  ec.setSearchMethod (tree);
-  ec.setInputCloud (cloud);
-  ec.extract (cluster_indices);
+    std::vector<pcl::PointIndices> cluster_indices;
+    pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+    ec.setClusterTolerance (0.1);
+    ec.setMinClusterSize ((int)(0.3*cloudSize));
+    ec.setMaxClusterSize (cloudSize);
+    ec.setSearchMethod (tree);
+    ec.setInputCloud (cloud);
+    ec.extract (cluster_indices);
 
-  int numClusters = cluster_indices.size();
+    int numClusters = cluster_indices.size();
 
-//  ROS_INFO("Number of Clusters  = %d", numClusters);
+    //  ROS_INFO("Number of Clusters  = %d", numClusters);
 
-  std::vector<pcl::PointIndices>::const_iterator it;
-  std::vector<int>::const_iterator pit;
+    std::vector<pcl::PointIndices>::const_iterator it;
+    std::vector<int>::const_iterator pit;
 
-  int index = 0;
-  double x = 0;
-  double y = 0;
-  double z = 0;
+    int index = 0;
+    double x = 0;
+    double y = 0;
+    double z = 0;
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr centroid_points (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr centroid_points (new pcl::PointCloud<pcl::PointXYZ>);
 
-  for(it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
+    for(it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
-      for(pit = it->indices.begin(); pit != it->indices.end(); pit++) {
-      cloud_cluster->points.push_back(cloud->points[*pit]);
-      }
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
+        for(pit = it->indices.begin(); pit != it->indices.end(); pit++) {
+            cloud_cluster->points.push_back(cloud->points[*pit]);
+        }
 
-//      ROS_INFO("Number of Points in the Cluster = %d", (int)cloud_cluster->points.size());
+        //      ROS_INFO("Number of Points in the Cluster = %d", (int)cloud_cluster->points.size());
 
-      *cloud = *cloud_cluster;
+        *cloud = *cloud_cluster;
 
     }
 
