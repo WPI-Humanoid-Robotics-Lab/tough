@@ -21,8 +21,8 @@
 #include "val_control/val_pelvis_navigation.h"
 #include "val_control/val_head_navigation.h"
 #include "val_control/val_gripper_control.h"
-//#include "val_task1/handle_grabber.h"
 #include "val_control/robot_state.h"
+#include "val_task2/val_rover_detection.h"
 
 using namespace decision_making;
 
@@ -43,6 +43,8 @@ class valTask2 {
     walkTracking* walk_track_;
     // panel detection object
     panel_detector* panel_detector_;
+    //Rover detector
+    rover* rover_detector_;
 
     // chest controller
     chestTrajectory* chest_controller_;
@@ -59,11 +61,14 @@ class valTask2 {
     unsigned int map_update_count_;
     void occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg);
 
+    // goal location for the panel
+    geometry_msgs::Pose2D panel_walk_goal_;
+    // goal location for the panel
+    geometry_msgs::Pose2D rover_walk_goal_;
+
     static valTask2* currentObject;
     public:
 
-    // goal location for the panel
-    geometry_msgs::Pose2D panel_walk_goal_;
 
     // default destructor
     ~valTask2();
@@ -88,5 +93,6 @@ class valTask2 {
     decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     geometry_msgs::Pose2D getPanelWalkGoal();
-    void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal_);
+    void setRoverWalkGoal(const geometry_msgs::Pose2D &rover_walk_goal);
+    void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal);
 };

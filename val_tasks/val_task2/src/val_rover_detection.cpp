@@ -1,4 +1,5 @@
 #include "val_task2/val_rover_detection.h"
+#include "val_common/val_common_names.h"
 
 #define lowerBox_pass_x_min  0.5
 #define lowerBox_pass_x_max  10.0
@@ -13,6 +14,20 @@
 #define upperBox_pass_y_max  10.0
 #define upperBox_pass_z_min  2.5
 #define upperBox_pass_z_max  3.0
+
+
+rover::rover(ros::NodeHandle nh)
+{
+  pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &rover::cloudCB, this);
+  pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_rover/cloud2", 1);
+
+  vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_rover/Position", 1 );
+}
+
+rover::~rover()
+{
+    pcl_sub.shutdown();
+}
 
 /*
  * NOTE: Applying voxel to the input cloud (refer periodic_snapshotter.cpp)is resulting in the incorrect rover position
@@ -70,7 +85,7 @@ void rover::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
     pcl::toROSMsg(*upperBoxCloud, output);
 
-    output.header.frame_id = "world";
+    output.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
 
     pcl_filtered_pub.publish(output);
 
