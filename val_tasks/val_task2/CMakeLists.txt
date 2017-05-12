@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   roscpp
   val_footstep
+  val_control
   perception_common
   pcl_conversions
   pcl_ros
@@ -42,7 +43,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES val_task2
- CATKIN_DEPENDS roscpp decision_making decision_making_parser dynamic_reconfigure val_footstep cv_bridge image_transport pcl_conversions pcl_ros sensor_msgs std_msgs
+ CATKIN_DEPENDS roscpp decision_making decision_making_parser dynamic_reconfigure val_footstep cv_bridge image_transport pcl_conversions pcl_ros sensor_msgs std_msgs val_control
  DEPENDS system_lib
  #DEPENDS system_lib
 )
@@ -58,34 +59,31 @@ include_directories(include
             src/val_task2.cpp
             src/val_task2SM.cpp
 	    src/button_detector.cpp
+            src/button_press.cpp
             src/solar_panel_grasp.cpp
             src/val_rover_detection.cpp
+	    src/cable_detector.cpp
  )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 
 
-add_executable(button_detector_node 
-	src/button_detector_node.cpp
+add_executable(rover_detection_node       src/val_rover_detection_node.cpp)
+target_link_libraries(rover_detection_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PROJECT_NAME} ${PCL_LIBRARY_DIRS})
+
+add_executable(button_detector_node  src/button_detector_node.cpp)
+
+target_link_libraries(button_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES}   ${PROJECT_NAME} ${PCL_LIBRARY_DIRS})
+
+add_executable(button_press_node        src/button_press_node.cpp)
+target_link_libraries(button_press_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES}   ${PROJECT_NAME})
+
+add_executable(cable_detector_node        src/cable_detector_node.cpp)
+target_link_libraries(cable_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES}   ${PROJECT_NAME}
 )
 
-target_link_libraries(button_detector_node ${catkin_LIBRARIES}
-   ${OpenCV_LIBRARIES}
-   ${PROJECT_NAME} ${PCL_LIBRARY_DIRS}
-)
-
-add_executable(rover_detection_node
-        src/val_rover_detection_node.cpp
-)
-
-target_link_libraries(rover_detection_node
-   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PROJECT_NAME} ${PCL_LIBRARY_DIRS})
-
-
-add_executable(val_task2_node
-            src/val_task2_node.cpp
-)
+add_executable(val_task2_node            src/val_task2_node.cpp)
 
 add_executable(path_subtraction src/path_subtraction.cpp)
 target_link_libraries(path_subtraction  ${catkin_LIBRARIES})

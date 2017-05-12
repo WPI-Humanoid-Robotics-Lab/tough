@@ -30,6 +30,8 @@ class button_detector
     const int hsvLowRed_[6] = {0, 5, 178, 255, 51, 149}; // lh, uh, ls, us, lv, uv
     const int hsvHighRed_[6] = {170, 180, 204, 255, 140, 191};
 
+    std::vector<cv::Point> convexHulls_;
+
     int frameID_ = 0;
 
     ros::NodeHandle nh_;
@@ -46,6 +48,7 @@ public:
     bool getButtonLocation(geometry_msgs::Point &buttonLoc);
     bool findButtons(geometry_msgs::Point&);
     button_detector(ros::NodeHandle nh);
+    ~button_detector();
 
 };
 

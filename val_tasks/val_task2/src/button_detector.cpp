@@ -1,5 +1,6 @@
 #include <val_task2/button_detector.h>
 #include <visualization_msgs/Marker.h>
+#include <pcl/common/centroid.h>
 #include "val_common/val_common_names.h"
 
 #define DISABLE_DRAWINGS true
@@ -32,11 +33,13 @@ size_t button_detector::findMaxContour(const std::vector<std::vector<cv::Point> 
 {
     int largest_area = 0;
     int largest_contour_index = 0;
+    std::vector<std::vector<cv::Point>> hull(contours.size());
 
-    for( int i = 0; i< contours.size(); i++ )
+    for( size_t i = 0; i< contours.size(); i++ )
     {
+        cv::convexHull(contours[i], hull[i], false);
         //  Find the area of contour
-        double area = cv::contourArea( contours[i],false);
+        double area = cv::contourArea( hull[i]);
 
         if(area > largest_area)
         {
@@ -45,6 +48,9 @@ size_t button_detector::findMaxContour(const std::vector<std::vector<cv::Point> 
             largest_contour_index = i;
         }
     }
+
+    convexHulls_ = hull[largest_contour_index];
+
     return largest_contour_index;
 }
 
@@ -52,7 +58,6 @@ bool button_detector::getButtonLocation(geometry_msgs::Point& buttonLoc)
 {
 
     bool foundButton = false;
-    pcl::PointXYZRGB pclPoint;
     src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
     src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
     tf::TransformListener listener;
@@ -67,31 +72,41 @@ bool button_detector::getButtonLocation(geometry_msgs::Point& buttonLoc)
     // Find contours
     cv::findContours(outImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
-    pclPoint = pcl::PointXYZRGB();
 
     if(!contours.empty()) //avoid seg fault at runtime by checking that the contours exist
     {
-        cv::Moments moment = cv::moments((cv::Mat)contours[findMaxContour(contours)]);
-
-        if (moment.m00)
-        {
-            cv::Point2f point = cv::Point2f(moment.m10/moment.m00,moment.m01/moment.m00);
-
-            ROS_DEBUG("m00:%.2f, m10:%.2f, m01:%.2f",moment.m00, moment.m10, moment.m01);
-            ROS_DEBUG("x:%d, y:%d", int(point.x), int(point.y));
-
-            buttonLoc.x = int (point.x);
-            buttonLoc.y = int (point.y);
-            foundButton = true;
-        }
+        findMaxContour(contours);
+        foundButton = true;
     }
 
+    cv::Mat hullPoints = cv::Mat::zeros(current_image_.size(), CV_8UC1);
+    cv::fillConvexPoly(hullPoints, convexHulls_,cv::Scalar(255));
+    cv::Mat nonZeroCoordinates;
+    cv::erode(hullPoints, hullPoints, cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(5,5)));
+    cv::findNonZero(hullPoints, nonZeroCoordinates);
+    if (nonZeroCoordinates.total() < 10){
+        return false;
+    }
+
+    pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
+
+    for (int k = 0; k < nonZeroCoordinates.total(); k++ ) {
+        pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
+
+        if (temp_pclPoint.z > -2.0)
+        {
+            currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
+
+        }
+    }
+    Eigen::Vector4f cloudCentroid;
+    //  Calculating the Centroid of the handle Point cloud
+    pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
     if( foundButton )
     {
-        pclPoint = organizedCloud->at(buttonLoc.x,buttonLoc.y);
-        geom_point.point.x = pclPoint.x;
-        geom_point.point.y = pclPoint.y;
-        geom_point.point.z = pclPoint.z;
+        geom_point.point.x = cloudCentroid(0);
+        geom_point.point.y = cloudCentroid(1);
+        geom_point.point.z = cloudCentroid(2);
         geom_point.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
         try
         {
@@ -103,6 +118,10 @@ bool button_detector::getButtonLocation(geometry_msgs::Point& buttonLoc)
             return false;
         }
     }
+    buttonLoc.x = double (geom_point.point.x);
+    buttonLoc.y = double (geom_point.point.y);
+    buttonLoc.z = double (geom_point.point.z);
+    //ROS_INFO_STREAM(buttonLoc.x<<"\t"<<buttonLoc.y<<"\t"<<buttonLoc.z<<std::endl);
 
     visualize_point(geom_point.point);
 
@@ -158,4 +177,9 @@ void button_detector::visualize_point(const geometry_msgs::Point &point){
     marker.color.b = 0.0;
 
     markers_.markers.push_back(marker);
+}
+
+button_detector::~button_detector()
+{
+
 }
