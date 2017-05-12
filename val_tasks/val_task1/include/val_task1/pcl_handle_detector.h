@@ -56,6 +56,7 @@ class pcl_handle_detector
 
 public:
   pcl_handle_detector(ros::NodeHandle &nh, float panel_offset,geometry_msgs::Pose panel_loc_);
+  ~pcl_handle_detector();
 
 
 };

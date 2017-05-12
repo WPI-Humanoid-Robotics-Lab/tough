@@ -11,6 +11,14 @@ pcl_handle_detector::pcl_handle_detector(ros::NodeHandle &nh, float panel_offset
   handle_loc_.clear();
 
 }
+
+pcl_handle_detector::~pcl_handle_detector()
+{
+    if(robot_state_ != nullptr)         delete robot_state_;
+    pcl_sub_.shutdown();
+}
+
+
 void pcl_handle_detector::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 {
   if (input->data.empty())
@@ -23,7 +31,7 @@ void pcl_handle_detector::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
   sensor_msgs::PointCloud2 output;
 
   pcl::fromROSMsg(*input, *cloud);
-  ROS_INFO("Receiving cloud size 4:  %d",(int)cloud->points.size());
+  ROS_INFO("Receiving cloud size:  %d",(int)cloud->points.size());
 
 //  pcl::transformPointCloud(*cloud,*cloud,);
 //  transcloud(cloud);
@@ -35,7 +43,9 @@ void pcl_handle_detector::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 
   pcl::toROSMsg(*cloud, output);
   pcl_filtered_pub_.publish(output);
-  ROS_INFO("publshing cloud size 1 24:  %d",(int)cloud->points.size());
+  ROS_INFO("publshing cloud size:  %d",(int)cloud->points.size());
+  ros::Time endTime = ros::Time::now();
+  std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
 
 }
 
