@@ -11,7 +11,7 @@ SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
 
-find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
+#find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(PCL REQUIRED)
 
@@ -142,6 +142,10 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_library(${PROJECT_NAME}
+         src/val_solar_detection.cpp
+)
+
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/val_rover_detection.cpp
@@ -171,7 +175,7 @@ include_directories(
  target_link_libraries(${PROJECT_NAME}_node
    ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
-   ${PCL_LIBRARIES}
+   ${PCL_LIBRARIES} ${PROJECT_NAME}
  )
 #############
 ## Install ##

@@ -44,12 +44,13 @@ private:
   ros::Subscriber pcl_sub;
 
   ros::Publisher pcl_filtered_pub;
+  ros::Publisher rover_cloud_pub;
 
 
   ros::Publisher vis_pub;
 
   RobotStateInformer* current_state_;
-  void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
+  void cloudCB(const sensor_msgs::PointCloud2::Ptr &input);
 
   void PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
@@ -57,6 +58,7 @@ private:
   void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
 
     void roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+    geometry_msgs::Pose rover_loc_;
 
   /*
   void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
@@ -73,16 +75,6 @@ private:
 public:
   // Constructor
 
-  plane(ros::NodeHandle nh)
-  {
-
-
-    current_state_ = RobotStateInformer::getRobotStateInformer(nh);
-    pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &plane::cloudCB, this);
-//    pcl_sub =  nh.subscribe("/field/octomap_point_cloud_centers", 10, &plane::cloudCB, this);
-    pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_plane/cloud2", 1);
-    vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_solar/visualization_marker", 1 );
-
-  }
+  plane(ros::NodeHandle nh, geometry_msgs::Pose rover_loc);
 
 };
