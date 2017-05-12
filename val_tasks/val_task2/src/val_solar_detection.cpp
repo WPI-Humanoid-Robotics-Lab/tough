@@ -1,4 +1,4 @@
-#include "val_solar_detection/val_solar_detection.h"
+#include "val_task2/val_solar_detection.h"
 
 plane::plane(ros::NodeHandle nh, geometry_msgs::Pose rover_loc)
 {

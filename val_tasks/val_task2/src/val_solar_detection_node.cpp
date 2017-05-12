@@ -1,4 +1,4 @@
-#include "val_solar_detection/val_solar_detection.h"
+#include "val_task2/val_solar_detection.h"
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "solar_plane_detection");

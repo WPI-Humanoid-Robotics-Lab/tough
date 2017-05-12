@@ -66,6 +66,7 @@ include_directories(include
             src/val_rover_detection.cpp
 	    src/cable_detector.cpp
             src/plug_detector.cpp
+            src/val_solar_detection.cpp
  )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -75,8 +76,11 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 add_executable(rover_detection_node       src/val_rover_detection_node.cpp)
 target_link_libraries(rover_detection_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PROJECT_NAME} ${PCL_LIBRARY_DIRS} ${PROJECT_NAME})
 
-add_executable(button_detector_node  src/button_detector_node.cpp)
 
+add_executable(solar_detection_node       src/val_solar_detection_node.cpp)
+target_link_libraries(solar_detection_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PROJECT_NAME} ${PCL_LIBRARY_DIRS} ${PROJECT_NAME})
+
+add_executable(button_detector_node  src/button_detector_node.cpp)
 target_link_libraries(button_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES}   ${PROJECT_NAME} ${PCL_LIBRARY_DIRS})
 
 add_executable(button_press_node        src/button_press_node.cpp)
