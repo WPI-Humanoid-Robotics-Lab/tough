@@ -43,7 +43,7 @@ valTask1::valTask1(ros::NodeHandle nh):
     // panel detection
     panel_detector_     = nullptr;
     finish_box_detector_= nullptr;
-    handle_detector_    = new handle_detector(nh_);
+    handle_detector_    = new HandleDetector(nh_);
     handle_grabber_     = new handle_grabber(nh_);
     move_handle_        = new move_handle(nh_);
 
