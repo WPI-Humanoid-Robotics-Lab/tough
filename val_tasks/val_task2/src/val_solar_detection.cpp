@@ -30,12 +30,12 @@ void plane::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
     pcl::fromROSMsg(*input, *cloud);
 
    roverremove(cloud);
-    PassThroughFilter(cloud);
+    //PassThroughFilter(cloud);
 
     ROS_INFO("pub %d",(int)cloud->points.size());
 
-    planeDetection(cloud);
-    getPosition(cloud,location);
+    //planeDetection(cloud);
+    //getPosition(cloud,location);
     pcl::toROSMsg(*cloud,output);
     output.header.frame_id="world";
     pcl_filtered_pub.publish(output);
@@ -52,7 +52,8 @@ void plane::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     tf::Matrix3x3 rotation(quat);
     tfScalar roll,pitch,yaw;
     rotation.getRPY(roll,pitch,yaw);
-    double theta = yaw;
+
+    double theta = yaw-1.5708;
 
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;
@@ -66,7 +67,7 @@ void plane::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     Eigen::Vector3f boxTranslatation;
          boxTranslatation[0]=rover_loc_.position.x;
          boxTranslatation[1]=rover_loc_.position.y;
-         boxTranslatation[2]=0;
+         boxTranslatation[2]=0.1;  // to remove the points belonging to the walkway
     Eigen::Vector3f boxRotation;
          boxRotation[0]=0;  // rotation around x-axis
          boxRotation[1]=0;  // rotation around y-axis
@@ -83,18 +84,31 @@ void plane::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     box_filter.setMax(maxPoint);
     box_filter.setTranslation(boxTranslatation);
     box_filter.setRotation(boxRotation);
-    box_filter.setNegative(true);
-    box_filter.filter(*cloud);
+
 
 
     sensor_msgs::PointCloud2 rover_output;
     box_filter.setNegative(false);
     box_filter.filter(rover_cloud);
+
+    // brute force
+    for (auto i = rover_cloud.points.begin() ;i!=rover_cloud.points.end();++i)
+    {
+        (i)->z = 0;
+    }
+
+
+
     sensor_msgs::PointCloud2 output;
     pcl::toROSMsg(rover_cloud,rover_output);
+    ROS_INFO("rover cloud size %d",(int)rover_cloud.points.size());
     output.header.frame_id="world";
     rover_cloud_pub.publish(rover_output);
 
+
+
+    box_filter.setNegative(true);
+    box_filter.filter(*cloud);
 //    box_filter.filter(indices);
 
 
