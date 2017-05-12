@@ -6,13 +6,13 @@
 
 #define DISABLE_DRAWINGS true
 
-handle_detector::handle_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
+HandleDetector::HandleDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
     ms_sensor_.giveQMatrix(qMatrix_);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_handles",1);
 }
 
-void handle_detector::showImage(cv::Mat image, std::string caption)
+void HandleDetector::showImage(cv::Mat image, std::string caption)
 {
 #ifdef DISABLE_DRAWINGS
     return;
@@ -22,19 +22,19 @@ void handle_detector::showImage(cv::Mat image, std::string caption)
     cv::waitKey(0);
 }
 
-inline void handle_detector::colorSegment(const cv::Mat &imgHSV, const int hsv[6], cv::Mat &outImg)
+inline void HandleDetector::colorSegment(const cv::Mat &imgHSV, const int hsv[6], cv::Mat &outImg)
 {
     cv::inRange(imgHSV,cv::Scalar(hsv[0],hsv[2],hsv[4]), cv::Scalar(hsv[1],hsv[3],hsv[5]),outImg);
 }
 
-void handle_detector::doMorphology (cv::Mat &image)
+void HandleDetector::doMorphology (cv::Mat &image)
 {
     cv::dilate(image, image, cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(15,15)));
     cv::dilate(image, image, cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(10,10)));
 }
 
 
-void handle_detector::findMaxContour(const cv::Mat image, cv::Rect &roi)
+void HandleDetector::findMaxContour(const cv::Mat image, cv::Rect &roi)
 {
     cv::Mat canny_output;
     std::vector<std::vector<cv::Point> > contours;
@@ -85,7 +85,7 @@ void handle_detector::findMaxContour(const cv::Mat image, cv::Rect &roi)
     roi = boundRect[largest_contour_index];
 }
 
-bool handle_detector::findAllContours (const cv::Mat &image)
+bool HandleDetector::findAllContours (const cv::Mat &image)
 {
     cv::Mat canny_output;
     std::vector<std::vector<cv::Point>> contours;
@@ -134,7 +134,7 @@ bool handle_detector::findAllContours (const cv::Mat &image)
     return false;
 }
 
-bool handle_detector::getHandleLocation(std::vector<geometry_msgs::Point>& handleLocs)
+bool HandleDetector::getHandleLocation(std::vector<geometry_msgs::Point>& handleLocs)
 {
 
     bool foundButton = false;
@@ -216,12 +216,12 @@ bool handle_detector::getHandleLocation(std::vector<geometry_msgs::Point>& handl
 
 }
 
-void handle_detector::getReducedImage(cv::Mat &image, const cv::Rect &roi)
+void HandleDetector::getReducedImage(cv::Mat &image, const cv::Rect &roi)
 {
     image = image(roi);
 }
 
-bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
+bool HandleDetector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
 {
     buttonCenters_.clear();
     rectCenter_.clear();
@@ -300,7 +300,7 @@ bool handle_detector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
 
 }
 
-void handle_detector::visualize_point(geometry_msgs::Point point){
+void HandleDetector::visualize_point(geometry_msgs::Point point){
 
     std::cout<< "goal origin :\n"<< point << std::endl;
     static int id = 0;

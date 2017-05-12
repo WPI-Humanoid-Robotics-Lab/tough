@@ -6,7 +6,7 @@ int main(int argc, char** argv){
 
     ros::NodeHandle nh;
 
-    rover obj(nh);
+    RoverDetector obj(nh);
 
     ros::Rate loop(1);
 

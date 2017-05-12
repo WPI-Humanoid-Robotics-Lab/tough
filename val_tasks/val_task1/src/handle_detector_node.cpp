@@ -7,7 +7,7 @@ int main(int argc, char** argv)
     int numIterations = 0;
     bool foundButton = false;
     std::vector<geometry_msgs::Point> handleLocs;
-    handle_detector h1(nh);
+    HandleDetector h1(nh);
 
     while (numIterations <200)
     {

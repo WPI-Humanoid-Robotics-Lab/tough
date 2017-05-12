@@ -143,7 +143,7 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
     ROS_INFO_STREAM("executing " << name);
 
     if(panel_detector_ == nullptr) {
-        panel_detector_ = new panel_detector(nh_, DETECTOR_TYPE::HANDLE_PANEL_COARSE);
+        panel_detector_ = new PanelDetector(nh_, DETECTOR_TYPE::HANDLE_PANEL_COARSE);
     }
 
     static int fail_count = 0;
@@ -327,7 +327,7 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
     ROS_INFO_STREAM("executing " << name);
 
     if(panel_detector_ == nullptr) {
-        panel_detector_ = new panel_detector(nh_, DETECTOR_TYPE::HANDLE_PANEL_FINE);
+        panel_detector_ = new PanelDetector(nh_, DETECTOR_TYPE::HANDLE_PANEL_FINE);
         ros::Duration(0.2).sleep();
     }
 

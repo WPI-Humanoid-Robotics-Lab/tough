@@ -48,7 +48,7 @@ class valTask1 {
     walkTracking* walk_track_;
 
     // panel detection object
-    panel_detector* panel_detector_;
+    PanelDetector* panel_detector_;
     //handle detector
     handle_detector* handle_detector_;
     //moving handle

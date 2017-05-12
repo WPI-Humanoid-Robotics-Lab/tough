@@ -42,9 +42,9 @@ class valTask2 {
     // object for tracking robot walk
     walkTracking* walk_track_;
     // panel detection object
-    panel_detector* panel_detector_;
+    PanelDetector* panel_detector_;
     //Rover detector
-    rover* rover_detector_;
+    RoverDetector* rover_detector_;
 
     // chest controller
     chestTrajectory* chest_controller_;
@@ -65,6 +65,9 @@ class valTask2 {
     geometry_msgs::Pose2D panel_walk_goal_;
     // goal location for the panel
     geometry_msgs::Pose2D rover_walk_goal_;
+
+    void initControllers();
+    void initDetectors();
 
     static valTask2* currentObject;
     public:
