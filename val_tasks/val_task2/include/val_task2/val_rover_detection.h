@@ -46,6 +46,10 @@ private:
 
   ros::Publisher vis_plane_pub;
 
+  std::vector<geometry_msgs::Pose> detections_;
+
+  int detection_tries_;
+
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
 
   void lowerBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
@@ -62,12 +66,10 @@ public:
 
   // Constructor
 
-  rover(ros::NodeHandle nh)
-  {
-    pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &rover::cloudCB, this);
-    pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_rover/cloud2", 1);
+  rover(ros::NodeHandle nh);
+  ~rover();
+  bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
 
-    vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_rover/Position", 1 );
-  }
+  int getDetectionTries() const;
 
 };

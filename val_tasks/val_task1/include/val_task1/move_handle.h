@@ -13,6 +13,8 @@
 #include <vector>
 #include <stdio.h>      /* printf */
 #include <iostream>
+#include <tf/transform_listener.h>
+
 
 
 class move_handle{
@@ -20,13 +22,15 @@ class move_handle{
   ros::Publisher array_pub;
   ros::NodeHandle nh_;
   RobotStateInformer* robot_state_;
-  armTrajectory *right_armTraj,*left_armTraj;
+  armTrajectory *armTraj;
+
 
 public:
   move_handle (ros::NodeHandle);
-  void follow_path(std::vector<geometry_msgs::Pose> &, armSide, geometry_msgs::Pose);
+  void follow_path(std::vector<geometry_msgs::Pose> &, armSide, geometry_msgs::Pose,std::vector<double> );
   void createCircle(geometry_msgs::Point center,int side, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points);
   void visulatize(std::vector<geometry_msgs::Pose> &);
+private:
   std::vector<double> linspace(double , double , int );
 
 };
