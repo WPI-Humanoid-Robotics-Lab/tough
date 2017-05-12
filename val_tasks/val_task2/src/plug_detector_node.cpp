@@ -2,7 +2,7 @@
 
 int main(int argc, char** argv)
 {
-    ros::init (argc,argv,"findCableDetector");
+    ros::init (argc,argv,"findPlugDetector");
     ros::NodeHandle nh;
     int numIterations = 0;
     bool foundPlug = false;
@@ -12,7 +12,7 @@ int main(int argc, char** argv)
     while (!foundPlug && numIterations < 20)
     {
         foundPlug = p1.findPlug(PlugLoc);
-        //ROS_INFO(foundPlug ? "***** Cable detected" : "xxxxx Cable not detected");
+        //ROS_INFO(foundPlug ? "***** Plug detected" : "xxxxx Plug not detected");
         numIterations++;
     }
 
