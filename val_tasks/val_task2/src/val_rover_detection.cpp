@@ -1,4 +1,4 @@
-#include "val_rover_detection/val_rover_detection_node.h"
+#include "val_task2/val_rover_detection.h"
 
 #define lowerBox_pass_x_min  0.5
 #define lowerBox_pass_x_max  10.0
@@ -318,19 +318,4 @@ void rover::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
     // ROS_WARN(" %d ", (int)centroid_points->points.size());
 
-}
-
-int main(int argc, char** argv){
-
-  ros::init(argc, argv, "rover_detection");
-
-  ros::NodeHandle nh;
-
-  rover obj(nh);
-
-  while(ros::ok()){
-
-    ros::spinOnce();
-  }
-  return 0;
 }
