@@ -14,21 +14,15 @@
 
 plane::plane(ros::NodeHandle nh, geometry_msgs::Pose rover_loc)
 {
-
-
-  current_state_ = RobotStateInformer::getRobotStateInformer(nh);
-
-
   pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &plane::cloudCB, this);
-
-//    pcl_sub =  nh.subscribe("/field/octomap_point_cloud_centers", 10, &plane::cloudCB, this);
   pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_plane/cloud2", 1);
   vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_solar/visualization_marker", 1 );
   rover_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/block_map",1);
 
   rover_loc_ = rover_loc;
   current_state_ = RobotStateInformer::getRobotStateInformer(nh);
-
+  detection_tries_ = 0;
+  detections_.clear();
 }
 
 
@@ -48,7 +42,8 @@ void plane::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
     ROS_INFO("pub %d",(int)cloud->points.size());
 
     planeDetection(cloud);
-    //getPosition(cloud,location);
+    getPosition(cloud,location);
+
     pcl::toROSMsg(*cloud,output);
     output.header.frame_id="world";
     pcl_filtered_pub.publish(output);
@@ -66,7 +61,8 @@ void plane::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     tfScalar roll,pitch,yaw;
     rotation.getRPY(roll,pitch,yaw);
 
-    double theta = yaw-1.5708;
+//    double theta = yaw-1.5708; // rover right of walkway
+    double theta = yaw+1.5708;   //left of walkway
 
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;
@@ -133,6 +129,8 @@ void plane::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 
     float min_x,min_y,max_x,max_y;
     geometry_msgs::Point pt_in,pt_out;
+
+    // transforming pts from pelvis to world frame
     pt_in.x = solar_pass_x_min;
     pt_in.y =  0;
     pt_in.z =  0;
@@ -271,7 +269,7 @@ void plane::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msg
 
     ROS_INFO("The Orientation is given by := %0.2f", theta);
 
-    double offset = -1.2;
+    double offset = 1.4;
     pose.position.x = pose.position.x - (offset*cos(theta));
     pose.position.y = pose.position.y - (offset*sin(theta));
     pose.position.z = 0.0;
