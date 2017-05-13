@@ -201,7 +201,7 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
         geometry_msgs::Point finalPoint, intermPoint;
 
         current_state_->transformPoint(goal,intermPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-        intermPoint.x += 0.2;
+//        intermPoint.x += 0.15;
         intermPoint.z += 0.1;
 
         //transform that point back to world frame
@@ -221,7 +221,7 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
 
 
         current_state_->transformPoint(goal,finalPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-        finalPoint.x += 0.2;
+//        finalPoint.x += 0.15;
         finalPoint.z -= 0.15;
 
         //transform that point back to world frame
