@@ -1,5 +1,5 @@
 #include "val_task2/val_solar_detection.h"
-#define solar_pass_x_min -10.0
+#define solar_pass_x_min -5.0
 #define solar_pass_x_max  10.0
 #define solar_pass_y_min -10.0
 #define solar_pass_y_max  10.0
@@ -212,7 +212,7 @@ void plane::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
   seg.setInputCloud (cloud);
   seg.segment (*inliers, *coefficients);
   double ak = pow(coefficients->values[0],2)+pow(coefficients->values[1],2)+pow(coefficients->values[2],2);
-  double test = coefficients->values[2]/pow(ak,0.5);
+  double test = coefficients->values[0]/pow(ak,0.5);
   ROS_WARN_STREAM("cos angle :"<<test<<" acos "<<acos(test));
 
   pcl::ExtractIndices<pcl::PointXYZ> extract;
