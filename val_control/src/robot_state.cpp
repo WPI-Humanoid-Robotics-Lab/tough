@@ -238,3 +238,10 @@ bool RobotStateInformer::transformPoint(const geometry_msgs::Point &pt_in, geome
     pt_out = stmp_pt_out.point;
     return true;
 }
+
+
+bool RobotStateInformer::isHandleInGrasp(armSide side)
+{
+    // fill this in :)
+    return true;
+}

@@ -14,7 +14,7 @@ chestTrajectory::~chestTrajectory()
 {
 }
 
-void chestTrajectory::controlChest(float roll , float pitch , float yaw)
+void chestTrajectory::controlChest(float roll , float pitch , float yaw, float time)
 {
     ihmc_msgs::ChestTrajectoryRosMessage msg;
     ihmc_msgs::SO3TrajectoryPointRosMessage data;
@@ -22,7 +22,7 @@ void chestTrajectory::controlChest(float roll , float pitch , float yaw)
     pitch = pitch*TO_RADIANS;
     yaw   =   yaw*TO_RADIANS;
 
-    data.time = 0.0;
+    data.time = time;
     tf::Quaternion quatInPelvisFrame;
     quatInPelvisFrame.setRPY(roll,pitch,yaw);
 

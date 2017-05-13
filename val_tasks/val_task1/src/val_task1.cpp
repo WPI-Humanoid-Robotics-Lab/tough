@@ -490,20 +490,45 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
 {
     ROS_INFO_STREAM("executing " << name);
 
-    // move the chest, so we get maximum manipulability
-    chest_controller_->controlChest(0, 10, 40);
+    /*
+     * Executing -> when grasp_handles is called
+     * Retry -> grasp handles is called but it failed
+     * Failed -> retry failed 5 times
+     * Success -> grasp is successful
+     */
+    static bool executing = false;
+    static int retry_count = 0;
 
-    // grasp the handle
-    //1 - right
-    //3 - left
-    // sleep before grasping (to account for sway coming with ches motion)
-    ros::Duration(1).sleep();
-    geometry_msgs::Pose pose;
-    robot_state_->getCurrentPose("/rightPalm", pose);
-    handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[1]);
+    if(!executing){
+        ROS_INFO("Executing the grasp handle command");
+        executing = true;
+        // move the chest, so we get maximum manipulability
+        chest_controller_->controlChest(0, 10, 40);
 
-    ///@todo: check to verify if the grasp is sucess
-    eventQueue.riseEvent("/GRASPED_PITCH_HANDLE");
+        // grasp the handle
+        //1 - right
+        //3 - left
+        // sleep before grasping (to account for sway coming with ches motion)
+        ros::Duration(1).sleep();
+        geometry_msgs::Pose pose;
+        robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF, pose);
+        handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[1]);
+        eventQueue.riseEvent("/GRASP_PITCH_HANDLE_EXECUTING");
+    }
+    else if (robot_state_->isHandleInGrasp(armSide::RIGHT)){
+        ROS_INFO("Grasp is successful");
+        eventQueue.riseEvent("/GRASPED_PITCH_HANDLE");
+    }
+    else if (retry_count < 5 ){
+        ROS_INFO("Grasp Failed, retrying");
+        executing = false;
+        ++retry_count;
+        eventQueue.riseEvent("/GRASP_PITCH_HANDLE_RETRY");
+    }
+    else {
+        ROS_INFO("Failed all conditions. state error");
+        eventQueue.riseEvent("/GRASP_PITCH_HANDLE_FAILED");
+    }
 
     // generate the event
     while(!preemptiveWait(1000, eventQueue)){
@@ -521,17 +546,11 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     ros::Duration(1).sleep();
     pelvis_controller_->controlPelvisHeight(0.8);
 
-    //    if(move_handle_ == nullptr) {
-    //        move_handle_ = new move_handle(nh_);
-    //    }
-    //    //move_handle_->createCircle(handle_loc_[0], 1, panel_coeff_, rightWaypoints);
-    //    move_handle_->createCircle(handle_loc_[0], handle_loc_[1], 1, panel_coeff_, rightWaypoints);
-
     // generate the way points in cartersian space
     std::vector<geometry_msgs::Pose> waypoints;
     //desired pose (i.e. the grab pose)
     geometry_msgs::Pose grab_pose;
-    robot_state_->getCurrentPose("/rightMiddleFingerPitch1Link",grab_pose);
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME,grab_pose);
     task1_utils_->getCircle3D(handle_loc_[0], handle_loc_[1], grab_pose, panel_coeff_, waypoints, 0.125, 10);
 
     ///@todo: remove the visulaisation
@@ -543,9 +562,6 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
     // execute the trajectory
     arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
-
-    //    if(move_handle_ != nullptr) delete move_handle_;
-    //    move_handle_ = nullptr;
 
     //eventQueue.riseEvent("/PITCH_CORRECTION_SUCESSFUL");
 

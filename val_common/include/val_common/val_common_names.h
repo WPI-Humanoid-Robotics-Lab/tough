@@ -17,6 +17,9 @@ namespace VAL_COMMON_NAMES
     static const std::string R_PALM_TF = "/rightPalm";
     static const std::string L_PALM_TF = "/leftPalm";
 
+    static const std::string R_END_EFFECTOR_FRAME = "/rightMiddleFingerPitch1Link";
+    static const std::string L_END_EFFECTOR_FRAME = "/leftMiddleFingerPitch1Link";
+
     /* valkyrie Torso*/
     static const std::string PELVIS_TF = "/pelvis";
     static const std::string TORSO_TF = "/torso";
