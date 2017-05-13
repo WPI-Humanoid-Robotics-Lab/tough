@@ -49,7 +49,7 @@ private:
 
   ros::Publisher vis_pub;
 
-  RobotStateInformer* current_state_;
+  RobotStateInformer* robot_state_;
 
   geometry_msgs::Pose rover_loc_;
   std::vector<geometry_msgs::Pose> detections_;
@@ -82,5 +82,10 @@ public:
   // Constructor
 
   plane(ros::NodeHandle nh, geometry_msgs::Pose rover_loc);
+  ~plane();
+  bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
+
+  int getDetectionTries() const;
+
 
 };

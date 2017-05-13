@@ -16,9 +16,16 @@ int main(int argc, char** argv){
 
   plane obj(nh,rover_loc);
 
+  ros::Rate loop(1);
   while(ros::ok()){
-
-    ros::spinOnce();
+      std::vector<geometry_msgs::Pose> poses;
+      if(obj.getDetections(poses))
+          for (size_t i = 0; i < poses.size(); ++i){
+              //ROS_INFO_STREAM("x : "<<poses[i].position.x<<"y : "<<poses[i].position.y<<"z : "<<poses[i].position.z);
+              //ROS_INFO_STREAM("x : "<<poses[i].orientation.x<<"y : "<<poses[i].orientation.y<<"z : "<<poses[i].orientation.z<<" w: "<<poses[i].orientation.w);
+          }
+      ros::spinOnce();
+      loop.sleep();
   }
   return 0;
 }

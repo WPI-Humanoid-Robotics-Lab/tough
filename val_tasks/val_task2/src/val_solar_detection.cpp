@@ -20,14 +20,39 @@ plane::plane(ros::NodeHandle nh, geometry_msgs::Pose rover_loc)
   rover_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/block_map",1);
 
   rover_loc_ = rover_loc;
-  current_state_ = RobotStateInformer::getRobotStateInformer(nh);
+  robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
   detection_tries_ = 0;
   detections_.clear();
+}
+plane::~plane()
+{
+      if(robot_state_ != nullptr)         delete robot_state_;
+      pcl_sub.shutdown();
+}
+
+bool plane::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
+{
+    ret_val.clear();
+    ret_val = detections_;
+    return !ret_val.empty();
+
+}
+int plane::getDetectionTries() const
+{
+    return detection_tries_;
+
 }
 
 
 void plane::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 {
+
+    if (input->data.empty()){
+        return;
+    }
+    ++detection_tries_;
+
+
     geometry_msgs::Pose location;
     ros::Time startTime = ros::Time::now();
 
@@ -39,21 +64,23 @@ void plane::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
    roverremove(cloud);
    PassThroughFilter(cloud);
 
-    ROS_INFO("pub %d",(int)cloud->points.size());
+//    ROS_INFO("pub %d",(int)cloud->points.size());
 
     planeDetection(cloud);
     getPosition(cloud,location);
+    detections_.push_back(location);
 
     pcl::toROSMsg(*cloud,output);
     output.header.frame_id="world";
     pcl_filtered_pub.publish(output);
 
     ros::Time endTime = ros::Time::now();
+    std::cout << "Number of detections               = " << detections_.size() << std::endl;
+    std::cout << "Number of tries                    = " << detection_tries_ << std::endl;
     std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
 
-
-
 }
+
 void plane::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
     tf::Quaternion quat(rover_loc_.orientation.x,rover_loc_.orientation.y,rover_loc_.orientation.z,rover_loc_.orientation.w);
@@ -106,14 +133,11 @@ void plane::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
         (i)->z = 0;
     }
 
-
-
     sensor_msgs::PointCloud2 output;
     pcl::toROSMsg(rover_cloud,rover_output);
-    ROS_INFO("rover cloud size %d",(int)rover_cloud.points.size());
+    //ROS_INFO("rover cloud size %d",(int)rover_cloud.points.size());
     output.header.frame_id="world";
     rover_cloud_pub.publish(rover_output);
-
 
 
     box_filter.setNegative(true);
@@ -134,22 +158,22 @@ void plane::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     pt_in.x = solar_pass_x_min;
     pt_in.y =  0;
     pt_in.z =  0;
-    current_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
     min_x = pt_out.x;
     pt_in.x = solar_pass_x_max;
     pt_in.y =  0;
     pt_in.z =  0;
-    current_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
     max_x = pt_out.x;
     pt_in.x =  0;
     pt_in.y = solar_pass_y_min;
     pt_in.z =  0;
-    current_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
     min_y = pt_out.y;
     pt_in.x =  0;
     pt_in.y = solar_pass_y_max;
     pt_in.z =  0;
-    current_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
     max_y = pt_out.y;
 
 
@@ -187,7 +211,9 @@ void plane::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
   seg.setDistanceThreshold (0.008);
   seg.setInputCloud (cloud);
   seg.segment (*inliers, *coefficients);
-
+  double ak = pow(coefficients->values[0],2)+pow(coefficients->values[1],2)+pow(coefficients->values[2],2);
+  double test = coefficients->values[2]/pow(ak,0.5);
+  ROS_WARN_STREAM("cos angle :"<<test<<" acos "<<acos(test));
 
   pcl::ExtractIndices<pcl::PointXYZ> extract;
 
@@ -246,7 +272,9 @@ void plane::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msg
     point2.z = eigenVectors.col(0)[2] + pose.position.z;
 
     double slope = (pose.position.z - point2.z)/(pose.position.y - point2.y);
-    ROS_INFO("slope is %f",slope);
+    double xzslope = (pose.position.z - point2.z)/(pose.position.x - point2.x);
+
+    ROS_INFO("slope is %f xz %f",slope,xzslope);
 
 
     float theta = 0;
@@ -259,12 +287,10 @@ void plane::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msg
     if(slope > 0){
 
         theta = atan2(sinTheta, cosTheta) * -1.0;
-
     }
     else{
 
         theta = atan2(sinTheta, cosTheta);
-
     }
 
     ROS_INFO("The Orientation is given by := %0.2f", theta);
@@ -274,7 +300,16 @@ void plane::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msg
     pose.position.y = pose.position.y - (offset*sin(theta));
     pose.position.z = 0.0;
 
-    ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
+//    ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
+
+
+    // if we need the orientation parallel to the walkway then use this.
+    if(slope>0){//solar panel on the right
+        theta+=1.5708;
+    }
+    else{ //solar panel on the left
+        theta-=1.5708;
+    }
 
     geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
 
