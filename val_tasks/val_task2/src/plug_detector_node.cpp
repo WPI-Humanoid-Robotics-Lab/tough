@@ -9,7 +9,8 @@ int main(int argc, char** argv)
     geometry_msgs::Point PlugLoc;
     plug_detector p1(nh);
 
-    while (!foundPlug && numIterations < 20)
+    while(ros::ok())
+    //while (!foundPlug && numIterations < 20)
     {
         foundPlug = p1.findPlug(PlugLoc);
         //ROS_INFO(foundPlug ? "***** Plug detected" : "xxxxx Plug not detected");
@@ -17,4 +18,3 @@ int main(int argc, char** argv)
     }
 
 }
-

@@ -30,7 +30,9 @@ void cable_detector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
     return;
 #endif
     setTrackbar();
+
     cv::imshow("binary thresholding", outImg);
+    cv::imshow("HSV thresholding", imgHSV);
     cv::waitKey(3);
 }
 
@@ -75,32 +77,39 @@ bool cable_detector::getCableLocation(geometry_msgs::Point& cableLoc)
     // Find contours
     cv::findContours(outImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
-
+    Eigen::Vector4f cloudCentroid;
     if(!contours.empty()) //avoid seg fault at runtime by checking that the contours exist
     {
         foundCable = true;
         point = getOrientation(contours[findMaxContour(contours)], outImg);
-    }
+        //ROS_INFO_STREAM(point << std::endl);
 
-    pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
+        pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
 
-    for (size_t k = 0; k < 10; k++ )
-    {
-        for (size_t l = 0; l < 10; l++ )
+        for (size_t k = 0; k < 10; k++ )
         {
-            pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(point.x + k, point.y + l);
-
-            if (temp_pclPoint.z > -2.0 && temp_pclPoint.z < 2.0 )
+            for (size_t l = 0; l < 10; l++ )
             {
-                currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
+                pcl::PointXYZRGB temp_pclPoint;
+                try
+                {
+                    temp_pclPoint = organizedCloud->at(point.x + k, point.y + l);
+                }
+                catch (const std::out_of_range& ex){
+                    ROS_ERROR("%s",ex.what());
+                    return false;
+                }
+
+                if (temp_pclPoint.z > -2.0 && temp_pclPoint.z < 2.0 )
+                {
+                    ROS_INFO_STREAM(temp_pclPoint << std::endl);
+                    currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
+                }
             }
         }
+        //  Calculating the Centroid of the handle Point cloud
+        pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
     }
-
-    Eigen::Vector4f cloudCentroid;
-    //  Calculating the Centroid of the handle Point cloud
-    pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
-
     if( foundCable )
     {
         geom_point.point.x = cloudCentroid(0);
@@ -165,7 +174,7 @@ cv::Point cable_detector::getOrientation(const std::vector<cv::Point> &contourPt
     //VISUALIZATION - Uncomment this line
     //drawAxis(current_image_, cntr, p1, cv::Scalar(0, 255, 0), 1);
     //drawAxis(current_image_, cntr, p2, cv::Scalar(255, 255, 0), 1);
-    //ROS_INFO_STREAM(p2 << std::endl);
+    //ROS_INFO_STREAM(p1 << std::endl);
     showImage(current_image_);
     return p2;
 }
@@ -173,6 +182,7 @@ cv::Point cable_detector::getOrientation(const std::vector<cv::Point> &contourPt
 bool cable_detector::findCable(geometry_msgs::Point& cableLoc)
 {
     //VISUALIZATION - include a spinOnce here to visualize the eigenvectors
+    ros::spinOnce();
     markers_.markers.clear();
     if(ms_sensor_.giveImage(current_image_))
     {

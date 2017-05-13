@@ -90,14 +90,9 @@ add_executable(cable_detector_node        src/cable_detector_node.cpp)
 target_link_libraries(cable_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES}   ${PROJECT_NAME}
 )
 
-add_executable(plug_detector_node
-        src/plug_detector_node.cpp
-)
+add_executable(plug_detector_node	src/plug_detector_node.cpp)
 
-target_link_libraries(plug_detector_node ${catkin_LIBRARIES}
-   ${OpenCV_LIBRARIES}
-   ${PROJECT_NAME}
-)
+target_link_libraries(plug_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES}   ${PROJECT_NAME})
 
 add_executable(map_filter_node
         src/map_filter_node.cpp

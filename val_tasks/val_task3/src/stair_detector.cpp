@@ -82,37 +82,37 @@ bool stair_detector::getStairLocation(geometry_msgs::Point& stairLoc)
     // Find contours
     cv::findContours(outImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
-
+    Eigen::Vector4f cloudCentroid;
     if(!contours.empty()) //avoid seg fault at runtime by checking that the contours exist
     {
         findMaxContour(contours);
         foundStair = true;
-    }
 
-    cv::Mat hullPoints = cv::Mat::zeros(current_image_.size(), CV_8UC1);
-    cv::fillConvexPoly(hullPoints, convexHulls_,cv::Scalar(255));
-    cv::Mat nonZeroCoordinates;
-    cv::findNonZero(hullPoints, nonZeroCoordinates);
-    if (nonZeroCoordinates.total() < 10){
-        return false;
-    }
 
-    pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
-
-    for (int k = 0; k < nonZeroCoordinates.total(); k++ ) {
-        pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
-
-        if (temp_pclPoint.z > -2.0)
-        {
-            currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
-
+        cv::Mat hullPoints = cv::Mat::zeros(current_image_.size(), CV_8UC1);
+        cv::fillConvexPoly(hullPoints, convexHulls_,cv::Scalar(255));
+        cv::Mat nonZeroCoordinates;
+        cv::findNonZero(hullPoints, nonZeroCoordinates);
+        if (nonZeroCoordinates.total() < 10){
+            return false;
         }
+
+        pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
+
+        for (int k = 0; k < nonZeroCoordinates.total(); k++ ) {
+            pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
+
+            if (temp_pclPoint.z > -2.0)
+            {
+                currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
+
+            }
+        }
+
+
+        //  Calculating the Centroid of the handle Point cloud
+        pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
     }
-
-    Eigen::Vector4f cloudCentroid;
-    //  Calculating the Centroid of the handle Point cloud
-    pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
-
     if( foundStair )
     {
         geom_point.point.x = cloudCentroid(0);

@@ -1,6 +1,7 @@
 #ifndef PLUG_DETECTOR_H
 #define PLUG_DETECTOR_H
 
+
 #include <geometry_msgs/Point.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -28,11 +29,10 @@ class plug_detector
     // Blue Range    - 114, 125, 100, 255, 0, 255
     // Low Red Range - 0, 5, 178, 255, 51, 149
     // High Red Range - 170, 180, 204, 255, 140, 191
-    // Golden Yellow Range - 23, 93, 76, 255, 22, 255
-    int hsv_[6] = {23, 93, 76, 255, 22, 255};
+    // mahima range - 23, 39, 172, 255, 104, 205
+    int hsv_[6] = {23, 39, 172, 255, 104, 205};
 
     std::vector<cv::Point> convexHulls_;
-
 
     int frameID_ = 0;
     std::string side_;
@@ -47,12 +47,12 @@ class plug_detector
 public:
     plug_detector(ros::NodeHandle nh);
     void setTrackbar();
-    void showImage(cv::Mat, std::string caption="plug Detection");
+    void showImage(cv::Mat, std::string caption="Plug Detection");
     void colorSegment(cv::Mat &imgHSV, cv::Mat &outImg);
     size_t findMaxContour(const std::vector<std::vector<cv::Point> >& contours);
     bool getPlugLocation(geometry_msgs::Point &);
-    //cv::Point getOrientation(const std::vector<cv::Point> &, cv::Mat &);
-    //void drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale = 0.2);
+    cv::Point getOrientation(const std::vector<cv::Point> &, cv::Mat &);
+    void drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale = 0.2);
     bool findPlug(geometry_msgs::Point &);
     ~plug_detector();
 
