@@ -81,6 +81,7 @@
   <build_depend>val_gui</build_depend>
   <build_depend>val_control</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>val_moveit_planners</build_depend>
 
   <build_depend>cv_bridge</build_depend>
   <build_depend>image_transport</build_depend>
@@ -126,6 +127,9 @@
   <run_depend>val_gui</run_depend>
   <run_depend>val_control</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <run_depend>val_moveit_planners</run_depend>
+
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

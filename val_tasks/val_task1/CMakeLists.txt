@@ -55,6 +55,7 @@ find_package(catkin REQUIRED COMPONENTS
   val_footstep
   val_task_common
   navigation_common
+  val_moveit_planners
 )
 
 
@@ -338,3 +339,6 @@ target_link_libraries(test_handle ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(test_move_handle src/test_move_handle.cpp)
 target_link_libraries(test_move_handle ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(test_catesian_planner src/test_catesian_planner.cpp)
+target_link_libraries(test_catesian_planner ${catkin_LIBRARIES} ${PROJECT_NAME})

@@ -14,14 +14,14 @@ int main(int argc, char** argv){
     RobotStateInformer* robot_state = RobotStateInformer::getRobotStateInformer(node_handle);
 
     geometry_msgs::Point center;
-    center.x = 2.68;
-    center.y = 0.939;
-    center.z = 0.839;
+    center.x = 2.63;
+    center.y = 0.956;
+    center.z = 0.813;
 
     geometry_msgs::Point start;
-    start.x = 2.55;
-    start.y = 0.872;
-    start.z = 0.906;
+    start.x = 2.62;
+    start.y = 0.81;
+    start.z = 0.823;
 
     std::vector<geometry_msgs::Pose> points;
     std::vector<float> panelCoeffs {0.0002, -0.459, 0.883, -0.2246};
@@ -31,6 +31,7 @@ int main(int argc, char** argv){
     robot_state->getCurrentPose("/rightMiddleFingerPitch1Link",grasp_pose);
 
     task1_utils.getCircle3D(center, start, grasp_pose, panelCoeffs, points, 0.125, 10);
+    task1_utils.visulatise6DPoints(points);
     ROS_INFO("waypoints generated");
 
     ROS_INFO("Planning the trajectory");
