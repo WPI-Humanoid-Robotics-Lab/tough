@@ -49,7 +49,13 @@ private:
 
   ros::Publisher vis_pub;
 
-  RobotStateInformer* current_state_;
+  RobotStateInformer* robot_state_;
+
+  geometry_msgs::Pose rover_loc_;
+  std::vector<geometry_msgs::Pose> detections_;
+  int detection_tries_;
+
+
   void cloudCB(const sensor_msgs::PointCloud2::Ptr &input);
 
   void PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
@@ -57,8 +63,8 @@ private:
   void planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
   void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
 
-    void roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-    geometry_msgs::Pose rover_loc_;
+  void roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+
 
   /*
   void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
@@ -76,5 +82,10 @@ public:
   // Constructor
 
   plane(ros::NodeHandle nh, geometry_msgs::Pose rover_loc);
+  ~plane();
+  bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
+
+  int getDetectionTries() const;
+
 
 };

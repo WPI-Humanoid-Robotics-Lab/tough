@@ -1,5 +1,6 @@
 #include <iostream>
 #include <math.h>
+#include <memory>
 
 #include <ros/ros.h>
 
@@ -35,20 +36,22 @@
 
 #include <visualization_msgs/MarkerArray.h>
 
-class rover{
+class RoverDetector{
 private:
 
-  ros::Subscriber pcl_sub;
+  ros::Subscriber pcl_sub_;
 
-  ros::Publisher pcl_filtered_pub;
+  ros::Publisher pcl_filtered_pub_;
 
-  ros::Publisher vis_pub;
+  ros::Publisher vis_pub_;
 
-  ros::Publisher vis_plane_pub;
+  ros::Publisher vis_plane_pub_;
 
   std::vector<geometry_msgs::Pose> detections_;
 
   int detection_tries_;
+
+  std::shared_ptr<bool> isRoverOnRight_;
 
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
 
@@ -60,16 +63,17 @@ private:
 
   void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
-  void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl::PointCloud<pcl::PointXYZ>::Ptr& upperBoxCloud, geometry_msgs::Pose& pose);
+  void getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr& upperBoxCloud, geometry_msgs::Pose& pose);
 
 public:
 
   // Constructor
 
-  rover(ros::NodeHandle nh);
-  ~rover();
+  RoverDetector(ros::NodeHandle nh);
+  ~RoverDetector();
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
 
   int getDetectionTries() const;
+  bool isRoverOnRight() const;
 
 };

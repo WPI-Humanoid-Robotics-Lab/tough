@@ -114,7 +114,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
     ROS_INFO_STREAM("executing " << name);
 
     if(rover_detector_ == nullptr){
-        rover_detector_ = new rover(nh_);
+        rover_detector_ = new RoverDetector(nh_);
     }
 
     static int fail_count = 0;
@@ -180,7 +180,6 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
 
     return TaskResult::SUCCESS();
 }
-
 
 decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {

@@ -16,17 +16,20 @@
 #define upperBox_pass_z_max  3.0
 
 
-rover::rover(ros::NodeHandle nh)
+RoverDetector::RoverDetector(ros::NodeHandle nh)
 {
-  pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &rover::cloudCB, this);
-  pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_rover/cloud2", 1);
+    pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &RoverDetector::cloudCB, this);
+    pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_rover/cloud2", 1);
 
-  vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_rover/Position", 1 );
+    vis_pub_ = nh.advertise<visualization_msgs::Marker>( "/val_rover/Position", 1 );
+    detections_.clear();
+    detection_tries_ = 0;
+    isRoverOnRight_ = nullptr;
 }
 
-rover::~rover()
+RoverDetector::~RoverDetector()
 {
-    pcl_sub.shutdown();
+    pcl_sub_.shutdown();
 }
 
 /*
@@ -34,13 +37,12 @@ rover::~rover()
  *
  * */
 
-void rover::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
+void RoverDetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
     if (input->data.empty()){
         return;
     }
     ++detection_tries_;
-    detections_.clear();
 
     ros::Time startTime = ros::Time::now();
 
@@ -80,18 +82,19 @@ void rover::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
     detections_.push_back(pose);
 
     ros::Time endTime = ros::Time::now();
-
+    std::cout << "Number of detections               = " << detections_.size() << std::endl;
+    std::cout << "Number of tries                    = " << detection_tries_ << std::endl;
     std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
 
     pcl::toROSMsg(*upperBoxCloud, output);
 
     output.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
 
-    pcl_filtered_pub.publish(output);
+    pcl_filtered_pub_.publish(output);
 
 }
 
-void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl::PointCloud<pcl::PointXYZ>::Ptr& upperBoxCloud, geometry_msgs::Pose& pose){
+void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr& upperBoxCloud, geometry_msgs::Pose& pose){
 
     Eigen::Vector4f lowerBoxCentroid;
     pcl::compute3DCentroid(*lowerBoxCloud, lowerBoxCentroid);
@@ -182,7 +185,7 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
 
     //    ROS_INFO("The Orientation is given by := %0.2f", theta);
 
-    double offset = 6.3;
+    double offset = 6.15;
 
     pose.position.x = upperBoxPosition.x - (offset*cos(theta));
     pose.position.y = upperBoxPosition.y - (offset*sin(theta));
@@ -193,16 +196,21 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
     ROS_INFO("slopeyz %.2f, theta %.2f",yzSlope,theta);
 
 
-    if(yzSlope>0)  //rover on the left
+    if(yzSlope>0)  {//rover on the left
         quaternion = tf::createQuaternionMsgFromYaw(theta-1.5708);
-    else //rover on the right
+        isRoverOnRight_ = std::make_shared<bool>(false);
+    }
+    else {
+        //rover on the right
         quaternion = tf::createQuaternionMsgFromYaw(theta+1.5708);
+        isRoverOnRight_ = std::make_shared<bool>(true);
+    }
 
     pose.orientation = quaternion;
 
     visualization_msgs::Marker marker;
 
-    marker.header.frame_id = "world";
+    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
     marker.header.stamp = ros::Time();
     marker.ns = "Rover Position";
     marker.id = 0;
@@ -227,11 +235,11 @@ void rover::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl:
     marker.color.b = 0.0;
     marker.lifetime = ros::Duration(5);
 
-    vis_pub.publish(marker);
+    vis_pub_.publish(marker);
 
 }
 
-bool rover::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
+bool RoverDetector::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
 {
     ret_val.clear();
     ret_val = detections_;
@@ -239,13 +247,20 @@ bool rover::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
 
 }
 
-int rover::getDetectionTries() const
+int RoverDetector::getDetectionTries() const
 {
     return detection_tries_;
 
 }
 
-void rover::lowerBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+bool RoverDetector::isRoverOnRight() const
+{
+    assert(isRoverOnRight_.use_count() > 0 && "Call only if you detect the rover");
+    return *isRoverOnRight_;
+
+}
+
+void RoverDetector::lowerBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
@@ -268,7 +283,7 @@ void rover::lowerBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud
 
 }
 
-void rover::upperBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+void RoverDetector::upperBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
@@ -291,7 +306,7 @@ void rover::upperBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud
 
 }
 
-void rover::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+void RoverDetector::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
@@ -319,7 +334,7 @@ void rover::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
 
 
-void rover::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+void RoverDetector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out (new pcl::PointCloud<pcl::PointXYZ>);
 
