@@ -18,12 +18,13 @@
 
 RoverDetector::RoverDetector(ros::NodeHandle nh)
 {
-  pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &RoverDetector::cloudCB, this);
-  pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_rover/cloud2", 1);
+    pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &RoverDetector::cloudCB, this);
+    pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_rover/cloud2", 1);
 
-  vis_pub_ = nh.advertise<visualization_msgs::Marker>( "/val_rover/Position", 1 );
-  detections_.clear();
-  detection_tries_ = 0;
+    vis_pub_ = nh.advertise<visualization_msgs::Marker>( "/val_rover/Position", 1 );
+    detections_.clear();
+    detection_tries_ = 0;
+    isRoverOnRight_ = nullptr;
 }
 
 RoverDetector::~RoverDetector()
@@ -195,10 +196,15 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
     ROS_INFO("slopeyz %.2f, theta %.2f",yzSlope,theta);
 
 
-    if(yzSlope>0)  //rover on the left
+    if(yzSlope>0)  {//rover on the left
         quaternion = tf::createQuaternionMsgFromYaw(theta-1.5708);
-    else //rover on the right
+        isRoverOnRight_ = std::make_shared<bool>(false);
+    }
+    else {
+        //rover on the right
         quaternion = tf::createQuaternionMsgFromYaw(theta+1.5708);
+        isRoverOnRight_ = std::make_shared<bool>(true);
+    }
 
     pose.orientation = quaternion;
 
@@ -244,6 +250,13 @@ bool RoverDetector::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
 int RoverDetector::getDetectionTries() const
 {
     return detection_tries_;
+
+}
+
+bool RoverDetector::isRoverOnRight() const
+{
+    assert(isRoverOnRight_.use_count() > 0 && "Call only if you detect the rover");
+    return *isRoverOnRight_;
 
 }
 
