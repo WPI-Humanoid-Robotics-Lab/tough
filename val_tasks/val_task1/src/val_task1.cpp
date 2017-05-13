@@ -27,7 +27,6 @@ valTask1* valTask1::getValTask1(ros::NodeHandle nh){
     }
     ROS_ERROR("Object already exists");
     assert(false && "Object already exists");
-
 }
 
 // constructor and destrcutor
@@ -52,12 +51,20 @@ valTask1::valTask1(ros::NodeHandle nh):
     pelvis_controller_  = new pelvisTrajectory(nh_);
     head_controller_    = new HeadTrajectory(nh_);
     gripper_controller_ = new gripperControl(nh_);
+    arm_controller_     = new armTrajectory(nh_);
 
     //state informer
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     map_update_count_ = 0;
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask1::occupancy_grid_cb, this);
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask1::visited_map_cb, this);
+
+    // cartesian planners for the arm
+    left_arm_planner_ = new cartesianPlanner("leftArm", "/world");
+    right_arm_planner_ = new cartesianPlanner("rightArm", "/world");
+
+    // task1 utils
+    task1_utils_ = new task1Utils(nh_);
 }
 
 // destructor
@@ -73,6 +80,7 @@ valTask1::~valTask1(){
     if(head_controller_ != nullptr)     delete head_controller_;
     if(gripper_controller_ != nullptr)  delete gripper_controller_;
     if(robot_state_ != nullptr)         delete robot_state_;
+    if(arm_controller_ != nullptr)      delete arm_controller_;
 }
 
 void valTask1::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
@@ -222,7 +230,7 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
 
 decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM_ONCE("executing " << name);
 
     static int fail_count = 0;
 
@@ -368,8 +376,6 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
             ++retry_count;
             eventQueue.riseEvent("/DETECT_PANEL_FINE_RETRY");
         }
-
-
     }
 
     else if(retry_count < 5) {
@@ -407,7 +413,7 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
 
 decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM_ONCE("executing " << name);
 
     static int fail_count = 0;
 
@@ -479,28 +485,30 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
 
 }
 
-decision_making::TaskResult valTask1::adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+
+    // move the chest, so we get maximum manipulability
+    chest_controller_->controlChest(0, 10, 40);
+
+    // grasp the handle
     //1 - right
     //3 - left
-    static bool isPoseSet = false;
+    // sleep before grasping (to account for sway coming with ches motion)
+    ros::Duration(1).sleep();
+    geometry_msgs::Pose pose;
+    robot_state_->getCurrentPose("/rightPalm", pose);
+    handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[1]);
 
-    //    geometry_msgs::Pose pose;
-    //    robot_state_->getCurrentPose("/leftPalm", pose);
-
-    ROS_INFO("Grasp left handle");
-
-    //blocking call, takes about 10sec
-    //   handle_grabber_->grasp_handles(armSide::LEFT, handle_loc_[3]);
-
-    ///@todo: decide how do we confirm grabbning sucessful
-    eventQueue.riseEvent("/ADJUST_ARMS_SUCESSFUL");
+    ///@todo: check to verify if the grasp is sucess
+    eventQueue.riseEvent("/GRASPED_PITCH_HANDLE");
 
     // generate the event
     while(!preemptiveWait(1000, eventQueue)){
-        eventQueue.riseEvent("/ADJUST_ARMS_SUCESSFUL");
+        ROS_INFO("waiting for transition");
     }
+
     return TaskResult::SUCCESS();
 }
 
@@ -508,26 +516,46 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 {
     ROS_INFO_STREAM("executing " << name);
 
-    geometry_msgs::Pose pose;
-    robot_state_->getCurrentPose("/leftPalm", pose);
-    handle_grabber_->grasp_handles(armSide::LEFT , handle_loc_[3]);
+    // reduce the pelvis height, so we get maximum maipulability
     ros::Duration(1).sleep();
+    pelvis_controller_->controlPelvisHeight(0.8);
 
-    //    std::vector<geometry_msgs::Pose> rightWaypoints;
     //    if(move_handle_ == nullptr) {
     //        move_handle_ = new move_handle(nh_);
     //    }
+    //    //move_handle_->createCircle(handle_loc_[0], 1, panel_coeff_, rightWaypoints);
+    //    move_handle_->createCircle(handle_loc_[0], handle_loc_[1], 1, panel_coeff_, rightWaypoints);
 
-    //    ros::Duration(1).sleep();
-    //    move_handle_->createCircle(handle_loc_[0], 1, panel_coeff_, rightWaypoints);
+    // generate the way points in cartersian space
+    std::vector<geometry_msgs::Pose> waypoints;
+    //desired pose (i.e. the grab pose)
+    geometry_msgs::Pose grab_pose;
+    robot_state_->getCurrentPose("/rightMiddleFingerPitch1Link",grab_pose);
+    task1_utils_->getCircle3D(handle_loc_[0], handle_loc_[1], grab_pose, panel_coeff_, waypoints, 0.125, 10);
 
-    if(move_handle_ != nullptr) delete move_handle_;
-    move_handle_ = nullptr;
+    ///@todo: remove the visulaisation
+    task1_utils_->visulatise6DPoints(waypoints);
 
-    eventQueue.riseEvent("/PITCH_CORRECTION_SUCESSFUL");
-    gripper_controller_->openGripper(armSide::LEFT);
-    ros::Duration(0.2).sleep();
+    // plan the trajectory
+    moveit_msgs::RobotTrajectory traj;
+    right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
 
+    // execute the trajectory
+    arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
+
+//    if(move_handle_ != nullptr) delete move_handle_;
+//    move_handle_ = nullptr;
+
+    //eventQueue.riseEvent("/PITCH_CORRECTION_SUCESSFUL");
+
+    return TaskResult::SUCCESS();
+}
+
+decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+    ROS_INFO_STREAM("executing " << name);
+
+    ///@todo: complete the state
     return TaskResult::SUCCESS();
 }
 
@@ -555,6 +583,16 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     eventQueue.riseEvent("/YAW_CORRECTION_SUCESSFUL");
     return TaskResult::SUCCESS();
 }
+
+decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+    ROS_INFO_STREAM("executing " << name);
+
+    ///@todo: complete the state
+
+    return TaskResult::SUCCESS();
+}
+
 
 decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
@@ -726,5 +764,3 @@ void valTask1::setPanelCoeff(const std::vector<float> &panel_coeff)
 {
     panel_coeff_ = panel_coeff;
 }
-
-
