@@ -476,7 +476,6 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
         eventQueue.riseEvent("/WALK_TO_PANEL_RETRY");
     }
 
-    ros::Duration(1).sleep();
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");

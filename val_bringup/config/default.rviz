@@ -6,9 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /PointCloud21
-        - /Map1
-        - /MarkerArray2
+        - /Walkway1
       Splitter Ratio: 0.5
     Tree Height: 544
   - Class: rviz/Selection
@@ -447,11 +445,11 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
-    - Alpha: 1
+    - Alpha: 0.6
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 9.21494
-        Min Value: -0.120023
+        Max Value: 0.0612373
+        Min Value: -0.00751354
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -465,7 +463,7 @@ Visualization Manager:
       Max Intensity: 0
       Min Color: 0; 0; 0
       Min Intensity: 0
-      Name: PointCloud2
+      Name: Walkway
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
@@ -480,8 +478,8 @@ Visualization Manager:
     - Alpha: 0.2
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 9.1527
-        Min Value: -0.118518
+        Max Value: 11.6828
+        Min Value: -0.162589
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -499,7 +497,7 @@ Visualization Manager:
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
-      Size (Pixels): 3
+      Size (Pixels): 2
       Size (m): 0.01
       Style: Points
       Topic: /field/assembled_cloud2
@@ -819,7 +817,7 @@ Visualization Manager:
     - Class: rviz/MarkerArray
       Enabled: false
       Marker Topic: /field/occupied_cells_vis_array
-      Name: MarkerArray
+      Name: Octomap
       Namespaces:
         {}
       Queue Size: 100
@@ -829,7 +827,7 @@ Visualization Manager:
       Marker Topic: /visualization_marker
       Name: Marker
       Namespaces:
-        {}
+        Center of the Panel: true
       Queue Size: 100
       Value: true
     - Alpha: 0.1
@@ -844,7 +842,31 @@ Visualization Manager:
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /footstep_planner/footsteps_array
-      Name: MarkerArray
+      Name: Footsteps
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /detected_handles
+      Name: Handles
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /handle_path
+      Name: HandTrajectory
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /val_rover/Position
+      Name: Marker
       Namespaces:
         {}
       Queue Size: 100
@@ -873,22 +895,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.96844
+      Distance: 6.84766
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 2.14946
-        Y: 0.720574
-        Z: 0.793263
+        X: 2.70954
+        Y: 0.0694147
+        Z: 0.0604619
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.680399
+      Pitch: 0.785398
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.9486
+      Yaw: 3.0004
     Saved: ~
 Window Geometry:
   Displays:
