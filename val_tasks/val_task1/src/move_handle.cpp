@@ -55,7 +55,7 @@ void move_handle::createCircle(geometry_msgs::Point center, int side, const std:
   std::cout<<"starting angle : "<<hand_angle<<"\n";
   //geterate a traj from start angle to the finish angle
 //  path = linspace(hand_angle,spin, num_steps);
-  path = linspace(hand_angle,spin, num_steps);
+  path = linspace(hand_angle,hand_angle - spin, num_steps);
 
   dist = fabs( a*finger_pose.position.x  + b*finger_pose.position.y + c*finger_pose.position.z  + d )/sqrt( pow(a,2) + pow(b,2) + pow(c,2) );
 
@@ -91,7 +91,7 @@ void move_handle::follow_path(std::vector<geometry_msgs::Pose>& points, armSide 
 
     std::vector<armTrajectory::armTaskSpaceData> *arm_data_vector = new std::vector<armTrajectory::armTaskSpaceData>();
     // for(auto input_pose : *input_poses)
-    float desired_time = 10.0;
+    float desired_time = 120.0;
     float handle_angle = 0;
     geometry_msgs::Quaternion new_pose;
     double yaw,roll,pitch;
@@ -140,6 +140,7 @@ std::vector<double> move_handle::linspace(double min, double max, int n)
     for (int i = 0; i <= n-2; i++)
     {
      double temp = min + i*(max-min)/(floor((double)n) - 1);
+     std::cout<<temp<<"\n"<<std::endl;
      result.insert(result.begin() + iterator, temp);
      iterator += 1;
     }
