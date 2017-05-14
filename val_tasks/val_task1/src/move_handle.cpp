@@ -7,7 +7,7 @@ move_handle::move_handle(ros::NodeHandle n) : nh_(n) {
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 
 }
-void move_handle::createCircle(geometry_msgs::Point center, int side, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points)
+void move_handle::createCircle(geometry_msgs::Point center, int side, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, const float spin)
 {
 
     // calculate rotated angle
@@ -16,7 +16,6 @@ void move_handle::createCircle(geometry_msgs::Point center, int side, const std:
   float radius = .20,num_steps = 10;
   float hand_z_plane = 0;
   float dist = 0;
-  float spin = M_PI/4; //
   float hand_angle;
   std::vector<double> path;
   armSide input_side;
@@ -110,8 +109,6 @@ void move_handle::follow_path(std::vector<geometry_msgs::Pose>& points, armSide 
     tf::Quaternion q(temp.pose.orientation.x, temp.pose.orientation.y, temp.pose.orientation.z, temp.pose.orientation.w);
     tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
 
-
-
     for(int i=0;i<num_poses;i++)
     {
         geometry_msgs::Pose input_pose = points.at(i);
@@ -140,7 +137,6 @@ std::vector<double> move_handle::linspace(double min, double max, int n)
     for (int i = 0; i <= n-2; i++)
     {
      double temp = min + i*(max-min)/(floor((double)n) - 1);
-     std::cout<<temp<<"\n"<<std::endl;
      result.insert(result.begin() + iterator, temp);
      iterator += 1;
     }
