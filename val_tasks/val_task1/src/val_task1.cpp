@@ -241,11 +241,20 @@ decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMC
     geometry_msgs::Pose current_pelvis_pose;
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
 
-    // check if the pose is changed
-    ///@todo: what if pose has not changed but robot did not reach the goal and is not walking?
-    if (taskCommonUtils::isPoseChanged(pose_prev, panel_walk_goal_coarse_))
+    // Check if goal is reached before walking
+    if (taskCommonUtils::isGoalReached(current_pelvis_pose, panel_walk_goal_coarse_))
     {
-        ROS_INFO_STREAM("pose chaned to "<<panel_walk_goal_coarse_);
+        ROS_INFO("reached panel");
+
+        // TODO: check if robot rechead the panel
+        eventQueue.riseEvent("/REACHED_PANEL");
+        // required for robot to stablize as goal tolerance is high
+        ros::Duration(1).sleep();
+    }
+    // check if the pose is changed
+    else if (taskCommonUtils::isPoseChanged(pose_prev, panel_walk_goal_coarse_))
+    {
+        ROS_INFO_STREAM("pose changed to "<<panel_walk_goal_coarse_);
         walker_->walkToGoal(panel_walk_goal_coarse_, false);
         // sleep so that the walk starts
         ROS_INFO("Footsteps should be generated now");
@@ -253,25 +262,17 @@ decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMC
 
         // update the previous pose
         pose_prev = panel_walk_goal_coarse_;
+        eventQueue.riseEvent("/WALK_EXECUTING");
     }
 
     // if walking stay in the same state
-    if (walk_track_->isWalking())
+    else if (walk_track_->isWalking())
     {
         // no state change
         ROS_INFO_THROTTLE(2, "walking");
         eventQueue.riseEvent("/WALK_EXECUTING");
     }
     // if walk finished
-    // TODO change to see if we are at the goal
-    else if ( fabs(panel_walk_goal_coarse_.x - current_pelvis_pose.position.x) < 0.05 && fabs(panel_walk_goal_coarse_.y - current_pelvis_pose.position.y) < 0.05 )
-    {
-
-        ROS_INFO("reached panel");
-
-        // TODO: check if robot rechead the panel
-        eventQueue.riseEvent("/REACHED_PANEL");
-    }
     // if failed for more than 5 times, go to error state
     else if (fail_count > 5)
     {
@@ -425,39 +426,38 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
 
     // check if the pose is changed
-    ///@todo: what if pose has not changed but robot did not reach the goal and is not walking?
-    if (taskCommonUtils::isPoseChanged(pose_prev, panel_walk_goal_fine_))
+    if (taskCommonUtils::isGoalReached(current_pelvis_pose, panel_walk_goal_fine_) )
     {
-        ROS_INFO("pose chaned");
+
+        ROS_INFO("reached panel");
+        // TODO: check if robot rechead the panel
+        eventQueue.riseEvent("/REACHED_PANEL_FINE");
+        // required for robot to stablize as goal tolerance is high
+        ros::Duration(1).sleep();
+    }
+    else if (taskCommonUtils::isPoseChanged(pose_prev, panel_walk_goal_fine_))
+    {
+        ROS_INFO("pose changed");
         //reset chest before moving close to panel
         chest_controller_->controlChest(0, 0, 0);
         ROS_INFO("Adjusted Chest");
         walker_->walkToGoal(panel_walk_goal_fine_, false);
         ROS_INFO("Footsteps should be published now");
         // sleep so that the walk starts
-        ros::Duration(2).sleep();
+        ros::Duration(4).sleep();
 
         // update the previous pose
         pose_prev = panel_walk_goal_fine_;
+        eventQueue.riseEvent("/WALK_TO_PANEL_EXECUTING");
     }
-
     // if walking stay in the same state
-    if (walk_track_->isWalking())
+    else if (walk_track_->isWalking())
     {
         // no state change
         ROS_INFO_THROTTLE(2, "walking");
         eventQueue.riseEvent("/WALK_TO_PANEL_EXECUTING");
     }
     // if walk finished
-    // TODO change to see if we are at the goal
-    else if ( fabs(panel_walk_goal_fine_.x - current_pelvis_pose.position.x) < 0.05 && fabs(panel_walk_goal_fine_.y - current_pelvis_pose.position.y) < 0.05 )
-    {
-
-        ROS_INFO("reached panel");
-
-        // TODO: check if robot rechead the panel
-        eventQueue.riseEvent("/REACHED_PANEL_FINE");
-    }
     // if failed for more than 5 times, go to error state
     else if (fail_count > 5)
     {
@@ -476,6 +476,7 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
         eventQueue.riseEvent("/WALK_TO_PANEL_RETRY");
     }
 
+    ros::Duration(1).sleep();
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
@@ -489,20 +490,45 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
 {
     ROS_INFO_STREAM("executing " << name);
 
-    // move the chest, so we get maximum manipulability
-    chest_controller_->controlChest(0, 10, 40);
+    /*
+     * Executing -> when grasp_handles is called
+     * Retry -> grasp handles is called but it failed
+     * Failed -> retry failed 5 times
+     * Success -> grasp is successful
+     */
+    static bool executing = false;
+    static int retry_count = 0;
 
-    // grasp the handle
-    //1 - right
-    //3 - left
-    // sleep before grasping (to account for sway coming with ches motion)
-    ros::Duration(1).sleep();
-    geometry_msgs::Pose pose;
-    robot_state_->getCurrentPose("/rightPalm", pose);
-    handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[1]);
+    if(!executing){
+        ROS_INFO("Executing the grasp handle command");
+        executing = true;
+        // move the chest, so we get maximum manipulability
+        chest_controller_->controlChest(0, 10, 40);
 
-    ///@todo: check to verify if the grasp is sucess
-    eventQueue.riseEvent("/GRASPED_PITCH_HANDLE");
+        // grasp the handle
+        //1 - right
+        //3 - left
+        // sleep before grasping (to account for sway coming with ches motion)
+        ros::Duration(1).sleep();
+        geometry_msgs::Pose pose;
+        robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF, pose);
+        handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[1]);
+        eventQueue.riseEvent("/GRASP_PITCH_HANDLE_EXECUTING");
+    }
+    else if (robot_state_->isHandleInGrasp(armSide::RIGHT)){
+        ROS_INFO("Grasp is successful");
+        eventQueue.riseEvent("/GRASPED_PITCH_HANDLE");
+    }
+    else if (retry_count < 5 ){
+        ROS_INFO("Grasp Failed, retrying");
+        executing = false;
+        ++retry_count;
+        eventQueue.riseEvent("/GRASP_PITCH_HANDLE_RETRY");
+    }
+    else {
+        ROS_INFO("Failed all conditions. state error");
+        eventQueue.riseEvent("/GRASP_PITCH_HANDLE_FAILED");
+    }
 
     // generate the event
     while(!preemptiveWait(1000, eventQueue)){
@@ -520,17 +546,11 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     ros::Duration(1).sleep();
     pelvis_controller_->controlPelvisHeight(0.8);
 
-    //    if(move_handle_ == nullptr) {
-    //        move_handle_ = new move_handle(nh_);
-    //    }
-    //    //move_handle_->createCircle(handle_loc_[0], 1, panel_coeff_, rightWaypoints);
-    //    move_handle_->createCircle(handle_loc_[0], handle_loc_[1], 1, panel_coeff_, rightWaypoints);
-
     // generate the way points in cartersian space
     std::vector<geometry_msgs::Pose> waypoints;
     //desired pose (i.e. the grab pose)
     geometry_msgs::Pose grab_pose;
-    robot_state_->getCurrentPose("/rightMiddleFingerPitch1Link",grab_pose);
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME,grab_pose);
     task1_utils_->getCircle3D(handle_loc_[0], handle_loc_[1], grab_pose, panel_coeff_, waypoints, 0.125, 10);
 
     ///@todo: remove the visulaisation
@@ -542,9 +562,6 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
     // execute the trajectory
     arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
-
-//    if(move_handle_ != nullptr) delete move_handle_;
-//    move_handle_ = nullptr;
 
     //eventQueue.riseEvent("/PITCH_CORRECTION_SUCESSFUL");
 
@@ -625,14 +642,12 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
             eventQueue.riseEvent("/DETECT_FINISH_SUCESSFUL");
             if(finish_box_detector_ != nullptr) delete finish_box_detector_;
             finish_box_detector_ = nullptr;
-
+            //sleep is required to avoid moving to next state before subscriber is shutdown
+            ros::Duration(2).sleep();
             break;
         }
-
+        // this is to avoid detecting points that will always be in collision
         retry_count++;
-        ros::Duration(3).sleep();
-        eventQueue.riseEvent("/DETECT_FINISH_RETRY");
-
     }
     else if(retry_count++ < 5){
         ros::Duration(3).sleep();
@@ -642,6 +657,8 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
         eventQueue.riseEvent("/DETECT_FINISH_FAILED");
         if(finish_box_detector_ != nullptr) delete finish_box_detector_;
         finish_box_detector_ = nullptr;
+        //sleep is required to avoid moving to next state before subscriber is shutdown
+        ros::Duration(2).sleep();
     }
 
     // wait infinetly until an external even occurs
@@ -659,17 +676,22 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
     static int fail_count = 0;
 
     // walk to the goal location
-    // the goal can be updated on the run time
+
     static geometry_msgs::Pose2D pose_prev;
 
     geometry_msgs::Pose current_pelvis_pose;
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
 
     // check if the pose is changed
-    ///@todo: what if pose has not changed but robot did not reach the goal and is not walking?
-    if (taskCommonUtils::isPoseChanged(pose_prev, next_finishbox_center_))
+    if ( taskCommonUtils::isGoalReached(current_pelvis_pose, next_finishbox_center_)) {
+        ROS_INFO("reached panel");
+        // TODO: check if robot rechead the panel
+        eventQueue.riseEvent("/WALK_TO_FINISH_SUCESSFUL");
+    }
+    // the goal can be updated on the run time
+    else if (taskCommonUtils::isPoseChanged(pose_prev, next_finishbox_center_))
     {
-        ROS_INFO("pose chaned");
+        ROS_INFO("pose changed");
         //reset chest before moving close to panel
         chest_controller_->controlChest(0, 0, 0);
         ROS_INFO("Adjusted Chest");
@@ -680,25 +702,18 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
 
         // update the previous pose
         pose_prev = next_finishbox_center_;
+        eventQueue.riseEvent("/WALK_TO_FINISH_EXECUTING");
     }
 
     // if walking stay in the same state
-    if (walk_track_->isWalking())
+    else if (walk_track_->isWalking())
     {
         // no state change
         ROS_INFO_THROTTLE(2, "walking");
-        eventQueue.riseEvent("/WALK_TO_FINISH_RETRY");
+        eventQueue.riseEvent("/WALK_TO_FINISH_EXECUTING");
     }
     // if walk finished
     // TODO change to see if we are at the goal
-    else if ( fabs(next_finishbox_center_.x - current_pelvis_pose.position.x) < 0.05 && fabs(next_finishbox_center_.y - current_pelvis_pose.position.y) < 0.05 )
-    {
-
-        ROS_INFO("reached panel");
-
-        // TODO: check if robot rechead the panel
-        eventQueue.riseEvent("/WALK_TO_FINISH_SUCESSFUL");
-    }
     // if failed for more than 5 times, go to error state
     else if (fail_count > 5)
     {
