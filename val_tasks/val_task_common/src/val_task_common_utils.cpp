@@ -26,10 +26,10 @@ bool taskCommonUtils::isGoalReached(geometry_msgs::Pose2D pose_old, geometry_msg
     {
         ret = false;
     }
-    else if (fabs(fmod(pose_new.theta,(2*M_PI)) - fmod(pose_new.theta,(2*M_PI))) > GOAL_ANGLE_TOLERANCE)
-    {
-        ret = false;
-    }
+//    else if (fabs(fmod(pose_new.theta,(2*M_PI)) - fmod(pose_new.theta,(2*M_PI))) > GOAL_ANGLE_TOLERANCE)
+//    {
+//        ret = false;
+//    }
 
     return ret;
 }

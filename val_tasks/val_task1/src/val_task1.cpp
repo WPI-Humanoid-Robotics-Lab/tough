@@ -515,7 +515,7 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
         handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[1]);
         eventQueue.riseEvent("/GRASP_PITCH_HANDLE_EXECUTING");
     }
-    else if (robot_state_->isHandleInGrasp(armSide::RIGHT)){
+    else if (robot_state_->isGraspped(armSide::RIGHT)){
         ROS_INFO("Grasp is successful");
         eventQueue.riseEvent("/GRASPED_PITCH_HANDLE");
     }
