@@ -66,12 +66,12 @@ void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point s
     float d = planeCoeffs.at(3);
 
     // starting point
-    geometry_msgs::Pose circel_point_pose;
-    circel_point_pose.position.x = start.x;
-    circel_point_pose.position.y = start.y;
-    circel_point_pose.position.z = start.z;
-    circel_point_pose.orientation = pose.orientation;
-    points.push_back(circel_point_pose);
+    geometry_msgs::Pose circle_point_pose;
+    circle_point_pose.position.x = start.x;
+    circle_point_pose.position.y = start.y;
+    circle_point_pose.position.z = start.z;
+    circle_point_pose.orientation = pose.orientation;
+    points.push_back(circle_point_pose);
 
     float dist = fabs(a*start.x  + b*start.y + c*start.z  + d )/sqrt(pow(a,2) + pow(b,2) + pow(c,2));
 
@@ -84,17 +84,17 @@ void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point s
     {
         // angle to the first point
         float alpha = atan2((start_pose.position.y - center.y),(start_pose.position.x - center.x));
-        circel_point_pose.position.x = center.x + radius*cos(alpha - (float)(2*M_PI/steps));
-        circel_point_pose.position.y = center.y + radius*sin(alpha - (float)(2*M_PI/steps));
+        circle_point_pose.position.x = center.x + radius*cos(alpha - (float)(2*M_PI/steps));
+        circle_point_pose.position.y = center.y + radius*sin(alpha - (float)(2*M_PI/steps));
 
         //point.position.z = -(a*point.position.x  + b* point.position.y + d)/c;
-        circel_point_pose.position.z = -(a*circel_point_pose.position.x  + b* circel_point_pose.position.y + + d)/c + dist; //(d - dist+.05) )/c;
+        circle_point_pose.position.z = -(a*circle_point_pose.position.x  + b* circle_point_pose.position.y + + d)/c + dist; //(d - dist+.05) )/c;
 
         // orientation
-        circel_point_pose.orientation = pose.orientation;
-        points.push_back(circel_point_pose);
+        circle_point_pose.orientation = pose.orientation;
+        points.push_back(circle_point_pose);
 
-        start_pose = circel_point_pose;
+        start_pose = circle_point_pose;
     }
 }
 
