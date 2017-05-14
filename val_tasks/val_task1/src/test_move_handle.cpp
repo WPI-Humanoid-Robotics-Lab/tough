@@ -38,7 +38,12 @@ int main(int argc, char** argv){
     ihmc_msgs::StopAllTrajectoryRosMessage stopMsg;
     stopMsg.unique_id=45;
     int retry=0;
-
+    std::vector<float> jointPos,closeGrasp;
+    std::vector<float> closeRightGrasp,closeLeftGrasp,openGrasp;
+    closeRightGrasp={1.09,1.47,1.84,0.90,1.20,1.51,0.99,1.34,1.68,0.55,0.739,0.92,1.40};
+    closeLeftGrasp={-1.09,-1.47,-1.84,-0.90,-1.20,-1.51,-0.99,-1.34,-1.68,-0.55,-0.739,-0.92,1.40};
+    openGrasp={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+    float diffClose,diffOpen;
 
     while(ros::ok())
     {
@@ -48,12 +53,118 @@ int main(int argc, char** argv){
         cout<<"s - stop trajectoris \n";
         cout<<"t - status \n";
         cout<<"c - configure position \n";
+        cout<<"g - grasp joints \n ";
 
         cin>>input;
         if(input=='q')
         {
             cout<<"Exiting Code \n";
             exit(0);
+        }
+        else if(input=='g')
+        {
+            //            cout<<robot_state_->getJointPosition("leftIndexFingerPitch1")<<"\n";
+            //            cout<<robot_state_->getJointPosition("leftIndexFingerPitch2")<<"\n";
+            //            cout<<robot_state_->getJointPosition("leftIndexFingerPitch3")<<"\n";
+            //            cout<<robot_state_->getJointPosition("leftMiddleFingerPitch1")<<"\n";
+            //            cout<<robot_state_->getJointPosition("leftMiddleFingerPitch2")<<"\n";
+            //            cout<<robot_state_->getJointPosition("leftMiddleFingerPitch3")<<"\n";
+            //            cout<<robot_state_->getJointPosition("leftPinkyPitch1")<<"\n";
+            //            cout<<robot_state_->getJointPosition("leftPinkyPitch2")<<"\n";
+            //            cout<<robot_state_->getJointPosition("leftPinkyPitch3")<<"\n";
+            //            cout<<robot_state_->getJointPosition("leftThumbPitch1")<<"\n";
+            //            cout<<robot_state_->getJointPosition("leftThumbPitch2")<<"\n";
+            //            cout<<robot_state_->getJointPosition("leftThumbPitch3")<<"\n";
+            //            cout<<robot_state_->getJointPosition("leftThumbRoll")<<"\n";
+
+            cout<<"Enter side (Left-0) (Right-1) \n";
+            cin>>hand;
+
+            closeGrasp= hand ==0 ? closeLeftGrasp :closeRightGrasp;
+            jointPos.clear();
+            if(hand ==1)
+            {
+//                cout<<"Right Selected \n";
+//                cout<<robot_state_->getJointPosition("rightIndexFingerPitch1")<<"\n";
+//                cout<<robot_state_->getJointPosition("rightIndexFingerPitch2")<<"\n";
+//                cout<<robot_state_->getJointPosition("rightIndexFingerPitch3")<<"\n";
+//                cout<<robot_state_->getJointPosition("rightMiddleFingerPitch1")<<"\n";
+//                cout<<robot_state_->getJointPosition("rightMiddleFingerPitch2")<<"\n";
+//                cout<<robot_state_->getJointPosition("rightMiddleFingerPitch3")<<"\n";
+//                cout<<robot_state_->getJointPosition("rightPinkyPitch1")<<"\n";
+//                cout<<robot_state_->getJointPosition("rightPinkyPitch2")<<"\n";
+//                cout<<robot_state_->getJointPosition("rightPinkyPitch3")<<"\n";
+//                cout<<robot_state_->getJointPosition("rightThumbPitch1")<<"\n";
+//                cout<<robot_state_->getJointPosition("rightThumbPitch2")<<"\n";
+//                cout<<robot_state_->getJointPosition("rightThumbPitch3")<<"\n";
+//                cout<<robot_state_->getJointPosition("rightThumbRoll")<<"\n";
+
+                jointPos.push_back(robot_state_->getJointPosition("rightIndexFingerPitch1"));
+                jointPos.push_back(robot_state_->getJointPosition("rightIndexFingerPitch2"));
+                jointPos.push_back(robot_state_->getJointPosition("rightIndexFingerPitch3"));
+                jointPos.push_back(robot_state_->getJointPosition("rightMiddleFingerPitch1"));
+                jointPos.push_back(robot_state_->getJointPosition("rightMiddleFingerPitch2"));
+                jointPos.push_back(robot_state_->getJointPosition("rightMiddleFingerPitch3"));
+                jointPos.push_back(robot_state_->getJointPosition("rightPinkyPitch1"));
+                jointPos.push_back(robot_state_->getJointPosition("rightPinkyPitch2"));
+                jointPos.push_back(robot_state_->getJointPosition("rightPinkyPitch3"));
+                jointPos.push_back(robot_state_->getJointPosition("rightThumbPitch1"));
+                jointPos.push_back(robot_state_->getJointPosition("rightThumbPitch2"));
+                jointPos.push_back(robot_state_->getJointPosition("rightThumbPitch3"));
+                jointPos.push_back(robot_state_->getJointPosition("rightThumbRoll"));
+            }
+            else
+            {
+//                cout<<"Left Selected \n";
+//                cout<<robot_state_->getJointPosition("leftIndexFingerPitch1")<<"\n";
+//                cout<<robot_state_->getJointPosition("leftIndexFingerPitch2")<<"\n";
+//                cout<<robot_state_->getJointPosition("leftIndexFingerPitch3")<<"\n";
+//                cout<<robot_state_->getJointPosition("leftMiddleFingerPitch1")<<"\n";
+//                cout<<robot_state_->getJointPosition("leftMiddleFingerPitch2")<<"\n";
+//                cout<<robot_state_->getJointPosition("leftMiddleFingerPitch3")<<"\n";
+//                cout<<robot_state_->getJointPosition("leftPinkyPitch1")<<"\n";
+//                cout<<robot_state_->getJointPosition("leftPinkyPitch2")<<"\n";
+//                cout<<robot_state_->getJointPosition("leftPinkyPitch3")<<"\n";
+//                cout<<robot_state_->getJointPosition("leftThumbPitch1")<<"\n";
+//                cout<<robot_state_->getJointPosition("leftThumbPitch2")<<"\n";
+//                cout<<robot_state_->getJointPosition("leftThumbPitch3")<<"\n";
+//                cout<<robot_state_->getJointPosition("leftThumbRoll")<<"\n";
+
+                jointPos.push_back(robot_state_->getJointPosition("leftIndexFingerPitch1"));
+                jointPos.push_back(robot_state_->getJointPosition("leftIndexFingerPitch2"));
+                jointPos.push_back(robot_state_->getJointPosition("leftIndexFingerPitch3"));
+                jointPos.push_back(robot_state_->getJointPosition("leftMiddleFingerPitch1"));
+                jointPos.push_back(robot_state_->getJointPosition("leftMiddleFingerPitch2"));
+                jointPos.push_back(robot_state_->getJointPosition("leftMiddleFingerPitch3"));
+                jointPos.push_back(robot_state_->getJointPosition("leftPinkyPitch1"));
+                jointPos.push_back(robot_state_->getJointPosition("leftPinkyPitch2"));
+                jointPos.push_back(robot_state_->getJointPosition("leftPinkyPitch3"));
+                jointPos.push_back(robot_state_->getJointPosition("leftThumbPitch1"));
+                jointPos.push_back(robot_state_->getJointPosition("leftThumbPitch2"));
+                jointPos.push_back(robot_state_->getJointPosition("leftThumbPitch3"));
+                jointPos.push_back(robot_state_->getJointPosition("leftThumbRoll"));
+            }
+            diffClose=0;
+            diffOpen=0;
+            for (size_t i = 0; i < closeGrasp.size(); ++i) {
+//                cout<<jointPos[i]<<"\t"<<closeGrasp[i]<<"\t"<<(jointPos[i]-closeGrasp[i])<<"\t"<<diffClose<<"\n";
+                diffClose+=fabs(jointPos[i]-closeGrasp[i]);
+                diffOpen+=fabs(jointPos[i]-openGrasp[i]);
+            }
+            cout<<"diff close "<<diffClose<<"\n";
+            cout<<"diff open "<<diffOpen<<"\n";
+            if(fabs(diffOpen)<0.1)
+            {
+                cout<<"Opened Gripper \n";
+            }
+            else if(fabs(diffClose)<0.1)
+            {
+                cout<<"Closed Gripper \n";
+            }
+            else
+            {
+                cout<<"Handle Grabbed or Unknown State\n";
+            }
         }
         else if(input=='s')
         {

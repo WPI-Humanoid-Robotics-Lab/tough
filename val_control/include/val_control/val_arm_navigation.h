@@ -149,6 +149,8 @@ private:
     const std::vector<float> DEFAULT_RIGHT_POSE;
     const std::vector<float> DEFAULT_LEFT_POSE;
     const int NUM_ARM_JOINTS;
+    std::vector<std::pair<float, float> > joint_limits_left_;
+    std::vector<std::pair<float, float> > joint_limits_right_;
     ros::NodeHandle nh_;
     ros::Publisher  armTrajectoryPublisher;
     ros::Publisher  handTrajectoryPublisher;
