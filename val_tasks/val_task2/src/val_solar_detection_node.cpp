@@ -1,7 +1,7 @@
 #include "val_task2/val_solar_detection.h"
 
 int main(int argc, char** argv){
-  ros::init(argc, argv, "solar_plane_detection");
+  ros::init(argc, argv, "solar_array_detection");
   ros::NodeHandle nh;
   geometry_msgs::Pose rover_loc;
 
