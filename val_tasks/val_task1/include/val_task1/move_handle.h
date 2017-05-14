@@ -28,7 +28,7 @@ class move_handle{
 public:
   move_handle (ros::NodeHandle);
   void follow_path(std::vector<geometry_msgs::Pose> &, armSide, geometry_msgs::Pose,std::vector<double>);
-  void createCircle(geometry_msgs::Point center,int side, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points,const float);
+  void createCircle(geometry_msgs::Point center,int side, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points,const float spin = 2*M_PI);
   void visulatize(std::vector<geometry_msgs::Pose> &);
 private:
   std::vector<double> linspace(double , double , int );
