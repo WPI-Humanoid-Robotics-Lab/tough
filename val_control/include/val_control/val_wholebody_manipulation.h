@@ -25,7 +25,7 @@ private :
     void chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj);
     std::vector<std::pair<float, float> > joint_limits_left_;
     std::vector<std::pair<float, float> > joint_limits_right_;
-
+    bool validateTrajectory(const trajectory_msgs::JointTrajectory &traj);
 };
 
 #endif // WHOLEBODYMANIPULATION_H

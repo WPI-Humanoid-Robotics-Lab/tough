@@ -26,6 +26,10 @@ wholebodyManipulation::wholebodyManipulation(ros::NodeHandle &nh):nh_(nh)
 
 void wholebodyManipulation::compileMsg(const armSide side, const trajectory_msgs::JointTrajectory &traj)
 {
+
+    if(!validateTrajectory(traj)){
+        return;
+    }
     ihmc_msgs::WholeBodyTrajectoryRosMessage wholeBodyMsg;
 
     //Solving for side conflicts
@@ -144,5 +148,15 @@ void wholebodyManipulation::chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &m
         msg.chest_trajectory_message.taskspace_trajectory_points.push_back(data);
     }
 
+}
+
+bool wholebodyManipulation::validateTrajectory(const trajectory_msgs::JointTrajectory &traj)
+{
+    for (trajectory_msgs::JointTrajectoryPoint point : traj.points){
+        if (point.positions.size() != 10){
+            return false;
+        }
+    }
+    return true;
 }
 
