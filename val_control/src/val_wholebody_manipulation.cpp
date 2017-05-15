@@ -4,6 +4,24 @@ wholebodyManipulation::wholebodyManipulation(ros::NodeHandle &nh):nh_(nh)
 {
     m_wholebodyPub = nh_.advertise<ihmc_msgs::WholeBodyTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/whole_body_trajectory", 10, true);
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    joint_limits_left_.resize(7);
+    joint_limits_right_.resize(7);
+
+    joint_limits_left_[0]={-2.85,2.0};
+    joint_limits_left_[1]={-1.519,1.266};
+    joint_limits_left_[2]={-3.1,2.18};
+    joint_limits_left_[3]={-2.174,0.12};
+    joint_limits_left_[4]={-2.019,3.14};
+    joint_limits_left_[5]={-0.62,0.625};
+    joint_limits_left_[6]={-0.36,0.48};
+
+    joint_limits_right_[0]={-2.85,2.0};
+    joint_limits_right_[1]={-1.266,1.519};
+    joint_limits_right_[2]={-3.1,2.18};
+    joint_limits_right_[3]={-0.12,2.174};
+    joint_limits_right_[4]={-2.019,3.14};
+    joint_limits_right_[5]={-0.625,0.62};
+    joint_limits_right_[6]={-0.48,0.36};
 }
 
 void wholebodyManipulation::compileMsg(const armSide side, const trajectory_msgs::JointTrajectory &traj)
@@ -48,12 +66,12 @@ void wholebodyManipulation::compileMsg(const armSide side, const trajectory_msgs
     if(side == LEFT)
     {
         wholeBodyMsg.left_arm_trajectory_message.unique_id=wholeBodyMsg.unique_id;
-        leftArmMsg(wholeBodyMsg,traj);
+        leftArmMsg(wholeBodyMsg,traj,joint_limits_left_);
     }
     else
     {
         wholeBodyMsg.right_arm_trajectory_message.unique_id=wholeBodyMsg.unique_id;
-        rightArmMsg(wholeBodyMsg,traj);
+        rightArmMsg(wholeBodyMsg,traj,joint_limits_right_);
     }
 
     // Chest
@@ -65,15 +83,16 @@ void wholebodyManipulation::compileMsg(const armSide side, const trajectory_msgs
     ros::Duration(1).sleep();
 }
 
-void wholebodyManipulation::leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj)
+void wholebodyManipulation::leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_)
 {
     msg.left_arm_trajectory_message.joint_trajectory_messages.resize(7);
     for(int trajPointNumber = 0; trajPointNumber < traj.points.size(); trajPointNumber++){
         for (int jointNumber = 3; jointNumber < 10; ++jointNumber) {
             ihmc_msgs::TrajectoryPoint1DRosMessage ihmc_pointMsg;
             ihmc_pointMsg.time = traj.points[trajPointNumber].time_from_start.toSec();
-
             ihmc_pointMsg.position = traj.points[trajPointNumber].positions[jointNumber];
+            ihmc_pointMsg.position= ihmc_pointMsg.position <= joint_limits_[jointNumber-3].first  ? joint_limits_[jointNumber-3].first : ihmc_pointMsg.position;
+            ihmc_pointMsg.position = ihmc_pointMsg.position>= joint_limits_[jointNumber-3].second ? joint_limits_[jointNumber-3].second : ihmc_pointMsg.position;
             ihmc_pointMsg.velocity = traj.points[trajPointNumber].velocities[jointNumber];
 
             msg.left_arm_trajectory_message.joint_trajectory_messages[jointNumber-3].trajectory_points.push_back(ihmc_pointMsg);
@@ -83,15 +102,16 @@ void wholebodyManipulation::leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage 
     }
 }
 
-void wholebodyManipulation::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj)
+void wholebodyManipulation::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_)
 {
     msg.right_arm_trajectory_message.joint_trajectory_messages.resize(7);
     for(int trajPointNumber = 0; trajPointNumber < traj.points.size(); trajPointNumber++){
         for (int jointNumber = 3; jointNumber < 10; ++jointNumber) {
             ihmc_msgs::TrajectoryPoint1DRosMessage ihmc_pointMsg;
             ihmc_pointMsg.time = traj.points[trajPointNumber].time_from_start.toSec();
-
             ihmc_pointMsg.position = traj.points[trajPointNumber].positions[jointNumber];
+            ihmc_pointMsg.position= ihmc_pointMsg.position <= joint_limits_[jointNumber-3].first  ? joint_limits_[jointNumber-3].first : ihmc_pointMsg.position;
+            ihmc_pointMsg.position = ihmc_pointMsg.position>= joint_limits_[jointNumber-3].second ? joint_limits_[jointNumber-3].second : ihmc_pointMsg.position;
             ihmc_pointMsg.velocity = traj.points[trajPointNumber].velocities[jointNumber];
 
             msg.right_arm_trajectory_message.joint_trajectory_messages[jointNumber-3].trajectory_points.push_back(ihmc_pointMsg);

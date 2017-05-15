@@ -20,9 +20,12 @@ private :
     ros::NodeHandle nh_;
     ros::Publisher m_wholebodyPub;
     RobotStateInformer* robot_state_;
-    void rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj);
-    void leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj);
+    void rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_);
+    void leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_);
     void chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj);
+    std::vector<std::pair<float, float> > joint_limits_left_;
+    std::vector<std::pair<float, float> > joint_limits_right_;
+
 };
 
 #endif // WHOLEBODYMANIPULATION_H
