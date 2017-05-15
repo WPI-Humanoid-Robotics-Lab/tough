@@ -503,7 +503,7 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
         ROS_INFO("Executing the grasp handle command");
         executing = true;
         // move the chest, so we get maximum manipulability
-        chest_controller_->controlChest(0, 10, 40);
+//        chest_controller_->controlChest(0, 10, 40);
 
         // grasp the handle
         //1 - right
@@ -544,7 +544,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
     // reduce the pelvis height, so we get maximum maipulability
     ros::Duration(1).sleep();
-    pelvis_controller_->controlPelvisHeight(0.8);
+//    pelvis_controller_->controlPelvisHeight(0.8);
 
     // generate the way points in cartersian space
     std::vector<geometry_msgs::Pose> waypoints;
@@ -561,7 +561,8 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
 
     // execute the trajectory
-    arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
+    wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
+    //    arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
 
     //eventQueue.riseEvent("/PITCH_CORRECTION_SUCESSFUL");
 
