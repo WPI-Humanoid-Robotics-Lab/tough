@@ -29,6 +29,7 @@ private:
 
      std::map<std::string, RobotState> currentState_;
      std::mutex currentStateMutex_;
+    ~RobotStateInformer();
 
 public:
     static RobotStateInformer* getRobotStateInformer(ros::NodeHandle nh);
@@ -56,7 +57,7 @@ public:
 
     bool isGraspped(armSide side);
     std::vector<float> closeRightGrasp,closeLeftGrasp,openGrasp;
-    ~RobotStateInformer();
+
 
 };
 

@@ -47,11 +47,12 @@ valTask1::valTask1(ros::NodeHandle nh):
     move_handle_        = new move_handle(nh_);
 
     // controllers
-    chest_controller_   = new chestTrajectory(nh_);
-    pelvis_controller_  = new pelvisTrajectory(nh_);
-    head_controller_    = new HeadTrajectory(nh_);
-    gripper_controller_ = new gripperControl(nh_);
-    arm_controller_     = new armTrajectory(nh_);
+    chest_controller_    = new chestTrajectory(nh_);
+    pelvis_controller_   = new pelvisTrajectory(nh_);
+    head_controller_     = new HeadTrajectory(nh_);
+    gripper_controller_  = new gripperControl(nh_);
+    arm_controller_      = new armTrajectory(nh_);
+    wholebody_controller_= new wholebodyManipulation(nh_);
 
     //state informer
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
@@ -60,8 +61,8 @@ valTask1::valTask1(ros::NodeHandle nh):
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask1::visited_map_cb, this);
 
     // cartesian planners for the arm
-    left_arm_planner_ = new cartesianPlanner("leftArm", "/world");
-    right_arm_planner_ = new cartesianPlanner("rightArm", "/world");
+    left_arm_planner_ = new cartesianPlanner("leftPalm", "/world");
+    right_arm_planner_ = new cartesianPlanner("rightPalm", "/world");
 
     // task1 utils
     task1_utils_ = new task1Utils(nh_);
@@ -79,7 +80,6 @@ valTask1::~valTask1(){
     if(pelvis_controller_ != nullptr)   delete pelvis_controller_;
     if(head_controller_ != nullptr)     delete head_controller_;
     if(gripper_controller_ != nullptr)  delete gripper_controller_;
-    if(robot_state_ != nullptr)         delete robot_state_;
     if(arm_controller_ != nullptr)      delete arm_controller_;
 }
 
@@ -512,6 +512,7 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
         geometry_msgs::Pose pose;
         robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF, pose);
         handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[1]);
+        ros::Duration(0.2).sleep(); //wait till grasp is complete
         eventQueue.riseEvent("/GRASP_PITCH_HANDLE_EXECUTING");
     }
     else if (robot_state_->isGraspped(armSide::RIGHT)){
@@ -545,7 +546,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     static bool execute_once = true;
     static int retry_count = 0;
     static double pitch_correction_per_point;
-#define PITCH_TEST_ROTATION 10.0
+#define PITCH_TEST_ROTATION 10
     double position_error = task1_utils_->getPitchDiff();
 
     // generate the way points in cartersian space
@@ -571,8 +572,8 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         // plan the trajectory
         moveit_msgs::RobotTrajectory traj;
         right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
-
         traj.joint_trajectory.points.resize(PITCH_TEST_ROTATION);
+        ROS_INFO("trajectory points trimmed");
 
         // execute the trajectory
         wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
@@ -581,6 +582,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
         //stop all trajectories
         double error_after = task1_utils_->getPitchDiff();
+        /// @todo what happens when points are not generated correctly?
 
         pitch_correction_per_point = (error_before - error_after) / PITCH_TEST_ROTATION;
         ROS_INFO_STREAM("Pitch correction per point"<<pitch_correction_per_point);
@@ -612,10 +614,6 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
         task1_utils_->getCircle3D(handle_loc_[0], handle_loc_[1], grab_pose, panel_coeff_, waypoints, 0.125, 10);
 
-        // execute the trajectory
-        wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
-        //    arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
-
         ///@todo: remove the visulaisation
         task1_utils_->visulatise6DPoints(waypoints);
 
@@ -625,7 +623,9 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         traj.joint_trajectory.points.resize(points_to_rotate);
 
         // execute the trajectory
-        arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
+        wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
+        //    arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
+
         ros::Duration(5).sleep();
 
         //stop all trajectories
