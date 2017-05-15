@@ -75,7 +75,7 @@ void move_handle::createCircle(geometry_msgs::Point center, int side, const std:
     // point.orientation.z=t.z();
     //std::cout<<"direction:  "<<dir<<std::endl;
 
-    point.position.z = -(a*point.position.x  + b* point.position.y + (d - dist+.05) )/c   ;
+    point.position.z = -(a*point.position.x  + b* point.position.y + (d - dist+.1) )/c   ;
 
     points.push_back(point);
   }
@@ -117,7 +117,7 @@ void move_handle::follow_path(std::vector<geometry_msgs::Pose>& points, armSide 
         task_space_data->pose.position = input_pose.position;
         hand_pose.setRPY(roll,pitch,yaw);
         tf::quaternionTFToMsg(hand_pose,new_pose);
-        task_space_data->pose.orientation = new_pose;
+        task_space_data->pose.orientation = hand.orientation    ;
         task_space_data->time = (i/num_poses)*desired_time; //what xyzzy
         arm_data_vector->push_back(*task_space_data);
         ROS_INFO_STREAM(task_space_data->pose);
