@@ -145,6 +145,8 @@ bool PanelDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geom
     pcl::eigen33(covarianceMatrix, eigenVectors, eigenValues);
 
     double OFFSET = preset_configs_[currentDetector].OFFSET;
+
+    // what can be done to detect only the lower plane?
     if (preset_configs_[currentDetector].settingName == "HANDLE_PANEL_COARSE" || preset_configs_[currentDetector].settingName == "HANDLE_PANEL_FINE"){
         if(pose.position.z > 0.80 && pose.position.z < 0.83){
             ROS_INFO("Upper plane detected");

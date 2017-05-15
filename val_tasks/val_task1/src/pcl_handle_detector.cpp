@@ -14,7 +14,6 @@ pcl_handle_detector::pcl_handle_detector(ros::NodeHandle &nh, float panel_offset
 
 pcl_handle_detector::~pcl_handle_detector()
 {
-    if(robot_state_ != nullptr)         delete robot_state_;
     pcl_sub_.shutdown();
 }
 

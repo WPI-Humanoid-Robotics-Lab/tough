@@ -28,8 +28,8 @@ int main(int argc, char **argv)
     goal.y = 0.0;
     goal.theta =-1.57 ;
     ROS_INFO("About to walk");
-    //walk.walkToGoal(goal);
-    walk.turn(RIGHT);
+    walk.walkToGoal(goal);
+//    walk.turn(RIGHT);
 
     //walk.walkNSteps(1,0.3);
     ROS_INFO("Command Executed");

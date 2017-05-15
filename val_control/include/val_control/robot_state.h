@@ -7,6 +7,7 @@
 #include <tf/transform_listener.h>
 #include <mutex>
 #include "val_common/val_common_names.h"
+#include "val_common/val_common_defines.h"
 
 struct RobotState{
     std::string name;
@@ -28,6 +29,7 @@ private:
 
      std::map<std::string, RobotState> currentState_;
      std::mutex currentStateMutex_;
+    ~RobotStateInformer();
 
 public:
     static RobotStateInformer* getRobotStateInformer(ros::NodeHandle nh);
@@ -53,7 +55,9 @@ public:
     bool transformPoint(const geometry_msgs::PointStamped &pt_in, geometry_msgs::PointStamped &pt_out,const std::string target_frame=VAL_COMMON_NAMES::WORLD_TF);
     bool transformPoint(const geometry_msgs::Point &pt_in, geometry_msgs::Point &pt_out,const std::string &from_frame, const std::string &to_frame=VAL_COMMON_NAMES::WORLD_TF);
 
-    ~RobotStateInformer();
+    bool isGraspped(armSide side);
+    std::vector<float> closeRightGrasp,closeLeftGrasp,openGrasp;
+
 
 };
 

@@ -21,4 +21,7 @@
     <!--node
     if="$(arg reconf_gui)"
     pkg="rqt_console" type="rqt_console" name="rqt_console"/-->
+
+    <!-- launch the move group -->
+   <include file="$(find val_moveit_config)/launch/move_group.launch" />
 </launch>

@@ -23,12 +23,47 @@ void gripperControl::controlGripper(const armSide side, const std::vector<double
         ROS_ERROR("Please check the size of the vector");
     }
 
-     msg.data = gripperData;
+    msg.data = gripperData;
 
     if (side == LEFT){
         leftGripperContPublisher.publish(msg);
     }
 
+    else {
+        rightGripperContPublisher.publish(msg);
+    }
+}
+
+void gripperControl::controlGripper(const armSide side, GRIPPER_STATE state)
+{
+    std_msgs::Float64MultiArray msg;
+    msg.data.clear();
+
+    switch (state) {
+    case GRIPPER_STATE::OPEN:
+        msg.data.resize(5);
+        break;
+
+    case GRIPPER_STATE::OPEN_THUMB_IN:
+        msg.data.resize(5);
+        msg.data[0] = 1.4;
+        break;
+
+    case GRIPPER_STATE::CLOSE:
+        msg.data = side == LEFT? CLOSE_LEFT_GRIPPER : CLOSE_RIGHT_GRIPPER;
+        break;
+
+    case GRIPPER_STATE::CUP:
+        msg.data = side == LEFT? CUP_LEFT_GRIPPER : CUP_RIGHT_GRIPPER;
+        break;
+
+    default:
+        break;
+    }
+
+    if (side == LEFT){
+        leftGripperContPublisher.publish(msg);
+    }
     else {
         rightGripperContPublisher.publish(msg);
     }
@@ -54,7 +89,6 @@ void gripperControl::openGripper(const armSide side)
     std_msgs::Float64MultiArray msg;
     msg.data.clear();
     msg.data.resize(5);
-    msg.data[0] = 1.4;
     if (side == LEFT){
         leftGripperContPublisher.publish(msg);
     }

@@ -1,0 +1,10 @@
+<launch>
+  
+   <include file="$(find val_bringup)/launch/joint_state.launch" />
+   <include file="$(find val_perception_bringup)/launch/field_laser_assembler.launch" />
+   <include file="$(find val_perception_bringup)/launch/field_octomap.launch"/>
+   <include file="$(find val_footstep)/launch/val_footstep.launch"/>
+   <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 0.8"/>
+   
+   
+</launch>
