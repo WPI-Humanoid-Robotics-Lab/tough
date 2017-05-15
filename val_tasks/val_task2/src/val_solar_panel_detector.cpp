@@ -43,7 +43,7 @@ void SolarPanelDetect::getoffset(float &minX, float &maxX,float &minY, float &ma
 
 void SolarPanelDetect::setoffset(float minX, float maxX,float minY, float maxY,float minZ, float maxZ)
 {
-    float slope =tan(rover_theta);
+//    float slope =tan(rover_theta);
     ROS_INFO("setting offset");
 
     min_x = minX;
@@ -57,6 +57,7 @@ void SolarPanelDetect::setoffset(float minX, float maxX,float minY, float maxY,f
 
 void SolarPanelDetect::setRoverTheta()
 {
+    // this func is for finding yaw and used for tranformation of the cloud
     tf::Quaternion quat(rover_loc_.orientation.x,rover_loc_.orientation.y,rover_loc_.orientation.z,rover_loc_.orientation.w);
     tf::Matrix3x3 rotation(quat);
     tfScalar roll,pitch,yaw;
@@ -123,8 +124,6 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,ge
     Eigen::Vector3f eigenValues;
     pcl::eigen33(covarianceMatrix, eigenVectors, eigenValues);
 
-
-
 /*    ROS_INFO_STREAM("centroid x: "<<centroid(0)<<"centroid y: "<<centroid(1)<<"centroid z: "<<centroid(2));
     ROS_INFO_STREAM("Eigen value "<<eigenValues.col(0)<<"vec : "<<eigenVectors.col(0)[0]<<" "<<eigenVectors.col(0)[1]<<" "<<eigenVectors.col(0)[2]);
     ROS_INFO_STREAM("Eigen value "<<eigenValues.col(1)<<"vec : "<<eigenVectors.col(1)[0]<<" "<<eigenVectors.col(1)[1]<<" "<<eigenVectors.col(1)[2]);
@@ -136,10 +135,22 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,ge
 
 //    ROS_INFO("theta %.2f",theta);
     // so that arrow is always inwards that is quadrant I and II
-    if (theta <0)
+    if(isroverRight_)
     {
-        ROS_INFO("hey");
-        theta+=M_PI;
+        if (theta >0)
+        {
+    //        ROS_INFO("hey");
+            theta-=M_PI;
+        }
+
+    }
+    else
+    {
+        if (theta <0)
+        {
+    //        ROS_INFO("hey");
+            theta+=M_PI;
+        }
     }
 
 //    float slope = (cloud->points[0].x-cloud->points[1].x)/(cloud->points[0].y-cloud->points[1].y);
@@ -303,21 +314,24 @@ void SolarPanelDetect::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cl
 {
 
 
-    float min_x,min_y,max_x,max_y;
-    min_x = 0;
-    max_x = 1;
-    min_y = -1.5;
-    max_y =  1.5;
+//    float min_x,min_y,max_x,max_y;
+//    min_x = 0;
+//    max_x = 1;
+//    min_y = -1.5;
+//    max_y =  1.5;
 
-    geometry_msgs::Point pt_in,pt_out;
 /*
+    geometry_msgs::Point pt_in,pt_out;
     // transforming pts from pelvis to world frame
     pt_in.x = solar_pass_x_min;
     pt_in.y =  0;
     pt_in.z =  0;
     robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
-    min_x = pt_out.x;
-    pt_in.x = solar_pass_x_max;
+    min_x = pt_out.x;    min_x = 0;
+    max_x = 1;
+    min_y = -1.5;
+    max_y =  1.5;
+    pt_in.x = solar_pass_x_max;min_x
     pt_in.y =  0;
     pt_in.z =  0;
     robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
@@ -349,7 +363,7 @@ void SolarPanelDetect::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cl
     pcl::PassThrough<pcl::PointXYZ> pass_z;
     pass_z.setInputCloud(cloud);
     pass_z.setFilterFieldName("z");
-    pass_z.setFilterLimits(0.8,1.2);
+    pass_z.setFilterLimits(min_z,max_z);
     pass_z.filter(*cloud);
 
 }
