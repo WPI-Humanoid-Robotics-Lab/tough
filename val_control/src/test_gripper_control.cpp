@@ -20,7 +20,12 @@ int main(int argc, char **argv){
         }
 
     }
-    else{
+    else if(argc == 3){
+        armSide side = (armSide)std::atoi(argv[1]);
+        GRIPPER_STATE state = (GRIPPER_STATE)std::atoi(argv[2]);
+        gripcont.controlGripper(side, state);
+    }
+    else {
         ROS_INFO("Usage: rosrun %s 1 \n to open grippers \n running demo", argv[0]);
         std::vector<double> leftgripClose = {1.4, -0.55, 0.0, -0.9, -1.0};
         std::vector<double> rightgripClose = {1.4, 0.55, 0.0, 0.9, 1.0};
