@@ -56,23 +56,26 @@ private:
   std::vector<geometry_msgs::Pose> detections_;
   int detection_tries_;
 
+  float min_x,max_x, min_y,max_y,min_z,max_z;
 
 
   void cloudCB(const sensor_msgs::PointCloud2::Ptr &input);
   void PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
   void setRoverTheta();
+  void visualizept(geometry_msgs::Pose pose);
+  void visualizept(float x,float y,float z);
 
-  float min_x,max_x;
 
-//  void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
+  void transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool isinverse);
+  void filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+  void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,geometry_msgs::Pose &pose);
 
 public:
   SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose rover_loc, bool isroverRight);
   ~SolarPanelDetect();
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
   int getDetectionTries() const;
-  void transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool isinverse);
-  void setXoffset(float minX=-5.0, float maxX=5.0);
-  void getXoffset(float &minX, float &maxX);
+  void setoffset(float minX=-5.0, float maxX=5.0, float minY=0.0, float maxY=1.0, float minZ=0.8, float maxZ=1.2);
+  void getoffset(float &minX, float &maxX,float &minY, float &maxY,float &minZ, float &maxZ);
 
 };
