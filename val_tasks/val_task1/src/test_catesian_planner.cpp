@@ -6,6 +6,7 @@
 #include <val_control/robot_state.h>
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
+#include "val_control/val_wholebody_manipulation.h"
 
 int main(int argc, char** argv){
 
@@ -21,37 +22,38 @@ int main(int argc, char** argv){
 
     geometry_msgs::Point centerWorld,centerPelvis;
 
-    centerPelvis.x = 0.576;
-    centerPelvis.y= -0.196;
-    centerPelvis.z = -0.139;
-    robot_state->transformPoint(centerPelvis,centerWorld,VAL_COMMON_NAMES::PELVIS_TF);
+    centerPelvis.x = 2.66;
+    centerPelvis.y= 0.945;
+    centerPelvis.z = 0.845;
+//    robot_state->transformPoint(centerPelvis,centerWorld,VAL_COMMON_NAMES::PELVIS_TF);
 
 
     geometry_msgs::Point startWorld,startPelvis;
 
-    startPelvis.x = 0.432;
-    startPelvis.y= -0.189;
-    startPelvis.z = -0.138;
-    robot_state->transformPoint(startPelvis,startWorld,VAL_COMMON_NAMES::PELVIS_TF);
+    startPelvis.x = 2.6;
+    startPelvis.y= 0.84;
+    startPelvis.z = 0.82;
+//    robot_state->transformPoint(startPelvis,startWorld,VAL_COMMON_NAMES::PELVIS_TF);
 
     std::vector<geometry_msgs::Pose> points;
-    std::vector<float> panelCoeffs {-0.002, 0.4591, 0.8884, -0.1502};
-
+//    std::vector<float> panelCoeffs {-0.002, 0.4591, 0.8884, -0.1502};
+  std::vector<float> panelCoeffs {-0.0053, -0.4647, 0.8840, -0.1993};
     //desired pose
     geometry_msgs::Pose grasp_pose;
-    robot_state->getCurrentPose("/rightMiddleFingerPitch1Link",grasp_pose);
-
-    task1_utils.getCircle3D(centerWorld, startWorld, grasp_pose, panelCoeffs, points, 0.125, 10);
+    robot_state->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME,grasp_pose);
+task1_utils.getCircle3D(centerPelvis, startPelvis, grasp_pose, panelCoeffs, points, 0.125, 10);
+//    task1_utils.getCircle3D(centerWorld, startWorld, grasp_pose, panelCoeffs, points, 0.125, 10);
     task1_utils.visulatise6DPoints(points);
     ROS_INFO("waypoints generated");
 
     ROS_INFO("Planning the trajectory");
-    cartesianPlanner rightArmPlanner("rightArm", "/world");
+    cartesianPlanner rightArmPlanner("rightPalm", VAL_COMMON_NAMES::WORLD_TF);
     moveit_msgs::RobotTrajectory trajectory;
     rightArmPlanner.getTrajFromCartPoints(points, trajectory, false);
 
 
-    moveit::planning_interface::MoveGroup::Plan my_plan;
+
+
     //    if (1)
     //    {
     //        ROS_INFO("Visualizing plan 1 (again)");
@@ -66,7 +68,11 @@ int main(int argc, char** argv){
 
 
 
-    //    ROS_INFO("executing on robot\n");
-    //    armTrajectory armTraj(node_handle);
-    //    armTraj.moveArmTrajectory(RIGHT, trajectory.joint_trajectory);
+    ROS_INFO("executing on robot\n");
+//            armTrajectory armTraj(node_handle);
+//            armTraj.moveArmTrajectory(RIGHT, trajectory.joint_trajectory);
+
+    wholebodyManipulation msg(node_handle);
+    msg.compileMsg(RIGHT,trajectory.joint_trajectory);
+
 }

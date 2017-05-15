@@ -32,6 +32,7 @@
 #include "val_task_common/finish_box_detector.h"
 #include <val_task1/val_task1_utils.h>
 #include <val_moveit_planners/val_cartesian_planner.h>
+#include <val_control/val_wholebody_manipulation.h>
 
 using namespace decision_making;
 
@@ -71,6 +72,8 @@ class valTask1 {
     gripperControl* gripper_controller_;
     // arm
     armTrajectory* arm_controller_;
+    // whole body controller
+    wholebodyManipulation* wholebody_controller_;
     //robot state informer
     RobotStateInformer* robot_state_;
     // task1 utils

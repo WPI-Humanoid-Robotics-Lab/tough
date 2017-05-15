@@ -502,7 +502,8 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
         ROS_INFO("Executing the grasp handle command");
         executing = true;
         // move the chest, so we get maximum manipulability
-        chest_controller_->controlChest(0, 10, 40);
+        //        chest_controller_->controlChest(0, 10, 40);
+
         // grasp the handle
         //1 - right
         //3 - left
@@ -560,9 +561,6 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         execute_once = false;
         ROS_INFO_STREAM("Finding pitch correction per point");
 
-        // reduce the pelvis height, so we get maximum maipulability
-        pelvis_controller_->controlPelvisHeight(0.8);
-
         double error_before =  position_error;
 
         task1_utils_->getCircle3D(handle_loc_[0], handle_loc_[1], grab_pose, panel_coeff_, waypoints, 0.125, 10);
@@ -577,7 +575,8 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         traj.joint_trajectory.points.resize(PITCH_TEST_ROTATION);
 
         // execute the trajectory
-        arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
+        wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
+        //        arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
         ros::Duration(4).sleep();
 
         //stop all trajectories
@@ -613,6 +612,9 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
         task1_utils_->getCircle3D(handle_loc_[0], handle_loc_[1], grab_pose, panel_coeff_, waypoints, 0.125, 10);
 
+        // execute the trajectory
+        wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
+        //    arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
 
         ///@todo: remove the visulaisation
         task1_utils_->visulatise6DPoints(waypoints);
