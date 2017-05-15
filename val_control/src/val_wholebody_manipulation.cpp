@@ -65,7 +65,7 @@ void wholebodyManipulation::compileMsg(const armSide side, const trajectory_msgs
     ros::Duration(1).sleep();
 }
 
-void wholebodyManipulation::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj)
+void wholebodyManipulation::leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj)
 {
     msg.left_arm_trajectory_message.joint_trajectory_messages.resize(7);
     for(int trajPointNumber = 0; trajPointNumber < traj.points.size(); trajPointNumber++){
@@ -83,7 +83,7 @@ void wholebodyManipulation::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage
     }
 }
 
-void wholebodyManipulation::leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj)
+void wholebodyManipulation::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj)
 {
     msg.right_arm_trajectory_message.joint_trajectory_messages.resize(7);
     for(int trajPointNumber = 0; trajPointNumber < traj.points.size(); trajPointNumber++){
