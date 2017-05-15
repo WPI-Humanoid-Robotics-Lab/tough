@@ -136,7 +136,7 @@ void task1Utils::visulatise6DPoints(std::vector<geometry_msgs::Pose> &points)
         marker_tangent.action = visualization_msgs::Marker::ADD;
         marker_tangent.pose = points[i];
 
-        ROS_INFO_STREAM(i<<"pose"<<points[i].position);
+//        ROS_INFO_STREAM(i<<"pose"<<points[i].position);
         marker_tangent.scale.x = 0.05;
         marker_tangent.scale.y = 0.006;
         marker_tangent.scale.z = 0.006;
@@ -156,7 +156,7 @@ void task1Utils::visulatise6DPoints(std::vector<geometry_msgs::Pose> &points)
         marker_point.action = visualization_msgs::Marker::ADD;
         marker_point.pose = points[i];
 
-        ROS_INFO_STREAM(i<<"pose"<<points[i].position);
+//        ROS_INFO_STREAM(i<<"pose"<<points[i].position);
         marker_point.scale.x = 0.005;
         marker_point.scale.y = 0.005;
         marker_point.scale.z = 0.005;

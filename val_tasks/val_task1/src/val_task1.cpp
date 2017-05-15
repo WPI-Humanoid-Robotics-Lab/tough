@@ -503,7 +503,6 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
         executing = true;
         // move the chest, so we get maximum manipulability
         chest_controller_->controlChest(0, 10, 40);
-
         // grasp the handle
         //1 - right
         //3 - left
@@ -541,28 +540,110 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 {
     ROS_INFO_STREAM("executing " << name);
 
-    // reduce the pelvis height, so we get maximum maipulability
-    ros::Duration(1).sleep();
-    pelvis_controller_->controlPelvisHeight(0.8);
+    static double prev_position_error=9999;
+    static bool execute_once = true;
+    static int retry_count = 0;
+    static double pitch_correction_per_point;
+#define PITCH_TEST_ROTATION 10.0
+    double position_error = task1_utils_->getPitchDiff();
 
     // generate the way points in cartersian space
     std::vector<geometry_msgs::Pose> waypoints;
     //desired pose (i.e. the grab pose)
     geometry_msgs::Pose grab_pose;
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME,grab_pose);
-    task1_utils_->getCircle3D(handle_loc_[0], handle_loc_[1], grab_pose, panel_coeff_, waypoints, 0.125, 10);
 
-    ///@todo: remove the visulaisation
-    task1_utils_->visulatise6DPoints(waypoints);
 
-    // plan the trajectory
-    moveit_msgs::RobotTrajectory traj;
-    right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+    if (execute_once){
+        //do the stuff that needs to be executed only once
+        //calculate (change in pitch)/(number of points)
+        execute_once = false;
+        ROS_INFO_STREAM("Finding pitch correction per point");
 
-    // execute the trajectory
-    arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
+        // reduce the pelvis height, so we get maximum maipulability
+        pelvis_controller_->controlPelvisHeight(0.8);
 
-    //eventQueue.riseEvent("/PITCH_CORRECTION_SUCESSFUL");
+        double error_before =  position_error;
+
+        task1_utils_->getCircle3D(handle_loc_[0], handle_loc_[1], grab_pose, panel_coeff_, waypoints, 0.125, 10);
+
+        ///@todo: remove the visulaisation
+        task1_utils_->visulatise6DPoints(waypoints);
+
+        // plan the trajectory
+        moveit_msgs::RobotTrajectory traj;
+        right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+
+        traj.joint_trajectory.points.resize(PITCH_TEST_ROTATION);
+
+        // execute the trajectory
+        arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
+        ros::Duration(4).sleep();
+
+        //stop all trajectories
+        double error_after = task1_utils_->getPitchDiff();
+
+        pitch_correction_per_point = (error_before - error_after) / PITCH_TEST_ROTATION;
+        ROS_INFO_STREAM("Pitch correction per point"<<pitch_correction_per_point);
+
+        prev_position_error = error_after;
+
+        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
+    }
+
+    if(task1_utils_->isPitchCompleted()){
+        //completed.
+        ROS_INFO_STREAM("Pitch correction checkpoint completed");
+        eventQueue.riseEvent("/PITCH_CORRECTION_SUCESSFUL");
+        //safely release the handle and move arm to a safe position
+    }
+    else if (task1_utils_->isPitchCorrectNow()){
+        // sleep for 3 sec and come back to this state
+        // stop all trajectories
+        ROS_INFO_STREAM("Pitch is correct. holding on to that position");
+        ros::Duration(3).sleep();
+        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
+    }
+    else if(fabs(position_error) < fabs(prev_position_error) ){
+        ROS_INFO_STREAM("Adjusting pitch");
+        prev_position_error = position_error;
+
+        int points_to_rotate = position_error*pitch_correction_per_point;
+        // generate these many points and rotate handle
+
+        task1_utils_->getCircle3D(handle_loc_[0], handle_loc_[1], grab_pose, panel_coeff_, waypoints, 0.125, 10);
+
+
+        ///@todo: remove the visulaisation
+        task1_utils_->visulatise6DPoints(waypoints);
+
+        // plan the trajectory
+        moveit_msgs::RobotTrajectory traj;
+        right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+        traj.joint_trajectory.points.resize(points_to_rotate);
+
+        // execute the trajectory
+        arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
+        ros::Duration(5).sleep();
+
+        //stop all trajectories
+        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
+    }
+    else if(fabs(position_error) >= fabs(prev_position_error) && retry_count++ < 5) {
+        //failed. change direction and retry
+        //want to reset execute_once?
+        ROS_INFO_STREAM("current error is more than previous error. retrying");
+        execute_once = true;
+        prev_position_error=9999;
+        eventQueue.riseEvent("/PITCH_CORRECTION_RETRY");
+    }
+    else{
+        //failed completely
+        ROS_INFO_STREAM("Pitch correction failed");
+        execute_once = true;
+        prev_position_error=9999;
+        eventQueue.riseEvent("/PITCH_CORRECTION_FAILED");
+    }
 
     return TaskResult::SUCCESS();
 }
