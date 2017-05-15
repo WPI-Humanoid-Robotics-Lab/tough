@@ -26,10 +26,11 @@ bool taskCommonUtils::isGoalReached(geometry_msgs::Pose2D pose_old, geometry_msg
     {
         ret = false;
     }
-//    else if (fabs(fmod(pose_new.theta,(2*M_PI)) - fmod(pose_new.theta,(2*M_PI))) > GOAL_ANGLE_TOLERANCE)
-//    {
-//        ret = false;
-//    }
+
+    else if (fabs(fmod(pose_new.theta,(2*M_PI)) - fmod(pose_new.theta,(2*M_PI))) > GOAL_ANGLE_TOLERANCE)
+    {
+        ret = false;
+    }
 
     return ret;
 }
@@ -41,5 +42,5 @@ bool taskCommonUtils::isGoalReached(geometry_msgs::Pose pose_old, geometry_msgs:
     pose2d_old.x = pose_old.position.x;
     pose2d_old.y = pose_old.position.y;
     pose2d_old.theta = tf::getYaw(pose_old.orientation);
-    return !taskCommonUtils::isPoseChanged(pose2d_old, pose_new);
+    return taskCommonUtils::isGoalReached(pose2d_old, pose_new);
 }
