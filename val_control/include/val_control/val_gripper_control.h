@@ -5,6 +5,12 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <val_common/val_common_defines.h>
 
+enum class GRIPPER_STATE{
+    OPEN=0,
+    OPEN_THUMB_IN,
+    CLOSE,
+    CUP
+};
 
 class gripperControl {
 
@@ -13,8 +19,15 @@ private:
     ros::NodeHandle nh_;
     ros::Publisher leftGripperContPublisher;
     ros::Publisher rightGripperContPublisher;
-    const std::vector<double> CLOSE_LEFT_GRIPPER = {1.4, -0.55, -1.1, -0.9, -1.0};
-    const std::vector<double> CLOSE_RIGHT_GRIPPER = {1.4, 0.55, 1.1, 0.9, 1.0};
+    //GRIPPER_STATE::OPEN_THUMB_IN
+    const std::vector<double> OPEN_THUMB_IN_LEFT_GRIPPER  = {1.3999, 0.0, 0.0, 0.0, 0.0};
+    const std::vector<double> OPEN_THUMB_IN_RIGHT_GRIPPER = {1.3999, 0.0, 0.0, 0.0, 0.0};
+    //GRIPPER_STATE::CLOSE
+    const std::vector<double> CLOSE_LEFT_GRIPPER  = {1.3999, -0.55, -1.1, -0.9, -1.0};
+    const std::vector<double> CLOSE_RIGHT_GRIPPER = {1.3999, 0.55, 1.1, 0.9, 1.0};
+    //GRIPPER_STATE::CUP
+    const std::vector<double> CUP_LEFT_GRIPPER  = {1.3999, -0.2, -0.55, -0.55, -0.55};
+    const std::vector<double> CUP_RIGHT_GRIPPER = {1.3999, 0.2, 0.55, 0.55, 0.55};
 
 public:
     /**
@@ -30,6 +43,8 @@ public:
      * @param gripperData is a vector of size 5.
      */
     void controlGripper(const armSide side, const std::vector<double> gripperData);
+
+    void controlGripper(const armSide side, GRIPPER_STATE state=GRIPPER_STATE::OPEN);
 
     /**
      * @brief closeGripper closes the gripper completely.

@@ -23,9 +23,11 @@ void task1Node::registerStateMethods(void)
     LocalTasks::registrate("STATE_DETECT_HANDLE_CENTER",std::bind(&valTask1::detectHandleCenterTask,task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_DETECT_PANEL_FINE",   std::bind(&valTask1::detectPanelFineTask,   task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_WALK_TO_PANEL",       std::bind(&valTask1::walkToPanel,           task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_ADJUST_ARMS",         std::bind(&valTask1::adjustArmTask,         task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_GRASP_PITCH_HANDLE",  std::bind(&valTask1::graspPitchHandleTask,  task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_CORRECT_PITCH",       std::bind(&valTask1::controlPitchTask,      task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_GRASP_YAW_HANDLE",    std::bind(&valTask1::graspYawHandleTask,    task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_CORRECT_YAW",         std::bind(&valTask1::controlYawTask,        task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_REDETECT_HANDLE",     std::bind(&valTask1::redetectHandleTask,    task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_DETECT_FINISH",       std::bind(&valTask1::detectfinishBoxTask,   task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_WALK_TO_FINISH",      std::bind(&valTask1::walkToFinishTask,      task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("END_STATE",                 std::bind(&valTask1::endTask,               task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));

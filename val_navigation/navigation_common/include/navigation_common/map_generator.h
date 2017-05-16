@@ -13,6 +13,13 @@
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include "val_control/robot_state.h"
 
+enum CELL_STATUS{
+    FREE = 0,
+    VISITED = 50,
+    BLOCKED = 90,
+    OCCUPIED = 100
+};
+
 class MapGenerator{
 
 public:
@@ -25,15 +32,18 @@ public:
 private:
     void resetMap(const std_msgs::Empty &msg);
     void convertToOccupancyGrid(const sensor_msgs::PointCloud2Ptr msg);
+    void updatePointsToBlock(const sensor_msgs::PointCloud2Ptr msg);
     void timerCallback(const ros::TimerEvent& e);
 
     ros::NodeHandle nh_;
     ros::Subscriber pointcloudSub_;
     ros::Subscriber resetMapSub_;
+    ros::Subscriber blockMapSub_;
     ros::Publisher  mapPub_;
     ros::Publisher  visitedMapPub_;
     nav_msgs::OccupancyGrid occGrid_;
     nav_msgs::OccupancyGrid visitedOccGrid_;
+    sensor_msgs::PointCloud2 pointsToBlock_;
     ros::Timer timer_;
     RobotStateInformer* currentState_;
 

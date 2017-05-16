@@ -61,7 +61,7 @@ RUN sudo apt-get -y update && sudo apt-get install -y srcsim
 ############### Not required as the srcsim and controller will be ona different server ###############
 
 
-RUN /bin/bash -c "source /opt/ros/indigo/setup.bash && \
+RUN /bin/bash -c "source /opt/nasa/indigo/setup.bash && \
                   mkdir -p ~/indigo_ws/src && \
                   cd ~/indigo_ws/src && \
                   catkin_init_workspace && \
@@ -155,4 +155,4 @@ RUN /bin/bash -c "source /opt/nasa/indigo/setup.bash && cd ~/indigo_ws && sudo r
 # roslaunch val_bringup final1.launch init:='false'
 
 # This cmd should be the roslaunch val_bringup
-CMD echo "Done"
+CMD roslaunch val_bringup final1.launch

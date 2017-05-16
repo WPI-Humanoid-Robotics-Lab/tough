@@ -7,7 +7,7 @@ move_handle::move_handle(ros::NodeHandle n) : nh_(n) {
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 
 }
-void move_handle::createCircle(geometry_msgs::Point center, int side, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points)
+void move_handle::createCircle(geometry_msgs::Point center, int side, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, const float spin)
 {
 
     // calculate rotated angle
@@ -16,7 +16,6 @@ void move_handle::createCircle(geometry_msgs::Point center, int side, const std:
   float radius = .20,num_steps = 10;
   float hand_z_plane = 0;
   float dist = 0;
-  float spin = M_PI/4; //
   float hand_angle;
   std::vector<double> path;
   armSide input_side;
@@ -55,7 +54,7 @@ void move_handle::createCircle(geometry_msgs::Point center, int side, const std:
   std::cout<<"starting angle : "<<hand_angle<<"\n";
   //geterate a traj from start angle to the finish angle
 //  path = linspace(hand_angle,spin, num_steps);
-  path = linspace(hand_angle,spin, num_steps);
+  path = linspace(hand_angle,hand_angle - spin, num_steps);
 
   dist = fabs( a*finger_pose.position.x  + b*finger_pose.position.y + c*finger_pose.position.z  + d )/sqrt( pow(a,2) + pow(b,2) + pow(c,2) );
 
@@ -76,7 +75,7 @@ void move_handle::createCircle(geometry_msgs::Point center, int side, const std:
     // point.orientation.z=t.z();
     //std::cout<<"direction:  "<<dir<<std::endl;
 
-    point.position.z = -(a*point.position.x  + b* point.position.y + (d - dist+.05) )/c   ;
+    point.position.z = -(a*point.position.x  + b* point.position.y + (d - dist+.1) )/c   ;
 
     points.push_back(point);
   }
@@ -91,7 +90,7 @@ void move_handle::follow_path(std::vector<geometry_msgs::Pose>& points, armSide 
 
     std::vector<armTrajectory::armTaskSpaceData> *arm_data_vector = new std::vector<armTrajectory::armTaskSpaceData>();
     // for(auto input_pose : *input_poses)
-    float desired_time = 10.0;
+    float desired_time = 120.0;
     float handle_angle = 0;
     geometry_msgs::Quaternion new_pose;
     double yaw,roll,pitch;
@@ -110,8 +109,6 @@ void move_handle::follow_path(std::vector<geometry_msgs::Pose>& points, armSide 
     tf::Quaternion q(temp.pose.orientation.x, temp.pose.orientation.y, temp.pose.orientation.z, temp.pose.orientation.w);
     tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
 
-
-
     for(int i=0;i<num_poses;i++)
     {
         geometry_msgs::Pose input_pose = points.at(i);
@@ -120,7 +117,7 @@ void move_handle::follow_path(std::vector<geometry_msgs::Pose>& points, armSide 
         task_space_data->pose.position = input_pose.position;
         hand_pose.setRPY(roll,pitch,yaw);
         tf::quaternionTFToMsg(hand_pose,new_pose);
-        task_space_data->pose.orientation = new_pose;
+        task_space_data->pose.orientation = hand.orientation    ;
         task_space_data->time = (i/num_poses)*desired_time; //what xyzzy
         arm_data_vector->push_back(*task_space_data);
         ROS_INFO_STREAM(task_space_data->pose);

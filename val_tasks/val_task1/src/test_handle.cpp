@@ -24,10 +24,9 @@ int main(int argc, char** argv){
   std::vector<geometry_msgs::Pose> points;
   std::vector<float> panelCoeffs {-0.3028,-0.3481,0.8872,0.5768};
 
-
+  handle.createCircle(center, 0,panelCoeffs, points, M_PI/4);
   while(ros::ok())
   {
-    handle.createCircle(center, 0,panelCoeffs, points);
 //    handle.follow_path();
     ros::spinOnce();
     loop_rate.sleep();

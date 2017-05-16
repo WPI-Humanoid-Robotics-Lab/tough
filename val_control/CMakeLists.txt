@@ -28,6 +28,7 @@ include_directories(${catkin_INCLUDE_DIRS} include)
    src/val_head_navigation.cpp
    src/val_gripper_control.cpp
    src/robot_state.cpp
+   src/val_wholebody_manipulation.cpp
 )
 
  target_link_libraries(val_control
