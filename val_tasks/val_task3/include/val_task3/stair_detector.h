@@ -29,7 +29,8 @@ class stair_detector
     // Low Red Range - 0, 5, 178, 255, 51, 149
     // High Red Range - 170, 180, 204, 255, 140, 191
     // Golden Yellow Range - 23, 93, 76, 255, 22, 255
-    int hsv_[6] = {23, 93, 76, 255, 22, 255};
+    // mahima range - 23, 53, 152, 255, 6, 213
+    int hsv_[6] = {23, 53, 152, 255, 6, 213};
 
     std::vector<cv::Point> convexHulls_;
 

@@ -5,7 +5,7 @@
 #include <thread>
 
 #define DISABLE_DRAWINGS true
-//#define DISABLE_TRACKBAR true
+#define DISABLE_TRACKBAR true
 
 plug_detector::plug_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
@@ -25,14 +25,13 @@ void plug_detector::showImage(cv::Mat image, std::string caption)
 
 void plug_detector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
 {
-    cv::inRange(imgHSV,cv::Scalar(hsv_[0], hsv_[2], hsv_[6]), cv::Scalar(hsv_[1], hsv_[3], hsv_[5]), outImg);
+    cv::inRange(imgHSV,cv::Scalar(hsv_[0], hsv_[2], hsv_[4]), cv::Scalar(hsv_[1], hsv_[3], hsv_[5]), outImg);
     cv::morphologyEx(outImg, outImg, cv::MORPH_OPEN, getStructuringElement( cv::MORPH_ELLIPSE,cv::Size(3,3)));
     cv::dilate(outImg, outImg, getStructuringElement( cv::MORPH_ELLIPSE, cv::Size(5,5)));
 #ifdef DISABLE_TRACKBAR
     return;
 #endif
     setTrackbar();
-
     cv::imshow("binary thresholding", outImg);
     cv::imshow("HSV thresholding", imgHSV);
     cv::waitKey(3);

@@ -26,7 +26,7 @@ void stair_detector::showImage(cv::Mat image, std::string caption)
 void stair_detector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
 {
     cv::cvtColor(imgHSV, imgHSV, cv::COLOR_BGR2HSV);
-    cv::inRange(imgHSV, cv::Scalar(hsv_[0], hsv_[2], hsv_[6]), cv::Scalar(hsv_[1], hsv_[3], hsv_[5]), outImg);
+    cv::inRange(imgHSV, cv::Scalar(hsv_[0], hsv_[2], hsv_[4]), cv::Scalar(hsv_[1], hsv_[3], hsv_[5]), outImg);
     //cv::morphologyEx(outImg, outImg, cv::MORPH_OPEN, getStructuringElement( cv::MORPH_ELLIPSE,cv::Size(3,3)));
     //cv::dilate(outImg, outImg, getStructuringElement( cv::MORPH_ELLIPSE, cv::Size(5,5)));
 #ifdef DISABLE_TRACKBAR

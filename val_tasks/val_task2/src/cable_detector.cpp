@@ -5,7 +5,7 @@
 #include <thread>
 
 #define DISABLE_DRAWINGS true
-#define DISABLE_TRACKBAR true
+//#define DISABLE_TRACKBAR true
 
 cable_detector::cable_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
@@ -25,7 +25,7 @@ void cable_detector::showImage(cv::Mat image, std::string caption)
 
 void cable_detector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
 {
-    cv::inRange(imgHSV,cv::Scalar(hsv_[0], hsv_[2], hsv_[6]), cv::Scalar(hsv_[1], hsv_[3], hsv_[5]), outImg);
+    cv::inRange(imgHSV,cv::Scalar(hsv_[0], hsv_[2], hsv_[4]), cv::Scalar(hsv_[1], hsv_[3], hsv_[5]), outImg);
 #ifdef DISABLE_TRACKBAR
     return;
 #endif
@@ -102,7 +102,6 @@ bool cable_detector::getCableLocation(geometry_msgs::Point& cableLoc)
 
                 if (temp_pclPoint.z > -2.0 && temp_pclPoint.z < 2.0 )
                 {
-                    ROS_INFO_STREAM(temp_pclPoint << std::endl);
                     currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
                 }
             }

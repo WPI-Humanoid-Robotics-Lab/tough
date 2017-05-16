@@ -30,7 +30,8 @@ class plug_detector
     // Low Red Range - 0, 5, 178, 255, 51, 149
     // High Red Range - 170, 180, 204, 255, 140, 191
     // mahima range - 23, 39, 172, 255, 104, 205
-    int hsv_[6] = {23, 39, 172, 255, 104, 205};
+    // Golden Yellow Range - 23, 93, 76, 255, 22, 255
+    int hsv_[6] = {23, 93, 76, 255, 22, 255};
 
     std::vector<cv::Point> convexHulls_;
 
