@@ -12,9 +12,9 @@
  * */
 
 
-plane::plane(ros::NodeHandle nh, geometry_msgs::Pose rover_loc)
+RoverBlocker::RoverBlocker(ros::NodeHandle nh, geometry_msgs::Pose rover_loc)
 {
-  pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &plane::cloudCB, this);
+  pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &RoverBlocker::cloudCB, this);
   pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_plane/cloud2", 1);
   vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_solar/visualization_marker", 1 );
   rover_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/block_map",1);
@@ -24,26 +24,26 @@ plane::plane(ros::NodeHandle nh, geometry_msgs::Pose rover_loc)
   detection_tries_ = 0;
   detections_.clear();
 }
-plane::~plane()
+RoverBlocker::~RoverBlocker()
 {
       pcl_sub.shutdown();
 }
 
-bool plane::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
+bool RoverBlocker::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
 {
     ret_val.clear();
     ret_val = detections_;
     return !ret_val.empty();
 
 }
-int plane::getDetectionTries() const
+int RoverBlocker::getDetectionTries() const
 {
     return detection_tries_;
 
 }
 
 
-void plane::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
+void RoverBlocker::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 {
 
     if (input->data.empty()){
@@ -80,7 +80,7 @@ void plane::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 
 }
 
-void plane::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+void RoverBlocker::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
     tf::Quaternion quat(rover_loc_.orientation.x,rover_loc_.orientation.y,rover_loc_.orientation.z,rover_loc_.orientation.w);
     tf::Matrix3x3 rotation(quat);
@@ -146,7 +146,7 @@ void plane::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 
 }
 
-void plane::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+void RoverBlocker::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
 
 
@@ -196,7 +196,7 @@ void plane::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 
 }
 
-void plane::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+void RoverBlocker::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
 
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
@@ -229,7 +229,7 @@ void plane::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 
 
 
-void plane::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose){
+void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose){
 
     Eigen::Vector4f centroid;
 //  Calculating the Centroid of the Panel Point cloud

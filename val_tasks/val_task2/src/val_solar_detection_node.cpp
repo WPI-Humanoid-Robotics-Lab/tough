@@ -26,7 +26,7 @@ int main(int argc, char** argv){
   }
 
 
-  plane obj(nh,rover_loc);
+  RoverBlocker obj(nh,rover_loc);
 
   ros::Rate loop(1);
   while(ros::ok()){

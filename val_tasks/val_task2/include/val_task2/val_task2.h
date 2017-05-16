@@ -1,6 +1,8 @@
 #pragma once
 
-// !!!!! important other wise created collision with std
+/*******************************************************
+ * !!!!! important other wise created collision with std
+ * *****************************************************/
 #define DISABLE_DECISION_MAKING_LOG true
 
 #include <iostream>
@@ -49,6 +51,8 @@ class valTask2 {
     RoverDetector* rover_detector_;
     //solar panel detector
     SolarPanelDetect* solar_panel_detector_;
+    // Block rover in /map
+    RoverBlocker* rover_in_map_blocker_;
 
     // chest controller
     chestTrajectory* chest_controller_;

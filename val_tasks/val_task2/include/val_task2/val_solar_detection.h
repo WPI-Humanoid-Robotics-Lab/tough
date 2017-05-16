@@ -38,7 +38,7 @@
 #include <visualization_msgs/MarkerArray.h>
 //#include "octomap_server/"
 
-class plane{
+class RoverBlocker{
 private:
 
   ros::Subscriber pcl_sub;
@@ -81,8 +81,8 @@ private:
 public:
   // Constructor
 
-  plane(ros::NodeHandle nh, geometry_msgs::Pose rover_loc);
-  ~plane();
+  RoverBlocker(ros::NodeHandle nh, geometry_msgs::Pose rover_loc);
+  ~RoverBlocker();
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
 
   int getDetectionTries() const;

@@ -40,6 +40,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     //initialize all detection pointers
     rover_detector_ = nullptr;
     solar_panel_detector_ = nullptr;
+    rover_in_map_blocker_ = nullptr;
 
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     map_update_count_ = 0;
@@ -73,6 +74,7 @@ decision_making::TaskResult valTask2::initTask(string name, const FSMCallContext
     // if the map does not update fast enought and this is called greater then 10 time it will break
     if(retry_count == 0){
         map_update_count_ = 0;
+        taskCommonUtils::moveToInitPose(nh_);
     }
     // It is depenent on the timer timer right now.
 
@@ -116,6 +118,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
 
     if(rover_detector_ == nullptr){
         rover_detector_ = new RoverDetector(nh_);
+        taskCommonUtils::moveToWalkSafePose(nh_);
     }
 
     static int fail_count = 0;
@@ -140,6 +143,12 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
         setRoverWalkGoal(pose2D);
         setRoverSide(rover_detector_->isRoverOnRight());
 
+        // block rover in /map
+        rover_in_map_blocker_ = new RoverBlocker(nh_, poses[idx]);
+        //wait for the map to update. This is required to ensure the footsteps dont collide with rover
+        ros::Duration(0.5).sleep();
+
+
         std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
         std::cout << "yaw: " << pose2D.theta  <<std::endl;
         retry_count = 0;
@@ -159,6 +168,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
     // if failed for more than 5 times, go to error state
     else if (fail_count > 5) {
         // reset the fail count
+        ROS_INFO("Rover detection failed");
         fail_count = 0;
         eventQueue.riseEvent("/DETECT_ROVER_FAILED");
         if(rover_detector_ != nullptr) delete rover_detector_;
@@ -167,6 +177,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
     // if failed retry detecting the panel
     else
     {
+        ROS_INFO("Retrying detection");
         // increment the fail count
         fail_count++;
         eventQueue.riseEvent("/DETECT_ROVER_RETRY");
@@ -176,16 +187,12 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
         ROS_INFO("waiting for transition");
     }
 
-
-    // generate the event
-    eventQueue.riseEvent("/DETECTED_ROVER");
-
     return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM_ONCE("executing " << name);
 
     static int fail_count = 0;
 
@@ -195,7 +202,6 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
 
     geometry_msgs::Pose current_pelvis_pose;
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
-    ROS_INFO("fetched robot's current position");
 
     ///@todo: what if pose has not changed but robot did not reach the goal and is not walking?
     if ( taskCommonUtils::isGoalReached(current_pelvis_pose, rover_walk_goal_) ) {

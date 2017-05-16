@@ -14,5 +14,6 @@ namespace taskCommonUtils {
 bool isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
 bool isGoalReached(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new);
 bool isGoalReached(geometry_msgs::Pose pose_old, geometry_msgs::Pose2D pose_new);
-
+void moveToWalkSafePose(ros::NodeHandle nh);
+void moveToInitPose(ros::NodeHandle nh);
 }
