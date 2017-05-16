@@ -25,6 +25,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf_conversions
   val_task_common
+  val_moveit_planners
 
 )
 
