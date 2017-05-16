@@ -86,7 +86,11 @@ void SolarPanelDetect::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 
     transformCloud(cloud,true);
     PassThroughFilter(cloud);
+    if(cloud->empty())
+        return;
     filter_solar_panel(cloud);
+    if(cloud->empty())
+        return;
     transformCloud(cloud,false);
 
     geometry_msgs::Pose pose;
@@ -157,17 +161,13 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,ge
 //    theta = 0;
 //    ROS_INFO("theta %.2f  theta1 %.2f",theta,theta1);
 
-//    theta = theta1;
-//    double pitch = (30*M_PI)/180;
+
     geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch,theta);
 
 //    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
     pose.orientation = quaternion;
 
     visualizept(pose);
-//    visualizept(centroid(0)+eigenVectors.col(1)[0],centroid(1)+eigenVectors.col(1)[1],centroid(2)+0*eigenVectors.col(1)[2]);
-//    visualizept(centroid(0),centroid(1),centroid(2));
-
 }
 
 
@@ -186,6 +186,9 @@ void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
     pass_z.setFilterLimits(max_pt(2)-0.06,max_pt(2));
     pass_z.filter(*cloud);
 
+    if(cloud->empty())
+        return;
+
     //getting a pt in the handle
     for(int i = 0; i!=cloud->points.size();++i)
     {
@@ -198,6 +201,8 @@ void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
             break;
         }
     }
+
+
 
     // clustering the points
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
@@ -240,6 +245,8 @@ void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
 
     }
     cloud = solar_panel_cloud;
+
+
 }
 
 void SolarPanelDetect::visualizept(geometry_msgs::Pose pose)
