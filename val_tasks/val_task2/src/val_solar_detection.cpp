@@ -26,7 +26,6 @@ plane::plane(ros::NodeHandle nh, geometry_msgs::Pose rover_loc)
 }
 plane::~plane()
 {
-      if(robot_state_ != nullptr)         delete robot_state_;
       pcl_sub.shutdown();
 }
 

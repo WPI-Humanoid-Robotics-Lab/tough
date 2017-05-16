@@ -15,7 +15,6 @@ SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose rover
 SolarPanelDetect::~SolarPanelDetect()
 {
     pcl_sub.shutdown();
-    if(robot_state_ != nullptr)         delete robot_state_;
 }
 bool SolarPanelDetect::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
 {
