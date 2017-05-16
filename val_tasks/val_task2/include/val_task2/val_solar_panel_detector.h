@@ -5,6 +5,7 @@
 
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/Quaternion.h>
@@ -49,7 +50,7 @@ private:
   // do we need this
   RobotStateInformer* robot_state_;
 
-  geometry_msgs::Pose rover_loc_;
+  geometry_msgs::Pose2D rover_loc_;
   bool isroverRight_;
   float rover_theta;
 
@@ -71,7 +72,7 @@ private:
   void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,geometry_msgs::Pose &pose);
 
 public:
-  SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose rover_loc, bool isroverRight);
+  SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight);
   ~SolarPanelDetect();
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
   int getDetectionTries() const;

@@ -1,5 +1,5 @@
 #include "val_task2/val_solar_panel_detector.h"
-SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose rover_loc, bool isroverRight)
+SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight)
 {
     pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &SolarPanelDetect::cloudCB, this);;
     pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_panel/cloud2", 1);
@@ -57,11 +57,7 @@ void SolarPanelDetect::setoffset(float minX, float maxX,float minY, float maxY,f
 void SolarPanelDetect::setRoverTheta()
 {
     // this func is for finding yaw and used for tranformation of the cloud
-    tf::Quaternion quat(rover_loc_.orientation.x,rover_loc_.orientation.y,rover_loc_.orientation.z,rover_loc_.orientation.w);
-    tf::Matrix3x3 rotation(quat);
-    tfScalar roll,pitch,yaw;
-    rotation.getRPY(roll,pitch,yaw);
-    rover_theta = yaw;
+    rover_theta = rover_loc_.theta;
     ROS_INFO("angle %.2f",rover_theta);
     if (isroverRight_)
     {
@@ -299,7 +295,7 @@ void SolarPanelDetect::transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud
 {
 //    ROS_INFO("trasnforming cloud");
     Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-    transform.translation() << rover_loc_.position.x,rover_loc_.position.y,rover_loc_.position.z;
+    transform.translation() << rover_loc_.x,rover_loc_.y,0.0;
     transform.rotate (Eigen::AngleAxisf (rover_theta, Eigen::Vector3f::UnitZ()));
     if (isinverse)
     {

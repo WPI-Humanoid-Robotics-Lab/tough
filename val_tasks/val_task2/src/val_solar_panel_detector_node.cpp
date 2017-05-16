@@ -4,7 +4,7 @@
 int main(int argc, char** argv){
   ros::init(argc, argv, "solar_plane_detection");
   ros::NodeHandle nh;
-  geometry_msgs::Pose rover_loc;
+  geometry_msgs::Pose2D rover_loc;
   std::vector<geometry_msgs::Pose> rover_poses;
   bool isroverRight;
 
@@ -19,7 +19,11 @@ int main(int argc, char** argv){
           rover_obj.getDetections(rover_poses);
           if(rover_poses.size())
           {
-              rover_loc = rover_poses[rover_poses.size()-1];
+              geometry_msgs::Pose rover_loc_3d;
+              rover_loc_3d = rover_poses[rover_poses.size()-1];
+              rover_loc.x = rover_loc_3d.position.x;
+              rover_loc.y = rover_loc_3d.position.y;
+              rover_loc.theta = tf::getYaw(rover_loc_3d.orientation);
               isroverRight = rover_obj.isRoverOnRight();
     //          ROS_INFO("rover loc main: %f right: %d",rover_poses[rover_poses.size()-1].position.x,(int)isroverRight);
               break;
