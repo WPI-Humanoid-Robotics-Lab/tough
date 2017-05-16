@@ -144,7 +144,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
         setRoverSide(rover_detector_->isRoverOnRight());
 
         // block rover in /map
-        rover_in_map_blocker_ = new RoverBlocker(nh_, poses[idx]);
+        rover_in_map_blocker_ = new RoverBlocker(nh_, pose2D,is_rover_on_right_);
         //wait for the map to update. This is required to ensure the footsteps dont collide with rover
         ros::Duration(0.5).sleep();
 

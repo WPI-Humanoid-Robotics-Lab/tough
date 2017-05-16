@@ -12,7 +12,7 @@
  * */
 
 
-RoverBlocker::RoverBlocker(ros::NodeHandle nh, geometry_msgs::Pose rover_loc)
+RoverBlocker::RoverBlocker(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight)
 {
   pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &RoverBlocker::cloudCB, this);
   pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_plane/cloud2", 1);
@@ -23,6 +23,7 @@ RoverBlocker::RoverBlocker(ros::NodeHandle nh, geometry_msgs::Pose rover_loc)
   robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
   detection_tries_ = 0;
   detections_.clear();
+  isroverRight_ = isroverRight;
 }
 RoverBlocker::~RoverBlocker()
 {
@@ -59,7 +60,7 @@ void RoverBlocker::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
     sensor_msgs::PointCloud2 output;
 
     pcl::fromROSMsg(*input, *cloud);
-
+ROS_INFO("removing rover");
    roverremove(cloud);
    PassThroughFilter(cloud);
 
@@ -82,13 +83,20 @@ void RoverBlocker::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 
 void RoverBlocker::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
-    tf::Quaternion quat(rover_loc_.orientation.x,rover_loc_.orientation.y,rover_loc_.orientation.z,rover_loc_.orientation.w);
+    /*tf::Quaternion quat(rover_loc_.orientation.x,rover_loc_.orientation.y,rover_loc_.orientation.z,rover_loc_.orientation.w);
     tf::Matrix3x3 rotation(quat);
     tfScalar roll,pitch,yaw;
     rotation.getRPY(roll,pitch,yaw);
-
-//    double theta = yaw-1.5708; // rover right of walkway
-    double theta = yaw+1.5708;   //left of walkway
+    */
+    double theta;
+    if (isroverRight_)
+    {
+        theta = rover_loc_.theta-1.5708; // rover right of walkway
+    }
+    else
+    {
+        theta = rover_loc_.theta+1.5708;   //left of walkway
+    }
 
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;
@@ -100,8 +108,8 @@ void RoverBlocker::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     maxPoint[1]=+2;
     maxPoint[2]=3;
     Eigen::Vector3f boxTranslatation;
-         boxTranslatation[0]=rover_loc_.position.x;
-         boxTranslatation[1]=rover_loc_.position.y;
+         boxTranslatation[0]=rover_loc_.x;
+         boxTranslatation[1]=rover_loc_.y;
          boxTranslatation[2]=0.1;  // to remove the points belonging to the walkway
     Eigen::Vector3f boxRotation;
          boxRotation[0]=0;  // rotation around x-axis

@@ -5,6 +5,7 @@
 
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/Quaternion.h>
@@ -51,9 +52,10 @@ private:
 
   RobotStateInformer* robot_state_;
 
-  geometry_msgs::Pose rover_loc_;
+  geometry_msgs::Pose2D rover_loc_;
   std::vector<geometry_msgs::Pose> detections_;
   int detection_tries_;
+  bool isroverRight_;
 
 
   void cloudCB(const sensor_msgs::PointCloud2::Ptr &input);
@@ -81,7 +83,7 @@ private:
 public:
   // Constructor
 
-  RoverBlocker(ros::NodeHandle nh, geometry_msgs::Pose rover_loc);
+  RoverBlocker(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight);
   ~RoverBlocker();
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
 

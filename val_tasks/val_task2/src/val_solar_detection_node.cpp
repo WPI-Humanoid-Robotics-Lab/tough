@@ -3,8 +3,9 @@
 int main(int argc, char** argv){
   ros::init(argc, argv, "solar_array_detection");
   ros::NodeHandle nh;
-  geometry_msgs::Pose rover_loc;
+  geometry_msgs::Pose2D rover_loc;
   std::vector<geometry_msgs::Pose> rover_poses;
+  bool isroverRight;
 
   ros::Rate loop1(1);
 
@@ -17,7 +18,12 @@ int main(int argc, char** argv){
           rover_obj.getDetections(rover_poses);
           if(rover_poses.size())
           {
-              rover_loc = rover_poses[rover_poses.size()-1];
+              geometry_msgs::Pose rover_loc_3d;
+              rover_loc_3d = rover_poses[rover_poses.size()-1];
+              rover_loc.x = rover_loc_3d.position.x;
+              rover_loc.y = rover_loc_3d.position.y;
+              rover_loc.theta = tf::getYaw(rover_loc_3d.orientation);
+              isroverRight = rover_obj.isRoverOnRight();
               break;
           }
           ros::spinOnce();
@@ -26,7 +32,7 @@ int main(int argc, char** argv){
   }
 
 
-  RoverBlocker obj(nh,rover_loc);
+  RoverBlocker obj(nh,rover_loc,isroverRight);
 
   ros::Rate loop(1);
   while(ros::ok()){
