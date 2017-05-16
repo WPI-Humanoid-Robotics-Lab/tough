@@ -57,6 +57,7 @@ private:
   int detection_tries_;
 
   float min_x,max_x, min_y,max_y,min_z,max_z;
+  float pitch;
 
 
   void cloudCB(const sensor_msgs::PointCloud2::Ptr &input);
@@ -75,7 +76,7 @@ public:
   ~SolarPanelDetect();
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
   int getDetectionTries() const;
-  void setoffset(float minX=0, float maxX=1.0, float minY=-1.5, float maxY=1.5, float minZ=0.8, float maxZ=1.2);
-  void getoffset(float &minX, float &maxX,float &minY, float &maxY,float &minZ, float &maxZ);
+  void setoffset(float minX=0, float maxX=1.0, float minY=-1.5, float maxY=1.5, float minZ=0.8, float maxZ=1.2, float pitchDeg=30);
+  void getoffset(float &minX, float &maxX,float &minY, float &maxY,float &minZ, float &maxZ, float &pitchDeg);
 
 };

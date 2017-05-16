@@ -30,7 +30,7 @@ int SolarPanelDetect::getDetectionTries() const
 
 }
 
-void SolarPanelDetect::getoffset(float &minX, float &maxX,float &minY, float &maxY,float &minZ, float &maxZ)
+void SolarPanelDetect::getoffset(float &minX, float &maxX,float &minY, float &maxY,float &minZ, float &maxZ, float &pitchDeg)
 {
     minX = min_x;
     maxX = max_x;
@@ -38,9 +38,10 @@ void SolarPanelDetect::getoffset(float &minX, float &maxX,float &minY, float &ma
     maxY = max_y;
     minZ = min_z;
     maxZ = max_z;
+    pitchDeg = (pitch*180)/M_PI;
 }
 
-void SolarPanelDetect::setoffset(float minX, float maxX,float minY, float maxY,float minZ, float maxZ)
+void SolarPanelDetect::setoffset(float minX, float maxX, float minY, float maxY, float minZ, float maxZ, float pitchDeg)
 {
 //    float slope =tan(rover_theta);
     ROS_INFO("setting offset");
@@ -51,6 +52,7 @@ void SolarPanelDetect::setoffset(float minX, float maxX,float minY, float maxY,f
     max_y = maxY;
     min_z = minZ;
     max_z = maxZ;
+    pitch = (pitchDeg*M_PI)/180;
 }
 
 
@@ -160,8 +162,10 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,ge
 //    ROS_INFO("theta %.2f  theta1 %.2f",theta,theta1);
 
 //    theta = theta1;
+//    double pitch = (30*M_PI)/180;
+    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch,theta);
 
-    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
+//    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
     pose.orientation = quaternion;
 
     visualizept(pose);
