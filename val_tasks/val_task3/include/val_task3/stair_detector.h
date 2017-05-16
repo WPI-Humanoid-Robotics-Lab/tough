@@ -13,6 +13,9 @@
 #include <geometry_msgs/PointStamped.h>
 #include <visualization_msgs/MarkerArray.h>
 
+//#include <pcl/point_types.h>
+//#include <pcl/filters/radius_outlier_removal.h>
+
 #include <tf/transform_broadcaster.h>
 
 #include <iostream>
@@ -29,10 +32,10 @@ class stair_detector
     // Low Red Range - 0, 5, 178, 255, 51, 149
     // High Red Range - 170, 180, 204, 255, 140, 191
     // Golden Yellow Range - 23, 93, 76, 255, 22, 255
-    // mahima range - 23, 53, 152, 255, 6, 213
-    int hsv_[6] = {23, 53, 152, 255, 6, 213};
+    // mahima range - 23, 53, 60, 255, 0, 213
+    int hsv_[6] = {23, 53, 60, 255, 6, 213};
 
-    std::vector<cv::Point> convexHulls_;
+    std::vector<std::vector<cv::Point> > convexHulls_;
 
 
     int frameID_ = 0;
@@ -50,7 +53,7 @@ public:
     void setTrackbar();
     void showImage(cv::Mat, std::string caption="stair Detection");
     void colorSegment(cv::Mat &imgHSV, cv::Mat &outImg);
-    size_t findMaxContour(const std::vector<std::vector<cv::Point> >& contours);
+    void findMaxContour(const std::vector<std::vector<cv::Point> >& contours);
     bool getStairLocation(geometry_msgs::Point &);
     //cv::Point getOrientation(const std::vector<cv::Point> &, cv::Mat &);
     //void drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale = 0.2);
