@@ -14,19 +14,6 @@ solar_panel_handle_grabber::solar_panel_handle_grabber(ros::NodeHandle n):nh_(n)
     leftHandOrientation_.quaternion.z = -0.519;
     leftHandOrientation_.quaternion.w = 0.510;
 
-    //    /* Side Grip */
-    //    leftHandOrientation_.quaternion.x = 0.155;
-    //    leftHandOrientation_.quaternion.y = -0.061;
-    //    leftHandOrientation_.quaternion.z = -0.696;
-    //    leftHandOrientation_.quaternion.w = 0.699;
-
-    //    /* Side Grip */
-    //    rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    //    rightHandOrientation_.quaternion.x = -0.094;
-    //    rightHandOrientation_.quaternion.y = -0.027;
-    //    rightHandOrientation_.quaternion.z = 0.973;
-    //    rightHandOrientation_.quaternion.w = -0.209;
-
     /* Top Grip */
     rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
     rightHandOrientation_.quaternion.x = -0.175;
