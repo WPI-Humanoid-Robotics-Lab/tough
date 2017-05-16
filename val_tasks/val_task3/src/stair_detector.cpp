@@ -1,4 +1,4 @@
-#include "val_task2/cable_detector.h"
+#include "val_task3/stair_detector.h"
 #include <visualization_msgs/Marker.h>
 #include "val_common/val_common_names.h"
 #include <pcl/common/centroid.h>
@@ -7,13 +7,13 @@
 #define DISABLE_DRAWINGS true
 //#define DISABLE_TRACKBAR true
 
-cable_detector::cable_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
+stair_detector::stair_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
     ms_sensor_.giveQMatrix(qMatrix_);
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_cable",1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_stair",1);
 }
 
-void cable_detector::showImage(cv::Mat image, std::string caption)
+void stair_detector::showImage(cv::Mat image, std::string caption)
 {
 #ifdef DISABLE_DRAWINGS
     return;
@@ -23,20 +23,23 @@ void cable_detector::showImage(cv::Mat image, std::string caption)
     cv::waitKey(3);
 }
 
-void cable_detector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
+void stair_detector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
 {
-    cv::inRange(imgHSV,cv::Scalar(hsv_[0], hsv_[2], hsv_[4]), cv::Scalar(hsv_[1], hsv_[3], hsv_[5]), outImg);
+    cv::cvtColor(imgHSV, imgHSV, cv::COLOR_BGR2HSV);
+    cv::inRange(imgHSV, cv::Scalar(hsv_[0], hsv_[2], hsv_[4]), cv::Scalar(hsv_[1], hsv_[3], hsv_[5]), outImg);
+    //cv::morphologyEx(outImg, outImg, cv::MORPH_OPEN, getStructuringElement( cv::MORPH_ELLIPSE,cv::Size(3,3)));
+    //cv::dilate(outImg, outImg, getStructuringElement( cv::MORPH_ELLIPSE, cv::Size(5,5)));
 #ifdef DISABLE_TRACKBAR
     return;
 #endif
     setTrackbar();
-
+    //ROS_INFO_STREAM(outImg);
     cv::imshow("binary thresholding", outImg);
-    cv::imshow("HSV thresholding", imgHSV);
+    cv::imshow("Actual Image", current_image_);
     cv::waitKey(3);
 }
 
-size_t cable_detector::findMaxContour(const std::vector<std::vector<cv::Point> >& contours)
+size_t stair_detector::findMaxContour(const std::vector<std::vector<cv::Point> >& contours)
 {
     int largest_area = 0;
     int largest_contour_index = 0;
@@ -56,12 +59,14 @@ size_t cable_detector::findMaxContour(const std::vector<std::vector<cv::Point> >
         }
     }
 
+    convexHulls_ = hull[largest_contour_index];
+
     return largest_contour_index;
 }
 
-bool cable_detector::getCableLocation(geometry_msgs::Point& cableLoc)
+bool stair_detector::getStairLocation(geometry_msgs::Point& stairLoc)
 {
-    bool foundCable = false;
+    bool foundStair = false;
     src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
     src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
     tf::TransformListener listener;
@@ -69,7 +74,7 @@ bool cable_detector::getCableLocation(geometry_msgs::Point& cableLoc)
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
     cv::Mat imgHSV, outImg;
-    cv::Point point;
+    //cv::Point point;
 
     cv::cvtColor(current_image_, imgHSV, cv::COLOR_BGR2HSV);
     colorSegment(imgHSV, outImg);
@@ -80,36 +85,35 @@ bool cable_detector::getCableLocation(geometry_msgs::Point& cableLoc)
     Eigen::Vector4f cloudCentroid;
     if(!contours.empty()) //avoid seg fault at runtime by checking that the contours exist
     {
-        foundCable = true;
-        point = getOrientation(contours[findMaxContour(contours)], outImg);
-        //ROS_INFO_STREAM(point << std::endl);
+        findMaxContour(contours);
+        foundStair = true;
+
+
+        cv::Mat hullPoints = cv::Mat::zeros(current_image_.size(), CV_8UC1);
+        cv::fillConvexPoly(hullPoints, convexHulls_,cv::Scalar(255));
+        cv::Mat nonZeroCoordinates;
+        cv::findNonZero(hullPoints, nonZeroCoordinates);
+        if (nonZeroCoordinates.total() < 10){
+            return false;
+        }
 
         pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
 
-        for (size_t k = 0; k < 10; k++ )
-        {
-            for (size_t l = 0; l < 10; l++ )
-            {
-                pcl::PointXYZRGB temp_pclPoint;
-                try
-                {
-                    temp_pclPoint = organizedCloud->at(point.x + k, point.y + l);
-                }
-                catch (const std::out_of_range& ex){
-                    ROS_ERROR("%s",ex.what());
-                    return false;
-                }
+        for (int k = 0; k < nonZeroCoordinates.total(); k++ ) {
+            pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
 
-                if (temp_pclPoint.z > -2.0 && temp_pclPoint.z < 2.0 )
-                {
-                    currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
-                }
+            if (temp_pclPoint.z > -2.0)
+            {
+                currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
+
             }
         }
+
+
         //  Calculating the Centroid of the handle Point cloud
         pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
     }
-    if( foundCable )
+    if( foundStair )
     {
         geom_point.point.x = cloudCentroid(0);
         geom_point.point.y = cloudCentroid(1);
@@ -125,98 +129,40 @@ bool cable_detector::getCableLocation(geometry_msgs::Point& cableLoc)
             return false;
         }
     }
-    cableLoc.x = double (geom_point.point.x);
-    cableLoc.y = double (geom_point.point.y);
-    cableLoc.z = double (geom_point.point.z);
+    stairLoc.x = double (geom_point.point.x);
+    stairLoc.y = double (geom_point.point.y);
+    stairLoc.z = double (geom_point.point.z);
 
     visualize_point(geom_point.point);
 
     marker_pub_.publish(markers_);
 
-    return foundCable;
+    return foundStair;
 }
 
-cv::Point cable_detector::getOrientation(const std::vector<cv::Point> &contourPts, cv::Mat &img)
+
+
+bool stair_detector::findStair(geometry_msgs::Point& stairLoc)
 {
-    int sz = static_cast<int>(contourPts.size());
-    cv::Mat data_pts = cv::Mat(sz, 2, CV_64FC1);
+    //VISUALIZATION - include ros::spinOnce();
 
-    for (int i = 0; i < data_pts.rows; ++i)
-    {
-        data_pts.at<double>(i, 0) = contourPts[i].x;
-        data_pts.at<double>(i, 1) = contourPts[i].y;
-    }
-
-    //Perform PCA analysis
-    cv::PCA pca_analysis(data_pts, cv::Mat(), CV_PCA_DATA_AS_ROW);
-
-    //Store the center of the object
-    cv::Point cntr = cv::Point(static_cast<int>(pca_analysis.mean.at<double>(0, 0)),
-    static_cast<int>(pca_analysis.mean.at<double>(0, 1)));
-
-    //Store the eigenvalues and eigenvectors
-    std::vector<cv::Point2d> eigen_vecs(2);
-    std::vector<double> eigen_val(2);
-
-    for (int i = 0; i < 2; ++i)
-    {
-        eigen_vecs[i] = cv::Point2d(pca_analysis.eigenvectors.at<double>(i, 0),
-        pca_analysis.eigenvectors.at<double>(i, 1));
-        eigen_val[i] = pca_analysis.eigenvalues.at<double>(0, i);
-    }
-    //ROS_INFO_STREAM(cntr << std::endl);
-    // Draw the principal components
-    cv::circle(current_image_, cntr, 3, cv::Scalar(255, 0, 255), 2);
-    cv::Point p1 = cntr + 0.02 * cv::Point(static_cast<int>(eigen_vecs[0].x * eigen_val[0]), static_cast<int>(eigen_vecs[0].y * eigen_val[0]));
-    cv::Point p2 = cntr + 7.0 * cv::Point(static_cast<int>(eigen_vecs[1].x * eigen_val[1]), static_cast<int>(eigen_vecs[1].y * eigen_val[1]));
-
-    //VISUALIZATION - Uncomment this line
-    //drawAxis(current_image_, cntr, p1, cv::Scalar(0, 255, 0), 1);
-    //drawAxis(current_image_, cntr, p2, cv::Scalar(255, 255, 0), 1);
-    //ROS_INFO_STREAM(p1 << std::endl);
-    showImage(current_image_);
-    return p2;
-}
-
-bool cable_detector::findCable(geometry_msgs::Point& cableLoc)
-{
-    //VISUALIZATION - include a spinOnce here to visualize the eigenvectors
+    cv::Mat outImg;
     ros::spinOnce();
     markers_.markers.clear();
     if(ms_sensor_.giveImage(current_image_))
     {
         if( ms_sensor_.giveDisparityImage(current_disparity_))
         {
-            return getCableLocation(cableLoc);
+            colorSegment(current_image_, outImg);
+            //return getStairLocation(stairLoc);
+            return true;
         }
     }
     return 0;
 }
 
-void cable_detector::drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale)
-{
-    double angle;
-    double hypotenuse;
 
-    angle = std::atan2( (double) p.y - q.y, (double) p.x - q.x ); // angle in radians
-    hypotenuse = std::sqrt( (double) (p.y - q.y) * (p.y - q.y) + (p.x - q.x) * (p.x - q.x));
-    // double degrees = angle * 180 / CV_PI; // convert radians to degrees (0-180 range)
-    // cout << "Degrees: " << abs(degrees - 180) << endl; // angle in 0-360 degrees range
-    // Here we lengthen the arrow by a factor of scale
-
-    q.x = (int) (p.x - scale * hypotenuse * std::cos(angle));
-    q.y = (int) (p.y - scale * hypotenuse * std::sin(angle));
-    cv::line(img, p, q, colour, 1, CV_AA);
-    // create the arrow hooks
-    p.x = (int) (q.x + 9 * std::cos(angle + CV_PI / 4));
-    p.y = (int) (q.y + 9 * std::sin(angle + CV_PI / 4));
-    cv::line(img, p, q, colour, 1, CV_AA);
-    p.x = (int) (q.x + 9 * std::cos(angle - CV_PI / 4));
-    p.y = (int) (q.y + 9 * std::sin(angle - CV_PI / 4));
-    cv::line(img, p, q, colour, 1, CV_AA);
-}
-
-void cable_detector::setTrackbar()
+void stair_detector::setTrackbar()
 {
     cv::namedWindow("binary thresholding");
     cv::createTrackbar("hl", "binary thresholding", &hsv_[0], 180);
@@ -234,7 +180,7 @@ void cable_detector::setTrackbar()
     cv::getTrackbarPos("vu", "binary thresholding");
 }
 
-void cable_detector::visualize_point(geometry_msgs::Point point){
+void stair_detector::visualize_point(geometry_msgs::Point point){
 
     std::cout<< "goal origin :\n"<< point << std::endl;
     static int id = 0;
@@ -269,7 +215,7 @@ void cable_detector::visualize_point(geometry_msgs::Point point){
     markers_.markers.push_back(marker);
 }
 
-cable_detector::~cable_detector()
+stair_detector::~stair_detector()
 {
 
 }
