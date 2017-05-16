@@ -1,18 +1,30 @@
 #include "val_task2/val_solar_detection.h"
-
+#include "val_task2/val_rover_detection.h"
 int main(int argc, char** argv){
   ros::init(argc, argv, "solar_array_detection");
   ros::NodeHandle nh;
   geometry_msgs::Pose rover_loc;
+  std::vector<geometry_msgs::Pose> rover_poses;
 
-  // obtained from rover detetion code
-  rover_loc.position.x = 3.50641;
-  rover_loc.position.y = -1.05765;
-  rover_loc.position.z = 0;
-  rover_loc.orientation.x = 0;
-  rover_loc.orientation.y = 0;
-  rover_loc.orientation.z = -0.380194;
-  rover_loc.orientation.w = 0.924907;
+  ros::Rate loop1(1);
+
+  if(true) //to destruct the rover_obj
+  {
+      RoverDetector rover_obj(nh);
+      while(ros::ok())
+      {
+
+          rover_obj.getDetections(rover_poses);
+          if(rover_poses.size())
+          {
+              rover_loc = rover_poses[rover_poses.size()-1];
+              break;
+          }
+          ros::spinOnce();
+          loop1.sleep();
+      }
+  }
+
 
   plane obj(nh,rover_loc);
 
