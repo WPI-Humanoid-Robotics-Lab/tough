@@ -7,26 +7,38 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <val_common/val_common_names.h>
+#include <val_control/val_chest_navigation.h>
+#include <val_control/val_pelvis_navigation.h>
+#include <val_control/val_gripper_control.h>
+#include <val_control/val_head_navigation.h>
+#include <val_control/val_arm_navigation.h>
 
 class task2Utils {
 private:
     ros::NodeHandle nh_;
-    ros::Subscriber satellite_sub_;
-    srcsim::Satellite msg_;
+    // chest controller
+    chestTrajectory* chest_controller_;
+    //pelvis controller
+    pelvisTrajectory* pelvis_controller_;
+    //head controller
+    HeadTrajectory* head_controller_;
+    //grippers
+    gripperControl* gripper_controller_;
+    // arm
+    armTrajectory* arm_controller_;
 
-    ros::Publisher marker_pub_;
-    void satelliteMsgCB (const srcsim::Satellite &msg);
+    // Need to edit
+    const std::vector<float> leftShoulderSeedPanelGraspStatic_ = {-0.23, -0.07, 0.75, -1.53, 1.21, -0.40, 0.0};
+    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.23, -0.07, 0.75, -1.53, 1.21, -0.40, 0.0};
+
+    //before walking
+    const std::vector<float> rightShoulderSeedPanelGraspStatic_ = {-0.04, 1.04, 0.17, 0.94, 1.18, 0.01, -0.08};
+    //while walking
+    const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.04, 1.16, 0.12, 0.94, 1.13, 0.01, -0.08};
 
 public:
     task2Utils(ros::NodeHandle nh);
+    void afterPanelGraspPose(const armSide side);
     ~task2Utils();
 
-    bool isPitchCorrectNow(void);
-    bool isYawCorrectNow(void);
-    bool isPitchCompleted(void);
-    bool isYawCompleted(void);
-    double getPitchDiff (void);
-    double getYawDiff (void);
-    void getCircle3D (geometry_msgs::Point center, geometry_msgs::Point start,geometry_msgs::Pose pose, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, float radius, int steps =10);
-    void visulatise6DPoints(std::vector<geometry_msgs::Pose> &points);
 };
