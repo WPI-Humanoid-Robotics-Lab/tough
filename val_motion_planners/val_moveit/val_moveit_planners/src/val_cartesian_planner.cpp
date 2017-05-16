@@ -60,13 +60,13 @@ double cartesianPlanner::getTrajFromCartPoints(std::vector<geometry_msgs::Pose> 
     group_->setPoseReferenceFrame(reference_frame_);
     double frac = group_->computeCartesianPath(points, 0.01, 0.0, trajectory, avoid_collisions);
 
-    ROS_INFO("fraction path planned %f ", frac);
-    ROS_INFO("joint names");
-    for (it = trajectory.joint_trajectory.joint_names.begin(); it < trajectory.joint_trajectory.joint_names.end(); it++)
-        std::cout << *it << std::endl;
-    std::cout << "joint trajectories" << std::endl;
-    for (std::vector<trajectory_msgs::JointTrajectoryPoint>::iterator itp = trajectory.joint_trajectory.points.begin(); itp < trajectory.joint_trajectory.points.end(); itp++)
-        std::cout << *itp << std::endl;
+    std::cout<<"Fraction of path planned:   "<<frac*100<<"\n";
+//    ROS_INFO("joint names");
+//    for (it = trajectory.joint_trajectory.joint_names.begin(); it < trajectory.joint_trajectory.joint_names.end(); it++)
+//        std::cout << *it << std::endl;
+//    std::cout << "joint trajectories" << std::endl;
+//    for (std::vector<trajectory_msgs::JointTrajectoryPoint>::iterator itp = trajectory.joint_trajectory.points.begin(); itp < trajectory.joint_trajectory.points.end(); itp++)
+//        std::cout << *itp << std::endl;
 
     // return the fraction of path planned
     return frac;

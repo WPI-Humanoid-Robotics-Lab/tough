@@ -23,12 +23,16 @@
 #include "val_control/val_pelvis_navigation.h"
 #include "val_control/val_head_navigation.h"
 #include "val_control/val_gripper_control.h"
+#include "val_control/val_arm_navigation.h"
 #include "val_task1/handle_detector.h"
 #include "val_task1/handle_grabber.h"
 #include "val_control/robot_state.h"
 #include "val_task1/move_handle.h"
 #include "val_task_common/val_task_common_utils.h"
 #include "val_task_common/finish_box_detector.h"
+#include <val_task1/val_task1_utils.h>
+#include <val_moveit_planners/val_cartesian_planner.h>
+#include <val_control/val_wholebody_manipulation.h>
 
 using namespace decision_making;
 
@@ -66,8 +70,17 @@ class valTask1 {
     HeadTrajectory* head_controller_;
     //grippers
     gripperControl* gripper_controller_;
+    // arm
+    armTrajectory* arm_controller_;
+    // whole body controller
+    wholebodyManipulation* wholebody_controller_;
     //robot state informer
     RobotStateInformer* robot_state_;
+    // task1 utils
+    task1Utils* task1_utils_;
+    // cartesian planner
+    cartesianPlanner* right_arm_planner_;
+    cartesianPlanner* left_arm_planner_;
 
     ros::Publisher array_pub_;
 
@@ -108,9 +121,11 @@ class valTask1 {
     decision_making::TaskResult detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectPanelFineTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult walkToPanel(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    decision_making::TaskResult adjustArmTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult graspPitchHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult controlPitchTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult graspYawHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult controlYawTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult redetectHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectfinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);

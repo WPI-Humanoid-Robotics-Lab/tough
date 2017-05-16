@@ -7,6 +7,8 @@
 #include <val_control/val_arm_navigation.h>
 #include <val_control/val_gripper_control.h>
 #include <val_control/robot_state.h>
+#include "val_moveit_planners/val_cartesian_planner.h"
+#include "val_control/val_wholebody_manipulation.h"
 
 #define Y_OFFSET 0.05
 
@@ -31,7 +33,9 @@ private:
    RobotStateInformer *current_state_;
    geometry_msgs::QuaternionStamped leftHandOrientation_ ;
    geometry_msgs::QuaternionStamped rightHandOrientation_;
-
+   cartesianPlanner* right_arm_planner_;
+   cartesianPlanner* left_arm_planner_;
+   wholebodyManipulation* wholebody_controller_;
    /*Top Grip*/
    const std::vector<float> leftShoulderSeed_ = {-0.23, -0.72, 0.65, -1.51, 2.77, 0.0, 0.0};
    /*Side Grip*/

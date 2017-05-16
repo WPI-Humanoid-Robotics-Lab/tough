@@ -183,6 +183,7 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
         }
     }
 
+
     //    ROS_INFO("The Orientation is given by := %0.2f", theta);
 
     double offset = 6.15;
@@ -195,16 +196,24 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
     geometry_msgs::Quaternion quaternion;
     ROS_INFO("slopeyz %.2f, theta %.2f",yzSlope,theta);
 
+    float angle;
 
     if(yzSlope>0)  {//rover on the left
+        angle = theta-1.5708;
         quaternion = tf::createQuaternionMsgFromYaw(theta-1.5708);
         isRoverOnRight_ = std::make_shared<bool>(false);
     }
     else {
         //rover on the right
+        angle = theta+1.5708;
         quaternion = tf::createQuaternionMsgFromYaw(theta+1.5708);
         isRoverOnRight_ = std::make_shared<bool>(true);
     }
+
+
+    float distance_offset = -0.2;
+    pose.position.x = pose.position.x + distance_offset * cos(angle);
+    pose.position.y = pose.position.y + distance_offset * sin(angle);
 
     pose.orientation = quaternion;
 

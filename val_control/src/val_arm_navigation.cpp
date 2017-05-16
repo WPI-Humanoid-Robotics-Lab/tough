@@ -17,6 +17,24 @@ armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
     markerPub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
     stateInformer_ = RobotStateInformer::getRobotStateInformer(nh_);
     //this->armTrajectorySunscriber = nh_.subscribe("/ihmc_ros/valkyrie/output/ha", 20,&ValkyrieWalker::footstepStatusCB, this);
+    joint_limits_left_.resize(NUM_ARM_JOINTS);
+    joint_limits_right_.resize(NUM_ARM_JOINTS);
+
+    joint_limits_left_[0]={-2.85,2.0};
+    joint_limits_left_[1]={-1.519,1.266};
+    joint_limits_left_[2]={-3.1,2.18};
+    joint_limits_left_[3]={-2.174,0.12};
+    joint_limits_left_[4]={-2.019,3.14};
+    joint_limits_left_[5]={-0.62,0.625};
+    joint_limits_left_[6]={-0.36,0.49};
+
+    joint_limits_right_[0]={-2.85,2.0};
+    joint_limits_right_[1]={-1.266,1.519};
+    joint_limits_right_[2]={-3.1,2.18};
+    joint_limits_right_[3]={-0.12,2.174};
+    joint_limits_right_[4]={-2.019,3.14};
+    joint_limits_right_[5]={-0.625,0.62};
+    joint_limits_right_[6]={-0.48,0.36};
 
 }
 
@@ -28,18 +46,17 @@ armTrajectory::~armTrajectory(){
 void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos)
 {
 
+    std::vector<std::pair<float, float> > joint_limits_;
+    joint_limits_= msg.robot_side == LEFT ? joint_limits_left_ : joint_limits_right_;
     for (int i=0;i<NUM_ARM_JOINTS;i++)
     {
         ihmc_msgs::TrajectoryPoint1DRosMessage p;
-        ihmc_msgs::OneDoFJointTrajectoryRosMessage t;
-        t.trajectory_points.clear();
-
+        pos[i] = pos[i] < joint_limits_[i].first  ? joint_limits_[i].first : pos[i];
+        pos[i] = pos[i] > joint_limits_[i].second ? joint_limits_[i].second : pos[i];
         p.time = time;
         p.position = pos[i];
         p.velocity = 0;
         p.unique_id = armTrajectory::arm_id;
-        t.trajectory_points.push_back(p);
-        t.unique_id = armTrajectory::arm_id;
         msg.joint_trajectory_messages[i].trajectory_points.push_back(p);
     }
 
@@ -341,11 +358,26 @@ void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &ms
         ROS_WARN("Check number of trajectory points");
         return;
     }
+    std::vector<std::pair<float, float> > joint_limits_;
+    joint_limits_= msg.robot_side == LEFT ? joint_limits_left_ : joint_limits_right_;
 
     for (int i=0;i<NUM_ARM_JOINTS;i++)
     {
         ihmc_msgs::TrajectoryPoint1DRosMessage p;
+//        point.positions[i] = point.positions[i] <= joint_limits_[i].first  ? joint_limits_[i].first : point.positions[i];
+//        point.positions[i] = point.positions[i] >= joint_limits_[i].second ? joint_limits_[i].second : point.positions[i];
+        if(point.positions[i] <= joint_limits_[i].first)
+        {
+            std::cout<<"wrapped lower point "<<point.positions[i]<<"\n";
+            point.positions[i]=joint_limits_[i].first;
 
+        }
+        else if(point.positions[i] >= joint_limits_[i].second)
+        {
+            std::cout<<"wrapped upper point "<<point.positions[i]<<"\n";
+            point.positions[i]=joint_limits_[i].second;
+
+        }
         p.time = point.time_from_start.toSec();
         p.position = point.positions[i];
         p.velocity = point.velocities[i];

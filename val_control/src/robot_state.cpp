@@ -16,6 +16,9 @@ RobotStateInformer::RobotStateInformer(ros::NodeHandle nh):nh_(nh){
     ROS_INFO("Object Created");
     jointStateSub_ = nh_.subscribe("/joint_states", 1, &RobotStateInformer::jointStateCB, this);
     ros::Duration(0.2).sleep();
+    closeRightGrasp={1.09,1.47,1.84,0.90,1.20,1.51,0.99,1.34,1.68,0.55,0.739,0.92,1.40};
+    closeLeftGrasp={0.0,-1.47,-1.84,-0.90,-1.20,-1.51,-0.99,-1.34,-1.68,-0.55,-0.739,-0.92,1.40};
+    openGrasp={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 }
 
 RobotStateInformer::~RobotStateInformer(){
@@ -237,4 +240,59 @@ bool RobotStateInformer::transformPoint(const geometry_msgs::Point &pt_in, geome
     }
     pt_out = stmp_pt_out.point;
     return true;
+}
+
+
+bool RobotStateInformer::isGraspped(armSide side)
+{
+    std::vector<float> jointPos,closeGrasp;
+    closeGrasp= side ==LEFT ? closeLeftGrasp :closeRightGrasp;
+
+    if(side ==RIGHT)
+    {
+        jointPos.push_back(getJointPosition("rightIndexFingerPitch1"));
+        jointPos.push_back(getJointPosition("rightIndexFingerPitch2"));
+        jointPos.push_back(getJointPosition("rightIndexFingerPitch3"));
+        jointPos.push_back(getJointPosition("rightMiddleFingerPitch1"));
+        jointPos.push_back(getJointPosition("rightMiddleFingerPitch2"));
+        jointPos.push_back(getJointPosition("rightMiddleFingerPitch3"));
+        jointPos.push_back(getJointPosition("rightPinkyPitch1"));
+        jointPos.push_back(getJointPosition("rightPinkyPitch2"));
+        jointPos.push_back(getJointPosition("rightPinkyPitch3"));
+        jointPos.push_back(getJointPosition("rightThumbPitch1"));
+        jointPos.push_back(getJointPosition("rightThumbPitch2"));
+        jointPos.push_back(getJointPosition("rightThumbPitch3"));
+        jointPos.push_back(getJointPosition("rightThumbRoll"));
+    }
+    else
+    {
+        jointPos.push_back(getJointPosition("leftIndexFingerPitch1"));
+        jointPos.push_back(getJointPosition("leftIndexFingerPitch2"));
+        jointPos.push_back(getJointPosition("leftIndexFingerPitch3"));
+        jointPos.push_back(getJointPosition("leftMiddleFingerPitch1"));
+        jointPos.push_back(getJointPosition("leftMiddleFingerPitch2"));
+        jointPos.push_back(getJointPosition("leftMiddleFingerPitch3"));
+        jointPos.push_back(getJointPosition("leftPinkyPitch1"));
+        jointPos.push_back(getJointPosition("leftPinkyPitch2"));
+        jointPos.push_back(getJointPosition("leftPinkyPitch3"));
+        jointPos.push_back(getJointPosition("leftThumbPitch1"));
+        jointPos.push_back(getJointPosition("leftThumbPitch2"));
+        jointPos.push_back(getJointPosition("leftThumbPitch3"));
+        jointPos.push_back(getJointPosition("leftThumbRoll"));
+    }
+    float diffClose=0.0,diffOpen=0.0;
+    for (size_t i = 0; i < closeGrasp.size(); ++i) {
+        diffClose+=fabs(jointPos[i]-closeGrasp[i]);
+        diffOpen+=fabs(jointPos[i]-openGrasp[i]);
+    }
+    if(fabs(diffOpen)<0.1)
+    {
+        return false;
+    }
+    else if(fabs(diffClose)<0.1)
+    {
+        return false;
+    }
+    else return true;
+
 }

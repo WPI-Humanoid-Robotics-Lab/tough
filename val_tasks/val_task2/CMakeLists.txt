@@ -67,10 +67,14 @@ include_directories(include
 	    src/cable_detector.cpp
             src/plug_detector.cpp
             src/val_solar_detection.cpp
+            src/val_solar_panel_detector.cpp
  )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
+
+add_executable(solar_panel_detector_node       src/val_solar_panel_detector_node.cpp)
+target_link_libraries(solar_panel_detector_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PROJECT_NAME} ${PCL_LIBRARY_DIRS} ${PROJECT_NAME})
 
 
 add_executable(rover_detection_node       src/val_rover_detection_node.cpp)

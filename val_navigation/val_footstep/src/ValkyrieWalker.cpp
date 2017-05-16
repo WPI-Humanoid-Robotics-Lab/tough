@@ -125,7 +125,7 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
     geometry_msgs::Pose2D start;
     humanoid_nav_msgs::PlanFootsteps srv;
-    ros::ServiceClient footstep_client = nh_.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("/plan_footsteps");
+    footstep_client_ = nh_.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("/plan_footsteps");
     // get start from robot position
 
     ihmc_msgs::FootstepDataRosMessage::Ptr startstep(new ihmc_msgs::FootstepDataRosMessage());
@@ -140,8 +140,8 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
     srv.request.start = start;
     srv.request.goal = goal;
-
-    if(footstep_client.call(srv))
+    // The service calls succeeds everytime. result variable stores the actual result of planning
+    if(footstep_client_.call(srv) && srv.response.result)
     {
 
         for(int i=0; i <srv.response.footsteps.size();i++)
