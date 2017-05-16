@@ -113,6 +113,9 @@ void PanelDetector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud
     ROS_INFO("a : %0.4f, b : %0.4f, c : %0.4f, d: %.4f",coefficients->values[0], coefficients->values[1], coefficients->values[2], coefficients->values[3]);
 
     //update the plane model
+    // if the upper plane id detected its c is almost 1. that plane is paraller to xy plane.
+    // so for the safety we consider the detected plane is parallel to xy plane if c >=0.95
+    // the lower plane c is around 0.87
     panel_plane_model_[0] = coefficients->values[0]; // a
     panel_plane_model_[1] = coefficients->values[1]; // b
     panel_plane_model_[2] = coefficients->values[2]; // c
@@ -148,11 +151,21 @@ bool PanelDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geom
 
     // what can be done to detect only the lower plane?
     if (preset_configs_[currentDetector].settingName == "HANDLE_PANEL_COARSE" || preset_configs_[currentDetector].settingName == "HANDLE_PANEL_FINE"){
-        if(pose.position.z > 0.80 && pose.position.z < 0.83){
+//        if(pose.position.z > 0.80 && pose.position.z < 0.83)
+        if(panel_plane_model_[2]>=0.95)
+        {
             ROS_INFO("Upper plane detected");
-            OFFSET += 0.1;
+            if(preset_configs_[currentDetector].settingName == "HANDLE_PANEL_COARSE")
+            {
+                OFFSET += 0.1;
+            }
+            else if (preset_configs_[currentDetector].settingName == "HANDLE_PANEL_FINE")
+            {
+                return false;
+            }
         }
-        else if(pose.position.z > 0.75){
+//        else if(pose.position.z > 0.75)
+        else if(panel_plane_model_[2]>0.8){
             ROS_INFO("Lower Plane Detected");
             //        OFFSET = 0.6;
         }
