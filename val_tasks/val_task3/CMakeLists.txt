@@ -9,11 +9,22 @@ set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FL
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  decision_making
+  decision_making_parser
+  dynamic_reconfigure
   roscpp
-  rospy
-  std_msgs
-
+  val_footstep
+  val_control
   perception_common
+  pcl_conversions
+  pcl_ros
+  cv_bridge
+  image_transport
+  sensor_msgs
+  std_msgs
+  tf
+  tf_conversions
+  val_task_common
 )
 
 ## System dependencies are found with CMake's conventions
@@ -109,11 +120,17 @@ include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_I
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
+
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
+
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES val_task3
-  CATKIN_DEPENDS roscpp rospy perception_common dynamic_reconfigure
-  DEPENDS system_lib
+ INCLUDE_DIRS include
+ LIBRARIES val_task3
+ CATKIN_DEPENDS roscpp decision_making decision_making_parser dynamic_reconfigure val_footstep cv_bridge image_transport pcl_conversions pcl_ros sensor_msgs std_msgs val_control
+ DEPENDS system_lib
+ #DEPENDS system_lib
 )
 
 ###########
@@ -131,6 +148,7 @@ include_directories(
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
          src/val_task3.cpp
+         src/stair_detector.cpp
 )
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -138,6 +156,9 @@ add_library(${PROJECT_NAME}
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
 
+
+add_executable(stair_detector_node        src/stair_detector_node.cpp)
+target_link_libraries(stair_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES}   ${PROJECT_NAME})
 #############
 ## Install ##
 #############
@@ -153,18 +174,18 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} $
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS val_task3 val_task3_node
+#install(TARGETS val_task3 val_task3_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+#)
 
 ## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
+#install(DIRECTORY include/${PROJECT_NAME}/
 #   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 #   FILES_MATCHING PATTERN "*.h"
 #   PATTERN ".svn" EXCLUDE
-# )
+#)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
