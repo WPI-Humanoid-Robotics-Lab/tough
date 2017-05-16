@@ -66,17 +66,14 @@ void solar_panel_handle_grabber::setRightHandOrientation(const geometry_msgs::Qu
 }
 
 
-void solar_panel_handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Point &goal, float executionTime)
+void solar_panel_handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Pose &goal, float executionTime)
 {
     const std::vector<float>* seed;
-    geometry_msgs::QuaternionStamped* finalOrientationStamped;
     if(side == armSide::LEFT){
         seed = &leftShoulderSeed_;
-        finalOrientationStamped = &leftHandOrientation_;
     }
     else {
         seed = &rightShoulderSeed_;
-        finalOrientationStamped = &rightHandOrientation_;
     }
 
 
@@ -96,33 +93,25 @@ void solar_panel_handle_grabber::grasp_handles(const armSide side, const geometr
     geometry_msgs::Pose finalGoal, intermGoal;
     geometry_msgs::Point finalPoint, intermPoint;
 
-    current_state_->transformPoint(goal,intermPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-    intermPoint.z += 0.1;
+    current_state_->transformPose(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    intermGoal.position.z += 0.1;
 
     //transform that point back to world frame
-    current_state_->transformPoint(intermPoint, intermPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPose(intermGoal, intermGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
 
     ROS_INFO("Moving at an intermidate point before goal");
-    intermGoal.position = intermPoint;
-    geometry_msgs::QuaternionStamped temp  = *finalOrientationStamped;
-
-    current_state_->transformQuaternion(temp, temp);
-    intermGoal.orientation = temp.quaternion;
-
     armTraj_.moveArmInTaskSpace(side, intermGoal, executionTime*2);
     ros::Duration(executionTime*2).sleep();
 
     //move arm to final position with known orientation
 
-    current_state_->transformPoint(goal,finalPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-    finalPoint.x -= 0.04; // this is to compensate for the distance between palm frame and center of palm
+    current_state_->transformPose(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    finalGoal.position.x -= 0.04; // this is to compensate for the distance between palm frame and center of palm
 
     //transform that point back to world frame
-    current_state_->transformPoint(finalPoint, finalPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPose(finalGoal, finalGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
 
     ROS_INFO("Moving towards goal");
-    finalGoal.position = finalPoint;
-    finalGoal.orientation = temp.quaternion;
 
     std::vector<geometry_msgs::Pose> waypoints;
 
