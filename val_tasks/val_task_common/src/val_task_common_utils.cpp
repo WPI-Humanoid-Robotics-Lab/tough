@@ -50,36 +50,38 @@ bool taskCommonUtils::isGoalReached(geometry_msgs::Pose pose_old, geometry_msgs:
     return taskCommonUtils::isGoalReached(pose2d_old, pose_new);
 }
 
-void taskCommonUtils::moveToWalkSafePose(ros::NodeHandle nh)
+void taskCommonUtils::moveToWalkSafePose(ros::NodeHandle &nh)
 {
     ROS_INFO("Moving to walk safe pose");
     chestTrajectory chest_controller(nh);
-    chest_controller.controlChest(0, 0, 0, 1);
+    chest_controller.controlChest(0.0f, 0.0f, 0.0f);
     ros::Duration(0.5).sleep();
 
     pelvisTrajectory pelvis_controller(nh);
-    pelvis_controller.controlPelvisHeight(0.9);
+    pelvis_controller.controlPelvisHeight(0.9f);
     ros::Duration(0.5).sleep();
 
     HeadTrajectory  head_controller(nh);
-    head_controller.moveHead(0, 0, 0);
-//    ros::Duration(1).sleep();
+    head_controller.moveHead(0.0f, 0.0f, 0.0f);
+    ros::Duration(1).sleep();
 
     gripperControl gripper_controller(nh);
     gripper_controller.openGripper(armSide::RIGHT);
     gripper_controller.openGripper(armSide::LEFT);
-//    ros::Duration(0.2).sleep();
+    ros::Duration(0.2).sleep();
 
     armTrajectory arm_controller(nh);
+    ROS_INFO("Moving Arms Now");
     arm_controller.moveToDefaultPose(armSide::RIGHT);
+    ros::Duration(0.2).sleep();
     arm_controller.moveToDefaultPose(armSide::LEFT);
-    ros::Duration(0.5).sleep();
+    ros::Duration(0.2).sleep();
 
 }
 
 
 
-void taskCommonUtils::moveToInitPose(ros::NodeHandle nh)
+void taskCommonUtils::moveToInitPose(ros::NodeHandle &nh)
 {
     armTrajectory armTraj(nh);
     armTrajectory::armJointData l;

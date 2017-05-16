@@ -118,7 +118,6 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
 
     if(rover_detector_ == nullptr){
         rover_detector_ = new RoverDetector(nh_);
-        taskCommonUtils::moveToWalkSafePose(nh_);
     }
 
     static int fail_count = 0;
@@ -146,8 +145,8 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
         // block rover in /map
         rover_in_map_blocker_ = new RoverBlocker(nh_, pose2D,is_rover_on_right_);
         //wait for the map to update. This is required to ensure the footsteps dont collide with rover
-        ros::Duration(0.5).sleep();
-
+//        ros::Duration(0.5).sleep();
+        taskCommonUtils::moveToWalkSafePose(nh_);
 
         std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
         std::cout << "yaw: " << pose2D.theta  <<std::endl;
