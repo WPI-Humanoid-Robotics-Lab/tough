@@ -1,0 +1,57 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+
+  <model name="air_leak_detector">
+
+    <link name="base">
+
+      <inertial>
+        <pose>
+        0
+        -0.0008
+        0.03399
+        0
+        0
+        0
+        </pose>
+        <inertia>
+          <ixx>0.005172208333333333</ixx>
+          <iyy>0.0009736016666666666</iyy>
+          <izz>0.005377408333333333</izz>
+        </inertia>
+        <mass>1.0</mass>
+      </inertial>
+
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <uri>model://air_leak_detector/meshes/air_leak_detector.obj</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e5</kp>
+              <kd>1</kd>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.0015</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <uri>model://air_leak_detector/meshes/air_leak_detector.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+
+    </link>
+
+  </model>
+
+</sdf>
