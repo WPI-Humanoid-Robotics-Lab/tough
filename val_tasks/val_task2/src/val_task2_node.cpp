@@ -23,7 +23,7 @@ void task2Node::registerStateMethods(void)
     LocalTasks::registrate("STATE_DETECT_ROVER",               std::bind(&valTask2::detectRoverTask,      task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_WALK_TO_ROVER",              std::bind(&valTask2::walkToRoverTask,      task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_DETECT_SOLAR_PANEL",         std::bind(&valTask2::detectPanelTask,      task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_ORIENT_TO_SOLAR_PANEL",      std::bind(&valTask2::orientPanelTask,      task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_GRASP_SOLAR_PANEL",          std::bind(&valTask2::graspPanelTask,       task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_PICK_SOLAR_PANEL",           std::bind(&valTask2::pickPanelTask,        task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_DETECT_SOLAR_ARRAY",         std::bind(&valTask2::detectSolarArrayTask, task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_WALK_TO_SOLAR_ARRAY",        std::bind(&valTask2::walkSolarArrayTask,   task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));

@@ -163,7 +163,12 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,ge
 
 
     geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch,theta);
-
+    tfScalar r, p, y;
+    tf::Quaternion q;
+    tf::quaternionMsgToTF(quaternion, q);
+    tf::Matrix3x3 rot(q);
+    rot.getRPY(r, p, y);
+    ROS_INFO("Roll %.2f, Pitch %.2f, Yaw %.2f", (float)r, (float)p, (float)y);
 //    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
     pose.orientation = quaternion;
 

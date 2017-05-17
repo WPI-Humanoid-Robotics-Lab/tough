@@ -291,6 +291,7 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
 
     if (state_request == PCL_STATE_CONTROL::PAUSE){
         ROS_INFO("Laser assembling paused");
+        registered_pointcloud_pub_.publish(prev_msg_);
         return;
     }
 

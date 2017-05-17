@@ -27,6 +27,8 @@
 #include "val_task2/val_rover_detection.h"
 #include "val_task2/val_solar_detection.h"
 #include "val_task2/val_solar_panel_detector.h"
+#include "val_task2/solar_panel_grasp.h"
+#include <val_task2/val_task2_utils.h>
 
 using namespace decision_making;
 
@@ -40,19 +42,25 @@ class valTask2 {
     ros::NodeHandle nh_;
     // default constructor
     valTask2(ros::NodeHandle nh);
+    //utils
+    task2Utils* task2_utils_;
 
     // object for the walker api
     ValkyrieWalker* walker_;
     // object for tracking robot walk
     walkTracking* walk_track_;
+
+
+    // Block rover in /map
+    RoverBlocker* rover_in_map_blocker_;
     // panel detection object
     PanelDetector* panel_detector_;
     //Rover detector
     RoverDetector* rover_detector_;
     //solar panel detector
     SolarPanelDetect* solar_panel_detector_;
-    // Block rover in /map
-    RoverBlocker* rover_in_map_blocker_;
+    // panel grabber
+    solar_panel_handle_grabber* panel_grabber_;
 
     // chest controller
     chestTrajectory* chest_controller_;
@@ -93,7 +101,7 @@ class valTask2 {
     decision_making::TaskResult detectRoverTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult walkToRoverTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    decision_making::TaskResult orientPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult graspPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult pickPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult walkSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
