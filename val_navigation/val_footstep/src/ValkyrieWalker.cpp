@@ -93,9 +93,9 @@ bool ValkyrieWalker::walkPreComputedSteps(const std::vector<float> x_offset, con
         ROS_ERROR("X Offset and Y Offset have different size");
 
 
-    size_t numberOfStpes = x_offset.size();
+    size_t numberOfSteps = x_offset.size();
 
-    for (int m =1; m <= numberOfStpes ; m++) {
+    for (int m =1; m <= numberOfSteps ; m++) {
         if(m%2 == 1)
             list.footstep_data_list.push_back(*getOffsetStep(startLeg , x_offset[m-1], y_offset[m-1]));
         else
@@ -106,6 +106,54 @@ bool ValkyrieWalker::walkPreComputedSteps(const std::vector<float> x_offset, con
     return true;
 }
 
+bool ValkyrieWalker::walkLocalPreComputedSteps(const std::vector<float> x_offset, const std::vector<float> y_offset, armSide startLeg){
+
+    ihmc_msgs::FootstepDataListRosMessage list;
+    list.default_transfer_time= transfer_time;
+    list.default_swing_time = swing_time;
+    list.execution_mode = execution_mode;
+    list.unique_id = ValkyrieWalker::id;
+
+    if (x_offset.size() != y_offset.size())
+        ROS_ERROR("X Offset and Y Offset have different size");
+
+    ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
+    ihmc_msgs::FootstepDataRosMessage::Ptr newFootStep(new ihmc_msgs::FootstepDataRosMessage());
+
+    geometry_msgs::Point currentWorldLocation,currentPelvisLocation;
+
+    size_t numberOfSteps = x_offset.size();
+
+    for (int m = 1; m <= numberOfSteps; ++m) {
+        if(m%2 == 1)
+        {
+            getCurrentStep(startLeg, *current);
+        }
+        else
+        {
+            getCurrentStep((startLeg+1)%2, *current);
+        }
+
+        currentWorldLocation.x=current->location.x;
+        currentWorldLocation.y=current->location.y;
+        currentWorldLocation.z=current->location.z;
+        current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+
+        currentPelvisLocation.x+=x_offset[m-1];
+        currentPelvisLocation.y+=y_offset[m-1];
+        current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF);
+        newFootStep->location.x=currentWorldLocation.x;
+        newFootStep->location.y=currentWorldLocation.y;
+        newFootStep->location.z=current->location.z;
+        newFootStep->orientation=current->orientation;
+        newFootStep->robot_side=current->robot_side;
+        newFootStep->trajectory_type=current->trajectory_type;
+        list.footstep_data_list.push_back(*newFootStep);
+    }
+
+    this->walkGivenSteps(list);
+    return true;
+}
 
 bool ValkyrieWalker::walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list , bool waitForSteps)
 {
@@ -281,6 +329,7 @@ ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double 
     //    this->footstep_client_ = nh_.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("/plan_footsteps");
     this->footsteps_pub_   = nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/valkyrie/control/footstep_list",1,true);
     this->footstep_status_ = nh_.subscribe("/ihmc_ros/valkyrie/output/footstep_status", 20,&ValkyrieWalker::footstepStatusCB, this);
+    current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     this->nudgestep_pub_   = nh_.advertise<ihmc_msgs::FootTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/foot_trajectory",1,true);
     this->loadeff_pub      = nh_.advertise<ihmc_msgs::EndEffectorLoadBearingRosMessage>("/ihmc_ros/valkyrie/control/end_effector_load_bearing",1,true);
 

@@ -28,6 +28,7 @@ class cable_detector
     // Blue Range    - 114, 125, 100, 255, 0, 255
     // Low Red Range - 0, 5, 178, 255, 51, 149
     // High Red Range - 170, 180, 204, 255, 140, 191
+    // mahima range - 23, 39, 172, 255, 104, 205
     int hsv_[6] = {114, 125, 100, 255, 0, 255};
 
     int frameID_ = 0;

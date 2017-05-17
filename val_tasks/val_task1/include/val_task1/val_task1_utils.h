@@ -29,5 +29,4 @@ public:
     double getYawDiff (void);
     void getCircle3D (geometry_msgs::Point center, geometry_msgs::Point start,geometry_msgs::Pose pose, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, float radius, int steps =10);
     void visulatise6DPoints(std::vector<geometry_msgs::Pose> &points);
-    void moveToWalkSafePose(void);
 };

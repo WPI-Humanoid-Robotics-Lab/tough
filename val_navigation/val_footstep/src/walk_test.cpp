@@ -23,12 +23,12 @@ int main(int argc, char **argv)
  geometry_msgs::Pose2D goal;
 
 */
-    geometry_msgs::Pose2D goal;
-    goal.x = 0.0;
-    goal.y = 0.0;
-    goal.theta =-1.57 ;
+//    geometry_msgs::Pose2D goal;
+//    goal.x = 0.0;
+//    goal.y = 0.0;
+//    goal.theta =-1.57 ;
     ROS_INFO("About to walk");
-    walk.walkToGoal(goal);
+//    walk.walkToGoal(goal);
     ros::Duration(5).sleep();
     walk.raiseLeg(RIGHT,0.2);
     ros::Duration(2).sleep();

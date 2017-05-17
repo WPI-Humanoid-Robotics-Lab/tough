@@ -173,28 +173,3 @@ void task1Utils::visulatise6DPoints(std::vector<geometry_msgs::Pose> &points)
     ros::Duration(0.2).sleep();
 }
 
-void task1Utils::moveToWalkSafePose()
-{
-    chestTrajectory chest_controller(nh_);
-    chest_controller.controlChest(0, 0, 0, 1);
-    ros::Duration(1).sleep();
-
-    pelvisTrajectory pelvis_controller(nh_);
-    pelvis_controller.controlPelvisHeight(0.9);
-    ros::Duration(1).sleep();
-
-    HeadTrajectory  head_controller(nh_);
-    head_controller.moveHead(0, 0, 0);
-    ros::Duration(1).sleep();
-
-    gripperControl gripper_controller(nh_);
-    gripper_controller.openGripper(armSide::RIGHT);
-    gripper_controller.openGripper(armSide::LEFT);
-    ros::Duration(0.2).sleep();
-
-    armTrajectory arm_controller(nh_);
-    arm_controller.moveToDefaultPose(armSide::RIGHT);
-    arm_controller.moveToDefaultPose(armSide::LEFT);
-    ros::Duration(1).sleep();
-
-}

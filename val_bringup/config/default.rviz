@@ -447,8 +447,8 @@ Visualization Manager:
     - Alpha: 0.6
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0.0575188
-        Min Value: -0.012219
+        Max Value: 0.0476582
+        Min Value: -0.0214678
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -477,8 +477,8 @@ Visualization Manager:
     - Alpha: 0.2
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 12.4476
-        Min Value: -0.154816
+        Max Value: 12.5495
+        Min Value: -0.133519
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -843,7 +843,7 @@ Visualization Manager:
       Marker Topic: /footstep_planner/footsteps_array
       Name: Footsteps
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -865,9 +865,9 @@ Visualization Manager:
     - Class: rviz/Marker
       Enabled: true
       Marker Topic: /val_rover/Position
-      Name: Marker
+      Name: Rover
       Namespaces:
-        {}
+        Rover Position: true
       Queue Size: 100
       Value: true
     - Class: moveit_rviz_plugin/Trajectory
@@ -1271,6 +1271,14 @@ Visualization Manager:
       State Display Time: 0.05 s
       Trajectory Topic: /move_group/display_planned_path
       Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /val_solar_panel/visualization_marker
+      Name: SolarPanel
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -1302,15 +1310,15 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 2.71148
-        Y: 0.993389
-        Z: 0.742895
+        X: 2.76648
+        Y: 0.758319
+        Z: 1.08203
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.580398
+      Pitch: 0.890398
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.2004
+      Yaw: 1.7954
     Saved: ~
 Window Geometry:
   Displays:

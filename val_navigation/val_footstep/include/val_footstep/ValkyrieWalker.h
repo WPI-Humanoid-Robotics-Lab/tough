@@ -20,6 +20,7 @@
 #include "tf/tf.h"
 #include <tf/transform_listener.h>
 #include <val_common/val_common_defines.h>
+#include <val_control/robot_state.h>
 
 
 
@@ -109,6 +110,8 @@ public:
     bool turn(armSide side);
     void load_eff(armSide side, EE_LOADING load);
     bool raiseLeg(armSide side, float height);
+    bool walkLocalPreComputedSteps(const std::vector<float> x_offset, const std::vector<float> y_offset, armSide startLeg);
+    RobotStateInformer *current_state_;
     bool curlLeg(armSide side, float radius);
 
 

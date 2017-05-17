@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
   ihmc_msgs
   val_common
+  val_control
   )
 #find_package(PkgConfig REQUIRED)
 

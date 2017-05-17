@@ -1,6 +1,8 @@
 #pragma once
 
-// !!!!! important other wise created collision with std
+/*******************************************************
+ * !!!!! important other wise created collision with std
+ * *****************************************************/
 #define DISABLE_DECISION_MAKING_LOG true
 
 #include <iostream>
@@ -23,6 +25,8 @@
 #include "val_control/val_gripper_control.h"
 #include "val_control/robot_state.h"
 #include "val_task2/val_rover_detection.h"
+#include "val_task2/val_solar_detection.h"
+#include "val_task2/val_solar_panel_detector.h"
 
 using namespace decision_making;
 
@@ -45,6 +49,10 @@ class valTask2 {
     PanelDetector* panel_detector_;
     //Rover detector
     RoverDetector* rover_detector_;
+    //solar panel detector
+    SolarPanelDetect* solar_panel_detector_;
+    // Block rover in /map
+    RoverBlocker* rover_in_map_blocker_;
 
     // chest controller
     chestTrajectory* chest_controller_;
@@ -65,6 +73,10 @@ class valTask2 {
     geometry_msgs::Pose2D panel_walk_goal_;
     // goal location for the panel
     geometry_msgs::Pose2D rover_walk_goal_;
+    bool is_rover_on_right_;
+
+    //solar panel handle grasp pose
+    geometry_msgs::Pose solar_panel_handle_pose_;
 
     void initControllers();
     void initDetectors();
@@ -97,5 +109,7 @@ class valTask2 {
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     geometry_msgs::Pose2D getPanelWalkGoal();
     void setRoverWalkGoal(const geometry_msgs::Pose2D &rover_walk_goal);
+    void setRoverSide(const bool isRoverOnRight);
+    void setSolarPanelHandlePose(const geometry_msgs::Pose &pose);
     void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal);
 };
