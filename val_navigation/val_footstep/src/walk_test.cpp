@@ -29,6 +29,10 @@ int main(int argc, char **argv)
     goal.theta =-1.57 ;
     ROS_INFO("About to walk");
     walk.walkToGoal(goal);
+    ros::Duration(5).sleep();
+    walk.raiseLeg(RIGHT,0.2);
+    ros::Duration(2).sleep();
+    walk.curlLeg(RIGHT,0.1);
 //    walk.turn(RIGHT);
 
     //walk.walkNSteps(1,0.3);

@@ -116,6 +116,97 @@ bool ValkyrieWalker::walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list 
     }
     return true;
 }
+bool ValkyrieWalker::raiseLeg(armSide side, float height)
+{
+    ihmc_msgs::FootTrajectoryRosMessage foot;
+    ihmc_msgs::SE3TrajectoryPointRosMessage data;
+
+    ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
+    getCurrentStep(side, *current);
+
+    // get current position
+    data.position.x = current->location.x;
+    data.position.y = current->location.y;
+    data.position.z = current->location.z+height;
+    data.orientation=current->orientation;
+    data.unique_id=100;
+    data.time=3.0;
+    foot.robot_side = side;
+    foot.execution_mode=0; //OVERRIDE
+    foot.unique_id=101;
+    foot.taskspace_trajectory_points.push_back(data);
+    nudgestep_pub_.publish(foot);
+    return true;
+
+}
+
+bool ValkyrieWalker::curlLeg(armSide side, float radius)
+{
+    ihmc_msgs::FootTrajectoryRosMessage foot;
+    ihmc_msgs::SE3TrajectoryPointRosMessage data;
+
+    ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
+    getCurrentStep(side, *current);
+
+    // converting point in pelvis frame
+    geometry_msgs::PointStamped pt_in,pt_out;
+    geometry_msgs::PoseStamped final;
+    pt_in.point.x=current->location.x;
+    pt_in.point.y=current->location.y;
+    pt_in.point.z=current->location.z;
+    pt_in.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
+    try{
+
+        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+    // converting back to world frame
+    final.pose.position.x=pt_out.point.x-radius;
+    final.pose.position.y=pt_out.point.y;
+    final.pose.position.z=pt_out.point.z+radius;
+    final.pose.orientation.x=0;
+    final.pose.orientation.y=0.5;
+    final.pose.orientation.z=0;
+    final.pose.orientation.w=0.866;
+    final.header.frame_id =VAL_COMMON_NAMES::PELVIS_TF;
+    final.header.stamp =ros::Time(0);
+
+
+    try{
+
+        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        tf_listener_.transformPose(VAL_COMMON_NAMES::WORLD_TF, final, final);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+    // get current position
+    data.position.x = final.pose.position.x;
+    data.position.y = final.pose.position.y;
+    data.position.z = final.pose.position.z;
+    data.orientation=final.pose.orientation;
+    data.unique_id=100;
+    data.time=3.0;
+    foot.robot_side = side;
+    foot.execution_mode=0; //OVERRIDE
+    foot.unique_id=101;
+    foot.taskspace_trajectory_points.push_back(data);
+    nudgestep_pub_.publish(foot);
+    return true;
+
+}
+
 
 
 //Calls the footstep planner service to get footsteps to reach goal
@@ -187,9 +278,11 @@ double ValkyrieWalker::getSwing_height() const
 // constructor
 ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double InSwingTime, int InMode, double swingHeight):nh_(nh)
 {
-//    this->footstep_client_ = nh_.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("/plan_footsteps");
+    //    this->footstep_client_ = nh_.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("/plan_footsteps");
     this->footsteps_pub_   = nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/valkyrie/control/footstep_list",1,true);
     this->footstep_status_ = nh_.subscribe("/ihmc_ros/valkyrie/output/footstep_status", 20,&ValkyrieWalker::footstepStatusCB, this);
+    this->nudgestep_pub_   = nh_.advertise<ihmc_msgs::FootTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/foot_trajectory",1,true);
+    this->loadeff_pub      = nh_.advertise<ihmc_msgs::EndEffectorLoadBearingRosMessage>("/ihmc_ros/valkyrie/control/end_effector_load_bearing",1,true);
 
     transfer_time  = InTransferTime;
     swing_time     = InSwingTime;
@@ -429,6 +522,17 @@ bool ValkyrieWalker::turn(armSide side)
     this->footsteps_pub_.publish(list);
     ValkyrieWalker::id--;
     this->waitForSteps(list.footstep_data_list.size());
+
+}
+
+void ValkyrieWalker::load_eff(armSide side, EE_LOADING load)
+{
+    ihmc_msgs::EndEffectorLoadBearingRosMessage msg;
+    msg.unique_id=1;
+    msg.robot_side=side;
+    msg.end_effector=0;  // 0- foot 1 -hand
+    msg.request=(int)load;  // 0 -load 1 -unload
+    loadeff_pub.publish(msg);
 
 }
 

@@ -10,10 +10,8 @@ set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FL
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  rospy
   std_msgs
-
-  perception_common
+  val_footstep
 )
 
 ## System dependencies are found with CMake's conventions
@@ -112,7 +110,7 @@ include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_I
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES val_task3
-  CATKIN_DEPENDS roscpp rospy perception_common dynamic_reconfigure
+  CATKIN_DEPENDS roscpp rospy perception_common dynamic_reconfigure val_footstep
   DEPENDS system_lib
 )
 
@@ -131,7 +129,13 @@ include_directories(
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
          src/val_task3.cpp
+         src/val_stairclimb.cpp
 )
+
+add_executable(stair_climb_node src/val_stairclimb.cpp)
+target_link_libraries(stair_climb_node ${catkin_LIBRARIES} ${PROJECT_NAME})
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
