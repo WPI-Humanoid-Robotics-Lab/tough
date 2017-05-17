@@ -47,6 +47,7 @@ class stair_detector
     src_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
     void visualize_point(geometry_msgs::Point point);
+    void visualize_direction(geometry_msgs::Point point1, geometry_msgs::Point point2);
 
 public:
     stair_detector(ros::NodeHandle nh);
@@ -54,10 +55,10 @@ public:
     void showImage(cv::Mat, std::string caption="stair Detection");
     void colorSegment(cv::Mat &imgHSV, cv::Mat &outImg);
     void findMaxContour(const std::vector<std::vector<cv::Point> >& contours);
-    bool getStairLocation(geometry_msgs::Point &);
+    bool getStairLocation(geometry_msgs::Point &, uint&);
     //cv::Point getOrientation(const std::vector<cv::Point> &, cv::Mat &);
     //void drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale = 0.2);
-    bool findStair(geometry_msgs::Point &);
+    bool findStair(geometry_msgs::Point &, uint&);
     ~stair_detector();
 
 };

@@ -8,10 +8,11 @@ int main(int argc, char** argv)
     bool foundStair = false;
     geometry_msgs::Point StairLoc;
     stair_detector s1(nh);
+    uint numSideBarsDetected;
     //while (!foundStair && numIterations < 20)
     while(ros::ok())
     {
-        s1.findStair(StairLoc);
+        foundStair = s1.findStair(StairLoc, numSideBarsDetected);
         //ROS_INFO(foundStair ? "***** Stair detected" : "xxxxx Stair not detected");
         numIterations++;
     }
