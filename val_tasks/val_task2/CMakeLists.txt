@@ -25,6 +25,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf_conversions
   val_task_common
+  val_moveit_planners
 
 )
 
@@ -68,6 +69,7 @@ include_directories(include
             src/plug_detector.cpp
             src/val_solar_detection.cpp
             src/val_solar_panel_detector.cpp
+            src/val_task2_utils.cpp
  )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

@@ -1,0 +1,1831 @@
+<%
+  # Template for habitat model for SRC finals world
+
+  # Requires the following global variables:
+  # $habitat_frame
+
+  # Door frame in world coordinates
+  door_offset_x = -6.68
+  door_offset_y = -1.215
+  door_frame = $habitat_frame * TMatrix(door_offset_x, door_offset_y, 0);
+  door_pos_z = 2.28
+
+  # Door dimensions
+  door_col_size_x = 1.27
+  door_col_size_y = 0.25
+  door_col_size_z = 1.99
+
+  door_vis_pos_x = 6.68
+  door_vis_pos_y = -door_offset_y
+  door_vis_pos_z = -door_pos_z - 0.6
+
+  # Valve dimensions
+  valve_pos_x = 0
+  valve_pos_y = -0.12
+  valve_pos_z = 0.08
+
+%>
+
+<!-- Base model - static frame -->
+
+<model name="habitat_base">
+  <static>true</static>
+
+  <pose>
+  <%= $habitat_frame[0, 2] %>
+  <%= $habitat_frame[1, 2] %>
+  0
+  0
+  0
+  <%= Math::atan2($habitat_frame[1, 0], $habitat_frame[0, 0]) %>
+  </pose>
+
+  <link name="base">
+
+    <!-- Stairs collisions -->
+
+    <%
+      step_count = 7
+      size_x = 2.46997
+      size_y = 0.317063
+      size_z = 0.210
+      pos_x = -6.686
+      for step in 0..step_count
+        pos_y = -5.597 + 0.2389 * step
+        pos_z = 0.1079 + 0.2031 * step
+    %>
+
+    <collision name="step_<%= step %>">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 0</pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <% end %>
+
+    <!-- floor collisions -->
+
+    <%
+      size_x = 20.00
+      size_y = 8.00
+      pos_x = 2.00
+      pos_y = 0.155
+      pos_z = pos_z + 0.1804
+    %>
+
+    <collision name="floor_1">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 0</pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = 0.00
+      size_x = 8.00
+      size_y = 12.00
+    %>
+
+    <collision name="floor_2">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 0</pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <!-- Rail collisions -->
+
+    <%
+      left_pos_x = -7.920
+      right_bottom_pos_x = -5.4505
+      right_top_pos_x = -5.4305
+
+      size_x = 2.46
+      size_y = 0.055
+      size_z = 0.034
+      pos_x = left_pos_x
+      pos_y = -4.838
+      pos_z = 1.828
+      pitch = -0.7133
+      yaw = Math::PI / 2.0
+    %>
+
+    <collision name="rail_1_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_1_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 2.52
+      size_z = 0.037
+      pos_x = left_pos_x
+      pos_y = -4.678
+      pos_z = 1.368
+      pitch = -0.709
+    %>
+
+    <collision name="rail_2_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_2_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 1.96
+      size_y = 0.055
+      size_z = 0.048
+      pos_x = left_pos_x
+      pos_y = -2.13
+      pos_z = 2.625
+      pitch = 0
+    %>
+
+    <collision name="rail_3_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_top_pos_x
+    %>
+
+    <collision name="rail_3_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = left_pos_x
+      pos_z = 2.153
+    %>
+
+    <collision name="rail_4_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_top_pos_x
+    %>
+
+    <collision name="rail_4_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.16
+      pos_x = left_pos_x
+      pos_y = -3.64
+    %>
+
+    <collision name="rail_5_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_5_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.37
+      pos_x = left_pos_x
+      pos_y = -3.735
+      pos_z = 2.625
+    %>
+
+    <collision name="rail_6_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_6_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.46
+      pos_x = left_pos_x
+      pos_y = -5.88
+      pos_z = 0.555
+    %>
+
+    <collision name="rail_7_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_7_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.35
+      pos_x = left_pos_x
+      pos_y = -5.935
+      pos_z = 1.027
+    %>
+
+    <collision name="rail_8_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_8_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.05
+      size_z = 0.478
+      pos_x = left_pos_x
+      pos_y = -5.65
+      pos_z = 0.335
+    %>
+
+    <collision name="rail_9_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_9_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.046
+      size_z = 0.478
+      pos_x = left_pos_x
+      pos_y = -5.722
+      pos_z = 0.795
+      pitch = -0.325
+    %>
+
+    <collision name="rail_10_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_10_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.05
+      size_z = 0.568
+      pos_x = left_pos_x
+      pos_y = -3.738
+      pos_z = 1.89
+      pitch = 0
+    %>
+
+    <collision name="rail_11_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_11_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.046
+      size_z = 0.478
+      pos_x = left_pos_x
+      pos_y = -3.81
+      pos_z = 2.39
+      pitch = -0.325
+    %>
+
+    <collision name="rail_12_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_12_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_z = 1.028
+      pos_x = left_pos_x
+      pos_y = -2.842
+      pos_z = 2.12
+      pitch = 0
+    %>
+
+    <collision name="rail_13_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_top_pos_x
+    %>
+
+    <collision name="rail_13_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = left_pos_x
+      pos_y = -1.595
+    %>
+
+    <collision name="rail_14_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_top_pos_x
+    %>
+
+    <collision name="rail_14_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.10
+      size_y = 0.055
+      size_z = 0.048
+      pos_x = left_pos_x
+      pos_y = -6.15
+      pos_z = 0.568
+      pitch = 0.29
+    %>
+
+    <collision name="rail_15_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_15_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.11
+      size_y = 0.055
+      size_z = 0.046
+      pos_x = left_pos_x
+      pos_y = -6.224
+      pos_z = 0.612
+      pitch = 0.78
+    %>
+
+    <collision name="rail_16_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_16_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.10
+      size_y = 0.055
+      size_z = 0.047
+      pos_x = left_pos_x
+      pos_y = -6.271
+      pos_z = 0.691
+      pitch = 1.30
+    %>
+
+    <collision name="rail_17_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_17_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.12
+      size_y = 0.055
+      size_z = 0.050
+      pos_x = left_pos_x
+      pos_y = -6.283
+      pos_z = 0.791
+      pitch = Math::PI / 2.0
+    %>
+
+    <collision name="rail_18_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_18_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.10
+      size_y = 0.055
+      size_z = 0.048
+      pos_x = left_pos_x
+      pos_y = -6.271
+      pos_z = 0.891
+      pitch = 1.86
+    %>
+
+    <collision name="rail_19_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_19_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.107
+      size_y = 0.055
+      size_z = 0.048
+      pos_x = left_pos_x
+      pos_y = -6.225
+      pos_z = 0.968
+      pitch = 2.36
+    %>
+
+    <collision name="rail_20_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_20_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.10
+      size_y = 0.055
+      size_z = 0.048
+      pos_x = left_pos_x
+      pos_y = -6.15
+      pos_z = 1.014
+      pitch = -0.29
+    %>
+
+    <collision name="rail_21_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_21_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      rail_circle_off_y = 2.998
+      rail_circle_off_z = 1.598
+      size_x = 0.10
+      size_y = 0.055
+      size_z = 0.048
+      pos_x = left_pos_x
+      pos_y = -6.15 + rail_circle_off_y
+      pos_z = 0.568 + rail_circle_off_z
+      pitch = 0.29
+    %>
+
+    <collision name="rail_22_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_top_pos_x
+    %>
+
+    <collision name="rail_22_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.11
+      size_y = 0.055
+      size_z = 0.046
+      pos_x = left_pos_x
+      pos_y = -6.224 + rail_circle_off_y
+      pos_z = 0.612 + rail_circle_off_z
+      pitch = 0.78
+    %>
+
+    <collision name="rail_23_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_top_pos_x
+    %>
+
+    <collision name="rail_23_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.10
+      size_y = 0.055
+      size_z = 0.047
+      pos_x = left_pos_x
+      pos_y = -6.271 + rail_circle_off_y
+      pos_z = 0.691 + rail_circle_off_z
+      pitch = 1.30
+    %>
+
+    <collision name="rail_24_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_top_pos_x
+    %>
+
+    <collision name="rail_24_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.12
+      size_y = 0.055
+      size_z = 0.050
+      pos_x = left_pos_x
+      pos_y = -6.283 + rail_circle_off_y
+      pos_z = 0.791 + rail_circle_off_z
+      pitch = Math::PI / 2.0
+    %>
+
+    <collision name="rail_25_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_top_pos_x
+    %>
+
+    <collision name="rail_25_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.10
+      size_y = 0.055
+      size_z = 0.048
+      pos_x = left_pos_x
+      pos_y = -6.271 + rail_circle_off_y
+      pos_z = 0.891 + rail_circle_off_z
+      pitch = 1.86
+    %>
+
+    <collision name="rail_26_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_top_pos_x
+    %>
+
+    <collision name="rail_26_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.107
+      size_y = 0.055
+      size_z = 0.048
+      pos_x = left_pos_x
+      pos_y = -6.225 + rail_circle_off_y
+      pos_z = 0.968 + rail_circle_off_z
+      pitch = 2.36
+    %>
+
+    <collision name="rail_27_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_top_pos_x
+    %>
+
+    <collision name="rail_27_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.10
+      size_y = 0.055
+      size_z = 0.048
+      pos_x = left_pos_x
+      pos_y = -6.15 + rail_circle_off_y
+      pos_z = 1.014 + rail_circle_off_z
+      pitch = -0.29
+    %>
+
+    <collision name="rail_28_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_top_pos_x
+    %>
+
+    <collision name="rail_28_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.10
+      size_y = 0.055
+      size_z = 0.048
+      pos_x = left_pos_x
+      pos_y = -3.515
+      pos_z = 0.568 + rail_circle_off_z
+      pitch = -0.29
+    %>
+
+    <collision name="rail_29_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_29_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.11
+      size_y = 0.055
+      size_z = 0.046
+      pos_x = left_pos_x
+      pos_y = -3.444
+      pos_z = 0.612 + rail_circle_off_z
+      pitch = -0.78
+    %>
+
+    <collision name="rail_30_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_30_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.10
+      size_y = 0.055
+      size_z = 0.047
+      pos_x = left_pos_x
+      pos_y = -3.397
+      pos_z = 0.691 + rail_circle_off_z
+      pitch = -1.30
+    %>
+
+    <collision name="rail_31_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_31_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.12
+      size_y = 0.055
+      size_z = 0.050
+      pos_x = left_pos_x
+      pos_y = -3.384
+      pos_z = 0.791 + rail_circle_off_z
+      pitch = -Math::PI / 2.0
+    %>
+
+    <collision name="rail_32_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_32_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.10
+      size_y = 0.055
+      size_z = 0.048
+      pos_x = left_pos_x
+      pos_y = -3.396
+      pos_z = 0.891 + rail_circle_off_z
+      pitch = -1.86
+    %>
+
+    <collision name="rail_33_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_33_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.107
+      size_y = 0.055
+      size_z = 0.048
+      pos_x = left_pos_x
+      pos_y = -3.442
+      pos_z = 0.968 + rail_circle_off_z
+      pitch = -2.36
+    %>
+
+    <collision name="rail_34_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_34_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      size_x = 0.10
+      size_y = 0.055
+      size_z = 0.048
+      pos_x = left_pos_x
+      pos_y = -3.52
+      pos_z = 1.014 + rail_circle_off_z
+      pitch = 0.29
+    %>
+
+    <collision name="rail_35_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = right_bottom_pos_x
+    %>
+
+    <collision name="rail_35_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 <%= pitch %> <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <!-- Small module entrance door collisions -->
+
+    <%
+      pos_x = -7.447
+      pos_y = -1.175
+      pos_z = 2.9
+      size_x = 0.16
+      size_y = 0.5
+      size_z = 2.2
+    %>
+
+    <collision name="entrance_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 0</pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+      <surface>
+        <contact>
+          <!-- Don't collide with door -->
+          <collide_bitmask>0x01</collide_bitmask>
+        </contact>
+      </surface>
+    </collision>
+
+    <%
+      size_y = 0.3
+      pos_x = -5.923
+      pos_y = -1.276
+    %>
+
+    <collision name="entrance_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 0</pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+      <surface>
+        <contact>
+          <!-- Don't collide with door -->
+          <collide_bitmask>0x01</collide_bitmask>
+        </contact>
+      </surface>
+    </collision>
+
+    <%
+      pos_x = -7.80
+      pos_y = -0.475
+      pos_z = 2.9
+      size_y = 1.2
+      yaw = 0.495
+    %>
+
+    <!-- Small module wall collisions -->
+
+    <collision name="wall_1">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = -7.76
+      pos_y = 0.505
+      pos_z = 2.9
+      size_y = 1.5
+      yaw = -0.525
+    %>
+
+    <collision name="wall_2">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = -6.69
+      pos_y = 1.185
+      pos_z = 2.9
+      size_y = 1.5
+      yaw = Math::PI * 0.5
+    %>
+
+    <collision name="wall_3">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = -5.89
+      pos_y = 1.00
+      pos_z = 2.9
+      size_y = 0.5
+      yaw = 0.525
+    %>
+
+    <collision name="wall_4">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = -5.93
+      pos_y = -1.04
+      pos_z = 2.9
+      size_y = 0.5
+      yaw = -0.525
+    %>
+
+    <collision name="wall_5">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+      <surface>
+        <contact>
+          <!-- Don't collide with door -->
+          <collide_bitmask>0x01</collide_bitmask>
+        </contact>
+      </surface>
+    </collision>
+
+    <!-- Passage collisions -->
+
+    <%
+      pos_x = -5.295
+      pos_y = 0.928
+      pos_z = 2.9
+      size_x = 0.845
+      size_y = 0.5
+      size_z = 2.2
+    %>
+
+    <collision name="passage_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 0</pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_y = -0.93
+    %>
+
+    <collision name="passage_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 0</pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <!-- Large module wall collisions -->
+
+    <%
+      pos_x = -4.905
+      pos_y = 1.798
+      pos_z = 2.9
+      size_x = 0.1
+      size_y = 2.23
+      size_z = 2.2
+    %>
+
+    <collision name="wall_6">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 0</pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = -2.681
+      pos_y = 4.28
+      pos_z = 2.9
+      size_x = 0.1
+      size_y = 5.73
+      size_z = 2.2
+      yaw = -1.047
+    %>
+
+    <collision name="wall_7">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = 2.46
+      yaw = 1.049
+    %>
+
+    <collision name="wall_8">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = 5.0
+      pos_y = 1.798
+      size_x = 0.32
+      size_y = 2.23
+      yaw = 0.0
+    %>
+
+    <collision name="wall_9">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_y = -1.798
+    %>
+
+    <collision name="wall_10">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = 2.46
+      pos_y = -4.28
+      pos_z = 2.9
+      size_x = 0.1
+      size_y = 5.73
+      size_z = 2.2
+      yaw = -1.049
+    %>
+
+    <collision name="wall_11">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = -2.46
+      yaw = 1.049
+    %>
+
+    <collision name="wall_12">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_x = -5.0
+      pos_y = -1.798
+      size_x = 0.32
+      size_y = 2.23
+      yaw = 0.0
+    %>
+
+    <collision name="wall_13">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <!-- Passage collisions -->
+
+    <%
+      pos_x = 5.295
+      pos_y = 0.928
+      pos_z = 2.9
+      size_x = 0.845
+      size_y = 0.5
+      size_z = 2.2
+      roll = 0.0
+    %>
+
+    <collision name="passage_2_left">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 0</pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_y = -0.93
+    %>
+
+    <collision name="passage_2_right">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> 0 0 0</pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <!-- Long module -->
+
+    <%
+      pos_x = 8.919
+      pos_y = 1.161
+      pos_z = 2.3537
+      size_x = 6.159
+      size_y = 0.1319
+      size_z = 2.16955
+      roll = -0.518
+    %>
+
+    <collision name="wall_14">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> <%= roll %> 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <%
+      pos_y = -1.161
+      roll = 0.518
+    %>
+
+    <collision name="wall_15">
+      <pose><%= pos_x %> <%= pos_y %> <%= pos_z %> <%= roll %> 0 <%= yaw %></pose>
+      <geometry>
+        <box>
+          <size><%= size_x %> <%= size_y %> <%= size_z %> </size>
+        </box>
+      </geometry>
+    </collision>
+
+    <!-- VISUALS -->
+
+    <visual name="stairs">
+      <pose>0 0 0 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://src_habitat/meshes/hdu.obj</uri>
+          <scale>0.0254 0.0254 0.0254</scale>
+          <submesh>
+            <name>Stairs</name>
+          </submesh>
+        </mesh>
+      </geometry>
+    </visual>
+
+    <visual name="module_small">
+      <pose>0 0 0 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://src_habitat/meshes/hdu.obj</uri>
+          <scale>0.0254 0.0254 0.0254</scale>
+          <submesh>
+            <name>Module_Small</name>
+          </submesh>
+        </mesh>
+      </geometry>
+    </visual>
+
+    <visual name="door_01">
+      <pose>0 0 0 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://src_habitat/meshes/hdu.obj</uri>
+          <scale>0.0254 0.0254 0.0254</scale>
+          <submesh>
+            <name>Door_01</name>
+          </submesh>
+        </mesh>
+      </geometry>
+    </visual>
+
+    <visual name="door_03">
+      <geometry>
+        <mesh>
+          <uri>model://src_habitat/meshes/hdu.obj</uri>
+          <scale>0.0254 0.0254 0.0254</scale>
+          <submesh>
+            <name>Door_03</name>
+          </submesh>
+        </mesh>
+      </geometry>
+    </visual>
+
+    <visual name="door_04">
+      <pose>0 0 0 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://src_habitat/meshes/hdu.obj</uri>
+          <scale>0.0254 0.0254 0.0254</scale>
+          <submesh>
+            <name>Door_04</name>
+          </submesh>
+        </mesh>
+      </geometry>
+    </visual>
+
+    <visual name="module_large">
+      <pose>0 0 0 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://src_habitat/meshes/hdu.obj</uri>
+          <scale>0.0254 0.0254 0.0254</scale>
+          <submesh>
+            <name>Module_Large</name>
+          </submesh>
+        </mesh>
+      </geometry>
+    </visual>
+
+    <visual name="module_long">
+      <pose>0 0 0 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://src_habitat/meshes/hdu.obj</uri>
+          <scale>0.0254 0.0254 0.0254</scale>
+          <submesh>
+            <name>Module_Long</name>
+          </submesh>
+        </mesh>
+      </geometry>
+    </visual>
+
+    <visual name="finish_box">
+      <pose>9.0 0.0 1.814 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>1.5 1.5 0.01 </size>
+        </box>
+      </geometry>
+      <material>
+        <script>
+          <uri>model://src_habitat/materials/scripts</uri>
+          <uri>model://src_habitat/materials/textures</uri>
+          <name>FinishBox</name>
+        </script>
+      </material>
+    </visual>
+
+  </link>
+</model>
+
+<!-- Door -->
+<model name="habitat_door">
+
+  <pose>
+    <%= door_frame[0, 2] %>
+    <%= door_frame[1, 2] %>
+    2.88
+    0
+    0
+    <%= Math::atan2(door_frame[1, 0], door_frame[0, 0]) %>
+  </pose>
+
+  <!-- door body -->
+  <link name="base">
+
+    <inertial>
+      <mass>18</mass>
+      <inertia>
+        <ixx>6.304</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>6.9932</iyy>
+        <iyz>0</iyz>
+        <izz>0.7979</izz>
+      </inertia>
+    </inertial>
+
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= door_col_size_x %> <%= door_col_size_y %> <%= door_col_size_z %></size>
+        </box>
+      </geometry>
+      <surface>
+        <contact>
+          <!-- Don't collide with habitat -->
+          <collide_bitmask>0x10</collide_bitmask>
+        </contact>
+      </surface>
+    </collision>
+
+    <visual name="visual">
+      <pose><%= door_vis_pos_x %> <%= door_vis_pos_y %> <%= door_vis_pos_z %> 0 0 0</pose>
+      <geometry>
+        <mesh>
+          <uri>model://src_habitat/meshes/hdu.obj</uri>
+          <scale>0.0254 0.0254 0.0254</scale>
+          <submesh>
+            <name>Door_02</name>
+          </submesh>
+        </mesh>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- door valve -->
+  <link name="valve">
+    <pose><%= valve_pos_x %> <%= valve_pos_y %> <%= valve_pos_z %> 0 0 3.14</pose>
+    <inertial>
+      <mass>7.8219</mass>
+      <pose>0 0.0615 0 0 0 0</pose>
+      <inertia>
+        <ixx>0.0695</ixx>
+        <ixy>0.0000</ixy>
+        <ixz>0.0000</ixz>
+        <iyy>0.1349</iyy>
+        <iyz>0.0000</iyz>
+        <izz>0.0695</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <mesh>
+          <uri>model://src_habitat/meshes/wheel_valve_large.dae</uri>
+        </mesh>
+      </geometry>
+      <surface>
+        <friction>
+          <ode>
+            <mu>1</mu>
+            <mu2>1</mu2>
+          </ode>
+        </friction>
+        <contact>
+          <ode>
+            <kp>1000000.0</kp>
+            <kd>100.0</kd>
+            <max_vel>0.01</max_vel>
+            <min_depth>0.001</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <mesh>
+          <uri>model://src_habitat/meshes/wheel_valve_large.dae</uri>
+        </mesh>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Joint connecting the valve and the door -->
+  <joint name="valve_hinge" type="revolute">
+    <parent>base</parent>
+    <child>valve</child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>0</lower>
+        <upper><%= Math::PI * 2.1 %></upper>
+      </limit>
+      <dynamics>
+        <friction><%= rand(1.0...1.6) %></friction>
+        <damping><%= rand(0.01...0.05) %></damping>
+      </dynamics>
+    </axis>
+  </joint>
+
+  <!-- Door hinge -->
+  <joint name="door_hinge" type="revolute">
+    <parent>world</parent>
+    <child>base</child>
+    <pose>-0.8 <%= door_col_size_y * 0.5 %> 0.2 0 0 0</pose>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>0</lower>
+        <upper>1.57</upper>
+      </limit>
+      <dynamics>
+        <friction><%= rand(10.0...20.0) %></friction>
+        <damping><%= rand(1.0...4.0) %></damping>
+      </dynamics>
+    </axis>
+  </joint>
+
+  <!-- Door lock -->
+  <joint name="door_lock" type="fixed">
+    <parent>world</parent>
+    <child>base</child>
+  </joint>
+
+</model>
+

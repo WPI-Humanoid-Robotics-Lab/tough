@@ -12,6 +12,7 @@
 #include <val_task2/val_task2.h>
 #include <srcsim/StartTask.h>
 #include "val_task_common/val_task_common_utils.h"
+#include "val_task2/val_task2_utils.h"
 
 using namespace std;
 
@@ -41,7 +42,10 @@ valTask2::valTask2(ros::NodeHandle nh):
     rover_detector_ = nullptr;
     solar_panel_detector_ = nullptr;
     rover_in_map_blocker_ = nullptr;
+    panel_grabber_        = nullptr;
 
+    //utils
+    task2_utils_    = new task2Utils(nh_);
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     map_update_count_ = 0;
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask2::occupancy_grid_cb, this);
@@ -118,7 +122,6 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
 
     if(rover_detector_ == nullptr){
         rover_detector_ = new RoverDetector(nh_);
-        taskCommonUtils::moveToWalkSafePose(nh_);
     }
 
     static int fail_count = 0;
@@ -146,8 +149,8 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
         // block rover in /map
         rover_in_map_blocker_ = new RoverBlocker(nh_, pose2D,is_rover_on_right_);
         //wait for the map to update. This is required to ensure the footsteps dont collide with rover
-        ros::Duration(0.5).sleep();
-
+//        ros::Duration(0.5).sleep();
+        taskCommonUtils::moveToWalkSafePose(nh_);
 
         std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
         std::cout << "yaw: " << pose2D.theta  <<std::endl;
@@ -313,12 +316,54 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
     return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult valTask2::orientPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
 
-    // generate the event
-    eventQueue.riseEvent("/REACHED_ROVER");
+    /*
+     * Executing -> when grasp_handles is called
+     * Retry -> grasp handles is called but it failed
+     * Failed -> retry failed 5 times
+     * Success -> grasp is successful
+     */
+    static bool executing = false;
+    static int retry_count = 0;
+    static armSide side;
+    if(panel_grabber_ == nullptr){
+        panel_grabber_ = new solar_panel_handle_grabber(nh_);
+    }
+
+    if(!executing){
+        ROS_INFO("Executing the grasp panel handle command");
+        executing = true;
+        // grasp the handle
+        side = is_rover_on_right_ ? armSide::RIGHT : armSide::LEFT;
+        panel_grabber_->grasp_handles(side, solar_panel_handle_pose_);
+        ros::Duration(0.2).sleep(); //wait till grasp is complete
+        eventQueue.riseEvent("/GRASP_RETRY");
+    }
+    else if (robot_state_->isGraspped(side)){
+        ROS_INFO("Grasp is successful");
+        task2_utils_->afterPanelGraspPose(side);
+        eventQueue.riseEvent("/GRASPED_PANEL");
+    }
+    else if (retry_count < 5 ){
+        ROS_INFO("Grasp Failed, retrying");
+        executing = false;
+        ++retry_count;
+        eventQueue.riseEvent("/GRASP_RETRY");
+    }
+    else {
+        ROS_INFO("Failed all conditions. state error");
+        executing = false;
+        retry_count = 0;
+        eventQueue.riseEvent("/GRASP_PANEL_FAILED");
+    }
+
+//    // generate the event
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
 
     return TaskResult::SUCCESS();
 }
