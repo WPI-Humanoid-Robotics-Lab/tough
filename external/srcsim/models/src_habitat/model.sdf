@@ -1,0 +1,196 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="src_habitat">
+
+    <static>true</static>
+
+    <link name="base">
+
+      <!-- VISUALS -->
+
+      <visual name="stairs">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Stairs</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <visual name="module_small">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Module_Small</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <visual name="door_01">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Door_01</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <visual name="door_03">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Door_03</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <visual name="door_04">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Door_04</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <visual name="module_large">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Module_Large</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <visual name="module_long">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Module_Long</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </visual>
+
+      <!-- MESH COLLISIONS -->
+
+      <collision name="stairs">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Stairs</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <collision name="module_small">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Module_Small</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <collision name="door_01">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Door_01</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <collision name="door_02">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Door_02</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <collision name="door_03">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Door_03</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <collision name="door_04">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Door_04</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <collision name="module_large">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Module_Large</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <collision name="module_long">
+        <geometry>
+          <mesh>
+            <uri>model://src_habitat/meshes/hdu.obj</uri>
+            <scale>0.0254 0.0254 0.0254</scale>
+            <submesh>
+              <name>Module_Long</name>
+            </submesh>
+          </mesh>
+        </geometry>
+      </collision>
+
+    </link>
+
+  </model>
+</sdf>
