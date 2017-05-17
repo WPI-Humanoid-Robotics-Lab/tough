@@ -50,7 +50,8 @@ int main(int argc, char** argv){
   RoverBlocker obj(nh,rover_loc,isroverRight);
   ros::Rate loop(1);
   std::vector<geometry_msgs::Pose> solar_array_poses;
-  while(ros::ok()&& solar_array_poses.size() < NUM_SAMPLES){
+//  solar_array_poses.size() < NUM_SAMPLES
+  while(ros::ok() ){
       if(obj.getDetections(solar_array_poses))
           for (size_t i = 0; i < solar_array_poses.size(); ++i){
               //ROS_INFO_STREAM("x : "<<poses[i].position.x<<"y : "<<poses[i].position.y<<"z : "<<poses[i].position.z);

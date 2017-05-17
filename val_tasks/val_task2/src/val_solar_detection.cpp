@@ -290,14 +290,7 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
     float theta = 0;
     float cosTheta = 0;
     float sinTheta = 0;
-    /*
-     * NOT WORKING
-    // sometimes maxPoint is diverging away from the plane
-    // still it wasn't affecting the final pose
-    // for safety changing it to centroid;
-    maxPoint.x = centroid(0);
-    maxPoint.y = centroid(1);
-    maxPoint.z = centroid(2);*/
+
 
 
     cosTheta = (maxPoint.x - minPoint.x)/(sqrt(pow((maxPoint.x - minPoint.x),2) + pow((maxPoint.y - minPoint.y),2) + pow((maxPoint.z - minPoint.z),2)));
@@ -458,6 +451,31 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
     marker.color.r = 1.0;
     marker.color.g = 1.0;
     marker.color.b = 1.0;
+    mk_array.markers.push_back(marker);
+
+    marker.ns = "vec 1";
+    marker.pose.position.x = centroid(0)+eigenVectors.col(0)[0];
+    marker.pose.position.y = centroid(1)+eigenVectors.col(0)[1];
+    marker.pose.position.z = centroid(2)+eigenVectors.col(0)[2];
+    marker.color.r = 0.0;
+    marker.color.g = 0.0;
+    marker.color.b = 1.0;
+    mk_array.markers.push_back(marker);
+    marker.ns = "vec 2";
+    marker.pose.position.x = centroid(0)+eigenVectors.col(1)[0];
+    marker.pose.position.y = centroid(1)+eigenVectors.col(1)[1];
+    marker.pose.position.z = centroid(2)+eigenVectors.col(1)[2];
+    marker.color.r = 1.0;
+    marker.color.g = 0.0;
+    marker.color.b = 0.0;
+    mk_array.markers.push_back(marker);
+    marker.ns = "vec 3";
+    marker.pose.position.x = centroid(0)+eigenVectors.col(2)[0];
+    marker.pose.position.y = centroid(1)+eigenVectors.col(2)[1];
+    marker.pose.position.z = centroid(2)+eigenVectors.col(2)[2];
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
     mk_array.markers.push_back(marker);
 
     vis_pub_array.publish(mk_array);
