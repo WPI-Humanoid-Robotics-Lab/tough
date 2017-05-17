@@ -17,6 +17,7 @@
 #include "tf/tf.h"
 #include <tf/transform_listener.h>
 #include <val_common/val_common_defines.h>
+#include <val_control/robot_state.h>
 
 /**
  * @brief The ValkyrieWalker class This class provides access to the footsteps of valkyrie. It can be used
@@ -102,6 +103,8 @@ public:
         swing_height = value;
     }
     bool turn(armSide side);
+    bool walkLocalPreComputedSteps(const std::vector<float> x_offset, const std::vector<float> y_offset, armSide startLeg);
+    RobotStateInformer *current_state_;
 
 private:
     static int id ;
