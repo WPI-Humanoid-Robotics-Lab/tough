@@ -55,6 +55,17 @@ void SolarPanelDetect::setoffset(float minX, float maxX, float minY, float maxY,
     pitch = (pitchDeg*M_PI)/180;
 }
 
+void SolarPanelDetect::getOutwardOrientation(geometry_msgs::Pose &pose)
+{
+    tfScalar r, p, y;
+    tf::Quaternion q;
+    tf::quaternionMsgToTF(pose.orientation, q);
+    tf::Matrix3x3 rot(q);
+    rot.getRPY(r, p, y);
+    y = y-M_PI;
+    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(r,p,y);
+    pose.orientation = quaternion;
+}
 
 void SolarPanelDetect::setRoverTheta()
 {
@@ -162,7 +173,15 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,ge
 //    ROS_INFO("theta %.2f  theta1 %.2f",theta,theta1);
 
 
+    // for viz
     geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch,theta);
+    pose.orientation = quaternion;
+    visualizept(pose);
+    // for valkyrie orientation :
+    // pointing inwards : if panel is behind valkyrie: theta
+    // pointing outwards : if panel is in front of valkyrie: theta-M_PI taken care by another function
+    quaternion = tf::createQuaternionMsgFromRollPitchYaw(pitch,0,theta);
+    pose.orientation = quaternion;
     tfScalar r, p, y;
     tf::Quaternion q;
     tf::quaternionMsgToTF(quaternion, q);
@@ -170,9 +189,7 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,ge
     rot.getRPY(r, p, y);
     ROS_INFO("Roll %.2f, Pitch %.2f, Yaw %.2f", (float)r, (float)p, (float)y);
 //    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
-    pose.orientation = quaternion;
 
-    visualizept(pose);
 }
 
 

@@ -38,11 +38,16 @@ int main(int argc, char** argv){
   ros::Rate loop(1);
   while(ros::ok()){
       std::vector<geometry_msgs::Pose> poses;
-//      if(obj.getDetections(poses))
-//          for (size_t i = 0; i < poses.size(); ++i){
-//              //ROS_INFO_STREAM("x : "<<poses[i].position.x<<"y : "<<poses[i].position.y<<"z : "<<poses[i].position.z);
-//              //ROS_INFO_STREAM("x : "<<poses[i].orientation.x<<"y : "<<poses[i].orientation.y<<"z : "<<poses[i].orientation.z<<" w: "<<poses[i].orientation.w);
-//          }
+      ROS_INFO("hello");
+      if(obj.getDetections(poses))
+          for (size_t i = 0; i < poses.size(); ++i){
+              ROS_INFO_STREAM("x : "<<poses[i].position.x<<"y : "<<poses[i].position.y<<"z : "<<poses[i].position.z);
+              ROS_INFO_STREAM("x y z w : "<<poses[i].orientation.x<<" "<<poses[i].orientation.y<<" "<<poses[i].orientation.z<<" "<<poses[i].orientation.w);
+              obj.getOutwardOrientation(poses[i]);
+              ROS_INFO("outward Orientation");
+              ROS_INFO_STREAM("x : "<<poses[i].position.x<<"y : "<<poses[i].position.y<<"z : "<<poses[i].position.z);
+              ROS_INFO_STREAM("x y z w : "<<poses[i].orientation.x<<" "<<poses[i].orientation.y<<" "<<poses[i].orientation.z<<" "<<poses[i].orientation.w);
+          }
       ros::spinOnce();
       loop.sleep();
   }
