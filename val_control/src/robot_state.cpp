@@ -221,6 +221,27 @@ bool RobotStateInformer::transformPoint(const geometry_msgs::PointStamped &pt_in
     return true;
 }
 
+bool RobotStateInformer::transformPose(const geometry_msgs::Pose &pose_in, geometry_msgs::Pose &pose_out,const std::string &from_frame, const std::string &to_frame)
+{
+    geometry_msgs::PoseStamped in, out;
+    in.header.frame_id = from_frame;
+    in.header.stamp = ros::Time(0);
+    in.pose = pose_in;
+    try{
+
+        listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        listener_.transformPose(to_frame, in, out);
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+    pose_out = out.pose;
+    return true;
+}
+
 bool RobotStateInformer::transformPoint(const geometry_msgs::Point &pt_in, geometry_msgs::Point &pt_out,const std::string &from_frame, const std::string &to_frame)
 {
     geometry_msgs::PointStamped stmp_pt_in, stmp_pt_out;

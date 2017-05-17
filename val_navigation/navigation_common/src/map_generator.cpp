@@ -149,4 +149,5 @@ void MapGenerator::updatePointsToBlock(const sensor_msgs::PointCloud2Ptr msg) {
             }
         }
     }
+    mapPub_.publish(occGrid_);
 }

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <math.h>
+#include <memory>
 
 #include <ros/ros.h>
 
@@ -50,6 +51,8 @@ private:
 
   int detection_tries_;
 
+  std::shared_ptr<bool> isRoverOnRight_;
+
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
 
   void lowerBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
@@ -71,5 +74,6 @@ public:
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
 
   int getDetectionTries() const;
+  bool isRoverOnRight() const;
 
 };

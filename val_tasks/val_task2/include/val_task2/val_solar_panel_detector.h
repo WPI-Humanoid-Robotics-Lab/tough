@@ -37,57 +37,47 @@
 #include <pcl/sample_consensus/ransac.h>
 #include "val_control/robot_state.h"
 #include <visualization_msgs/MarkerArray.h>
-//#include "octomap_server/"
 
-class RoverBlocker{
+class SolarPanelDetect
+{
 private:
 
   ros::Subscriber pcl_sub;
-
   ros::Publisher pcl_filtered_pub;
-  ros::Publisher rover_cloud_pub;
+  ros::Publisher vis_pub;
 
 
-  ros::Publisher vis_pub,vis_pub_array ;
-
+  // do we need this
   RobotStateInformer* robot_state_;
 
   geometry_msgs::Pose2D rover_loc_;
+  bool isroverRight_;
+  float rover_theta;
+
   std::vector<geometry_msgs::Pose> detections_;
   int detection_tries_;
-  bool isroverRight_;
+
+  float min_x,max_x, min_y,max_y,min_z,max_z;
+  float pitch;
 
 
   void cloudCB(const sensor_msgs::PointCloud2::Ptr &input);
-
   void PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-
-  void planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-  void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
-
-  void roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+  void setRoverTheta();
+  void visualizept(geometry_msgs::Pose pose);
+  void visualizept(float x,float y,float z);
 
 
-  /*
-  void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-
-  void removeWalkWay(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool setneg = false);
-
-  pcl::ModelCoefficients::Ptr getCylinderCoefficients(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-
-  void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, pcl::PointCloud<pcl::PointXYZ>::Ptr& upperBoxCloud, geometry_msgs::Pose& pose);
-*/
-  // void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-  // void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose);
+  void transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool isinverse);
+  void filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+  void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,geometry_msgs::Pose &pose);
 
 public:
-  // Constructor
-
-  RoverBlocker(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight);
-  ~RoverBlocker();
+  SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight);
+  ~SolarPanelDetect();
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
-
   int getDetectionTries() const;
-
+  void setoffset(float minX=0, float maxX=1.0, float minY=-1.5, float maxY=1.5, float minZ=0.8, float maxZ=1.2, float pitchDeg=60);
+  void getoffset(float &minX, float &maxX,float &minY, float &maxY,float &minZ, float &maxZ, float &pitchDeg);
 
 };
