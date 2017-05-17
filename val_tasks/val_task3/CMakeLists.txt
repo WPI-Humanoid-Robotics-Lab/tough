@@ -149,6 +149,7 @@ add_library(${PROJECT_NAME}
          src/val_task3.cpp
          src/val_stairclimb.cpp
          src/stair_detector.cpp
+         src/table_detector.cpp
 )
 
 add_executable(stair_climb_node src/val_stairclimb.cpp)
@@ -164,6 +165,10 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} $
 
 add_executable(stair_detector_node        src/stair_detector_node.cpp)
 target_link_libraries(stair_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES}   ${PROJECT_NAME})
+
+
+add_executable(table_detector_node        src/table_detector_node.cpp)
+target_link_libraries(table_detector_node ${catkin_LIBRARIES}   ${PCL_LIBRARIES}   ${PROJECT_NAME})
 #############
 ## Install ##
 #############
