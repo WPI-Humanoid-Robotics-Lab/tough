@@ -1,0 +1,58 @@
+<%
+  # Template for leak model for SRC finals world
+
+  # Requires the following global variables:
+  # $habitat_frame, $table_pos_z
+
+  # start and end points of the line
+  pt_0 = $habitat_frame * TMatrix(-4.781079, 3.018834, 0)
+  pt_f = $habitat_frame * TMatrix(-0.136121, 5.695208, 0)
+
+  # where in the line
+  r = rand(0.0...1.0)
+
+  x = pt_0[0, 2] + r * (pt_f[0, 2] - pt_0[0, 2])
+  y = pt_0[1, 2] + r * (pt_f[1, 2] - pt_0[1, 2])
+
+  # height
+  min_height = $table_pos_z + 0.835
+  max_height = min_height + 0.878
+
+  z = rand(min_height...max_height)
+
+%>
+
+<model name="leak">
+  <static>true</static>
+
+  <pose><%= x %> <%= y %> <%= z %> 0 0 0</pose>
+
+  <link name="base">
+
+    <collision name="collision">
+
+      <geometry>
+        <sphere>
+          <radius>0.02</radius>
+        </sphere>
+      </geometry>
+
+      <surface>
+        <contact>
+          <!-- Only collide with patch tool -->
+          <collide_bitmask>0x10000</collide_bitmask>
+        </contact>
+      </surface>
+
+    </collision>
+
+    <sensor name="leak_sensor" type="contact">
+      <contact>
+        <collision>collision</collision>
+      </contact>
+    </sensor>
+
+  </link>
+
+</model>
+
