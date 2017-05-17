@@ -25,7 +25,7 @@ void plug_detector::showImage(cv::Mat image, std::string caption)
 
 void plug_detector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
 {
-    cv::inRange(imgHSV, cv::Scalar(hsv_[0], hsv_[2], hsv_[6]), cv::Scalar(hsv_[1], hsv_[3], hsv_[5]), outImg);
+    cv::inRange(imgHSV,cv::Scalar(hsv_[0], hsv_[2], hsv_[4]), cv::Scalar(hsv_[1], hsv_[3], hsv_[5]), outImg);
     cv::morphologyEx(outImg, outImg, cv::MORPH_OPEN, getStructuringElement( cv::MORPH_ELLIPSE,cv::Size(3,3)));
     cv::dilate(outImg, outImg, getStructuringElement( cv::MORPH_ELLIPSE, cv::Size(5,5)));
 #ifdef DISABLE_TRACKBAR
@@ -33,6 +33,7 @@ void plug_detector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
 #endif
     setTrackbar();
     cv::imshow("binary thresholding", outImg);
+    cv::imshow("HSV thresholding", imgHSV);
     cv::waitKey(3);
 }
 
@@ -55,7 +56,6 @@ size_t plug_detector::findMaxContour(const std::vector<std::vector<cv::Point> >&
             largest_contour_index = i;
         }
     }
-
     convexHulls_ = hull[largest_contour_index];
 
     return largest_contour_index;
@@ -71,7 +71,6 @@ bool plug_detector::getPlugLocation(geometry_msgs::Point& plugLoc)
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
     cv::Mat imgHSV, outImg;
-    //cv::Point point;
 
     cv::cvtColor(current_image_, imgHSV, cv::COLOR_BGR2HSV);
     colorSegment(imgHSV, outImg);
@@ -79,37 +78,35 @@ bool plug_detector::getPlugLocation(geometry_msgs::Point& plugLoc)
     // Find contours
     cv::findContours(outImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
-
+    Eigen::Vector4f cloudCentroid;
     if(!contours.empty()) //avoid seg fault at runtime by checking that the contours exist
     {
-        findMaxContour(contours);
         foundPlug = true;
-    }
+        findMaxContour(contours);
 
-    cv::Mat hullPoints = cv::Mat::zeros(current_image_.size(), CV_8UC1);
-    cv::fillConvexPoly(hullPoints, convexHulls_,cv::Scalar(255));
-    cv::Mat nonZeroCoordinates;
-    cv::findNonZero(hullPoints, nonZeroCoordinates);
-    if (nonZeroCoordinates.total() < 10){
-        return false;
-    }
+        pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
+        cv::Mat hullPoints = cv::Mat::zeros(current_image_.size(), CV_8UC1);
+        cv::fillConvexPoly(hullPoints, convexHulls_, cv::Scalar(255));
+        cv::Mat nonZeroCoordinates;
+        cv::findNonZero(hullPoints, nonZeroCoordinates);
 
-    pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
 
-    for (int k = 0; k < nonZeroCoordinates.total(); k++ ) {
-        pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
-
-        if (temp_pclPoint.z > -2.0)
-        {
-            currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
-
+        if (nonZeroCoordinates.total() < 10){
+            return false;
         }
+        for (int k = 0; k < nonZeroCoordinates.total(); k++ ) {
+            pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
+
+            if (temp_pclPoint.z > -2.0)
+            {
+                currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
+
+            }
+        }
+
+        //  Calculating the Centroid of the handle Point cloud
+        pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
     }
-
-    Eigen::Vector4f cloudCentroid;
-    //  Calculating the Centroid of the handle Point cloud
-    pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
-
     if( foundPlug )
     {
         geom_point.point.x = cloudCentroid(0);
@@ -137,12 +134,10 @@ bool plug_detector::getPlugLocation(geometry_msgs::Point& plugLoc)
     return foundPlug;
 }
 
-
-
 bool plug_detector::findPlug(geometry_msgs::Point& plugLoc)
 {
-    //VISUALIZATION - include ros::spinOnce();
-    //ros::spinOnce();
+    //VISUALIZATION - include a spinOnce here to visualize the eigenvectors
+    ros::spinOnce();
     markers_.markers.clear();
     if(ms_sensor_.giveImage(current_image_))
     {
@@ -153,7 +148,6 @@ bool plug_detector::findPlug(geometry_msgs::Point& plugLoc)
     }
     return 0;
 }
-
 
 void plug_detector::setTrackbar()
 {
@@ -212,3 +206,4 @@ plug_detector::~plug_detector()
 {
 
 }
+
