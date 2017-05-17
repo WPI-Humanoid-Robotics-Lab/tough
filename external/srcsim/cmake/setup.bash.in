@@ -1,0 +1,118 @@
+#!/bin/bash
+
+ROS_DISTRO="indigo"
+LINUX_GROUP_NEEDED="ros"
+JAVA_HOME_DIR="/usr/lib/jvm/java-8-openjdk-amd64"
+LIMITD_FILE="/etc/security/limits.d/ros-rtprio.conf"
+NASA_SETUP_FILE="/opt/nasa/${ROS_DISTRO}/setup.bash"
+# modify the URI to point to default?
+IHMC_NETWORK_FILE_URI="https://raw.githubusercontent.com/ihmcrobotics/ihmc_ros_core/0.8.0/ihmc_ros_common/configurations/IHMCNetworkParametersTemplate.ini"
+IHMC_NETWORK_FILE="${HOME}/.ihmc/IHMCNetworkParameters.ini"
+IHMC_JAVA_ADAPTER_DIR="/opt/ros/${ROS_DISTRO}/share/ihmc_ros_java_adapter"
+
+get_current_update_alternatives_link()
+{
+   local software=${1}
+
+   echo "$(update-alternatives --query ${software} | grep Value | awk '{ print $2 }')"
+}
+
+check_java_according_to_java_home()
+{
+   local software=${1}
+
+   current_java_link=$(get_current_update_alternatives_link ${software})
+
+   # Check if the value does not contain the JAVA_HOME_DIR
+   if [[ "${current_java_link/${JAVA_HOME_DIR}}" == "${current_java_link}" ]]; then
+       return 1
+   fi
+
+   return 0
+}
+
+# Source the NASA setup.bash file
+if [[ ! -f ${NASA_SETUP_FILE} ]]; then
+  echo "The file ${NASA_SETUP_FILE} was not found."
+  echo "Is the nasa-${ROS_DISTRO}-workspace installed?"
+  return 1
+fi
+
+source ${NASA_SETUP_FILE}
+
+# Point JAVA_HOME to openjdk8-jdk
+if [[ ! -d ${JAVA_HOME_DIR} ]]; then
+  echo "The directory ${JAVA_HOME_DIR} was not found."
+  echo "Is the openjdk-8-jdk-headless package installed?"
+  return 1
+fi
+
+export JAVA_HOME=${JAVA_HOME_LINK}
+
+# Download the IHMCNetworkParametersTemplate.ini file if needed
+if [[ ! -f ${IHMC_NETWORK_FILE} ]]; then
+  echo " * IHMCNetworkParameters.ini not found, download it now to ${IHMC_NETWORK_FILE}"
+  mkdir -p ${HOME}/.ihmc
+  curl ${IHMC_NETWORK_FILE_URI} > ${IHMC_NETWORK_FILE} 2>/dev/null
+fi
+
+export IS_GAZEBO=trueexport
+export ROS_IP=127.0.0.1
+
+# Check java links
+if ! $(check_java_according_to_java_home java); then
+  echo "update-alternatives report a not valid path java8 path:"
+  echo "$(get_current_update_alternatives_link java)"
+  return 1
+fi
+
+if ! $(check_java_according_to_java_home javac); then
+  echo "update-alternatives report a not valid path javac8 path:"
+  echo "$(get_current_update_alternatives_link javac)"
+  return 1
+fi
+
+# Check perms on ihmc_java_adapter
+if [[ ! -w ${IHMC_JAVA_ADAPTER_DIR} ]]; then
+  echo "The user ${USER} does not have write permissions on ${IHMC_JAVA_ADAPTER_DIR}"
+  echo "If the system is not intended to run srcsim for different system user"
+  echo "you can run 'sudo chown -R $USER:$USER /opt/ros/indigo/share/ihmc_ros_java_adapter'"
+  echo "to allow the user to write on it"
+  return 1
+fi
+
+# Check ros groups exists and user belongs to it
+if [[ ! $(getent group ${LINUX_GROUP_NEEDED})  &&
+      ! $(groups ${USER} | grep -q ${LINUX_GROUP_NEEDED}) ]]; then
+  echo "The user ${USER} does not belong to the group ${LINUX_GROUP_NEEDED}"
+  echo "To add the group and the user to it:"
+  echo " - sudo groupadd ${LINUX_GROUP_NEEDED}"
+  echo " - sudo usermod -a -G ${LINUX_GROUP_NEEDED} $USER"
+  return 1
+fi
+
+# Check limits.d file
+if [[ ! -f ${LIMITD_FILE} ]]; then
+  echo "The ${LIMITD_FILE} is not present in the system"
+  echo "To add it with the right configuration:"
+  echo " - sudo bash -c 'echo \"@${LINUX_GROUP_NEEDED} - rtprio 99\" > /etc/security/limits.d/ros-rtprio.conf'"
+  return 1
+fi
+
+# Check gazebo models
+if [[ ! -d "${HOME}/.gazebo/models" ]]; then
+  echo "Gazebo models were not found in the user HOME"
+  echo "To download them:"
+  echo " - mkdir -p ${HOME}/.gazebo/models"
+  echo " - wget -qO- https://bitbucket.org/osrf/gazebo_models/get/default.tar.gz | tar xvz --strip 1 -C ${HOME}/.gazebo/models"
+  return 1
+fi
+
+# Check valkyrie controller
+if [[ ! -d "${HOME}/valkyrie" ]]; then
+  echo "Valkyrie controller was not found in the user HOME"
+  echo "To download it:"
+  echo " - mkdir -p ${HOME}/.gazebo/models"
+  echo " - wget -qO- http://gazebosim.org/distributions/srcsim/valkyrie_controller.tar.gz | tar xvz -C ${HOME}"
+  return 1
+fi
