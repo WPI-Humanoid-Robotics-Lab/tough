@@ -1,0 +1,14 @@
+material FinishBox
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture finish.png
+      }
+    }
+  }
+}
+

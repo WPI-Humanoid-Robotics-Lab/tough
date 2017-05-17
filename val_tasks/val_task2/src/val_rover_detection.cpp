@@ -144,7 +144,8 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
     float sinTheta = 0;
 
     cosTheta = (maxPoint.y - minPoint.y)/(sqrt(pow((maxPoint.x - minPoint.x),2) + pow((maxPoint.y - minPoint.y),2) + pow((maxPoint.z - minPoint.z),2)));
-    sinTheta = sqrt(1 - (pow(cosTheta, 2)));
+    sinTheta= (maxPoint.x - minPoint.x)/(sqrt(pow((maxPoint.x - minPoint.x),2) + pow((maxPoint.y - minPoint.y),2) + pow((maxPoint.z - minPoint.z),2)));
+//    sinTheta = sqrt(1 - (pow(cosTheta, 2)));
 
     double yzSlope = (upperBoxPosition.z - lowerBoxPosition.z)/(upperBoxPosition.y - lowerBoxPosition.y);
 
@@ -186,7 +187,7 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
 
     //    ROS_INFO("The Orientation is given by := %0.2f", theta);
 
-    double offset = 6.15;
+    double offset = 6.25;
 
     pose.position.x = upperBoxPosition.x - (offset*cos(theta));
     pose.position.y = upperBoxPosition.y - (offset*sin(theta));
