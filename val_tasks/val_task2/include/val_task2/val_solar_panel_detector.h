@@ -79,5 +79,6 @@ public:
   int getDetectionTries() const;
   void setoffset(float minX=0, float maxX=1.0, float minY=-1.5, float maxY=1.5, float minZ=0.8, float maxZ=1.2, float pitchDeg=60);
   void getoffset(float &minX, float &maxX,float &minY, float &maxY,float &minZ, float &maxZ, float &pitchDeg);
+  void getOutwardOrientation(geometry_msgs::Pose &pose);
 
 };

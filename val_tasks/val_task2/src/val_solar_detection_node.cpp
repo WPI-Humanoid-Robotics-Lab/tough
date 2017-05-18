@@ -41,16 +41,17 @@ int main(int argc, char** argv){
   geometry_msgs::PoseStamped goal;
   goal.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
   goal.pose = rover_poses[rover_poses.size() -1];
-  goalPub.publish(goal);
+//  goalPub.publish(goal);
 //  std::cout <<obj.isRoverOnRight()<<std::endl;
-  ROS_INFO("Reaching Rover ");
-  ros::Duration(40).sleep();
+//  ROS_INFO("Reaching Rover ");
+//  ros::Duration(40).sleep();
 
 
   RoverBlocker obj(nh,rover_loc,isroverRight);
   ros::Rate loop(1);
   std::vector<geometry_msgs::Pose> solar_array_poses;
-  while(ros::ok()&& solar_array_poses.size() < NUM_SAMPLES){
+//  solar_array_poses.size() < NUM_SAMPLES
+  while(ros::ok() ){
       if(obj.getDetections(solar_array_poses))
           for (size_t i = 0; i < solar_array_poses.size(); ++i){
               //ROS_INFO_STREAM("x : "<<poses[i].position.x<<"y : "<<poses[i].position.y<<"z : "<<poses[i].position.z);
@@ -61,9 +62,9 @@ int main(int argc, char** argv){
   }
   goal.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
   goal.pose = solar_array_poses[NUM_SAMPLES -1];
-  goalPub.publish(goal);
+//  goalPub.publish(goal);
 //  std::cout <<obj.isRoverOnRight()<<std::endl;
-  ROS_INFO("Reaching solar Array coarse");
+//  ROS_INFO("Reaching solar Array coarse");
 //  ros::Duration(20).sleep();
   return 0;
 }
