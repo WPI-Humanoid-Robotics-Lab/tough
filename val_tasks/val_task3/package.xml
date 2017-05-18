@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>val_task3</name>
-  <version>0.0.0</version>
-  <description>The val_task3 package</description>
+<name>val_task3</name>
+<version>0.0.0</version>
+<description>The val_task3 package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
@@ -70,11 +70,12 @@
   <run_depend>libpcl-all</run_depend>
   <run_depend>perception_common</run_depend>
   <run_depend>val_task_common</run_depend>
+  <run_depend>val_footstep</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <!-- Other tools can request additional information be placed here -->
+  <!-- Other tools can request additional information be placed here -->
 
   </export>
-</package>
+  </package>
