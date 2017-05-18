@@ -262,6 +262,7 @@ void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
 
     if(!(int)cluster_indices.size())
         return;
+    // if cluster is zero then dont process further
 
     std::vector<float> euc_dist;
     for(it = cluster_indices.begin(); it != cluster_indices.end(); ++it)

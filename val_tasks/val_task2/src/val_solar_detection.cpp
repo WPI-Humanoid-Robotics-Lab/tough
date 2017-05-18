@@ -3,8 +3,8 @@
 #define solar_pass_x_max  10.0
 #define solar_pass_y_min -10.0
 #define solar_pass_y_max  10.0
-#define solar_pass_z_min  1.0
-#define solar_pass_z_max  1.68
+#define solar_pass_z_min  1.38
+#define solar_pass_z_max  1.91
 
 /* x axis : -10 to 10
  * y axis : -10 to 10
@@ -334,6 +334,14 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
         }
     }
 
+    float cosTheta1 = eigenVectors.col(2)[0]/sqrt(pow(eigenVectors.col(2)[0],2)+pow(eigenVectors.col(2)[1],2));
+    float sinTheta1 = eigenVectors.col(2)[1]/sqrt(pow(eigenVectors.col(2)[0],2)+pow(eigenVectors.col(2)[1],2));
+
+    float theta1 = atan2(sinTheta1, cosTheta1);
+    ROS_INFO_STREAM("Testing:\n eigen value: "<<eigenValues.col(0)<<"\nVec: "
+                    <<eigenVectors.col(0)<<"eigen value: "<<eigenValues.col(1)
+                    <<"\nVec: "<<eigenVectors.col(1)<<"eigen value: "<<eigenValues.col(2)
+                    <<"\nVec: "<<eigenVectors.col(2));
 
     /*if(slope > 0){
 
@@ -383,7 +391,10 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
       pose.position.y = pose.position.y + distance_offset * sin(angle);
 
 
-    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(angle);
+      //uncomment after this
+//    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(angle);
+      //testing
+    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta1);
 
     pose.orientation = quaternion;
 
@@ -397,9 +408,9 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
     marker.id = 0;
     marker.type = visualization_msgs::Marker::ARROW;
     marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.x = pose.position.x;
-    marker.pose.position.y = pose.position.y;
-    marker.pose.position.z = pose.position.z;
+    marker.pose.position.x = centroid(0);
+    marker.pose.position.y = centroid(1);
+    marker.pose.position.z = centroid(2);
     marker.pose.orientation.x = pose.orientation.x;
     marker.pose.orientation.y = pose.orientation.y;
     marker.pose.orientation.z = pose.orientation.z;
