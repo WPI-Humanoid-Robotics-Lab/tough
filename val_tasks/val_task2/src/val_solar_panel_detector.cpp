@@ -57,6 +57,9 @@ void SolarPanelDetect::setoffset(float minX, float maxX, float minY, float maxY,
 
 void SolarPanelDetect::getOutwardOrientation(geometry_msgs::Pose &pose)
 {
+    // for valkyrie orientation :
+    // pointing inwards : if panel is behind valkyrie: theta
+    // pointing outwards : if panel is in front of valkyrie: theta-M_PI
     tfScalar r, p, y;
     tf::Quaternion q;
     tf::quaternionMsgToTF(pose.orientation, q);
@@ -95,6 +98,7 @@ void SolarPanelDetect::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
     pcl::fromROSMsg(*input, *cloud);
 
 
+    // instead of transforming the points for pass through filter the entire cloud is tranformed
     transformCloud(cloud,true);
     PassThroughFilter(cloud);
     if(cloud->empty())
@@ -177,11 +181,18 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,ge
     geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch,theta);
     pose.orientation = quaternion;
     visualizept(pose);
-    // for valkyrie orientation :
-    // pointing inwards : if panel is behind valkyrie: theta
-    // pointing outwards : if panel is in front of valkyrie: theta-M_PI taken care by another function
-    quaternion = tf::createQuaternionMsgFromRollPitchYaw(pitch,0,theta);
+
+    // the frames are different (y axis) for both the arms
+    if(isroverRight_)
+    {
+        quaternion = tf::createQuaternionMsgFromRollPitchYaw(pitch,0,theta); //for right arm
+    }
+    else
+    {
+        quaternion = tf::createQuaternionMsgFromRollPitchYaw(-pitch,0,theta); //for left arm
+    }
     pose.orientation = quaternion;
+
     tfScalar r, p, y;
     tf::Quaternion q;
     tf::quaternionMsgToTF(quaternion, q);
@@ -211,11 +222,15 @@ void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
     if(cloud->empty())
         return;
 
+    ROS_INFO("cloud size before clustering %d",(int)cloud->points.size());
+
     //getting a pt in the handle
     for(int i = 0; i!=cloud->points.size();++i)
     {
         //ROS_WARN("pt z : %.2f",cloud->points[i].z);
-        if(cloud->points[i].z>=(max_pt(2)-0.01))
+//        this condition might be the reason for choosing the cluster wrongly (occasionally)
+//        if(cloud->points[i].z>=(max_pt(2)-0.01))
+        if(cloud->points[i].z>=(max_pt(2)))
         {
             //ROS_INFO("here z is %.2f",cloud->points[i].z);
             max_pt(0)=cloud->points[i].x;
@@ -244,6 +259,10 @@ void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
 
     // we can find pts on the handle based on the euclidean distance
     ROS_INFO("number of clusters: %d",(int)cluster_indices.size());
+
+    if(!(int)cluster_indices.size())
+        return;
+
     std::vector<float> euc_dist;
     for(it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
     {
