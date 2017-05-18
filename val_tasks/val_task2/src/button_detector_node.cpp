@@ -13,7 +13,7 @@ int main(int argc, char** argv)
     while (!foundButton && numIterations < 20)
     {
         foundButton = b1.findButtons(ButtonLoc);
-        //ROS_INFO(foundButton ? "***** Button detected" : "xxxxx button not detected");
+        ROS_INFO(foundButton ? "***** Button detected" : "xxxxx button not detected");
         numIterations++;
     }
 

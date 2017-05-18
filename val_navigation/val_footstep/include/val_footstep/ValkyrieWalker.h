@@ -11,6 +11,9 @@
 #include "ihmc_msgs/FootstepDataListRosMessage.h"
 #include "ihmc_msgs/FootstepDataRosMessage.h"
 #include "ihmc_msgs/FootstepStatusRosMessage.h"
+#include "ihmc_msgs/FootTrajectoryRosMessage.h"
+#include "ihmc_msgs/WholeBodyTrajectoryRosMessage.h"
+#include<ihmc_msgs/EndEffectorLoadBearingRosMessage.h>
 #include <geometry_msgs/TransformStamped.h>
 #include "std_msgs/String.h"
 #include "ros/time.h"
@@ -18,6 +21,8 @@
 #include <tf/transform_listener.h>
 #include <val_common/val_common_defines.h>
 #include <val_control/robot_state.h>
+
+
 
 /**
  * @brief The ValkyrieWalker class This class provides access to the footsteps of valkyrie. It can be used
@@ -103,8 +108,14 @@ public:
         swing_height = value;
     }
     bool turn(armSide side);
+    void load_eff(armSide side, EE_LOADING load);
+    bool raiseLeg(armSide side, float height, float stepLength);
     bool walkLocalPreComputedSteps(const std::vector<float> x_offset, const std::vector<float> y_offset, armSide startLeg);
     RobotStateInformer *current_state_;
+    bool curlLeg(armSide side, float radius);
+    bool placeLeg(armSide side, float offset=0.1f);
+    bool nudgeFoot(armSide side, float distance);
+
 
 private:
     static int id ;
@@ -113,7 +124,7 @@ private:
     int step_counter;
     ros::NodeHandle     nh_;
     ros::Time           cbTime_;
-    ros::Publisher      footsteps_pub_ ;
+    ros::Publisher      footsteps_pub_ ,nudgestep_pub_,loadeff_pub;
     ros::Subscriber     footstep_status_ ;
     ros::ServiceClient  footstep_client_ ;
     tf::TransformListener       tf_listener_;

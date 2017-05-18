@@ -137,7 +137,6 @@ bool plug_detector::getPlugLocation(geometry_msgs::Point& plugLoc)
 bool plug_detector::findPlug(geometry_msgs::Point& plugLoc)
 {
     //VISUALIZATION - include a spinOnce here to visualize the eigenvectors
-    ros::spinOnce();
     markers_.markers.clear();
     if(ms_sensor_.giveImage(current_image_))
     {
