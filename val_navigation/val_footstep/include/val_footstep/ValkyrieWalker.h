@@ -109,10 +109,12 @@ public:
     }
     bool turn(armSide side);
     void load_eff(armSide side, EE_LOADING load);
-    bool raiseLeg(armSide side, float height);
+    bool raiseLeg(armSide side, float height, float stepLength);
     bool walkLocalPreComputedSteps(const std::vector<float> x_offset, const std::vector<float> y_offset, armSide startLeg);
     RobotStateInformer *current_state_;
     bool curlLeg(armSide side, float radius);
+    bool placeLeg(armSide side, float offset=0.1f);
+    bool nudgeFoot(armSide side, float distance);
 
 
 private:

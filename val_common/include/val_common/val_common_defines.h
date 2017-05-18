@@ -17,7 +17,7 @@ enum class direction{
 };
 
 enum class EE_LOADING{
-    UNLOAD=0,
-    LOAD
+    LOAD=0,
+    UNLOAD
 };
 

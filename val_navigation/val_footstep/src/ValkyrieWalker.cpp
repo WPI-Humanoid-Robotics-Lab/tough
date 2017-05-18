@@ -164,7 +164,7 @@ bool ValkyrieWalker::walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list 
     }
     return true;
 }
-bool ValkyrieWalker::raiseLeg(armSide side, float height)
+bool ValkyrieWalker::raiseLeg(armSide side, float height,float stepLength)
 {
     ihmc_msgs::FootTrajectoryRosMessage foot;
     ihmc_msgs::SE3TrajectoryPointRosMessage data;
@@ -172,19 +172,144 @@ bool ValkyrieWalker::raiseLeg(armSide side, float height)
     ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
     getCurrentStep(side, *current);
 
+    float stepFactor =1.0;
     // get current position
     data.position.x = current->location.x;
     data.position.y = current->location.y;
-    data.position.z = current->location.z+height;
+    data.position.z = current->location.z+(stepFactor*height);
     data.orientation=current->orientation;
     data.unique_id=100;
-    data.time=3.0;
+    data.time=2.0;
     foot.robot_side = side;
     foot.execution_mode=0; //OVERRIDE
     foot.unique_id=101;
     foot.taskspace_trajectory_points.push_back(data);
+
+
+
+    //  take step forward
+    // convert point to pelvis frame
+
+    geometry_msgs::PointStamped pt_in,pt_out;
+    pt_in.point.x=current->location.x;
+    pt_in.point.y=current->location.y;
+    pt_in.point.z=current->location.z;
+    pt_in.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
+    try{
+
+        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+    // add value of step length to x axis
+    pt_out.point.x +=stepLength;
+
+    // convert back to world frame
+
+    try{
+
+        tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
+        tf_listener_.transformPoint(VAL_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+
+    // add to data
+    data.position.x = pt_out.point.x;
+    data.position.z = current->location.z+(stepFactor*height); // tolerance
+    data.unique_id=200;
+    data.time=4.0;
+    //      foot.taskspace_trajectory_points.push_back(data);
+
+    //  take step down
+
+    data.position.x = pt_out.point.x;
+    data.position.z = current->location.z+height;
+    data.unique_id=300;
+    data.time=6.0;
+    //    foot.taskspace_trajectory_points.push_back(data);
+
     nudgestep_pub_.publish(foot);
+
     return true;
+
+}
+
+bool ValkyrieWalker::nudgeFoot(armSide side, float distance)
+{
+    ihmc_msgs::FootTrajectoryRosMessage foot;
+    ihmc_msgs::SE3TrajectoryPointRosMessage data;
+
+    ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
+    getCurrentStep(side, *current);
+
+    geometry_msgs::PointStamped pt_in,pt_out;
+    pt_in.point.x=current->location.x;
+    pt_in.point.y=current->location.y;
+    pt_in.point.z=current->location.z;
+    pt_in.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
+    try{
+
+        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+    // convert back to world frame
+    pt_out.point.x+=distance;
+
+    try{
+
+        tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
+        tf_listener_.transformPoint(VAL_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+
+    // add to data
+
+    data.position.x = pt_out.point.x;
+    data.position.y = pt_out.point.y;
+    data.position.z = pt_out.point.z;
+    data.orientation=current->orientation;
+
+    std::cout<<"point x"<<data.position.x<<"\n";
+    std::cout<<"point y"<<data.position.y<<"\n";
+    std::cout<<"point z"<<data.position.z<<"\n";
+
+    data.unique_id=700;
+    data.time=2.0;
+
+    foot.robot_side = side;
+    foot.execution_mode=0; //OVERRIDE
+    foot.unique_id=321;
+    foot.taskspace_trajectory_points.push_back(data);
+
+    nudgestep_pub_.publish(foot);
+
+    return true;
+
 
 }
 
@@ -254,6 +379,81 @@ bool ValkyrieWalker::curlLeg(armSide side, float radius)
     return true;
 
 }
+
+bool ValkyrieWalker::placeLeg(armSide side, float offset)
+{
+
+    ihmc_msgs::FootTrajectoryRosMessage foot;
+    ihmc_msgs::SE3TrajectoryPointRosMessage data;
+
+    ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
+    getCurrentStep((side+1)%2, *current);
+
+    geometry_msgs::PointStamped pt_in,pt_out;
+    pt_in.point.x=current->location.x;
+    pt_in.point.y=current->location.y;
+    pt_in.point.z=current->location.z;
+    pt_in.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
+    try{
+
+        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+    // convert back to world frame
+    if(side ==LEFT)
+    {
+        pt_out.point.y+=0.20;
+    }
+    else pt_out.point.y-=0.20;
+
+    pt_out.point.z+=offset;
+
+    try{
+
+        tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
+        tf_listener_.transformPoint(VAL_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+
+    // add to data
+
+    data.position.x = pt_out.point.x;
+    data.position.y = pt_out.point.y;
+    data.position.z = pt_out.point.z;
+    data.orientation=current->orientation;
+
+    std::cout<<"point x "<<data.position.x<<"\n";
+    std::cout<<"point y "<<data.position.y<<"\n";
+    std::cout<<"point z "<<data.position.z<<"\n";
+
+    data.unique_id=900;
+    data.time=3.0;
+
+    foot.robot_side = side;
+    foot.execution_mode=0; //OVERRIDE
+    foot.unique_id=391;
+    foot.taskspace_trajectory_points.push_back(data);
+
+    nudgestep_pub_.publish(foot);
+
+    return true;
+
+
+}
+
 
 
 

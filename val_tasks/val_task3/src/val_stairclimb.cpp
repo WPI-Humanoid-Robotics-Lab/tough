@@ -25,6 +25,6 @@ bool StairClimb::takeStep(armSide side,float stepLength, float stepHeight)
 
     // Stage 1
     float raise_factor=1.5;
-    walker_->raiseLeg(side,raise_factor*stepHeight);
+    walker_->raiseLeg(side,stepHeight,stepLength);
 
 }
