@@ -5,7 +5,7 @@
 #include <thread>
 
 #define DISABLE_DRAWINGS true
-//#define DISABLE_TRACKBAR true
+#define DISABLE_TRACKBAR true
 
 cable_detector::cable_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
@@ -167,21 +167,20 @@ cv::Point cable_detector::getOrientation(const std::vector<cv::Point> &contourPt
     //ROS_INFO_STREAM(cntr << std::endl);
     // Draw the principal components
     cv::circle(current_image_, cntr, 3, cv::Scalar(255, 0, 255), 2);
-    cv::Point p1 = cntr + 0.02 * cv::Point(static_cast<int>(eigen_vecs[0].x * eigen_val[0]), static_cast<int>(eigen_vecs[0].y * eigen_val[0]));
-    cv::Point p2 = cntr + 7.0 * cv::Point(static_cast<int>(eigen_vecs[1].x * eigen_val[1]), static_cast<int>(eigen_vecs[1].y * eigen_val[1]));
+    cv::Point p1 = cntr + 0.3 * cv::Point(static_cast<int>(eigen_vecs[0].x * eigen_val[0]), static_cast<int>(eigen_vecs[0].y * eigen_val[0]));
+    cv::Point p2 = cntr + 1.0 * cv::Point(static_cast<int>(eigen_vecs[1].x * eigen_val[1]), static_cast<int>(eigen_vecs[1].y * eigen_val[1]));
 
     //VISUALIZATION - Uncomment this line
     //drawAxis(current_image_, cntr, p1, cv::Scalar(0, 255, 0), 1);
     //drawAxis(current_image_, cntr, p2, cv::Scalar(255, 255, 0), 1);
-    //ROS_INFO_STREAM(p1 << std::endl);
+    //ROS_INFO_STREAM(p2 << std::endl);
     showImage(current_image_);
-    return p2;
+    return p1;
 }
 
 bool cable_detector::findCable(geometry_msgs::Point& cableLoc)
 {
     //VISUALIZATION - include a spinOnce here to visualize the eigenvectors
-    ros::spinOnce();
     markers_.markers.clear();
     if(ms_sensor_.giveImage(current_image_))
     {

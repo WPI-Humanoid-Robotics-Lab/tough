@@ -9,11 +9,11 @@ int main(int argc, char** argv)
     geometry_msgs::Point CableLoc;
     cable_detector c1(nh);
 
-    while(ros::ok())
-    //while (!foundCable && numIterations < 20)
+    //while(ros::ok())
+    while (!foundCable && numIterations < 20)
     {
         foundCable = c1.findCable(CableLoc);
-        //ROS_INFO(foundCable ? "***** Cable detected" : "xxxxx Cable not detected");
+        ROS_INFO(foundCable ? "***** Cable detected" : "xxxxx Cable not detected");
         numIterations++;
     }
 
