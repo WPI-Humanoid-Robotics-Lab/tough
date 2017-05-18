@@ -4,8 +4,8 @@ import time
 import rospy
 from std_msgs.msg import String
 
-FIELD_IP = "127.0.0.1" #""192.168.2.10"
-PORT = 9009
+FIELD_IP = "172.17.0.2" #""192.168.2.10"
+PORT = 8080 
 
 class mysocket:
     def __init__(self, sock=None):
@@ -63,6 +63,9 @@ if __name__ == '__main__':
         msg = sock.myreceive()
         if (msg[len(FIELD_IP)+4] == "+"):
             # any message that begins with a + is
+            command = msg[len(FIELD_IP)+5:-1]
             print msg[:len(FIELD_IP)+4] + "**Command Recieved** " + msg[len(FIELD_IP)+4:-1]
+            print "executing '"+command + "'"
+
         else:
             print msg[:len(FIELD_IP)+4] + "**Message Recieved** " + msg[len(FIELD_IP)+4:-1]

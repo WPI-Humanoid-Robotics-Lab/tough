@@ -4,8 +4,8 @@ import sys
 import socket
 import select
 
-FIELD_IP = "127.0.0.1" #""192.168.2.10"
-PORT = 9009
+FIELD_IP = "172.17.0.2" #""192.168.2.10"
+PORT =8080 
 
 
 def broadcast_client():
