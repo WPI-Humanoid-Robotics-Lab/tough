@@ -40,17 +40,21 @@
 #include <pcl/sample_consensus/ransac.h>
 #include "val_control/robot_state.h"
 #include <visualization_msgs/MarkerArray.h>
+#include "val_task3/stair_detector.h"
 
 class steps_detector
 {
     ros::Subscriber pcl_sub_;
     ros::NodeHandle nh_;
     ros::Publisher pcl_pub_;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_;
+    stair_detector sd_;
 
 public:
     steps_detector(ros::NodeHandle& );
     ~steps_detector();
     void stepsCB(const sensor_msgs::PointCloud2::Ptr& );
+    void planeSegmentation(const std::vector<double>& );
 };
 
 #endif // STEPS_DETECTOR_H

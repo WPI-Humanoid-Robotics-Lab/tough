@@ -7,7 +7,7 @@
 #define DISABLE_DRAWINGS true
 //#define DISABLE_TRACKBAR true
 
-stair_detector::stair_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
+stair_detector::stair_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor), coefficients_(4), endPoints_(2)
 {
     ms_sensor_.giveQMatrix(qMatrix_);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_stair",1);
@@ -69,7 +69,6 @@ void stair_detector::findMaxContour(const std::vector<std::vector<cv::Point> >& 
         }
     }
     if (largest_area > 500) convexHulls_.push_back(hull[largest_contour_index]);
-    //ROS_INFO_STREAM("Index" << second_largest_contour_index << std::endl);
     if (second_largest_area > 500) convexHulls_.push_back(hull[second_largest_contour_index]);
 
 }
@@ -99,8 +98,6 @@ bool stair_detector::getStairLocation(geometry_msgs::Point& stairLoc, uint& numS
     // Find contours
     cv::findContours(outImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
-  //    cv::imshow("contours",outImg);
-//    cv::waitKey(3);
 
     if(!contours.empty()) //avoid seg fault at runtime by checking that the contours exist
     {
@@ -109,7 +106,6 @@ bool stair_detector::getStairLocation(geometry_msgs::Point& stairLoc, uint& numS
         if (convexHulls_.size() != 2) { ROS_INFO_STREAM("no. of bars " << convexHulls_.size() << std::endl); numSideBarsDetected = convexHulls_.size(); return false;}
 
         foundStair = true;
-        //ROS_INFO_STREAM("1" << std::endl);
         for(size_t i = 0; i < convexHulls_.size(); i++)
         {
             ROS_INFO_STREAM("convex hull area" << i << "\t" << cv::contourArea( convexHulls_[i]) << std::endl);
@@ -117,7 +113,6 @@ bool stair_detector::getStairLocation(geometry_msgs::Point& stairLoc, uint& numS
             cv::fillConvexPoly(hullPoints, convexHulls_[i],cv::Scalar(255));
             cv::Mat nonZeroCoordinates;
             cv::findNonZero(hullPoints, nonZeroCoordinates);
-            // ROS_INFO_STREAM("1a" << std::endl);
 
             if (nonZeroCoordinates.total() < 10)    return false;
 
@@ -131,13 +126,11 @@ bool stair_detector::getStairLocation(geometry_msgs::Point& stairLoc, uint& numS
                 pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
                 if (temp_pclPoint.z < -2.0 || temp_pclPoint.y > -0.0)
                 {
-                    //ROS_INFO_STREAM("temp pcl z point "<< temp_pclPoint.z << std::endl);
                     continue;
                 }
 
 
                 double norm = std::pow(temp_pclPoint.x, 2) + std::pow(temp_pclPoint.y, 2) + std::pow(temp_pclPoint.z, 2);
-                //ROS_INFO_STREAM("temp pcl y point "<< norm<< std::endl);
                 if (norm < temp_norm)
                 {
                     temp_norm = norm;
@@ -155,23 +148,18 @@ bool stair_detector::getStairLocation(geometry_msgs::Point& stairLoc, uint& numS
             cloudCentroid(0) = currentDetectionCloud[smallest_norm_index].x;
             cloudCentroid(1) = currentDetectionCloud[smallest_norm_index].y;
             cloudCentroid(2) = currentDetectionCloud[smallest_norm_index].z;
-             //ROS_INFO_STREAM("1c" << std::endl);
-            //ROS_INFO_STREAM(smallest_norm_index  << '\t' << cloudCentroid << std::endl);
+            endPoints_[i] = cloudCentroid;
+
             if( foundStair )
             {
-            //ROS_INFO_STREAM("Before Cloud Centroid: " << cloudCentroid(2)/2.0 << std::endl);
-            //ROS_INFO_STREAM("Before Geom Point: " << geom_point.point.z << std::endl);
             geom_point.point.x += cloudCentroid(0)/2.0;
             geom_point.point.y += cloudCentroid(1)/2.0;
             geom_point.point.z += cloudCentroid(2)/2.0;
             dir_vec.point.x += std::pow(-1, i) * cloudCentroid(0);
             dir_vec.point.y += std::pow(-1, i) * cloudCentroid(1);
             dir_vec.point.z += std::pow(-1, i) * cloudCentroid(2);
-            //ROS_INFO_STREAM("After Cloud Centroid: " << cloudCentroid(2)/2.0 << std::endl);
-            //ROS_INFO_STREAM("After Geom Point: " << geom_point.point.z << std::endl);
             geom_point.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
             dir_vec.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
-             //ROS_INFO_STREAM("1d" << std::endl);
             }
         }
         try
@@ -186,7 +174,6 @@ bool stair_detector::getStairLocation(geometry_msgs::Point& stairLoc, uint& numS
             return false;
         }
 
-    //ROS_INFO_STREAM("2" << std::endl);
     stairLoc.x = double (geom_point.point.x);
     stairLoc.y = double (geom_point.point.y);
     stairLoc.z = double (geom_point.point.z);
@@ -205,12 +192,19 @@ bool stair_detector::getStairLocation(geometry_msgs::Point& stairLoc, uint& numS
         C = (new_point.x - geom_point.point.x)*(dir_vec.point.x);
         new_point.y = geom_point.point.y - C/double(dir_vec.point.y);
     }
-    //ROS_INFO_STREAM("3" << std::endl);
+
+    dirVector_.x = new_point.x - geom_point.point.x;
+    dirVector_.y = new_point.y - geom_point.point.y;
+    dirVector_.z = new_point.z - geom_point.point.z;
+
+    coefficients_[0] = dir_vec.point.x;
+    coefficients_[1] = dir_vec.point.y;
+    coefficients_[2] = 0;
+    coefficients_[3] = (geom_point.point.x * dir_vec.point.x) + (geom_point.point.y * dir_vec.point.y);
+
     visualize_direction(geom_point.point, new_point);
-    //visualize_point(geom_point.point);
-    //ROS_INFO_STREAM("4" << std::endl);
+
     marker_pub_.publish(markers_);
-    //ROS_INFO_STREAM("5" << std::endl);
     }
     return foundStair;
 }
@@ -253,6 +247,22 @@ void stair_detector::setTrackbar()
     cv::getTrackbarPos("su", "binary thresholding");
     cv::getTrackbarPos("vl", "binary thresholding");
     cv::getTrackbarPos("vu", "binary thresholding");
+}
+
+
+std::vector<double> stair_detector::coefficients() const
+{
+    return coefficients_;
+}
+
+std::vector<Eigen::Vector4f> stair_detector::endPoints() const
+{
+    return endPoints_;
+}
+
+geometry_msgs::Point stair_detector::dirVector() const
+{
+    return dirVector_;
 }
 
 void stair_detector::visualize_point(geometry_msgs::Point point){
