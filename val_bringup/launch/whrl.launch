@@ -5,7 +5,10 @@
    <include file="$(find val_perception_bringup)/launch/field_octomap.launch"/>
    <include file="$(find val_footstep)/launch/val_footstep.launch"/>
    <include file="$(find val_task1)/launch/task1.launch"/>
-   <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 0.8"/>
+   <node pkg="rostopic"    type="rostopic"            name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 0.8"/>
+   <node pkg="val_bringup" type="broadcast_server.py" name="broadcast_server" respawn="true" output="screen"/>
+   <node pkg="val_bringup" type="message_parser.py"   name="message_parser"   respawn="true" output="screen"/>
+
    
    
 </launch>
