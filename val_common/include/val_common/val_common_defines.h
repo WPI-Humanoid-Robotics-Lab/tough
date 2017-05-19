@@ -15,3 +15,9 @@ enum class direction{
     FRONT,     //Positive X
     BACK       //Negative X
 };
+
+enum class EE_LOADING{
+    LOAD=0,
+    UNLOAD
+};
+

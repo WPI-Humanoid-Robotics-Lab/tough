@@ -35,6 +35,8 @@ find_package(PCL 1.7 REQUIRED)
 
 include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
+
+
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
@@ -148,8 +150,15 @@ include_directories(
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
          src/val_task3.cpp
+         src/val_stairclimb.cpp
          src/stair_detector.cpp
+#         src/steps_detector.cpp
 )
+
+add_executable(stair_climb_node src/val_stairclimb.cpp)
+target_link_libraries(stair_climb_node ${catkin_LIBRARIES} ${PROJECT_NAME})
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
@@ -159,6 +168,9 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} $
 
 add_executable(stair_detector_node        src/stair_detector_node.cpp)
 target_link_libraries(stair_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES}   ${PROJECT_NAME})
+
+#add_executable(steps_detector_node        src/steps_detector_node.cpp)
+#target_link_libraries(steps_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES} ${PCL_LIBRARIES_DIRS}   ${PROJECT_NAME})
 #############
 ## Install ##
 #############
