@@ -39,7 +39,7 @@
 #include <visualization_msgs/MarkerArray.h>
 //#include "octomap_server/"
 
-class RoverBlocker{
+class SolarArrayDetector{
 private:
 
   ros::Subscriber pcl_sub;
@@ -83,8 +83,8 @@ private:
 public:
   // Constructor
 
-  RoverBlocker(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight);
-  ~RoverBlocker();
+  SolarArrayDetector(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight);
+  ~SolarArrayDetector();
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
 
   int getDetectionTries() const;

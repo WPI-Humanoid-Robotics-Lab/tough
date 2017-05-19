@@ -51,7 +51,7 @@ int main(int argc, char** argv){
     ros::Duration(40).sleep();
 
 
-    RoverBlocker obj(nh,rover_loc,isroverRight);
+    SolarArrayDetector obj(nh,rover_loc,isroverRight);
     ros::Rate loop(1);
     std::vector<geometry_msgs::Pose> solar_array_poses;
     while(ros::ok()&& solar_array_poses.size() < NUM_SAMPLES){
