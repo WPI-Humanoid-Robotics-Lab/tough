@@ -42,6 +42,7 @@ cableGrabber::cableGrabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh
     left_arm_planner_ = new cartesianPlanner("leftPalm", VAL_COMMON_NAMES::WORLD_TF);
     right_arm_planner_ = new cartesianPlanner("rightPalm", VAL_COMMON_NAMES::WORLD_TF);
     wholebody_controller_ = new wholebodyManipulation(nh_);
+    marker_pub_ = nh_.advertise<visualization_msgs::Marker>("modified_cable_position",1);
 }
 
 cableGrabber::~cableGrabber()
@@ -81,16 +82,55 @@ void cableGrabber::grasp_cable(const armSide side, const geometry_msgs::Point &g
     geometry_msgs::QuaternionStamped temp  = *finalOrientationStamped;
     current_state_->transformQuaternion(temp, temp);
 
-    ROS_INFO("Moving towards goal with whole body controller");
-    finalGoal.position = goal;
-    finalGoal.position.z+=0.05;
-    finalGoal.orientation = temp.quaternion;
+    // Accounting for distance between the palm and middle finger end effector
+    geometry_msgs::Point interim_goal;
+    current_state_->transformPoint(goal,interim_goal,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME);
+    interim_goal.y-=0.6;
+    //    interim_goal.z-=0.10;
+    current_state_->transformPoint(interim_goal,interim_goal,VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME,VAL_COMMON_NAMES::WORLD_TF);
 
+    //************ visualizing modified point
+
+    visualization_msgs::Marker marker;
+    // Set the frame ID and timestamp.  See the TF tutorials for information on these.
+    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+    marker.header.stamp = ros::Time::now();
+
+    // Set the namespace and id for this marker.  This serves to create a unique ID
+    // Any marker sent with the same namespace and id will overwrite the old one
+
+    marker.id = 455;
+
+    // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
+    marker.type = visualization_msgs::Marker::CUBE;
+
+    // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
+    marker.action = visualization_msgs::Marker::ADD;
+
+    // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
+    marker.pose.position = interim_goal;
+    marker.pose.orientation.w = 1.0f;
+
+    marker.scale.x = 0.01;
+    marker.scale.y = 0.01;
+    marker.scale.z = 0.01;
+    marker.color.a = 1.0; // Don't forget to set the alpha!
+    marker.color.r = 1.0;
+    marker.color.g = 0.0;
+    marker.color.b = 0.0;
+
+    marker_pub_.publish(marker);
+
+    ROS_INFO("Moving towards goal with whole body controller");
+    finalGoal.position = interim_goal;
+    finalGoal.position.z+=0.03;
+    finalGoal.orientation = temp.quaternion;
     std::vector<geometry_msgs::Pose> waypoints;
     waypoints.push_back(finalGoal);
 
     moveit_msgs::RobotTrajectory traj;
     right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+
     wholebody_controller_->compileMsg(side, traj.joint_trajectory);
 
     gripper_.controlGripper(side,GRIPPER_STATE::OPEN_THUMB_IN_APPROACH);
