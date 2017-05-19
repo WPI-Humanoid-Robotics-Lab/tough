@@ -66,6 +66,9 @@ valTask1::valTask1(ros::NodeHandle nh):
 
     // task1 utils
     task1_utils_ = new task1Utils(nh_);
+
+    // grasp state initialised
+    prev_grasp_state_ = prevGraspState::NOT_INITIALISED;
 }
 
 // destructor
@@ -489,6 +492,9 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
 {
     ROS_INFO_STREAM("executing " << name);
 
+    // set the grasp state
+    prev_grasp_state_ = prevGraspState::GRASP_PITCH_HANDLE;
+
     /*
      * Executing -> when grasp_handles is called
      * Retry -> grasp handles is called but it failed
@@ -652,10 +658,58 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
 decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
+
     ROS_INFO_STREAM("executing " << name);
 
-    ///@todo: complete the state
+    // set the grasp state
+    prev_grasp_state_ = prevGraspState::GRASP_YAW_HANDLE;
+
+    /*
+         * Executing -> when grasp_handles is called
+         * Retry -> grasp handles is called but it failed
+         * Failed -> retry failed 5 times
+         * Success -> grasp is successful
+         */
+    static bool executing = false;
+    static int retry_count = 0;
+
+    if(!executing){
+        ROS_INFO("Executing the grasp handle command");
+        executing = true;
+
+        // grasp the handle
+        //1 - right
+        //3 - left
+        // sleep before grasping (to account for sway coming with ches motion)
+        ros::Duration(1).sleep();
+        geometry_msgs::Pose pose;
+        robot_state_->getCurrentPose(VAL_COMMON_NAMES::L_PALM_TF, pose);
+        handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[3]);
+        ros::Duration(0.2).sleep(); //wait till grasp is complete
+        eventQueue.riseEvent("/GRASP_YAW_HANDLE_EXECUTING");
+    }
+    else if (robot_state_->isGraspped(armSide::LEFT)){
+        ROS_INFO("Grasp is successful");
+        eventQueue.riseEvent("/GRASPED_YAW_HANDLE");
+    }
+    else if (retry_count < 5 ){
+        ROS_INFO("Grasp Failed, retrying");
+        executing = false;
+        ++retry_count;
+        eventQueue.riseEvent("/GRASP_YAW_HANDLE_RETRY");
+    }
+    else {
+        ROS_INFO("Failed all conditions. state error");
+        eventQueue.riseEvent("/GRASP_YAW_HANDLE_FAILED");
+    }
+
+    // generate the event
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
+
     return TaskResult::SUCCESS();
+
 }
 
 decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
@@ -687,7 +741,22 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
 {
     ROS_INFO_STREAM("executing " << name);
 
-    ///@todo: complete the state
+    static std::string next_state_transition;
+
+    // based on the previous state set the state transition
+    if (prev_grasp_state_ == prevGraspState::GRASP_PITCH_HANDLE)
+    {
+        // set the transition
+        next_state_transition = "/REDETECTED_HANDLE_GRASP_PITCH";
+    }
+    else if (prev_grasp_state_ == prevGraspState::GRASP_YAW_HANDLE)
+    {
+        // set the transition
+        next_state_transition = "/REDETECTED_HANDLE_GRASP_YAW";
+    }
+
+    // reset the state
+    prev_grasp_state_ = prevGraspState::NOT_INITIALISED;
 
     return TaskResult::SUCCESS();
 }

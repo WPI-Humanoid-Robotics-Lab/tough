@@ -8,6 +8,13 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <val_common/val_common_names.h>
 
+// previous grasp state
+enum class prevGraspState {
+    NOT_INITIALISED = 0,
+    GRASP_PITCH_HANDLE,
+    GRASP_YAW_HANDLE
+};
+
 class task1Utils {
 private:
     ros::NodeHandle nh_;

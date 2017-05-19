@@ -81,6 +81,8 @@ class valTask1 {
     // cartesian planner
     cartesianPlanner* right_arm_planner_;
     cartesianPlanner* left_arm_planner_;
+    // grasp state variable
+    prevGraspState prev_grasp_state_;
 
     ros::Publisher array_pub_;
 
