@@ -24,6 +24,8 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf_conversions
   val_task_common
+  val_moveit_planners
+
 )
 
 ## System dependencies are found with CMake's conventions
@@ -149,6 +151,7 @@ add_library(${PROJECT_NAME}
          src/val_task3.cpp
          src/val_stairclimb.cpp
          src/stair_detector.cpp
+         src/leak_detector_grabber.cpp
 )
 
 add_executable(stair_climb_node src/val_stairclimb.cpp)
@@ -164,6 +167,10 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} $
 
 add_executable(stair_detector_node        src/stair_detector_node.cpp)
 target_link_libraries(stair_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES}   ${PROJECT_NAME})
+
+
+add_executable(leak_detector_grabber_node src/leak_detector_grabber_node.cpp)
+target_link_libraries(leak_detector_grabber_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 #############
 ## Install ##
 #############
