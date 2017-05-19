@@ -5,13 +5,13 @@
 
 #define DISABLE_DRAWINGS true
 
-button_detector::button_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_)
+ButtonDetector::ButtonDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_)
 {
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_buttons",1);
     ms_sensor_.giveQMatrix(qMatrix_);
 }
 
-void button_detector::showImage(cv::Mat image, std::string caption)
+void ButtonDetector::showImage(cv::Mat image, std::string caption)
 {
 #ifdef DISABLE_DRAWINGS
     return;
@@ -21,7 +21,7 @@ void button_detector::showImage(cv::Mat image, std::string caption)
     cv::waitKey(0);
 }
 
-inline void button_detector::colorSegment(const cv::Mat &imgHSV, const int hsvl[6], const int hsvu[6], cv::Mat &outImg)
+inline void ButtonDetector::colorSegment(const cv::Mat &imgHSV, const int hsvl[6], const int hsvu[6], cv::Mat &outImg)
 {
     cv::Mat mask1, mask2;
     cv::inRange(imgHSV,cv::Scalar(hsvl[0],hsvl[2],hsvl[4]), cv::Scalar(hsvl[1],hsvl[3],hsvl[5]),mask1);
@@ -29,7 +29,7 @@ inline void button_detector::colorSegment(const cv::Mat &imgHSV, const int hsvl[
     outImg = mask1 | mask2;
 }
 
-size_t button_detector::findMaxContour(const std::vector<std::vector<cv::Point> >& contours)
+size_t ButtonDetector::findMaxContour(const std::vector<std::vector<cv::Point> >& contours)
 {
     int largest_area = 0;
     int largest_contour_index = 0;
@@ -54,7 +54,7 @@ size_t button_detector::findMaxContour(const std::vector<std::vector<cv::Point> 
     return largest_contour_index;
 }
 
-bool button_detector::getButtonLocation(geometry_msgs::Point& buttonLoc)
+bool ButtonDetector::getButtonLocation(geometry_msgs::Point& buttonLoc)
 {
 
     bool foundButton = false;
@@ -130,7 +130,7 @@ bool button_detector::getButtonLocation(geometry_msgs::Point& buttonLoc)
 
 }
 
-bool button_detector::findButtons(geometry_msgs::Point &buttonLoc)
+bool ButtonDetector::findButtons(geometry_msgs::Point &buttonLoc)
 {
     markers_.markers.clear();
 
@@ -144,7 +144,7 @@ bool button_detector::findButtons(geometry_msgs::Point &buttonLoc)
     return 0;
 }
 
-void button_detector::visualize_point(const geometry_msgs::Point &point){
+void ButtonDetector::visualize_point(const geometry_msgs::Point &point){
 
     std::cout<< "goal origin :\n"<< point << std::endl;
     static int id = 0;
@@ -179,7 +179,7 @@ void button_detector::visualize_point(const geometry_msgs::Point &point){
     markers_.markers.push_back(marker);
 }
 
-button_detector::~button_detector()
+ButtonDetector::~ButtonDetector()
 {
 
 }

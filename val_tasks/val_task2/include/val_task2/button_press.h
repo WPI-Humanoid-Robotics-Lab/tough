@@ -12,7 +12,7 @@ class button_press
 {
     armTrajectory armTraj_;
     ros::NodeHandle nh_;
-    button_detector bd_;
+    ButtonDetector bd_;
     tf::TransformListener listener_;
     gripperControl gripper_;
     RobotStateInformer *current_state_;

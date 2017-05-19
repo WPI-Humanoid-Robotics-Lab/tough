@@ -49,6 +49,10 @@ void gripperControl::controlGripper(const armSide side, GRIPPER_STATE state)
         msg.data[0] = 1.4;
         break;
 
+    case GRIPPER_STATE::OPEN_THUMB_IN_APPROACH:
+        msg.data = side == LEFT? OPEN_THUMB_APPROACH_IN_LEFT_GRIPPER : OPEN_THUMB_APPROACH_IN_RIGHT_GRIPPER;
+        break;
+
     case GRIPPER_STATE::CLOSE:
         msg.data = side == LEFT? CLOSE_LEFT_GRIPPER : CLOSE_RIGHT_GRIPPER;
         break;
