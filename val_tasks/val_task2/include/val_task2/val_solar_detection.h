@@ -48,7 +48,7 @@ private:
   ros::Publisher rover_cloud_pub;
 
 
-  ros::Publisher vis_pub,vis_pub_array ;
+  ros::Publisher vis_pub_array ;
 
   RobotStateInformer* robot_state_;
 
