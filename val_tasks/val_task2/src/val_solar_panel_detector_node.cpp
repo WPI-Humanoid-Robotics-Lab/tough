@@ -24,9 +24,11 @@ int main(int argc, char** argv){
               rover_loc.x = rover_loc_3d.position.x;
               rover_loc.y = rover_loc_3d.position.y;
               rover_loc.theta = tf::getYaw(rover_loc_3d.orientation);
-              isroverRight = rover_obj.isRoverOnRight();
-    //          ROS_INFO("rover loc main: %f right: %d",rover_poses[rover_poses.size()-1].position.x,(int)isroverRight);
-              break;
+              ROVER_SIDE roverSide;
+              if(rover_obj.getRoverSide(roverSide)){
+                  isroverRight = roverSide == ROVER_SIDE::RIGHT;
+                  break;
+              }
           }
           ros::spinOnce();
           loop1.sleep();

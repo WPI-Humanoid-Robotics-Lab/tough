@@ -52,7 +52,7 @@ class valTask2 {
 
 
     // Block rover in /map
-    RoverBlocker* rover_in_map_blocker_;
+    SolarArrayDetector* rover_in_map_blocker_;
     // panel detection object
     PanelDetector* panel_detector_;
     //Rover detector

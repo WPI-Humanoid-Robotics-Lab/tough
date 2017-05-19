@@ -12,9 +12,9 @@
  * */
 
 
-RoverBlocker::RoverBlocker(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight)
+SolarArrayDetector::SolarArrayDetector(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight)
 {
-  pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &RoverBlocker::cloudCB, this);
+  pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &SolarArrayDetector::cloudCB, this);
   pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_plane/cloud2", 1);
   vis_pub_array = nh.advertise<visualization_msgs::MarkerArray>( "/val_solar/visualization_markers", 1 );
   rover_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/block_map",1);
@@ -25,26 +25,26 @@ RoverBlocker::RoverBlocker(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, 
   detections_.clear();
   isroverRight_ = isroverRight;
 }
-RoverBlocker::~RoverBlocker()
+SolarArrayDetector::~SolarArrayDetector()
 {
       pcl_sub.shutdown();
 }
 
-bool RoverBlocker::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
+bool SolarArrayDetector::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
 {
     ret_val.clear();
     ret_val = detections_;
     return !ret_val.empty();
 
 }
-int RoverBlocker::getDetectionTries() const
+int SolarArrayDetector::getDetectionTries() const
 {
     return detection_tries_;
 
 }
 
 
-void RoverBlocker::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
+void SolarArrayDetector::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 {
 
     if (input->data.empty()){
@@ -80,7 +80,7 @@ void RoverBlocker::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 
 }
 
-void RoverBlocker::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+void SolarArrayDetector::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
     /*tf::Quaternion quat(rover_loc_.orientation.x,rover_loc_.orientation.y,rover_loc_.orientation.z,rover_loc_.orientation.w);
     tf::Matrix3x3 rotation(quat);
@@ -153,7 +153,7 @@ void RoverBlocker::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 
 }
 
-void RoverBlocker::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+void SolarArrayDetector::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
 
 
@@ -203,7 +203,7 @@ void RoverBlocker::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 
 }
 
-void RoverBlocker::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+void SolarArrayDetector::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
 
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
@@ -230,7 +230,7 @@ void RoverBlocker::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 
 
 
-void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose){
+void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose){
 
     Eigen::Vector4f centroid;
 //  Calculating the Centroid of the Panel Point cloud

@@ -35,6 +35,11 @@
 #include <pcl/sample_consensus/ransac.h>
 
 #include <visualization_msgs/MarkerArray.h>
+enum class ROVER_SIDE{
+    LEFT = 0,
+    RIGHT,
+    UNKOWN
+};
 
 class RoverDetector{
 private:
@@ -51,7 +56,7 @@ private:
 
   int detection_tries_;
 
-  std::shared_ptr<bool> isRoverOnRight_;
+  ROVER_SIDE roverSide_;
 
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
 
@@ -74,6 +79,6 @@ public:
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
 
   int getDetectionTries() const;
-  bool isRoverOnRight() const;
+  bool getRoverSide(ROVER_SIDE &side) const;
 
 };

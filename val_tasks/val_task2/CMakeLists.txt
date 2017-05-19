@@ -62,7 +62,6 @@ include_directories(include
             src/val_task2SM.cpp
 	    src/button_detector.cpp
             src/button_press.cpp
-            src/map_filter.cpp
             src/solar_panel_grasp.cpp
             src/val_rover_detection.cpp
 	    src/cable_detector.cpp
@@ -101,17 +100,7 @@ add_executable(plug_detector_node	src/plug_detector_node.cpp)
 
 target_link_libraries(plug_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES}   ${PROJECT_NAME})
 
-add_executable(map_filter_node
-        src/map_filter_node.cpp
-)
-
-target_link_libraries(map_filter_node ${catkin_LIBRARIES} ${PROJECT_NAME}
-)
-
 add_executable(val_task2_node            src/val_task2_node.cpp)
-
-add_executable(path_subtraction src/path_subtraction.cpp)
-target_link_libraries(path_subtraction  ${catkin_LIBRARIES})
 
 add_executable(solar_panel_grasp_node src/solar_panel_grasp_node.cpp)
 target_link_libraries(solar_panel_grasp_node  ${catkin_LIBRARIES} ${PROJECT_NAME})

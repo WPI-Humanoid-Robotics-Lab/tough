@@ -26,7 +26,14 @@ int main(int argc, char** argv){
     goal.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
     goal.pose = poses[NUM_SAMPLES -1];
     goalPub.publish(goal);
-    std::cout <<obj.isRoverOnRight()<<std::endl;
+    ROVER_SIDE roverSide;
+    if(obj.getRoverSide(roverSide)){
+        std::string str = (roverSide == ROVER_SIDE::RIGHT) ? "Rover on Right" : "Rover on Left";
+        std::cout <<  str <<std::endl;
+    }
+    else{
+        std::cout<<"Rover side could not be determined"<<std::endl;
+    }
     ros::Duration(0.2).sleep();
     return 0;
 }

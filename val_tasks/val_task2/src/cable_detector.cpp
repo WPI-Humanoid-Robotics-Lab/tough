@@ -7,13 +7,13 @@
 #define DISABLE_DRAWINGS true
 #define DISABLE_TRACKBAR true
 
-cable_detector::cable_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
+CableDetector::CableDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
     ms_sensor_.giveQMatrix(qMatrix_);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_cable",1);
 }
 
-void cable_detector::showImage(cv::Mat image, std::string caption)
+void CableDetector::showImage(cv::Mat image, std::string caption)
 {
 #ifdef DISABLE_DRAWINGS
     return;
@@ -23,7 +23,7 @@ void cable_detector::showImage(cv::Mat image, std::string caption)
     cv::waitKey(3);
 }
 
-void cable_detector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
+void CableDetector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
 {
     cv::inRange(imgHSV,cv::Scalar(hsv_[0], hsv_[2], hsv_[4]), cv::Scalar(hsv_[1], hsv_[3], hsv_[5]), outImg);
 #ifdef DISABLE_TRACKBAR
@@ -36,7 +36,7 @@ void cable_detector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
     cv::waitKey(3);
 }
 
-size_t cable_detector::findMaxContour(const std::vector<std::vector<cv::Point> >& contours)
+size_t CableDetector::findMaxContour(const std::vector<std::vector<cv::Point> >& contours)
 {
     int largest_area = 0;
     int largest_contour_index = 0;
@@ -59,7 +59,7 @@ size_t cable_detector::findMaxContour(const std::vector<std::vector<cv::Point> >
     return largest_contour_index;
 }
 
-bool cable_detector::getCableLocation(geometry_msgs::Point& cableLoc)
+bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
 {
     bool foundCable = false;
     src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
@@ -136,7 +136,7 @@ bool cable_detector::getCableLocation(geometry_msgs::Point& cableLoc)
     return foundCable;
 }
 
-cv::Point cable_detector::getOrientation(const std::vector<cv::Point> &contourPts, cv::Mat &img)
+cv::Point CableDetector::getOrientation(const std::vector<cv::Point> &contourPts, cv::Mat &img)
 {
     int sz = static_cast<int>(contourPts.size());
     cv::Mat data_pts = cv::Mat(sz, 2, CV_64FC1);
@@ -178,7 +178,7 @@ cv::Point cable_detector::getOrientation(const std::vector<cv::Point> &contourPt
     return p1;
 }
 
-bool cable_detector::findCable(geometry_msgs::Point& cableLoc)
+bool CableDetector::findCable(geometry_msgs::Point& cableLoc)
 {
     //VISUALIZATION - include a spinOnce here to visualize the eigenvectors
     markers_.markers.clear();
@@ -192,7 +192,7 @@ bool cable_detector::findCable(geometry_msgs::Point& cableLoc)
     return 0;
 }
 
-void cable_detector::drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale)
+void CableDetector::drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale)
 {
     double angle;
     double hypotenuse;
@@ -215,7 +215,7 @@ void cable_detector::drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar
     cv::line(img, p, q, colour, 1, CV_AA);
 }
 
-void cable_detector::setTrackbar()
+void CableDetector::setTrackbar()
 {
     cv::namedWindow("binary thresholding");
     cv::createTrackbar("hl", "binary thresholding", &hsv_[0], 180);
@@ -233,7 +233,7 @@ void cable_detector::setTrackbar()
     cv::getTrackbarPos("vu", "binary thresholding");
 }
 
-void cable_detector::visualize_point(geometry_msgs::Point point){
+void CableDetector::visualize_point(geometry_msgs::Point point){
 
     std::cout<< "goal origin :\n"<< point << std::endl;
     static int id = 0;
@@ -268,7 +268,7 @@ void cable_detector::visualize_point(geometry_msgs::Point point){
     markers_.markers.push_back(marker);
 }
 
-cable_detector::~cable_detector()
+CableDetector::~CableDetector()
 {
 
 }
