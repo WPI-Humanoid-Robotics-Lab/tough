@@ -6,9 +6,9 @@
 #define solar_pass_z_min  1.38
 #define solar_pass_z_max  1.91
 
-/* x axis : -10 to 10
+/* x axis : -2 to 10
  * y axis : -10 to 10
- * z axis : 1 to 1.68
+ * z axis : 1.38 to 1.91
  * */
 
 
@@ -16,8 +16,7 @@ SolarArrayDetector::SolarArrayDetector(ros::NodeHandle nh, geometry_msgs::Pose2D
 {
   pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &SolarArrayDetector::cloudCB, this);
   pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_plane/cloud2", 1);
-  vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_solar/visualization_marker", 1 );
-  vis_pub_array = nh.advertise<visualization_msgs::MarkerArray>( "/val_solar/visualization_marker1", 1 );
+  vis_pub_array = nh.advertise<visualization_msgs::MarkerArray>( "/val_solar/visualization_markers", 1 );
   rover_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/block_map",1);
 
   rover_loc_ = rover_loc;
@@ -61,10 +60,9 @@ void SolarArrayDetector::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
     sensor_msgs::PointCloud2 output;
 
     pcl::fromROSMsg(*input, *cloud);
-ROS_INFO("removing rover");
-   roverremove(cloud);
-   PassThroughFilter(cloud);
-
+    ROS_INFO("removing rover");
+    roverremove(cloud);
+    PassThroughFilter(cloud);
 //    ROS_INFO("pub %d",(int)cloud->points.size());
 
     planeDetection(cloud);
@@ -219,19 +217,13 @@ void SolarArrayDetector::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& clo
   seg.setDistanceThreshold (0.008);
   seg.setInputCloud (cloud);
   seg.segment (*inliers, *coefficients);
-/*
-  double ak = pow(coefficients->values[0],2)+pow(coefficients->values[1],2)+pow(coefficients->values[2],2);
-  double test = coefficients->values[0]/pow(ak,0.5);
-  ROS_WARN_STREAM("cos angle :"<<test<<" acos "<<acos(test));
-*/
+
   pcl::ExtractIndices<pcl::PointXYZ> extract;
 
   extract.setInputCloud (cloud);
   extract.setIndices (inliers);
   extract.setNegative (false);
   extract.filter (*cloud);
-
-//  ROS_INFO("Point cloud representing the planar component = %d", (int)cloud->points.size());
 
 }
 
@@ -258,7 +250,7 @@ void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
 //    std::cout<<"The EigenVectors are : " << eigenVectors << std::endl;
 
     ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
-
+/*
     geometry_msgs::Point point1;
     point1.x = eigenVectors.col(2)[0] + pose.position.x;
     point1.y = eigenVectors.col(2)[1] + pose.position.y;
@@ -332,12 +324,35 @@ void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
         else if (xySlope == 0){
             theta = atan2(sinTheta, cosTheta) * -1.0;
         }
-    }
+    }*/
 
     float cosTheta1 = eigenVectors.col(2)[0]/sqrt(pow(eigenVectors.col(2)[0],2)+pow(eigenVectors.col(2)[1],2));
     float sinTheta1 = eigenVectors.col(2)[1]/sqrt(pow(eigenVectors.col(2)[0],2)+pow(eigenVectors.col(2)[1],2));
+    float theta1 = atan2(sinTheta1, cosTheta1);  // should be the final yaw for parallel to solar array
 
-    float theta1 = atan2(sinTheta1, cosTheta1);
+
+
+    float cosTheta2 = eigenVectors.col(0)[0]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
+    float sinTheta2 = eigenVectors.col(0)[1]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
+    float theta2 = atan2(sinTheta2, cosTheta2);
+
+    // eigenVectors.col(0)[2] < 0 // pointing downwards or towards the walkway // perpendicular to solar array
+
+    if (eigenVectors.col(0)[2] < 0)
+    {
+        theta2+=M_PI;
+
+    }
+
+    ROS_INFO("green marker t1 %.2f",theta1);
+    ROS_INFO("blue marker t2 %.2f",theta2);
+
+    // coarse location
+    float off = -2.2;
+    pose.position.x = centroid(0) + off*cos(theta2);
+    pose.position.y = centroid(1) + off*sin(theta2);
+    pose.position.z = 0;//centroid(2);
+
     ROS_INFO_STREAM("Testing:\n eigen value: "<<eigenValues.col(0)<<"\nVec: "
                     <<eigenVectors.col(0)<<"eigen value: "<<eigenValues.col(1)
                     <<"\nVec: "<<eigenVectors.col(1)<<"eigen value: "<<eigenValues.col(2)
@@ -354,13 +369,14 @@ void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
 
     ROS_INFO("The Orientation is given by := %0.2f", theta);
     */
+    /*
     double offset = 2.0;
     pose.position.x = pose.position.x - (offset*cos(theta));
     pose.position.y = pose.position.y - (offset*sin(theta));
     pose.position.z = 0;//pose.position.z;
 
     ROS_INFO("slopeyz %.2f, theta %.2f",yzSlope,theta);
-
+    */
 //    ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
 
 
@@ -372,6 +388,7 @@ void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
         theta-=1.5708;
     }*/
 
+    /*
     float angle;
 //geometry_msgs::Quaternion quaternion;
       if(yzSlope>0)  {//rover on the left
@@ -388,13 +405,13 @@ void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
 
       float distance_offset = -1;
       pose.position.x = pose.position.x + distance_offset * cos(angle);
-      pose.position.y = pose.position.y + distance_offset * sin(angle);
+      pose.position.y = pose.position.y + distance_offset * sin(angle); */
 
 
       //uncomment after this
 //    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(angle);
       //testing
-    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta1);
+    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta2);
 
     pose.orientation = quaternion;
 
@@ -408,13 +425,14 @@ void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
     marker.id = 0;
     marker.type = visualization_msgs::Marker::ARROW;
     marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.x = centroid(0);
+    /*marker.pose.position.x = centroid(0);
     marker.pose.position.y = centroid(1);
     marker.pose.position.z = centroid(2);
     marker.pose.orientation.x = pose.orientation.x;
     marker.pose.orientation.y = pose.orientation.y;
     marker.pose.orientation.z = pose.orientation.z;
-    marker.pose.orientation.w = pose.orientation.w;
+    marker.pose.orientation.w = pose.orientation.w;*/
+    marker.pose = pose;
     marker.scale.x = 0.6;
     marker.scale.y = 0.05;
     marker.scale.z = 0.05;
@@ -424,14 +442,14 @@ void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
     marker.color.b = 0.0;
     marker.lifetime = ros::Duration(5);
 
-    vis_pub.publish(marker);
     mk_array.markers.push_back(marker);
-    marker.ns = "maxPoint";
     marker.type = visualization_msgs::Marker::SPHERE;
-    marker.pose.position= maxPoint;
     marker.scale.x = 0.05;
     marker.scale.y = 0.05;
     marker.scale.z = 0.05;
+    /*
+    marker.ns = "maxPoint";
+    marker.pose.position= maxPoint;
     marker.color.a = 1.0;
     marker.color.r = 1.0;
     marker.color.g = 0.0;
@@ -463,7 +481,7 @@ void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
     marker.color.g = 1.0;
     marker.color.b = 1.0;
     mk_array.markers.push_back(marker);
-
+*/
     marker.ns = "vec 1";
     marker.pose.position.x = centroid(0)+eigenVectors.col(0)[0];
     marker.pose.position.y = centroid(1)+eigenVectors.col(0)[1];
