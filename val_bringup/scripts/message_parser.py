@@ -1,10 +1,13 @@
 #!/usr/bin/env python
+
 import socket
 import time
+import subprocess
 import rospy
 from std_msgs.msg import String
+from diagnostic_msgs.msg import DiagnosticArray
 
-FIELD_IP = "172.17.0.2" #""192.168.2.10"
+FIELD_IP = "192.168.2.10"
 PORT = 8080 
 
 class mysocket:
@@ -43,15 +46,16 @@ class mysocket:
 sock = mysocket()
 sock.connect(FIELD_IP,PORT)
 
-def callback(data):
+def state_callback(data):
     #send only data that is required. it should be a string only
-    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
-    sock.mysend(data.data +" \n")
+    for msg in data.status:
+        rospy.loginfo(rospy.get_caller_id() + "Message %s", msg.message)
+        sock.mysend(msg.message +" \n")
 
 def listener():
     # Listen to the decision making topic
-    rospy.init_node('listener', anonymous=True)
-    rospy.Subscriber("chatter", String, callback)
+    rospy.init_node('state_listener', anonymous=True)
+    rospy.Subscriber("/decision_making/monitoring", DiagnosticArray, state_callback)
 
 
 
@@ -66,6 +70,7 @@ if __name__ == '__main__':
             command = msg[len(FIELD_IP)+5:-1]
             print msg[:len(FIELD_IP)+4] + "**Command Recieved** " + msg[len(FIELD_IP)+4:-1]
             print "executing '"+command + "'"
+            subprocess.Popen(command.split())
 
         else:
             print msg[:len(FIELD_IP)+4] + "**Message Recieved** " + msg[len(FIELD_IP)+4:-1]

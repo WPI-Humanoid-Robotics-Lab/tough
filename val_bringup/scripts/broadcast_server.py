@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#  broadcast server
 
 import sys
 import socket
@@ -8,7 +7,7 @@ import select
 HOST = 'localhost'
 SOCKET_LIST = []
 RECV_BUFFER = 4096
-PORT = 9009
+PORT = 8080
 
 
 def braodcast_server():

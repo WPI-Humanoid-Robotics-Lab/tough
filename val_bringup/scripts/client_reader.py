@@ -4,8 +4,8 @@ import sys
 import socket
 import select
 
-FIELD_IP = "172.17.0.2" #""192.168.2.10"
-PORT =8080 
+FIELD_IP = "192.168.2.10"
+PORT = 8080
 
 
 def broadcast_client():
@@ -46,11 +46,12 @@ def broadcast_client():
                     sys.stdout.flush()
 
             else:
-                # user entered a message
-                msg = sys.stdin.readline()
-                s.send(msg)
-                sys.stdout.write('[OCU] ');
-                sys.stdout.flush()
+                pass
+#                # user entered a message
+#                msg = sys.stdin.readline()
+#                s.send(msg)
+#                sys.stdout.write('[OCU] ');
+#                sys.stdout.flush()
 
 
 if __name__ == "__main__":
