@@ -24,7 +24,7 @@ RoverDetector::RoverDetector(ros::NodeHandle nh)
     vis_pub_ = nh.advertise<visualization_msgs::Marker>( "/val_rover/Position", 1 );
     detections_.clear();
     detection_tries_ = 0;
-    isRoverOnRight_ = nullptr;
+    roverSide_ = ROVER_SIDE::UNKOWN;
 }
 
 RoverDetector::~RoverDetector()
@@ -202,13 +202,13 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
     if(yzSlope>0)  {//rover on the left
         angle = theta-1.5708;
         quaternion = tf::createQuaternionMsgFromYaw(theta-1.5708);
-        isRoverOnRight_ = std::make_shared<bool>(false);
+        roverSide_ = ROVER_SIDE::LEFT;
     }
     else {
         //rover on the right
         angle = theta+1.5708;
         quaternion = tf::createQuaternionMsgFromYaw(theta+1.5708);
-        isRoverOnRight_ = std::make_shared<bool>(true);
+        roverSide_ = ROVER_SIDE::RIGHT;
     }
 
 
@@ -263,10 +263,10 @@ int RoverDetector::getDetectionTries() const
 
 }
 
-bool RoverDetector::isRoverOnRight() const
+bool RoverDetector::getRoverSide(ROVER_SIDE &side) const
 {
-    assert(isRoverOnRight_.use_count() > 0 && "Call only if you detect the rover");
-    return *isRoverOnRight_;
+    side = roverSide_ ;
+    return roverSide_ != ROVER_SIDE::UNKOWN;
 
 }
 
