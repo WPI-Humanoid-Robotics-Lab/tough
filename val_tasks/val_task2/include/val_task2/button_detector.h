@@ -21,7 +21,7 @@
 #include <vector>
 
 //red button only
-class button_detector
+class ButtonDetector
 {
     cv::Mat current_image_, current_image_HSV_, current_disparity_, qMatrix_;
     cv::Mat imLowRed_, imHighRed_;
@@ -47,8 +47,8 @@ public:
     size_t findMaxContour(const std::vector<std::vector<cv::Point> >&);
     bool getButtonLocation(geometry_msgs::Point &buttonLoc);
     bool findButtons(geometry_msgs::Point&);
-    button_detector(ros::NodeHandle nh);
-    ~button_detector();
+    ButtonDetector(ros::NodeHandle nh);
+    ~ButtonDetector();
 
 };
 

@@ -7,7 +7,7 @@ int main(int argc, char** argv)
     int numIterations = 0;
     bool foundButton = false;
     geometry_msgs::Point ButtonLoc;
-    button_detector b1(nh);
+    ButtonDetector b1(nh);
 
     //while(ros::ok())
     while (!foundButton && numIterations < 20)

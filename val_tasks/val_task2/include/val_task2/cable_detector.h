@@ -18,7 +18,7 @@
 #include <iostream>
 #include <vector>
 
-class cable_detector
+class CableDetector
 {
     cv::Mat current_image_, current_image_HSV_, current_disparity_, qMatrix_;
 
@@ -42,7 +42,7 @@ class cable_detector
     void visualize_point(geometry_msgs::Point point);
 
 public:
-    cable_detector(ros::NodeHandle nh);
+    CableDetector(ros::NodeHandle nh);
     void setTrackbar();
     void showImage(cv::Mat, std::string caption="Cable Detection");
     void colorSegment(cv::Mat &imgHSV, cv::Mat &outImg);
@@ -51,7 +51,7 @@ public:
     cv::Point getOrientation(const std::vector<cv::Point> &, cv::Mat &);
     void drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale = 0.2);
     bool findCable(geometry_msgs::Point &);
-    ~cable_detector();
+    ~CableDetector();
 
 };
 
