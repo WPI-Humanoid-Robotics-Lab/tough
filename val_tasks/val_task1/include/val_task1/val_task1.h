@@ -19,20 +19,22 @@
 #include "val_footstep/ValkyrieWalker.h"
 #include "val_task_common/val_walk_tracker.h"
 #include "val_task_common/panel_detection.h"
-#include "val_control/val_chest_navigation.h"
-#include "val_control/val_pelvis_navigation.h"
-#include "val_control/val_head_navigation.h"
-#include "val_control/val_gripper_control.h"
-#include "val_control/val_arm_navigation.h"
+#include "val_controllers/val_chest_navigation.h"
+#include "val_controllers/val_pelvis_navigation.h"
+#include "val_controllers/val_head_navigation.h"
+#include "val_controllers/val_gripper_control.h"
+#include "val_controllers/val_arm_navigation.h"
 #include "val_task1/handle_detector.h"
 #include "val_task1/handle_grabber.h"
-#include "val_control/robot_state.h"
+#include "val_controllers/robot_state.h"
 #include "val_task1/move_handle.h"
 #include "val_task_common/val_task_common_utils.h"
 #include "val_task_common/finish_box_detector.h"
 #include <val_task1/val_task1_utils.h>
 #include <val_moveit_planners/val_cartesian_planner.h>
-#include <val_control/val_wholebody_manipulation.h>
+#include <val_controllers/val_wholebody_manipulation.h>
+#include <val_task_common/val_upperbody_tracker.h>
+#include <val_control_common/val_control_common.h>
 
 using namespace decision_making;
 
@@ -83,6 +85,10 @@ class valTask1 {
     cartesianPlanner* left_arm_planner_;
     // grasp state variable
     prevGraspState prev_grasp_state_;
+    // upper body tracker
+    uuperBodyTracker* upper_body_tracker_;
+    // val control common api's
+    valControlCommon* control_helper_;
 
     ros::Publisher array_pub_;
 

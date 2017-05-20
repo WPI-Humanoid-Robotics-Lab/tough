@@ -20,12 +20,11 @@ enum class prevGraspState {
 };
 
 // handle positions
-enum class handlePos {
-    PITCH_KNOB_CENTER = 0,
-    PITCH_KNOB_HANDLE,
-    YAW_KNOB_CENTER,
-    YAW_KNOB_HANDLE
-};
+//!!! enum is not used as this will be used for vector acess
+#define PITCH_KNOB_CENTER    0
+#define PITCH_KNOB_HANDLE    1
+#define YAW_KNOB_CENTER      2
+#define YAW_KNOB_HANDLE      3
 
 // pitch yaw selection
 enum class controlSelection {
@@ -60,6 +59,6 @@ public:
     double getPitchDiff (void);
     double getYawDiff (void);
     valueDirection getPitchValueDirection(double current_value, controlSelection control);
-    void getCircle3D (geometry_msgs::Point center, geometry_msgs::Point start,geometry_msgs::Pose pose, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, float radius, int steps =10);
+    void getCircle3D (geometry_msgs::Point center, geometry_msgs::Point start,geometry_msgs::Quaternion orientation, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, float radius, int steps =10);
     void visulatise6DPoints(std::vector<geometry_msgs::Pose> &points);
 };

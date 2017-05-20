@@ -56,6 +56,7 @@ find_package(catkin REQUIRED COMPONENTS
   val_task_common
   navigation_common
   val_moveit_planners
+  val_control_common
 )
 
 

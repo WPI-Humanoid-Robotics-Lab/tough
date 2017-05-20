@@ -1,12 +1,12 @@
-#include <val_control/val_arm_navigation.h>
+#include <val_controllers/val_arm_navigation.h>
 #include <ros/ros.h>
 #include <val_moveit_planners/val_cartesian_planner.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <val_task1/val_task1_utils.h>
-#include <val_control/robot_state.h>
+#include <val_controllers/robot_state.h>
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
-#include "val_control/val_wholebody_manipulation.h"
+#include "val_controllers/val_wholebody_manipulation.h"
 
 int main(int argc, char** argv){
 
@@ -41,7 +41,7 @@ int main(int argc, char** argv){
     //desired pose
     geometry_msgs::Pose grasp_pose;
     robot_state->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME,grasp_pose);
-task1_utils.getCircle3D(centerPelvis, startPelvis, grasp_pose, panelCoeffs, points, 0.125, 10);
+    task1_utils.getCircle3D(centerPelvis, startPelvis, grasp_pose.orientation, panelCoeffs, points, 0.125, 10);
 //    task1_utils.getCircle3D(centerWorld, startWorld, grasp_pose, panelCoeffs, points, 0.125, 10);
     task1_utils.visulatise6DPoints(points);
     ROS_INFO("waypoints generated");

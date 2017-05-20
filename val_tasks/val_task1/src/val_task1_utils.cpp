@@ -94,7 +94,7 @@ valueDirection task1Utils::getPitchValueDirection(double current_value, controlS
     return ret;
 }
 
-void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point start, geometry_msgs::Pose pose, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, float radius, int steps)
+void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point start, geometry_msgs::Quaternion orientation, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, float radius, int steps)
 {
     if (planeCoeffs.size() != 4){
         ROS_INFO("Please check the plane coefficiants");
@@ -111,7 +111,7 @@ void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point s
     circle_point_pose.position.x = start.x;
     circle_point_pose.position.y = start.y;
     circle_point_pose.position.z = start.z;
-    circle_point_pose.orientation = pose.orientation;
+    circle_point_pose.orientation = orientation;
     points.push_back(circle_point_pose);
 
     float dist = fabs(a*start.x  + b*start.y + c*start.z  + d )/sqrt(pow(a,2) + pow(b,2) + pow(c,2));
@@ -129,10 +129,10 @@ void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point s
         circle_point_pose.position.y = center.y + radius*sin(alpha - (float)(2*M_PI/steps));
 
         //point.position.z = -(a*point.position.x  + b* point.position.y + d)/c;
-        circle_point_pose.position.z = -(a*circle_point_pose.position.x  + b* circle_point_pose.position.y + + d)/c + dist; //(d - dist+.05) )/c;
+        circle_point_pose.position.z = -(a*circle_point_pose.position.x  + b* circle_point_pose.position.y + d)/c + dist; //(d - dist+.05) )/c;
 
         // orientation
-        circle_point_pose.orientation = pose.orientation;
+        circle_point_pose.orientation = orientation;
         points.push_back(circle_point_pose);
 
         start_pose = circle_point_pose;

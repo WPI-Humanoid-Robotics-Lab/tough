@@ -14,7 +14,7 @@
 #include "val_task1/val_task1.h"
 #include "navigation_common/map_generator.h"
 #include "srcsim/StartTask.h"
-#include <val_control/robot_state.h>
+#include <val_controllers/robot_state.h>
 
 #define foreach BOOST_FOREACH
 
@@ -64,6 +64,12 @@ valTask1::valTask1(ros::NodeHandle nh):
     left_arm_planner_ = new cartesianPlanner("leftPalm", "/world");
     right_arm_planner_ = new cartesianPlanner("rightPalm", "/world");
 
+    // upper body tracker
+    upper_body_tracker_ = new uuperBodyTracker(nh_);
+
+    // val control common api;s
+    control_helper_ = new valControlCommon(nh_);
+
     // task1 utils
     task1_utils_ = new task1Utils(nh_);
 
@@ -74,16 +80,22 @@ valTask1::valTask1(ros::NodeHandle nh):
 // destructor
 valTask1::~valTask1(){
 
-    if(walker_ != nullptr)              delete walker_;
-    if(walk_track_ != nullptr)          delete walk_track_;
-    if(panel_detector_ != nullptr)      delete panel_detector_;
-    if(handle_detector_ != nullptr)     delete handle_detector_;
-    if(move_handle_ != nullptr)         delete move_handle_;
-    if(chest_controller_ != nullptr)    delete chest_controller_;
-    if(pelvis_controller_ != nullptr)   delete pelvis_controller_;
-    if(head_controller_ != nullptr)     delete head_controller_;
-    if(gripper_controller_ != nullptr)  delete gripper_controller_;
-    if(arm_controller_ != nullptr)      delete arm_controller_;
+    if(walker_ != nullptr)                delete walker_;
+    if(walk_track_ != nullptr)            delete walk_track_;
+    if(panel_detector_ != nullptr)        delete panel_detector_;
+    if(handle_detector_ != nullptr)       delete handle_detector_;
+    if(move_handle_ != nullptr)           delete move_handle_;
+    if(chest_controller_ != nullptr)      delete chest_controller_;
+    if(pelvis_controller_ != nullptr)     delete pelvis_controller_;
+    if(head_controller_ != nullptr)       delete head_controller_;
+    if(gripper_controller_ != nullptr)    delete gripper_controller_;
+    if(arm_controller_ != nullptr)        delete arm_controller_;
+    if(wholebody_controller_ != nullptr)  delete wholebody_controller_;
+    if(left_arm_planner_ != nullptr)      delete left_arm_planner_;
+    if(right_arm_planner_ != nullptr)     delete right_arm_planner_;
+    if(upper_body_tracker_ != nullptr)    delete upper_body_tracker_;
+    if(task1_utils_ != nullptr)           delete task1_utils_;
+    if(control_helper_ != nullptr)        delete control_helper_;
 }
 
 void valTask1::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
@@ -548,6 +560,115 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 {
     ROS_INFO_STREAM("executing " << name);
 
+    static bool execute_once = true;
+    //current pose of the hand
+    geometry_msgs::Pose current_hand_pose;
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME, current_hand_pose);
+
+    // execute this part once
+    if (execute_once)
+    {
+        // reset the execute flag
+        execute_once = false;
+
+        // generate the way points for the knob (current pose(6DOF) of arm is used to generate the way points)
+        std::vector<geometry_msgs::Pose> waypoints;
+        task1_utils_->getCircle3D(handle_loc_[PITCH_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, 0.125, 10);
+        ROS_INFO("way points generatd");
+
+        ///@todo: remove the visulaisation
+        task1_utils_->visulatise6DPoints(waypoints);
+
+        // plan the trajectory
+        moveit_msgs::RobotTrajectory traj;
+        right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+        ROS_INFO("trajectory generated");
+
+        // execute the trajectory
+        wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
+        ROS_INFO("trajectory sent to controllers");
+
+    }
+
+    // checks to handle the behaviour, which will also trigger necessary transitions
+
+    // if the pitch is corrected
+    if (task1_utils_->isPitchCorrectNow())
+    {
+        // stop all the trajectories
+        control_helper_->stopAllTrajectories();
+
+        ROS_INFO("pitch correct now");
+
+        // wait until the pich correction becomes complete
+        ros::Duration(5).sleep();
+
+        //check if its complete
+        if (task1_utils_->isPitchCompleted())
+        {
+            // sucessuflly done
+            eventQueue.riseEvent("/PITCH_CORRECTION_SUCESSFUL");
+
+            // set the execute flag
+            execute_once = true;
+
+            //reset the arm to default pose
+            gripper_controller_->openGripper(armSide::RIGHT);
+            ros::Duration(1).sleep();
+            arm_controller_->moveToDefaultPose(armSide::RIGHT);
+
+            ROS_INFO("pitch completed now");
+        }
+        else
+        {
+            // still stay in the same state
+            eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
+            ROS_INFO("correct but not finished");
+        }
+    }
+    // if we lost the grasp while executing the trajectory
+    else if (!robot_state_->isGraspped(armSide::RIGHT))
+    {
+        // redetect the handles (retry)
+        eventQueue.riseEvent("/PITCH_CORRECTION_RETRY");
+
+        //set the execute once flag back
+        execute_once = true;
+
+        ROS_INFO("grasp lost");
+    }
+    // if the arm is not moving any more (ideally its back to the starting point)
+    ///@todo: not sure if this is required..!!!
+    /// how do we check if its at the same point..??
+    else if (!upper_body_tracker_->isArmMoving(armSide::RIGHT, 10))
+    {
+        // replan and execute from the current point,
+        // set the execute once state
+        execute_once = true;
+
+        // still stay in the same state
+        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
+
+        ROS_INFO("arm moment stopped, replanning rajectory with the current pose");
+    }
+    // fall through case
+    else
+    {
+        // ie. its still executing, stay in the same state
+        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
+
+        ROS_INFO_THROTTLE(2, "executing");
+    }
+
+    /// This state canot go to error state direclty, the transition to error will happen
+    /// from the rdetect handles state
+
+    // generate the event externally (this a fail safe case, should not be required ideally)
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
+
+#if (0)
     static double prev_position_error=9999;
     static bool execute_once = true;
     static int retry_count = 0;
@@ -652,6 +773,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         prev_position_error=9999;
         eventQueue.riseEvent("/PITCH_CORRECTION_FAILED");
     }
+#endif
 
     return TaskResult::SUCCESS();
 }
@@ -765,6 +887,7 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
 decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+
     static int retry_count = 0;
     // generate the event
     if (finish_box_detector_ == nullptr){
@@ -823,6 +946,16 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
 decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+
+    // set the robot to default state to walk
+    pelvis_controller_->controlPelvisHeight(0.9);
+    ros::Duration(1).sleep();
+    chest_controller_->controlChest(0.0, 0.0, 0.0);
+    ros::Duration(1).sleep();
+    arm_controller_->moveToDefaultPose(armSide::LEFT);
+    ros::Duration(1).sleep();
+    arm_controller_->moveToDefaultPose(armSide::RIGHT);
+    ros::Duration(1).sleep();
 
     static int fail_count = 0;
 
