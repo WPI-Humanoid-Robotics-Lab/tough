@@ -11,21 +11,31 @@ int main(int argc, char **argv){
     ROS_INFO("starting leak detector grabber");
 
     geometry_msgs::Pose goal;
-    geometry_msgs::Pose finalGoal;
+    geometry_msgs::Pose fGoal;
 
     goal.orientation.x = -0.504;
     goal.orientation.y = 0.535;
     goal.orientation.z = 0.504;
     goal.orientation.w = 0.453;
-   // goal.orientation.w = 1;
 
-    rs->transformPose(goal,finalGoal,VAL_COMMON_NAMES::PELVIS_TF);
+    rs->transformPose(goal,fGoal,VAL_COMMON_NAMES::PELVIS_TF);
 
-    finalGoal.position.x = -0.645;
-    finalGoal.position.y = 0.199;
-    finalGoal.position.z = 0.887;
 
-    ldg.graspDetector(finalGoal);
+    if(argc == 4){
+
+        fGoal.position.x = std::atof(argv[1]);
+        fGoal.position.y = std::atof(argv[2]);
+        fGoal.position.z = std::atof(argv[3]);
+    }
+
+    else{
+
+        fGoal.position.x = -0.445;
+        fGoal.position.y = 0.159;
+        fGoal.position.z = 0.927;
+    }
+
+    ldg.graspDetector(fGoal);
 
     ros::spin();
     return 0;
