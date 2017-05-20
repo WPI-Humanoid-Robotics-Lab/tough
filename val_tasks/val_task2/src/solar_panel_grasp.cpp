@@ -78,7 +78,6 @@ void solar_panel_handle_grabber::grasp_handles(const armSide side, const geometr
 
     //move arm to given point with known orientation and higher z
     geometry_msgs::Pose finalGoal, intermGoal;
-    geometry_msgs::Point finalPoint, intermPoint;
 
     current_state_->transformPose(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
     intermGoal.position.z += 0.1;

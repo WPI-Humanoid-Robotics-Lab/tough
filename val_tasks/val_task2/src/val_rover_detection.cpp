@@ -16,7 +16,7 @@
 #define upperBox_pass_z_max  3.0
 
 
-RoverDetector::RoverDetector(ros::NodeHandle nh)
+RoverDetector::RoverDetector(ros::NodeHandle nh, bool getFine)
 {
     pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &RoverDetector::cloudCB, this);
     pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_rover/cloud2", 1);
@@ -25,6 +25,7 @@ RoverDetector::RoverDetector(ros::NodeHandle nh)
     detections_.clear();
     detection_tries_ = 0;
     roverSide_ = ROVER_SIDE::UNKOWN;
+    finePose_ = getFine;
 }
 
 RoverDetector::~RoverDetector()
@@ -187,7 +188,7 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
 
     //    ROS_INFO("The Orientation is given by := %0.2f", theta);
 
-    double offset = 6.25;
+    double offset = finePose_ ? 6.0 : 6.35;
 
     pose.position.x = upperBoxPosition.x - (offset*cos(theta));
     pose.position.y = upperBoxPosition.y - (offset*sin(theta));
@@ -200,19 +201,19 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
     float angle;
 
     if(yzSlope>0)  {//rover on the left
-        angle = theta-1.5708;
-        quaternion = tf::createQuaternionMsgFromYaw(theta-1.5708);
+        angle = finePose_ ? theta : theta-1.5708;
+        quaternion = tf::createQuaternionMsgFromYaw(angle);
         roverSide_ = ROVER_SIDE::LEFT;
     }
     else {
         //rover on the right
-        angle = theta+1.5708;
-        quaternion = tf::createQuaternionMsgFromYaw(theta+1.5708);
+        angle = finePose_ ? theta : theta+1.5708;
+        quaternion = tf::createQuaternionMsgFromYaw(angle);
         roverSide_ = ROVER_SIDE::RIGHT;
     }
 
 
-    float distance_offset = -0.2;
+    float distance_offset = finePose_ ? -0.2 : -0.6;
     pose.position.x = pose.position.x + distance_offset * cos(angle);
     pose.position.y = pose.position.y + distance_offset * sin(angle);
 

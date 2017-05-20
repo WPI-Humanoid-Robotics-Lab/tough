@@ -58,6 +58,8 @@ private:
 
   ROVER_SIDE roverSide_;
 
+  bool finePose_;
+
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
 
   void lowerBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
@@ -74,7 +76,7 @@ public:
 
   // Constructor
 
-  RoverDetector(ros::NodeHandle nh);
+  RoverDetector(ros::NodeHandle nh, bool getFine=false);
   ~RoverDetector();
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
 
