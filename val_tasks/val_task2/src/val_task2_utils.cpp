@@ -19,20 +19,26 @@ task2Utils::~task2Utils()
 
 void task2Utils::afterPanelGraspPose(const armSide side)
 {
+    // reorient the chest
     chest_controller_->controlChest(0,0,0);
     ros::Duration(2).sleep();
+
+    // walk a step back
+    std::vector<float> x_offset={-0.2,-0.2};
+    std::vector<float> y_offset={0.0,0.0};
+    walk->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
+
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
         seed1 = &leftShoulderSeedPanelGraspStatic_;
         seed2 = &leftShoulderSeedPanelGraspWalk_;
-
     }
     else
     {
         seed1 = &rightShoulderSeedPanelGraspStatic_;
         seed2 = &rightShoulderSeedPanelGraspWalk_;
-
     }
+
     std::vector< std::vector<float> > armData;
     armData.push_back(*seed1);
 
