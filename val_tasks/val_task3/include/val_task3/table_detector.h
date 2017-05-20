@@ -20,9 +20,19 @@ class table_detector
 {
     ros::NodeHandle nh_;
     ros::Publisher marker_pub_;
+    ros::Subscriber pcl_sub_;
+
+    src_perception::MultisensePointCloud point_cloud_listener_;
 
 public:
+
+    typedef pcl::PointXYZ          Point;
+    typedef pcl::PointCloud<table_detector::Point> PointCloud;
+
     table_detector(ros::NodeHandle nh);
+
+    void cloudCB(const table_detector::PointCloud::ConstPtr &cloud);
+    bool findTable(geometry_msgs::Point &detected_pt);
 
     ~table_detector();
 

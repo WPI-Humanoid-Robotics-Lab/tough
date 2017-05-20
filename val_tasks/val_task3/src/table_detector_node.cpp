@@ -16,6 +16,7 @@ int main(int argc, char** argv)
         found = detector.findTable(table_location);
 
         numIterations++;
+        ros::spinOnce();
     }
 
 }
