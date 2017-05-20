@@ -8,11 +8,11 @@ solar_panel_handle_grabber::solar_panel_handle_grabber(ros::NodeHandle n):nh_(n)
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 
 
-//    left hand - panel angled		-0.587, -0.327,  0.658, -0.339
-//    left hand - panel perpendicular		 0.697,  0.232, -0.664,  0.142
+    //    left hand - panel angled		-0.587, -0.327,  0.658, -0.339
+    //    left hand - panel perpendicular		 0.697,  0.232, -0.664,  0.142
 
-//    right hand - panel angled		-0.631,  0.339,  0.680,  0.159
-//    right hand - panel perpendicular	 0.781, -0.155, -0.605, -0.020
+    //    right hand - panel angled		-0.631,  0.339,  0.680,  0.159
+    //    right hand - panel perpendicular	 0.781, -0.155, -0.605, -0.020
     leftHandOrientationAngled_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
     leftHandOrientationAngled_.quaternion.x = -0.587;
     leftHandOrientationAngled_.quaternion.y = -0.327;
@@ -74,17 +74,19 @@ void solar_panel_handle_grabber::setRightHandOrientation(const geometry_msgs::Qu
 
 void solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs::Pose &goal, float executionTime)
 {
-    tf::Pose tfPose;
-    tf::poseMsgToTF(goal,tfPose);
-    float yaw = tf::getYaw(tfPose.getRotation());
-
 
     const std::vector<float>* seed;
+    std::string palmFrame;
+    float offset;
     if(side == armSide::LEFT){
         seed = &leftShoulderSeed_;
+        palmFrame = VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME;
+        offset = -0.04;
     }
     else {
         seed = &rightShoulderSeed_;
+        palmFrame = VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
+        offset = 0.04;
     }
 
 
@@ -110,19 +112,21 @@ void solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     current_state_->transformPose(intermGoal, intermGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
 
     ROS_INFO("Moving at an intermidate point before goal");
+    ROS_INFO_STREAM("Intermidiate goal"<<intermGoal);
     armTraj_.moveArmInTaskSpace(side, intermGoal, executionTime*2);
     ros::Duration(executionTime*2).sleep();
 
     //move arm to final position with known orientation
 
-    current_state_->transformPose(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-    finalGoal.position.x -= 0.04; // this is to compensate for the distance between palm frame and center of palm
+    current_state_->transformPose(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF, palmFrame);
+    finalGoal.position.y += offset; // this is to compensate for the distance between palm frame and center of palm
+    finalGoal.position.z -= 0.03;
 
     //transform that point back to world frame
-    current_state_->transformPose(finalGoal, finalGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPose(finalGoal, finalGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
 
     ROS_INFO("Moving towards goal");
-
+    ROS_INFO_STREAM("Final goal"<<finalGoal);
     std::vector<geometry_msgs::Pose> waypoints;
 
     waypoints.push_back(finalGoal);
@@ -137,10 +141,10 @@ void solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
         right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
     }
     ROS_INFO("Calculated Traj");
-//    wholebody_controller_->compileMsg(side, traj.joint_trajectory);
+    wholebody_controller_->compileMsg(side, traj.joint_trajectory);
 
-//    ros::Duration(executionTime).sleep();
+    ros::Duration(executionTime).sleep();
     ROS_INFO("Closing grippers");
-//    gripper_.closeGripper(side);
-//    ros::Duration(0.3).sleep();
+    gripper_.closeGripper(side);
+    ros::Duration(0.3).sleep();
 }

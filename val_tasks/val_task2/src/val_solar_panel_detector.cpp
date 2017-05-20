@@ -183,14 +183,14 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,ge
     visualizept(pose);
 
 //    // the frames are different (y axis) for both the arms
-//    if(isroverRight_)
-//    {
-//        quaternion = tf::createQuaternionMsgFromRollPitchYaw(pitch,0,theta); //for right arm
-//    }
-//    else
-//    {
-//        quaternion = tf::createQuaternionMsgFromRollPitchYaw(-pitch,0,theta); //for left arm
-//    }
+    if(false)
+    {
+        quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch + M_PI_2, theta - M_PI_2); //for right arm
+    }
+    else
+    {
+        quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch + M_PI_2, theta - M_PI_2); //for left arm
+    }
     pose.orientation = quaternion;
 
     tfScalar r, p, y;
