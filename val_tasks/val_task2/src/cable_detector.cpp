@@ -4,7 +4,7 @@
 #include <pcl/common/centroid.h>
 #include <thread>
 
-#define DISABLE_DRAWINGS true
+//#define DISABLE_DRAWINGS true
 #define DISABLE_TRACKBAR true
 
 CableDetector::CableDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
