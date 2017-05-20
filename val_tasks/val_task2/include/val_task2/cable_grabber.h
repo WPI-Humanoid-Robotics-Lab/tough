@@ -33,8 +33,11 @@ private:
 
     /*Top Grip*/
     const std::vector<float> leftShoulderSeed_ = {-0.23, -0.72, 0.65, -1.51, 2.77, 0.0, 0.0};
-    //    const std::vector<float> rightShoulderSeed_ = {-0.23, 0.72, 0.65, 1.51, 2.77, 0.0, 0.0};
-    const std::vector<float> rightShoulderSeed_ = {-0.57, 1.09, 0.65, 1.14, 2.78, -0.19, 0.0};
+    //    const std::vector<float> rightShoulderSeed_ = {-0.23, 0.72, 0.65, 1.51, 2.77, 0.0, 0.0}; approach default
+    //    const std::vector<float> rightShoulderSeed_ = {-0.57, 1.09, 0.65, 1.14, 2.78, -0.19, 0.0}; approach 1
+    //        const std::vector<float> rightShoulderSeed_ = {-0.18,0.50,0.50,1.50,2.11,0.0,0.0}; //approach 2
+    const std::vector<float> rightShoulderSeed_ = {-1,1.16,1.60,0.78,1.64,0.0,0.0}; //approach 3
+    ros::Publisher marker_pub_;
 
 };
 

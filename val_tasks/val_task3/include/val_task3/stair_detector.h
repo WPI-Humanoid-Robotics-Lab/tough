@@ -36,7 +36,9 @@ class stair_detector
     int hsv_[6] = {23, 53, 60, 255, 6, 213};
 
     std::vector<std::vector<cv::Point> > convexHulls_;
-
+    std::vector<double> coefficients_;
+    std::vector<Eigen::Vector4f> endPoints_;
+    geometry_msgs::Point dirVector_;
 
     int frameID_ = 0;
     std::string side_;
@@ -61,5 +63,8 @@ public:
     bool findStair(geometry_msgs::Point &, uint&);
     ~stair_detector();
 
+    std::vector<double> coefficients() const;
+    std::vector<Eigen::Vector4f> endPoints() const;
+    geometry_msgs::Point dirVector() const;
 };
 #endif // STAIR_DETECTOR_H
