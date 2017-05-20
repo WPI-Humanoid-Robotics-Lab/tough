@@ -77,16 +77,16 @@ void solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
 
     const std::vector<float>* seed;
     std::string palmFrame;
-    float offset;
+    float palmToFingerOffset;
     if(side == armSide::LEFT){
         seed = &leftShoulderSeed_;
         palmFrame = VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME;
-        offset = -0.04;
+        palmToFingerOffset = -0.04;
     }
     else {
         seed = &rightShoulderSeed_;
         palmFrame = VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
-        offset = 0.04;
+        palmToFingerOffset = 0.04;
     }
 
 
@@ -119,16 +119,23 @@ void solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     //move arm to final position with known orientation
 
     current_state_->transformPose(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF, palmFrame);
-    finalGoal.position.y += offset; // this is to compensate for the distance between palm frame and center of palm
-    finalGoal.position.z -= 0.03;
+    current_state_->transformPose(intermGoal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, palmFrame);
+
+    intermGoal.position.y += palmToFingerOffset;
+    intermGoal.position.z -= 0.02; //finger to center of palm in Z-axis of hand frame
+    finalGoal.position.y  += palmToFingerOffset; // this is to compensate for the distance between palm frame and center of palm
+    finalGoal.position.z  -= 0.02; //finger to center of palm in Z-axis of hand frame
+
 
     //transform that point back to world frame
     current_state_->transformPose(finalGoal, finalGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPose(intermGoal, intermGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
 
     ROS_INFO("Moving towards goal");
     ROS_INFO_STREAM("Final goal"<<finalGoal);
     std::vector<geometry_msgs::Pose> waypoints;
 
+    waypoints.push_back(intermGoal);
     waypoints.push_back(finalGoal);
     ROS_INFO_STREAM(finalGoal);
     moveit_msgs::RobotTrajectory traj;
