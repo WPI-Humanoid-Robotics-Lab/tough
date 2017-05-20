@@ -135,6 +135,7 @@ include_directories(
    src/panel_detection.cpp
    src/val_task_common_utils.cpp
    src/finish_box_detector.cpp
+   src/val_upperbody_tracker.cpp
  )
 
 ## Add cmake target dependencies of the library
