@@ -6,20 +6,37 @@
 solar_panel_handle_grabber::solar_panel_handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-    leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    /* Top Grip */
 
-    leftHandOrientation_.quaternion.x = 0.089;
-    leftHandOrientation_.quaternion.y = 0.680;
-    leftHandOrientation_.quaternion.z = -0.519;
-    leftHandOrientation_.quaternion.w = 0.510;
+
+//    left hand - panel angled		-0.587, -0.327,  0.658, -0.339
+//    left hand - panel perpendicular		 0.697,  0.232, -0.664,  0.142
+
+//    right hand - panel angled		-0.631,  0.339,  0.680,  0.159
+//    right hand - panel perpendicular	 0.781, -0.155, -0.605, -0.020
+    leftHandOrientationAngled_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationAngled_.quaternion.x = -0.587;
+    leftHandOrientationAngled_.quaternion.y = -0.327;
+    leftHandOrientationAngled_.quaternion.z =  0.658;
+    leftHandOrientationAngled_.quaternion.w = -0.339;
+
+    leftHandOrientationPerpen_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationPerpen_.quaternion.x =  0.697;
+    leftHandOrientationPerpen_.quaternion.y =  0.232;
+    leftHandOrientationPerpen_.quaternion.z = -0.664;
+    leftHandOrientationPerpen_.quaternion.w =  0.142;
 
     /* Top Grip */
-    rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    rightHandOrientation_.quaternion.x = -0.175;
-    rightHandOrientation_.quaternion.y = 0.714;
-    rightHandOrientation_.quaternion.z = 0.488;
-    rightHandOrientation_.quaternion.w = 0.471;
+    rightHandOrientationAngled_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    rightHandOrientationAngled_.quaternion.x = -0.631;
+    rightHandOrientationAngled_.quaternion.y =  0.339;
+    rightHandOrientationAngled_.quaternion.z =  0.680;
+    rightHandOrientationAngled_.quaternion.w =  0.159;
+
+    rightHandOrientationPerpen_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    rightHandOrientationPerpen_.quaternion.x =  0.781;
+    rightHandOrientationPerpen_.quaternion.y = -0.155;
+    rightHandOrientationPerpen_.quaternion.z = -0.605;
+    rightHandOrientationPerpen_.quaternion.w = -0.020;
 
     // cartesian planners for the arm
     left_arm_planner_ = new cartesianPlanner("leftPalm", VAL_COMMON_NAMES::WORLD_TF);
@@ -29,32 +46,39 @@ solar_panel_handle_grabber::solar_panel_handle_grabber(ros::NodeHandle n):nh_(n)
 
 solar_panel_handle_grabber::~solar_panel_handle_grabber()
 {
-
+    delete left_arm_planner_;
+    delete right_arm_planner_;
+    delete wholebody_controller_;
 }
 
 
 geometry_msgs::QuaternionStamped solar_panel_handle_grabber::leftHandOrientation() const
 {
-    return leftHandOrientation_;
+    return leftHandOrientationAngled_;
 }
 
 void solar_panel_handle_grabber::setLeftHandOrientation(const geometry_msgs::QuaternionStamped &leftHandOrientation)
 {
-    leftHandOrientation_ = leftHandOrientation;
+    leftHandOrientationAngled_ = leftHandOrientation;
 }
 geometry_msgs::QuaternionStamped solar_panel_handle_grabber::rightHandOrientation() const
 {
-    return rightHandOrientation_;
+    return rightHandOrientationAngled_;
 }
 
 void solar_panel_handle_grabber::setRightHandOrientation(const geometry_msgs::QuaternionStamped &rightHandOrientation)
 {
-    rightHandOrientation_ = rightHandOrientation;
+    rightHandOrientationAngled_ = rightHandOrientation;
 }
 
 
-void solar_panel_handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Pose &goal, float executionTime)
+void solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs::Pose &goal, float executionTime)
 {
+    tf::Pose tfPose;
+    tf::poseMsgToTF(goal,tfPose);
+    float yaw = tf::getYaw(tfPose.getRotation());
+
+
     const std::vector<float>* seed;
     if(side == armSide::LEFT){
         seed = &leftShoulderSeed_;
@@ -113,10 +137,10 @@ void solar_panel_handle_grabber::grasp_handles(const armSide side, const geometr
         right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
     }
     ROS_INFO("Calculated Traj");
-    wholebody_controller_->compileMsg(side, traj.joint_trajectory);
+//    wholebody_controller_->compileMsg(side, traj.joint_trajectory);
 
-    ros::Duration(executionTime).sleep();
+//    ros::Duration(executionTime).sleep();
     ROS_INFO("Closing grippers");
-    gripper_.closeGripper(side);
-    ros::Duration(0.3).sleep();
+//    gripper_.closeGripper(side);
+//    ros::Duration(0.3).sleep();
 }

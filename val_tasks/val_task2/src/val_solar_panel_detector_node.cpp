@@ -35,7 +35,7 @@ int main(int argc, char** argv){
       }
   }
 
-  SolarPanelDetect obj(nh,rover_loc,isroverRight);
+  SolarPanelDetect obj(nh,rover_loc,false);
 
   ros::Rate loop(1);
   while(ros::ok()){
