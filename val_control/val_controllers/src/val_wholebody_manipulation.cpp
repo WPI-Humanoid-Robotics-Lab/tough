@@ -1,4 +1,4 @@
-#include "val_control/val_wholebody_manipulation.h"
+#include "val_controllers/val_wholebody_manipulation.h"
 
 wholebodyManipulation::wholebodyManipulation(ros::NodeHandle &nh):nh_(nh)
 {

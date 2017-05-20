@@ -37,7 +37,7 @@
 
 #include <vector>
 #include "val_common/val_common_names.h"
-#include "val_control/robot_state.h"
+#include "val_controllers/robot_state.h"
 
 
 class pcl_handle_detector

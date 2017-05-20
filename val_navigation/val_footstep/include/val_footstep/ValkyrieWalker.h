@@ -17,7 +17,7 @@
 #include "tf/tf.h"
 #include <tf/transform_listener.h>
 #include <val_common/val_common_defines.h>
-#include <val_control/robot_state.h>
+#include <val_controllers/robot_state.h>
 
 /**
  * @brief The ValkyrieWalker class This class provides access to the footsteps of valkyrie. It can be used
