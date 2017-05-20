@@ -30,7 +30,7 @@ find_package(catkin REQUIRED COMPONENTS
   trac_ik_examples
   trac_ik_kinematics_plugin
   trac_ik_lib
-  val_control
+  val_controllers
 #  descartes_core
 #  descartes_planner
 #  descartes_moveit

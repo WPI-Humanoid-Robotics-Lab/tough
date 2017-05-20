@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <package>
-  <name>val_control</name>
+  <name>val_controllers</name>
   <version>0.0.0</version>
-  <description>The val_control package</description>
+  <description>The val_controllers package</description>
 
-  <maintainer email="sahil@todo.todo">sahil</maintainer>
+  <maintainer email="sumanth@todo.todo">sumanth</maintainer>
 
   <license>TODO</license>
 
-  <!-- <url type="website">http://wiki.ros.org/val_control</url> -->
+  <!-- <url type="website">http://wiki.ros.org/val_controllers</url> -->
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>geometry_msgs</build_depend>
