@@ -1,9 +1,4 @@
 #include <val_task1/val_task1_utils.h>
-#include <val_control/val_chest_navigation.h>
-#include <val_control/val_pelvis_navigation.h>
-#include <val_control/val_gripper_control.h>
-#include <val_control/val_head_navigation.h>
-#include <val_control/val_arm_navigation.h>
 
 task1Utils::task1Utils(ros::NodeHandle nh):
     nh_(nh)
@@ -56,6 +51,47 @@ double task1Utils::getPitchDiff (void)
 double task1Utils::getYawDiff (void)
 {
     return (msg_.target_yaw - msg_.current_yaw);
+}
+
+valueDirection task1Utils::getPitchValueDirection(double current_value, controlSelection control)
+{
+    valueDirection ret = valueDirection::NOT_INITIALISED;
+
+    static double prev_value = 0;
+    static bool once = true;
+
+    // only on init
+    if (once)
+    {
+        // initialise preveious valuie and return
+        prev_value = current_value;
+
+        // reset the once flag
+        once = false;
+
+        ROS_INFO("initialised");
+    }
+    else if (fabs(fabs(current_value) - fabs(prev_value)) > MINIMUM_MOVMENT_IN_RAD) // moved atleast by 5 degrees
+    {
+        ROS_INFO("moved by 5deg");
+
+        if ((control == controlSelection::PITCH ? msg_.target_pitch : msg_.target_yaw) < prev_value)
+        {
+            ret = valueDirection::VALUE_INCREASING;
+            ROS_INFO("increasing");
+        }
+        else
+        {
+            ret = valueDirection::VALUE_DECREASING;
+            ROS_INFO("decreasing");
+        }
+
+        // set the once flag for next time
+        once = true;
+    }
+
+
+    return ret;
 }
 
 void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point start, geometry_msgs::Pose pose, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, float radius, int steps)
@@ -136,7 +172,7 @@ void task1Utils::visulatise6DPoints(std::vector<geometry_msgs::Pose> &points)
         marker_tangent.action = visualization_msgs::Marker::ADD;
         marker_tangent.pose = points[i];
 
-//        ROS_INFO_STREAM(i<<"pose"<<points[i].position);
+        //        ROS_INFO_STREAM(i<<"pose"<<points[i].position);
         marker_tangent.scale.x = 0.05;
         marker_tangent.scale.y = 0.006;
         marker_tangent.scale.z = 0.006;
@@ -156,7 +192,7 @@ void task1Utils::visulatise6DPoints(std::vector<geometry_msgs::Pose> &points)
         marker_point.action = visualization_msgs::Marker::ADD;
         marker_point.pose = points[i];
 
-//        ROS_INFO_STREAM(i<<"pose"<<points[i].position);
+        //        ROS_INFO_STREAM(i<<"pose"<<points[i].position);
         marker_point.scale.x = 0.005;
         marker_point.scale.y = 0.005;
         marker_point.scale.z = 0.005;
