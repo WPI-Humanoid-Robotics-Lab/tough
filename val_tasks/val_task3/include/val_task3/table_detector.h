@@ -20,6 +20,7 @@ class table_detector
 {
     ros::NodeHandle nh_;
     ros::Publisher marker_pub_;
+    ros::Publisher points_pub_;
     ros::Subscriber pcl_sub_;
 
     src_perception::MultisensePointCloud point_cloud_listener_;
