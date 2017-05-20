@@ -5,7 +5,7 @@
 #include <thread>
 
 #define DISABLE_DRAWINGS true
-//#define DISABLE_TRACKBAR true
+#define DISABLE_TRACKBAR true
 
 stair_detector::stair_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor), coefficients_(4), endPoints_(2)
 {
