@@ -104,11 +104,14 @@ void taskCommonUtils::moveToInitPose(ros::NodeHandle &nh)
     ros::Duration(0.5).sleep();
 }
 
-void taskCommonUtils::fixHandFramePose(armSide side, geometry_msgs::Pose &poseInWorldFrame){
+void taskCommonUtils::fixHandFramePose(ros::NodeHandle nh, armSide side, geometry_msgs::Pose &poseInWorldFrame){
 
-//    RobotStateInformer *current_state = RobotStateInformer::getRobotStateInformer(nh);
+    RobotStateInformer *current_state = RobotStateInformer::getRobotStateInformer(nh);
+    geometry_msgs::Pose poseInPelvisFrame;
+    current_state->transformPose(poseInWorldFrame, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+
     tf::Quaternion tfQuat;
-    tf::quaternionMsgToTF(poseInWorldFrame.orientation, tfQuat);
+    tf::quaternionMsgToTF(poseInPelvisFrame.orientation, tfQuat);
     double roll, pitch, yaw;
     tf::Matrix3x3(tfQuat).getRPY(roll, pitch, yaw);
 
@@ -118,9 +121,10 @@ void taskCommonUtils::fixHandFramePose(armSide side, geometry_msgs::Pose &poseIn
     }
     else {
         pitch += M_PI_2;
-        yaw   -= M_PI_2;
+        roll  -= M_PI_2;
     }
     tf::Quaternion tfQuatOut = tf::createQuaternionFromRPY(roll, pitch, yaw);
-    tf::quaternionTFToMsg(tfQuatOut, poseInWorldFrame.orientation);
+    tf::quaternionTFToMsg(tfQuatOut, poseInPelvisFrame.orientation);
+    current_state->transformPose(poseInPelvisFrame, poseInWorldFrame, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
 
 }
