@@ -299,7 +299,7 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_msg(new pcl::PointCloud<pcl::PointXYZ>);
     convertROStoPCL(msg, pcl_msg);
 
-    if (state_request == PCL_STATE_CONTROL::RESET || prev_msg_->row_step > 10000000 || prev_msg_->data.empty()){
+    if (state_request == PCL_STATE_CONTROL::RESET || prev_msg_->data.empty()){
         ROS_INFO("Resetting Pointcloud");
         merged_cloud = msg;
         pointcloud_for_octomap_pub_.publish(prev_msg_->data.empty() ? msg : prev_msg_);
