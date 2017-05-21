@@ -1,5 +1,7 @@
 #include <val_task3/leak_detector_grabber.h>
 #include <val_control/robot_state.h>
+#include <val_task_common/val_task_common_utils.h>
+#include <tf/transform_datatypes.h>
 
 int main(int argc, char **argv){
 
@@ -12,30 +14,36 @@ int main(int argc, char **argv){
 
     geometry_msgs::Pose goal;
     geometry_msgs::Pose fGoal;
+    goal.orientation.x = std::atof(argv[4]);
+    goal.orientation.y = std::atof(argv[5]);
+    goal.orientation.z = std::atof(argv[6]);
+    goal.orientation.w = std::atof(argv[7]);
 
-    goal.orientation.x = -0.504;
-    goal.orientation.y = 0.535;
-    goal.orientation.z = 0.504;
-    goal.orientation.w = 0.453;
+    taskCommonUtils::fixHandFramePose(RIGHT,goal);
 
-    rs->transformPose(goal,fGoal,VAL_COMMON_NAMES::PELVIS_TF);
+//    goal.orientation.x = -0.504;
+//    goal.orientation.y = 0.535;
+//    goal.orientation.z = 0.504;
+//    goal.orientation.w = 0.453;
+
+//    rs->transformPose(goal,fGoal,VAL_COMMON_NAMES::PELVIS_TF);
 
 
-    if(argc == 4){
+    if(argc == 8){
 
-        fGoal.position.x = std::atof(argv[1]);
-        fGoal.position.y = std::atof(argv[2]);
-        fGoal.position.z = std::atof(argv[3]);
+        goal.position.x = std::atof(argv[1]);
+        goal.position.y = std::atof(argv[2]);
+        goal.position.z = std::atof(argv[3]);
     }
 
     else{
 
-        fGoal.position.x = -0.445;
-        fGoal.position.y = 0.159;
-        fGoal.position.z = 0.927;
+        goal.position.x = -0.445;
+        goal.position.y = 0.159;
+        goal.position.z = 0.927;
     }
 
-    ldg.graspDetector(fGoal);
+    ldg.graspDetector(goal);
 
     ros::spin();
     return 0;
