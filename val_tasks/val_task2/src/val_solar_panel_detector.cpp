@@ -1,4 +1,20 @@
 #include "val_task2/val_solar_panel_detector.h"
+
+void SolarPanelDetect::invertYaw(geometry_msgs::Pose &pose)
+{
+    // for valkyrie orientation :
+    // pointing inwards : if panel is behind valkyrie: theta
+    // pointing outwards : if panel is in front of valkyrie: theta-M_PI
+    tfScalar r, p, y;
+    tf::Quaternion q;
+    tf::quaternionMsgToTF(pose.orientation, q);
+    tf::Matrix3x3 rot(q);
+    rot.getRPY(r, p, y);
+    y = y-M_PI;
+    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(r,p,y);
+    pose.orientation = quaternion;
+}
+
 SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight)
 {
     pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &SolarPanelDetect::cloudCB, this);;
@@ -55,21 +71,6 @@ void SolarPanelDetect::setoffset(float minX, float maxX, float minY, float maxY,
     pitch = (pitchDeg*M_PI)/180;
 }
 
-void SolarPanelDetect::getOutwardOrientation(geometry_msgs::Pose &pose)
-{
-    // for valkyrie orientation :
-    // pointing inwards : if panel is behind valkyrie: theta
-    // pointing outwards : if panel is in front of valkyrie: theta-M_PI
-    tfScalar r, p, y;
-    tf::Quaternion q;
-    tf::quaternionMsgToTF(pose.orientation, q);
-    tf::Matrix3x3 rot(q);
-    rot.getRPY(r, p, y);
-    y = y-M_PI;
-    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(r,p,y);
-    pose.orientation = quaternion;
-}
-
 void SolarPanelDetect::setRoverTheta()
 {
     // this func is for finding yaw and used for tranformation of the cloud
@@ -117,10 +118,8 @@ void SolarPanelDetect::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 
 
 
-    ROS_INFO("pub size cloud %d",(int)cloud->points.size());
-
     pcl::toROSMsg(*cloud,output);
-    output.header.frame_id="world";
+    output.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
     pcl_filtered_pub.publish(output);
 
 }
@@ -155,7 +154,6 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,ge
     {
         if (theta >0)
         {
-    //        ROS_INFO("hey");
             theta-=M_PI;
         }
 
@@ -164,7 +162,6 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,ge
     {
         if (theta <0)
         {
-    //        ROS_INFO("hey");
             theta+=M_PI;
         }
     }
@@ -181,17 +178,6 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,ge
     geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch,theta);
     pose.orientation = quaternion;
     visualizept(pose);
-
-//    // the frames are different (y axis) for both the arms
-    if(false)
-    {
-        quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch + M_PI_2, theta - M_PI_2); //for right arm
-    }
-    else
-    {
-        quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch + M_PI_2, theta - M_PI_2); //for left arm
-    }
-    pose.orientation = quaternion;
 
     tfScalar r, p, y;
     tf::Quaternion q;
@@ -222,7 +208,7 @@ void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
     if(cloud->empty())
         return;
 
-    ROS_INFO("cloud size before clustering %d",(int)cloud->points.size());
+//    ROS_INFO("cloud size before clustering %d",(int)cloud->points.size());
 
     //getting a pt in the handle
     for(int i = 0; i!=cloud->points.size();++i)
@@ -258,7 +244,7 @@ void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
     std::vector<int>::const_iterator pit;
 
     // we can find pts on the handle based on the euclidean distance
-    ROS_INFO("number of clusters: %d",(int)cluster_indices.size());
+//    ROS_INFO("number of clusters: %d",(int)cluster_indices.size());
 
     if(!(int)cluster_indices.size())
         return;
@@ -360,41 +346,6 @@ void SolarPanelDetect::transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud
 
 void SolarPanelDetect::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
-
-
-//    float min_x,min_y,max_x,max_y;
-//    min_x = 0;
-//    max_x = 1;
-//    min_y = -1.5;
-//    max_y =  1.5;
-
-/*
-    geometry_msgs::Point pt_in,pt_out;
-    // transforming pts from pelvis to world frame
-    pt_in.x = solar_pass_x_min;
-    pt_in.y =  0;
-    pt_in.z =  0;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
-    min_x = pt_out.x;    min_x = 0;
-    max_x = 1;
-    min_y = -1.5;
-    max_y =  1.5;
-    pt_in.x = solar_pass_x_max;min_x
-    pt_in.y =  0;
-    pt_in.z =  0;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
-    max_x = pt_out.x;
-    pt_in.x =  0;
-    pt_in.y = solar_pass_y_min;
-    pt_in.z =  0;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
-    min_y = pt_out.y;
-    pt_in.x =  0;
-    pt_in.y = solar_pass_y_max;
-    pt_in.z =  0;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
-    max_y = pt_out.y;
-*/
 
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
