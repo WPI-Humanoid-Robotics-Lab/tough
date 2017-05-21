@@ -3,6 +3,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Pose.h>
+#include <val_control/val_arm_navigation.h>
 
 #define DISTANCE_TOLERANCE      0.02      // 2cm
 #define ANGLE_TOLERANCE         0.0174533   // 1 degree
@@ -16,4 +17,5 @@ bool isGoalReached(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_ne
 bool isGoalReached(geometry_msgs::Pose pose_old, geometry_msgs::Pose2D pose_new);
 void moveToWalkSafePose(ros::NodeHandle &nh);
 void moveToInitPose(ros::NodeHandle &nh);
+void fixHandFramePose(armSide side, geometry_msgs::Pose &poseInWorldFrame);
 }

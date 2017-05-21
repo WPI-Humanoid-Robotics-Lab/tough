@@ -103,3 +103,24 @@ void taskCommonUtils::moveToInitPose(ros::NodeHandle &nh)
     armTraj.moveArmJoints(initPose);
     ros::Duration(0.5).sleep();
 }
+
+void taskCommonUtils::fixHandFramePose(armSide side, geometry_msgs::Pose &poseInWorldFrame){
+
+//    RobotStateInformer *current_state = RobotStateInformer::getRobotStateInformer(nh);
+    tf::Quaternion tfQuat;
+    tf::quaternionMsgToTF(poseInWorldFrame.orientation, tfQuat);
+    double roll, pitch, yaw;
+    tf::Matrix3x3(tfQuat).getRPY(roll, pitch, yaw);
+
+    if (side == armSide::LEFT){
+        pitch += M_PI_2;
+        yaw   -= M_PI_2;
+    }
+    else {
+        pitch += M_PI_2;
+        yaw   -= M_PI_2;
+    }
+    tf::Quaternion tfQuatOut = tf::createQuaternionFromRPY(roll, pitch, yaw);
+    tf::quaternionTFToMsg(tfQuatOut, poseInWorldFrame.orientation);
+
+}
