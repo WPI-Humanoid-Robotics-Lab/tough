@@ -17,5 +17,5 @@ bool isGoalReached(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_ne
 bool isGoalReached(geometry_msgs::Pose pose_old, geometry_msgs::Pose2D pose_new);
 void moveToWalkSafePose(ros::NodeHandle &nh);
 void moveToInitPose(ros::NodeHandle &nh);
-void fixHandFramePose(armSide side, geometry_msgs::Pose &poseInWorldFrame);
+void fixHandFramePose(ros::NodeHandle nh, armSide side, geometry_msgs::Pose &poseInWorldFrame);
 }
