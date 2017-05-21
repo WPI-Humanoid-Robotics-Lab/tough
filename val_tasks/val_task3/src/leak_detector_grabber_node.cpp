@@ -19,7 +19,7 @@ int main(int argc, char **argv){
     goal.orientation.z = std::atof(argv[6]);
     goal.orientation.w = std::atof(argv[7]);
 
-    taskCommonUtils::fixHandFramePose(RIGHT,goal);
+    taskCommonUtils::fixHandFramePose(nh,RIGHT,goal);
 
 //    goal.orientation.x = -0.504;
 //    goal.orientation.y = 0.535;
@@ -43,7 +43,7 @@ int main(int argc, char **argv){
         goal.position.z = 0.927;
     }
 
-    ldg.graspDetector(goal);
+    ldg.graspDetector(RIGHT,goal);
 
     ros::spin();
     return 0;

@@ -16,7 +16,7 @@ public:
     leakDetectorGrabber(ros::NodeHandle nh);
     ~leakDetectorGrabber();
 
-    void graspDetector(const geometry_msgs::Pose &goal, float executionTime=2.0f);
+    void graspDetector(armSide side, const geometry_msgs::Pose &goal, float executionTime=2.0f);
 
 private:
     ros::NodeHandle nh_;
