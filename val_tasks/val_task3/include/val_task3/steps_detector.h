@@ -57,7 +57,7 @@ public:
     void planeSegmentation(const std::vector<double>& , const geometry_msgs::Point & );
     struct less_than_key
     {
-        inline bool operator ()(const pcl::PointXYZ& p1, const pcl::PointXYZ& p2) const
+        inline bool operator ()(const pcl::PointXYZ& p1, const pcl::PointXYZ& p2)
         {
         return ((std::pow(p1.x, 2) + std::pow(p1.y, 2) + std::pow(p1.z, 2)) < (std::pow(p2.x, 2) + std::pow(p2.y, 2) + std::pow(p2.z, 2)));
         }
