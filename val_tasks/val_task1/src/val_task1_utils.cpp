@@ -53,9 +53,19 @@ double task1Utils::getYawDiff (void)
     return (msg_.target_yaw - msg_.current_yaw);
 }
 
-valueDirection task1Utils::getPitchValueDirection(double current_value, controlSelection control)
+double task1Utils::getPitch (void)
 {
-    valueDirection ret = valueDirection::NOT_INITIALISED;
+    return msg_.current_pitch;
+}
+
+double task1Utils::getYaw (void)
+{
+    return msg_.current_yaw;
+}
+
+valueDirection task1Utils::getValueDirection(double current_value, controlSelection control)
+{
+    valueDirection ret = valueDirection::VALUE_CONSTANT;
 
     static double prev_value = 0;
     static bool once = true;
@@ -94,7 +104,30 @@ valueDirection task1Utils::getPitchValueDirection(double current_value, controlS
     return ret;
 }
 
-void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point start, geometry_msgs::Quaternion orientation, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, float radius, int steps)
+valueConstant task1Utils::isValueConstant (double current_value, controlSelection control)
+{
+    static int debounce_count = 0;
+    valueConstant ret = valueConstant::NOT_INITIALISED;
+
+    if (getValueDirection(current_value, control) == valueDirection::VALUE_CONSTANT)
+    {
+        debounce_count++;
+        ret = valueConstant::NOT_INITIALISED;
+    }
+    else if (debounce_count > 20)
+    {
+        debounce_count = 0;
+        ret = valueConstant::VALUE_NOT_CHANGING;
+    }
+    else
+    {
+        ret = valueConstant::VALUE_CHANGING;
+    }
+
+    return ret;
+}
+
+void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point start, geometry_msgs::Quaternion orientation, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, handleDirection direction, float radius, int steps)
 {
     if (planeCoeffs.size() != 4){
         ROS_INFO("Please check the plane coefficiants");
@@ -112,7 +145,7 @@ void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point s
     circle_point_pose.position.y = start.y;
     circle_point_pose.position.z = start.z;
     circle_point_pose.orientation = orientation;
-    points.push_back(circle_point_pose);
+    // points.push_back(circle_point_pose);
 
     float dist = fabs(a*start.x  + b*start.y + c*start.z  + d )/sqrt(pow(a,2) + pow(b,2) + pow(c,2));
 
@@ -125,8 +158,15 @@ void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point s
     {
         // angle to the first point
         float alpha = atan2((start_pose.position.y - center.y),(start_pose.position.x - center.x));
-        circle_point_pose.position.x = center.x + radius*cos(alpha - (float)(2*M_PI/steps));
-        circle_point_pose.position.y = center.y + radius*sin(alpha - (float)(2*M_PI/steps));
+
+        if (direction == handleDirection::ANTICLOCK_WISE) {
+            circle_point_pose.position.x = center.x + radius*cos(alpha - (float)(2*M_PI/steps));
+            circle_point_pose.position.y = center.y + radius*sin(alpha - (float)(2*M_PI/steps));
+        }
+        else if (direction == handleDirection::CLOCK_WISE){
+            circle_point_pose.position.x = center.x + radius*cos(alpha + (float)(2*M_PI/steps));
+            circle_point_pose.position.y = center.y + radius*sin(alpha + (float)(2*M_PI/steps));
+        }
 
         //point.position.z = -(a*point.position.x  + b* point.position.y + d)/c;
         circle_point_pose.position.z = -(a*circle_point_pose.position.x  + b* circle_point_pose.position.y + d)/c + dist; //(d - dist+.05) )/c;

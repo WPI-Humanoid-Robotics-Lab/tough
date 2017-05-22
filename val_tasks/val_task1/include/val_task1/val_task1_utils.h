@@ -34,9 +34,20 @@ enum class controlSelection {
 
 // Pitch/Yaw direction
 enum class valueDirection {
-    NOT_INITIALISED = 0,
+    VALUE_CONSTANT = 0,
     VALUE_INCREASING,
     VALUE_DECREASING
+};
+
+enum class valueConstant {
+    NOT_INITIALISED = 0,
+    VALUE_NOT_CHANGING,
+    VALUE_CHANGING
+};
+
+enum class handleDirection {
+    ANTICLOCK_WISE = 0,
+    CLOCK_WISE
 };
 
 class task1Utils {
@@ -58,7 +69,10 @@ public:
     bool isYawCompleted(void);
     double getPitchDiff (void);
     double getYawDiff (void);
-    valueDirection getPitchValueDirection(double current_value, controlSelection control);
-    void getCircle3D (geometry_msgs::Point center, geometry_msgs::Point start,geometry_msgs::Quaternion orientation, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, float radius, int steps =10);
+    double getPitch (void);
+    double getYaw (void);
+    valueDirection getValueDirection(double current_value, controlSelection control);
+    void getCircle3D (geometry_msgs::Point center, geometry_msgs::Point start,geometry_msgs::Quaternion orientation, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, handleDirection direction, float radius, int steps =10);
     void visulatise6DPoints(std::vector<geometry_msgs::Pose> &points);
+    valueConstant isValueConstant(double current_value, controlSelection control);
 };

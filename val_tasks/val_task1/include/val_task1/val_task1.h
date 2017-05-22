@@ -35,6 +35,9 @@
 #include <val_controllers/val_wholebody_manipulation.h>
 #include <val_task_common/val_upperbody_tracker.h>
 #include <val_control_common/val_control_common.h>
+#include <val_task1/pcl_handle_detector.h>
+#include <chrono>
+#include <ctime>
 
 using namespace decision_making;
 
@@ -86,9 +89,11 @@ class valTask1 {
     // grasp state variable
     prevGraspState prev_grasp_state_;
     // upper body tracker
-    uuperBodyTracker* upper_body_tracker_;
+    upperBodyTracker* upper_body_tracker_;
     // val control common api's
     valControlCommon* control_helper_;
+    // pcl handle detector for redetcting
+    pcl_handle_detector* pcl_handle_detector_;
 
     ros::Publisher array_pub_;
 
@@ -112,6 +117,10 @@ class valTask1 {
     nav_msgs::OccupancyGrid visited_map_;
 
     geometry_msgs::Pose2D next_finishbox_center_;
+
+    // helper functions
+    void resetRobotToDefaults(int arm_pose=1);
+
     public:
 
     // goal location for the panel

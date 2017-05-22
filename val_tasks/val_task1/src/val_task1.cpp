@@ -65,7 +65,7 @@ valTask1::valTask1(ros::NodeHandle nh):
     right_arm_planner_ = new cartesianPlanner("rightPalm", "/world");
 
     // upper body tracker
-    upper_body_tracker_ = new uuperBodyTracker(nh_);
+    upper_body_tracker_ = new upperBodyTracker(nh_);
 
     // val control common api;s
     control_helper_ = new valControlCommon(nh_);
@@ -132,8 +132,9 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
     if (map_update_count_ > 1) {
         // move to a configuration that is robust while walking
         retry_count = 0;
-        pelvis_controller_->controlPelvisHeight(0.9);
-        ros::Duration(1.0f).sleep();
+
+        // reset robot to defaults
+        resetRobotToDefaults();
 
         // start the task
         ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
@@ -330,6 +331,10 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
 
         // generate the event
         eventQueue.riseEvent("/DETECTED_HANDLE");
+
+        // reset the neck
+        head_controller_->moveHead(0.0f, 0.0f, 0.0f, 0.0f);
+        ros::Duration(1).sleep();
     }
     else if( retry_count++ < 10){
         ROS_INFO("Did not detect handle, retrying");
@@ -529,7 +534,7 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
         ros::Duration(1).sleep();
         geometry_msgs::Pose pose;
         robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF, pose);
-        handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[1]);
+        handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[PITCH_KNOB_HANDLE]);
         ros::Duration(0.2).sleep(); //wait till grasp is complete
         eventQueue.riseEvent("/GRASP_PITCH_HANDLE_EXECUTING");
     }
@@ -558,12 +563,16 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
 
 decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM_ONCE("executing " << name);
 
     static bool execute_once = true;
-    //current pose of the hand
-    geometry_msgs::Pose current_hand_pose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME, current_hand_pose);
+    static int retry_count = 0;
+    static handleDirection rot_dir = handleDirection::ANTICLOCK_WISE;
+
+    //timer
+    std::chrono::system_clock::time_point timer_start;
+
+    ROS_INFO("time in sec %d ", std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - timer_start).count());
 
     // execute this part once
     if (execute_once)
@@ -571,9 +580,17 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         // reset the execute flag
         execute_once = false;
 
+        // set the pelvis height
+        // pelvis_controller_->controlPelvisHeight(0.77);
+
         // generate the way points for the knob (current pose(6DOF) of arm is used to generate the way points)
+
+        //current pose of the hand
+        geometry_msgs::Pose current_hand_pose;
+        robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME, current_hand_pose);
+
         std::vector<geometry_msgs::Pose> waypoints;
-        task1_utils_->getCircle3D(handle_loc_[PITCH_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, 0.125, 10);
+        task1_utils_->getCircle3D(handle_loc_[PITCH_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, 0.125, 10);
         ROS_INFO("way points generatd");
 
         ///@todo: remove the visulaisation
@@ -588,12 +605,31 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
         ROS_INFO("trajectory sent to controllers");
 
+        // start the timer
+        timer_start = std::chrono::high_resolution_clock::now();
     }
 
     // checks to handle the behaviour, which will also trigger necessary transitions
 
+    // if the handle is moving in wrong direction, flip the points
+    if(task1_utils_->getValueDirection(task1_utils_->getPitch(), controlSelection::PITCH) == valueDirection::VALUE_INCREASING)
+    {
+        ROS_INFO("value is incresing");
+
+        // stop all the trajectories
+        control_helper_->stopAllTrajectories();
+
+        // set the execute flag
+        execute_once = true;
+
+        // flip the direction
+        rot_dir = (rot_dir == handleDirection::ANTICLOCK_WISE) ? handleDirection::CLOCK_WISE : handleDirection::ANTICLOCK_WISE;
+
+        // still stay in the same state
+        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
+    }
     // if the pitch is corrected
-    if (task1_utils_->isPitchCorrectNow())
+    else if (task1_utils_->isPitchCorrectNow())
     {
         // stop all the trajectories
         control_helper_->stopAllTrajectories();
@@ -612,10 +648,11 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
             // set the execute flag
             execute_once = true;
 
-            //reset the arm to default pose
-            gripper_controller_->openGripper(armSide::RIGHT);
-            ros::Duration(1).sleep();
-            arm_controller_->moveToDefaultPose(armSide::RIGHT);
+            //reset robot to defaults
+            resetRobotToDefaults();
+
+            // reset the count
+            retry_count = 0;
 
             ROS_INFO("pitch completed now");
         }
@@ -629,6 +666,9 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     // if we lost the grasp while executing the trajectory
     else if (!robot_state_->isGraspped(armSide::RIGHT))
     {
+        // stop all the trajectories
+        control_helper_->stopAllTrajectories();
+
         // redetect the handles (retry)
         eventQueue.riseEvent("/PITCH_CORRECTION_RETRY");
 
@@ -637,10 +677,8 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
         ROS_INFO("grasp lost");
     }
-    // if the arm is not moving any more (ideally its back to the starting point)
-    ///@todo: not sure if this is required..!!!
-    /// how do we check if its at the same point..??
-    else if (!upper_body_tracker_->isArmMoving(armSide::RIGHT, 10))
+    // if the arm is not moving any more
+    else if (task1_utils_->isValueConstant(task1_utils_->getPitch(), controlSelection::PITCH) == valueConstant::VALUE_NOT_CHANGING)
     {
         // replan and execute from the current point,
         // set the execute once state
@@ -650,6 +688,51 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
 
         ROS_INFO("arm moment stopped, replanning rajectory with the current pose");
+    }
+//    // if the arm is not moving any more (ideally its back to the starting point)
+//    ///@todo: not sure if this is required..!!!
+//    /// how do we check if its at the same point..??
+//    else if (!upper_body_tracker_->isArmMoving(armSide::RIGHT, 10))
+//    {
+//        // replan and execute from the current point,
+//        // set the execute once state
+//        execute_once = true;
+
+//        // still stay in the same state
+//        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
+
+//        ROS_INFO("arm moment stopped, replanning rajectory with the current pose");
+//    }
+    // if timeout
+    // i.e. arm is wobbling around a local minima
+    ///@todo use ros timer, instead of system clock
+    else if (0) //std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - timer_start).count() > 5000) // real time
+    {
+        ROS_INFO("timeout");
+
+        // stop all the trajectories
+        control_helper_->stopAllTrajectories();
+
+        // redetect the handles (retry)
+        eventQueue.riseEvent("/PITCH_CORRECTION_RETRY");
+
+        //set the execute once flag back
+        execute_once = true;
+
+        // increment the count
+        retry_count++;
+    }
+    // maximum fails
+    else if (retry_count > 5)
+    {
+        //reset robot to default state
+        resetRobotToDefaults();
+
+        // reset the count
+        retry_count = 0;
+
+        //error state
+        eventQueue.riseEvent("/PITCH_CORRECTION_FAILED");
     }
     // fall through case
     else
@@ -806,7 +889,7 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
         ros::Duration(1).sleep();
         geometry_msgs::Pose pose;
         robot_state_->getCurrentPose(VAL_COMMON_NAMES::L_PALM_TF, pose);
-        handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[3]);
+        handle_grabber_->grasp_handles(armSide::LEFT , handle_loc_[YAW_KNOB_HANDLE]);
         ros::Duration(0.2).sleep(); //wait till grasp is complete
         eventQueue.riseEvent("/GRASP_YAW_HANDLE_EXECUTING");
     }
@@ -837,26 +920,183 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
 decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
 
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM_ONCE("executing " << name);
 
-    //    geometry_msgs::Pose pose;
-    //    robot_state_->getCurrentPose("/leftPalm", pose);
-    //    handle_grabber_->grasp_handles(armSide::LEFT, handle_loc_[3]);
-    //    ros::Duration(1).sleep();
+    static bool execute_once = true;
+    static int retry_count = 0;
+    static handleDirection rot_dir = handleDirection::CLOCK_WISE;
 
-    //    std::vector<geometry_msgs::Pose> leftWaypoints;
-    //    if(move_handle_ == nullptr) {
-    //        move_handle_ = new move_handle(nh_);
-    //    }
+    ROS_INFO("1");
+    // execute this part once
+    if (execute_once)
+    {
+        // reset the execute flag
+        execute_once = false;
 
-    //    ros::Duration(1).sleep();
-    //    move_handle_->createCircle(handle_loc_[2], 0, panel_coeff_, leftWaypoints);
+        // set the pelvis height
+        // pelvis_controller_->controlPelvisHeight(0.77);
 
-    //    if(move_handle_ != nullptr) delete move_handle_;
-    //    move_handle_ = nullptr;
+        // generate the way points for the knob (current pose(6DOF) of arm is used to generate the way points)
+        //current pose of the hand
+        geometry_msgs::Pose current_hand_pose;
+        robot_state_->getCurrentPose(VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME, current_hand_pose);
 
-    eventQueue.riseEvent("/YAW_CORRECTION_SUCESSFUL");
-    return TaskResult::SUCCESS();
+        std::vector<geometry_msgs::Pose> waypoints;
+        task1_utils_->getCircle3D(handle_loc_[YAW_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, 0.125, 15);
+        ROS_INFO("way points generatd");
+
+        ///@todo: remove the visulaisation
+        task1_utils_->visulatise6DPoints(waypoints);
+
+        // plan the trajectory
+        moveit_msgs::RobotTrajectory traj;
+        left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+        ROS_INFO("trajectory generated");
+
+        // execute the trajectory
+        wholebody_controller_->compileMsg(armSide::LEFT, traj.joint_trajectory);
+        ROS_INFO("trajectory sent to controllers");
+
+    }
+
+    // checks to handle the behaviour, which will also trigger necessary transitions
+ROS_INFO("2");
+    if(task1_utils_->getValueDirection(task1_utils_->getYaw(), controlSelection::YAW) == valueDirection::VALUE_INCREASING)
+    {
+        ROS_INFO("value is incresing");
+
+        // stop all the trajectories
+        control_helper_->stopAllTrajectories();
+
+        // set the execute flag
+        execute_once = true;
+
+        // flip the direction
+        rot_dir = (rot_dir == handleDirection::ANTICLOCK_WISE) ? handleDirection::CLOCK_WISE : handleDirection::ANTICLOCK_WISE;
+
+        // still stay in the same state
+        eventQueue.riseEvent("/YAW_CORRECTION_EXECUTING");
+    }
+    // if the yaw is corrected
+    else if (task1_utils_->isYawCorrectNow())
+    {
+        // stop all the trajectories
+        control_helper_->stopAllTrajectories();
+
+        ROS_INFO("yaw correct now");
+
+        // wait until the pich correction becomes complete
+        ros::Duration(5).sleep();
+
+        //check if its complete
+        if (task1_utils_->isYawCompleted())
+        {
+            // sucessuflly done
+            eventQueue.riseEvent("/YAW_CORRECTION_SUCESSFUL");
+
+            // set the execute flag
+            execute_once = true;
+
+            //reset robot to defaults
+            resetRobotToDefaults();
+
+            // reset the count
+            retry_count = 0;
+
+            ROS_INFO("yaw completed now");
+        }
+        else
+        {
+            // still stay in the same state
+            eventQueue.riseEvent("/YAW_CORRECTION_EXECUTING");
+            ROS_INFO("correct but not finished");
+        }
+    }
+    // if we lost the grasp while executing the trajectory
+    else if (!robot_state_->isGraspped(armSide::LEFT))
+    {
+        // redetect the handles (retry)
+        eventQueue.riseEvent("/YAW_CORRECTION_RETRY");
+
+        //set the execute once flag back
+        execute_once = true;
+
+        ROS_INFO("grasp lost");
+    }
+    // if the arm is not moving any more
+    else if (task1_utils_->isValueConstant(task1_utils_->getYaw(), controlSelection::YAW) == valueConstant::VALUE_NOT_CHANGING)
+    {
+        // replan and execute from the current point,
+        // set the execute once state
+        execute_once = true;
+
+        // still stay in the same state
+        eventQueue.riseEvent("/YAW_CORRECTION_EXECUTING");
+
+        ROS_INFO("arm moment stopped, replanning rajectory with the current pose");
+    }
+//    // if the arm is not moving any more (ideally its back to the starting point)
+//    ///@todo: not sure if this is required..!!!
+//    /// how do we check if its at the same point..??
+//    else if (!upper_body_tracker_->isArmMoving(armSide::LEFT, 10))
+//    {
+//        // replan and execute from the current point,
+//        // set the execute once state
+//        execute_once = true;
+
+//        // still stay in the same state
+//        eventQueue.riseEvent("/YAW_CORRECTION_EXECUTING");
+
+//        ROS_INFO("arm moment stopped, replanning rajectory with the current pose");
+//    }
+    // if timeout
+    // i.e. arm is wobbling around a local minima
+    ///@todo use ros timer, instead of system clock
+    else if (0) //std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - timer_start).count() > 5000) // real time
+    {
+        ROS_INFO("timeout");
+
+        // stop all the trajectories
+        control_helper_->stopAllTrajectories();
+
+        // redetect the handles (retry)
+        eventQueue.riseEvent("/YAW_CORRECTION_RETRY");
+
+        //set the execute once flag back
+        execute_once = true;
+
+        // increment the count
+        retry_count++;
+    }
+    // maximum fails
+    else if (retry_count > 5)
+    {
+        //reset robot to default state
+        resetRobotToDefaults();
+
+        // reset the count
+        retry_count = 0;
+
+        //error state
+        eventQueue.riseEvent("/YAW_CORRECTION_FAILED");
+    }
+    // fall through case
+    else
+    {
+        // ie. its still executing, stay in the same state
+        eventQueue.riseEvent("/YAW_CORRECTION_EXECUTING");
+
+        ROS_INFO_THROTTLE(2, "executing");
+    }
+
+    ROS_INFO("3");
+    /// This state canot go to error state direclty, the transition to error will happen
+    /// from the rdetect handles state
+
+    // generate the event externally (this a fail safe case, should not be required ideally)
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
 }
 
 decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
@@ -864,6 +1104,13 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
     ROS_INFO_STREAM("executing " << name);
 
     static std::string next_state_transition;
+    static int retry_count = 0;
+
+    // reset the robot to defaults (with 0 arm pose)
+    resetRobotToDefaults(0);
+
+    // titlt the head
+    head_controller_->moveHead(0.0f, 30.0f, 0.0f, 2.0f);
 
     // based on the previous state set the state transition
     if (prev_grasp_state_ == prevGraspState::GRASP_PITCH_HANDLE)
@@ -877,8 +1124,51 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
         next_state_transition = "/REDETECTED_HANDLE_GRASP_YAW";
     }
 
+    // create the object for the pcl detector
+    geometry_msgs::Pose pose;
+    pose.position.x = panel_walk_goal_fine_.x;
+    pose.position.y = panel_walk_goal_fine_.y;
+    pose.position.z = 0;
+    tf::Quaternion q = tf::createQuaternionFromYaw(panel_walk_goal_fine_.theta);
+    tf::quaternionTFToMsg(q, pose.orientation);
+    pcl_handle_detector_ = new pcl_handle_detector(nh_, pose);
+
+    //get the detections
+    std::vector<geometry_msgs::Point> handle_poses;
+    // if detection is sucessful
+    if (pcl_handle_detector_->getDetections(handle_poses))
+    {
+        // update the local positions of the handles
+        handle_loc_[PITCH_KNOB_HANDLE] = handle_poses[1];
+        handle_loc_[YAW_KNOB_HANDLE] = handle_poses[0];
+
+        // state transition
+        eventQueue.riseEvent(next_state_transition);
+    }
+    else if (retry_count > 10)
+    {
+        //reset the count
+        retry_count = 0;
+
+        eventQueue.riseEvent("/REDETECT_HANDLE_FAILED");
+    }
+    else
+    {
+        // increment the retry count
+        retry_count++;
+        eventQueue.riseEvent("/REDETECT_HANDLE_RETRY");
+    }
+
+    // delete the object of pcl handler
+    if(pcl_handle_detector_ != nullptr)        delete pcl_handle_detector_;
+
     // reset the state
     prev_grasp_state_ = prevGraspState::NOT_INITIALISED;
+
+    // generate the event externally (this a fail safe case, should not be required ideally)
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
 
     return TaskResult::SUCCESS();
 }
@@ -1062,4 +1352,41 @@ void valTask1::setPanelWalkGoalFine(const geometry_msgs::Pose2D &panel_walk_goal
 void valTask1::setPanelCoeff(const std::vector<float> &panel_coeff)
 {
     panel_coeff_ = panel_coeff;
+}
+
+// helper functions
+void valTask1::resetRobotToDefaults(int arm_pose)
+{
+    // open grippers
+    gripper_controller_->openGripper(armSide::RIGHT);
+    ros::Duration(1).sleep();
+    gripper_controller_->openGripper(armSide::LEFT);
+    ros::Duration(1).sleep();
+
+    // increse pelvis
+    pelvis_controller_->controlPelvisHeight(0.9);
+    ros::Duration(1.0f).sleep();
+
+    // reset chest
+    chest_controller_->controlChest(0.0, 0.0, 0.0);
+    ros::Duration(1).sleep();
+
+    // arms to default
+    if (arm_pose == 0)
+    {
+        arm_controller_->moveToZeroPose(armSide::LEFT);
+        ros::Duration(1).sleep();
+        arm_controller_->moveToZeroPose(armSide::RIGHT);
+        ros::Duration(1).sleep();
+    }
+    else if (arm_pose == 1)
+    {
+    arm_controller_->moveToDefaultPose(armSide::LEFT);
+    ros::Duration(1).sleep();
+    arm_controller_->moveToDefaultPose(armSide::RIGHT);
+    ros::Duration(1).sleep();
+    }
+
+    // neck to defaults
+    head_controller_->moveHead(0.0f, 0.0f, 0.0f, 0.0f);
 }

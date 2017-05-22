@@ -1,6 +1,6 @@
 # include <val_task_common/val_upperbody_tracker.h>
 
-uuperBodyTracker::uuperBodyTracker(ros::NodeHandle nh): nh_(nh),
+upperBodyTracker::upperBodyTracker(ros::NodeHandle nh): nh_(nh),
     // torso
     track_torso_yaw_(nh_, "torsoYawLink", "pelvis"),
     track_torso_pitch_(nh_, "torsoPitchLink", "pelvis"),
@@ -25,12 +25,12 @@ uuperBodyTracker::uuperBodyTracker(ros::NodeHandle nh): nh_(nh),
 
 }
 
-uuperBodyTracker::~uuperBodyTracker()
+upperBodyTracker::~upperBodyTracker()
 {
 
 }
 
-bool uuperBodyTracker::isArmMoving(armSide side, int dof)
+bool upperBodyTracker::isArmMoving(armSide side, int dof)
 {
     bool ret = false;
     static int l7debounce_count  = 0;
@@ -128,7 +128,7 @@ bool uuperBodyTracker::isArmMoving(armSide side, int dof)
         // consider robot still in walking (in the debounce period)
         ret = true;
 
-        // std::cout << "debounce motion"<< std::endl;
+        std::cout << "debounce motion"<< std::endl;
     }
     else
     {
@@ -138,7 +138,7 @@ bool uuperBodyTracker::isArmMoving(armSide side, int dof)
         // robot is not walking, its static
         ret = false;
 
-        // std::cout << "static" <<std::endl;
+        std::cout << "static" <<std::endl;
     }
 
     // set the debounce count to static variable, if the arm moved
@@ -150,7 +150,7 @@ bool uuperBodyTracker::isArmMoving(armSide side, int dof)
     return ret;
 }
 
-bool uuperBodyTracker::isTorsoMoving(void)
+bool upperBodyTracker::isTorsoMoving(void)
 {
     bool ret = false;
     static int debounce_count = 0;

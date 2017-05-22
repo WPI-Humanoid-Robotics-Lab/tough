@@ -13,7 +13,7 @@ enum class armMotionState {
     RIGHT_10DOF
 };
 
-class uuperBodyTracker{
+class upperBodyTracker{
 private:
     ros::NodeHandle nh_;
     // object for motion tracking
@@ -28,8 +28,8 @@ private:
     track_torso_roll_;
 
 public:
-    uuperBodyTracker(ros::NodeHandle nh);
-    ~uuperBodyTracker();
+    upperBodyTracker(ros::NodeHandle nh);
+    ~upperBodyTracker();
 
     // determines if robot is waliking, returns True if walking
     bool isArmMoving(armSide side, int dof);
