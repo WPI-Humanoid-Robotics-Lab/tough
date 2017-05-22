@@ -1,15 +1,22 @@
 #include <val_task1/pcl_handle_detector.h>
 
-pcl_handle_detector::pcl_handle_detector(ros::NodeHandle &nh, float panel_offset,geometry_msgs::Pose panel_loc_)
+pcl_handle_detector::pcl_handle_detector(ros::NodeHandle &nh, geometry_msgs::Pose panel_loc_)
 {
-  pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &pcl_handle_detector::cloudCB, this);
-  pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_task1/handle_detector/filteredPointCloud", 1);
-  vis_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/val_task1/handle_detector/visualization_marker", 1 );
-  robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
-  offset = panel_offset;
-  panel_coarse_loc_ = panel_loc_;
-  handle_loc_.clear();
+    pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &pcl_handle_detector::cloudCB, this);
+    pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_task1/handle_detector/filteredPointCloud", 1);
+    vis_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/val_task1/handle_detector/visualization_marker", 1 );
+    robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
+    offset = 0.7;   //fine panel detection offset.
+    panel_coarse_loc_ = panel_loc_;
+    handle_loc_.clear();
 
+}
+
+bool pcl_handle_detector::getDetections(std::vector<geometry_msgs::Point> &detections)
+{
+    //index 0 is red, 1 is blue
+    detections = handle_loc_;
+    return handle_loc_.size() == 2;
 }
 
 pcl_handle_detector::~pcl_handle_detector()
@@ -20,31 +27,31 @@ pcl_handle_detector::~pcl_handle_detector()
 
 void pcl_handle_detector::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 {
-  if (input->data.empty())
-      return;
+    if (input->data.empty())
+        return;
+    handle_loc_.clear();
+    ros::Time startTime = ros::Time::now();
 
-  ros::Time startTime = ros::Time::now();
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    sensor_msgs::PointCloud2 output;
 
-  sensor_msgs::PointCloud2 output;
+    pcl::fromROSMsg(*input, *cloud);
+    ROS_INFO("Receiving cloud size:  %d",(int)cloud->points.size());
 
-  pcl::fromROSMsg(*input, *cloud);
-  ROS_INFO("Receiving cloud size:  %d",(int)cloud->points.size());
-
-//  pcl::transformPointCloud(*cloud,*cloud,);
-//  transcloud(cloud);
-  if (extractHandle(cloud))
-      ROS_INFO("Success");
-  else
-      ROS_WARN("Failed");
+    //  pcl::transformPointCloud(*cloud,*cloud,);
+    //  transcloud(cloud);
+    if (extractHandle(cloud))
+        ROS_INFO("Success");
+    else
+        ROS_WARN("Failed");
 
 
-  pcl::toROSMsg(*cloud, output);
-  pcl_filtered_pub_.publish(output);
-  ROS_INFO("publshing cloud size:  %d",(int)cloud->points.size());
-  ros::Time endTime = ros::Time::now();
-  std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
+    pcl::toROSMsg(*cloud, output);
+    pcl_filtered_pub_.publish(output);
+    ROS_INFO("publshing cloud size:  %d",(int)cloud->points.size());
+    ros::Time endTime = ros::Time::now();
+    std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
 
 }
 
@@ -73,14 +80,14 @@ bool pcl_handle_detector::extractHandle(pcl::PointCloud<pcl::PointXYZ>::Ptr& clo
     ROS_INFO("Box Filter\n Min Pt x:%.2f y:%.2f z:%.2f\n Max Pt x:%.2f y:%.2f z:%.2f", minPoint[0],minPoint[1],minPoint[2],maxPoint[0],maxPoint[1],maxPoint[2]);
 
     Eigen::Vector3f boxTranslatation;
-         boxTranslatation[0]=panel_coarse_loc_.position.x;
-         boxTranslatation[1]=panel_coarse_loc_.position.y;
-         boxTranslatation[2]=0.6;   //Lower z location of the panel
+    boxTranslatation[0]=panel_coarse_loc_.position.x;
+    boxTranslatation[1]=panel_coarse_loc_.position.y;
+    boxTranslatation[2]=0.6;   //Lower z location of the panel
 
     Eigen::Vector3f boxRotation;
-         boxRotation[0]= 0;       // rotation around x-axis
-         boxRotation[1]= 0;       // rotation around y-axis
-         boxRotation[2]= theta;     // rotation around z-axis
+    boxRotation[0]= 0;       // rotation around x-axis
+    boxRotation[1]= 0;       // rotation around y-axis
+    boxRotation[2]= theta;     // rotation around z-axis
 
     // apply box filter to get only the panel and knob
     pcl::CropBox<pcl::PointXYZ> box_filter;
@@ -151,7 +158,7 @@ bool pcl_handle_detector::extractHandle(pcl::PointCloud<pcl::PointXYZ>::Ptr& clo
     transform_2.translation() << centroid(0), centroid(1), centroid(2);
 
 
-/*
+    /*
     float angle;
     float slope = -1;
     if (slope >0)  // panel on the left of walkway
@@ -184,8 +191,8 @@ bool pcl_handle_detector::extractHandle(pcl::PointCloud<pcl::PointXYZ>::Ptr& clo
     pass_z.setFilterLimits(0.12,1);  // mostly is mean is at z=0.15
     pass_z.filter(*cloud);
 
-   // pcl::transformPointCloud (*cloud, *cloud, transform_3.inverse());
-  //  pcl::transformPointCloud (*cloud, *cloud, transform_2);
+    // pcl::transformPointCloud (*cloud, *cloud, transform_3.inverse());
+    //  pcl::transformPointCloud (*cloud, *cloud, transform_2);
 
     // now clustering the knob to get the mean location of the two knobs
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
@@ -200,71 +207,83 @@ bool pcl_handle_detector::extractHandle(pcl::PointCloud<pcl::PointXYZ>::Ptr& clo
     ec.setInputCloud (cloud);
     ec.extract (cluster_indices);
 
-     std::vector<std::vector<float> > mean;
+    std::vector<std::vector<float> > mean;
 
-     std::vector<pcl::PointIndices>::const_iterator it;
-     std::vector<int>::const_iterator pit;
+    std::vector<pcl::PointIndices>::const_iterator it;
+    std::vector<int>::const_iterator pit;
 
-     for(it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
-     {
-         std::vector<float> loc_mean;
-         float x=0.0,y=0.0,z=0.0;
-         for(pit = it->indices.begin(); pit != it->indices.end(); pit++)
-         {
-             x+=cloud->points[*pit].x;
-             y+=cloud->points[*pit].y;
-             z+=cloud->points[*pit].z;
-         }
+    for(it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
+    {
+        std::vector<float> loc_mean;
+        float x=0.0,y=0.0,z=0.0;
+        for(pit = it->indices.begin(); pit != it->indices.end(); pit++)
+        {
+            x+=cloud->points[*pit].x;
+            y+=cloud->points[*pit].y;
+            z+=cloud->points[*pit].z;
+        }
         loc_mean.push_back(x/it->indices.size());
         loc_mean.push_back(y/it->indices.size());
         loc_mean.push_back(z/it->indices.size());
         mean.push_back(loc_mean);
-     }
+    }
 
-     ROS_INFO("no. cluster %d",mean.size());
+    ROS_INFO("no. cluster %d",mean.size());
 
-     // if number of cluster is more than two then there are things other than knob in the point cloud
-     if (mean.size() !=2)
-     {
-         return false;
-     }
+    // if number of cluster is more than two then there are things other than knob in the point cloud
+    if (mean.size() !=2)
+    {
+        return false;
+    }
 
 
-     // a new cloud containing only the two mean location is created.
-     ROS_INFO("mean 1 x %.2f y %.2f z %.2f",mean[0][0],mean[0][1],mean[0][2]);
-     ROS_INFO("mean 2 x %.2f y %.2f z %.2f",mean[1][0],mean[1][1],mean[1][2]);
+    // a new cloud containing only the two mean location is created.
+    ROS_INFO("mean 1 x %.2f y %.2f z %.2f",mean[0][0],mean[0][1],mean[0][2]);
+    ROS_INFO("mean 2 x %.2f y %.2f z %.2f",mean[1][0],mean[1][1],mean[1][2]);
 
-     pcl::PointCloud<pcl::PointXYZ> loc_cloud;
-     pcl::PointXYZ data;
+    pcl::PointCloud<pcl::PointXYZ> loc_cloud;
+    pcl::PointXYZ data;
 
-     if(mean[0][1]>0)
-     {
-         //location of red valve is mean[0]
-         data.data[0] = mean[0][0];
-         data.data[1] = mean[0][1];
-         data.data[2] = mean[0][2];
-         loc_cloud.push_back(data);
-         data.data[0] = mean[1][0];
-         data.data[1] = mean[1][1];
-         data.data[2] = mean[1][2];
-         loc_cloud.push_back(data);
-     }
-     else
-     {
-         //location of red valve is mean[1]
-         data.data[0] = mean[1][0];
-         data.data[1] = mean[1][1];
-         data.data[2] = mean[1][2];
-         loc_cloud.push_back(data);
-         data.data[0] = mean[0][0];
-         data.data[1] = mean[0][1];
-         data.data[2] = mean[0][2];
-         loc_cloud.push_back(data);
-     }
+    if(mean[0][1]>0)
+    {
+        //location of red valve is mean[0]
+        data.data[0] = mean[0][0];
+        data.data[1] = mean[0][1];
+        data.data[2] = mean[0][2];
+        loc_cloud.push_back(data);
+        data.data[0] = mean[1][0];
+        data.data[1] = mean[1][1];
+        data.data[2] = mean[1][2];
+        loc_cloud.push_back(data);
+    }
+    else
+    {
+        //location of red valve is mean[1]
+        data.data[0] = mean[1][0];
+        data.data[1] = mean[1][1];
+        data.data[2] = mean[1][2];
+        loc_cloud.push_back(data);
+        data.data[0] = mean[0][0];
+        data.data[1] = mean[0][1];
+        data.data[2] = mean[0][2];
+        loc_cloud.push_back(data);
+    }
 
-     // transforming the new cloud (containing only 2 points) to its orginal location
-     pcl::transformPointCloud (loc_cloud, loc_cloud, transform_3.inverse());
-     pcl::transformPointCloud (loc_cloud, loc_cloud, transform_2);
+    // transforming the new cloud (containing only 2 points) to its orginal location
+    pcl::transformPointCloud (loc_cloud, loc_cloud, transform_3.inverse());
+    pcl::transformPointCloud (loc_cloud, loc_cloud, transform_2);
+
+    geometry_msgs::Point handle1, handle2;
+    handle1.x = loc_cloud[0].data[0];
+    handle1.y = loc_cloud[0].data[1];
+    handle1.z = loc_cloud[0].data[2];
+
+    handle2.x = loc_cloud[1].data[0];
+    handle2.y = loc_cloud[1].data[1];
+    handle2.z = loc_cloud[1].data[2];
+
+    handle_loc_.push_back(handle1);
+    handle_loc_.push_back(handle2);
 
     visualization_msgs::MarkerArray box_corners;
     visualization_msgs::Marker marker;

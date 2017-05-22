@@ -1,43 +1,11 @@
 #include <val_task2/solar_panel_grasp.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include "val_task_common/val_task_common_utils.h"
 
 solar_panel_handle_grabber::solar_panel_handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-
-
-    //    left hand - panel angled		-0.587, -0.327,  0.658, -0.339
-    //    left hand - panel perpendicular		 0.697,  0.232, -0.664,  0.142
-
-    //    right hand - panel angled		-0.631,  0.339,  0.680,  0.159
-    //    right hand - panel perpendicular	 0.781, -0.155, -0.605, -0.020
-    leftHandOrientationAngled_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    leftHandOrientationAngled_.quaternion.x = -0.587;
-    leftHandOrientationAngled_.quaternion.y = -0.327;
-    leftHandOrientationAngled_.quaternion.z =  0.658;
-    leftHandOrientationAngled_.quaternion.w = -0.339;
-
-    leftHandOrientationPerpen_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    leftHandOrientationPerpen_.quaternion.x =  0.697;
-    leftHandOrientationPerpen_.quaternion.y =  0.232;
-    leftHandOrientationPerpen_.quaternion.z = -0.664;
-    leftHandOrientationPerpen_.quaternion.w =  0.142;
-
-    /* Top Grip */
-    rightHandOrientationAngled_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    rightHandOrientationAngled_.quaternion.x = -0.631;
-    rightHandOrientationAngled_.quaternion.y =  0.339;
-    rightHandOrientationAngled_.quaternion.z =  0.680;
-    rightHandOrientationAngled_.quaternion.w =  0.159;
-
-    rightHandOrientationPerpen_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    rightHandOrientationPerpen_.quaternion.x =  0.781;
-    rightHandOrientationPerpen_.quaternion.y = -0.155;
-    rightHandOrientationPerpen_.quaternion.z = -0.605;
-    rightHandOrientationPerpen_.quaternion.w = -0.020;
-
     // cartesian planners for the arm
     left_arm_planner_ = new cartesianPlanner("leftPalm", VAL_COMMON_NAMES::WORLD_TF);
     right_arm_planner_ = new cartesianPlanner("rightPalm", VAL_COMMON_NAMES::WORLD_TF);
@@ -49,26 +17,6 @@ solar_panel_handle_grabber::~solar_panel_handle_grabber()
     delete left_arm_planner_;
     delete right_arm_planner_;
     delete wholebody_controller_;
-}
-
-
-geometry_msgs::QuaternionStamped solar_panel_handle_grabber::leftHandOrientation() const
-{
-    return leftHandOrientationAngled_;
-}
-
-void solar_panel_handle_grabber::setLeftHandOrientation(const geometry_msgs::QuaternionStamped &leftHandOrientation)
-{
-    leftHandOrientationAngled_ = leftHandOrientation;
-}
-geometry_msgs::QuaternionStamped solar_panel_handle_grabber::rightHandOrientation() const
-{
-    return rightHandOrientationAngled_;
-}
-
-void solar_panel_handle_grabber::setRightHandOrientation(const geometry_msgs::QuaternionStamped &rightHandOrientation)
-{
-    rightHandOrientationAngled_ = rightHandOrientation;
 }
 
 
@@ -110,6 +58,7 @@ void solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
 
     //transform that point back to world frame
     current_state_->transformPose(intermGoal, intermGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    taskCommonUtils::fixHandFramePose(nh_, side, intermGoal);
 
     ROS_INFO("Moving at an intermidate point before goal");
     ROS_INFO_STREAM("Intermidiate goal"<<intermGoal);
@@ -130,6 +79,7 @@ void solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     //transform that point back to world frame
     current_state_->transformPose(finalGoal, finalGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
     current_state_->transformPose(intermGoal, intermGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
+    taskCommonUtils::fixHandFramePose(nh_, side, finalGoal);
 
     ROS_INFO("Moving towards goal");
     ROS_INFO_STREAM("Final goal"<<finalGoal);

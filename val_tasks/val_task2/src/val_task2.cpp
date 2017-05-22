@@ -243,9 +243,10 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
 
     geometry_msgs::Pose current_pelvis_pose;
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
-
+    // Robot will walk to coarse goal furst. once that is reached, goal is changed to fine goal and the flag variable is updated
     if ( taskCommonUtils::isGoalReached(current_pelvis_pose, goal) ) {
 
+        // if coarse goal was already reached before, then the current state is fine goal reached, else it is coarse goal reached
         if(isCoarseGoalReachedBefore){
             ROS_INFO("reached fine goal");
             ROS_INFO("Final few steps before we reach rover");
@@ -338,10 +339,12 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
         size_t idx = poses.size()-1;
         setSolarPanelHandlePose(poses[idx]);
 
-        std::cout << "Position " << poses[idx].position.x<< " " <<poses[idx].position.y <<" "<<poses[idx].position.z<<std::endl;
-        std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
+        ROS_INFO_STREAM("Position " << poses[idx].position.x<< " " <<poses[idx].position.y <<" "<<poses[idx].position.z);
+        ROS_INFO_STREAM("quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w);
         retry_count = 0;
         eventQueue.riseEvent("/DETECTED_PANEL");
+        if(solar_panel_detector_ != nullptr) delete solar_panel_detector_;
+        solar_panel_detector_ = nullptr;
     }
 
     else if(retry_count < 5) {
@@ -395,7 +398,22 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
         ROS_INFO("Executing the grasp panel handle command");
         executing = true;
         // grasp the handle
-        side = armSide::RIGHT;
+        geometry_msgs::Pose poseInPelvisFrame;
+        robot_state_->transformPose(solar_panel_handle_pose_, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+        float yaw = tf::getYaw(poseInPelvisFrame.orientation);
+        ROS_INFO("Yaw Value : %f",yaw);
+        // if the vector is pointing outwards, reorient it
+        if (yaw > M_PI_2 || yaw < -M_PI_2){
+            geometry_msgs::Pose tempYaw(solar_panel_handle_pose_);
+            SolarPanelDetect::invertYaw(tempYaw);
+            setSolarPanelHandlePose(tempYaw);
+
+            robot_state_->transformPose(solar_panel_handle_pose_, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+            yaw = tf::getYaw(poseInPelvisFrame.orientation);
+        }
+
+        side = yaw < 0 ? armSide::LEFT : armSide::RIGHT;
+
         panel_grabber_->grasp_handles(side, solar_panel_handle_pose_);
         ros::Duration(0.2).sleep(); //wait till grasp is complete
         eventQueue.riseEvent("/GRASP_RETRY");
