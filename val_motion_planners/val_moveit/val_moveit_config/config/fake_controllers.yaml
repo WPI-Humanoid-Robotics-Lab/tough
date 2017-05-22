@@ -40,3 +40,16 @@ controller_list:
       - leftForearmYaw
       - leftWristRoll
       - leftWristPitch
+  - name: fake_rightMiddleFingerGroup_controller
+    joints:
+      - torsoYaw
+      - torsoPitch
+      - torsoRoll
+      - rightShoulderPitch
+      - rightShoulderRoll
+      - rightShoulderYaw
+      - rightElbowPitch
+      - rightForearmYaw
+      - rightWristRoll
+      - rightWristPitch
+      - rightMiddleFingerPitch1
