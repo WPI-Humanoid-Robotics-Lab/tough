@@ -1,5 +1,6 @@
 #include <val_task3/leak_detector_grabber.h>
 #include <val_control/robot_state.h>
+#include <val_task3/val_task3_utils.h>
 
 
 int main(int argc, char **argv){
@@ -7,6 +8,9 @@ int main(int argc, char **argv){
     ros::init(argc, argv, "leak_detector_grabber");
     ros::NodeHandle nh;
     leakDetectorGrabber ldg(nh);
+    task3Utils utils(nh);
+
+    utils.beforePanelManipPose();
 
     ROS_INFO("starting leak detector grabber");
 

@@ -152,6 +152,7 @@ add_library(${PROJECT_NAME}
          src/val_stairclimb.cpp
          src/stair_detector.cpp
          src/leak_detector_grabber.cpp
+         src/val_task3_utils.cpp
 )
 
 add_executable(stair_climb_node src/val_stairclimb.cpp)
