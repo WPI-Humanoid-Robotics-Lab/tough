@@ -188,7 +188,7 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
 
     //    ROS_INFO("The Orientation is given by := %0.2f", theta);
 
-    double offset = finePose_ ? 6.0 : 6.35;
+    double offset = finePose_ ? 6.45 : 6.45;
 
     pose.position.x = upperBoxPosition.x - (offset*cos(theta));
     pose.position.y = upperBoxPosition.y - (offset*sin(theta));

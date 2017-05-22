@@ -237,6 +237,8 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
         isCoarseGoalReachedBefore = false;
         fail_count = 0;
         executeOnce = false;
+        geometry_msgs::Pose2D  temp;
+        pose_prev = temp;
     }
 
     geometry_msgs::Pose current_pelvis_pose;
@@ -247,6 +249,8 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
         // if coarse goal was already reached before, then the current state is fine goal reached, else it is coarse goal reached
         if(isCoarseGoalReachedBefore){
             ROS_INFO("reached fine goal");
+            ROS_INFO("Final few steps before we reach rover");
+            walker_->walkLocalPreComputedSteps({0.25,0.25,0.5,0.5},{0.0,0.0,0.0,0.0},RIGHT);
             ros::Duration(1).sleep();
             // TODO: check if robot rechead the panel
             eventQueue.riseEvent("/REACHED_ROVER");
@@ -258,6 +262,7 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
             ROS_INFO("reached coarse goal");
             isCoarseGoalReachedBefore = true;
             goal = rover_walk_goal_fine_;
+            ros::Duration(1).sleep();
             eventQueue.riseEvent("/WALK_EXECUTING");
         }
     }
