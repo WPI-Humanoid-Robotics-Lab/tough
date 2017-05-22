@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /Cable1
       Splitter Ratio: 0.5
     Tree Height: 600
   - Class: rviz/Selection
@@ -448,8 +447,8 @@ Visualization Manager:
     - Alpha: 0.6
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0.087559
-        Min Value: 0.0191599
+        Max Value: 0.0429937
+        Min Value: -0.0264916
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -478,8 +477,8 @@ Visualization Manager:
     - Alpha: 0.2
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 8.51679
-        Min Value: -0.125713
+        Max Value: 7.9324
+        Min Value: -0.169549
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -1285,7 +1284,15 @@ Visualization Manager:
       Marker Topic: /detected_cable
       Name: Cable
       Namespaces:
-        0: true
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /detected_buttons
+      Name: Button
+      Namespaces:
+        {}
       Queue Size: 100
       Value: true
   Enabled: true
@@ -1312,22 +1319,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 0.523476
+      Distance: 1.30092
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.40534
-        Y: 0.870473
-        Z: 2.16062
+        X: 0.589242
+        Y: 0.634029
+        Z: 1.14626
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.860398
+      Pitch: 0.480399
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.325401
+      Yaw: 2.1354
     Saved: ~
 Window Geometry:
   Displays:
@@ -1347,5 +1354,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1855
-  X: 55
-  Y: 1083
+  X: 1975
+  Y: -14

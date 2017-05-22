@@ -3,15 +3,34 @@
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "button_press_node");
-  ros::NodeHandle nh;
-  button_press bp(nh);
-  armSide side = LEFT;
-  geometry_msgs::Point goal;
-  bp.getButton(goal);
-  bp.orientRobot();
-  bp.grasp_button(side, goal);
-  return 0;
+    ros::init(argc, argv, "button_press_node");
+    ros::NodeHandle nh;
+    button_press bp_(nh);
+    geometry_msgs::Point goal;
+
+    armSide side;
+    if(argc == 2)
+    {
+        if(std::atoi(argv[1]) == 0)
+        {
+            side = LEFT;
+        }
+        else
+        {
+            side = RIGHT;
+        }
+    }
+    else
+    {
+        ROS_INFO("Usage : %s <side> side = 0 or 1");
+        return -1;
+    }
+
+    // detecting button location which would act as goal to press the button
+    bp_.getButtonPosition(goal);
+    // pressing the button
+    bp_.pressButton(side, goal);
+    return 0;
 }
 
 

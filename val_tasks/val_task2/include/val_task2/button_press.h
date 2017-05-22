@@ -6,6 +6,9 @@
 #include <val_footstep/ValkyrieWalker.h>
 #include <val_common/val_common_defines.h>
 #include <val_common/val_common_names.h>
+#include "val_moveit_planners/val_cartesian_planner.h"
+#include "val_control/val_wholebody_manipulation.h"
+#include "val_control/val_chest_navigation.h"
 
 
 class button_press
@@ -20,32 +23,23 @@ class button_press
     geometry_msgs::QuaternionStamped leftHandOrientation_ ;
     geometry_msgs::QuaternionStamped rightHandOrientation_;
 
+    //    const std::vector<float> leftShoulderSeed_ = {-1.06 ,-0.77, 0.70, -1.12 ,1.96, 0.0, 0.0};
+    //    const std::vector<float> rightShoulderSeed_ = {-0.23, 0.72, 0.65 , 1.51, 2.77, 0.0, 0.0};
 
-    /*Top Grip*/
-    const std::vector<float> leftShoulderSeed_ = {-0.23, -0.72, 0.65, -1.51, 2.77, 0.0, 0.0};
-    /*Side Grip*/
- //   const std::vector<float> leftShoulderSeed_ = {-0.04, -0.24, 0.49, -1.30, 0.71, 0.61, -0.24};
-    const std::vector<float> rightShoulderSeed_ = {-0.23, 0.72, 0.65, 1.51, 2.77, 0.0, 0.0};
-
-    const std::vector<double> leftGripperSeed_ = {0.0, 0.0, -1.1, -0.9, -1.0};
-
-    const std::vector<double> rightGripperSeed_ = {0.0, 0.0, 1.1, 0.9, 1.0};
-
+    // Not in use currently
+    const std::vector<float> leftShoulderSeed_ = {-0.23 ,-1.16, -0.09, -1.39 ,1.09, 0.02, -0.06};
+    const std::vector<float> rightShoulderSeed_ = {-0.28, 0.99, 0.12 , 1.49, 1.03, 0.0, 0.0};
+    cartesianPlanner* right_arm_planner_;
+    cartesianPlanner* left_arm_planner_;
+    wholebodyManipulation* wholebody_controller_;
+    chestTrajectory * chest_controller_;
 
 public:
 
-    bool grasp_button(const armSide side, geometry_msgs::Point &goal, float executionTime=2.0f);
-
+    bool pressButton(const armSide side, geometry_msgs::Point &goal, float executionTime=2.0f);
     geometry_msgs::QuaternionStamped leftHandOrientation() const;
-    void setLeftHandOrientation(const geometry_msgs::QuaternionStamped &leftHandOrientation);
-
     geometry_msgs::QuaternionStamped rightHandOrientation() const;
-    void setRightHandOrientation(const geometry_msgs::QuaternionStamped &rightHandOrientation);
-
-    void getButton( geometry_msgs::Point &goal);
-
-    void orientRobot();
-
+    void getButtonPosition( geometry_msgs::Point &goal);
     button_press(ros::NodeHandle &);
     ~button_press();
 
