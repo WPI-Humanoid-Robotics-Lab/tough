@@ -67,6 +67,8 @@ void leakDetectorGrabber::graspDetector(armSide side, geometry_msgs::Pose &goal,
         ROS_INFO_STREAM("Final goal"<<finalGoal);
         std::vector<geometry_msgs::Pose> waypoints;
 
+        //gripper_.controlGripper(side,GRIPPER_STATE::OPEN_THUMB_IN);
+
         waypoints.push_back(intermGoal);
         waypoints.push_back(finalGoal);
 
@@ -86,43 +88,9 @@ void leakDetectorGrabber::graspDetector(armSide side, geometry_msgs::Pose &goal,
         wholebody_controller_.compileMsg(side, traj.joint_trajectory);
 
         ros::Duration(executionTime).sleep();
+        //gripper_.controlGripper(side,GRIPPER_STATE::CUP);
         ROS_INFO("Closing grippers");
         gripper_.closeGripper(side);
         ros::Duration(0.3).sleep();
-
-//    geometry_msgs::Pose finalGoal, intermGoal;
-//    std::vector<geometry_msgs::Pose> waypoints;
-//    moveit_msgs::RobotTrajectory traj;
-
-//    taskCommonUtils::fixHandFramePose(nh,side,goal);
-
-//    current_state_->transformPose(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-//    intermGoal.position.z += 0.1;
-//    current_state_->transformPose(intermGoal, intermGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-
-//    ROS_INFO("Moving at an intermidate point before goal");
-//    armTraj_.moveArmInTaskSpace(side, intermGoal, executionTime*2);
-//    ros::Duration(executionTime*2).sleep();
-
-//    current_state_->transformPose(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-//   // finalGoal.position.x -= 0.04;
-//   // finalGoal.position.y += 0.01;
-//    finalGoal.position.z += 0.002;
-//    current_state_->transformPose(finalGoal, finalGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-
-//    ROS_INFO("Moving towards goal");
-
-//    waypoints.push_back(finalGoal);
-//    ROS_INFO_STREAM(finalGoal);
-//    right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
-
-//    ROS_INFO("Calculated Traj");
-//    wholebody_controller_.compileMsg(side, traj.joint_trajectory);
-
-//    ros::Duration(executionTime).sleep();
-//    ROS_INFO("Closing grippers");
-//    ros::Duration(0.3).sleep();
-//    gripper_.closeGripper(side);
-//    ros::Duration(0.3).sleep();
 }
 
