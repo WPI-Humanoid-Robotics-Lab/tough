@@ -1,8 +1,14 @@
-#ifndef PCL_HANDLE_DETECTOR_H
-#define PCL_HANDLE_DETECTOR_H
+#ifndef STEPS_DETECTOR_H
+#define STEPS_DETECTOR_H
+
+#include <iostream>
+#include <math.h>
+
+#include <ros/ros.h>
 
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/Quaternion.h>
@@ -13,7 +19,6 @@
 #include <tf_conversions/tf_eigen.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
-#include <tf/tf.h>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -29,37 +34,27 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
-#include <pcl/filters/statistical_outlier_removal.h>
-
 #include <pcl/filters/crop_box.h>
 
-#include <visualization_msgs/MarkerArray.h>
-
-#include <vector>
-#include "val_common/val_common_names.h"
+#include <pcl/sample_consensus/sac_model_sphere.h>
+#include <pcl/sample_consensus/ransac.h>
 #include "val_control/robot_state.h"
+#include <visualization_msgs/MarkerArray.h>
+#include "val_task3/stair_detector.h"
 
-
-class pcl_handle_detector
+class steps_detector
 {
-  ros::Subscriber pcl_sub_;
-  ros::Publisher pcl_filtered_pub_;
-  ros::Publisher vis_pub_;
-
-  float offset;
-  geometry_msgs::Pose panel_coarse_loc_;
-  std::vector<geometry_msgs::Point> handle_loc_;
-  RobotStateInformer* robot_state_;
-
-  void cloudCB(const sensor_msgs::PointCloud2::Ptr &input);
-  bool extractHandle(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+    ros::Subscriber pcl_sub_;
+    ros::NodeHandle nh_;
+    ros::Publisher pcl_pub_;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_;
+    stair_detector sd_;
 
 public:
-  pcl_handle_detector(ros::NodeHandle &nh, geometry_msgs::Pose panel_loc_);
-  bool getDetections(std::vector<geometry_msgs::Point> &detections);
-  ~pcl_handle_detector();
-
-
+    steps_detector(ros::NodeHandle& );
+    ~steps_detector();
+    void stepsCB(const sensor_msgs::PointCloud2::Ptr& );
+    void planeSegmentation(const std::vector<double>& );
 };
 
-#endif // HANDLE_DETECTOR_H
+#endif // STEPS_DETECTOR_H

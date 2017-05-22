@@ -7,13 +7,14 @@ int main(int argc, char** argv)
     int numIterations = 0;
     bool foundCable = false;
     geometry_msgs::Point CableLoc;
-    cable_detector c1(nh);
+    CableDetector c1(nh);
 
     while(ros::ok())
     //while (!foundCable && numIterations < 20)
     {
         foundCable = c1.findCable(CableLoc);
         //ROS_INFO(foundCable ? "***** Cable detected" : "xxxxx Cable not detected");
+        ros::spinOnce();
         numIterations++;
     }
 

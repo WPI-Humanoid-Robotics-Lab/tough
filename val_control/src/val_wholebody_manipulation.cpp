@@ -153,7 +153,8 @@ void wholebodyManipulation::chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &m
 bool wholebodyManipulation::validateTrajectory(const trajectory_msgs::JointTrajectory &traj)
 {
     for (trajectory_msgs::JointTrajectoryPoint point : traj.points){
-        if (point.positions.size() != 10){
+        if (point.positions.size() != 10 && point.positions.size() != 11){
+            ROS_INFO("Points size mismatched in wholebody controller");
             return false;
         }
     }

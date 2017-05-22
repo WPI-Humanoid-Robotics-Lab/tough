@@ -55,10 +55,10 @@ namespace val_task1
     class ParamDescription : public AbstractParamDescription
     {
     public:
-      ParamDescription(std::string name, std::string type, uint32_t level, 
-          std::string description, std::string edit_method, T task1_parametersConfig::* f) :
-        AbstractParamDescription(name, type, level, description, edit_method),
-        field(f)
+      ParamDescription(std::string a_name, std::string a_type, uint32_t a_level, 
+          std::string a_description, std::string a_edit_method, T task1_parametersConfig::* a_f) :
+        AbstractParamDescription(a_name, a_type, a_level, a_description, a_edit_method),
+        field(a_f)
       {}
 
       T (task1_parametersConfig::* field);
@@ -141,7 +141,7 @@ namespace val_task1
     class GroupDescription : public AbstractGroupDescription
     {
     public:
-      GroupDescription(std::string name, std::string type, int parent, int id, bool s, T PT::* f) : AbstractGroupDescription(name, type, parent, id, s), field(f)
+      GroupDescription(std::string a_name, std::string a_type, int a_parent, int a_id, bool a_s, T PT::* a_f) : AbstractGroupDescription(a_name, a_type, a_parent, a_id, a_s), field(a_f)
       {
       }
 
@@ -271,11 +271,11 @@ double theta;
 
 
 
-//#line 14 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 14 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double x;
-//#line 15 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 15 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double y;
-//#line 16 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 16 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double theta;
 //#line 218 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
 
@@ -402,6 +402,9 @@ double theta;
   template <> // Max and min are ignored for strings.
   inline void task1_parametersConfig::ParamDescription<std::string>::clamp(task1_parametersConfig &config, const task1_parametersConfig &max, const task1_parametersConfig &min) const
   {
+    (void) config;
+    (void) min;
+    (void) max;
     return;
   }
 
@@ -413,47 +416,47 @@ double theta;
     {
 task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT, task1_parametersConfig> Default("Default", "", 0, 0, true, &task1_parametersConfig::groups);
 task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELWALKPOSE, task1_parametersConfig::DEFAULT> panelWalkPose("panelWalkPose", "", 0, 1, true, &task1_parametersConfig::DEFAULT::panelwalkpose);
-//#line 14 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 14 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.x = 0.0;
-//#line 14 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 14 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.x = 10.0;
-//#line 14 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 14 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.x = 2.828;
-//#line 14 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 14 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x", "double", 0, "x of goal location", "", &task1_parametersConfig::x)));
-//#line 14 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 14 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x", "double", 0, "x of goal location", "", &task1_parametersConfig::x)));
-//#line 15 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 15 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.y = -1.0;
-//#line 15 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 15 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.y = 1.0;
-//#line 15 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 15 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.y = 0.292;
-//#line 15 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 15 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y", "double", 0, "y of goal location", "", &task1_parametersConfig::y)));
-//#line 15 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 15 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y", "double", 0, "y of goal location", "", &task1_parametersConfig::y)));
-//#line 16 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 16 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.theta = -1.57;
-//#line 16 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 16 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.theta = 1.57;
-//#line 16 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 16 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.theta = 0.82;
-//#line 16 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 16 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta)));
-//#line 16 "/home/sathya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 16 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta)));
-//#line 107 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       panelWalkPose.convertParams();
-//#line 107 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       Default.groups.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELWALKPOSE, task1_parametersConfig::DEFAULT>(panelWalkPose)));
-//#line 107 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELWALKPOSE, task1_parametersConfig::DEFAULT>(panelWalkPose)));
-//#line 233 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 245 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       Default.convertParams();
-//#line 233 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+//#line 245 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT, task1_parametersConfig>(Default)));
-//#line 353 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
+//#line 356 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
 
       for (std::vector<task1_parametersConfig::AbstractGroupDescriptionConstPtr>::const_iterator i = __group_descriptions__.begin(); i != __group_descriptions__.end(); ++i)
       {

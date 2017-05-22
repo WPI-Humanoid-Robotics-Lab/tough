@@ -13,6 +13,9 @@
 #include <geometry_msgs/PointStamped.h>
 #include <visualization_msgs/MarkerArray.h>
 
+//#include <pcl/point_types.h>
+//#include <pcl/filters/radius_outlier_removal.h>
+
 #include <tf/transform_broadcaster.h>
 
 #include <iostream>
@@ -29,11 +32,13 @@ class stair_detector
     // Low Red Range - 0, 5, 178, 255, 51, 149
     // High Red Range - 170, 180, 204, 255, 140, 191
     // Golden Yellow Range - 23, 93, 76, 255, 22, 255
-    // mahima range - 23, 53, 152, 255, 6, 213
-    int hsv_[6] = {23, 53, 152, 255, 6, 213};
+    // mahima range - 23, 53, 60, 255, 0, 213
+    int hsv_[6] = {23, 53, 60, 255, 6, 213};
 
-    std::vector<cv::Point> convexHulls_;
-
+    std::vector<std::vector<cv::Point> > convexHulls_;
+    std::vector<double> coefficients_;
+    std::vector<Eigen::Vector4f> endPoints_;
+    geometry_msgs::Point dirVector_;
 
     int frameID_ = 0;
     std::string side_;
@@ -44,18 +49,22 @@ class stair_detector
     src_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
     void visualize_point(geometry_msgs::Point point);
+    void visualize_direction(geometry_msgs::Point point1, geometry_msgs::Point point2);
 
 public:
     stair_detector(ros::NodeHandle nh);
     void setTrackbar();
     void showImage(cv::Mat, std::string caption="stair Detection");
     void colorSegment(cv::Mat &imgHSV, cv::Mat &outImg);
-    size_t findMaxContour(const std::vector<std::vector<cv::Point> >& contours);
-    bool getStairLocation(geometry_msgs::Point &);
+    void findMaxContour(const std::vector<std::vector<cv::Point> >& contours);
+    bool getStairLocation(geometry_msgs::Point &, uint&);
     //cv::Point getOrientation(const std::vector<cv::Point> &, cv::Mat &);
     //void drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale = 0.2);
-    bool findStair(geometry_msgs::Point &);
+    bool findStair(geometry_msgs::Point &, uint&);
     ~stair_detector();
 
+    std::vector<double> coefficients() const;
+    std::vector<Eigen::Vector4f> endPoints() const;
+    geometry_msgs::Point dirVector() const;
 };
 #endif // STAIR_DETECTOR_H

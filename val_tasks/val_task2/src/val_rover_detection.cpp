@@ -16,15 +16,16 @@
 #define upperBox_pass_z_max  3.0
 
 
-RoverDetector::RoverDetector(ros::NodeHandle nh)
+RoverDetector::RoverDetector(ros::NodeHandle nh, bool getFine)
 {
     pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &RoverDetector::cloudCB, this);
     pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_rover/cloud2", 1);
 
-    vis_pub_ = nh.advertise<visualization_msgs::Marker>( "/val_rover/Position", 1 );
+    vis_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/val_rover/Position", 1 );
     detections_.clear();
     detection_tries_ = 0;
-    isRoverOnRight_ = nullptr;
+    roverSide_ = ROVER_SIDE::UNKOWN;
+    finePose_ = getFine;
 }
 
 RoverDetector::~RoverDetector()
@@ -77,9 +78,9 @@ void RoverDetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
         return;
     }
 
-    geometry_msgs::Pose pose;
-    getPosition(lowerBoxCloud, upperBoxCloud, pose );
-    detections_.push_back(pose);
+    std::vector<geometry_msgs::Pose> detectedPoses;
+    getPosition(lowerBoxCloud, upperBoxCloud, detectedPoses );
+    detections_.push_back(detectedPoses);
 
     ros::Time endTime = ros::Time::now();
     std::cout << "Number of detections               = " << detections_.size() << std::endl;
@@ -94,7 +95,10 @@ void RoverDetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
 }
 
-void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr& upperBoxCloud, geometry_msgs::Pose& pose){
+void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr& upperBoxCloud, std::vector<geometry_msgs::Pose>& detectedPoses){
+
+    detectedPoses.clear();
+    detectedPoses.resize(3); // 3 detections - coarse, fine, finer
 
     Eigen::Vector4f lowerBoxCentroid;
     pcl::compute3DCentroid(*lowerBoxCloud, lowerBoxCentroid);
@@ -145,7 +149,7 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
 
     cosTheta = (maxPoint.y - minPoint.y)/(sqrt(pow((maxPoint.x - minPoint.x),2) + pow((maxPoint.y - minPoint.y),2) + pow((maxPoint.z - minPoint.z),2)));
     sinTheta= (maxPoint.x - minPoint.x)/(sqrt(pow((maxPoint.x - minPoint.x),2) + pow((maxPoint.y - minPoint.y),2) + pow((maxPoint.z - minPoint.z),2)));
-//    sinTheta = sqrt(1 - (pow(cosTheta, 2)));
+    //    sinTheta = sqrt(1 - (pow(cosTheta, 2)));
 
     double yzSlope = (upperBoxPosition.z - lowerBoxPosition.z)/(upperBoxPosition.y - lowerBoxPosition.y);
 
@@ -187,69 +191,79 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
 
     //    ROS_INFO("The Orientation is given by := %0.2f", theta);
 
-    double offset = 6.25;
+    //    double offset = finePose_ ? 6.45 : 6.45;
+    double xOffset[3] = {6.45, 6.45, 6.05};
+    double thetaOffset[3] = {M_PI_2, 0.0, 0.0};
+    double yOffset[3] = {-0.6 , -0.2, -0.2};
+    for (int i =0; i < 3; ++i){
+        detectedPoses[i].position.x = upperBoxPosition.x - (xOffset[i]*cos(theta));
+        detectedPoses[i].position.y = upperBoxPosition.y - (xOffset[i]*sin(theta));
+        detectedPoses[i].position.z = 0.0;
 
-    pose.position.x = upperBoxPosition.x - (offset*cos(theta));
-    pose.position.y = upperBoxPosition.y - (offset*sin(theta));
-    pose.position.z = 0.0;
+        //    ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
+        geometry_msgs::Quaternion quaternion;
+        ROS_INFO("slopeyz %.2f, theta %.2f",yzSlope,theta);
 
-    //    ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
-    geometry_msgs::Quaternion quaternion;
-    ROS_INFO("slopeyz %.2f, theta %.2f",yzSlope,theta);
+        float angle;
 
-    float angle;
+        if(yzSlope>0)  {//rover on the left
+            //            angle = finePose_ ? theta : theta-1.5708;
+            angle = theta - thetaOffset[i];
+            quaternion = tf::createQuaternionMsgFromYaw(angle);
+            roverSide_ = ROVER_SIDE::LEFT;
+        }
+        else {
+            //rover on the right
+            //            angle = finePose_ ? theta : theta+1.5708;
+            angle = theta + thetaOffset[i];
+            quaternion = tf::createQuaternionMsgFromYaw(angle);
+            roverSide_ = ROVER_SIDE::RIGHT;
+        }
 
-    if(yzSlope>0)  {//rover on the left
-        angle = theta-1.5708;
-        quaternion = tf::createQuaternionMsgFromYaw(theta-1.5708);
-        isRoverOnRight_ = std::make_shared<bool>(false);
+
+
+        //    float yOffset = finePose_ ? -0.2 : -0.6;
+        detectedPoses[i].position.x = detectedPoses[i].position.x + yOffset[i] * cos(angle);
+        detectedPoses[i].position.y = detectedPoses[i].position.y + yOffset[i] * sin(angle);
+
+        detectedPoses[i].orientation = quaternion;
     }
-    else {
-        //rover on the right
-        angle = theta+1.5708;
-        quaternion = tf::createQuaternionMsgFromYaw(theta+1.5708);
-        isRoverOnRight_ = std::make_shared<bool>(true);
+
+    visualization_msgs::MarkerArray markerArray;
+    for(auto pose : detectedPoses){
+            visualization_msgs::Marker marker;
+
+            marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+            marker.header.stamp = ros::Time();
+            marker.ns = "Rover Position";
+            marker.id = 0;
+            marker.type = visualization_msgs::Marker::ARROW;
+            marker.action = visualization_msgs::Marker::ADD;
+
+            marker.pose.position.x = pose.position.x;
+            marker.pose.position.y = pose.position.y;
+            marker.pose.position.z = pose.position.z;
+
+            marker.pose.orientation.x = pose.orientation.x;
+            marker.pose.orientation.y = pose.orientation.y;
+            marker.pose.orientation.z = pose.orientation.z;
+            marker.pose.orientation.w = pose.orientation.w;
+
+            marker.scale.x = 0.6;
+            marker.scale.y = 0.05;
+            marker.scale.z = 0.05;
+            marker.color.a = 1.0;
+            marker.color.r = 1.0;
+            marker.color.g = 0.0;
+            marker.color.b = 0.0;
+            marker.lifetime = ros::Duration(5);
+        markerArray.markers.push_back(marker);
     }
-
-
-    float distance_offset = -0.2;
-    pose.position.x = pose.position.x + distance_offset * cos(angle);
-    pose.position.y = pose.position.y + distance_offset * sin(angle);
-
-    pose.orientation = quaternion;
-
-    visualization_msgs::Marker marker;
-
-    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
-    marker.header.stamp = ros::Time();
-    marker.ns = "Rover Position";
-    marker.id = 0;
-    marker.type = visualization_msgs::Marker::ARROW;
-    marker.action = visualization_msgs::Marker::ADD;
-
-    marker.pose.position.x = pose.position.x;
-    marker.pose.position.y = pose.position.y;
-    marker.pose.position.z = pose.position.z;
-
-    marker.pose.orientation.x = pose.orientation.x;
-    marker.pose.orientation.y = pose.orientation.y;
-    marker.pose.orientation.z = pose.orientation.z;
-    marker.pose.orientation.w = pose.orientation.w;
-
-    marker.scale.x = 0.6;
-    marker.scale.y = 0.05;
-    marker.scale.z = 0.05;
-    marker.color.a = 1.0;
-    marker.color.r = 1.0;
-    marker.color.g = 0.0;
-    marker.color.b = 0.0;
-    marker.lifetime = ros::Duration(5);
-
-    vis_pub_.publish(marker);
+    vis_pub_.publish(markerArray);
 
 }
 
-bool RoverDetector::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
+bool RoverDetector::getDetections(std::vector<std::vector<geometry_msgs::Pose> > &ret_val)
 {
     ret_val.clear();
     ret_val = detections_;
@@ -263,10 +277,10 @@ int RoverDetector::getDetectionTries() const
 
 }
 
-bool RoverDetector::isRoverOnRight() const
+bool RoverDetector::getRoverSide(ROVER_SIDE &side) const
 {
-    assert(isRoverOnRight_.use_count() > 0 && "Call only if you detect the rover");
-    return *isRoverOnRight_;
+    side = roverSide_ ;
+    return roverSide_ != ROVER_SIDE::UNKOWN;
 
 }
 

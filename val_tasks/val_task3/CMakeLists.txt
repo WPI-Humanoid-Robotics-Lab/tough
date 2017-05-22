@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   val_footstep
   val_control
+  perception_common
   pcl_conversions
   pcl_ros
   cv_bridge
@@ -35,6 +36,8 @@ find_package(Boost REQUIRED COMPONENTS system)
 find_package(PCL 1.7 REQUIRED)
 
 include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+
+
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -151,6 +154,7 @@ add_library(${PROJECT_NAME}
          src/val_task3.cpp
          src/val_stairclimb.cpp
          src/stair_detector.cpp
+         src/steps_detector.cpp
          src/leak_detector_grabber.cpp
          src/val_task3_utils.cpp
 )
@@ -169,6 +173,8 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} $
 add_executable(stair_detector_node        src/stair_detector_node.cpp)
 target_link_libraries(stair_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES}   ${PROJECT_NAME})
 
+add_executable(steps_detector_node        src/steps_detector_node.cpp)
+target_link_libraries(steps_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES} ${PCL_LIBRARIES_DIRS}   ${PROJECT_NAME})
 
 add_executable(leak_detector_grabber_node src/leak_detector_grabber_node.cpp)
 target_link_libraries(leak_detector_grabber_node ${catkin_LIBRARIES} ${PROJECT_NAME})

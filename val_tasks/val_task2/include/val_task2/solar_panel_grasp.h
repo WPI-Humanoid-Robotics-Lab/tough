@@ -16,7 +16,7 @@ class solar_panel_handle_grabber{
 public:
     solar_panel_handle_grabber(ros::NodeHandle n);
     ~solar_panel_handle_grabber();
-   void grasp_handles(const armSide side, const geometry_msgs::Pose &goal, float executionTime=2.0f);
+   bool grasp_handles(armSide side, const geometry_msgs::Pose &goal, float executionTime=2.0f);
 
    geometry_msgs::QuaternionStamped leftHandOrientation() const;
    void setLeftHandOrientation(const geometry_msgs::QuaternionStamped &leftHandOrientation);
@@ -33,8 +33,10 @@ private:
    cartesianPlanner* right_arm_planner_;
    cartesianPlanner* left_arm_planner_;
    wholebodyManipulation* wholebody_controller_;
-   geometry_msgs::QuaternionStamped leftHandOrientation_ ;
-   geometry_msgs::QuaternionStamped rightHandOrientation_;
+   geometry_msgs::QuaternionStamped leftHandOrientationAngled_ ;
+   geometry_msgs::QuaternionStamped rightHandOrientationAngled_;
+   geometry_msgs::QuaternionStamped leftHandOrientationPerpen_ ;
+   geometry_msgs::QuaternionStamped rightHandOrientationPerpen_;
 
    /*Top Grip*/
    const std::vector<float> leftShoulderSeed_ = {-0.23, -0.07, 0.75, -1.53, 1.21, -0.40, 0.0};

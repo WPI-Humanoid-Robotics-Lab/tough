@@ -3,21 +3,20 @@
 #define solar_pass_x_max  10.0
 #define solar_pass_y_min -10.0
 #define solar_pass_y_max  10.0
-#define solar_pass_z_min  1.0
-#define solar_pass_z_max  1.68
+#define solar_pass_z_min  1.38
+#define solar_pass_z_max  1.91
 
-/* x axis : -10 to 10
+/* x axis : -2 to 10
  * y axis : -10 to 10
- * z axis : 1 to 1.68
+ * z axis : 1.38 to 1.91
  * */
 
 
-RoverBlocker::RoverBlocker(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight)
+SolarArrayDetector::SolarArrayDetector(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight)
 {
-  pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &RoverBlocker::cloudCB, this);
+  pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &SolarArrayDetector::cloudCB, this);
   pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_plane/cloud2", 1);
-  vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_solar/visualization_marker", 1 );
-  vis_pub_array = nh.advertise<visualization_msgs::MarkerArray>( "/val_solar/visualization_marker1", 1 );
+  vis_pub_array = nh.advertise<visualization_msgs::MarkerArray>( "/val_solar/visualization_markers", 1 );
   rover_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/block_map",1);
 
   rover_loc_ = rover_loc;
@@ -26,26 +25,26 @@ RoverBlocker::RoverBlocker(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, 
   detections_.clear();
   isroverRight_ = isroverRight;
 }
-RoverBlocker::~RoverBlocker()
+SolarArrayDetector::~SolarArrayDetector()
 {
       pcl_sub.shutdown();
 }
 
-bool RoverBlocker::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
+bool SolarArrayDetector::getDetections(std::vector<geometry_msgs::Pose> &ret_val)
 {
     ret_val.clear();
     ret_val = detections_;
     return !ret_val.empty();
 
 }
-int RoverBlocker::getDetectionTries() const
+int SolarArrayDetector::getDetectionTries() const
 {
     return detection_tries_;
 
 }
 
 
-void RoverBlocker::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
+void SolarArrayDetector::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 {
 
     if (input->data.empty()){
@@ -61,10 +60,9 @@ void RoverBlocker::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
     sensor_msgs::PointCloud2 output;
 
     pcl::fromROSMsg(*input, *cloud);
-ROS_INFO("removing rover");
-   roverremove(cloud);
-   PassThroughFilter(cloud);
-
+//    ROS_INFO("removing rover");
+    roverremove(cloud);
+    PassThroughFilter(cloud);
 //    ROS_INFO("pub %d",(int)cloud->points.size());
 
     planeDetection(cloud);
@@ -76,13 +74,13 @@ ROS_INFO("removing rover");
     pcl_filtered_pub.publish(output);
 
     ros::Time endTime = ros::Time::now();
-    std::cout << "Number of detections               = " << detections_.size() << std::endl;
-    std::cout << "Number of tries                    = " << detection_tries_ << std::endl;
-    std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
+//    std::cout << "Number of detections               = " << detections_.size() << std::endl;
+//    std::cout << "Number of tries                    = " << detection_tries_ << std::endl;
+//    std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
 
 }
 
-void RoverBlocker::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+void SolarArrayDetector::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
     /*tf::Quaternion quat(rover_loc_.orientation.x,rover_loc_.orientation.y,rover_loc_.orientation.z,rover_loc_.orientation.w);
     tf::Matrix3x3 rotation(quat);
@@ -155,7 +153,7 @@ void RoverBlocker::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 
 }
 
-void RoverBlocker::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+void SolarArrayDetector::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
 
 
@@ -205,7 +203,7 @@ void RoverBlocker::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 
 }
 
-void RoverBlocker::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+void SolarArrayDetector::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
 
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
@@ -219,11 +217,7 @@ void RoverBlocker::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
   seg.setDistanceThreshold (0.008);
   seg.setInputCloud (cloud);
   seg.segment (*inliers, *coefficients);
-/*
-  double ak = pow(coefficients->values[0],2)+pow(coefficients->values[1],2)+pow(coefficients->values[2],2);
-  double test = coefficients->values[0]/pow(ak,0.5);
-  ROS_WARN_STREAM("cos angle :"<<test<<" acos "<<acos(test));
-*/
+
   pcl::ExtractIndices<pcl::PointXYZ> extract;
 
   extract.setInputCloud (cloud);
@@ -231,14 +225,12 @@ void RoverBlocker::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
   extract.setNegative (false);
   extract.filter (*cloud);
 
-//  ROS_INFO("Point cloud representing the planar component = %d", (int)cloud->points.size());
-
 }
 
 
 
 
-void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose){
+void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geometry_msgs::Pose& pose){
 
     Eigen::Vector4f centroid;
 //  Calculating the Centroid of the Panel Point cloud
@@ -257,8 +249,8 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
 //    std::cout<<"The EigenValues are : " << eigenValues << std::endl;
 //    std::cout<<"The EigenVectors are : " << eigenVectors << std::endl;
 
-    ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
-
+//    ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
+/*
     geometry_msgs::Point point1;
     point1.x = eigenVectors.col(2)[0] + pose.position.x;
     point1.y = eigenVectors.col(2)[1] + pose.position.y;
@@ -290,14 +282,7 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
     float theta = 0;
     float cosTheta = 0;
     float sinTheta = 0;
-    /*
-     * NOT WORKING
-    // sometimes maxPoint is diverging away from the plane
-    // still it wasn't affecting the final pose
-    // for safety changing it to centroid;
-    maxPoint.x = centroid(0);
-    maxPoint.y = centroid(1);
-    maxPoint.z = centroid(2);*/
+
 
 
     cosTheta = (maxPoint.x - minPoint.x)/(sqrt(pow((maxPoint.x - minPoint.x),2) + pow((maxPoint.y - minPoint.y),2) + pow((maxPoint.z - minPoint.z),2)));
@@ -339,8 +324,39 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
         else if (xySlope == 0){
             theta = atan2(sinTheta, cosTheta) * -1.0;
         }
+    }*/
+
+    float cosTheta1 = eigenVectors.col(2)[0]/sqrt(pow(eigenVectors.col(2)[0],2)+pow(eigenVectors.col(2)[1],2));
+    float sinTheta1 = eigenVectors.col(2)[1]/sqrt(pow(eigenVectors.col(2)[0],2)+pow(eigenVectors.col(2)[1],2));
+    float theta1 = atan2(sinTheta1, cosTheta1);  // should be the final yaw for parallel to solar array
+
+
+
+    float cosTheta2 = eigenVectors.col(0)[0]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
+    float sinTheta2 = eigenVectors.col(0)[1]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
+    float theta2 = atan2(sinTheta2, cosTheta2);
+
+    // eigenVectors.col(0)[2] < 0 // pointing downwards or towards the walkway // perpendicular to solar array
+
+    if (eigenVectors.col(0)[2] < 0)
+    {
+        theta2+=M_PI;
+
     }
 
+//    ROS_INFO("green marker t1 %.2f",theta1);
+//    ROS_INFO("blue marker t2 %.2f",theta2);
+
+    // coarse location
+    float off = -2.2;
+    pose.position.x = centroid(0) + off*cos(theta2);
+    pose.position.y = centroid(1) + off*sin(theta2);
+    pose.position.z = 0;//centroid(2);
+
+//    ROS_INFO_STREAM("Testing:\n eigen value: "<<eigenValues.col(0)<<"\nVec: "
+//                    <<eigenVectors.col(0)<<"eigen value: "<<eigenValues.col(1)
+//                    <<"\nVec: "<<eigenVectors.col(1)<<"eigen value: "<<eigenValues.col(2)
+//                    <<"\nVec: "<<eigenVectors.col(2));
 
     /*if(slope > 0){
 
@@ -353,13 +369,14 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
 
     ROS_INFO("The Orientation is given by := %0.2f", theta);
     */
+    /*
     double offset = 2.0;
     pose.position.x = pose.position.x - (offset*cos(theta));
     pose.position.y = pose.position.y - (offset*sin(theta));
     pose.position.z = 0;//pose.position.z;
 
     ROS_INFO("slopeyz %.2f, theta %.2f",yzSlope,theta);
-
+    */
 //    ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
 
 
@@ -371,6 +388,7 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
         theta-=1.5708;
     }*/
 
+    /*
     float angle;
 //geometry_msgs::Quaternion quaternion;
       if(yzSlope>0)  {//rover on the left
@@ -387,10 +405,13 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
 
       float distance_offset = -1;
       pose.position.x = pose.position.x + distance_offset * cos(angle);
-      pose.position.y = pose.position.y + distance_offset * sin(angle);
+      pose.position.y = pose.position.y + distance_offset * sin(angle); */
 
 
-    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(angle);
+      //uncomment after this
+//    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(angle);
+      //testing
+    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta2);
 
     pose.orientation = quaternion;
 
@@ -404,13 +425,14 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
     marker.id = 0;
     marker.type = visualization_msgs::Marker::ARROW;
     marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.x = pose.position.x;
-    marker.pose.position.y = pose.position.y;
-    marker.pose.position.z = pose.position.z;
+    /*marker.pose.position.x = centroid(0);
+    marker.pose.position.y = centroid(1);
+    marker.pose.position.z = centroid(2);
     marker.pose.orientation.x = pose.orientation.x;
     marker.pose.orientation.y = pose.orientation.y;
     marker.pose.orientation.z = pose.orientation.z;
-    marker.pose.orientation.w = pose.orientation.w;
+    marker.pose.orientation.w = pose.orientation.w;*/
+    marker.pose = pose;
     marker.scale.x = 0.6;
     marker.scale.y = 0.05;
     marker.scale.z = 0.05;
@@ -420,14 +442,14 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
     marker.color.b = 0.0;
     marker.lifetime = ros::Duration(5);
 
-    vis_pub.publish(marker);
     mk_array.markers.push_back(marker);
-    marker.ns = "maxPoint";
     marker.type = visualization_msgs::Marker::SPHERE;
-    marker.pose.position= maxPoint;
     marker.scale.x = 0.05;
     marker.scale.y = 0.05;
     marker.scale.z = 0.05;
+    /*
+    marker.ns = "maxPoint";
+    marker.pose.position= maxPoint;
     marker.color.a = 1.0;
     marker.color.r = 1.0;
     marker.color.g = 0.0;
@@ -458,6 +480,31 @@ void RoverBlocker::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geome
     marker.color.r = 1.0;
     marker.color.g = 1.0;
     marker.color.b = 1.0;
+    mk_array.markers.push_back(marker);
+*/
+    marker.ns = "vec 1";
+    marker.pose.position.x = centroid(0)+eigenVectors.col(0)[0];
+    marker.pose.position.y = centroid(1)+eigenVectors.col(0)[1];
+    marker.pose.position.z = centroid(2)+eigenVectors.col(0)[2];
+    marker.color.r = 0.0;
+    marker.color.g = 0.0;
+    marker.color.b = 1.0;
+    mk_array.markers.push_back(marker);
+    marker.ns = "vec 2";
+    marker.pose.position.x = centroid(0)+eigenVectors.col(1)[0];
+    marker.pose.position.y = centroid(1)+eigenVectors.col(1)[1];
+    marker.pose.position.z = centroid(2)+eigenVectors.col(1)[2];
+    marker.color.r = 1.0;
+    marker.color.g = 0.0;
+    marker.color.b = 0.0;
+    mk_array.markers.push_back(marker);
+    marker.ns = "vec 3";
+    marker.pose.position.x = centroid(0)+eigenVectors.col(2)[0];
+    marker.pose.position.y = centroid(1)+eigenVectors.col(2)[1];
+    marker.pose.position.z = centroid(2)+eigenVectors.col(2)[2];
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
     mk_array.markers.push_back(marker);
 
     vis_pub_array.publish(mk_array);

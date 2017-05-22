@@ -18,7 +18,7 @@
 #include <iostream>
 #include <vector>
 
-class cable_detector
+class CableDetector
 {
     cv::Mat current_image_, current_image_HSV_, current_disparity_, qMatrix_;
 
@@ -39,19 +39,19 @@ class cable_detector
     src_perception::MultisenseImage ms_sensor_;
     src_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
-    void visualize_point(geometry_msgs::Point point);
+    void visualize_point(geometry_msgs::Point point, double r, double g, double b);
 
 public:
-    cable_detector(ros::NodeHandle nh);
+    CableDetector(ros::NodeHandle nh);
     void setTrackbar();
     void showImage(cv::Mat, std::string caption="Cable Detection");
     void colorSegment(cv::Mat &imgHSV, cv::Mat &outImg);
     size_t findMaxContour(const std::vector<std::vector<cv::Point> >& contours);
     bool getCableLocation(geometry_msgs::Point &);
-    cv::Point getOrientation(const std::vector<cv::Point> &, cv::Mat &);
+    std::vector<cv::Point> getOrientation(const std::vector<cv::Point> &, cv::Mat &);
     void drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale = 0.2);
     bool findCable(geometry_msgs::Point &);
-    ~cable_detector();
+    ~CableDetector();
 
 };
 
