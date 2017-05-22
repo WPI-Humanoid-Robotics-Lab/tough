@@ -9,6 +9,8 @@
 #include <val_control/robot_state.h>
 #include "val_moveit_planners/val_cartesian_planner.h"
 #include "val_control/val_wholebody_manipulation.h"
+#include <val_task_common/val_task_common_utils.h>
+#include <tf/transform_datatypes.h>
 
 class leakDetectorGrabber{
 
@@ -16,7 +18,8 @@ public:
     leakDetectorGrabber(ros::NodeHandle nh);
     ~leakDetectorGrabber();
 
-    void graspDetector(const geometry_msgs::Pose &goal, float executionTime=2.0f);
+    void graspDetector(armSide side, geometry_msgs::Pose &goal, float executionTime=2.0f);
+
 
 private:
     ros::NodeHandle nh_;
@@ -25,7 +28,7 @@ private:
     gripperControl gripper_;
     RobotStateInformer *current_state_;
     cartesianPlanner *right_arm_planner_;
-    //cartesianPlanner left_arm_planner_;
+    cartesianPlanner *left_arm_planner_;
     wholebodyManipulation wholebody_controller_;
     geometry_msgs::QuaternionStamped leftHandOrientation_ ;
     geometry_msgs::QuaternionStamped rightHandOrientation_;
