@@ -468,14 +468,15 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
     // get start from robot position
 
     ihmc_msgs::FootstepDataRosMessage::Ptr startstep(new ihmc_msgs::FootstepDataRosMessage());
-    this->getCurrentStep(0,*startstep);
+    //this->getCurrentStep(0,*startstep);
+    geometry_msgs::Pose pelvisPose;
+    current_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pelvisPose);
 
-
-    start.x = startstep->location.x ;
-    start.y = startstep->location.y; // - 0.18; Why do we need to subtract this?
+    start.x = pelvisPose.position.x;
+    start.y = pelvisPose.position.y; // This is required to offset the left foot to get senter of the
     //    std::cout<< "Start Position  x = " << start.x << "  y = " << start.y<<std::endl;
 
-    start.theta = tf::getYaw(startstep->orientation);
+    start.theta = tf::getYaw(pelvisPose.orientation);
 
     srv.request.start = start;
     srv.request.goal = goal;
