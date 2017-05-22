@@ -54,7 +54,7 @@ class valTask2 {
 
 
     //Rover detector
-    RoverDetector* rover_detector_coarse_;
+    RoverDetector* rover_detector_;
     //Rover detector
     RoverDetector* rover_detector_fine_;
     // Block rover in /map
@@ -87,9 +87,8 @@ class valTask2 {
 
     // goal location for the panel
     geometry_msgs::Pose2D panel_walk_goal_;
-    // goal location for the panel
-    geometry_msgs::Pose2D rover_walk_goal_coarse_;
-    geometry_msgs::Pose2D rover_walk_goal_fine_;
+
+    std::vector<geometry_msgs::Pose2D> rover_walk_goal_waypoints_;
     bool is_rover_on_right_;
 
     //solar panel handle grasp pose
@@ -134,7 +133,7 @@ class valTask2 {
 
     geometry_msgs::Pose2D getPanelWalkGoal();
 
-    void setRoverWalkGoal(const geometry_msgs::Pose2D &rover_walk_goal, bool fine=false);
+    void setRoverWalkGoal(const std::vector<geometry_msgs::Pose2D> &rover_walk_goal);
     void setRoverSide(const bool isRoverOnRight);
     void setSolarPanelHandlePose(const geometry_msgs::Pose &pose);
     void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal);

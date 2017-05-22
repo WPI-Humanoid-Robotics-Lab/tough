@@ -13,6 +13,7 @@
 #include <srcsim/StartTask.h>
 #include "val_task_common/val_task_common_utils.h"
 #include "val_task2/val_task2_utils.h"
+#include <queue>
 
 using namespace std;
 
@@ -39,7 +40,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     pelvis_controller_ = new pelvisTrajectory(nh_);
     walk_track_ = new walkTracking(nh_);
     //initialize all detection pointers
-    rover_detector_coarse_ = nullptr;
+    rover_detector_ = nullptr;
     rover_detector_fine_   = nullptr;
     solar_panel_detector_  = nullptr;
     rover_in_map_blocker_  = nullptr;
@@ -121,63 +122,53 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
 {
     ROS_INFO_STREAM("executing " << name);
 
-    if(rover_detector_coarse_ == nullptr){
-        rover_detector_coarse_ = new RoverDetector(nh_);
-    }
-    if(rover_detector_fine_ == nullptr){
-        rover_detector_fine_ = new RoverDetector(nh_, true);
+    if(rover_detector_ == nullptr){
+        rover_detector_ = new RoverDetector(nh_);
     }
 
     static int fail_count = 0;
     static int retry_count = 0;
-    std::vector<geometry_msgs::Pose> coarsePoses;
-    std::vector<geometry_msgs::Pose> finePoses;
-    rover_detector_coarse_->getDetections(coarsePoses);
-    rover_detector_fine_->getDetections(finePoses);
+    std::vector<std::vector<geometry_msgs::Pose> > roverPoseWaypoints;
+    rover_detector_->getDetections(roverPoseWaypoints);
 
-    ROS_INFO("Size of poses : %d", (int)coarsePoses.size());
+
+    ROS_INFO("Size of poses : %d", (int)roverPoseWaypoints.size());
     //    // if we get atleast one detection, LOL
-    if (coarsePoses.size() > 1 && finePoses.size() > 1) {
+    if (roverPoseWaypoints.size() > 1 ) {
         // update the pose
-        geometry_msgs::Pose2D pose2DCoarse, pose2DFine;
-        // get the last detected pose
-        int coarseIndex = coarsePoses.size() -1 ;
-        pose2DCoarse.x = coarsePoses[coarseIndex].position.x;
-        pose2DCoarse.y = coarsePoses[coarseIndex].position.y;
+        std::vector<geometry_msgs::Pose2D> detectedPoses2D;
+        int length = roverPoseWaypoints.back().size();
+        int Idx = roverPoseWaypoints.size() -1 ;
+        for (int i = 0; i < length ; ++i){
+            geometry_msgs::Pose2D pose2D;
+            // get the last detected pose
+            pose2D.x = roverPoseWaypoints[Idx][i].position.x;
+            pose2D.y = roverPoseWaypoints[Idx][i].position.y;
 
-        std::cout << "x " << pose2DCoarse.x << " y " << pose2DCoarse.y << std::endl;
+            std::cout << "x " << pose2D.x << " y " << pose2D.y << std::endl;
 
-        // get the theta
-        pose2DCoarse.theta = tf::getYaw(coarsePoses[coarseIndex].orientation);
-        setRoverWalkGoal(pose2DCoarse);
+            // get the theta
+            pose2D.theta = tf::getYaw(roverPoseWaypoints[Idx][i].orientation);
+            detectedPoses2D.push_back(pose2D);
+        }
+        setRoverWalkGoal(detectedPoses2D);
 
-        int fineIndex = finePoses.size() -1 ;
-        pose2DFine.x = finePoses[fineIndex].position.x;
-        pose2DFine.y = finePoses[fineIndex].position.y;
-
-        std::cout << "x " << pose2DFine.x << " y " << pose2DFine.y << std::endl;
-
-        // get the theta
-        pose2DFine.theta = tf::getYaw(finePoses[fineIndex].orientation);
-        setRoverWalkGoal(pose2DFine, true);
 
         ROVER_SIDE roverSide;
-        if(rover_detector_coarse_->getRoverSide(roverSide)){
+        if(rover_detector_->getRoverSide(roverSide)){
             setRoverSide(roverSide == ROVER_SIDE::RIGHT);
             // block rover in /map
-            rover_in_map_blocker_ = new SolarArrayDetector(nh_, pose2DCoarse,is_rover_on_right_);
+            rover_in_map_blocker_ = new SolarArrayDetector(nh_, detectedPoses2D.back(),is_rover_on_right_);
             //wait for the map to update. This is required to ensure the footsteps dont collide with rover
             //        ros::Duration(0.5).sleep();
             taskCommonUtils::moveToWalkSafePose(nh_);
 
-            std::cout << "quat " << coarsePoses[coarseIndex].orientation.x << " " <<coarsePoses[coarseIndex].orientation.y <<" "<<coarsePoses[coarseIndex].orientation.z <<" "<<coarsePoses[coarseIndex].orientation.w <<std::endl;
-            std::cout << "yaw: " << pose2DCoarse.theta  <<std::endl;
             retry_count = 0;
             // update the plane coeffecients
             eventQueue.riseEvent("/DETECTED_ROVER");
             ROS_INFO("detected rover");
-            if(rover_detector_coarse_ != nullptr) delete rover_detector_coarse_;
-            rover_detector_coarse_ = nullptr;
+            if(rover_detector_ != nullptr) delete rover_detector_;
+            rover_detector_ = nullptr;
             if(rover_detector_fine_ != nullptr) delete rover_detector_fine_;
             rover_detector_fine_ = nullptr;
         }
@@ -198,8 +189,8 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
         ROS_INFO("Rover detection failed");
         fail_count = 0;
         eventQueue.riseEvent("/DETECT_ROVER_FAILED");
-        if(rover_detector_coarse_ != nullptr) delete rover_detector_coarse_;
-        rover_detector_coarse_ = nullptr;
+        if(rover_detector_ != nullptr) delete rover_detector_;
+        rover_detector_ = nullptr;
         if(rover_detector_fine_ != nullptr) delete rover_detector_fine_;
         rover_detector_fine_ = nullptr;
     }
@@ -230,10 +221,15 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
 
     static int fail_count = 0;
     static bool isCoarseGoalReachedBefore = false;
-
+    static std::queue<geometry_msgs::Pose2D> goal_waypoints;
     // Run this block once during every visit of the state from either a failed state or previous state
     if(executeOnce){
-        goal = rover_walk_goal_coarse_;
+        for (auto pose : rover_walk_goal_waypoints_){
+            ROS_INFO("X: %.2f  Y:%.2f  Theta:%.2f", pose.x, pose.y, pose.theta);
+            goal_waypoints.push(pose);
+        }
+        goal = goal_waypoints.front();
+        goal_waypoints.pop();
         isCoarseGoalReachedBefore = false;
         fail_count = 0;
         executeOnce = false;
@@ -243,15 +239,16 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
 
     geometry_msgs::Pose current_pelvis_pose;
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
-    // Robot will walk to coarse goal furst. once that is reached, goal is changed to fine goal and the flag variable is updated
+    // Robot will walk to coarse goal first. once that is reached, goal is changed to fine goal and the flag variable is updated
     if ( taskCommonUtils::isGoalReached(current_pelvis_pose, goal) ) {
-
+        ROS_INFO("Local goal reached. Number of waypoints remaining %d", goal_waypoints.size());
         // if coarse goal was already reached before, then the current state is fine goal reached, else it is coarse goal reached
-        if(isCoarseGoalReachedBefore){
-            ROS_INFO("reached fine goal");
+        if(goal_waypoints.empty()){
+            ROS_INFO("reached The rover");
+            ros::Duration(3).sleep(); // This is required for steps to complete
             ROS_INFO("Final few steps before we reach rover");
-            walker_->walkLocalPreComputedSteps({0.25,0.25,0.5,0.5},{0.0,0.0,0.0,0.0},RIGHT);
-            ros::Duration(1).sleep();
+            //            walker_->walkLocalPreComputedSteps({0.3,0.3},{0.0,0.0},RIGHT);
+            //            ros::Duration(1).sleep();
             // TODO: check if robot rechead the panel
             eventQueue.riseEvent("/REACHED_ROVER");
             executeOnce = true;
@@ -259,10 +256,10 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
         }
         else
         {
-            ROS_INFO("reached coarse goal");
-            isCoarseGoalReachedBefore = true;
-            goal = rover_walk_goal_fine_;
-            ros::Duration(1).sleep();
+            ROS_INFO("%d more waypoints to go", goal_waypoints.size());
+            goal= goal_waypoints.front();
+            goal_waypoints.pop();
+            ros::Duration(3).sleep();
             eventQueue.riseEvent("/WALK_EXECUTING");
         }
     }
@@ -322,7 +319,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
     }
 
     if(solar_panel_detector_ == nullptr) {
-        solar_panel_detector_ = new SolarPanelDetect(nh_, rover_walk_goal_coarse_, is_rover_on_right_);
+        solar_panel_detector_ = new SolarPanelDetect(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
         ros::Duration(0.2).sleep();
     }
 
@@ -413,17 +410,18 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
         }
 
         side = yaw < 0 ? armSide::LEFT : armSide::RIGHT;
-
-        panel_grabber_->grasp_handles(side, solar_panel_handle_pose_);
-        ros::Duration(0.2).sleep(); //wait till grasp is complete
-        eventQueue.riseEvent("/GRASP_RETRY");
-    }
-    else if (robot_state_->isGraspped(side)){
-        ROS_INFO("Grasp is successful");
-        task2_utils_->afterPanelGraspPose(side);
-        eventQueue.riseEvent("/GRASPED_PANEL");
-    }
-    else if (retry_count < 5 ){
+        if (panel_grabber_->grasp_handles(side, solar_panel_handle_pose_)) {
+            ros::Duration(0.2).sleep(); //wait till grasp is complete
+            ROS_INFO("Grasp is successful");
+            task2_utils_->afterPanelGraspPose(side);
+            eventQueue.riseEvent("/GRASPED_PANEL");
+        }
+        else{
+            ++retry_count;
+            eventQueue.riseEvent("/GRASP_RETRY");
+            executing = false;
+        }
+    } else if (retry_count < 5 ){
         ROS_INFO("Grasp Failed, retrying");
         executing = false;
         ++retry_count;
@@ -459,7 +457,7 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
     ROS_INFO_STREAM("executing " << name);
 
     if(solar_array_detector_ == nullptr) {
-        solar_array_detector_ = new SolarArrayDetector(nh_, rover_walk_goal_coarse_, is_rover_on_right_);
+        solar_array_detector_ = new SolarArrayDetector(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
         ros::Duration(0.2).sleep();
     }
 
@@ -747,13 +745,10 @@ void valTask2::setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal)
     panel_walk_goal_ = panel_walk_goal;
 }
 
-void valTask2::setRoverWalkGoal(const geometry_msgs::Pose2D &rover_walk_goal, bool fine)
-{   if (fine){
-        rover_walk_goal_fine_ = rover_walk_goal;
-    }
-    else{
-        rover_walk_goal_coarse_ = rover_walk_goal;
-    }
+void valTask2::setRoverWalkGoal(const std::vector<geometry_msgs::Pose2D> &rover_walk_goal)
+{
+    rover_walk_goal_waypoints_ = rover_walk_goal;
+
 }
 
 void valTask2::setRoverSide(const bool isRoverOnRight)

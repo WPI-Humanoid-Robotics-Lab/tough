@@ -467,7 +467,7 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
     footstep_client_ = nh_.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("/plan_footsteps");
     // get start from robot position
 
-    ihmc_msgs::FootstepDataRosMessage::Ptr startstep(new ihmc_msgs::FootstepDataRosMessage());
+//    ihmc_msgs::FootstepDataRosMessage::Ptr startstep(new ihmc_msgs::FootstepDataRosMessage());
     //this->getCurrentStep(0,*startstep);
     geometry_msgs::Pose pelvisPose;
     current_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pelvisPose);
@@ -496,8 +496,7 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
             step->location.x = srv.response.footsteps.at(i).pose.x;
             step->location.y = srv.response.footsteps.at(i).pose.y;
-            step->location.z = startstep->location.z;
-
+            step->location.z = step->location.z;
 
             tf::Quaternion t = tf::createQuaternionFromYaw(srv.response.footsteps.at(i).pose.theta);
             ROS_DEBUG("Step x  %d %.2f", i, srv.response.footsteps.at(i).pose.x);

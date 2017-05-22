@@ -28,7 +28,7 @@ private:
     // arm
     armTrajectory* arm_controller_;
     // walker class
-    ValkyrieWalker *walk;
+    ValkyrieWalker *walk_;
 
 
 

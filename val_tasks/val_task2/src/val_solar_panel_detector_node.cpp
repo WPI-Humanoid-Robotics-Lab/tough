@@ -5,7 +5,7 @@ int main(int argc, char** argv){
   ros::init(argc, argv, "solar_plane_detection");
   ros::NodeHandle nh;
   geometry_msgs::Pose2D rover_loc;
-  std::vector<geometry_msgs::Pose> rover_poses, rover_poses_fine;
+  std::vector<std::vector<geometry_msgs::Pose> > rover_poses;
   bool isroverRight;
 
   ros::Rate loop1(1);
@@ -13,19 +13,17 @@ int main(int argc, char** argv){
   if(true) //to destruct the rover_obj
   {
       RoverDetector rover_obj(nh);
-      RoverDetector rover_obj2(nh,true);
       while(ros::ok())
       {
 
           rover_obj.getDetections(rover_poses);
-          rover_obj2.getDetections(rover_poses_fine);
-          if(!(rover_poses.empty() || rover_poses_fine.empty()))
+          if(!rover_poses.empty() )
           {
               geometry_msgs::Pose rover_loc_3d;
-              rover_loc_3d = rover_poses_fine[rover_poses_fine.size()-1];
+              rover_loc_3d = rover_poses[rover_poses.size()-1][2];
               rover_loc.x = rover_loc_3d.position.x;
               rover_loc.y = rover_loc_3d.position.y;
-              rover_loc.theta = tf::getYaw(rover_poses.back().orientation);
+              rover_loc.theta = tf::getYaw(rover_poses.back()[2].orientation);
               ROVER_SIDE roverSide;
               if(rover_obj.getRoverSide(roverSide)){
                   isroverRight = roverSide == ROVER_SIDE::RIGHT;

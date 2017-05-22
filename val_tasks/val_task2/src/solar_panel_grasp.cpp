@@ -7,8 +7,8 @@ solar_panel_handle_grabber::solar_panel_handle_grabber(ros::NodeHandle n):nh_(n)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     // cartesian planners for the arm
-    left_arm_planner_ = new cartesianPlanner("leftPalm", VAL_COMMON_NAMES::WORLD_TF);
-    right_arm_planner_ = new cartesianPlanner("rightPalm", VAL_COMMON_NAMES::WORLD_TF);
+    left_arm_planner_ = new cartesianPlanner("leftMiddleFingerGroup", VAL_COMMON_NAMES::WORLD_TF);
+    right_arm_planner_ = new cartesianPlanner("rightMiddleFingerGroup", VAL_COMMON_NAMES::WORLD_TF);
     wholebody_controller_ = new wholebodyManipulation(nh_);
 }
 
@@ -20,26 +20,26 @@ solar_panel_handle_grabber::~solar_panel_handle_grabber()
 }
 
 
-void solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs::Pose &goal, float executionTime)
+bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs::Pose &goal, float executionTime)
 {
 
     const std::vector<float>* seed;
-    std::string palmFrame;
+    std::string endEffectorFrame;
     float palmToFingerOffset;
     if(side == armSide::LEFT){
         seed = &leftShoulderSeed_;
-        palmFrame = VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME;
-        palmToFingerOffset = -0.04;
+        endEffectorFrame = VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME;
+        palmToFingerOffset = 0.07;
     }
     else {
         seed = &rightShoulderSeed_;
-        palmFrame = VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
-        palmToFingerOffset = 0.04;
+        endEffectorFrame = VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
+        palmToFingerOffset = -0.07;
     }
 
 
     ROS_INFO("opening grippers");
-    gripper_.openGripper(side);
+    gripper_.controlGripper(side, GRIPPER_STATE::OPEN_THUMB_IN_APPROACH);
 
     //move shoulder roll outwards
     ROS_INFO("Setting shoulder roll");
@@ -67,18 +67,18 @@ void solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
 
     //move arm to final position with known orientation
 
-    current_state_->transformPose(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF, palmFrame);
-    current_state_->transformPose(intermGoal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, palmFrame);
+    current_state_->transformPose(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF, endEffectorFrame);
+    current_state_->transformPose(intermGoal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, endEffectorFrame);
 
     intermGoal.position.y += palmToFingerOffset;
-    intermGoal.position.z -= 0.02; //finger to center of palm in Z-axis of hand frame
+//    intermGoal.position.z -= 0.02; //finger to center of palm in Z-axis of hand frame
     finalGoal.position.y  += palmToFingerOffset; // this is to compensate for the distance between palm frame and center of palm
-    finalGoal.position.z  -= 0.02; //finger to center of palm in Z-axis of hand frame
+//    finalGoal.position.z  -= 0.02; //finger to center of palm in Z-axis of hand frame
 
 
     //transform that point back to world frame
-    current_state_->transformPose(finalGoal, finalGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
-    current_state_->transformPose(intermGoal, intermGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPose(finalGoal, finalGoal, endEffectorFrame, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPose(intermGoal, intermGoal, endEffectorFrame, VAL_COMMON_NAMES::WORLD_TF);
     taskCommonUtils::fixHandFramePose(nh_, side, finalGoal);
 
     ROS_INFO("Moving towards goal");
@@ -101,7 +101,22 @@ void solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     wholebody_controller_->compileMsg(side, traj.joint_trajectory);
 
     ros::Duration(executionTime).sleep();
+
+    geometry_msgs::Pose finalFramePose;
+    finalFramePose.position.y += palmToFingerOffset;
+    current_state_->transformPose(finalFramePose, finalFramePose, endEffectorFrame);
+
+    float x_diff = (finalGoal.position.x - finalFramePose.position.x);
+    float y_diff = (finalGoal.position.y - finalFramePose.position.y);
+    float z_diff = (finalGoal.position.z - finalFramePose.position.z);
+
+    if (x_diff*x_diff + y_diff*y_diff + z_diff*z_diff > 0.1){
+        return false;
+    }
+
+
     ROS_INFO("Closing grippers");
     gripper_.closeGripper(side);
     ros::Duration(0.3).sleep();
+    return true;
 }

@@ -10,6 +10,7 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     head_controller_     = new HeadTrajectory(nh_);
     gripper_controller_  = new gripperControl(nh_);
     arm_controller_      = new armTrajectory(nh_);
+    walk_                 = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
 }
 
 task2Utils::~task2Utils()
@@ -26,7 +27,7 @@ void task2Utils::afterPanelGraspPose(const armSide side)
     // walk a step back
     std::vector<float> x_offset={-0.2,-0.2};
     std::vector<float> y_offset={0.0,0.0};
-    walk->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
+    walk_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){

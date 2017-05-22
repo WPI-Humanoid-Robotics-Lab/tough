@@ -52,7 +52,7 @@ private:
 
   ros::Publisher vis_plane_pub_;
 
-  std::vector<geometry_msgs::Pose> detections_;
+  std::vector<std::vector<geometry_msgs::Pose>> detections_;
 
   int detection_tries_;
 
@@ -70,7 +70,7 @@ private:
 
   void segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
-  void getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr& upperBoxCloud, geometry_msgs::Pose& pose);
+  void getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr& upperBoxCloud, std::vector<geometry_msgs::Pose>& pose);
 
 public:
 
@@ -78,7 +78,7 @@ public:
 
   RoverDetector(ros::NodeHandle nh, bool getFine=false);
   ~RoverDetector();
-  bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
+  bool getDetections(std::vector<std::vector<geometry_msgs::Pose> > &ret_val);
 
   int getDetectionTries() const;
   bool getRoverSide(ROVER_SIDE &side) const;

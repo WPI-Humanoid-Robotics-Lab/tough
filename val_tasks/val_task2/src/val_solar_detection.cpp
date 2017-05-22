@@ -60,7 +60,7 @@ void SolarArrayDetector::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
     sensor_msgs::PointCloud2 output;
 
     pcl::fromROSMsg(*input, *cloud);
-    ROS_INFO("removing rover");
+//    ROS_INFO("removing rover");
     roverremove(cloud);
     PassThroughFilter(cloud);
 //    ROS_INFO("pub %d",(int)cloud->points.size());
@@ -74,9 +74,9 @@ void SolarArrayDetector::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
     pcl_filtered_pub.publish(output);
 
     ros::Time endTime = ros::Time::now();
-    std::cout << "Number of detections               = " << detections_.size() << std::endl;
-    std::cout << "Number of tries                    = " << detection_tries_ << std::endl;
-    std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
+//    std::cout << "Number of detections               = " << detections_.size() << std::endl;
+//    std::cout << "Number of tries                    = " << detection_tries_ << std::endl;
+//    std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
 
 }
 
@@ -249,7 +249,7 @@ void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
 //    std::cout<<"The EigenValues are : " << eigenValues << std::endl;
 //    std::cout<<"The EigenVectors are : " << eigenVectors << std::endl;
 
-    ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
+//    ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
 /*
     geometry_msgs::Point point1;
     point1.x = eigenVectors.col(2)[0] + pose.position.x;
@@ -344,8 +344,8 @@ void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
 
     }
 
-    ROS_INFO("green marker t1 %.2f",theta1);
-    ROS_INFO("blue marker t2 %.2f",theta2);
+//    ROS_INFO("green marker t1 %.2f",theta1);
+//    ROS_INFO("blue marker t2 %.2f",theta2);
 
     // coarse location
     float off = -2.2;
@@ -353,10 +353,10 @@ void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
     pose.position.y = centroid(1) + off*sin(theta2);
     pose.position.z = 0;//centroid(2);
 
-    ROS_INFO_STREAM("Testing:\n eigen value: "<<eigenValues.col(0)<<"\nVec: "
-                    <<eigenVectors.col(0)<<"eigen value: "<<eigenValues.col(1)
-                    <<"\nVec: "<<eigenVectors.col(1)<<"eigen value: "<<eigenValues.col(2)
-                    <<"\nVec: "<<eigenVectors.col(2));
+//    ROS_INFO_STREAM("Testing:\n eigen value: "<<eigenValues.col(0)<<"\nVec: "
+//                    <<eigenVectors.col(0)<<"eigen value: "<<eigenValues.col(1)
+//                    <<"\nVec: "<<eigenVectors.col(1)<<"eigen value: "<<eigenValues.col(2)
+//                    <<"\nVec: "<<eigenVectors.col(2));
 
     /*if(slope > 0){
 
