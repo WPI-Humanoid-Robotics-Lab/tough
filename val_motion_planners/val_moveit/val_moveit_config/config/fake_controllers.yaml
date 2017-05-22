@@ -53,3 +53,16 @@ controller_list:
       - rightWristRoll
       - rightWristPitch
       - rightMiddleFingerPitch1
+  - name: fake_leftMiddleFingerGroup_controller
+    joints:
+      - torsoYaw
+      - torsoPitch
+      - torsoRoll
+      - leftShoulderPitch
+      - leftShoulderRoll
+      - leftShoulderYaw
+      - leftElbowPitch
+      - leftForearmYaw
+      - leftWristRoll
+      - leftWristPitch
+      - leftMiddleFingerPitch1
