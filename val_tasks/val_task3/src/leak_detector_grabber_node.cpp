@@ -10,7 +10,7 @@ int main(int argc, char **argv){
     leakDetectorGrabber ldg(nh);
     task3Utils utils(nh);
 
-    utils.beforePanelManipPose();
+    //utils.beforePanelManipPose();
 
     ROS_INFO("starting leak detector grabber");
 

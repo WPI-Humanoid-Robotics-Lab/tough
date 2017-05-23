@@ -23,11 +23,11 @@ void leakDetectorGrabber::graspDetector(armSide side, geometry_msgs::Pose &goal,
 
     if(side == armSide::LEFT){
         palmFrame = VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME;
-        palmToFingerOffset = -0.04;
+        palmToFingerOffset = -0.07;
     }
     else {
         palmFrame = VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
-        palmToFingerOffset = 0.04;
+        palmToFingerOffset = 0.07;
     }
 
     ROS_INFO("opening grippers");
@@ -90,7 +90,7 @@ void leakDetectorGrabber::graspDetector(armSide side, geometry_msgs::Pose &goal,
         ros::Duration(executionTime).sleep();
         //gripper_.controlGripper(side,GRIPPER_STATE::CUP);
         ROS_INFO("Closing grippers");
-        gripper_.closeGripper(side);
+        //gripper_.closeGripper(side);
         ros::Duration(0.3).sleep();
 }
 
