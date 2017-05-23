@@ -112,9 +112,9 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
 
     ROS_INFO("Expected Goal Pose : %f %f %f", finalGoal.position.x, finalGoal.position.y, finalGoal.position.z);
     ROS_INFO("Actual Finger Pose : %f %f %f", finalFramePose.position.x, finalFramePose.position.y, finalFramePose.position.z);
-    ROS_INFO("Distance between final pose and goal is %f", x_diff*x_diff + y_diff*y_diff + z_diff*z_diff);
+    ROS_INFO("Distance between final pose and goal is %f", sqrt(x_diff*x_diff + y_diff*y_diff + z_diff*z_diff));
 
-    if (x_diff*x_diff + y_diff*y_diff + z_diff*z_diff > 0.1){
+    if (sqrt(x_diff*x_diff + y_diff*y_diff + z_diff*z_diff) > 0.05){
         return false;
     }
 
