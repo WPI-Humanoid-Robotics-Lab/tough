@@ -192,8 +192,8 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
     //    ROS_INFO("The Orientation is given by := %0.2f", theta);
 
     //    double offset = finePose_ ? 6.45 : 6.45;
-    double xOffset[3] = {6.45, 6.45, 6.05};
-    double thetaOffset[3] = {M_PI_2, 0.0, 0.0};
+    double xOffset[3] = {6.45, 6.35, 6.05};
+    double thetaOffset[3] = {M_PI_2, M_PI_4, 0.0};
     double yOffset[3] = {-0.6 , -0.2, -0.2};
     for (int i =0; i < 3; ++i){
         detectedPoses[i].position.x = upperBoxPosition.x - (xOffset[i]*cos(theta));
@@ -230,13 +230,14 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
     }
 
     visualization_msgs::MarkerArray markerArray;
+    int id=0;
     for(auto pose : detectedPoses){
             visualization_msgs::Marker marker;
 
             marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
             marker.header.stamp = ros::Time();
             marker.ns = "Rover Position";
-            marker.id = 0;
+            marker.id = id++;
             marker.type = visualization_msgs::Marker::ARROW;
             marker.action = visualization_msgs::Marker::ADD;
 
@@ -256,7 +257,7 @@ void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lower
             marker.color.r = 1.0;
             marker.color.g = 0.0;
             marker.color.b = 0.0;
-            marker.lifetime = ros::Duration(5);
+            marker.lifetime = ros::Duration(0);
         markerArray.markers.push_back(marker);
     }
     vis_pub_.publish(markerArray);

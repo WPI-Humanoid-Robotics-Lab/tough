@@ -35,7 +35,7 @@
 
 #include <pcl/sample_consensus/sac_model_sphere.h>
 #include <pcl/sample_consensus/ransac.h>
-#include "val_control/robot_state.h"
+#include "val_controllers/robot_state.h"
 #include <visualization_msgs/MarkerArray.h>
 
 class SolarPanelDetect
