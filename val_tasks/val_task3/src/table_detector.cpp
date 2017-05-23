@@ -21,6 +21,14 @@
 #define DISABLE_DRAWINGS false
 //#define DISABLE_TRACKBAR true
 
+#define TABLE_HEIGHT 0.8
+#define LEG_HEIGHT 0.5
+#define TABLE_SIZE_1 1.8
+#define TABLE_SIZE_2 1
+#define HEIGHT_TOLERANCE 0.1
+#define AREA_TOLERANCE 0.5
+#define SIZE_TOLERANCE 0.1
+
 table_detector::table_detector(ros::NodeHandle nh) : nh_(nh), point_cloud_listener_(nh, "/leftFoot", "/left_camera_frame")
 {
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_table",1);
@@ -38,16 +46,16 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
 
     auto points_at_table_height = boost::make_shared<pcl::PointIndices>();
     auto points_at_leg_height = boost::make_shared<pcl::PointIndices>();
-    pass.setFilterLimits(0.7, 0.9); // TODO: Extract constants
+    pass.setFilterLimits(TABLE_HEIGHT - HEIGHT_TOLERANCE, TABLE_HEIGHT + HEIGHT_TOLERANCE);
     pass.filter(points_at_table_height->indices);
-    pass.setFilterLimits(0.4, 0.6); // TODO: Extract constants
+    pass.setFilterLimits(LEG_HEIGHT - HEIGHT_TOLERANCE, LEG_HEIGHT + HEIGHT_TOLERANCE);
     pass.filter(points_at_leg_height->indices);
 
     // Perform euclidean clustering to find candidates
     auto candidates = boost::make_shared<std::vector<pcl::PointIndices>>();
     pcl::EuclideanClusterExtraction<table_detector::Point> ec;
-    ec.setClusterTolerance(0.04); // meters
-    ec.setMinClusterSize(100);
+    ec.setClusterTolerance(0.08); // meters
+    ec.setMinClusterSize(800);
     ec.setMaxClusterSize(25000);
     ec.setInputCloud(cloud);
     ec.setIndices(points_at_table_height);
@@ -121,10 +129,11 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
         chull.reconstruct(*cloud_hull);
 
         const double area = chull.getTotalArea();
-        if (std::abs(area - 1.71) > 0.5) {
+        if (std::abs(area - (TABLE_SIZE_1 * TABLE_SIZE_2)) > AREA_TOLERANCE) {
             ROS_DEBUG_STREAM("Candidate " << (++eliminated_candidates) << " eliminated based on area (" << area << ")");
             continue;
         }
+        ROS_DEBUG_STREAM("Candidate area: " << area);
 
         // chull gives implicitly closed shapes, this explicitly closes it
         cloud_hull->push_back(cloud_hull->front());
@@ -253,7 +262,7 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
             non_leg_clusters->pop_back();
         }
 
-        if (non_leg_clusters->size() <= 2) {
+        if (non_leg_clusters->size() < 2) {
             ROS_DEBUG_STREAM("Candidate " << (++eliminated_candidates)
                                           << " eliminated because it has fewer than 2 detected legs ("
                                           << non_leg_clusters->size() << ")");
@@ -337,6 +346,17 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
         float table_width = bb_max.x - bb_min.x;
         float table_length = bb_max.y - bb_min.y;
         float table_height = bb_max.z - bb_min.z;
+
+        float table_min_dim, table_max_dim;
+        std::tie(table_min_dim, table_max_dim) = std::minmax(table_width, table_length);
+
+        if (std::abs(table_min_dim - TABLE_SIZE_1) < SIZE_TOLERANCE ||
+                std::abs(table_max_dim - TABLE_SIZE_2) < SIZE_TOLERANCE) {
+            ROS_DEBUG_STREAM("Candidate " << (++eliminated_candidates)
+                                          << " eliminated because it was the wrong size (" << table_min_dim << " x "
+                                          << table_max_dim << ")");
+            continue;
+        }
 
         table_axis_align_tf.translation() = bb_center_worldframe;
 
