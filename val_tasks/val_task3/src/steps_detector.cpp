@@ -92,9 +92,9 @@ void steps_detector::planeSegmentation(const std::vector<double>& coefficients, 
     pcl::PointCloud<pcl::PointXYZ>::Ptr o2 (new pcl::PointCloud<pcl::PointXYZ>);
     for (size_t i = 1; i < o1->size(); i++)
     {
-        double dot_product = ((o1->points[i].x - temp_point.x) * 0 + (o1->points[i].y - temp_point.y) * 0 + (o1->points[i].z - temp_point.z) * 1);
+        double dot_product = ((o1->points[i].x - temp_point.x) * dir.x + (o1->points[i].y - temp_point.y) * dir.y + (o1->points[i].z - temp_point.z) * dir.z);
         //double cos_angle = ((o1->points[i].x - stairLoc.x) * dir.x + (o1->points[i].y - stairLoc.y) * dir.y + (o1->points[i].z - stairLoc.z) * dir.z)*100 / double(norm_cloud);
-        ROS_INFO_STREAM("dot_product : " << dot_product << std::endl);
+        //ROS_INFO_STREAM("dot_product : " << dot_product << std::endl);
         if (std::abs(dot_product) > 0.01) //&& std::abs(o2->points[i].z - temp_point_z) < 0.01 )
         {
             o2->points.push_back(o1->points[i]);
@@ -103,20 +103,53 @@ void steps_detector::planeSegmentation(const std::vector<double>& coefficients, 
     }
 
     std::sort(o2->points.begin(), o2->points.end(), less_than_key());
-    //geometry_msgs::Point dir = sd_.dirVector();
+    pcl::PointXYZ temp_point1;
+    temp_point1 = {0 ,0 ,0};
     temp_point = o2->points[0];
+    size_t j = 0;
     pcl::PointCloud<pcl::PointXYZ>::Ptr o3 (new pcl::PointCloud<pcl::PointXYZ>);
-    for (size_t i = 1; i < o2->size(); i++)
+    for (size_t i = 1 ; i < o2->size(); i++, j++)
     {
-        double dot_product = ((o2->points[i].x - temp_point.x) * 1 + (o2->points[i].y - temp_point.y) * 0 + (o2->points[i].z - temp_point.z) * 0);
+        double dot_product = ((o2->points[i].x - temp_point.x) * dir.x + (o2->points[i].y - temp_point.y) * dir.y + (o2->points[i].z - temp_point.z) * dir.z);
         //double cos_angle = ((o1->points[i].x - stairLoc.x) * dir.x + (o1->points[i].y - stairLoc.y) * dir.y + (o1->points[i].z - stairLoc.z) * dir.z)*100 / double(norm_cloud);
-        ROS_INFO_STREAM("dot_product : " << dot_product << std::endl);
-        if (std::abs(dot_product) > 0.04) //&& std::abs(o2->points[i].z - temp_point_z) < 0.01 )
+        //ROS_INFO_STREAM("j : " << j << std::endl);
+
+        if (std::abs(dot_product) > 0.04 && j > 5) //&& std::abs(o2->points[i].z - temp_point_z) < 0.01 )
         {
-            o3->points.push_back(o2->points[i]);
-            o3->points.push_back(o2->points[i-1]);
+            temp_point1.x /= double(j);
+            temp_point1.y /= double(j);
+            temp_point1.z /= double(j);
+            o3->points.push_back(temp_point1);
+            temp_point1 = {0 ,0 ,0};
+            j = 0;
         }
+
+        temp_point1.x += o2->points[i].x;
+        temp_point1.y += o2->points[i].y;
+        temp_point1.z += o2->points[i].z;
         temp_point = o2->points[i];
+    }
+
+    temp_point1.x /= double(j);
+    temp_point1.y /= double(j);
+    temp_point1.z /= double(j);
+    o3->points.push_back(temp_point1);
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr o4 (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointXYZ temp_point2;
+    temp_point2 = {0, 0, 0};
+    for (size_t i = 0; i < o3->size() - 1; i++)
+    {
+        temp_point2.x = (o3->points[i].x + o3->points[i+1].x)/2.0;
+        temp_point2.y = (o3->points[i].y + o3->points[i+1].y)/2.0;
+        temp_point2.z = (o3->points[i].z + o3->points[i+1].z)/2.0;
+
+        o4->points.push_back(temp_point2);
+    }
+
+    for (size_t i = 0; i < o4->size() - 1; i++)
+    {
+        ROS_INFO_STREAM("x : " << o4->points[i+1].x - o4->points[i].x << std::endl);
     }
 
 //    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
@@ -150,7 +183,7 @@ void steps_detector::planeSegmentation(const std::vector<double>& coefficients, 
 //    }
     //ROS_INFO_STREAM("Count" << o3->points.size() << std::endl);
     sensor_msgs::PointCloud2 output;
-    pcl::toROSMsg(*o3, output);
+    pcl::toROSMsg(*o4, output);
     output.header.frame_id = "world";
     pcl_pub_.publish(output);
 }
