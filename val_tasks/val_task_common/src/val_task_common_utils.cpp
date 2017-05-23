@@ -128,3 +128,11 @@ void taskCommonUtils::fixHandFramePose(ros::NodeHandle nh, armSide side, geometr
     current_state->transformPose(poseInPelvisFrame, poseInWorldFrame, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
 
 }
+
+
+void taskCommonUtils::clearPointCloud(ros::NodeHandle nh)
+{
+    ros::Publisher reset_pointcloud_pub = nh.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
+    std_msgs::Empty msg;
+    reset_pointcloud_pub.publish(msg);
+}
