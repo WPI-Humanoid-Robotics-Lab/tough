@@ -37,7 +37,7 @@
 
 #include <vector>
 #include "val_common/val_common_names.h"
-#include "val_control/robot_state.h"
+#include "val_controllers/robot_state.h"
 
 
 class pcl_handle_detector
@@ -48,14 +48,15 @@ class pcl_handle_detector
 
   float offset;
   geometry_msgs::Pose panel_coarse_loc_;
-  std::vector<geometry_msgs::Pose> handle_loc_;
+  std::vector<geometry_msgs::Point> handle_loc_;
   RobotStateInformer* robot_state_;
 
   void cloudCB(const sensor_msgs::PointCloud2::Ptr &input);
   bool extractHandle(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
 public:
-  pcl_handle_detector(ros::NodeHandle &nh, float panel_offset,geometry_msgs::Pose panel_loc_);
+  pcl_handle_detector(ros::NodeHandle &nh, geometry_msgs::Pose panel_loc_);
+  bool getDetections(std::vector<geometry_msgs::Point> &detections);
   ~pcl_handle_detector();
 
 

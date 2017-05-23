@@ -1,4 +1,4 @@
-#include "val_control/val_wholebody_manipulation.h"
+#include "val_controllers/val_wholebody_manipulation.h"
 
 wholebodyManipulation::wholebodyManipulation(ros::NodeHandle &nh):nh_(nh)
 {
@@ -153,7 +153,8 @@ void wholebodyManipulation::chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &m
 bool wholebodyManipulation::validateTrajectory(const trajectory_msgs::JointTrajectory &traj)
 {
     for (trajectory_msgs::JointTrajectoryPoint point : traj.points){
-        if (point.positions.size() != 10){
+        if (point.positions.size() != 10 && point.positions.size() != 11){
+            ROS_INFO("Points size mismatched in wholebody controller");
             return false;
         }
     }

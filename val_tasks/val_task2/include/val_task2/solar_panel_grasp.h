@@ -1,14 +1,14 @@
-#ifndef HANDLE_GRABBER_H
-#define HANDLE_GRABBER_H
+#ifndef SOLAR_PANEL_GRASP_H
+#define SOLAR_PANEL_GRASP_H
 
 #include <geometry_msgs/Pose.h>
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
-#include <val_control/val_arm_navigation.h>
-#include <val_control/val_gripper_control.h>
-#include <val_control/robot_state.h>
+#include <val_controllers/val_arm_navigation.h>
+#include <val_controllers/val_gripper_control.h>
+#include <val_controllers/robot_state.h>
 #include "val_moveit_planners/val_cartesian_planner.h"
-#include "val_control/val_wholebody_manipulation.h"
+#include "val_controllers/val_wholebody_manipulation.h"
 
 #define Y_OFFSET 0.05
 
@@ -16,7 +16,7 @@ class solar_panel_handle_grabber{
 public:
     solar_panel_handle_grabber(ros::NodeHandle n);
     ~solar_panel_handle_grabber();
-   void grasp_handles(const armSide side, const geometry_msgs::Pose &goal, float executionTime=2.0f);
+   bool grasp_handles(armSide side, const geometry_msgs::Pose &goal, float executionTime=2.0f);
 
    geometry_msgs::QuaternionStamped leftHandOrientation() const;
    void setLeftHandOrientation(const geometry_msgs::QuaternionStamped &leftHandOrientation);
@@ -33,8 +33,10 @@ private:
    cartesianPlanner* right_arm_planner_;
    cartesianPlanner* left_arm_planner_;
    wholebodyManipulation* wholebody_controller_;
-   geometry_msgs::QuaternionStamped leftHandOrientation_ ;
-   geometry_msgs::QuaternionStamped rightHandOrientation_;
+   geometry_msgs::QuaternionStamped leftHandOrientationAngled_ ;
+   geometry_msgs::QuaternionStamped rightHandOrientationAngled_;
+   geometry_msgs::QuaternionStamped leftHandOrientationPerpen_ ;
+   geometry_msgs::QuaternionStamped rightHandOrientationPerpen_;
 
    /*Top Grip*/
    const std::vector<float> leftShoulderSeed_ = {-0.23, -0.07, 0.75, -1.53, 1.21, -0.40, 0.0};
@@ -44,4 +46,4 @@ private:
 
 };
 
-#endif // HANDLE_GRABBER_H
+#endif // SOLAR_PANEL_GRASP_H

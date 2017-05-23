@@ -165,11 +165,13 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
     waypoints.push_back(finalGoal);
 
     moveit_msgs::RobotTrajectory traj;
-    right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+    if (side == armSide::RIGHT) right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+    if (side == armSide::LEFT)   left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+
     wholebody_controller_->compileMsg(side, traj.joint_trajectory);
 
     ros::Duration(executionTime).sleep();
     ROS_INFO("Closing grippers");
     gripper_.closeGripper(side);
-    ros::Duration(0.3).sleep();
+    ros::Duration(0.6).sleep();
 }

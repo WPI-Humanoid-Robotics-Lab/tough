@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   navigation_common
   perception_common
   roscpp
-  val_control
+  val_controllers
   image_transport
 )
 
@@ -114,7 +114,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES val_task_common
-  CATKIN_DEPENDS perception_common roscpp val_control navigation_common
+  CATKIN_DEPENDS perception_common roscpp val_controllers navigation_common
 #  DEPENDS system_lib
 )
 
@@ -135,6 +135,7 @@ include_directories(
    src/panel_detection.cpp
    src/val_task_common_utils.cpp
    src/finish_box_detector.cpp
+   src/val_upperbody_tracker.cpp
  )
 
 ## Add cmake target dependencies of the library

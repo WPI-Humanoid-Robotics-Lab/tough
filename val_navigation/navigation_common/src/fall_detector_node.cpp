@@ -13,11 +13,7 @@ int main(int argc, char **argv)
     {
         if(fall_detector.isRobotFallen())
         {
-            std::cout << "robot fallen"<< std::endl;
-        }
-        else
-        {
-            std::cout << "robot standing" <<std::endl;
+            ROS_ERROR("!!!!!!!!!!!!!!!!!!!!....Robot Fallen....!!!!!!!!!!!!!!!!!!!!");
         }
 
         rate.sleep();

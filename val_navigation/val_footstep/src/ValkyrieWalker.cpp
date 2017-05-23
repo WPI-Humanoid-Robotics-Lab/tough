@@ -467,15 +467,16 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
     footstep_client_ = nh_.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("/plan_footsteps");
     // get start from robot position
 
-    ihmc_msgs::FootstepDataRosMessage::Ptr startstep(new ihmc_msgs::FootstepDataRosMessage());
-    this->getCurrentStep(0,*startstep);
+//    ihmc_msgs::FootstepDataRosMessage::Ptr startstep(new ihmc_msgs::FootstepDataRosMessage());
+    //this->getCurrentStep(0,*startstep);
+    geometry_msgs::Pose pelvisPose;
+    current_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pelvisPose);
 
-
-    start.x = startstep->location.x ;
-    start.y = startstep->location.y; // - 0.18; Why do we need to subtract this?
+    start.x = pelvisPose.position.x;
+    start.y = pelvisPose.position.y; // This is required to offset the left foot to get senter of the
     //    std::cout<< "Start Position  x = " << start.x << "  y = " << start.y<<std::endl;
 
-    start.theta = tf::getYaw(startstep->orientation);
+    start.theta = tf::getYaw(pelvisPose.orientation);
 
     srv.request.start = start;
     srv.request.goal = goal;
@@ -495,8 +496,7 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
             step->location.x = srv.response.footsteps.at(i).pose.x;
             step->location.y = srv.response.footsteps.at(i).pose.y;
-            step->location.z = startstep->location.z;
-
+            step->location.z = step->location.z;
 
             tf::Quaternion t = tf::createQuaternionFromYaw(srv.response.footsteps.at(i).pose.theta);
             ROS_DEBUG("Step x  %d %.2f", i, srv.response.footsteps.at(i).pose.x);

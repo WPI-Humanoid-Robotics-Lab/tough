@@ -7,7 +7,7 @@ int main(int argc, char** argv){
     ros::init(argc, argv, "solar_array_detection");
     ros::NodeHandle nh;
     geometry_msgs::Pose2D rover_loc;
-    std::vector<geometry_msgs::Pose> rover_poses;
+    std::vector<std::vector<geometry_msgs::Pose>> rover_poses;
     bool isroverRight;
     int NUM_SAMPLES=2;
     ros::Publisher goalPub = nh.advertise<geometry_msgs::PoseStamped>("/valkyrie/goal",1);
@@ -24,7 +24,7 @@ int main(int argc, char** argv){
             if(rover_poses.size())
             {
                 geometry_msgs::Pose rover_loc_3d;
-                rover_loc_3d = rover_poses[rover_poses.size()-1];
+                rover_loc_3d = rover_poses[rover_poses.size()-1][2];
                 rover_loc.x = rover_loc_3d.position.x;
                 rover_loc.y = rover_loc_3d.position.y;
                 rover_loc.theta = tf::getYaw(rover_loc_3d.orientation);
@@ -44,7 +44,7 @@ int main(int argc, char** argv){
 
     geometry_msgs::PoseStamped goal;
     goal.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
-    goal.pose = rover_poses[rover_poses.size() -1];
+    goal.pose = rover_poses[rover_poses.size() -1][2];
     goalPub.publish(goal);
     //  std::cout <<obj.isRoverOnRight()<<std::endl;
     ROS_INFO("Reaching Rover ");

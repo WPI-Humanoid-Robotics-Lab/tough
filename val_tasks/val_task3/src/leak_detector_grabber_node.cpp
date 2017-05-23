@@ -1,5 +1,5 @@
 #include <val_task3/leak_detector_grabber.h>
-#include <val_control/robot_state.h>
+#include <val_controllers/robot_state.h>
 #include <val_task3/val_task3_utils.h>
 
 
@@ -10,7 +10,7 @@ int main(int argc, char **argv){
     leakDetectorGrabber ldg(nh);
     task3Utils utils(nh);
 
-    utils.beforePanelManipPose();
+    //utils.beforePanelManipPose();
 
     ROS_INFO("starting leak detector grabber");
 
