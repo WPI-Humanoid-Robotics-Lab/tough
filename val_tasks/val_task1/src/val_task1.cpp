@@ -1097,6 +1097,8 @@ ROS_INFO("2");
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
     }
+
+    return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
