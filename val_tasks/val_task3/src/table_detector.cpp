@@ -10,8 +10,7 @@
 #include <pcl/common/transforms.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/surface/convex_hull.h>
-#include <pcl/search/kdtree.h>
-#include <Eigen/StdVector>
+#include <pcl/filters/crop_box.h>
 
 // Local includes
 #include "val_task3/table_detector.h"
@@ -31,14 +30,33 @@
 
 table_detector::table_detector(ros::NodeHandle nh) : nh_(nh), point_cloud_listener_(nh, "/leftFoot", "/left_camera_frame")
 {
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_table",1);
-    points_pub_ = nh_.advertise<table_detector::PointCloud>("table_detection_debug_points",1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_table", 1);
+    blacklist_pub_ = nh_.advertise<table_detector::PointCloud>("/block_map", 1);
+    points_pub_ = nh_.advertise<table_detector::PointCloud>("table_detection_debug_points", 1);
     pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &table_detector::cloudCB, this);
     ROS_DEBUG("Table detector setup finished");
 }
 
-void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) {
-    ROS_DEBUG_STREAM("Got point cloud of size " << cloud->size());
+void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud_raw) {
+    ROS_DEBUG_STREAM("Got point cloud of size " << cloud_raw->size());
+
+    auto points_in_room = boost::make_shared<pcl::PointIndices>();
+    pcl::CropBox<table_detector::Point> cropFilter;
+    cropFilter.setInputCloud(cloud_raw);
+    table_detector::Point minPoint, maxPoint;
+    cropFilter.setMin({-12., -12., -12., 1});
+    cropFilter.setMax({12., 12., 12., 1});
+
+    cropFilter.filter(points_in_room->indices);
+
+    const auto cloud = boost::make_shared<table_detector::PointCloud>();
+    // Do a voxel grid filter to allow more accurate area estimates based on cloud size
+    pcl::VoxelGrid<table_detector::Point> sor;
+    sor.setInputCloud(cloud_raw);
+    sor.setIndices(points_in_room);
+    sor.setLeafSize(0.01f, 0.01f, 0.01f);
+    sor.filter(*cloud);
+
     // Run it through a z filter to approximately the height of the table
     pcl::PassThrough<table_detector::Point> pass;
     pass.setInputCloud(cloud);
@@ -105,6 +123,7 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
 
     int marker_id = 0;
     int eliminated_candidates = 0;
+    std::size_t best_candidate_points = 0;
     for (const auto &candidate_indices : *candidates) {
         // seg takes shared_ptr to the indices, so make one that refers back to the shared_ptr to the vector of indices
         const pcl::PointIndices::ConstPtr cluster_ptr(candidates, &candidate_indices);
@@ -358,6 +377,14 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
             continue;
         }
 
+        if (inliers->indices.size() <= best_candidate_points) {
+            ROS_DEBUG_STREAM("Candidate " << (++eliminated_candidates)
+                                          << " skipped because the previous candidate was better");
+
+        }
+
+        best_candidate_points = inliers->indices.size();
+
         table_axis_align_tf.translation() = bb_center_worldframe;
 
         // Compute vantage poses -- hardcoded relative to the table
@@ -392,7 +419,13 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
         leg_candidate_pts->header = cloud->header;
         points_pub_.publish(leg_candidate_pts);
 
+        table_detector::PointCloud block_map_cloud(*cloud, inliers->indices);
+        block_map_cloud.header = cloud->header;
+        blacklist_pub_.publish(block_map_cloud);
+
 #if !DISABLE_DRAWINGS
+        markers.markers.clear();
+
         for (std::size_t pose_i = 0; pose_i < vantage_poses_.size(); pose_i++) {
             auto arrow_marker = visualization_msgs::Marker();
 
@@ -416,7 +449,7 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
         auto hull_marker = visualization_msgs::Marker();
         pcl_conversions::fromPCL(cloud->header, hull_marker.header);
         hull_marker.ns = "table_outline";
-        hull_marker.id = marker_id;
+        hull_marker.id = 0;
         hull_marker.type = visualization_msgs::Marker::LINE_STRIP;
         hull_marker.scale.x = 0.01; // segment width in m
         hull_marker.color.r = 1;
@@ -437,7 +470,7 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
         auto cube_marker = visualization_msgs::Marker();
         pcl_conversions::fromPCL(cloud->header, cube_marker.header);
         cube_marker.ns = "table_box";
-        cube_marker.id = marker_id++;
+        cube_marker.id = 0;
         cube_marker.type = visualization_msgs::Marker::CUBE; // It's called cube, but it can be a rectangular prism
         cube_marker.pose.position.x = bb_center_worldframe.x();
         cube_marker.pose.position.y = bb_center_worldframe.y();
