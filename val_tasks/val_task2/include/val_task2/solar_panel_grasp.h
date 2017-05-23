@@ -1,14 +1,14 @@
-#ifndef HANDLE_GRABBER_H
-#define HANDLE_GRABBER_H
+#ifndef SOLAR_PANEL_GRASP_H
+#define SOLAR_PANEL_GRASP_H
 
 #include <geometry_msgs/Pose.h>
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
-#include <val_control/val_arm_navigation.h>
-#include <val_control/val_gripper_control.h>
-#include <val_control/robot_state.h>
+#include <val_controllers/val_arm_navigation.h>
+#include <val_controllers/val_gripper_control.h>
+#include <val_controllers/robot_state.h>
 #include "val_moveit_planners/val_cartesian_planner.h"
-#include "val_control/val_wholebody_manipulation.h"
+#include "val_controllers/val_wholebody_manipulation.h"
 
 #define Y_OFFSET 0.05
 
@@ -46,4 +46,4 @@ private:
 
 };
 
-#endif // HANDLE_GRABBER_H
+#endif // SOLAR_PANEL_GRASP_H

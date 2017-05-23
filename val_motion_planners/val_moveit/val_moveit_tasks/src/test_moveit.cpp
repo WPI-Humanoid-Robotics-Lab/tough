@@ -5,7 +5,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
-#include <val_control/val_arm_navigation.h>
+#include <val_controllers/val_arm_navigation.h>
 #include <ros/ros.h>
 
 

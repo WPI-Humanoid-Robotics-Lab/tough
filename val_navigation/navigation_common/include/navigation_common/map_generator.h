@@ -11,7 +11,7 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
-#include "val_control/robot_state.h"
+#include "val_controllers/robot_state.h"
 
 enum CELL_STATUS{
     FREE = 0,

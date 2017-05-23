@@ -50,12 +50,13 @@ find_package(catkin REQUIRED COMPONENTS
   trac_ik_kinematics_plugin
   trac_ik_lib
 
-  val_control
+  val_controllers
   val_gui
   val_footstep
   val_task_common
   navigation_common
   val_moveit_planners
+  val_control_common
 )
 
 

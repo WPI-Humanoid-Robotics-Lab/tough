@@ -1,4 +1,4 @@
-#include <val_control/val_pelvis_navigation.h>
+#include <val_controllers/val_pelvis_navigation.h>
 #include <val_common/val_common_names.h>
 
 int pelvisTrajectory::pelvis_id = -1;

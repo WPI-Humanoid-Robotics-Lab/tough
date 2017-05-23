@@ -1,4 +1,4 @@
-#include <val_control/val_gripper_control.h>
+#include <val_controllers/val_gripper_control.h>
 #include <tf/transform_listener.h>
 #include <val_common/val_common_names.h>
 

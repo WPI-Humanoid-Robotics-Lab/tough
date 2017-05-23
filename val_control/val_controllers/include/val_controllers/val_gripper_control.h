@@ -21,8 +21,8 @@ private:
     ros::Publisher leftGripperContPublisher;
     ros::Publisher rightGripperContPublisher;
     //GRIPPER_STATE::OPEN_THUMB_IN
-    const std::vector<double> OPEN_THUMB_IN_LEFT_GRIPPER  = {1.3999, 0.0, 0.0, 0.0, 0.0};
-    const std::vector<double> OPEN_THUMB_IN_RIGHT_GRIPPER = {1.3999, 0.0, 0.0, 0.0, 0.0};
+    const std::vector<double> OPEN_THUMB_IN_LEFT_GRIPPER  = {1.3999, 0.2, 0.0, 0.0, 0.0};
+    const std::vector<double> OPEN_THUMB_IN_RIGHT_GRIPPER = {1.3999, 0.2, 0.0, 0.0, 0.0};
     //GRIPPER_STATE::OPEN_THUMB_APPROACH
     const std::vector<double> OPEN_THUMB_APPROACH_IN_LEFT_GRIPPER  = {1.3999, -0.3, 0.0, 0.0, 0.0};
     const std::vector<double> OPEN_THUMB_APPROACH_IN_RIGHT_GRIPPER = {1.3999, 0.3, 0.0, 0.0, 0.0};
