@@ -71,8 +71,7 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
 
     pcl::SACSegmentation<table_detector::Point> leg_seg;
     leg_seg.setOptimizeCoefficients(true);
-    leg_seg.setModelType(pcl::SACMODEL_PARALLEL_PLANE);
-    leg_seg.setAxis({0.0, 0.0, 1.0});
+    leg_seg.setModelType(pcl::SACMODEL_LINE);
     leg_seg.setMethodType(pcl::SAC_RANSAC);
     leg_seg.setDistanceThreshold(0.02);
 
@@ -254,18 +253,23 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
             non_leg_clusters->pop_back();
         }
 
-        if (non_leg_clusters->size() <= 3) {
+        if (non_leg_clusters->size() <= 2) {
             ROS_DEBUG_STREAM("Candidate " << (++eliminated_candidates)
                                           << " eliminated because it has fewer than 2 detected legs ("
                                           << non_leg_clusters->size() << ")");
             continue;
         }
-        ROS_DEBUG_STREAM("Candidate had " << non_leg_clusters->size() << " detected sides");
+
+        // The table z axis is stored in coefficients and the x axis in best_model (those variables were not
+        // named very well). Together they fully describe a 3d rotation to align the coordinate system to the table.
+        // (ModelCoefficients' values 0..2 is the plane's unit normal and value 3 is distance, not needed here)
+        Eigen::Vector3f table_axis_z(coefficients->values[0], coefficients->values[1], coefficients->values[2]);
+        table_axis_z.normalize(); // PCL is supposed to do this but I don't trust it
 
         // Try RANSAC with a line model on each cluster, and use the best match to determine the table's yaw
         leg_seg.setInputCloud(non_leg_points);
         double best_variance = std::numeric_limits<double>::infinity();
-        pcl::ModelCoefficients best_model;
+        Eigen::Vector3f table_axis_x = Eigen::Vector3f::Zero();
         for (const auto &edge_cluster : *non_leg_clusters) {
             // Make an aliasing pointer for the cluster that aliases the pointer to the vector of clusters
             const auto edge_cluster_ptr = pcl::PointIndices::ConstPtr(non_leg_clusters, &edge_cluster);
@@ -275,53 +279,124 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
             pcl::ModelCoefficients edge_model;
             leg_seg.segment(edge_inliers, edge_model);
 
-            if (edge_inliers.indices.size() < edge_cluster.indices.size() * 0.95) { // edges should be very straight
+            if (edge_inliers.indices.size() < edge_cluster.indices.size() * 0.90) { // edges should be very straight
+                ROS_DEBUG_STREAM("Edge inliers was " << edge_inliers.indices.size() << "/" << edge_cluster.indices.size()
+                                              << " points ("
+                                              << (edge_inliers.indices.size() * 100.0 / edge_cluster.indices.size())
+                                              << "%)");
                 continue;
             }
 
-            const double variance = leg_seg.getModel()->computeVariance();
+            Eigen::Vector3f line_dir(edge_model.values[3], edge_model.values[4], edge_model.values[5]);
+
+            // table_axis_x is the rejection of line_dir onto table_axis_z
+            Eigen::Vector3f candidate_axis = line_dir - line_dir.dot(table_axis_z) * table_axis_z;
+
+            // Make sure the rejection didn't change the line very much
+            if (std::abs(line_dir.squaredNorm() - candidate_axis.squaredNorm()) > 0.1) {
+                ROS_DEBUG_STREAM("Edge rejection difference was " << std::abs(line_dir.squaredNorm() - candidate_axis.squaredNorm())
+                << " (" << line_dir.squaredNorm() << " vs. " << candidate_axis.squaredNorm() << ")");
+                continue;
+            }
+
+
+            const double variance = leg_seg.getModel()->computeVariance() / edge_inliers.indices.size();
             if (variance < best_variance) {
                 best_variance = variance;
-                best_model = edge_model;
+                table_axis_x = candidate_axis;
+                table_axis_x.normalize(); // necessary because of the rejection
             }
         }
 
-        // The table z axis is stored in coefficients and the x axis in best_model (those variables were not
-        // named very well). Together they fully describe a 3d rotation to align the coordinate system to the table.
-        // (ModelCoefficients' values 0..2 is the plane's unit normal and value 3 is distance, not needed here)
-        Eigen::Vector3f table_axis_x(best_model.values[0], best_model.values[1], best_model.values[2]);
-        Eigen::Vector3f table_axis_z(coefficients->values[0], coefficients->values[1], coefficients->values[2]);
+        if (table_axis_x.norm() < 0.01) {
+            ROS_DEBUG_STREAM("Candidate " << (++eliminated_candidates)
+                                          << " eliminated because none of its edges were detected successfully");
+            continue;
+        }
+
+        ROS_DEBUG_STREAM("Table axis x: " << table_axis_x.transpose());
+        ROS_DEBUG_STREAM("Table axis z: " << table_axis_z.transpose());
+
         Eigen::Affine3f table_axis_align_tf;
         table_axis_align_tf.linear() << table_axis_x, table_axis_z.cross(table_axis_x), table_axis_z;
+        table_axis_align_tf.translation() = Eigen::Vector3f::Zero();
         // Leave translation at its default of 0 -- I don't care about it
-
-        ROS_DEBUG_STREAM("\n" << table_axis_align_tf.linear());
-        // NOTE: CURRENT TASK: results are all wrong because SACMODEL_PARALLEL_PLANE actually gives you a perpendicular
-        // plane. Solution: Change to SACMODEL_LINE and set table_axis_x to the rejection (opposite of projection) of
-        // the line described by best_model onto table_axis_y (it will need to be normalized and probably will need a
-        // check to make sure isn't pointing in an wildly different direction). This will also fix the pretty big
-        // problem that currently table_axis_x and table_axis_z are not perfectly orthogonal since both have tolerances.
 
         // Transform the table inliers, from a very long time ago, to the new coordinate system using the inverse
         table_detector::PointCloud table_pts_aligned;
         pcl::transformPointCloud(*cloud, *inliers, table_pts_aligned, table_axis_align_tf.inverse());
+//        ROS_DEBUG_STREAM("Aligned pts: " << table_pts_aligned.size() << ", tf: \n" << table_axis_align_tf);
 
         // Finally we can get the bounding box via getMinMax3d
         table_detector::Point bb_min, bb_max;
         pcl::getMinMax3D(table_pts_aligned, bb_min, bb_max);
-        const auto bb_center = (bb_min.getVector3fMap() + bb_max.getVector3fMap())/2;
-        const auto bb_center_worldframe = table_axis_align_tf * bb_center;
+        const Eigen::Vector3f &bb_center = (bb_min.getVector3fMap() + bb_max.getVector3fMap())/2;
+        const Eigen::Vector3f &bb_center_worldframe = table_axis_align_tf * bb_center;
         const Eigen::Quaternionf bb_orientation(table_axis_align_tf.linear());
+
+        float table_width = bb_max.x - bb_min.x;
+        float table_length = bb_max.y - bb_min.y;
+        float table_height = bb_max.z - bb_min.z;
+
+        table_axis_align_tf.translation() = bb_center_worldframe;
+
+        // Compute vantage poses -- hardcoded relative to the table
+        std::vector<Eigen::Affine3f> relative_vantage_poses {
+                Eigen::Affine3f(Eigen::Translation3f(-table_width/2 - 0.5f, 0, 0)),
+                Eigen::Affine3f(Eigen::AngleAxisf(M_PI_2,     Eigen::Vector3f::UnitZ()) * Eigen::Translation3f(-table_length/2 - 0.5f, 0, 0)),
+                Eigen::Affine3f(Eigen::AngleAxisf(M_PI,       Eigen::Vector3f::UnitZ()) * Eigen::Translation3f( -table_width/2 - 0.5f, 0, 0)),
+                Eigen::Affine3f(Eigen::AngleAxisf(3 * M_PI_2, Eigen::Vector3f::UnitZ()) * Eigen::Translation3f(-table_length/2 - 0.5f, 0, 0))
+        };
+        vantage_poses_.clear();
+        std::transform(relative_vantage_poses.begin(), relative_vantage_poses.end(), std::back_inserter(vantage_poses_),
+        [&](const Eigen::Affine3f &rel_pose) {
+            const Eigen::Affine3f &pose = table_axis_align_tf * rel_pose;
+            geometry_msgs::PoseStamped msg;
+            pcl_conversions::fromPCL(cloud->header, msg.header);
+            msg.pose.position.x = pose.translation().x();
+            msg.pose.position.y = pose.translation().y();
+            msg.pose.position.z = pose.translation().z();
+            const Eigen::Quaternionf quat(pose.linear());
+            msg.pose.orientation.x = quat.x();
+            msg.pose.orientation.y = quat.y();
+            msg.pose.orientation.z = quat.z();
+            msg.pose.orientation.w = quat.w();
+
+            return msg;
+        });
+
+        ROS_DEBUG_STREAM("Box center in world frame: " << bb_center_worldframe.transpose());
+        ROS_DEBUG_STREAM("Box min: " << bb_min.getVector3fMap().transpose());
+        ROS_DEBUG_STREAM("Box max: " << bb_max.getVector3fMap().transpose());
 
         leg_candidate_pts->header = cloud->header;
         points_pub_.publish(leg_candidate_pts);
 
 #if !DISABLE_DRAWINGS
+        for (std::size_t pose_i = 0; pose_i < vantage_poses_.size(); pose_i++) {
+            auto arrow_marker = visualization_msgs::Marker();
+
+            pcl_conversions::fromPCL(cloud->header, arrow_marker.header);
+            arrow_marker.ns = "vantage_poses";
+            arrow_marker.id = pose_i;
+            arrow_marker.type = visualization_msgs::Marker::ARROW;
+            arrow_marker.pose = vantage_poses_[pose_i].pose;
+            arrow_marker.scale.x = 0.5;
+            arrow_marker.scale.y = 0.05;
+            arrow_marker.scale.z = 0.05;
+            arrow_marker.color.r = 1;
+            arrow_marker.color.g = 0;
+            arrow_marker.color.b = 1;
+            arrow_marker.color.a = 0.5;
+
+            markers.markers.push_back(arrow_marker);
+        }
+
         // HULL
         auto hull_marker = visualization_msgs::Marker();
         pcl_conversions::fromPCL(cloud->header, hull_marker.header);
-        hull_marker.ns = "table_candidates";
-        hull_marker.id = marker_id++;
+        hull_marker.ns = "table_outline";
+        hull_marker.id = marker_id;
         hull_marker.type = visualization_msgs::Marker::LINE_STRIP;
         hull_marker.scale.x = 0.01; // segment width in m
         hull_marker.color.r = 1;
@@ -336,18 +411,12 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
             hull_marker.points.back().z = pt.z;
         }
 
-        // LINE_STRIP doesn't automatically close
-        hull_marker.points.emplace_back();
-        hull_marker.points.back().x = cloud_hull->points.front().x;
-        hull_marker.points.back().y = cloud_hull->points.front().y;
-        hull_marker.points.back().z = cloud_hull->points.front().z;
-
         markers.markers.push_back(hull_marker);
 
         // CUBE
         auto cube_marker = visualization_msgs::Marker();
         pcl_conversions::fromPCL(cloud->header, cube_marker.header);
-        cube_marker.ns = "table_candidates";
+        cube_marker.ns = "table_box";
         cube_marker.id = marker_id++;
         cube_marker.type = visualization_msgs::Marker::CUBE; // It's called cube, but it can be a rectangular prism
         cube_marker.pose.position.x = bb_center_worldframe.x();
@@ -357,28 +426,29 @@ void table_detector::cloudCB(const table_detector::PointCloud::ConstPtr &cloud) 
         cube_marker.pose.orientation.y = bb_orientation.y();
         cube_marker.pose.orientation.z = bb_orientation.z();
         cube_marker.pose.orientation.w = bb_orientation.w();
-        cube_marker.scale.x = bb_max.x - bb_min.x;
-        cube_marker.scale.y = bb_max.y - bb_min.y;
-        cube_marker.scale.z = bb_max.z - bb_min.z;
+        cube_marker.scale.x = table_width;
+        cube_marker.scale.y = table_length;
+        cube_marker.scale.z = table_height;
         cube_marker.color.r = 0;
         cube_marker.color.g = 1;
         cube_marker.color.b = 0;
         cube_marker.color.a = 0.5;
-
-//        ROS_DEBUG_STREAM("Message: \n" << cube_marker);
 
         markers.markers.push_back(cube_marker);
 #endif
     }
 
     marker_pub_.publish(markers);
-
 }
 
-bool table_detector::findTable(geometry_msgs::Point &detected_pt) {
-    ROS_INFO_ONCE("findTable called");
-    ROS_DEBUG_ONCE("findTable called");
-    return false; // TODO
+bool table_detector::findTable(std::vector<geometry_msgs::PoseStamped> &poses) {
+    if (vantage_poses_.empty()) {
+        return false;
+    } else {
+        poses.clear();
+        std::copy(vantage_poses_.begin(), vantage_poses_.end(), std::back_inserter(poses));
+        return true;
+    }
 }
 
 table_detector::~table_detector()

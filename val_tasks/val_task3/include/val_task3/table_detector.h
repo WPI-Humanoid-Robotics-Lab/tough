@@ -25,6 +25,8 @@ class table_detector
 
     src_perception::MultisensePointCloud point_cloud_listener_;
 
+    std::vector<geometry_msgs::PoseStamped> vantage_poses_;
+
 public:
 
     typedef pcl::PointXYZ          Point;
@@ -33,7 +35,7 @@ public:
     table_detector(ros::NodeHandle nh);
 
     void cloudCB(const table_detector::PointCloud::ConstPtr &cloud);
-    bool findTable(geometry_msgs::Point &detected_pt);
+    bool findTable(std::vector<geometry_msgs::PoseStamped> &detected_pt);
 
     ~table_detector();
 

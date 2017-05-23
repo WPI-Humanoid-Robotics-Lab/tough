@@ -7,7 +7,7 @@ int main(int argc, char** argv)
     int numIterations = 0;
     bool found = false;
 
-    geometry_msgs::Point table_location;
+    std::vector<geometry_msgs::PoseStamped> table_location;
 
     table_detector detector(nh);
     //while (!found && numIterations < 20)
