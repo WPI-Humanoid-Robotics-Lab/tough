@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /Plug1
       Splitter Ratio: 0.5
     Tree Height: 600
   - Class: rviz/Selection
@@ -447,8 +448,8 @@ Visualization Manager:
     - Alpha: 0.6
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0.0429937
-        Min Value: -0.0264916
+        Max Value: 0.0340072
+        Min Value: -0.0359842
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -477,8 +478,8 @@ Visualization Manager:
     - Alpha: 0.2
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 7.9324
-        Min Value: -0.169549
+        Max Value: 7.90637
+        Min Value: -0.263931
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -1284,13 +1285,21 @@ Visualization Manager:
       Marker Topic: /detected_cable
       Name: Cable
       Namespaces:
-        {}
+        0: true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /detected_buttons
       Name: Button
+      Namespaces:
+        0: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /detected_plug
+      Name: Plug
       Namespaces:
         {}
       Queue Size: 100
@@ -1319,22 +1328,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.30092
+      Distance: 0.421202
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.589242
-        Y: 0.634029
-        Z: 1.14626
+        X: 0.269001
+        Y: -0.402021
+        Z: 1.65306
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.480399
+      Pitch: 1.1754
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.1354
+      Yaw: 3.42223
     Saved: ~
 Window Geometry:
   Displays:
@@ -1354,5 +1363,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1855
-  X: 1975
-  Y: -14
+  X: 1985
+  Y: 24

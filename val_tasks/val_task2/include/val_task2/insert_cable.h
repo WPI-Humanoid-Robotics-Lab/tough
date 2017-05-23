@@ -1,31 +1,30 @@
-#ifndef CABLEGRABBER_H
-#define CABLEGRABBER_H
+#ifndef INSERTCABLE_H
+#define INSERTCABLE_H
 
 
 #include <geometry_msgs/Pose.h>
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
-#include <val_controllers/val_arm_navigation.h>
-#include <val_controllers/val_gripper_control.h>
-#include <val_controllers/robot_state.h>
+#include <val_control/val_arm_navigation.h>
+#include <val_control/val_gripper_control.h>
+#include <val_control/robot_state.h>
 #include "val_moveit_planners/val_cartesian_planner.h"
-#include "val_controllers/val_wholebody_manipulation.h"
-#include "val_controllers/val_chest_navigation.h"
+#include "val_control/val_wholebody_manipulation.h"
+#include "val_control/val_chest_navigation.h"
 
-class cableGrabber
+class insertCable
 {
 public:
-    cableGrabber(ros::NodeHandle n);
-    ~cableGrabber();
-    void grasp_cable(const armSide side, const geometry_msgs::Point &goal, float executionTime=2.0f);
+    insertCable(ros::NodeHandle n);
+    ~insertCable();
+    void insert_cable(const armSide side, const geometry_msgs::Point &goal, float executionTime=2.0f);
 
 private:
     ros::NodeHandle nh_;
     armTrajectory armTraj_;
-    gripperControl gripper_;
-    RobotStateInformer *current_state_;
     geometry_msgs::QuaternionStamped leftHandOrientation_ ;
     geometry_msgs::QuaternionStamped rightHandOrientation_;
+    RobotStateInformer *current_state_;
     cartesianPlanner* right_arm_planner_;
     cartesianPlanner* left_arm_planner_;
     wholebodyManipulation* wholebody_controller_;
@@ -37,13 +36,8 @@ private:
     const std::vector<float> rightShoulderSeed_ = {-0.57, 1.09, 0.65, 1.14, 2.78, -0.19, 0.31}; //approach 1
     //        const std::vector<float> rightShoulderSeed_ = {-0.18,0.50,0.50,1.50,2.11,0.0,0.0}; //approach 2
     //    const std::vector<float> rightShoulderSeed_ = {-1,1.16,1.60,0.78,1.64,0.0,0.0}; //approach 3
-     const std::vector<float> rightAfterGraspShoulderSeed_ = {-0.57, 1.09, 0.65, 1.1, 1.18, -0.19, 0.31};
-    ros::Publisher marker_pub_;
+    const std::vector<float> rightAfterGraspShoulderSeed_ = {-0.57, 1.09, 0.65, 1.1, 1.18, -0.19, 0.31};
 
 };
 
-#endif // CABLEGRABBER_H
-
-
-
-
+#endif // INSERTCABLE_H

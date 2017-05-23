@@ -92,7 +92,7 @@ void cableGrabber::grasp_cable(const armSide side, const geometry_msgs::Point &g
     gripper1={1.2, 0.4, 0.3, 0.0 ,0.0 };
     gripper2={1.2, 0.6, 0.7, 0.0 ,0.0 };
     gripper3={1.2, 0.6, 0.7, 0.9 ,1.0 };
-    gripper_.controlGripper(RIGHT,gripper1);
+    gripper_.controlGripper(side,gripper1);
     ros::Duration(executionTime).sleep();
 
     //move shoulder roll outwards
@@ -159,13 +159,13 @@ void cableGrabber::grasp_cable(const armSide side, const geometry_msgs::Point &g
     ros::Duration(executionTime).sleep();
 
     ROS_INFO("Grip Sequence 1");
-    gripper_.controlGripper(RIGHT, gripper1);
+    gripper_.controlGripper(side, gripper1);
     ros::Duration(0.1).sleep();
     ROS_INFO("Grip Sequence 2");
-    gripper_.controlGripper(RIGHT, gripper2);
+    gripper_.controlGripper(side, gripper2);
     ros::Duration(0.1).sleep();
     ROS_INFO("Grip Sequence 3");
-    gripper_.controlGripper(RIGHT, gripper3);
+    gripper_.controlGripper(side, gripper3);
     ros::Duration(0.1).sleep();
 
     ROS_INFO("Moving chest to zero position");
