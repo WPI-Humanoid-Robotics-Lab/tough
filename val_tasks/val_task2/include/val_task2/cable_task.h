@@ -1,5 +1,5 @@
-#ifndef CABLEGRABBER_H
-#define CABLEGRABBER_H
+#ifndef CABLETASK_H
+#define CABLETASK_H
 
 
 #include <geometry_msgs/Pose.h>
@@ -12,20 +12,24 @@
 #include "val_controllers/val_wholebody_manipulation.h"
 #include "val_controllers/val_chest_navigation.h"
 
-class cableGrabber
+class cableTask
 {
 public:
-    cableGrabber(ros::NodeHandle n);
-    ~cableGrabber();
-    void grasp_cable(const armSide side, const geometry_msgs::Point &goal, float executionTime=2.0f);
+    cableTask(ros::NodeHandle n);
+    ~cableTask();
+    bool grasp_cable(const armSide side, const geometry_msgs::Point &goal, float executionTime=2.0f);
+    bool insert_cable(const armSide side, const geometry_msgs::Point &goal, float executionTime=2.0f);
 
 private:
     ros::NodeHandle nh_;
     armTrajectory armTraj_;
     gripperControl gripper_;
     RobotStateInformer *current_state_;
-    geometry_msgs::QuaternionStamped leftHandOrientation_ ;
-    geometry_msgs::QuaternionStamped rightHandOrientation_;
+    geometry_msgs::QuaternionStamped leftHandOrientationTop_ ;
+    geometry_msgs::QuaternionStamped rightHandOrientationTop_;
+    geometry_msgs::QuaternionStamped leftHandOrientationSide_ ;
+    geometry_msgs::QuaternionStamped rightHandOrientationSide_;
+
     cartesianPlanner* right_arm_planner_;
     cartesianPlanner* left_arm_planner_;
     wholebodyManipulation* wholebody_controller_;
@@ -33,16 +37,12 @@ private:
 
     /*Top Grip*/
     const std::vector<float> leftShoulderSeed_ = {-0.23, -0.72, 0.65, -1.51, 2.77, 0.0, 0.0};
-    //    const std::vector<float> rightShoulderSeed_ = {-0.23, 0.72, 0.65, 1.51, 2.77, 0.0, 0.0}; //approach default
     const std::vector<float> rightShoulderSeed_ = {-0.57, 1.09, 0.65, 1.14, 2.78, -0.19, 0.31}; //approach 1
-    //        const std::vector<float> rightShoulderSeed_ = {-0.18,0.50,0.50,1.50,2.11,0.0,0.0}; //approach 2
-    //    const std::vector<float> rightShoulderSeed_ = {-1,1.16,1.60,0.78,1.64,0.0,0.0}; //approach 3
-     const std::vector<float> rightAfterGraspShoulderSeed_ = {-0.57, 1.09, 0.65, 1.1, 1.18, -0.19, 0.31};
-    ros::Publisher marker_pub_;
+    const std::vector<float> rightAfterGraspShoulderSeed_ = {-0.57, 1.09, 0.65, 1.1, 1.18, -0.19, 0.31};
 
 };
 
-#endif // CABLEGRABBER_H
+#endif // CABLETASK_H
 
 
 

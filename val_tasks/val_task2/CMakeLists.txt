@@ -69,8 +69,7 @@ include_directories(include
             src/val_solar_detection.cpp
             src/val_solar_panel_detector.cpp
             src/val_task2_utils.cpp
-            src/cable_grabber.cpp
-            src/insert_cable.cpp
+            src/cable_task.cpp
  )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

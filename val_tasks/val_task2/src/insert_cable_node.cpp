@@ -1,13 +1,11 @@
 
-#include <val_task2/insert_cable.h>
-#include <val_control/val_gripper_control.h>
+#include <val_task2/cable_task.h>
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "insert_cable_node");
-    ros::NodeHandle nh;
-    insertCable ic(nh);
+    ros::NodeHandle nh_;
+    cableTask cable(nh_);
     ROS_INFO("Starting insert cable node");
-    gripperControl gc(nh);
 
     if(argc == 5){
         geometry_msgs::Point pt;
@@ -21,8 +19,7 @@ int main(int argc, char **argv)
         } else {
             side = RIGHT;
         }
-        gc.openGripper(side);
-        ic.insert_cable(side, pt);
+        cable.insert_cable(side, pt);
     } else{
         ROS_INFO("Usage : %s <side> <goal_x> <goal_y> <goal_z>\n side = 0 or 1");
         return -1;
