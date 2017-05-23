@@ -1,6 +1,6 @@
 #include "val_task3/steps_detector.h"
 
-steps_detector::steps_detector(ros::NodeHandle& nh) : nh_(nh), cloud_(new pcl::PointCloud<pcl::PointXYZ>), sd_(nh)
+steps_detector::steps_detector(ros::NodeHandle& nh) : nh_(nh), cloud_(new pcl::PointCloud<pcl::PointXYZ>)
 {
     pcl_sub_ = nh_.subscribe("/field/assembled_cloud2", 10, &steps_detector::stepsCB, this);
     pcl_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/val_steps/cloud2", 1, true);
@@ -12,178 +12,140 @@ steps_detector::~steps_detector()
     pcl_sub_.shutdown();
 }
 
-//bool operator ()(const pcl::PointXYZ& p1, const pcl::PointXYZ& p2)
-//{
-//    return ((std::pow(p1.x, 2) + std::pow(p1.y, 2) + std::pow(p1.z, 2)) < (std::pow(p2.x, 2) + std::pow(p2.y, 2) + std::pow(p2.z, 2)));
-//}
-
 void steps_detector::stepsCB(const sensor_msgs::PointCloud2::Ptr& input)
 {
-    if (input->data.empty()){
+    if (input->data.empty())
         return;
-    }
+    //add mutex
+    mtx_.lock();
     pcl::fromROSMsg(*input, *cloud_);
-    geometry_msgs::Point stairLoc;
-    std::vector<double> coefficients;
-    uint numSideBarsDetected;
-    sd_.findStair(stairLoc, numSideBarsDetected);
-    coefficients = sd_.coefficients();
-    ROS_INFO_STREAM("coefficients : " << coefficients[0] << "\t" << coefficients[1] << "\t"<< coefficients[2] << "\t"<< coefficients[3] << "\t" << std::endl);
-    ROS_INFO_STREAM("dirVector : " << sd_.dirVector() << std::endl);
-    planeSegmentation(coefficients, stairLoc);
+    mtx_.unlock();
 }
 
-void steps_detector::planeSegmentation(const std::vector<double>& coefficients, const geometry_msgs::Point& stairLoc)
+void steps_detector::getStepsPosition(const std::vector<double>& coefficients, const geometry_msgs::Point& dir_vector, const geometry_msgs::Point& stair_loc)
+{
+    coefficients_ = coefficients;
+    dirVector_= dir_vector;
+    stairLoc_ = stair_loc;
+
+    ROS_INFO_STREAM("1a" << std::endl);
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud1 (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud2 (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+
+    out_cloud1->clear();
+    out_cloud2->clear();
+    output_cloud->clear();
+    ROS_INFO_STREAM("1b" << std::endl);
+    mtx_.lock();
+    input_cloud = cloud_;
+    mtx_.unlock();
+    //copy cloud_ in a new variable using mutex
+ROS_INFO_STREAM("1c" << std::endl);
+    planeSegmentation(input_cloud, out_cloud1);
+    ROS_INFO_STREAM("1d" << std::endl);
+    zAxisSegmentation(out_cloud1, out_cloud2);
+    ROS_INFO_STREAM("1e" << std::endl);
+    stepCentroids(out_cloud2, output_cloud);
+    ROS_INFO_STREAM("1f" << std::endl);
+
+    sensor_msgs::PointCloud2 output;
+    pcl::toROSMsg(*output_cloud, output);
+    output.header.frame_id = "world";
+    pcl_pub_.publish(output);
+
+}
+
+void steps_detector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output)
 {
     int count = 0;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr o (new pcl::PointCloud<pcl::PointXYZ>);
-    o->points.clear();
-    for (size_t i = 0; i < cloud_->size(); i++)
+    pcl::PointCloud<pcl::PointXYZ>::Ptr temp_output (new pcl::PointCloud<pcl::PointXYZ>);
+    temp_output->points.clear();
+    for (size_t i = 0; i < input->size(); i++)
     {
-        //double threshold = coefficients[0] * cloud_->points[i].x + coefficients[1] * cloud_->points[i].y + coefficients[2] * cloud_->points[i].z - coefficients[3];
-        double threshold = 0.244626 * cloud_->points[i].x + -2.54532 * cloud_->points[i].y + 0 * cloud_->points[i].z - 3.85578;
+        double threshold = coefficients_[0] * input->points[i].x + coefficients_[1] * input->points[i].y + coefficients_[2] * input->points[i].z - coefficients_[3];
+        //double threshold = 0.244626 * input->points[i].x + -2.54532 * input->points[i].y + 0 * input->points[i].z - 3.85578;
         if (threshold < 0.01 && threshold > -0.01){
-            o->points.push_back(cloud_->points[i]);
+            temp_output->points.push_back(input->points[i]);
             count++;
         }
     }
     pcl::PassThrough<pcl::PointXYZ> pass;
-    pass.setInputCloud(o);
+    pass.setInputCloud(temp_output);
     pass.setFilterFieldName ("x");
-    pcl::PointCloud<pcl::PointXYZ>::Ptr o1 (new pcl::PointCloud<pcl::PointXYZ>);
-    pass.setFilterLimits (3.68824, 6.6);
-    //pass.setFilterLimitsNegative (true);
-    o1->points.clear();
-    pass.filter (*o1);
+    //pass.setFilterLimits (3.62829, 6.7);
+    pass.setFilterLimits (stairLoc_.x, stairLoc_.x + 3.1);
+    ROS_INFO_STREAM(stairLoc_.x << std::endl);
+    ROS_INFO_STREAM(temp_output->size() << std::endl);
+    pass.filter (*output);
+       ROS_INFO_STREAM(output->size() << std::endl);
+}
 
-//    pcl::ModelCoefficients::Ptr coefficients1 (new pcl::ModelCoefficients);
-//    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-    // Create the segmentation object
-//    pcl::SACSegmentationFromNormals<pcl::PointXYZ> seg;
-//    // Optional
-//    //seg.setOptimizeCoefficients (true);
-//    // Mandatory
-
-//    seg.setModelType (pcl::SACMODEL_PERPENDICULAR_PLANE);
-//    seg.setAxis(Eigen::Vector3f (0.0, 0.0, 1.0));
-//    seg.setEpsAngle(0.501799);
-//    seg.setMethodType (pcl::SAC_RANSAC);
-//    seg.setDistanceThreshold (0.003);
-
-//    seg.setInputCloud (o1);
-//    seg.segment (*inliers, *coefficients1);
-
-//    ROS_INFO_STREAM("Coefficients: " << inliers->indices.size() << std::endl);
-
-//    pcl::PointCloud<pcl::PointXYZ>::Ptr o2 (new pcl::PointCloud<pcl::PointXYZ>);
-//    o2->points.clear();
-//    for (size_t i = 0; i < inliers->indices.size(); i++)
-//    {
-//        o2->points.push_back(o1->points[inliers->indices[i]]);
-//    }
-//    // 0.244626	-2.54532	0	3.85578
-//    //ROS_INFO_STREAM("coefficients : " << coefficients[0] << "\t" << coefficients[1] << "\t"<< coefficients[2] << "\t"<< coefficients[3] << "\t" << std::endl);
-//    ROS_INFO_STREAM("coefficients : " << *coefficients1 << std::endl);
-
-
-    std::sort(o1->points.begin(), o1->points.end(), less_than_key());
-    geometry_msgs::Point dir = sd_.dirVector();
-    pcl::PointXYZ temp_point = o1->points[0];
-    pcl::PointCloud<pcl::PointXYZ>::Ptr o2 (new pcl::PointCloud<pcl::PointXYZ>);
-    for (size_t i = 1; i < o1->size(); i++)
+void steps_detector::zAxisSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output)
+{
+    std::sort(input->points.begin(), input->points.end(), comparePoints);
+        ROS_INFO_STREAM("1da" << std::endl);
+    pcl::PointXYZ temp_point = input->points[0];
+ROS_INFO_STREAM("1dab" << std::endl);
+    for (size_t i = 1; i < input->size(); i++)
     {
-        double dot_product = ((o1->points[i].x - temp_point.x) * dir.x + (o1->points[i].y - temp_point.y) * dir.y + (o1->points[i].z - temp_point.z) * dir.z);
-        //double cos_angle = ((o1->points[i].x - stairLoc.x) * dir.x + (o1->points[i].y - stairLoc.y) * dir.y + (o1->points[i].z - stairLoc.z) * dir.z)*100 / double(norm_cloud);
-        //ROS_INFO_STREAM("dot_product : " << dot_product << std::endl);
-        if (std::abs(dot_product) > 0.01) //&& std::abs(o2->points[i].z - temp_point_z) < 0.01 )
-        {
-            o2->points.push_back(o1->points[i]);
-        }
-        temp_point = o1->points[i];
+        double dot_product = ((input->points[i].x - temp_point.x) * 0 + (input->points[i].y - temp_point.y) * 0 + (input->points[i].z - temp_point.z) * 1);
+
+        if (std::abs(dot_product) > 0.01)
+            output->points.push_back(input->points[i]);
+        ROS_INFO_STREAM("1db" << std::endl);
+        temp_point = input->points[i];
     }
+    ROS_INFO_STREAM("1dc" << std::endl);
+}
 
-    std::sort(o2->points.begin(), o2->points.end(), less_than_key());
-    pcl::PointXYZ temp_point1;
-    temp_point1 = {0 ,0 ,0};
-    temp_point = o2->points[0];
+void steps_detector::stepCentroids(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output)
+{
+    std::sort(input->points.begin(), input->points.end(), comparePoints);
+    pcl::PointXYZ temp_point1 = {0 ,0 ,0};
+    pcl::PointXYZ temp_point = input->points[0];
     size_t j = 0;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr o3 (new pcl::PointCloud<pcl::PointXYZ>);
-    for (size_t i = 1 ; i < o2->size(); i++, j++)
+    pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    temp_cloud->clear();
+    for (size_t i = 1 ; i < input->size(); i++, j++)
     {
-        double dot_product = ((o2->points[i].x - temp_point.x) * dir.x + (o2->points[i].y - temp_point.y) * dir.y + (o2->points[i].z - temp_point.z) * dir.z);
-        //double cos_angle = ((o1->points[i].x - stairLoc.x) * dir.x + (o1->points[i].y - stairLoc.y) * dir.y + (o1->points[i].z - stairLoc.z) * dir.z)*100 / double(norm_cloud);
-        //ROS_INFO_STREAM("j : " << j << std::endl);
+        double dot_product = ((input->points[i].x - temp_point.x) * dirVector_.x + (input->points[i].y - temp_point.y) * dirVector_.y + (input->points[i].z - temp_point.z) * dirVector_.z);
 
-        if (std::abs(dot_product) > 0.04 && j > 5) //&& std::abs(o2->points[i].z - temp_point_z) < 0.01 )
+        if (std::abs(dot_product) > 0.04 && j > 5)
         {
             temp_point1.x /= double(j);
             temp_point1.y /= double(j);
             temp_point1.z /= double(j);
-            o3->points.push_back(temp_point1);
+            temp_cloud->points.push_back(temp_point1);
             temp_point1 = {0 ,0 ,0};
             j = 0;
         }
-
-        temp_point1.x += o2->points[i].x;
-        temp_point1.y += o2->points[i].y;
-        temp_point1.z += o2->points[i].z;
-        temp_point = o2->points[i];
+        temp_point1.x += input->points[i].x;
+        temp_point1.y += input->points[i].y;
+        temp_point1.z += input->points[i].z;
+        temp_point = input->points[i];
     }
-
     temp_point1.x /= double(j);
     temp_point1.y /= double(j);
     temp_point1.z /= double(j);
-    o3->points.push_back(temp_point1);
+    temp_cloud->points.push_back(temp_point1);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr o4 (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointXYZ temp_point2;
     temp_point2 = {0, 0, 0};
-    for (size_t i = 0; i < o3->size() - 1; i++)
+    for (size_t i = 0; i < temp_cloud->size() - 1; i++)
     {
-        temp_point2.x = (o3->points[i].x + o3->points[i+1].x)/2.0;
-        temp_point2.y = (o3->points[i].y + o3->points[i+1].y)/2.0;
-        temp_point2.z = (o3->points[i].z + o3->points[i+1].z)/2.0;
+        temp_point2.x = (temp_cloud->points[i].x + temp_cloud->points[i+1].x)/2.0;
+        temp_point2.y = (temp_cloud->points[i].y + temp_cloud->points[i+1].y)/2.0;
+        temp_point2.z = (temp_cloud->points[i].z + temp_cloud->points[i+1].z)/2.0;
 
-        o4->points.push_back(temp_point2);
+        output->points.push_back(temp_point2);
     }
 
-    for (size_t i = 0; i < o4->size() - 1; i++)
-    {
-        ROS_INFO_STREAM("x : " << o4->points[i+1].x - o4->points[i].x << std::endl);
-    }
-
-//    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
-//    tree->setInputCloud (o2);
-
-//    std::vector<pcl::PointIndices> cluster_indices;
-//    pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-//    int cloud_size = (int)o2->points.size();
-//    ec.setClusterTolerance (0.03); // 2cm
-//    ec.setMinClusterSize (3);
-//    ec.setMaxClusterSize (cloud_size);
-//    ec.setSearchMethod (tree);
-//    ec.setInputCloud (o2);
-//    ec.extract (cluster_indices);
-
-//    ROS_INFO_STREAM("size : " << cluster_indices.size() << std::endl);
-
-//    pcl::PointCloud<pcl::PointXYZ>::Ptr o3 (new pcl::PointCloud<pcl::PointXYZ>);
-//    o3->resize(o2->size());
-//    size_t j = 0;
-//    for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it, ++j)
+//    for (size_t i = 0; i < o4->size() - 1; i++)
 //    {
-//        Eigen::Vector4f cloudCentroid;
-//        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
-//        for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); ++pit)
-//            cloud_cluster->points.push_back (o2->points[*pit]);
-//        pcl::compute3DCentroid(*cloud_cluster, cloudCentroid);
-//        o3->points[j].x = cloudCentroid(0);
-//        o3->points[j].y = cloudCentroid(1);
-//        o3->points[j].z = cloudCentroid(2);
+//        ROS_INFO_STREAM("x : " << o4->points[i+1].x - o4->points[i].x << std::endl);
 //    }
-    //ROS_INFO_STREAM("Count" << o3->points.size() << std::endl);
-    sensor_msgs::PointCloud2 output;
-    pcl::toROSMsg(*o4, output);
-    output.header.frame_id = "world";
-    pcl_pub_.publish(output);
 }
+

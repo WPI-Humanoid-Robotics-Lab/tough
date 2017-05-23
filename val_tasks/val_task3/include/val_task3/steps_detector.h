@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <math.h>
+#include <mutex>
+#include <thread>
 
 #include <ros/ros.h>
 
@@ -40,7 +42,6 @@
 #include <pcl/sample_consensus/ransac.h>
 #include "val_controllers/robot_state.h"
 #include <visualization_msgs/MarkerArray.h>
-#include "val_task3/stair_detector.h"
 
 class steps_detector
 {
@@ -48,20 +49,24 @@ class steps_detector
     ros::NodeHandle nh_;
     ros::Publisher pcl_pub_;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_;
-    stair_detector sd_;
+    std::vector<double> coefficients_;
+    geometry_msgs::Point dirVector_;
+    geometry_msgs::Point stairLoc_;
+    std::mutex mtx_;
 
 public:
     steps_detector(ros::NodeHandle& );
     ~steps_detector();
     void stepsCB(const sensor_msgs::PointCloud2::Ptr& );
-    void planeSegmentation(const std::vector<double>& , const geometry_msgs::Point & );
-    struct less_than_key
-    {
-        inline bool operator ()(const pcl::PointXYZ& p1, const pcl::PointXYZ& p2)
-        {
-        return ((std::pow(p1.x, 2) + std::pow(p1.y, 2) + std::pow(p1.z, 2)) < (std::pow(p2.x, 2) + std::pow(p2.y, 2) + std::pow(p2.z, 2)));
-        }
-    };
+    void planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output);
+    void zAxisSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output);
+    void stepCentroids(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output);
+    void getStepsPosition(const std::vector<double>& , const geometry_msgs::Point& dirVector, const geometry_msgs::Point& stairLoc);
 };
+
+bool comparePoints(const pcl::PointXYZ& p1, const pcl::PointXYZ& p2)
+{
+    return ((std::pow(p1.x, 2) + std::pow(p1.y, 2) + std::pow(p1.z, 2)) < (std::pow(p2.x, 2) + std::pow(p2.y, 2) + std::pow(p2.z, 2)));
+}
 
 #endif // STEPS_DETECTOR_H
