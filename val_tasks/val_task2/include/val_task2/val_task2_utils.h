@@ -34,11 +34,11 @@ private:
 
 
     // Need to edit
-    const std::vector<float> leftShoulderSeedPanelGraspStatic_ = {-0.04, -1.04, 0.17, -0.94, 1.18, -0.01, 0.08};
+    const std::vector<float> leftShoulderSeedPanelGraspStatic_ = {-1.15, -1.04, 1.39, -1.69, 1.89, 0, 0};
     const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.04, -1.16, 0.12, -0.94, 1.13, -0.01, 0.08};
 
     //before walking
-    const std::vector<float> rightShoulderSeedPanelGraspStatic_ = {-0.04, 1.04, 0.17, 0.94, 1.18, 0.01, -0.08};
+    const std::vector<float> rightShoulderSeedPanelGraspStatic_ = {-1.15, 1.04, 1.39, 1.69, 1.89, 0, 0};
     //while walking
     const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.04, 1.16, 0.12, 0.94, 1.13, 0.01, -0.08};
 
