@@ -1,4 +1,4 @@
-#include <val_control/val_chest_navigation.h>
+#include <val_controllers/val_chest_navigation.h>
 #include <stdlib.h>
 
 int main(int argc, char **argv)

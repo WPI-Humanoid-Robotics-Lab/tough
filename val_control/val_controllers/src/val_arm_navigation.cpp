@@ -1,4 +1,4 @@
-#include<val_control/val_arm_navigation.h>
+#include<val_controllers/val_arm_navigation.h>
 #include<stdlib.h>
 #include<visualization_msgs/Marker.h>
 

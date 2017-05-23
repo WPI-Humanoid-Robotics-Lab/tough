@@ -1,4 +1,4 @@
-#include <val_control/val_chest_navigation.h>
+#include <val_controllers/val_chest_navigation.h>
 #include <tf/transform_listener.h>
 #include <val_common/val_common_names.h>
 
