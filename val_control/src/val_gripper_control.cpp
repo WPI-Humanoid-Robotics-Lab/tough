@@ -42,10 +42,12 @@ void gripperControl::controlGripper(const armSide side, GRIPPER_STATE state)
     switch (state) {
     case GRIPPER_STATE::OPEN:
         msg.data.resize(5);
+        msg.data.assign(5,0.0);
         break;
 
     case GRIPPER_STATE::OPEN_THUMB_IN:
         msg.data.resize(5);
+        msg.data.assign(5,0.0);
         msg.data[0] = 1.4;
         break;
 

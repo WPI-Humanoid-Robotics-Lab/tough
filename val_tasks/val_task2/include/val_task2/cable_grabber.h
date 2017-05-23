@@ -21,7 +21,6 @@ public:
 
 private:
     ros::NodeHandle nh_;
-    tf::TransformListener listener_;
     armTrajectory armTraj_;
     gripperControl gripper_;
     RobotStateInformer *current_state_;
