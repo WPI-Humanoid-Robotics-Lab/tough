@@ -1,4 +1,3 @@
-
 #include <val_task2/cable_task.h>
 int main(int argc, char **argv)
 {
