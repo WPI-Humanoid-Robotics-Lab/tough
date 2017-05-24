@@ -1,4 +1,4 @@
-#include <val_control/val_gripper_control.h>
+#include <val_controllers/val_gripper_control.h>
 #include <stdlib.h>
 
 int main(int argc, char **argv){

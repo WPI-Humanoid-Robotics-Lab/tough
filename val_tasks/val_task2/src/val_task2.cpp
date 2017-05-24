@@ -39,6 +39,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     walker_ = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
     pelvis_controller_ = new pelvisTrajectory(nh_);
     walk_track_ = new walkTracking(nh_);
+
     //initialize all detection pointers
     rover_detector_ = nullptr;
     rover_detector_fine_   = nullptr;
@@ -126,7 +127,6 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
         rover_detector_ = new RoverDetector(nh_);
     }
 
-    static int fail_count = 0;
     static int retry_count = 0;
     std::vector<std::vector<geometry_msgs::Pose> > roverPoseWaypoints;
     rover_detector_->getDetections(roverPoseWaypoints);
@@ -169,8 +169,6 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
             ROS_INFO("detected rover");
             if(rover_detector_ != nullptr) delete rover_detector_;
             rover_detector_ = nullptr;
-            if(rover_detector_fine_ != nullptr) delete rover_detector_fine_;
-            rover_detector_fine_ = nullptr;
         }
         else{
             eventQueue.riseEvent("/DETECT_ROVER_RETRY");
@@ -184,23 +182,12 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
     }
 
     // if failed for more than 5 times, go to error state
-    else if (fail_count > 5) {
+    else {
         // reset the fail count
         ROS_INFO("Rover detection failed");
-        fail_count = 0;
         eventQueue.riseEvent("/DETECT_ROVER_FAILED");
         if(rover_detector_ != nullptr) delete rover_detector_;
         rover_detector_ = nullptr;
-        if(rover_detector_fine_ != nullptr) delete rover_detector_fine_;
-        rover_detector_fine_ = nullptr;
-    }
-    // if failed retry detecting the panel
-    else
-    {
-        ROS_INFO("Retrying detection");
-        // increment the fail count
-        fail_count++;
-        eventQueue.riseEvent("/DETECT_ROVER_RETRY");
     }
 
     while(!preemptiveWait(1000, eventQueue)){
@@ -220,7 +207,6 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
     static geometry_msgs::Pose2D goal , pose_prev;
 
     static int fail_count = 0;
-    static bool isCoarseGoalReachedBefore = false;
     static std::queue<geometry_msgs::Pose2D> goal_waypoints;
     // Run this block once during every visit of the state from either a failed state or previous state
     if(executeOnce){
@@ -230,7 +216,6 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
         }
         goal = goal_waypoints.front();
         goal_waypoints.pop();
-        isCoarseGoalReachedBefore = false;
         fail_count = 0;
         executeOnce = false;
         geometry_msgs::Pose2D  temp;
@@ -249,7 +234,6 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
             ROS_INFO("Final few steps before we reach rover");
             //            walker_->walkLocalPreComputedSteps({0.3,0.3},{0.0,0.0},RIGHT);
             //            ros::Duration(1).sleep();
-            // TODO: check if robot rechead the panel
             eventQueue.riseEvent("/REACHED_ROVER");
             executeOnce = true;
             ros::Duration(1).sleep();

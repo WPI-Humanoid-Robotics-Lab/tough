@@ -13,7 +13,7 @@
         <chain base_link="leftShoulderPitchLink" tip_link="leftPalm" />
     </group>
     <group name="rightArm">
-        <chain base_link="torso" tip_link="rightPalm" />
+        <chain base_link="rightShoulderPitchLink" tip_link="rightPalm" />
     </group>
     <group name="rightPalm">
         <chain base_link="pelvis" tip_link="rightPalm" />

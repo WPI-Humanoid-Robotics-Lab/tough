@@ -1,4 +1,4 @@
-#include <val_control/val_pelvis_navigation.h>
+#include <val_controllers/val_pelvis_navigation.h>
 #include <stdlib.h>
 
 int main(int argc, char **argv)

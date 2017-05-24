@@ -4,11 +4,11 @@
 #include <geometry_msgs/Pose.h>
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
-#include <val_control/val_arm_navigation.h>
-#include <val_control/val_gripper_control.h>
-#include <val_control/robot_state.h>
+#include <val_controllers/val_arm_navigation.h>
+#include <val_controllers/val_gripper_control.h>
+#include <val_controllers/robot_state.h>
 #include "val_moveit_planners/val_cartesian_planner.h"
-#include "val_control/val_wholebody_manipulation.h"
+#include "val_controllers/val_wholebody_manipulation.h"
 #include <val_task_common/val_task_common_utils.h>
 #include <tf/transform_datatypes.h>
 

@@ -1,8 +1,8 @@
 #include <ros/ros.h>
-#include <val_control/val_arm_navigation.h>
-#include <val_control/val_pelvis_navigation.h>
+#include <val_controllers/val_arm_navigation.h>
+#include <val_controllers/val_pelvis_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
-#include <val_control/val_chest_navigation.h>
+#include <val_controllers/val_chest_navigation.h>
 #include <ihmc_msgs/ChestTrajectoryRosMessage.h>
 #include <ihmc_msgs/FootTrajectoryRosMessage.h>
 #include <tf2/utils.h>

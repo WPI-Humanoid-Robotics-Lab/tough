@@ -15,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   tf
   val_common
-  val_control
+  val_controllers
   )
 
 catkin_package(

@@ -47,11 +47,10 @@ cableGrabber::cableGrabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh
     rightHandOrientation_.quaternion.w = 0.188;
 
     // cartesian planners for the arm
-    left_arm_planner_ = new cartesianPlanner("leftPalm", VAL_COMMON_NAMES::WORLD_TF);
-    right_arm_planner_ = new cartesianPlanner("rightMiddleFingerGroup", VAL_COMMON_NAMES::WORLD_TF);
+    left_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    right_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     wholebody_controller_ = new wholebodyManipulation(nh_);
     chest_controller_ = new chestTrajectory(nh_);
-    marker_pub_ = nh_.advertise<visualization_msgs::Marker>("modified_cable_position",1);
 }
 
 cableGrabber::~cableGrabber()
@@ -59,6 +58,7 @@ cableGrabber::~cableGrabber()
     delete left_arm_planner_;
     delete right_arm_planner_;
     delete wholebody_controller_;
+    delete chest_controller_;
 }
 
 void cableGrabber::grasp_cable(const armSide side, const geometry_msgs::Point &goal, float executionTime)
@@ -72,13 +72,13 @@ void cableGrabber::grasp_cable(const armSide side, const geometry_msgs::Point &g
     if(side == armSide::LEFT){
         seed = &leftShoulderSeed_;
         palmFrame = VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME;
-        palmToFingerOffset = 0.07;//-0.15;
+        palmToFingerOffset = 0.07;
         finalOrientationStamped = &leftHandOrientation_;
     }
     else {
         seed = &rightShoulderSeed_;
         palmFrame = VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
-        palmToFingerOffset = -0.07;//0.15;
+        palmToFingerOffset = -0.07;
         finalOrientationStamped = &rightHandOrientation_;
         seedAfter=&rightAfterGraspShoulderSeed_;
     }
@@ -115,25 +115,12 @@ void cableGrabber::grasp_cable(const armSide side, const geometry_msgs::Point &g
 
     ROS_INFO("Moving at an intermidate point before goal");
 
-    //    geometry_msgs::Pose inter;
-
-    //    inter.position=intermGoal;
-    //    inter.orientation= temp.quaternion;
-
-
-    //    armTraj_.moveArmInTaskSpace(side, inter, executionTime*2);
-    //    ros::Duration(executionTime*2).sleep();
-
-    //move arm to final position with known orientation
 
     current_state_->transformPoint(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF, palmFrame);
     current_state_->transformPoint(intermGoal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, palmFrame);
 
     intermGoal.y += palmToFingerOffset;
-    intermGoal.z -= 0.0;//0.02; //finger to center of palm in Z-axis of hand frame
     finalGoal.y  += palmToFingerOffset; // this is to compensate for the distance between palm frame and center of palm
-    finalGoal.z  -= 0.0;//0.02; //finger to center of palm in Z-axis of hand frame
-
 
     //transform that point back to world frame
     current_state_->transformPoint(finalGoal, finalGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);

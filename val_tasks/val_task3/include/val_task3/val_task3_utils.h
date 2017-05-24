@@ -8,11 +8,11 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <val_common/val_common_names.h>
-#include <val_control/val_chest_navigation.h>
-#include <val_control/val_pelvis_navigation.h>
-#include <val_control/val_gripper_control.h>
-#include <val_control/val_head_navigation.h>
-#include <val_control/val_arm_navigation.h>
+#include <val_controllers/val_chest_navigation.h>
+#include <val_controllers/val_pelvis_navigation.h>
+#include <val_controllers/val_gripper_control.h>
+#include <val_controllers/val_head_navigation.h>
+#include <val_controllers/val_arm_navigation.h>
 
 
 class task3Utils{

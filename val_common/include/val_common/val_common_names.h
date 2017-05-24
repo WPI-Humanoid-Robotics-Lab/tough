@@ -36,6 +36,25 @@ namespace VAL_COMMON_NAMES
     /* Topics*/
     static const std::string RECTIFIED_IMAGE_TOPIC = "/multisense/camera/left/image_rect_color";
 
+    /* Moveit Groups */
+    // leftArm -- > leftShoulderPitchLink to leftPalm
+    static const std::string LEFT_ARM_GROUP = "leftArm";
+
+    // rightArm -- > rightShoulderPitchLink to rightPalm
+    static const std::string RIGHT_ARM_GROUP = "rightArm";
+
+    // leftPalm -- > pelvis to leftPalm
+    static const std::string LEFT_PALM_GROUP = "leftPalm";
+
+    // rightPalm -- > pelvis to rightPalm
+    static const std::string RIGHT_PALM_GROUP = "rightPalm";
+
+    // rightMiddleFingerGroup -- > pelvis to rightMiddleFingerPitch1Link
+    static const std::string RIGHT_ENDEFFECTOR_GROUP = "rightMiddleFingerGroup";
+
+    // leftMiddleFingerGroup -- > pelvis to leftMiddleFingerPitch1Link
+    static const std::string LEFT_ENDEFFECTOR_GROUP = "leftMiddleFingerGroup";
+
 }
 
 #endif
