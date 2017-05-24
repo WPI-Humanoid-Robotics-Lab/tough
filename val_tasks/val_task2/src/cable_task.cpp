@@ -97,10 +97,21 @@ bool cableTask::grasp_cable(const armSide side, const geometry_msgs::Point &goal
     ros::Duration(executionTime).sleep();
 
     //move shoulder roll outwards
-    ROS_INFO("Setting shoulder roll");
+    ROS_INFO("Initial Pose");
     std::vector< std::vector<float> > armData;
+
+    armData.push_back(leftShoulderSeedInitial_);
+    armTraj_.moveArmJoints(LEFT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
+    armData.clear();
+    armData.push_back(rightShoulderSeedInitial_);
+    armTraj_.moveArmJoints(RIGHT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
+
+    armData.clear();
     armData.push_back(*seed);
 
+    ROS_INFO("Moving closer to cable");
     armTraj_.moveArmJoints(side, armData, executionTime);
     ros::Duration(executionTime*2).sleep();
 
@@ -198,6 +209,16 @@ bool cableTask::insert_cable(const armSide side, const geometry_msgs::Point &goa
         finalOrientationStamped = &rightHandOrientationSide_;
     }
 
+    ROS_INFO("Setting initial pose");
+    std::vector< std::vector<float> > armData;
+    armData.push_back(leftShoulderSeedInitial_);
+    armTraj_.moveArmJoints(LEFT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
+    armData.clear();
+    armData.push_back(rightShoulderSeedInitial_);
+    armTraj_.moveArmJoints(RIGHT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
+
     // getting the orientation
     geometry_msgs::QuaternionStamped temp  = *finalOrientationStamped;
     current_state_->transformQuaternion(temp, temp);
@@ -206,19 +227,17 @@ bool cableTask::insert_cable(const armSide side, const geometry_msgs::Point &goa
     geometry_msgs::Pose finalPoint;
     std::vector<geometry_msgs::Pose> waypoints;
 
-    // To determine the lower and upper limits of lowering the cable
-    float lowerLimit,upperLimit,step;
-    upperLimit-0.2;
-    lowerLimit=0.1;
-    step=0.01;
 
-    for(size_t i=goal.z+upperLimit; i<goal.z+lowerLimit;i-=step)
-    {
-        finalPoint.position=goal;
-        finalPoint.position.z+=i;
-        finalPoint.orientation=temp.quaternion;
-        waypoints.push_back(finalPoint);
-    }
+    finalPoint.position=goal;
+    finalPoint.position.z+=0.3;
+    finalPoint.orientation=temp.quaternion;
+    waypoints.push_back(finalPoint);
+
+    finalPoint.position=goal;
+    finalPoint.position.z+=0.2;
+    finalPoint.orientation=temp.quaternion;
+    waypoints.push_back(finalPoint);
+
 
     moveit_msgs::RobotTrajectory traj;
     if(side == armSide::LEFT)
@@ -230,7 +249,7 @@ bool cableTask::insert_cable(const armSide side, const geometry_msgs::Point &goa
         right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
     }
 
-    ROS_INFO("Calculated Traj");
+    ROS_INFO("Moving to goal");
     wholebody_controller_->compileMsg(side, traj.joint_trajectory);
     ros::Duration(executionTime).sleep();
 

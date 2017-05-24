@@ -40,6 +40,10 @@ private:
     const std::vector<float> rightShoulderSeed_ = {-0.57, 1.09, 0.65, 1.14, 2.78, -0.19, 0.31}; //approach 1
     const std::vector<float> rightAfterGraspShoulderSeed_ = {-0.57, 1.09, 0.65, 1.1, 1.18, -0.19, 0.31};
 
+    // Initial Seed
+    const std::vector<float> leftShoulderSeedInitial_ = {-0.81,0.0,0.65,-1.51,1.26,0.0,0.0};
+    const std::vector<float> rightShoulderSeedInitial_ = {-0.81,0.19,0.65,1.49,1.29,0.0,0.0};
+
 };
 
 #endif // CABLETASK_H
