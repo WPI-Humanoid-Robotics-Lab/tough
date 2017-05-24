@@ -37,6 +37,7 @@ void task2Utils::afterPanelGraspPose(const armSide side)
     }
 
     std::vector< std::vector<float> > armData;
+    armData.clear();
     armData.push_back(*seed1);
 
     arm_controller_->moveArmJoints(side, armData, 2.0f);

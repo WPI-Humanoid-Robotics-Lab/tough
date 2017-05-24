@@ -39,7 +39,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     walker_ = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
     pelvis_controller_ = new pelvisTrajectory(nh_);
     walk_track_ = new walkTracking(nh_);
-
+    chest_controller_ = new chestTrajectory(nh_);
     //initialize all detection pointers
     rover_detector_ = nullptr;
     rover_detector_fine_   = nullptr;
@@ -128,6 +128,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
     }
 
     static int retry_count = 0;
+    static int fail_count = 0;
     std::vector<std::vector<geometry_msgs::Pose> > roverPoseWaypoints;
     rover_detector_->getDetections(roverPoseWaypoints);
 
@@ -164,6 +165,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
             taskCommonUtils::moveToWalkSafePose(nh_);
 
             retry_count = 0;
+            fail_count = 0;
             // update the plane coeffecients
             eventQueue.riseEvent("/DETECTED_ROVER");
             ROS_INFO("detected rover");
@@ -179,11 +181,18 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
         ++retry_count;
         ros::Duration(2).sleep();
         eventQueue.riseEvent("/DETECT_ROVER_RETRY");
+    }   else if (fail_count < 5)    {
+        // increment the fail count
+        fail_count++;
+        taskCommonUtils::clearPointCloud(nh_);
+        eventQueue.riseEvent("/DETECT_ROVER_RETRY");
     }
 
     // if failed for more than 5 times, go to error state
     else {
         // reset the fail count
+        fail_count = 0;
+        retry_count = 0;
         ROS_INFO("Rover detection failed");
         eventQueue.riseEvent("/DETECT_ROVER_FAILED");
         if(rover_detector_ != nullptr) delete rover_detector_;
@@ -296,14 +305,9 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
 {
     ROS_INFO_STREAM("executing " << name);
 
-    // we reached here means we don't need the map blocker anymore.
-    if (rover_in_map_blocker_ != nullptr){
-        delete rover_in_map_blocker_;
-        rover_in_map_blocker_  = nullptr;
-    }
-
     if(solar_panel_detector_ == nullptr) {
         solar_panel_detector_ = new SolarPanelDetect(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
+        chest_controller_->controlChest(0, 0, 0);
         ros::Duration(0.2).sleep();
     }
 
@@ -322,6 +326,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
 
         ROS_INFO_STREAM("Position " << poses[idx].position.x<< " " <<poses[idx].position.y <<" "<<poses[idx].position.z);
         ROS_INFO_STREAM("quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w);
+        fail_count = 0;
         retry_count = 0;
         eventQueue.riseEvent("/DETECTED_PANEL");
         if(solar_panel_detector_ != nullptr) delete solar_panel_detector_;
@@ -339,6 +344,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
     {
         // reset the fail count
         fail_count = 0;
+        retry_count = 0;
         eventQueue.riseEvent("/DETECT_PANEL_FAILED");
         if(solar_panel_detector_ != nullptr) delete solar_panel_detector_;
         solar_panel_detector_ = nullptr;
@@ -361,6 +367,11 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
 decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+    // we reached here means we don't need the map blocker anymore.
+    if (rover_in_map_blocker_ != nullptr){
+        delete rover_in_map_blocker_;
+        rover_in_map_blocker_  = nullptr;
+    }
 
     /*
      * Executing -> when grasp_handles is called

@@ -1,29 +1,36 @@
-#include "val_task2/cable_grabber.h"
+#include "val_task2/cable_task.h"
 
 
-cableGrabber::cableGrabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
+cableTask::cableTask(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-    leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationTop_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
     /* Top Grip */
 
-    leftHandOrientation_.quaternion.x = 0.604;
-    leftHandOrientation_.quaternion.y = 0.434;
-    leftHandOrientation_.quaternion.z = -0.583;
-    leftHandOrientation_.quaternion.w = 0.326;
+    leftHandOrientationTop_.quaternion.x = 0.604;
+    leftHandOrientationTop_.quaternion.y = 0.434;
+    leftHandOrientationTop_.quaternion.z = -0.583;
+    leftHandOrientationTop_.quaternion.w = 0.326;
 
-    //    /* Side Grip */
-    //    leftHandOrientation_.quaternion.x = 0.155;
-    //    leftHandOrientation_.quaternion.y = -0.061;
-    //    leftHandOrientation_.quaternion.z = -0.696;
-    //    leftHandOrientation_.quaternion.w = 0.699;
+    /* Top Grip Flat Hand */
+    rightHandOrientationTop_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    rightHandOrientationTop_.quaternion.x = -0.549;
+    rightHandOrientationTop_.quaternion.y = 0.591;
+    rightHandOrientationTop_.quaternion.z = 0.560;
+    rightHandOrientationTop_.quaternion.w = 0.188;
 
-    //    /* Side Grip */
-    //    rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    //    rightHandOrientation_.quaternion.x = -0.094;
-    //    rightHandOrientation_.quaternion.y = -0.027;
-    //    rightHandOrientation_.quaternion.z = 0.973;
-    //    rightHandOrientation_.quaternion.w = -0.209;
+    /* Side Grip */
+    leftHandOrientationSide_.quaternion.x = 0.155;
+    leftHandOrientationSide_.quaternion.y = -0.061;
+    leftHandOrientationSide_.quaternion.z = -0.696;
+    leftHandOrientationSide_.quaternion.w = 0.699;
+
+    /* Side Grip */
+    rightHandOrientationSide_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    rightHandOrientationSide_.quaternion.x = -0.094;
+    rightHandOrientationSide_.quaternion.y = -0.027;
+    rightHandOrientationSide_.quaternion.z = 0.973;
+    rightHandOrientationSide_.quaternion.w = -0.209;
 
     /* Top Grip Flat Hand */
     //    rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
@@ -39,13 +46,6 @@ cableGrabber::cableGrabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh
     //    rightHandOrientation_.quaternion.z = -0.614;
     //    rightHandOrientation_.quaternion.w = -0.261;
 
-    /* Top Grip Flat Hand */
-    rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    rightHandOrientation_.quaternion.x = -0.549;
-    rightHandOrientation_.quaternion.y = 0.591;
-    rightHandOrientation_.quaternion.z = 0.560;
-    rightHandOrientation_.quaternion.w = 0.188;
-
     // cartesian planners for the arm
     left_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     right_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
@@ -53,7 +53,7 @@ cableGrabber::cableGrabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh
     chest_controller_ = new chestTrajectory(nh_);
 }
 
-cableGrabber::~cableGrabber()
+cableTask::~cableTask()
 {
     delete left_arm_planner_;
     delete right_arm_planner_;
@@ -61,7 +61,7 @@ cableGrabber::~cableGrabber()
     delete chest_controller_;
 }
 
-void cableGrabber::grasp_cable(const armSide side, const geometry_msgs::Point &goal, float executionTime)
+bool cableTask::grasp_cable(const armSide side, const geometry_msgs::Point &goal, float executionTime)
 {
     // setting initial values
     geometry_msgs::QuaternionStamped* finalOrientationStamped;
@@ -71,15 +71,16 @@ void cableGrabber::grasp_cable(const armSide side, const geometry_msgs::Point &g
     float palmToFingerOffset;
     if(side == armSide::LEFT){
         seed = &leftShoulderSeed_;
+        seedAfter=&leftShoulderSeed_;
         palmFrame = VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME;
         palmToFingerOffset = 0.07;
-        finalOrientationStamped = &leftHandOrientation_;
+        finalOrientationStamped = &leftHandOrientationTop_;
     }
     else {
         seed = &rightShoulderSeed_;
         palmFrame = VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
         palmToFingerOffset = -0.07;
-        finalOrientationStamped = &rightHandOrientation_;
+        finalOrientationStamped = &rightHandOrientationTop_;
         seedAfter=&rightAfterGraspShoulderSeed_;
     }
 
@@ -92,7 +93,7 @@ void cableGrabber::grasp_cable(const armSide side, const geometry_msgs::Point &g
     gripper1={1.2, 0.4, 0.3, 0.0 ,0.0 };
     gripper2={1.2, 0.6, 0.7, 0.0 ,0.0 };
     gripper3={1.2, 0.6, 0.7, 0.9 ,1.0 };
-    gripper_.controlGripper(RIGHT,gripper1);
+    gripper_.controlGripper(side,gripper1);
     ros::Duration(executionTime).sleep();
 
     //move shoulder roll outwards
@@ -159,13 +160,13 @@ void cableGrabber::grasp_cable(const armSide side, const geometry_msgs::Point &g
     ros::Duration(executionTime).sleep();
 
     ROS_INFO("Grip Sequence 1");
-    gripper_.controlGripper(RIGHT, gripper1);
+    gripper_.controlGripper(side, gripper1);
     ros::Duration(0.1).sleep();
     ROS_INFO("Grip Sequence 2");
-    gripper_.controlGripper(RIGHT, gripper2);
+    gripper_.controlGripper(side, gripper2);
     ros::Duration(0.1).sleep();
     ROS_INFO("Grip Sequence 3");
-    gripper_.controlGripper(RIGHT, gripper3);
+    gripper_.controlGripper(side, gripper3);
     ros::Duration(0.1).sleep();
 
     ROS_INFO("Moving chest to zero position");
@@ -176,5 +177,61 @@ void cableGrabber::grasp_cable(const armSide side, const geometry_msgs::Point &g
     ROS_INFO("Moving arms to intermediate position");
     armTraj_.moveArmJoints(side, armData, executionTime);
     ros::Duration(executionTime*2).sleep();
+    return true;
+
+}
+
+bool cableTask::insert_cable(const armSide side, const geometry_msgs::Point &goal, float executionTime)
+{
+    /*
+     * calculate difference in (x,y) position of middlefinger and socket point
+     * subscribe to the topic /srcsim/finals/task to check when the cable touches
+     * lower the cable( to a defined depth) till you see the touch message
+     * if in touch position stop moving and wait for completion. release the cable when completed
+     * if none of the above happens, do that in a circular area of defined radius
+    */
+    geometry_msgs::QuaternionStamped* finalOrientationStamped;
+    if(side == armSide::LEFT){
+        finalOrientationStamped = &leftHandOrientationSide_;
+    }
+    else{
+        finalOrientationStamped = &rightHandOrientationSide_;
+    }
+
+    // getting the orientation
+    geometry_msgs::QuaternionStamped temp  = *finalOrientationStamped;
+    current_state_->transformQuaternion(temp, temp);
+
+
+    geometry_msgs::Pose finalPoint;
+    std::vector<geometry_msgs::Pose> waypoints;
+
+    // To determine the lower and upper limits of lowering the cable
+    float lowerLimit,upperLimit,step;
+    upperLimit-0.2;
+    lowerLimit=0.1;
+    step=0.01;
+
+    for(size_t i=goal.z+upperLimit; i<goal.z+lowerLimit;i-=step)
+    {
+        finalPoint.position=goal;
+        finalPoint.position.z+=i;
+        finalPoint.orientation=temp.quaternion;
+        waypoints.push_back(finalPoint);
+    }
+
+    moveit_msgs::RobotTrajectory traj;
+    if(side == armSide::LEFT)
+    {
+        left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+    }
+    else
+    {
+        right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+    }
+
+    ROS_INFO("Calculated Traj");
+    wholebody_controller_->compileMsg(side, traj.joint_trajectory);
+    ros::Duration(executionTime).sleep();
 
 }
