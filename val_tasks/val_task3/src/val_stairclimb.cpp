@@ -28,3 +28,8 @@ bool StairClimb::takeStep(armSide side,float stepLength, float stepHeight)
     walker_->raiseLeg(side,stepHeight,stepLength);
 
 }
+
+int main(int argc, char** argv){
+
+    return 0;
+}
