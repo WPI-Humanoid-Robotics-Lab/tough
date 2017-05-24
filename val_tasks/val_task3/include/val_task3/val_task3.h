@@ -21,11 +21,11 @@
 #include "val_footstep/ValkyrieWalker.h"
 #include "val_task_common/val_walk_tracker.h"
 #include "val_task_common/panel_detection.h"
-#include "val_control/val_chest_navigation.h"
-#include "val_control/val_pelvis_navigation.h"
-#include "val_control/val_head_navigation.h"
-#include "val_control/val_gripper_control.h"
-#include "val_control/robot_state.h"
+#include "val_controllers/val_chest_navigation.h"
+#include "val_controllers/val_pelvis_navigation.h"
+#include "val_controllers/val_head_navigation.h"
+#include "val_controllers/val_gripper_control.h"
+#include "val_controllers/robot_state.h"
 
 
 using namespace decision_making;
