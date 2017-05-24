@@ -142,8 +142,23 @@ void SolarArrayDetector::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
         (i)->z = 0;
     }
 
+    // Widen cloud in +/- y to make sure val doesn't walk into the side of it
+    Eigen::Affine3f rover_shift_l, rover_shift_r;
+    const auto rover_align = Eigen::AngleAxisf(theta, Eigen::Vector3f::UnitZ());
+
+    rover_shift_l.linear() = Eigen::Matrix3f::Identity();
+    rover_shift_l.translation() = rover_align * Eigen::Vector3f(0, -0.4, 0);
+    rover_shift_r.linear() = Eigen::Matrix3f::Identity();
+    rover_shift_r.translation() = rover_align * Eigen::Vector3f(0, 0.4, 0);
+
+    pcl::PointCloud<pcl::PointXYZ> rover_shifted_l, rover_shifted_r;
+    pcl::transformPointCloud(rover_cloud, rover_shifted_l, rover_shift_l);
+    pcl::transformPointCloud(rover_cloud, rover_shifted_r, rover_shift_r);
+
+    rover_shifted_l += rover_shifted_r;
+
     sensor_msgs::PointCloud2 output;
-    pcl::toROSMsg(rover_cloud,rover_output);
+    pcl::toROSMsg(rover_shifted_l, rover_output);
     //ROS_INFO("rover cloud size %d",(int)rover_cloud.points.size());
     output.header.frame_id="world";
     rover_cloud_pub.publish(rover_output);
