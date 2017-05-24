@@ -88,6 +88,8 @@ void SolarArrayDetector::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     rotation.getRPY(roll,pitch,yaw);
     */
     double theta;
+    theta = rover_loc_.theta;
+/*
     if (isroverRight_)
     {
         theta = rover_loc_.theta-1.5708; // rover right of walkway
@@ -96,6 +98,7 @@ void SolarArrayDetector::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     {
         theta = rover_loc_.theta+1.5708;   //left of walkway
     }
+*/
 
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;
