@@ -12,7 +12,7 @@ task1Utils::task1Utils(ros::NodeHandle nh):
 
 task1Utils::~task1Utils()
 {
-
+  satellite_sub_.shutdown();
 }
 
 
