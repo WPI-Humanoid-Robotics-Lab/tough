@@ -13,7 +13,7 @@
 #define  MINIMUM_MOVMENT_IN_RAD  0.0872665
 
 // control time ouit (real time)
-#define HANDLE_CONTROL_TIMEOUT_SEC 180 //sec
+#define HANDLE_CONTROL_TIMEOUT_SEC 120 //sec
 
 // previous grasp state
 enum class prevGraspState {

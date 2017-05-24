@@ -61,8 +61,8 @@ valTask1::valTask1(ros::NodeHandle nh):
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask1::visited_map_cb, this);
 
     // cartesian planners for the arm
-    left_arm_planner_ = new cartesianPlanner("leftPalm", "/world");
-    right_arm_planner_ = new cartesianPlanner("rightPalm", "/world");
+    left_arm_planner_ = new cartesianPlanner("leftPalm",  "/world"); // "leftMiddleFingerGroup", "/world");
+    right_arm_planner_ = new cartesianPlanner("rightPalm",  "/world"); // "rightMiddleFingerGroup", "/world");
 
     // upper body tracker
     upper_body_tracker_ = new upperBodyTracker(nh_);
@@ -228,6 +228,8 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
         eventQueue.riseEvent("/DETECT_PANEL_FAILED");
         if(panel_detector_ != nullptr) delete panel_detector_;
         panel_detector_ = nullptr;
+
+        ROS_INFO("reset fail count");
     }
     // if failed retry detecting the panel
     else
@@ -235,6 +237,8 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
         // increment the fail count
         fail_count++;
         eventQueue.riseEvent("/DETECT_PANEL_RETRY");
+
+        ROS_INFO("increment fail count");
     }
 
     while(!preemptiveWait(1000, eventQueue)){
@@ -957,6 +961,9 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         wholebody_controller_->compileMsg(armSide::LEFT, traj.joint_trajectory);
         ROS_INFO("trajectory sent to controllers");
 
+        // start the timer
+        timer_start = std::chrono::system_clock::now();
+
     }
 
     // checks to handle the behaviour, which will also trigger necessary transitions
@@ -1142,8 +1149,10 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
 
     //get the detections
     std::vector<geometry_msgs::Point> handle_poses;
+    pcl_handle_detector_->getDetections(handle_poses);
+
     // if detection is sucessful
-    if (pcl_handle_detector_->getDetections(handle_poses))
+    if (handle_poses.size() > 1)
     {
         // update the local positions of the handles
         handle_loc_[PITCH_KNOB_HANDLE] = handle_poses[1];
@@ -1154,6 +1163,15 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
 
         // reset the state
         prev_grasp_state_ = prevGraspState::NOT_INITIALISED;
+
+        //delete the panel detector object
+        if (pcl_handle_detector_ != nullptr) delete pcl_handle_detector_;
+        pcl_handle_detector_ = nullptr;
+
+        // get the arms to default pose
+        arm_controller_->moveToDefaultPose(armSide::LEFT);
+        ros::Duration(1).sleep();
+        arm_controller_->moveToDefaultPose(armSide::RIGHT);
 
         // state transition
         eventQueue.riseEvent(next_state_transition);
@@ -1168,6 +1186,10 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
 
         // set the execute once flag
         execute_once = true;
+
+        //delete the panel detector object
+        if (pcl_handle_detector_ != nullptr) delete pcl_handle_detector_;
+        pcl_handle_detector_ = nullptr;
 
         eventQueue.riseEvent("/REDETECT_HANDLE_FAILED");
     }
