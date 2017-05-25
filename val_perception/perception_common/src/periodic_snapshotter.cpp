@@ -119,7 +119,7 @@ PeriodicSnapshotter::PeriodicSnapshotter()
     // Start the timer that will trigger the processing loop (timerCallback)
     float timeout;
     n_.param<float>("val_laser_assembler_svc/laser_snapshot_timeout", timeout, 5.0);
-    ROS_INFO("Snapshot timeout : %.2f seconds", timeout);
+    ROS_INFO("PeriodicSnapshotter::PeriodicSnapshotter : Snapshot timeout : %.2f seconds", timeout);
     timer_ = n_.createTimer(ros::Duration(timeout,0), &PeriodicSnapshotter::timerCallback, this);
 
     // Need to track if we've called the timerCallback at least once
@@ -139,7 +139,7 @@ void PeriodicSnapshotter::timerCallback(const ros::TimerEvent& e)
     //   don't have a start and end time yet
     if (first_time_)
     {
-        ROS_INFO("Ignoring current snapshot");
+        ROS_INFO("PeriodicSnapshotter::timerCallback : Ignoring current snapshot");
         first_time_ = false;
         return;
     }
@@ -152,16 +152,16 @@ void PeriodicSnapshotter::timerCallback(const ros::TimerEvent& e)
     // Make the service call
     if (client_.call(srv))
     {
-        ROS_INFO("Published Cloud with %u points", (uint32_t)(srv.response.cloud.data.size())) ;
+        ROS_INFO("PeriodicSnapshotter::timerCallback : Published Cloud with %u points", (uint32_t)(srv.response.cloud.data.size())) ;
         snapshot_pub_.publish(srv.response.cloud);
         pcl::PCLPointCloud2 pcl_pc2;
         pcl_conversions::toPCL(srv.response.cloud,pcl_pc2);
         pcl::fromPCLPointCloud2(pcl_pc2,*laser_assembler::PeriodicSnapshotter::POINTCLOUD_STATIC_PTR);
-        ROS_INFO("Size of pointcloud is %d", laser_assembler::PeriodicSnapshotter::POINTCLOUD_STATIC_PTR->size());
+        ROS_INFO("PeriodicSnapshotter::timerCallback : Size of pointcloud is %d", laser_assembler::PeriodicSnapshotter::POINTCLOUD_STATIC_PTR->size());
     }
     else
     {
-        ROS_ERROR("Error making service call\n") ;
+        ROS_WARN("Error making service call\n") ;
     }
 }
 
@@ -290,7 +290,7 @@ void PeriodicSnapshotter::pausePointcloudCB(const std_msgs::Bool &msg)
 void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
 
     if (state_request == PCL_STATE_CONTROL::PAUSE){
-        ROS_INFO("Laser assembling paused");
+        ROS_INFO("PeriodicSnapshotter::mergeClouds : Laser assembling paused");
         registered_pointcloud_pub_.publish(prev_msg_);
         return;
     }
@@ -300,7 +300,7 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
     convertROStoPCL(msg, pcl_msg);
 
     if (state_request == PCL_STATE_CONTROL::RESET || prev_msg_->data.empty()){
-        ROS_INFO("Resetting Pointcloud");
+        ROS_INFO("PeriodicSnapshotter::mergeClouds : Resetting Pointcloud");
         merged_cloud = msg;
         pointcloud_for_octomap_pub_.publish(prev_msg_->data.empty() ? msg : prev_msg_);
         state_request = PCL_STATE_CONTROL::RESUME;

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "val_task_common/val_task_common_utils.h"
+#include "val_control_common/val_control_common.h"
 
 solar_panel_handle_grabber::solar_panel_handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
 {
@@ -36,7 +37,7 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
         endEffectorFrame = VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
         palmToFingerOffset = -0.07;
     }
-
+    valControlCommon control_util(nh_);
 
     ROS_INFO("opening grippers");
     gripper_.controlGripper(side, GRIPPER_STATE::OPEN_THUMB_IN_APPROACH);
@@ -46,61 +47,68 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     std::vector< std::vector<float> > armData;
     armData.push_back(*seed);
 
-    armTraj_.moveArmJoints(side, armData, executionTime);
-    ros::Duration(executionTime*2).sleep();
-
+//    armTraj_.moveArmJoints(side, armData, executionTime);
+//    ros::Duration(executionTime*2).sleep();
+//    control_util.stopAllTrajectories();
 
     //move arm to given point with known orientation and higher z
     geometry_msgs::Pose finalGoal, intermGoal;
 
     current_state_->transformPose(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-    intermGoal.position.z += 0.1;
+    float yaw = tf::getYaw(intermGoal.orientation);
+    intermGoal.position.x -= 0.2*cos(yaw);
+    intermGoal.position.y -= 0.2*sin(yaw);
 
     //transform that point back to world frame
     current_state_->transformPose(intermGoal, intermGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-    taskCommonUtils::fixHandFramePose(nh_, side, intermGoal);
+    taskCommonUtils::fixHandFramePalmUp(nh_, side, intermGoal);
 
     ROS_INFO("Moving at an intermidate point before goal");
     ROS_INFO_STREAM("Intermidiate goal"<<intermGoal);
     armTraj_.moveArmInTaskSpace(side, intermGoal, executionTime*2);
     ros::Duration(executionTime*2).sleep();
+    control_util.stopAllTrajectories();
 
     //move arm to final position with known orientation
 
-    current_state_->transformPose(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF, endEffectorFrame);
-    current_state_->transformPose(intermGoal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, endEffectorFrame);
-
-    intermGoal.position.y += palmToFingerOffset;
-//    intermGoal.position.z -= 0.02; //finger to center of palm in Z-axis of hand frame
-    finalGoal.position.y  += palmToFingerOffset; // this is to compensate for the distance between palm frame and center of palm
-//    finalGoal.position.z  -= 0.02; //finger to center of palm in Z-axis of hand frame
-
+    current_state_->transformPose(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    finalGoal.position.x += 0.1*cos(yaw);
+    finalGoal.position.y += 0.1*sin(yaw);
 
     //transform that point back to world frame
-    current_state_->transformPose(finalGoal, finalGoal, endEffectorFrame, VAL_COMMON_NAMES::WORLD_TF);
-    current_state_->transformPose(intermGoal, intermGoal, endEffectorFrame, VAL_COMMON_NAMES::WORLD_TF);
-    taskCommonUtils::fixHandFramePose(nh_, side, finalGoal);
+    current_state_->transformPose(finalGoal, finalGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
 
+    taskCommonUtils::fixHandFramePalmUp(nh_, side, finalGoal);
+    intermGoal.position.z -= 0.06;
+    finalGoal.position.z  -= 0.06;
     ROS_INFO("Moving towards goal");
     ROS_INFO_STREAM("Final goal"<<finalGoal);
     std::vector<geometry_msgs::Pose> waypoints;
 
     waypoints.push_back(intermGoal);
     waypoints.push_back(finalGoal);
-    ROS_INFO_STREAM(finalGoal);
+
+    finalGoal.position.z  += 0.2;
+    waypoints.push_back(finalGoal);
+
     moveit_msgs::RobotTrajectory traj;
     if(side == armSide::LEFT)
     {
-        left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+        if (left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false) < 0.98){
+         ROS_INFO("Trajectory is not planned 100% - retrying");
+            return false;
+        }
     }
     else
     {
-        right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+        if (right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
+            ROS_INFO("Trajectory is not planned 100% - retrying");
+               return false;
+           }
     }
     ROS_INFO("Calculated Traj");
     wholebody_controller_->compileMsg(side, traj.joint_trajectory);
-
-    ros::Duration(executionTime).sleep();
+    ros::Duration(executionTime*2).sleep();
 
     geometry_msgs::Pose finalFramePose;
     ROS_INFO("Fecthing position of %s", endEffectorFrame.c_str());
@@ -114,9 +122,9 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     ROS_INFO("Actual Finger Pose : %f %f %f", finalFramePose.position.x, finalFramePose.position.y, finalFramePose.position.z);
     ROS_INFO("Distance between final pose and goal is %f", sqrt(x_diff*x_diff + y_diff*y_diff + z_diff*z_diff));
 
-    if (sqrt(x_diff*x_diff + y_diff*y_diff + z_diff*z_diff) > 0.05){
-        return false;
-    }
+//    if (sqrt(x_diff*x_diff + y_diff*y_diff + z_diff*z_diff) > 0.1){
+//        return false;
+//    }
 
 
     ROS_INFO("Closing grippers");
