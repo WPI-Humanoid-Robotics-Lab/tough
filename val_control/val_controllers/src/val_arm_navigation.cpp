@@ -20,21 +20,23 @@ armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
     joint_limits_left_.resize(NUM_ARM_JOINTS);
     joint_limits_right_.resize(NUM_ARM_JOINTS);
 
-    joint_limits_left_[0]={-2.85,2.0};
-    joint_limits_left_[1]={-1.519,1.266};
-    joint_limits_left_[2]={-3.1,2.18};
-    joint_limits_left_[3]={-2.174,0.12};
-    joint_limits_left_[4]={-2.019,3.14};
-    joint_limits_left_[5]={-0.62,0.625};
-    joint_limits_left_[6]={-0.36,0.49};
+    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
+    joint_limits_left_[0]={-2.84,1.99};
+    joint_limits_left_[1]={-1.509,1.256};
+    joint_limits_left_[2]={-3.09,2.17};
+    joint_limits_left_[3]={-2.164,0.11};
+    joint_limits_left_[4]={-2.009,3.13};
+    joint_limits_left_[5]={-0.61,0.615};
+    joint_limits_left_[6]={-0.35,0.48};
 
-    joint_limits_right_[0]={-2.85,2.0};
-    joint_limits_right_[1]={-1.266,1.519};
-    joint_limits_right_[2]={-3.1,2.18};
-    joint_limits_right_[3]={-0.12,2.174};
-    joint_limits_right_[4]={-2.019,3.14};
-    joint_limits_right_[5]={-0.625,0.62};
-    joint_limits_right_[6]={-0.48,0.36};
+    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
+    joint_limits_right_[0]={-2.84,1.99};
+    joint_limits_right_[1]={-1.256,1.509};
+    joint_limits_right_[2]={-3.09,2.17};
+    joint_limits_right_[3]={-0.11,2.164};
+    joint_limits_right_[4]={-2.009,3.13};
+    joint_limits_right_[5]={-0.615,0.61};
+    joint_limits_right_[6]={-0.47,0.35};
 
 }
 

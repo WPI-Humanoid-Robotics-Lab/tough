@@ -1230,7 +1230,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
         for(size_t i = 0; i < detections.size(); ++i){
             size_t index = MapGenerator::getIndex(detections[i].x, detections[i].y);
             ROS_INFO("Index in map %d and size of visited map is %d", (int)index, (int)visited_map_.data.size());
-            if(visited_map_.data.at(index) == 50){
+            if(visited_map_.data.at(index) == CELL_STATUS::VISITED){
                 continue;
             }
 

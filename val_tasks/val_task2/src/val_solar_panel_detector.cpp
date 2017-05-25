@@ -76,6 +76,8 @@ void SolarPanelDetect::setRoverTheta()
     // this func is for finding yaw and used for tranformation of the cloud
     rover_theta = rover_loc_.theta;
     ROS_INFO("angle %.2f",rover_theta);
+    /*
+     * If the rover orientation given is parallel to walkway
     if (isroverRight_)
     {
         rover_theta-=1.5708;
@@ -83,7 +85,7 @@ void SolarPanelDetect::setRoverTheta()
     else
     {
         rover_theta+=1.5708;
-    }
+    }*/
 
 }
 

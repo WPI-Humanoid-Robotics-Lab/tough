@@ -2,6 +2,9 @@
 
 ### SRC Sim 0.X.X (2017-XX-XX)
 
+* Add publishing of Score message
+    * [Pull request 69](https://bitbucket.org/osrf/srcsim/pull-requests/69)
+
 ### SRC Sim 0.5.0 (2017-05-16)
 
 * Task 1 changes

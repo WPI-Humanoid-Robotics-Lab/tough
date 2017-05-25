@@ -105,14 +105,14 @@
     </include>
 
 
-    
 
-    
+
+
 
     <!-- TASK 2 -->
 
     <!-- Task 2 start - Box plugin -->
-    
+
 
     <plugin name="boxT2Start" filename="libBoxContainsPlugin.so">
       <entity>valkyrie</entity>
@@ -159,7 +159,7 @@
 
 
     <!-- Rover -->
-    
+
 
     <include>
       <pose>
@@ -174,9 +174,9 @@
     </include>
 
     <!-- Solar panel -->
-    
 
-    
+
+
 
 <model name="solar_panel">
 
@@ -729,7 +729,7 @@
 
   </link>
 
-  
+
 
   <joint name="base_panel_01" type="revolute">
     <pose>0 0.0455 0.095 0 0 0</pose>
@@ -823,7 +823,7 @@
     </axis>
   </joint>
 
-  
+
   <joint name="button" type="prismatic">
     <pose>0 0 0.005 0 0 0</pose>
     <parent>panel_01</parent>
@@ -963,13 +963,13 @@
 
 
     <!-- Solar Array -->
-    
+
 
     <include>
       <pose>
         6.205410797096131
         4.161405254328569
-        0
+        0.2
         0
         0
         0.7853981633974481
@@ -978,9 +978,9 @@
     </include>
 
     <!-- Cable -->
-    
 
-    
+
+
 
 <model name="solar_panel_cable">
 
@@ -989,7 +989,7 @@
   <pose>
     6.063989440858822
     4.868512035515117
-    0.85
+    1.05
     0
     0
     -0.7853981633974485
@@ -1019,7 +1019,7 @@
     </visual>
   </link>
 
-  
+
 
   <link name="link_1">
     <pose>0.0 0 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -1109,7 +1109,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -1137,7 +1137,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_2">
     <pose>0.058778525229247314 0.08090169943749476 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -1227,7 +1227,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -1255,7 +1255,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_3">
     <pose>0.11755705045849463 0 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -1345,7 +1345,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -1373,7 +1373,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_4">
     <pose>0.17633557568774197 -0.08090169943749476 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -1463,7 +1463,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -1491,7 +1491,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_5">
     <pose>0.23511410091698925 0 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -1581,7 +1581,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -1609,7 +1609,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_6">
     <pose>0.29389262614623657 0.08090169943749476 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -1699,7 +1699,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -1727,7 +1727,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_7">
     <pose>0.35267115137548394 0 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -1817,7 +1817,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -1845,7 +1845,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_8">
     <pose>0.41144967660473125 -0.08090169943749476 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -1935,7 +1935,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -1963,7 +1963,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_9">
     <pose>0.4702282018339785 0 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -2053,7 +2053,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2081,7 +2081,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_10">
     <pose>0.5290067270632258 0.08090169943749476 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -2171,7 +2171,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2199,7 +2199,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_11">
     <pose>0.5877852522924731 0 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -2289,7 +2289,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2317,7 +2317,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_12">
     <pose>0.6465637775217205 -0.08090169943749476 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -2407,7 +2407,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2435,7 +2435,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_13">
     <pose>0.7053423027509679 0 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -2525,7 +2525,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2553,7 +2553,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_14">
     <pose>0.7641208279802151 0.08090169943749476 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -2643,7 +2643,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2671,7 +2671,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_15">
     <pose>0.8228993532094625 0 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -2761,7 +2761,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2789,7 +2789,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_16">
     <pose>0.8816778784387097 -0.08090169943749476 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -2879,7 +2879,7 @@
       </material>
     </visual>
 
-    
+
 
     <collision name="plug_collision_1">
       <pose>0 0 0.1 0 0 0</pose>
@@ -3014,7 +3014,7 @@
         <collision>sphere</collision>
       </contact>
     </sensor>
-    
+
 
   </link>
 
@@ -3042,7 +3042,7 @@
     </physics>
   </joint>
 
-  
+
 
   <joint name="world" type="fixed">
     <child>link_0</child>
@@ -3060,7 +3060,7 @@
 
 
     <!-- Checkpoint 2 - Box plugin -->
-    
+
 
     <plugin name="boxT2CP2" filename="libBoxContainsPlugin.so">
       <entity>solar_panel</entity>
@@ -3068,7 +3068,7 @@
       <pose>
         6.205410797096131
         4.161405254328569
-        0.9
+        1.1
         0
         0
         0.7853981633974481
@@ -3077,7 +3077,7 @@
     </plugin>
 
     <!-- Bling -->
-    
+
 
     <!-- Walkway -->
     <include>
@@ -3184,19 +3184,19 @@
     </include>
 
 
-    
+
 
     <!-- /TASK 2 -->
-    
 
-    
+
+
 
     <!-- Finals plugin -->
     <plugin name="finals" filename="libFinalsPlugin.so">
 
-      
 
-      
+
+
         <task2>
           <timeout>3600</timeout>
 
@@ -3215,7 +3215,7 @@
             <panel_pose>
               6.205684
               3.887435
-              0.7
+              0.9
               0
               0
               -2.9333258265337734
@@ -3260,9 +3260,9 @@
 
         </task2>
 
-      
 
-      
+
+
 
     </plugin>
 
