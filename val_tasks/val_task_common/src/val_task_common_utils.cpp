@@ -130,9 +130,29 @@ void taskCommonUtils::fixHandFramePose(ros::NodeHandle nh, armSide side, geometr
 }
 
 
-void taskCommonUtils::clearPointCloud(ros::NodeHandle nh)
+void taskCommonUtils::fixHandFramePalmUp(ros::NodeHandle nh, armSide side, geometry_msgs::Pose &poseInWorldFrame)
 {
-    ros::Publisher reset_pointcloud_pub = nh.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
-    std_msgs::Empty msg;
-    reset_pointcloud_pub.publish(msg);
+    RobotStateInformer *current_state = RobotStateInformer::getRobotStateInformer(nh);
+    geometry_msgs::Pose poseInPelvisFrame;
+    current_state->transformPose(poseInWorldFrame, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+
+    tf::Quaternion tfQuat;
+    tf::quaternionMsgToTF(poseInPelvisFrame.orientation, tfQuat);
+    double roll, pitch, yaw;
+    tf::Matrix3x3(tfQuat).getRPY(roll, pitch, yaw);
+
+    if (side == armSide::LEFT){
+        roll  += M_PI / 6.0f;
+        pitch -= 80.0*M_PI/180.0;
+        yaw   -= M_PI * 4.0f/6.0f;
+    }
+    else {
+        roll += M_PI / 6.0f;
+        pitch -= 80.0*M_PI/180.0;
+        roll  += M_PI / 3.0f;
+    }
+    tf::Quaternion tfQuatOut = tf::createQuaternionFromRPY(roll, pitch, yaw);
+    tf::quaternionTFToMsg(tfQuatOut, poseInPelvisFrame.orientation);
+    current_state->transformPose(poseInPelvisFrame, poseInWorldFrame, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+
 }
