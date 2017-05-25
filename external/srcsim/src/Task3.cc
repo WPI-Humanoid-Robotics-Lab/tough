@@ -186,6 +186,8 @@ void Task3CP2::Skip()
   }
 
   this->hingeJoint->SetForce(0, 100000);
+
+  Checkpoint::Skip();
 }
 
 /////////////////////////////////////////////////

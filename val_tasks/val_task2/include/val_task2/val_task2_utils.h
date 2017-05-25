@@ -29,22 +29,31 @@ private:
     armTrajectory* arm_controller_;
     // walker class
     ValkyrieWalker *walk_;
-
-
+    // robot state
+    RobotStateInformer *current_state_;
+    ros::Publisher reset_pointcloud_pub ;
+    ros::Publisher pause_pointcloud_pub ;
 
 
     // Need to edit
-    const std::vector<float> leftShoulderSeedPanelGraspStatic_ = {-1.15, -1.04, 1.39, -1.69, 1.89, 0, 0};
+    const std::vector<float> leftSeedGraspingHand_ = {-1.40, -1.04, 1.39, -1.85, -1.10, 0, 0};
+    const std::vector<float> leftSeedNonGraspingHand_ = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};
     const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.04, -1.16, 0.12, -0.94, 1.13, -0.01, 0.08};
 
     //before walking
-    const std::vector<float> rightShoulderSeedPanelGraspStatic_ = {-1.15, 1.04, 1.39, 1.69, 1.89, 0, 0};
+    const std::vector<float> rightSeedGraspingHand = {-1.40, 1.04, 1.39, 1.85, -1.10, 0, 0};
+    const std::vector<float> rightSeedNonGraspingHand_ = {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0};
     //while walking
     const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.04, 1.16, 0.12, 0.94, 1.13, 0.01, -0.08};
 
 public:
     task2Utils(ros::NodeHandle nh);
     void afterPanelGraspPose(const armSide side);
+    void movePanelToWalkSafePose(const armSide side);
+    bool isPanelPicked(const armSide side);
+    void clearPointCloud();
+    void pausePointCloud();
+    void resumePointCloud();
     ~task2Utils();
 
 };

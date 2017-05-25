@@ -17,6 +17,9 @@
 
 #include <gazebo/common/Console.hh>
 
+#include <ros/time.h>
+#include <srcsim/Score.h>
+
 #include "srcsim/FinalsPlugin.hh"
 #include "srcsim/Task1.hh"
 #include "srcsim/Task2.hh"
@@ -100,6 +103,9 @@ void FinalsPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
 
   this->startTaskRosService = this->rosNode->advertiseService(
       "/srcsim/finals/start_task", &FinalsPlugin::OnStartTaskRosRequest, this);
+
+  this->scoreRosPub = this->rosNode->advertise<srcsim::Score>(
+      "/srcsim/finals/score", 1000);
 
   this->taskRosSub = this->rosNode->subscribe("/srcsim/finals/task", 10,
       &FinalsPlugin::OnTaskRosMsg, this);
@@ -218,17 +224,17 @@ bool FinalsPlugin::OnStartTaskRosRequest(srcsim::StartTask::Request &_req,
     this->current++;
   }
 
+  this->current = _req.task_id;
+
+  // Start task
+  this->tasks[this->current - 1]->Start(time, _req.checkpoint_id);
+
   // Start update
   if (!this->updateConnection)
   {
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
         std::bind(&FinalsPlugin::OnUpdate, this, std::placeholders::_1));
   }
-
-  this->current = _req.task_id;
-
-  // Start task
-  this->tasks[this->current - 1]->Start(time, _req.checkpoint_id);
 
   _res.success = true;
   return true;
@@ -241,6 +247,52 @@ void FinalsPlugin::OnUpdate(const common::UpdateInfo &_info)
     return;
 
   this->tasks[this->current - 1]->Update(_info.simTime);
+
+  // Publish ROS score message
+  srcsim::Score msg;
+
+  // Check up to the current task
+  for (auto i = 1; i <= this->current; ++i)
+  {
+    // Skip tasks which haven't been created
+    if (!this->tasks[i-1])
+    {
+      continue;
+    }
+
+    // Add completion time for all past checkpoints
+    for (size_t j = 1; j <= this->tasks[i-1]->CheckpointCount(); ++j)
+    {
+      if (i == this->current && j >= this->tasks[i-1]->CurrentCheckpointId()) {
+        // Skip the current (and future) checkpoints of the current task
+        continue;
+      }
+      ros::Time t(this->tasks[i-1]->GetCheckpointCompletion(j-1).Double());
+      msg.checkpoints_completion.push_back(t);
+    }
+  }
+
+  // Compute score based on checkpoint completion times from all tasks
+  msg.score = 0;
+  uint8_t last_checkpoint_score = 0;
+  for (auto t : msg.checkpoints_completion)
+  {
+    // TODO The data structure doesn't provide the information if the
+    // checkpoint was reset (which isn't suppot yet). In that case the
+    // last_checkpoint_score needs to be reset too.
+    if (t.isZero())
+    {
+      // End winning streak in case of incomplete checkpoints
+      last_checkpoint_score = 0;
+    }
+    else
+    {
+      // Next checkpoint gets one more point than previous checkpoint
+      last_checkpoint_score += 1;
+      msg.score += last_checkpoint_score;
+    }
+  }
+  this->scoreRosPub.publish(msg);
 }
 
 /////////////////////////////////////////////////

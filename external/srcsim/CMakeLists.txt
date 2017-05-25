@@ -5,11 +5,6 @@ if(NOT WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
 endif()
 
-include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
-pkg_check_modules(OGRE OGRE)
-include_directories( ${OGRE_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS}/Paging/)    
-link_directories( ${OGRE_LIBRARY_DIRS} )
-
 #####################
 ## Find components ##
 #####################
@@ -39,6 +34,7 @@ add_message_files(
   Console.msg
   Leak.msg
   Satellite.msg
+  Score.msg
   Task.msg
 )
 

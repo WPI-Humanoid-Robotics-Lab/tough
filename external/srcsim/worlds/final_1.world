@@ -5377,7 +5377,6 @@
 
             <!-- Table -->
             <insert_model>
-              <sdf version="1.6">
 
 
                 <include>
@@ -5392,12 +5391,10 @@
                   <uri>model://space_table</uri>
                 </include>
 
-              </sdf>
             </insert_model>
 
             <!-- Air leak detector -->
             <insert_model>
-              <sdf version="1.6">
 
 
 
@@ -5502,12 +5499,10 @@
 
 
 
-              </sdf>
             </insert_model>
 
             <!-- Leak patch tool -->
             <insert_model>
-              <sdf version="1.6">
 
 
                 <include>
@@ -5521,12 +5516,10 @@
                   </pose>
                   <uri>model://leak_patch_tool</uri>
                 </include>
-              </sdf>
             </insert_model>
 
             <!-- Leak -->
             <insert_model>
-              <sdf version="1.6">
 
 
 <model name="leak">
@@ -5564,13 +5557,11 @@
 </model>
 
 
-              </sdf>
             </insert_model>
 
             <!-- Bling -->
 
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_14</name>
       <pose>
@@ -5583,12 +5574,10 @@
       </pose>
       <uri>model://mars_crate</uri>
     </include>
-    </sdf>
     </insert_model>
 
 
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_15</name>
       <pose>
@@ -5601,12 +5590,10 @@
       </pose>
       <uri>model://mars_crate</uri>
     </include>
-    </sdf>
     </insert_model>
 
 
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_16</name>
       <pose>
@@ -5619,7 +5606,6 @@
       </pose>
       <uri>model://mars_crate</uri>
     </include>
-    </sdf>
     </insert_model>
 
 
@@ -5627,7 +5613,6 @@
             <!-- Bling -->
 
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_17</name>
       <pose>
@@ -5640,12 +5625,10 @@
       </pose>
       <uri>model://mars_crate</uri>
     </include>
-    </sdf>
     </insert_model>
 
 
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_18</name>
       <pose>
@@ -5658,7 +5641,6 @@
       </pose>
       <uri>model://mars_crate</uri>
     </include>
-    </sdf>
     </insert_model>
 
 
@@ -5666,7 +5648,6 @@
             <!-- Bling -->
 
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_19</name>
       <pose>
@@ -5679,12 +5660,10 @@
       </pose>
       <uri>model://mars_crate</uri>
     </include>
-    </sdf>
     </insert_model>
 
 
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_20</name>
       <pose>
@@ -5697,12 +5676,10 @@
       </pose>
       <uri>model://mars_crate</uri>
     </include>
-    </sdf>
     </insert_model>
 
 
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_21</name>
       <pose>
@@ -5715,7 +5692,6 @@
       </pose>
       <uri>model://mars_crate</uri>
     </include>
-    </sdf>
     </insert_model>
 
 
