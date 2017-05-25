@@ -12,12 +12,12 @@ cableTask::cableTask(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
     leftHandOrientationTop_.quaternion.z = -0.583;
     leftHandOrientationTop_.quaternion.w = 0.326;
 
-    /* Top Grip Flat Hand */
+    /* Top Grip Flat Hand modified*/
     rightHandOrientationTop_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    rightHandOrientationTop_.quaternion.x = -0.549;
-    rightHandOrientationTop_.quaternion.y = 0.591;
-    rightHandOrientationTop_.quaternion.z = 0.560;
-    rightHandOrientationTop_.quaternion.w = 0.188;
+    rightHandOrientationTop_.quaternion.x = -0.459;
+    rightHandOrientationTop_.quaternion.y = 0.550;
+    rightHandOrientationTop_.quaternion.z = 0.602;
+    rightHandOrientationTop_.quaternion.w = 0.353;
 
     /* Side Grip */
     leftHandOrientationSide_.quaternion.x = 0.155;
@@ -48,7 +48,7 @@ cableTask::cableTask(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
 
     // cartesian planners for the arm
     left_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
-    right_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    right_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_PALM_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     wholebody_controller_ = new wholebodyManipulation(nh_);
     chest_controller_ = new chestTrajectory(nh_);
 }
@@ -61,134 +61,66 @@ cableTask::~cableTask()
     delete chest_controller_;
 }
 
-bool cableTask::grasp_cable(const armSide side, const geometry_msgs::Point &goal, float executionTime)
+bool cableTask::grasp_cable(const geometry_msgs::Point &goal, float executionTime)
 {
-    // setting initial values
-    geometry_msgs::QuaternionStamped* finalOrientationStamped;
-    const std::vector<float>* seed;
-    const std::vector<float>* seedAfter;
-    std::string palmFrame;
-    float palmToFingerOffset;
-    if(side == armSide::LEFT){
-        seed = &leftShoulderSeed_;
-        seedAfter=&leftShoulderSeed_;
-        palmFrame = VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME;
-        palmToFingerOffset = 0.07;
-        finalOrientationStamped = &leftHandOrientationTop_;
-    }
-    else {
-        seed = &rightShoulderSeed_;
-        palmFrame = VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
-        palmToFingerOffset = -0.07;
-        finalOrientationStamped = &rightHandOrientationTop_;
-        seedAfter=&rightAfterGraspShoulderSeed_;
-    }
+    /* set orientation desired ( need to get this from perception ) @Todo change later!
+     * set seed point. one standard initial point to avoid collision and the other closer to the cable
+     * set grasping pose. approach from the thumb in the bottom. close all fingers to grasp
+     * set last seed position based on how to approach the socket
+     */
 
-    // getting the orientation
-    geometry_msgs::QuaternionStamped temp  = *finalOrientationStamped;
-    current_state_->transformQuaternion(temp, temp);
-
-    ROS_INFO("opening grippers");
-    std::vector<double> gripper1,gripper2,gripper3;
-    gripper1={1.2, 0.4, 0.3, 0.0 ,0.0 };
-    gripper2={1.2, 0.6, 0.7, 0.0 ,0.0 };
-    gripper3={1.2, 0.6, 0.7, 0.9 ,1.0 };
-    gripper_.controlGripper(side,gripper1);
-    ros::Duration(executionTime).sleep();
-
-    //move shoulder roll outwards
-    ROS_INFO("Initial Pose");
+    // Setting initial positions for both arms
+    ROS_INFO("grasp_cable: Initial Pose");
     std::vector< std::vector<float> > armData;
-
     armData.push_back(leftShoulderSeedInitial_);
     armTraj_.moveArmJoints(LEFT, armData, executionTime);
     ros::Duration(executionTime).sleep();
+
     armData.clear();
     armData.push_back(rightShoulderSeedInitial_);
+    armData.push_back(rightShoulderSeed_);
     armTraj_.moveArmJoints(RIGHT, armData, executionTime);
     ros::Duration(executionTime).sleep();
 
-    armData.clear();
-    armData.push_back(*seed);
+    // setting orientation of final pose
+    geometry_msgs::QuaternionStamped temp  =rightHandOrientationTop_;
+    current_state_->transformQuaternion(temp,temp);
 
-    ROS_INFO("Moving closer to cable");
-    armTraj_.moveArmJoints(side, armData, executionTime);
-    ros::Duration(executionTime*2).sleep();
+    geometry_msgs::Pose rightOffset;
+    current_state_->getCurrentPose("/rightPalm",rightOffset,"/rightThumbRollLink");
+    geometry_msgs::Point intermGoal;
+    current_state_->transformPoint(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::R_PALM_TF);
+    intermGoal.x+=rightOffset.position.x;
+    intermGoal.y+=rightOffset.position.y;
+    intermGoal.z+=rightOffset.position.z;
+    current_state_->transformPoint(intermGoal,intermGoal, VAL_COMMON_NAMES::R_PALM_TF, VAL_COMMON_NAMES::WORLD_TF);
 
-
-    //move arm to given point with known orientation and higher z
-    geometry_msgs::Point finalGoal, intermGoal;
-
-    current_state_->transformPoint(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-    intermGoal.z += 0.1;
-
-    //transform that point back to world frame
-    current_state_->transformPoint(intermGoal, intermGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-
-    ROS_INFO("Moving at an intermidate point before goal");
-
-
-    current_state_->transformPoint(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF, palmFrame);
-    current_state_->transformPoint(intermGoal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, palmFrame);
-
-    intermGoal.y += palmToFingerOffset;
-    finalGoal.y  += palmToFingerOffset; // this is to compensate for the distance between palm frame and center of palm
-
-    //transform that point back to world frame
-    current_state_->transformPoint(finalGoal, finalGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
-    current_state_->transformPoint(intermGoal, intermGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
-
-    ROS_INFO("Moving towards goal");
-    ROS_INFO_STREAM("Final goal"<<finalGoal);
-    std::vector<geometry_msgs::Pose> waypoints;
-
+    float offset=0.03;
     geometry_msgs::Pose final;
-
     final.position=intermGoal;
-    final.orientation= temp.quaternion;
+    final.position.z+=offset;
+    final.orientation=temp.quaternion;
 
+    std::vector<geometry_msgs::Pose> waypoints;
     waypoints.push_back(final);
-
-    final.position=finalGoal;
-    final.position.z+=0.01; // offset between cable and table
-    final.orientation= temp.quaternion;
-
-    waypoints.push_back(final);
-
     moveit_msgs::RobotTrajectory traj;
-    if(side == armSide::LEFT)
-    {
-        left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
-    }
-    else
-    {
-        right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
-    }
 
-    ROS_INFO("Calculated Traj");
-    wholebody_controller_->compileMsg(side, traj.joint_trajectory);
+    // Sending waypoints to the planner
+    right_arm_planner_->getTrajFromCartPoints(waypoints,traj,false);
 
-    ros::Duration(executionTime).sleep();
+    //    // Opening grippers
+    //    ROS_INFO("grasp_cable: Setting gripper position to open thumb");
+    //    std::vector<double> gripper1;
+    //    gripper1={1.35,0.5,0.0,0.0,0.0};
+    //    gripper_.controlGripper(RIGHT,gripper1);
+    //    ros::Duration(executionTime/2).sleep();
 
-    ROS_INFO("Grip Sequence 1");
-    gripper_.controlGripper(side, gripper1);
-    ros::Duration(0.1).sleep();
-    ROS_INFO("Grip Sequence 2");
-    gripper_.controlGripper(side, gripper2);
-    ros::Duration(0.1).sleep();
-    ROS_INFO("Grip Sequence 3");
-    gripper_.controlGripper(side, gripper3);
-    ros::Duration(0.1).sleep();
+    //    // Planning whole body motion
+    //    wholebody_controller_->compileMsg(RIGHT,traj);
+    //    ros::Duration(executionTime*2).sleep();
 
-    ROS_INFO("Moving chest to zero position");
-    chest_controller_->controlChest(0,0,0);
-
-    armData.clear();
-    armData.push_back(*seedAfter);
-    ROS_INFO("Moving arms to intermediate position");
-    armTraj_.moveArmJoints(side, armData, executionTime);
-    ros::Duration(executionTime*2).sleep();
-    return true;
+    //    // Grasping the cable
+    //    gripper_.closeGripper(RIGHT);
 
 }
 

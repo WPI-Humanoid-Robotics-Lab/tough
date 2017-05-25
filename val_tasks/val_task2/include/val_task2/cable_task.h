@@ -17,7 +17,7 @@ class cableTask
 public:
     cableTask(ros::NodeHandle n);
     ~cableTask();
-    bool grasp_cable(const armSide side, const geometry_msgs::Point &goal, float executionTime=2.0f);
+    bool grasp_cable(const geometry_msgs::Point &goal, float executionTime=2.0f);
     bool insert_cable(const armSide side, const geometry_msgs::Point &goal, float executionTime=2.0f);
 
 private:
@@ -37,7 +37,7 @@ private:
 
     /*Top Grip*/
     const std::vector<float> leftShoulderSeed_ = {-0.23, -0.72, 0.65, -1.51, 2.77, 0.0, 0.0};
-    const std::vector<float> rightShoulderSeed_ = {-0.57, 1.09, 0.65, 1.14, 2.78, -0.19, 0.31}; //approach 1
+    const std::vector<float> rightShoulderSeed_ = {-0.81,0.60,1.12,1.16,1.91,0.0,0.0}; //approach 1
     const std::vector<float> rightAfterGraspShoulderSeed_ = {-0.57, 1.09, 0.65, 1.1, 1.18, -0.19, 0.31};
 
     // Initial Seed
