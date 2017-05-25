@@ -4,7 +4,6 @@ steps_detector::steps_detector(ros::NodeHandle& nh) : nh_(nh), cloud_(new pcl::P
 {
     pcl_sub_ = nh_.subscribe("/field/assembled_cloud2", 10, &steps_detector::stepsCB, this);
     pcl_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/val_steps/cloud2", 1, true);
-
 }
 
 steps_detector::~steps_detector()
@@ -20,49 +19,73 @@ void steps_detector::stepsCB(const sensor_msgs::PointCloud2::Ptr& input)
     mtx_.lock();
     pcl::fromROSMsg(*input, *cloud_);
     mtx_.unlock();
+    //ROS_INFO_STREAM("Input Cloud Size : " << cloud_->size() << std::endl);
 }
 
-void steps_detector::getStepsPosition(const std::vector<double>& coefficients, const geometry_msgs::Point& dir_vector, const geometry_msgs::Point& stair_loc)
+bool steps_detector::getStepsPosition(const std::vector<double>& coefficients, const geometry_msgs::Point& dir_vector, const geometry_msgs::Point& stair_loc)
 {
+    bool steps_detected = false;
     coefficients_ = coefficients;
     dirVector_= dir_vector;
     stairLoc_ = stair_loc;
 
-    ROS_INFO_STREAM("1a" << std::endl);
-
-    pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    if (cloud_->empty())
+        return false;
+    ROS_INFO_STREAM("1 :" << std::endl);
+//    pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud1 (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud2 (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
-    out_cloud1->clear();
-    out_cloud2->clear();
-    output_cloud->clear();
-    ROS_INFO_STREAM("1b" << std::endl);
     mtx_.lock();
     input_cloud = cloud_;
     mtx_.unlock();
+
+//    if (input_cloud->empty())
+//        return false;
     //copy cloud_ in a new variable using mutex
-ROS_INFO_STREAM("1c" << std::endl);
+    ROS_INFO_STREAM("cloud size :" << cloud_->size() << std::endl);
+    //  Disabling voxel filter -- enabling this will impact rover detection
+//    float leafsize  = 0.006;
+//    pcl::VoxelGrid<pcl::PointXYZ> grid;
+//    grid.setLeafSize (leafsize, leafsize, leafsize);
+//    grid.setInputCloud (input_cloud);
+//    grid.filter (*out_cloud);
+
+    if (input_cloud->empty())
+        return false;
     planeSegmentation(input_cloud, out_cloud1);
-    ROS_INFO_STREAM("1d" << std::endl);
+
+    if (out_cloud1->empty())
+        return false;
     zAxisSegmentation(out_cloud1, out_cloud2);
-    ROS_INFO_STREAM("1e" << std::endl);
+
+    if (out_cloud2->empty())
+        return false;
     stepCentroids(out_cloud2, output_cloud);
-    ROS_INFO_STREAM("1f" << std::endl);
+
+    if (!output_cloud->empty())
+        steps_detected = true;
 
     sensor_msgs::PointCloud2 output;
     pcl::toROSMsg(*output_cloud, output);
     output.header.frame_id = "world";
+    //ROS_INFO_STREAM("output :" << output.data.at(1) << std::endl);
     pcl_pub_.publish(output);
 
+    input_cloud->points.clear();
+    out_cloud1->points.clear();
+    out_cloud2->points.clear();
+    output_cloud->points.clear();
+
+    return steps_detected;
 }
 
 void steps_detector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output)
 {
     int count = 0;
     pcl::PointCloud<pcl::PointXYZ>::Ptr temp_output (new pcl::PointCloud<pcl::PointXYZ>);
-    temp_output->points.clear();
     for (size_t i = 0; i < input->size(); i++)
     {
         double threshold = coefficients_[0] * input->points[i].x + coefficients_[1] * input->points[i].y + coefficients_[2] * input->points[i].z - coefficients_[3];
@@ -72,33 +95,30 @@ void steps_detector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr
             count++;
         }
     }
+    if (temp_output->empty())
+        return;
     pcl::PassThrough<pcl::PointXYZ> pass;
     pass.setInputCloud(temp_output);
     pass.setFilterFieldName ("x");
     //pass.setFilterLimits (3.62829, 6.7);
-    pass.setFilterLimits (stairLoc_.x, stairLoc_.x + 3.1);
-    ROS_INFO_STREAM(stairLoc_.x << std::endl);
-    ROS_INFO_STREAM(temp_output->size() << std::endl);
+    pass.setFilterLimits (stairLoc_.x, stairLoc_.x + STAIR_LENGTH_FORWARD);
     pass.filter (*output);
-       ROS_INFO_STREAM(output->size() << std::endl);
+    temp_output->points.clear();
 }
 
 void steps_detector::zAxisSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output)
 {
     std::sort(input->points.begin(), input->points.end(), comparePoints);
-        ROS_INFO_STREAM("1da" << std::endl);
     pcl::PointXYZ temp_point = input->points[0];
-ROS_INFO_STREAM("1dab" << std::endl);
     for (size_t i = 1; i < input->size(); i++)
     {
         double dot_product = ((input->points[i].x - temp_point.x) * 0 + (input->points[i].y - temp_point.y) * 0 + (input->points[i].z - temp_point.z) * 1);
-
-        if (std::abs(dot_product) > 0.01)
+        double norm_threshold = std::sqrt(std::pow(input->points[i-1].x - input->points[i].x, 2) + std::pow(input->points[i-1].z - input->points[i].z, 2));
+                //ROS_INFO_STREAM("output :" << norm_threshold << std::endl);
+        if (std::abs(dot_product) > 0.01 && norm_threshold > 0.03)
             output->points.push_back(input->points[i]);
-        ROS_INFO_STREAM("1db" << std::endl);
         temp_point = input->points[i];
     }
-    ROS_INFO_STREAM("1dc" << std::endl);
 }
 
 void steps_detector::stepCentroids(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output)
@@ -108,7 +128,6 @@ void steps_detector::stepCentroids(const pcl::PointCloud<pcl::PointXYZ>::Ptr& in
     pcl::PointXYZ temp_point = input->points[0];
     size_t j = 0;
     pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-    temp_cloud->clear();
     for (size_t i = 1 ; i < input->size(); i++, j++)
     {
         double dot_product = ((input->points[i].x - temp_point.x) * dirVector_.x + (input->points[i].y - temp_point.y) * dirVector_.y + (input->points[i].z - temp_point.z) * dirVector_.z);
@@ -132,6 +151,9 @@ void steps_detector::stepCentroids(const pcl::PointCloud<pcl::PointXYZ>::Ptr& in
     temp_point1.z /= double(j);
     temp_cloud->points.push_back(temp_point1);
 
+    if (temp_cloud->empty())
+        return;
+
     pcl::PointXYZ temp_point2;
     temp_point2 = {0, 0, 0};
     for (size_t i = 0; i < temp_cloud->size() - 1; i++)
@@ -143,9 +165,51 @@ void steps_detector::stepCentroids(const pcl::PointCloud<pcl::PointXYZ>::Ptr& in
         output->points.push_back(temp_point2);
     }
 
-//    for (size_t i = 0; i < o4->size() - 1; i++)
-//    {
-//        ROS_INFO_STREAM("x : " << o4->points[i+1].x - o4->points[i].x << std::endl);
-//    }
+    pcl::PointXYZ temp_point3;
+    temp_point3.x = double(temp_point2.x + 0.2391737143);
+    temp_point3.y = double(temp_point2.y);
+    temp_point3.z = double(temp_point2.z + 0.2015475);
+
+    output->points.push_back(temp_point3);
+
+    for (size_t i = 0; i < output->size() - 1; i++)
+    {
+        //ROS_INFO_STREAM("y : " << output->points[i+1].y << std::endl);
+        ROS_INFO_STREAM("x : " << output->points[i+1].x - output->points[i].x << std::endl);
+    }
+    temp_cloud->points.clear();
 }
 
+void steps_detector::visualize_point(geometry_msgs::Point point)
+{
+    static int id = 0;
+    visualization_msgs::Marker marker;
+    // Set the frame ID and timestamp.  See the TF tutorials for information on these.
+    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+    marker.header.stamp = ros::Time::now();
+
+    // Set the namespace and id for this marker.  This serves to create a unique ID
+    // Any marker sent with the same namespace and id will overwrite the old one
+    marker.ns = std::to_string(frameID_);
+    marker.id = id++;
+
+    // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
+    marker.type = visualization_msgs::Marker::CUBE;
+
+    // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
+    marker.action = visualization_msgs::Marker::ADD;
+
+    // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
+    marker.pose.position = point;
+    marker.pose.orientation.w = 1.0f;
+
+    marker.scale.x = 0.01;
+    marker.scale.y = 0.01;
+    marker.scale.z = 0.01;
+    marker.color.a = 1.0; // Don't forget to set the alpha!
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
+
+    markers_.markers.push_back(marker);
+}

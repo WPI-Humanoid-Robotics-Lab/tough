@@ -43,6 +43,8 @@
 #include "val_controllers/robot_state.h"
 #include <visualization_msgs/MarkerArray.h>
 
+#define STAIR_LENGTH_FORWARD 3.1
+
 class steps_detector
 {
     ros::Subscriber pcl_sub_;
@@ -53,6 +55,9 @@ class steps_detector
     geometry_msgs::Point dirVector_;
     geometry_msgs::Point stairLoc_;
     std::mutex mtx_;
+    ros::Publisher marker_pub_;
+    int frameID_ = 0;
+    visualization_msgs::MarkerArray markers_;
 
 public:
     steps_detector(ros::NodeHandle& );
@@ -61,7 +66,8 @@ public:
     void planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output);
     void zAxisSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output);
     void stepCentroids(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output);
-    void getStepsPosition(const std::vector<double>& , const geometry_msgs::Point& dirVector, const geometry_msgs::Point& stairLoc);
+    bool getStepsPosition(const std::vector<double>& , const geometry_msgs::Point& dirVector, const geometry_msgs::Point& stairLoc);
+    void visualize_point(geometry_msgs::Point point);
 };
 
 bool comparePoints(const pcl::PointXYZ& p1, const pcl::PointXYZ& p2)
