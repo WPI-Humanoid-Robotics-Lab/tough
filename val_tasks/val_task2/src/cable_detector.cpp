@@ -4,8 +4,8 @@
 #include <pcl/common/centroid.h>
 #include <thread>
 
-#define DISABLE_DRAWINGS true
-#define DISABLE_TRACKBAR true
+//#define DISABLE_DRAWINGS true
+//#define DISABLE_TRACKBAR true
 
 CableDetector::CableDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
@@ -79,7 +79,9 @@ bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
     // Find contours
     cv::findContours(outImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
-    Eigen::Vector4f cloudCentroid;
+    Eigen::Vector4f cloudCentroid0;
+    Eigen::Vector4f cloudCentroid1;
+    Eigen::Vector4f cloudCentroid2;
     if(!contours.empty()) //avoid seg fault at runtime by checking that the contours exist
     {
         foundCable = true;
@@ -87,52 +89,68 @@ bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
         //ROS_INFO_STREAM(point << std::endl);
         double theta = (1/3600.0) * 3.14159265359;
         double r = std::sqrt(std::pow(points[1].x - points[0].x , 2) + std::pow(points[1].y - points[0].y , 2)) + 5.0;
-        pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
+        pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud0;
+        pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud1;
+        pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud2;
 
-        for (size_t k = 0; k < 360; k++ )
+        for (size_t k = 0; k < 10; k++ )
         {
             for (size_t l = 0; l < 10; l++ )
             {
-
-                pcl::PointXYZRGB temp_pclPoint;
+                pcl::PointXYZRGB temp_pclPoint0;
+                pcl::PointXYZRGB temp_pclPoint1;
+                pcl::PointXYZRGB temp_pclPoint2;
                 try
                 {
-                    temp_pclPoint = organizedCloud->at(int(points[1].x + r * std::cos(k * l * theta)), int(points[1].y + r * std::sin(k * l * theta)));
+                    //temp_pclPoint = organizedCloud->at(int(points[1].x + r * std::cos(k * l * theta)), int(points[1].y + r * std::sin(k * l * theta)));
+                    temp_pclPoint0 = organizedCloud->at(points[0].x + k, points[0].y + l );
+                    temp_pclPoint1 = organizedCloud->at(points[1].x + k, points[1].y + l);
+                    temp_pclPoint2 = organizedCloud->at(points[2].x + k, points[2].y + l);
                 }
                 catch (const std::out_of_range& ex){
                     ROS_ERROR("%s",ex.what());
                     return false;
                 }
 
-                if (temp_pclPoint.z > -2.0 && temp_pclPoint.z < 2.0 )
+                if (temp_pclPoint0.z > -2.0 && temp_pclPoint0.z < 2.0 )
                 {
-                    currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
+                    currentDetectionCloud0.push_back(pcl::PointXYZRGB(temp_pclPoint0));
+                }
+
+                if (temp_pclPoint1.z > -2.0 && temp_pclPoint1.z < 2.0 )
+                {
+                    currentDetectionCloud1.push_back(pcl::PointXYZRGB(temp_pclPoint1));
+                }
+
+                if (temp_pclPoint2.z > -2.0 && temp_pclPoint2.z < 2.0 )
+                {
+                    currentDetectionCloud2.push_back(pcl::PointXYZRGB(temp_pclPoint2));
                 }
             }
         }
         //  Calculating the Centroid of the handle Point cloud
-        pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
+        pcl::compute3DCentroid(currentDetectionCloud0, cloudCentroid0);
+        pcl::compute3DCentroid(currentDetectionCloud1, cloudCentroid1);
+        pcl::compute3DCentroid(currentDetectionCloud2, cloudCentroid2);
     }
 
     if( foundCable )
     {
-        pcl::PointXYZRGB temp_pclPoint1 = organizedCloud->at(points[0].x, points[0].y);
-        pcl::PointXYZRGB temp_pclPoint2 = organizedCloud->at(points[1].x, points[1].y);
+        //pcl::PointXYZRGB temp_pclPoint2 = organizedCloud->at(points[1].x, points[1].y);
+        geom_point.point.x = cloudCentroid0(0);
+        geom_point.point.y = cloudCentroid0(1);
+        geom_point.point.z = cloudCentroid0(2);
+        geom_point.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
 
-        geom_point1.point.x = temp_pclPoint1.x;
-        geom_point1.point.y = temp_pclPoint1.y;
-        geom_point1.point.z = temp_pclPoint1.z;
+        geom_point1.point.x = cloudCentroid1(0);
+        geom_point1.point.y = cloudCentroid1(1);
+        geom_point1.point.z = cloudCentroid1(2);
         geom_point1.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
 
-        geom_point2.point.x = temp_pclPoint2.x;
-        geom_point2.point.y = temp_pclPoint2.y;
-        geom_point2.point.z = temp_pclPoint2.z;
+        geom_point2.point.x = cloudCentroid2(0);
+        geom_point2.point.y = cloudCentroid2(1);
+        geom_point2.point.z = cloudCentroid2(2);
         geom_point2.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
-
-        geom_point.point.x = cloudCentroid(0);
-        geom_point.point.y = cloudCentroid(1);
-        geom_point.point.z = cloudCentroid(2);
-        geom_point.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
         try
         {
             listener.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, ros::Time(0), ros::Duration(3.0));
@@ -149,9 +167,10 @@ bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
     cableLoc.y = double (geom_point.point.y);
     cableLoc.z = double (geom_point.point.z);
 
-    visualize_point(geom_point1.point, 0.0, 0.0, 1.0);
-    //visualize_point(geom_point2.point, 0.0, 1.0, 0.0);
     visualize_point(geom_point.point, 0.7, 0.5, 0.0);
+    visualize_point(geom_point1.point, 0.0, 0.0, 1.0);
+    visualize_point(geom_point2.point, 1.0, 0.8, 0.3);
+    visualize_direction(geom_point2.point, geom_point1.point);
 
     marker_pub_.publish(markers_);
 
@@ -189,16 +208,18 @@ std::vector<cv::Point> CableDetector::getOrientation(const std::vector<cv::Point
     //ROS_INFO_STREAM(cntr << std::endl);
     // Draw the principal components
     cv::circle(current_image_, cntr, 3, cv::Scalar(255, 0, 255), 2);
-    cv::Point p1 = cntr + 0.3 * cv::Point(static_cast<int>(eigen_vecs[0].x * eigen_val[0]), static_cast<int>(eigen_vecs[0].y * eigen_val[0]));
-    cv::Point p2 = cntr + 1.0 * cv::Point(static_cast<int>(eigen_vecs[1].x * eigen_val[1]), static_cast<int>(eigen_vecs[1].y * eigen_val[1]));
+    cv::Point p1 = cntr + 0.03 * cv::Point(static_cast<int>(eigen_vecs[0].x * eigen_val[0]), static_cast<int>(eigen_vecs[0].y * eigen_val[0]));
+    cv::Point p2 = cntr - 0.03 * cv::Point(static_cast<int>(eigen_vecs[0].x * eigen_val[0]), static_cast<int>(eigen_vecs[0].y * eigen_val[0]));
+    //cv::Point p2 = cntr + 1.0 * cv::Point(static_cast<int>(eigen_vecs[1].x * eigen_val[1]), static_cast<int>(eigen_vecs[1].y * eigen_val[1]));
 
     //VISUALIZATION - Uncomment this line
     drawAxis(current_image_, cntr, p1, cv::Scalar(0, 255, 0), 1);
     drawAxis(current_image_, cntr, p2, cv::Scalar(255, 255, 0), 1);
     //ROS_INFO_STREAM(p2 << std::endl);
-    std::vector<cv::Point> points(2);
+    std::vector<cv::Point> points(3);
     points[0] = cntr;
     points[1] = p1;
+    points[2] = p2;
     showImage(current_image_);
     return points;
 }
@@ -292,6 +313,39 @@ void CableDetector::visualize_point(geometry_msgs::Point point, double r, double
 
     markers_.markers.push_back(marker);
 }
+
+void CableDetector::visualize_direction(geometry_msgs::Point point1, geometry_msgs::Point point2)
+{
+    static int id = 0;
+    visualization_msgs::Marker marker;
+    // Set the frame ID and timestamp.  See the TF tutorials for information on these.
+    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+    marker.header.stamp = ros::Time::now();
+
+    // Set the namespace and id for this marker.  This serves to create a unique ID
+    // Any marker sent with the same namespace and id will overwrite the old one
+    marker.ns = std::to_string(frameID_);
+    marker.id = id++;
+
+    // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
+    marker.type = visualization_msgs::Marker::ARROW;
+    marker.points.push_back(point1);
+    marker.points.push_back(point2);
+    // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
+    marker.action = visualization_msgs::Marker::ADD;
+    // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
+    //marker.pose.position = point;
+    //marker.pose.orientation.w = 1.0f;
+    marker.scale.x = 0.01;
+    marker.scale.y = 0.05;
+    marker.scale.z = 0.01;
+    marker.color.a = 1.0; // Don't forget to set the alpha!
+    marker.color.r = 1.0;
+    marker.color.g = 0.0;
+    marker.color.b = 0.0;
+    markers_.markers.push_back(marker);
+}
+
 
 CableDetector::~CableDetector()
 {
