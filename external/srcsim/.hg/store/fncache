@@ -7,6 +7,7 @@ data/models/satellite_dish/materials/textures/satellite.png.i
 data/test/gtest/include/gtest/internal/gtest-tuple.h.pump.i
 data/models/src_habitat/materials/textures/Metal_Seamed.png.i
 data/satellite/plugin/CMakeLists.txt.i
+data/src/HarnessManager.cc.i
 data/models/satellite_dish/meshes/satellite_dish.dae.i
 data/test/gtest/src/gtest-death-test.cc.i
 data/models/walkway_finish_adjacent/materials/textures/walkway_finish.png.i
@@ -85,10 +86,12 @@ data/models/src_habitat/materials/textures/finish.png.i
 data/models/mars_rock_3/model.config.i
 data/worlds/qual1.world.i
 data/test/gtest/src/gtest.cc.i
+data/scripts/wait_for_controller.bash.i
 data/cmake/FindSSE.cmake.i
 data/models/src_doorway_q2/model.sdf.i
 data/include/srcsim/srcsim.hh.in.i
 data/models/walkway_finish_opposite/meshes/walkway_finish_opposite.obj.i
+data/launch/grasping_init_wait.launch.i
 data/models/mars_rock_2/model.config.i
 data/models/mars_rock_2/meshes/mars_rocks.mtl.i
 data/cmake/cpack.cmake.i
@@ -168,6 +171,7 @@ data/src/Task.cc.i
 data/models/space_table/materials/textures/space_table.png.i
 data/cmake/CodeCoverage.cmake.i
 data/test/gtest/src/gtest-filepath.cc.i
+data/msg/Harness.msg.i
 data/test/regression/CMakeLists.txt.i
 data/models/src_habitat/model.config.i
 data/launch/multisense.launch.i
@@ -228,6 +232,7 @@ data/src/SRCMultiSenseSLPlugin.cpp.i
 data/models/mars_crate_long/meshes/crate_long.obj.i
 data/msg/Satellite.msg.i
 data/cmake/pkgconfig/srcsim.in.i
+data/test/CMakeLists.txt.i
 data/models/solar_panel/materials/textures/solar_panel.png.d
 data/include/srcsim/srcsim_ros_harness.h.i
 data/worlds/unique.world.i
@@ -251,11 +256,12 @@ data/models/mars_crate/model.config.i
 data/models/src_habitat/meshes/hdu.mtl.i
 data/worlds/unique_task3.world.i
 data/test/gtest/include/gtest/gtest-death-test.h.i
-data/test/CMakeLists.txt.i
+data/include/srcsim/HarnessManager.hh.i
 data/models/solar_panel/meshes/solar_panel.mtl.i
 data/models/satellite_dish/model.config.i
 data/scripts/src_tc.rb.i
 data/src/Qual2Plugin.cc.i
+data/scripts/wait_for_controller.sh.i
 data/test/gtest/include/gtest/internal/custom/gtest.h.i
 data/include/srcsim/BoxContainsPlugin.hh.i
 data/models/src_habitat/meshes/hdu_02.jpg.d
