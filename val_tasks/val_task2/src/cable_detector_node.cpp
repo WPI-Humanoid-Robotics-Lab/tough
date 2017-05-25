@@ -12,7 +12,7 @@ int main(int argc, char** argv)
     while(ros::ok())
     //while (!foundCable && numIterations < 20)
     {
-        foundCable = c1.findCable(CableLoc);
+        //foundCable = c1.findCable(CableLoc);
         //ROS_INFO(foundCable ? "***** Cable detected" : "xxxxx Cable not detected");
         ros::spinOnce();
         numIterations++;
