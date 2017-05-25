@@ -39,6 +39,7 @@ class CableDetector
     src_perception::MultisenseImage ms_sensor_;
     src_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
+    void visualize_direction(geometry_msgs::Point point1, geometry_msgs::Point point2);
     void visualize_point(geometry_msgs::Point point, double r, double g, double b);
 
 public:
