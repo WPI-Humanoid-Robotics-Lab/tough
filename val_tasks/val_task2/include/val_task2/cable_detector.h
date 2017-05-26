@@ -84,6 +84,7 @@ public:
     bool findCable(geometry_msgs::Point &);
 
     void cloudCB(const sensor_msgs::PointCloud2::Ptr& );
+    bool getStandPosition(geometry_msgs::Point & );
     bool planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input);
 
 };
