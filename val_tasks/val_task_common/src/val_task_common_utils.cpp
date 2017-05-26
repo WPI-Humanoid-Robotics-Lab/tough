@@ -104,7 +104,7 @@ void taskCommonUtils::moveToInitPose(ros::NodeHandle &nh)
     ros::Duration(0.5).sleep();
 }
 
-void taskCommonUtils::fixHandFramePose(ros::NodeHandle nh, armSide side, geometry_msgs::Pose &poseInWorldFrame){
+void taskCommonUtils::fixHandFramePalmDown(ros::NodeHandle nh, armSide side, geometry_msgs::Pose &poseInWorldFrame){
 
     RobotStateInformer *current_state = RobotStateInformer::getRobotStateInformer(nh);
     geometry_msgs::Pose poseInPelvisFrame;

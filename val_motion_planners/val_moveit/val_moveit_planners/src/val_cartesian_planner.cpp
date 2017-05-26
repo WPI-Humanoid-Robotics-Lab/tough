@@ -60,7 +60,7 @@ double cartesianPlanner::getTrajFromCartPoints(std::vector<geometry_msgs::Pose> 
     group_->setPoseReferenceFrame(reference_frame_);
     double frac = 0.0;
     int retry = 0;
-    while (frac < 99 && retry++ < 5){
+    while (frac < 0.98 && retry++ < 5){
         frac = group_->computeCartesianPath(points, 0.01, 0.0, trajectory, avoid_collisions);
     }
 

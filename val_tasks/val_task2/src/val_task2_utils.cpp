@@ -14,7 +14,7 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     current_state_       = RobotStateInformer::getRobotStateInformer(nh_);
 
     reset_pointcloud_pub = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
-    reset_pointcloud_pub = nh_.advertise<std_msgs::Bool>("/field/pause_pointcloud",1);
+    pause_pointcloud_pub = nh_.advertise<std_msgs::Bool>("/field/pause_pointcloud",1);
 }
 
 task2Utils::~task2Utils()
@@ -72,7 +72,9 @@ void task2Utils::movePanelToWalkSafePose(const armSide side)
     {
         seed2 = &rightShoulderSeedPanelGraspWalk_;
     }
-
+    std::vector<double> grasp = {1.2, -0.6, -0.77, -0.9, -0.9};
+    gripper_controller_->controlGripper(side, grasp);
+    ros::Duration(1).sleep();
     std::vector< std::vector<float> > armData;
     armData.clear();
     armData.push_back(*seed2);
