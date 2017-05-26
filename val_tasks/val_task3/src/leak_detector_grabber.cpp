@@ -41,7 +41,7 @@ void leakDetectorGrabber::graspDetector(armSide side, geometry_msgs::Pose &goal,
 
     //transform that point back to world frame
     current_state_->transformPose(intermGoal, intermGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-    taskCommonUtils::fixHandFramePose(nh_, side, intermGoal);
+    taskCommonUtils::fixHandFramePalmDown(nh_, side, intermGoal);
 
     ROS_INFO("Moving at an intermidate point before goal");
     ROS_INFO_STREAM("Intermidiate goal"<<intermGoal);
@@ -61,7 +61,7 @@ void leakDetectorGrabber::graspDetector(armSide side, geometry_msgs::Pose &goal,
     //transform that point back to world frame
     current_state_->transformPose(finalGoal, finalGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
     current_state_->transformPose(intermGoal, intermGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
-    taskCommonUtils::fixHandFramePose(nh_, side, finalGoal);
+        taskCommonUtils::fixHandFramePalmDown(nh_, side, finalGoal);
 
     ROS_INFO("Moving towards goal");
     ROS_INFO_STREAM("Final goal"<<finalGoal);
@@ -87,9 +87,10 @@ void leakDetectorGrabber::graspDetector(armSide side, geometry_msgs::Pose &goal,
     ROS_INFO("Calculated Traj");
     wholebody_controller_.compileMsg(side, traj.joint_trajectory);
 
-    ros::Duration(executionTime).sleep();
-    ROS_INFO("Closing grippers");
-    gripper_.closeGripper(side);
-    ros::Duration(0.3).sleep();
+        ros::Duration(executionTime).sleep();
+        //gripper_.controlGripper(side,GRIPPER_STATE::CUP);
+        ROS_INFO("Closing grippers");
+        //gripper_.closeGripper(side);
+        ros::Duration(0.3).sleep();
 }
 

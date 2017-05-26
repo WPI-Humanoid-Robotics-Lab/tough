@@ -164,7 +164,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
         if(rover_detector_->getRoverSide(roverSide)){
             setRoverSide(roverSide == ROVER_SIDE::RIGHT);
             // block rover in /map
-            rover_in_map_blocker_ = new SolarArrayDetector(nh_, detectedPoses2D.back(),is_rover_on_right_);
+//            rover_in_map_blocker_ = new SolarArrayDetector(nh_, detectedPoses2D.back(),is_rover_on_right_);
             //wait for the map to update. This is required to ensure the footsteps dont collide with rover
             //        ros::Duration(0.5).sleep();
             taskCommonUtils::moveToWalkSafePose(nh_);
@@ -246,8 +246,6 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
             ROS_INFO("reached The rover");
             ros::Duration(3).sleep(); // This is required for steps to complete
             ROS_INFO("Final few steps before we reach rover");
-            //            walker_->walkLocalPreComputedSteps({0.3,0.3},{0.0,0.0},RIGHT);
-            //            ros::Duration(1).sleep();
             eventQueue.riseEvent("/REACHED_ROVER");
             executeOnce = true;
             ros::Duration(1).sleep();
@@ -396,7 +394,7 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
     static int retry_count = 0;
     static armSide side;
     if(panel_grabber_ == nullptr){
-        panel_grabber_ = new solar_panel_handle_grabber(nh_);
+        panel_grabber_ = new solar_panel_handle_grabber(nh_,BUTTON_LOCATION::RIGHT);
     }
 
     if(!executing){
@@ -471,19 +469,26 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         ros::Duration(3).sleep();
         /// @todo use goal waypoints to get away from rover. it can be detected in rover detection code
         armSide startingSide;
+        geometry_msgs::Pose pose;
+        pose.position.x = 0.0;
+        pose.orientation.w = 1.0;
         if (is_rover_on_right_){
-            x_offset={0.0,0.0,0.0, 0.0};
-            y_offset={0.2,0.2, 0.4, 0.4};
+            pose.position.y = 0.5;
             startingSide = armSide::LEFT;
         } else{
-            x_offset={0.0,0.0,0.0, 0.0};
-            y_offset={-0.2,-0.2, -0.4, -0.4};
+            pose.position.y = -0.5;
             startingSide = armSide::RIGHT;
         }
-
-        walker_->walkLocalPreComputedSteps(x_offset,y_offset,startingSide);
-        ros::Duration(3).sleep();
-//        task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_);
+        robot_state_->transformPose(pose, pose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+        geometry_msgs::Pose2D pose2D;
+        pose2D.x = pose.position.x;
+        pose2D.y = pose.position.y;
+        pose2D.theta = rover_walk_goal_waypoints_.back().theta;
+        ROS_INFO("Walking to x:%f y:%f theta:%f", pose2D.x,pose2D.y,pose2D.theta);
+        walker_->walkToGoal(pose2D);
+        //        walker_->walkLocalPreComputedSteps(x_offset,y_offset,startingSide);
+        ros::Duration(1).sleep();
+        task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_);
         eventQueue.riseEvent("/PICKED_PANEL");
     }
     else if (retry < 5){
