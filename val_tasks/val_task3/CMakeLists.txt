@@ -157,6 +157,7 @@ add_library(${PROJECT_NAME}
          src/steps_detector.cpp
          src/leak_detector_grabber.cpp
          src/val_task3_utils.cpp
+         src/rotate_valve.cpp
 )
 
 add_executable(stair_climb_node src/val_stairclimb.cpp)
@@ -178,6 +179,9 @@ target_link_libraries(steps_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARI
 
 add_executable(leak_detector_grabber_node src/leak_detector_grabber_node.cpp)
 target_link_libraries(leak_detector_grabber_node ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(grab_valve_node src/grab_valve_node.cpp)
+target_link_libraries(grab_valve_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 #############
 ## Install ##
 #############

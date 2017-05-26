@@ -19,6 +19,12 @@ cableTask::cableTask(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
     rightHandOrientationTop_.quaternion.z = 0.602;
     rightHandOrientationTop_.quaternion.w = 0.353;
 
+    //    rightHandOrientationTop_.quaternion.x = -0.549;
+    //    rightHandOrientationTop_.quaternion.y = 0.591;
+    //    rightHandOrientationTop_.quaternion.z = 0.560;
+    //    rightHandOrientationTop_.quaternion.w = 0.188;
+
+
     /* Side Grip */
     leftHandOrientationSide_.quaternion.x = 0.155;
     leftHandOrientationSide_.quaternion.y = -0.061;
@@ -82,6 +88,15 @@ bool cableTask::grasp_cable(const geometry_msgs::Point &goal, float executionTim
     armTraj_.moveArmJoints(RIGHT, armData, executionTime);
     ros::Duration(executionTime).sleep();
 
+    ROS_INFO("grasp_cable: Setting gripper position to open thumb");
+    std::vector<double> gripper1,gripper2;
+    gripper1={1.2, 1.35, 0.3, 0.0 ,0.0 };
+    gripper2={1.2, 0.4, 0.3, 0.0 ,0.0 };
+    gripper_.controlGripper(RIGHT,gripper1);
+    ros::Duration(executionTime/2).sleep();
+    gripper_.controlGripper(RIGHT,gripper2);
+    ros::Duration(executionTime/2).sleep();
+
     // setting orientation of final pose
     geometry_msgs::QuaternionStamped temp  =rightHandOrientationTop_;
     current_state_->transformQuaternion(temp,temp);
@@ -108,19 +123,26 @@ bool cableTask::grasp_cable(const geometry_msgs::Point &goal, float executionTim
     // Sending waypoints to the planner
     right_arm_planner_->getTrajFromCartPoints(waypoints,traj,false);
 
-    //    // Opening grippers
-    //    ROS_INFO("grasp_cable: Setting gripper position to open thumb");
-    //    std::vector<double> gripper1;
-    //    gripper1={1.35,0.5,0.0,0.0,0.0};
-    //    gripper_.controlGripper(RIGHT,gripper1);
-    //    ros::Duration(executionTime/2).sleep();
+    // Planning whole body motion
+    wholebody_controller_->compileMsg(RIGHT,traj.joint_trajectory);
+    ros::Duration(executionTime*1.5).sleep();
 
-    //    // Planning whole body motion
-    //    wholebody_controller_->compileMsg(RIGHT,traj);
-    //    ros::Duration(executionTime*2).sleep();
+    // Grasping the cable
+    ROS_INFO("grasp_cable: Closing the gripper ");
+    gripper_.closeGripper(RIGHT);
+    ros::Duration(executionTime).sleep();
 
-    //    // Grasping the cable
-    //    gripper_.closeGripper(RIGHT);
+    // Move chest
+    ROS_INFO("grasp_cable: Setting chest orientation ");
+    chest_controller_->controlChest(0,0,0);
+    ros::Duration(executionTime).sleep();
+
+    // Setting arm position to dock
+    ROS_INFO("grasp_cable: Setting arm position to dock cable");
+    armData.clear();
+    armData.push_back(rightAfterGraspShoulderSeed_);
+    armTraj_.moveArmJoints(RIGHT,armData,executionTime);
+
 
 }
 
