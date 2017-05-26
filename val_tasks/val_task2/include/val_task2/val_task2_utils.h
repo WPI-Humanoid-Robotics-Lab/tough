@@ -36,15 +36,17 @@ private:
 
 
     // Need to edit
-    const std::vector<float> leftSeedGraspingHand_ = {-1.40, -1.04, 1.39, -1.85, -1.10, 0, 0};
+    const std::vector<float> leftSeedGraspingHand_ = {-1.70, -1.04, 1.39, -1.85, -1.10, 0, 0};
     const std::vector<float> leftSeedNonGraspingHand_ = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};
-    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.04, -1.16, 0.12, -0.94, 1.13, -0.01, 0.08};
+//    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.04, -1.16, 0.12, -0.94, 1.13, -0.01, 0.08};
+    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.18, -0.59, 1.81, -1.05, -0.36, 0.0, 0.0};
 
     //before walking
-    const std::vector<float> rightSeedGraspingHand = {-1.40, 1.04, 1.39, 1.85, -1.10, 0, 0};
+    const std::vector<float> rightSeedGraspingHand = {-1.70, 1.04, 1.39, 1.85, -1.10, 0, 0};
     const std::vector<float> rightSeedNonGraspingHand_ = {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0};
     //while walking
-    const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.04, 1.16, 0.12, 0.94, 1.13, 0.01, -0.08};
+//    const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.04, 1.16, 0.12, 0.94, 1.13, 0.01, -0.08};
+    const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.18, 0.59, 1.81, 1.05, -0.36, 0.0, 0.0};
 
 public:
     task2Utils(ros::NodeHandle nh);
