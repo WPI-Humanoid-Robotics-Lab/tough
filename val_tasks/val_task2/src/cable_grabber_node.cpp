@@ -4,15 +4,20 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "cable_grabber");
     ros::NodeHandle nh;
-    cableTask cg(nh);
+    CableTask cg(nh);
     ROS_INFO("Starting cable grabber");
     gripperControl gc(nh);
 
-    if(argc == 5){
-        geometry_msgs::Point pt;
-        pt.x = std::atof(argv[2]);
-        pt.y = std::atof(argv[3]);
-        pt.z = std::atof(argv[4]);
+    if(argc == 9){
+        geometry_msgs::Pose pt;
+        pt.position.x = std::atof(argv[2]);
+        pt.position.y = std::atof(argv[3]);
+        pt.position.z = std::atof(argv[4]);
+        pt.orientation.x = std::atof(argv[5]);
+        pt.orientation.y = std::atof(argv[6]);
+        pt.orientation.z = std::atof(argv[7]);
+        pt.orientation.w = std::atof(argv[8]);
+
 
         armSide side;
         if(std::atoi(argv[1]) == 0){
