@@ -397,7 +397,7 @@ bool CableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr&
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
     for (size_t i = 0; i < input->size(); i++)
     {
-        if (std::abs(input->points[i].z - cableLoc_.z) < 0.03 &&)
+        if (std::abs(input->points[i].z - cableLoc_.z) < 0.03)
             output_cloud->points.push_back(input->points[i]);
     }
 
