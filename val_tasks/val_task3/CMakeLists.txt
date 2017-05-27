@@ -66,6 +66,7 @@ add_library(${PROJECT_NAME}
          src/door_valve_detector.cpp
          src/val_task3_utils.cpp
          src/rotate_valve.cpp
+         src/door_opener.cpp
 )
 
 add_executable(stair_climb_node src/val_stairclimb.cpp)

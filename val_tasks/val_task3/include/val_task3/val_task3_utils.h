@@ -20,13 +20,16 @@ private:
     ros::NodeHandle nh_;
     armTrajectory arm_controller_;
 
-    const std::vector<float> rightArmSeedPanelManip = {-0.23, 0, 0.70, 1.51, -0.05, 0, 0};
-    const std::vector<float> leftArmSeedPanelManip  = {-0.23, 0, 0.70, -1.51, 0.05, 0, 0};
+    const std::vector<float> RIGHT_ARM_SEED_TABLE_MANIP = {-0.23, 0, 0.70, 1.51, -0.05, 0, 0};
+    const std::vector<float> LEFT_ARM_SEED_TABLE_MANIP  = {-0.23, 0, 0.70, -1.51, 0.05, 0, 0};
+    const std::vector<float> RIGHT_ARM_DOOR_OPEN = {-1.30, 1.20, 0.65, 0.50, 1.28};
+    const std::vector<float> LEFT_ARM_DOOR_OPEN  = {-0.96, -1.20, 0.65, 1.39, 1.27, 0, 0};
 
 public:
     task3Utils(ros::NodeHandle nh);
     ~task3Utils();
     void beforePanelManipPose();
+    void beforDoorOpenPose();
 
 };
 
