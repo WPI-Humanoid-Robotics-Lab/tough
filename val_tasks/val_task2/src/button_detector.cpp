@@ -72,36 +72,32 @@ bool ButtonDetector::getButtonLocation(geometry_msgs::Point& buttonLoc)
     // Find contours
     cv::findContours(outImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
-
+    Eigen::Vector4f cloudCentroid;
     if(!contours.empty()) //avoid seg fault at runtime by checking that the contours exist
     {
         findMaxContour(contours);
         foundButton = true;
-    }
+        cv::Mat hullPoints = cv::Mat::zeros(current_image_.size(), CV_8UC1);
+        cv::fillConvexPoly(hullPoints, convexHulls_,cv::Scalar(255));
+        cv::Mat nonZeroCoordinates;
+        cv::erode(hullPoints, hullPoints, cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(5,5)));
+        cv::findNonZero(hullPoints, nonZeroCoordinates);
+        if (nonZeroCoordinates.total() < 10)
+            return false;
 
-    cv::Mat hullPoints = cv::Mat::zeros(current_image_.size(), CV_8UC1);
-    cv::fillConvexPoly(hullPoints, convexHulls_,cv::Scalar(255));
-    cv::Mat nonZeroCoordinates;
-    cv::erode(hullPoints, hullPoints, cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(5,5)));
-    cv::findNonZero(hullPoints, nonZeroCoordinates);
-    if (nonZeroCoordinates.total() < 10){
-        return false;
-    }
+        pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
 
-    pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
-
-    for (int k = 0; k < nonZeroCoordinates.total(); k++ ) {
-        pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
-
-        if (temp_pclPoint.z > -2.0)
-        {
-            currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
-
+        for (int k = 0; k < nonZeroCoordinates.total(); k++ ) {
+            pcl::PointXYZRGB temp_pclPoint = organizedCloud->at(nonZeroCoordinates.at<cv::Point>(k).x, nonZeroCoordinates.at<cv::Point>(k).y);
+            if (temp_pclPoint.z > -2.0 && (*(temp_pclPoint.data + 3)) > 0.99)
+            {
+                            //ROS_INFO_STREAM("r : " << *(temp_pclPoint.data + 4) << std::endl);
+                currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
+            }
         }
+        //  Calculating the Centroid of the handle Point cloud
+        pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
     }
-    Eigen::Vector4f cloudCentroid;
-    //  Calculating the Centroid of the handle Point cloud
-    pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
     if( foundButton )
     {
         geom_point.point.x = cloudCentroid(0);

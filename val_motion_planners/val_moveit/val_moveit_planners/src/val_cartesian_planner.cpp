@@ -58,7 +58,11 @@ double cartesianPlanner::getTrajFromCartPoints(std::vector<geometry_msgs::Pose> 
     // compute the trajectory
     ROS_INFO("Planning cartesian path now");
     group_->setPoseReferenceFrame(reference_frame_);
-    double frac = group_->computeCartesianPath(points, 0.01, 0.0, trajectory, avoid_collisions);
+    double frac = 0.0;
+    int retry = 0;
+    while (frac < 0.98 && retry++ < 5){
+        frac = group_->computeCartesianPath(points, 0.01, 0.0, trajectory, avoid_collisions);
+    }
 
     std::cout<<"Fraction of path planned:   "<<frac*100<<"\n";
 //    ROS_INFO("joint names");

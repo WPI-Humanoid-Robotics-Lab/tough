@@ -12,9 +12,14 @@
 
 #define Y_OFFSET 0.05
 
+enum class BUTTON_LOCATION{
+    LEFT=0,
+    RIGHT
+};
+
 class solar_panel_handle_grabber{
 public:
-    solar_panel_handle_grabber(ros::NodeHandle n);
+    solar_panel_handle_grabber(ros::NodeHandle n, BUTTON_LOCATION button_side= BUTTON_LOCATION::LEFT);
     ~solar_panel_handle_grabber();
    bool grasp_handles(armSide side, const geometry_msgs::Pose &goal, float executionTime=2.0f);
 
@@ -37,7 +42,7 @@ private:
    geometry_msgs::QuaternionStamped rightHandOrientationAngled_;
    geometry_msgs::QuaternionStamped leftHandOrientationPerpen_ ;
    geometry_msgs::QuaternionStamped rightHandOrientationPerpen_;
-
+   BUTTON_LOCATION button_side_;
    /*Top Grip*/
    const std::vector<float> leftShoulderSeed_ = {-0.23, -0.07, 0.75, -1.53, 1.21, -0.40, 0.0};
    /*Side Grip*/

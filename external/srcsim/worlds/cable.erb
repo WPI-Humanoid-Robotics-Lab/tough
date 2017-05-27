@@ -4,6 +4,42 @@
   # Requires the following global variables:
   # $cable_frame, $array_z_offset
 
+  def printBlackMaterial()
+    "<material>\n"\
+    "  <ambient>0 0 0 1</ambient>\n"\
+    "  <emissive>0 0 0 1</emissive>\n"\
+    "  <diffuse>0 0 0 1</diffuse>\n"\
+    "  <specular>1 1 1 1</specular>\n"\
+    "</material>\n"
+  end
+
+  def printLightBlueMaterial()
+    "<material>\n"\
+    "  <ambient>0 0 0.3 1</ambient>\n"\
+    "  <emissive>0 0 0.5 1</emissive>\n"\
+    "  <diffuse>0 0 0.1 1</diffuse>\n"\
+    "  <specular>1 1 1 1</specular>\n"\
+    "</material>\n"
+  end
+
+  def printMidBlueMaterial()
+    "<material>\n"\
+    "  <ambient>0 0 0.7 1</ambient>\n"\
+    "  <emissive>0 0 0 1</emissive>\n"\
+    "  <diffuse>0 0 0.1 1</diffuse>\n"\
+    "  <specular>1 1 1 1</specular>\n"\
+    "</material>\n"
+  end
+
+  def printDarkBlueMaterial()
+    "<material>\n"\
+    "  <ambient>0 0 0.3 1</ambient>\n"\
+    "  <emissive>0 0 0 1</emissive>\n"\
+    "  <diffuse>0 0 0.1 1</diffuse>\n"\
+    "  <specular>1 1 1 1</specular>\n"\
+    "</material>\n"
+  end
+
   radius = 0.010
   length = 0.1
   link_count = 16
@@ -11,6 +47,18 @@
   min_inertia = 0.0001
   height = 0.85 + $array_z_offset
   theta = Math::PI * 0.3
+
+  # plug
+  outer_radius = radius * 2.5
+  middle_radius = radius * 1.7
+  inner_radius = radius * 1.4
+
+  outer_length = length * 0.1
+  middle_length = length * 0.2
+  inner_length = length * 1.8
+
+  pos_1 = inner_length * 0.9
+  pos_2 = inner_length * 0.1
 %>
 
 <model name="solar_panel_cable">
@@ -41,12 +89,7 @@
           <radius><%= radius * 2 %></radius>
         </sphere>
       </geometry>
-      <material>
-        <ambient>0 0 0 1</ambient>
-        <emissive>0 0 0 1</emissive>
-        <diffuse>0 0 0 1</diffuse>
-        <specular>1 1 1 1</specular>
-      </material>
+      <%= printBlackMaterial() %>
     </visual>
   </link>
 
@@ -85,12 +128,28 @@
         <izz><%= [link_mass * radius * radius * 0.5, min_inertia].max %></izz>
       </inertia>
     </inertial>
+
     <collision name="cylinder">
+      <% if link != link_count %>
       <pose>0 0 <%= length / 2 %> 0 0 0</pose>
+      <% else %>
+      <pose>0 0 <%= inner_length / 2 %> 0 0 0</pose>
+      <% end %>
       <geometry>
         <cylinder>
+
+          <% if link != link_count %>
           <length><%= length %></length>
+          <% else %>
+          <length><%= inner_length %></length>
+          <% end %>
+
+          <% if link != link_count %>
           <radius><%= radius %></radius>
+          <% else %>
+          <radius><%= inner_radius %></radius>
+          <% end %>
+
         </cylinder>
       </geometry>
       <surface>
@@ -110,10 +169,47 @@
         </friction>
       </surface>
     </collision>
+
+    <visual name="cylinder">
+      <% if link != link_count %>
+      <pose>0 0 <%= length / 2 %> 0 0 0</pose>
+      <% else %>
+      <pose>0 0 <%= inner_length / 2 %> 0 0 0</pose>
+      <% end %>
+      <geometry>
+        <cylinder>
+
+          <% if link != link_count %>
+          <length><%= length %></length>
+          <% else %>
+          <length><%= inner_length %></length>
+          <% end %>
+
+          <% if link != link_count %>
+          <radius><%= radius %></radius>
+          <% else %>
+          <radius><%= inner_radius %></radius>
+          <% end %>
+
+        </cylinder>
+      </geometry>
+      <% if link != link_count %>
+      <%= printBlackMaterial() %>
+      <% else %>
+      <%= printDarkBlueMaterial() %>
+      <% end %>
+    </visual>
+
     <collision name="sphere">
       <geometry>
         <sphere>
+
+          <% if link != link_count %>
           <radius><%= radius %></radius>
+          <% else %>
+          <radius><%= inner_radius %></radius>
+          <% end %>
+
         </sphere>
       </geometry>
       <surface>
@@ -133,43 +229,34 @@
         </friction>
       </surface>
     </collision>
-    <visual name="cylinder">
-      <pose>0 0 <%= length / 2 %> 0 0 0</pose>
-      <geometry>
-        <cylinder>
-          <length><%= length %></length>
-          <radius><%= radius %></radius>
-        </cylinder>
-      </geometry>
-      <material>
-        <ambient>0 0 0 1</ambient>
-        <emissive>0 0 0 1</emissive>
-        <diffuse>0.1 0.1 0.1 1</diffuse>
-        <specular>1 1 1 1</specular>
-      </material>
-    </visual>
+
     <visual name="sphere">
       <geometry>
         <sphere>
+
+          <% if link != link_count %>
           <radius><%= radius %></radius>
+          <% else %>
+          <radius><%= inner_radius %></radius>
+          <% end %>
+
         </sphere>
       </geometry>
-      <material>
-        <ambient>0 0 0 1</ambient>
-        <emissive>0 0 0 1</emissive>
-        <diffuse>0.1 0.1 0.1 1</diffuse>
-        <specular>1 1 1 1</specular>
-      </material>
+      <% if link != link_count %>
+      <%= printBlackMaterial() %>
+      <% else %>
+      <%= printDarkBlueMaterial() %>
+      <% end %>
     </visual>
 
     <% if link == link_count %>
 
-    <collision name="plug_collision_1">
-      <pose>0 0 <%= length %> 0 0 0</pose>
+    <collision name="plug_outer_1">
+      <pose>0 0 <%= pos_1 %> 0 0 0</pose>
       <geometry>
         <cylinder>
-          <length><%= length * 0.1 %></length>
-          <radius><%= radius * 2.0 %></radius>
+          <length><%= outer_length %></length>
+          <radius><%= outer_radius %></radius>
         </cylinder>
       </geometry>
       <surface>
@@ -190,28 +277,23 @@
       </surface>
     </collision>
 
-    <visual name="plug_visual_1">
-      <pose>0 0 <%= length %> 0 0 0</pose>
+    <visual name="plug_outer_1">
+      <pose>0 0 <%= pos_1 %> 0 0 0</pose>
       <geometry>
         <cylinder>
-          <length><%= length * 0.1 %></length>
-          <radius><%= radius * 2.0 %></radius>
+          <length><%= outer_length %></length>
+          <radius><%= outer_radius %></radius>
         </cylinder>
       </geometry>
-      <material>
-        <ambient>0 0 0.3 1</ambient>
-        <emissive>0 0 0.5 1</emissive>
-        <diffuse>0 0 0.1 1</diffuse>
-        <specular>1 1 1 1</specular>
-      </material>
+      <%= printLightBlueMaterial() %>
     </visual>
 
-    <collision name="plug_collision_2">
-      <pose>0 0 <%= length %> 0 0 0</pose>
+    <collision name="plug_middle_1">
+      <pose>0 0 <%= pos_1 %> 0 0 0</pose>
       <geometry>
         <cylinder>
-          <length><%= length * 0.2 %></length>
-          <radius><%= radius * 1.5 %></radius>
+          <length><%= middle_length %></length>
+          <radius><%= middle_radius %></radius>
         </cylinder>
       </geometry>
       <surface>
@@ -232,28 +314,23 @@
       </surface>
     </collision>
 
-    <visual name="plug_visual_2">
-      <pose>0 0 <%= length %> 0 0 0</pose>
+    <visual name="plug_middle_1">
+      <pose>0 0 <%= pos_1 %> 0 0 0</pose>
       <geometry>
         <cylinder>
-          <length><%= length * 0.2 %></length>
-          <radius><%= radius * 1.5 %></radius>
+          <length><%= middle_length %></length>
+          <radius><%= middle_radius %></radius>
         </cylinder>
       </geometry>
-      <material>
-        <ambient>0 0 0.7 1</ambient>
-        <emissive>0 0 0.2 1</emissive>
-        <diffuse>0 0 0.1 1</diffuse>
-        <specular>1 1 1 1</specular>
-      </material>
+      <%= printMidBlueMaterial() %>
     </visual>
 
-    <collision name="plug_collision_3">
-      <pose>0 0 <%= length * 0.9 %> 0 0 0</pose>
+    <collision name="plug_outer_2">
+      <pose>0 0 <%= pos_2 %> 0 0 0</pose>
       <geometry>
         <cylinder>
-          <length><%= length * 0.5 %></length>
-          <radius><%= radius * 1.1 %></radius>
+          <length><%= outer_length %></length>
+          <radius><%= outer_radius %></radius>
         </cylinder>
       </geometry>
       <surface>
@@ -274,25 +351,60 @@
       </surface>
     </collision>
 
-    <visual name="plug_visual_3">
-      <pose>0 0 <%= length * 0.9 %> 0 0 0</pose>
+    <visual name="plug_outer_2">
+      <pose>0 0 <%= pos_2 %> 0 0 0</pose>
       <geometry>
         <cylinder>
-          <length><%= length * 0.5 %></length>
-          <radius><%= radius * 1.1 %></radius>
+          <length><%= outer_length %></length>
+          <radius><%= outer_radius %></radius>
         </cylinder>
       </geometry>
-      <material>
-        <ambient>0 0 0.3 1</ambient>
-        <emissive>0 0 0.2 1</emissive>
-        <diffuse>0 0 0.1 1</diffuse>
-        <specular>1 1 1 1</specular>
-      </material>
+      <%= printLightBlueMaterial() %>
+    </visual>
+
+    <collision name="plug_middle_2">
+      <pose>0 0 <%= pos_2 %> 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <length><%= middle_length %></length>
+          <radius><%= middle_radius %></radius>
+        </cylinder>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+        <friction>
+          <ode>
+            <mu>1.0</mu>
+            <mu2>1.0</mu2>
+          </ode>
+        </friction>
+      </surface>
+    </collision>
+
+    <visual name="plug_middle_2">
+      <pose>0 0 <%= pos_2 %> 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <length><%= middle_length %></length>
+          <radius><%= middle_radius %></radius>
+        </cylinder>
+      </geometry>
+      <%= printMidBlueMaterial() %>
     </visual>
 
     <sensor name="tip_sensor" type="contact">
       <contact>
-        <collision>plug_collision_3</collision>
+        <collision>plug_outer_1</collision>
+        <collision>plug_outer_2</collision>
+        <collision>plug_middle_1</collision>
+        <collision>plug_middl_2</collision>
         <collision>cylinder</collision>
         <collision>sphere</collision>
       </contact>
