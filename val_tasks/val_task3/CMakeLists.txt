@@ -62,6 +62,7 @@ add_library(${PROJECT_NAME}
          src/stair_detector.cpp
          src/steps_detector.cpp
          src/leak_detector_grabber.cpp
+         src/door_valve_detector.cpp
          src/val_task3_utils.cpp
 )
 
@@ -71,6 +72,9 @@ add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EX
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
+
+add_executable(door_valve_detector_node       src/door_valve_detector_node.cpp)
+target_link_libraries(door_valve_detector_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PROJECT_NAME} ${PCL_LIBRARY_DIRS} ${PROJECT_NAME})
 
 
 add_executable(stair_detector_node        src/stair_detector_node.cpp)
