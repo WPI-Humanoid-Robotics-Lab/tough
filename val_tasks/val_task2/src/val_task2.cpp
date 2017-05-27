@@ -463,8 +463,8 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
     } else if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
         ROS_INFO("Walking 1 step back");
         ros::Duration(0.5).sleep();
-        std::vector<float> x_offset={-0.3,-0.3};
-        std::vector<float> y_offset={0.0,0.0};
+        std::vector<float> x_offset={-0.3,-0.3,0.0};
+        std::vector<float> y_offset={0.0,0.0,-0.1};
         walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
         ros::Duration(3).sleep();
         /// @todo use goal waypoints to get away from rover. it can be detected in rover detection code
@@ -483,7 +483,7 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         geometry_msgs::Pose2D pose2D;
         pose2D.x = pose.position.x;
         pose2D.y = pose.position.y;
-        pose2D.theta = rover_walk_goal_waypoints_.back().theta;
+        pose2D.theta = rover_walk_goal_waypoints_.front().theta;
         ROS_INFO("Walking to x:%f y:%f theta:%f", pose2D.x,pose2D.y,pose2D.theta);
         walker_->walkToGoal(pose2D);
         //        walker_->walkLocalPreComputedSteps(x_offset,y_offset,startingSide);
@@ -542,8 +542,8 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
 
         setSolarArrayWalkGoal(pose2D);
 
-        std::cout << "Position " << poses[idx].position.x<< " " <<poses[idx].position.y <<" "<<poses[idx].position.z<<std::endl;
-        std::cout << "yaw: " << pose2D.theta  <<std::endl;
+        ROS_INFO("Position x:%f y:%f z:%f",poses[idx].position.x,poses[idx].position.y,poses[idx].position.z);
+        ROS_INFO("yaw:%f",pose2D.theta);
         retry_count = 0;
         eventQueue.riseEvent("/DETECTED_ARRAY");
     }
@@ -826,7 +826,7 @@ void valTask2::setSolarPanelHandlePose(const geometry_msgs::Pose &pose)
 
 void valTask2::setSolarArrayWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal)
 {
-    solar_array_walk_goal_ = panel_walk_goal_;
+    solar_array_walk_goal_ = panel_walk_goal;
 }
 
 void valTask2::setSolarArraySide(const bool isSolarArrayOnRight)
