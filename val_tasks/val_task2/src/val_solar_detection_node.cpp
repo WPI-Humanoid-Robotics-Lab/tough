@@ -45,10 +45,10 @@ int main(int argc, char** argv){
     geometry_msgs::PoseStamped goal;
     goal.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
     goal.pose = rover_poses[rover_poses.size() -1][2];
-    goalPub.publish(goal);
+//    goalPub.publish(goal);
     //  std::cout <<obj.isRoverOnRight()<<std::endl;
     ROS_INFO("Reaching Rover ");
-    ros::Duration(40).sleep();
+//    ros::Duration(40).sleep();
 
 
     SolarArrayDetector obj(nh,rover_loc,isroverRight);
@@ -65,7 +65,7 @@ int main(int argc, char** argv){
     }
     goal.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
     goal.pose = solar_array_poses[NUM_SAMPLES -1];
-    goalPub.publish(goal);
+//    goalPub.publish(goal);
     //  std::cout <<obj.isRoverOnRight()<<std::endl;
     ROS_INFO("Reaching solar Array coarse");
     //  ros::Duration(20).sleep();
