@@ -24,6 +24,7 @@ void task3Utils::beforePanelManipPose(){
 
 void task3Utils::beforDoorOpenPose(){
 
+
     std::vector< std::vector<float> > armData;
     armData.push_back(RIGHT_ARM_DOOR_OPEN);
 

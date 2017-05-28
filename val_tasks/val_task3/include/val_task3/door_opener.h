@@ -26,6 +26,7 @@ private:
     armTrajectory armTraj_;
     gripperControl gripper_;
     task3Utils task3_;
+    ValkyrieWalker walker_;
 };
 
 
