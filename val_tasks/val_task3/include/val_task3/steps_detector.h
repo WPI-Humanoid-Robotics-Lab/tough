@@ -66,7 +66,7 @@ public:
     void planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output);
     void zAxisSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output);
     void stepCentroids(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output);
-    bool getStepsPosition(const std::vector<double>& , const geometry_msgs::Point& dirVector, const geometry_msgs::Point& stairLoc);
+    bool getStepsPosition(const std::vector<double>& , const geometry_msgs::Point& dirVector, const geometry_msgs::Point& stairLoc, std::vector<pcl::PointXYZ>& steps_loc);
     void visualize_point(geometry_msgs::Point point);
 };
 

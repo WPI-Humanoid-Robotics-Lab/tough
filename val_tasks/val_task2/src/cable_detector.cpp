@@ -9,10 +9,12 @@
 
 CableDetector::CableDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor), cloud_(new pcl::PointCloud<pcl::PointXYZ>)
 {
+    robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     ms_sensor_.giveQMatrix(qMatrix_);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_cable",1);
     pcl_sub_ = nh_.subscribe("/field/assembled_cloud2", 10, &CableDetector::cloudCB, this);
     pcl_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/val_table/cloud2", 1, true);
+    eigenVecs_.reserve(2);
 }
 
 void CableDetector::cloudCB(const sensor_msgs::PointCloud2::Ptr& input)
@@ -31,9 +33,6 @@ bool CableDetector::getStandPosition(geometry_msgs::Point& stand_loc)
 {
     bool stand_detected = false;
 
-    //if (cableLoc_.z)
-      //  return false;
-    ROS_INFO_STREAM("1 :" << std::endl);
     if (cloud_->empty())
         return false;
 
@@ -43,13 +42,12 @@ bool CableDetector::getStandPosition(geometry_msgs::Point& stand_loc)
     mtx_.lock();
     input_cloud = cloud_;
     mtx_.unlock();
-    ROS_INFO_STREAM("2 :" << std::endl);
+
     if (input_cloud->empty())
         return false;
-    ROS_INFO_STREAM("3 :" << std::endl);
+
     stand_detected = true;
     planeSegmentation(input_cloud);
-    ROS_INFO_STREAM("4 :" << std::endl);
 
     return stand_detected;
 }
@@ -212,12 +210,12 @@ bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
     cableLoc_.y = double (geom_point2.point.y);
     cableLoc_.z = double (geom_point2.point.z);
 
-    visualize_point(geom_point.point, 0.7, 0.5, 0.0);
-    visualize_point(geom_point1.point, 0.0, 0.0, 1.0);
-    visualize_point(geom_point2.point, 1.0, 0.8, 0.3);
-    visualize_direction(geom_point2.point, geom_point1.point);
+    //visualize_point(geom_point.point, 0.7, 0.5, 0.0);
+    //visualize_point(geom_point1.point, 0.0, 0.0, 1.0);
+    //visualize_point(geom_point2.point, 1.0, 0.8, 0.3);
+    //visualize_direction(geom_point2.point, geom_point1.point);
 
-    marker_pub_.publish(markers_);
+    //marker_pub_.publish(markers_);
 
     return foundCable;
 }
@@ -241,21 +239,20 @@ std::vector<cv::Point> CableDetector::getOrientation(const std::vector<cv::Point
     static_cast<int>(pca_analysis.mean.at<double>(0, 1)));
 
     //Store the eigenvalues and eigenvectors
-    std::vector<cv::Point2d> eigen_vecs(2);
+    //std::vector<cv::Point2d> eigenVecs_(2);
     std::vector<double> eigen_val(2);
 
     for (int i = 0; i < 2; ++i)
     {
-        eigen_vecs[i] = cv::Point2d(pca_analysis.eigenvectors.at<double>(i, 0),
+        eigenVecs_[i] = cv::Point2d(pca_analysis.eigenvectors.at<double>(i, 0),
         pca_analysis.eigenvectors.at<double>(i, 1));
         eigen_val[i] = pca_analysis.eigenvalues.at<double>(0, i);
     }
-    //ROS_INFO_STREAM(cntr << std::endl);
     // Draw the principal components
     cv::circle(current_image_, cntr, 3, cv::Scalar(255, 0, 255), 2);
-    cv::Point p1 = cntr + 0.03 * cv::Point(static_cast<int>(eigen_vecs[0].x * eigen_val[0]), static_cast<int>(eigen_vecs[0].y * eigen_val[0]));
-    cv::Point p2 = cntr - 0.03 * cv::Point(static_cast<int>(eigen_vecs[0].x * eigen_val[0]), static_cast<int>(eigen_vecs[0].y * eigen_val[0]));
-    //cv::Point p2 = cntr + 1.0 * cv::Point(static_cast<int>(eigen_vecs[1].x * eigen_val[1]), static_cast<int>(eigen_vecs[1].y * eigen_val[1]));
+    cv::Point p1 = cntr + 0.03 * cv::Point(static_cast<int>(eigenVecs_[0].x * eigen_val[0]), static_cast<int>(eigenVecs_[0].y * eigen_val[0]));
+    cv::Point p2 = cntr - 0.03 * cv::Point(static_cast<int>(eigenVecs_[0].x * eigen_val[0]), static_cast<int>(eigenVecs_[0].y * eigen_val[0]));
+    //cv::Point p2 = cntr + 1.0 * cv::Point(static_cast<int>(eigenVecs_[1].x * eigen_val[1]), static_cast<int>(eigenVecs_[1].y * eigen_val[1]));
 
     //VISUALIZATION - Uncomment this line
     drawAxis(current_image_, cntr, p1, cv::Scalar(0, 255, 0), 1);
@@ -393,7 +390,8 @@ void CableDetector::visualize_direction(geometry_msgs::Point point1, geometry_ms
 
 bool CableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input)
 {
-    ROS_INFO_STREAM("3a :" << std::endl);
+    tf::TransformListener listener;
+    markers_.markers.clear();
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
     for (size_t i = 0; i < input->size(); i++)
     {
@@ -403,8 +401,7 @@ bool CableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr&
 
     Eigen::Vector4f centroid;
     geometry_msgs::PointStamped geom_point;
-
-    ROS_INFO_STREAM("3c :" << std::endl);
+    geometry_msgs::PointStamped geom_point1;
 
     pcl::PassThrough<pcl::PointXYZ> pass;
     pass.setInputCloud(output_cloud);
@@ -418,6 +415,79 @@ bool CableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr&
     //pass.setFilterLimits (3.62829, 6.7);
     pass1.setFilterLimits ( cableLoc_.y - 0.8, cableLoc_.y + 0.18);
     pass1.filter (*output_cloud);
+
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
+    seg.setOptimizeCoefficients(true);
+    seg.setModelType(pcl::SACMODEL_PLANE);
+    seg.setMethodType(pcl::SAC_RANSAC);
+    seg.setDistanceThreshold(0.03);
+    seg.setInputCloud(output_cloud);
+    auto inliers = boost::make_shared<pcl::PointIndices>();
+    auto coefficients = boost::make_shared<pcl::ModelCoefficients>();
+    seg.segment(*inliers, *coefficients);
+
+    pcl::ProjectInliers<pcl::PointXYZ> proj;
+    proj.setModelType(pcl::SACMODEL_PLANE);
+    proj.setInputCloud(output_cloud);
+    proj.setModelCoefficients(coefficients);
+    proj.setIndices(inliers);
+    auto cloud_projected = boost::make_shared<pcl::PointCloud<pcl::PointXYZ> >();
+    proj.filter(*cloud_projected);
+
+    pcl::ConvexHull<pcl::PointXYZ> chull;
+    chull.setDimension(2);
+    chull.setComputeAreaVolume(true);
+    // Create a Convex Hull representation of the projected inliers
+    auto cloud_hull = boost::make_shared<pcl::PointCloud<pcl::PointXYZ> >();
+    chull.setInputCloud(cloud_projected);
+    chull.reconstruct(*cloud_hull);
+
+    using HullLine = std::tuple<Eigen::Vector3f /* point */, Eigen::Vector3f /* direction */, float>;
+    std::vector<HullLine> hull_lines;
+    std::transform(cloud_hull->begin(), cloud_hull->end() - 1, cloud_hull->begin() + 1, std::back_inserter(hull_lines),
+        [](const pcl::PointXYZ &pt1, const pcl::PointXYZ &pt2) {
+            const Eigen::Vector3f &v1 = pt1.getVector3fMap();
+            const Eigen::Vector3f &v2 = pt2.getVector3fMap();
+            const Eigen::Vector3f &dir = v2 - v1;
+            return std::make_tuple(v1, dir, dir.squaredNorm());
+        }
+    );
+
+    pcl::compute3DCentroid(*cloud_hull, centroid);
+
+    ROS_INFO_STREAM("Centroid" << centroid << std::endl);
+
+    geom_point.point.x = centroid(0);
+    geom_point.point.y = centroid(1);
+    geom_point.point.z = centroid(2);
+    geom_point.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
+    tf::StampedTransform transform;
+    try
+    {
+        listener.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, ros::Time(0), ros::Duration(3.0));
+        listener.lookupTransform(VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF, ros::Time(0), transform);
+        //listener.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, geom_point, geom_point);
+    }
+    catch (tf::TransformException ex){
+        ROS_ERROR("%s",ex.what());
+        return false;
+    }
+
+    //geom_point1.point.x = transform.getOrigin().x();
+    //geom_point1.point.y = transform.getOrigin().y();
+    //geom_point1.point.z = centroid(2);
+    //geom_point1.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
+    //visualize_direction(geom_point.point, geom_point1.point);
+    visualize_point(geom_point.point, 0.7, 0.5, 0.0);
+    marker_pub_.publish(markers_);
+
+    sensor_msgs::PointCloud2 output;
+    pcl::toROSMsg(*cloud_hull, output);
+    output.header.frame_id = "world";
+    pcl_pub_.publish(output);
+    output_cloud->points.clear();
+    return true;
+
 //    pcl::PointCloud<pcl::PointXYZ>::Ptr max_cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
 //    for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
 //    {
@@ -433,18 +503,7 @@ bool CableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr&
 //    pcl::compute3DCentroid(*max_cloud_cluster, centroid);
 //    ROS_INFO_STREAM("Cloud Size" << max_cloud_cluster->size() << std::endl);
 //    ROS_INFO_STREAM("Cluster Indices" << cluster_indices.size() << std::endl);
-//    geom_point.point.x = centroid(0);
-//    geom_point.point.y = centroid(1);
-//    geom_point.point.z = centroid(2);
-//    geom_point.header.frame_id = VAL_COMMON_NAMES::LEFT_CAMERA_OPTICAL_FRAME_TF;
-    //visualize_point(geom_point.point, 0.7, 0.5, 0.0);
-    //marker_pub_.publish(markers_);
-    sensor_msgs::PointCloud2 output;
-    pcl::toROSMsg(*output_cloud, output);
-    output.header.frame_id = "world";
-    pcl_pub_.publish(output);
-    output_cloud->points.clear();
-    return true;
+
 }
 
 CableDetector::~CableDetector()

@@ -19,48 +19,44 @@ void steps_detector::stepsCB(const sensor_msgs::PointCloud2::Ptr& input)
     mtx_.lock();
     pcl::fromROSMsg(*input, *cloud_);
     mtx_.unlock();
-    //ROS_INFO_STREAM("Input Cloud Size : " << cloud_->size() << std::endl);
 }
 
-bool steps_detector::getStepsPosition(const std::vector<double>& coefficients, const geometry_msgs::Point& dir_vector, const geometry_msgs::Point& stair_loc)
+bool steps_detector::getStepsPosition(const std::vector<double>& coefficients, const geometry_msgs::Point& dir_vector, const geometry_msgs::Point& stair_loc, std::vector<pcl::PointXYZ>& step_points)
 {
     bool steps_detected = false;
+
+    if(!step_points.empty())
+        step_points.clear();
+
+    //get the coefficients, direction vector and the stair Location from the state machine
     coefficients_ = coefficients;
     dirVector_= dir_vector;
     stairLoc_ = stair_loc;
 
     if (cloud_->empty())
         return false;
-    ROS_INFO_STREAM("1 :" << std::endl);
-//    pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+
     pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud1 (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud2 (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
+    //copy cloud into local variable
     mtx_.lock();
     input_cloud = cloud_;
     mtx_.unlock();
 
-//    if (input_cloud->empty())
-//        return false;
-    //copy cloud_ in a new variable using mutex
-    ROS_INFO_STREAM("cloud size :" << cloud_->size() << std::endl);
-    //  Disabling voxel filter -- enabling this will impact rover detection
-//    float leafsize  = 0.006;
-//    pcl::VoxelGrid<pcl::PointXYZ> grid;
-//    grid.setLeafSize (leafsize, leafsize, leafsize);
-//    grid.setInputCloud (input_cloud);
-//    grid.filter (*out_cloud);
-
+    //Segment the plane and pass through filter to narrow the filter region to the stairs
     if (input_cloud->empty())
         return false;
     planeSegmentation(input_cloud, out_cloud1);
 
+    //Remove points horizontal to the ground
     if (out_cloud1->empty())
         return false;
     zAxisSegmentation(out_cloud1, out_cloud2);
 
+    //Find the step points by taking the midpoint of the centroids of the clusters obtained after the z-axis segmentation
     if (out_cloud2->empty())
         return false;
     stepCentroids(out_cloud2, output_cloud);
@@ -68,12 +64,18 @@ bool steps_detector::getStepsPosition(const std::vector<double>& coefficients, c
     if (!output_cloud->empty())
         steps_detected = true;
 
+    for (size_t i = 0; i < output_cloud->points.size(); i++)
+    {
+       step_points.push_back(output_cloud->points[i]);
+    }
+
+    //publish the output cloud for visualization
     sensor_msgs::PointCloud2 output;
     pcl::toROSMsg(*output_cloud, output);
     output.header.frame_id = "world";
-    //ROS_INFO_STREAM("output :" << output.data.at(1) << std::endl);
     pcl_pub_.publish(output);
 
+    //clear the points in the temporary clouds
     input_cloud->points.clear();
     out_cloud1->points.clear();
     out_cloud2->points.clear();

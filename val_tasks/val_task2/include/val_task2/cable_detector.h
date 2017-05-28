@@ -30,6 +30,8 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/filters/crop_box.h>
+#include <pcl/filters/project_inliers.h>
+#include <pcl/surface/convex_hull.h>
 
 #include <pcl/sample_consensus/sac_model_sphere.h>
 #include <pcl/sample_consensus/ransac.h>
@@ -64,7 +66,9 @@ class CableDetector
     src_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
     geometry_msgs::Point cableLoc_;
+    std::vector<cv::Point2d> eigenVecs_;
     std::mutex mtx_;
+    RobotStateInformer* robot_state_;
 
     void visualize_direction(geometry_msgs::Point point1, geometry_msgs::Point point2);
     void visualize_point(geometry_msgs::Point point, double r, double g, double b);

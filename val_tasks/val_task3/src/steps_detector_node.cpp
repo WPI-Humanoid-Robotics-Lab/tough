@@ -20,6 +20,7 @@ int main(int argc, char** argv)
   stairLoc.x = 3.56882;
   stairLoc.y = -1.07728;
   stairLoc.z = 0.758028;
+  std::vector<pcl::PointXYZ> steps_loc;
   while(ros::ok())
   {
 //      sd.findStair(stairLoc, numSideBarDetected);
@@ -29,7 +30,9 @@ int main(int argc, char** argv)
 //      ROS_INFO_STREAM("Coefficients : " << coefficients[0] << "\t" << coefficients[1] << "\t" << coefficients[2] << "\t" << coefficients[3] << std::endl);
 //      ROS_INFO_STREAM("Direction Vector : " << dirVector << std::endl);
 //      ROS_INFO_STREAM("Stair Loc : " << stairLoc << std::endl);
-      foundSteps = s1.getStepsPosition(coefficients, dirVector, stairLoc);
+      foundSteps = s1.getStepsPosition(coefficients, dirVector, stairLoc, steps_loc);
+      if(foundSteps)
+        ROS_INFO_STREAM("Steps Loc : " << steps_loc[0] << std::endl);
       //ROS_INFO(foundStair ? "***** Steps detected" : "xxxxx Steps not detected");
       ros::spinOnce();
       numIterations++;
