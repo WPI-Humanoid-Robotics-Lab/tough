@@ -22,7 +22,7 @@ void doorOpener::openDoor(geometry_msgs::Pose valveCenter){
                                 VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
 
-    valveCenter.position.x  -= 0.5;
+    valveCenter.position.x  -= 0.3;
 
     robot_state_->transformPose(valveCenter, valveCenter, VAL_COMMON_NAMES::PELVIS_TF);
 
