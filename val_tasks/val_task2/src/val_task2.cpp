@@ -200,7 +200,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
     }   else if (fail_count < 5)    {
         // increment the fail count
         fail_count++;
-        task2_utils_->clearPointCloud();
+        task2_utils_->clearBoxPointCloud();
         eventQueue.riseEvent("/DETECT_ROVER_RETRY");
     }
 
@@ -321,7 +321,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
     if(solar_panel_detector_ == nullptr) {
         if (!isFirstRun){
             ROS_INFO("Clearing pointcloud");
-            task2_utils_->clearPointCloud();
+            task2_utils_->clearBoxPointCloud();
         }
         task2_utils_->resumePointCloud();
         isFirstRun = false;
@@ -474,12 +474,12 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
     } else if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
 
         ROS_INFO("valTask2::pickPanelTask : Walking 1 step back");
-        ros::Duration(0.5).sleep();
+        task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_);
+        ros::Duration(1).sleep();
         std::vector<float> x_offset={-0.3,-0.3};
         std::vector<float> y_offset={0.0,0.1};
         walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
         ros::Duration(3).sleep();
-
         /// @todo The following code should be a new state
         // reorient the robot.
         ROS_INFO("valTask2::pickPanelTask : Reorienting");
@@ -487,7 +487,6 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         geometry_msgs::Pose pose;
         pose.position.x = 0.0;
         pose.orientation.w = 1.0;
-
         if (is_rover_on_right_){
             pose.position.y = 0.5;
             startingSide = armSide::LEFT;
@@ -499,10 +498,9 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         geometry_msgs::Pose2D pose2D;
         pose2D.x = pose.position.x;
         pose2D.y = pose.position.y;
-        pose2D.theta = rover_walk_goal_waypoints_.front().theta;
+        pose2D.theta = rover_walk_goal_waypoints_[1].theta; // 45 degrees turn
         ROS_INFO("Walking to x:%f y:%f theta:%f", pose2D.x,pose2D.y,pose2D.theta);
         walker_->walkToGoal(pose2D);
-
         ros::Duration(1).sleep();
         task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_);
         eventQueue.riseEvent("/PICKED_PANEL");

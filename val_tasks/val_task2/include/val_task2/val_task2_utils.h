@@ -33,6 +33,7 @@ private:
     RobotStateInformer *current_state_;
     ros::Publisher reset_pointcloud_pub ;
     ros::Publisher pause_pointcloud_pub ;
+    ros::Publisher clearbox_pointcloud_pub ;
 
     ros::Subscriber task_status_sub_;
 
@@ -66,6 +67,7 @@ private:
 
     void moveToPlacePanelPose2(const armSide graspingHand);
     void taskStatusCB(const srcsim::Task &msg);
+
 public:
     task2Utils(ros::NodeHandle nh);
     ~task2Utils();
@@ -76,5 +78,6 @@ public:
     void clearPointCloud();
     void pausePointCloud();
     void resumePointCloud();
+    void clearBoxPointCloud();
     int getCurrentCheckpoint() const;
 };
