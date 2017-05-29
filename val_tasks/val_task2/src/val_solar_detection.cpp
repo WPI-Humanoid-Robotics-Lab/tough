@@ -366,7 +366,7 @@ void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
 //    ROS_INFO("blue marker t2 %.2f",theta2);
 
     // coarse location
-    float off = -2.2;
+    float off = -2.0;
     pose.position.x = centroid(0) + off*cos(theta2);
     pose.position.y = centroid(1) + off*sin(theta2);
     pose.position.z = 0;//centroid(2);
