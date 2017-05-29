@@ -55,11 +55,13 @@ private:
     // panel placement poses
     const std::vector<float> leftPanelPlacementPose1_  = {-1.5, -1.4, 1.39, -0.9, -1.10, 0.5, 0};
     const std::vector<float> leftPanelPlacementPose2_  = {};
-    const std::vector<float> leftPanelPlacementSupport_  = {-0.66, -1.4, 0.75, -1.49, 1.29, 0, 0.26};
+    const std::vector<float> leftPanelPlacementSupport1_  = {-0.66, -1.4, 1.2, -1.49, 1.29, 0, 0.26};
+    const std::vector<float> leftPanelPlacementSupport2_  = {-0.66, -1.4, 0.75, -1.49, 1.29, 0, 0.26};
 
     const std::vector<float> rightPanelPlacementPose1_ = {-1.5, 1.4, 1.39, 0.9, -1.10, -0.5, 0};
     const std::vector<float> rightPanelPlacementPose2_ = {};
-    const std::vector<float> rightPanelPlacementSupport_  = {-0.66, 1.4, 0.75, 1.49, 1.29, 0, 0.26};
+    const std::vector<float> rightPanelPlacementSupport1_  = {-0.66, 1.4, 1.2, 1.49, 1.29, 0, 0.26};
+    const std::vector<float> rightPanelPlacementSupport2_  = {-0.66, 1.4, 0.75, 1.49, 1.29, 0, 0.26};
 
     // Gripper commands
     const std::vector<double> leftHandGrasp_          = {1.2, -0.6, -0.77, -0.9, -0.9};

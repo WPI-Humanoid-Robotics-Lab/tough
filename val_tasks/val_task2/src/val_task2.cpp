@@ -498,7 +498,7 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         geometry_msgs::Pose2D pose2D;
         pose2D.x = pose.position.x;
         pose2D.y = pose.position.y;
-        pose2D.theta = rover_walk_goal_waypoints_[1].theta; // 45 degrees turn
+        pose2D.theta = rover_walk_goal_waypoints_.front().theta;
         ROS_INFO("Walking to x:%f y:%f theta:%f", pose2D.x,pose2D.y,pose2D.theta);
         walker_->walkToGoal(pose2D);
         ros::Duration(1).sleep();
