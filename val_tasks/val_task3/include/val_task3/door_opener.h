@@ -19,7 +19,7 @@ public:
     doorOpener(ros::NodeHandle nh);
     ~doorOpener();
 
-    void openDoor();
+    void openDoor(geometry_msgs::Pose valveCenter);
 
 private:
     ros::NodeHandle nh_;
@@ -27,6 +27,7 @@ private:
     gripperControl gripper_;
     task3Utils task3_;
     ValkyrieWalker walker_;
+    RobotStateInformer *robot_state_;
 };
 
 
