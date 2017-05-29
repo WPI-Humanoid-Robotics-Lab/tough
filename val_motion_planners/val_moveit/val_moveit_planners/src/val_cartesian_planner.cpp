@@ -64,7 +64,7 @@ double cartesianPlanner::getTrajFromCartPoints(std::vector<geometry_msgs::Pose> 
         frac = group_->computeCartesianPath(points, 0.01, 0.0, trajectory, avoid_collisions);
     }
 
-    std::cout<<"Fraction of path planned:   "<<frac*100<<"\n";
+    std::cout<<"Fraction of path planned:   "<<frac*100<<" % \n";
 //    ROS_INFO("joint names");
 //    for (it = trajectory.joint_trajectory.joint_names.begin(); it < trajectory.joint_trajectory.joint_names.end(); it++)
 //        std::cout << *it << std::endl;
