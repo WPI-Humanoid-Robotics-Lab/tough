@@ -4,7 +4,7 @@ import sys
 import socket
 import select
 
-HOST = 'localhost'
+HOST = '192.168.2.10'
 SOCKET_LIST = []
 RECV_BUFFER = 4096
 PORT = 8080
