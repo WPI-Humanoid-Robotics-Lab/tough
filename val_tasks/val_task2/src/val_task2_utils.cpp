@@ -16,10 +16,11 @@ task2Utils::task2Utils(ros::NodeHandle nh):
 
     current_checkpoint_  = 0;
 
-    reset_pointcloud_pub = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
-    pause_pointcloud_pub = nh_.advertise<std_msgs::Bool>("/field/pause_pointcloud",1);
+    reset_pointcloud_pub    = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
+    pause_pointcloud_pub    = nh_.advertise<std_msgs::Bool>("/field/pause_pointcloud",1);
+    clearbox_pointcloud_pub = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
 
-    task_status_sub_     = nh_.subscribe("/srcsim/finals/task", 10, &task2Utils::taskStatusCB, this);
+    task_status_sub_        = nh_.subscribe("/srcsim/finals/task", 10, &task2Utils::taskStatusCB, this);
 }
 
 task2Utils::~task2Utils()
@@ -187,21 +188,23 @@ void task2Utils::taskStatusCB(const srcsim::Task &msg)
 
 }
 
-void task2Utils::clearPointCloud()
-{
+void task2Utils::clearPointCloud() {
     std_msgs::Empty msg;
     reset_pointcloud_pub.publish(msg);
 }
 
-void task2Utils::pausePointCloud()
-{
+void task2Utils::clearBoxPointCloud() {
+    std_msgs::Empty msg;
+    clearbox_pointcloud_pub.publish(msg);
+}
+
+void task2Utils::pausePointCloud() {
     std_msgs::Bool msg;
     msg.data = true;
     pause_pointcloud_pub.publish(msg);
 }
 
-void task2Utils::resumePointCloud()
-{
+void task2Utils::resumePointCloud() {
     std_msgs::Bool msg;
     msg.data = false;
     pause_pointcloud_pub.publish(msg);

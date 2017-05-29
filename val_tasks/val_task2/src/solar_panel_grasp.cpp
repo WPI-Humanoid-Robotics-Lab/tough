@@ -91,6 +91,8 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     waypoints.push_back(intermGoal);
     waypoints.push_back(finalGoal);
 
+    finalGoal.position.z  -= 0.01;
+    waypoints.push_back(finalGoal);
     moveit_msgs::RobotTrajectory traj;
     if(side == armSide::LEFT)
     {

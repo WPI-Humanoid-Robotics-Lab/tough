@@ -469,14 +469,15 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
 
 //    ihmc_msgs::FootstepDataRosMessage::Ptr startstep(new ihmc_msgs::FootstepDataRosMessage());
     //this->getCurrentStep(0,*startstep);
-    geometry_msgs::Pose pelvisPose;
-    current_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pelvisPose);
+    geometry_msgs::Pose pelvisPose, leftFootPose, rightFootPose;
+    current_state_->getCurrentPose(VAL_COMMON_NAMES::L_FOOT_TF,leftFootPose);
+    current_state_->getCurrentPose(VAL_COMMON_NAMES::R_FOOT_TF, rightFootPose);
 
-    start.x = pelvisPose.position.x;
-    start.y = pelvisPose.position.y; // This is required to offset the left foot to get senter of the
+    start.x = (leftFootPose.position.x + rightFootPose.position.x)/2.0f;
+    start.y = (leftFootPose.position.y + rightFootPose.position.y)/2.0f; // This is required to offset the left foot to get senter of the
     //    std::cout<< "Start Position  x = " << start.x << "  y = " << start.y<<std::endl;
 
-    start.theta = tf::getYaw(pelvisPose.orientation);
+    start.theta = tf::getYaw(rightFootPose.orientation);
 
     srv.request.start = start;
     srv.request.goal = goal;
