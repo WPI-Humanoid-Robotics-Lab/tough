@@ -65,6 +65,8 @@ class valTask2 {
     solar_panel_handle_grabber* panel_grabber_;
     // Solar array detector is also used for blocking map.
     SolarArrayDetector* solar_array_detector_;
+    // Solar array detector is also used for blocking map.
+    SolarArrayDetector* solar_array_fine_detector_;
     // button detector
     ButtonDetector* button_detector_;
     // cable detector
@@ -98,6 +100,7 @@ class valTask2 {
     geometry_msgs::Pose solar_panel_handle_pose_;
 
     geometry_msgs::Pose2D solar_array_walk_goal_;
+    geometry_msgs::Pose2D solar_array_fine_walk_goal_;
     bool is_array_on_right_;
 
     geometry_msgs::Point button_coordinates_;
@@ -125,6 +128,8 @@ class valTask2 {
     decision_making::TaskResult pickPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult walkSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectSolarArrayFineTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult alignSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult placePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectButtonTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult deployPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
@@ -135,7 +140,6 @@ class valTask2 {
     decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-
     geometry_msgs::Pose2D getPanelWalkGoal();
 
     void setRoverWalkGoal(const std::vector<geometry_msgs::Pose2D> &rover_walk_goal);

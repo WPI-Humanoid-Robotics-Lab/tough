@@ -42,12 +42,12 @@ void task2Utils::afterPanelGraspPose(const armSide side)
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
-        seed1 = &leftSeedGraspingHand_;
+        seed1 = &leftNearChestGrasp_;
         seed2 = &rightSeedNonGraspingHand_;
     }
     else
     {
-        seed1 = &rightSeedGraspingHand;
+        seed1 = &rightNearChestGrasp_;
         seed2 = &leftSeedNonGraspingHand_;
     }
 
@@ -129,10 +129,11 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     pelvis_controller_->controlPelvisHeight(1.1);
     ros::Duration(2).sleep();
 
-    const std::vector<float> *graspingHandPose, *nonGraspingHandPose2, *nonGraspingHandPose1;
+    const std::vector<float> *graspingHandPoseUp, *graspingHandPoseDown, *nonGraspingHandPose2, *nonGraspingHandPose1;
 
     if(graspingHand == armSide::LEFT){
-        graspingHandPose     = &leftPanelPlacementPose1_;
+        graspingHandPoseUp     = &leftPanelPlacementUpPose1_;
+        graspingHandPoseDown   = &leftPanelPlacementDownPose1_;
         nonGraspingHandPose1 = &rightPanelPlacementSupport1_;
         nonGraspingHandPose2 = &rightPanelPlacementSupport2_;
         // take non-GraspingHand out
@@ -141,7 +142,8 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     }
     else
     {
-        graspingHandPose     = &rightPanelPlacementPose1_;
+        graspingHandPoseUp     = &rightPanelPlacementUpPose1_;
+        graspingHandPoseDown   = &rightPanelPlacementDownPose1_;
         nonGraspingHandPose1 = &leftPanelPlacementSupport1_;
         nonGraspingHandPose2 = &leftPanelPlacementSupport2_;
         // take non-GraspingHand out
@@ -151,7 +153,7 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
 
     std::vector< std::vector<float> > armData;
     armData.clear();
-    armData.push_back(*graspingHandPose);
+    armData.push_back(*graspingHandPoseUp);
     arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
     ros::Duration(2).sleep();
 
@@ -160,7 +162,7 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
 
     //{-1.3, -1.4, 1.39, -0.9, -1.10, 0.5, 0.3};
     armData.clear();
-    armData.push_back({-1.2, -1.4, 1.39, -0.9, -1.10, 0.5, 0.4});
+    armData.push_back(*graspingHandPoseDown);
     arm_controller_->moveArmJoints(graspingHand, armData, 1.0f);
     ros::Duration(1).sleep();
 
