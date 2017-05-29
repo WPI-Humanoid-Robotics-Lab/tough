@@ -279,13 +279,13 @@ void PeriodicSnapshotter::resetPointcloudCB(const std_msgs::Empty &msg)
 
 void PeriodicSnapshotter::pausePointcloud(bool pausePointcloud)
 {
-    state_request = pausePointcloud ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESET;
+    state_request = pausePointcloud ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESUME;
 }
 
 void PeriodicSnapshotter::pausePointcloudCB(const std_msgs::Bool &msg)
 {
     //reset will make sure that older scans are discarded
-    state_request = msg.data ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESET;
+    state_request = msg.data ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESUME;
 }
 
 void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Empty &msg)
