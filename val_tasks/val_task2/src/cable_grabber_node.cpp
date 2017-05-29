@@ -26,7 +26,7 @@ int main(int argc, char **argv)
             side = RIGHT;
         }
         gc.openGripper(side);
-        cg.grasp_cable(pt);
+        cg.grasp_choke(side,pt);
     } else{
         ROS_INFO("Usage : %s <side> <goal_x> <goal_y> <goal_z>\n side = 0 or 1");
         return -1;

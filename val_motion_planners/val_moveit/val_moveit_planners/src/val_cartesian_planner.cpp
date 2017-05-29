@@ -33,13 +33,13 @@ double cartesianPlanner::getTrajFromCartPoints(std::vector<geometry_msgs::Pose> 
     joint_values = group_->getCurrentJointValues();
     std::vector<std::string>::iterator it;
     std::vector<double>::iterator itd;
-    ROS_INFO("current state");
-    for (it=joint_names.begin(), itd=joint_values.begin(); it<joint_names.end(); it++, itd++){
-        std::cout << *it << ": " << *itd << std::endl;
-    }
+//    ROS_INFO("current state");
+//    for (it=joint_names.begin(), itd=joint_values.begin(); it<joint_names.end(); it++, itd++){
+//        std::cout << *it << ": " << *itd << std::endl;
+//    }
 
-    ROS_INFO("Reference frame: %s", group_->getPlanningFrame().c_str());
-    ROS_INFO("Reference frame: %s", group_->getEndEffectorLink().c_str());
+//    ROS_INFO("Reference frame: %s", group_->getPlanningFrame().c_str());
+//    ROS_INFO("Reference frame: %s", group_->getEndEffectorLink().c_str());
 
     /**********************************************************************
        * These Parameters will alter the behaviour significantly
