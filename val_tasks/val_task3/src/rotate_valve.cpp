@@ -29,7 +29,6 @@ rotateValve::rotateValve(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
     leftHandOrientationSideDown_.quaternion.z = -0.655;
     leftHandOrientationSideDown_.quaternion.w =  0.598;
 
-
     // cartesian planners for the arm
     left_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     wholebody_controller_ = new wholebodyManipulation(nh_);
@@ -112,11 +111,19 @@ bool rotateValve::compute_traj(geometry_msgs::Point center, float radius, std::v
     current_state_->transformPoint(center,centerPelvis, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
     geometry_msgs::Pose point;
     for (int i = 0; i < NumSteps/3-1; ++i) {
+        point.position.x=centerPelvis.x;
         point.position.y=centerPelvis.y + radius*cos(i*2*M_PI/NumSteps);
         point.position.z=centerPelvis.z + radius*sin(i*2*M_PI/NumSteps);
-        point.position.x=centerPelvis.x;
-        point.orientation=leftHandOrientationSide_.quaternion;
-        if(i==((NumSteps/3)-2) ||i==((NumSteps/3)-3) ||i==((NumSteps/3)-4))
+
+        if(i<=1)
+        {
+            point.orientation=leftHandOrientationSide_.quaternion;
+        }
+        else if(i>1 && i<=3)
+        {
+            point.orientation=leftHandOrientationSideUp_.quaternion;
+        }
+        else if(i>3 && i<=6)
         {
             point.orientation=leftHandOrientationTop_.quaternion;
         }
