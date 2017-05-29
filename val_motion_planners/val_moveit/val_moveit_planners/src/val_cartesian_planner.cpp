@@ -33,13 +33,13 @@ double cartesianPlanner::getTrajFromCartPoints(std::vector<geometry_msgs::Pose> 
     joint_values = group_->getCurrentJointValues();
     std::vector<std::string>::iterator it;
     std::vector<double>::iterator itd;
-    ROS_INFO("current state");
-    for (it=joint_names.begin(), itd=joint_values.begin(); it<joint_names.end(); it++, itd++){
-        std::cout << *it << ": " << *itd << std::endl;
-    }
+//    ROS_INFO("current state");
+//    for (it=joint_names.begin(), itd=joint_values.begin(); it<joint_names.end(); it++, itd++){
+//        std::cout << *it << ": " << *itd << std::endl;
+//    }
 
-    ROS_INFO("Reference frame: %s", group_->getPlanningFrame().c_str());
-    ROS_INFO("Reference frame: %s", group_->getEndEffectorLink().c_str());
+//    ROS_INFO("Reference frame: %s", group_->getPlanningFrame().c_str());
+//    ROS_INFO("Reference frame: %s", group_->getEndEffectorLink().c_str());
 
     /**********************************************************************
        * These Parameters will alter the behaviour significantly
@@ -64,7 +64,7 @@ double cartesianPlanner::getTrajFromCartPoints(std::vector<geometry_msgs::Pose> 
         frac = group_->computeCartesianPath(points, 0.01, 0.0, trajectory, avoid_collisions);
     }
 
-    std::cout<<"Fraction of path planned:   "<<frac*100<<"\n";
+    std::cout<<"Fraction of path planned:   "<<frac*100<<" % \n";
 //    ROS_INFO("joint names");
 //    for (it = trajectory.joint_trajectory.joint_names.begin(); it < trajectory.joint_trajectory.joint_names.end(); it++)
 //        std::cout << *it << std::endl;

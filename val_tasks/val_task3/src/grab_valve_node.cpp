@@ -34,9 +34,9 @@ int main(int argc, char **argv)
                 rotate.grab_valve(pt);
                 std::vector<geometry_msgs::Pose> points;
                 geometry_msgs::Point cen;
-                cen.x=0.587;
-                cen.y=0.357;
-                cen.z=1.19;
+                cen.x=0.576;
+                cen.y=0.279;
+                cen.z=1.16;
 
                 rotate.compute_traj(cen,0.18,points);
                 rotate.move_valve(points);
