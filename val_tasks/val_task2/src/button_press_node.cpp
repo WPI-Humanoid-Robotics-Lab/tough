@@ -8,31 +8,24 @@ int main(int argc, char **argv)
     button_press bp_(nh);
     geometry_msgs::Point goal;
 
-    armSide side;
-    if(argc == 2)
-    {
-        if(std::atoi(argv[1]) == 0)
-        {
+    if(argc == 5){
+        geometry_msgs::Point pt;
+        pt.x = std::atof(argv[2]);
+        pt.y = std::atof(argv[3]);
+        pt.z = std::atof(argv[4]);
+
+        armSide side;
+        if(std::atoi(argv[1]) == 0){
             side = LEFT;
-        }
-        else
-        {
+        } else {
             side = RIGHT;
         }
-    }
-    else
-    {
-        ROS_INFO("Usage : %s <side> side = 0 or 1");
+        bp_.pressButton(side, pt);
+    } else{
+        ROS_INFO("Usage : %s <side> <goal_x> <goal_y> <goal_z>\n side = 0 or 1");
         return -1;
     }
 
-    // detecting button location which would act as goal to press the button
-//    bp_.getButtonPosition(goal);
-    goal.x=-0.413;
-    goal.y=-0.0753;
-    goal.z=1.24;
-    // pressing the button
-    bp_.pressButton(side, goal);
     return 0;
 }
 
