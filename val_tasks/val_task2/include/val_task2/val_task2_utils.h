@@ -55,19 +55,22 @@ private:
     // panel placement poses
     const std::vector<float> leftPanelPlacementUpPose1_  = {-1.5, -1.4, 1.39, -0.9, -1.10, 0.5, 0};
     const std::vector<float> leftPanelPlacementDownPose1_= {-1.2, -1.4, 1.39, -0.9, -1.10, 0.5, 0.4};
-    const std::vector<float> leftPanelPlacementPose2_  = {};
+
     const std::vector<float> leftPanelPlacementSupport1_  = {-0.66, -1.4, 1.2, -1.49, 1.29, 0, 0.26};
     const std::vector<float> leftPanelPlacementSupport2_  = {-0.66, -1.4, 0.75, -1.49, 1.29, 0, 0.26};
 
     const std::vector<float> rightPanelPlacementUpPose1_ = {-1.5, 1.4, 1.39, 0.9, -1.10, -0.5, 0};
     const std::vector<float> rightPanelPlacementDownPose1_= {-1.2, 1.4, 1.39, 0.9, -1.10, -0.5, 0.4};
-    const std::vector<float> rightPanelPlacementPose2_ = {};
+
     const std::vector<float> rightPanelPlacementSupport1_  = {-0.66, 1.4, 1.2, 1.49, 1.29, 0, 0.26};
     const std::vector<float> rightPanelPlacementSupport2_  = {-0.66, 1.4, 0.75, 1.49, 1.29, 0, 0.26};
 
     // Gripper commands
     const std::vector<double> leftHandGrasp_          = {1.2, -0.6, -0.77, -0.9, -0.9};
     const std::vector<double> rightHandGrasp_         = {1.2,  0.6,  0.77,  0.9,  0.9};
+
+    //Swapping sides of bag
+    std::vector<armTrajectory::armJointData> reOrientPanelTraj_;
 
     void moveToPlacePanelPose2(const armSide graspingHand);
     void taskStatusCB(const srcsim::Task &msg);

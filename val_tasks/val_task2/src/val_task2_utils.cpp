@@ -21,6 +21,14 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     clearbox_pointcloud_pub = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
 
     task_status_sub_        = nh_.subscribe("/srcsim/finals/task", 10, &task2Utils::taskStatusCB, this);
+
+    reOrientPanelTraj_.resize(2);
+    reOrientPanelTraj_[0].arm_pose = {-1.2, -1.04, 2.11, -0.85, -1.1, 0, 0.29};
+    reOrientPanelTraj_[0].time = 1;
+
+    reOrientPanelTraj_[1].arm_pose = {-1.2, -1.04, 2.11, -0.85, 1.21, 0, 0.29};
+    reOrientPanelTraj_[1].time = 2;
+
 }
 
 task2Utils::~task2Utils()
@@ -122,8 +130,6 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     }
 
     armSide nonGraspingHand = (armSide) !graspingHand;
-    // take non-GraspingHand out
-//    arm_controller_->moveToZeroPose(nonGraspingHand);
 
     // raise pelvis
     pelvis_controller_->controlPelvisHeight(1.1);
@@ -160,7 +166,6 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     gripper_controller_->openGripper(graspingHand);
     ros::Duration(0.5).sleep();
 
-    //{-1.3, -1.4, 1.39, -0.9, -1.10, 0.5, 0.3};
     armData.clear();
     armData.push_back(*graspingHandPoseDown);
     arm_controller_->moveArmJoints(graspingHand, armData, 1.0f);
