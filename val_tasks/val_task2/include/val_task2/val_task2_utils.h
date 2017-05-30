@@ -83,5 +83,6 @@ public:
     void pausePointCloud();
     void resumePointCloud();
     void clearBoxPointCloud();
+    void reOrientTowardsPanel(geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
 };

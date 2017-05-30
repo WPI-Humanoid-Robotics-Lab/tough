@@ -346,11 +346,13 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
     {
         size_t idx = poses.size()-1;
         setSolarPanelHandlePose(poses[idx]);
-
+        task2_utils_->reOrientTowardsPanel(solar_panel_handle_pose_);
+        ros::Duration(2.0).sleep();
         ROS_INFO_STREAM("Position " << poses[idx].position.x<< " " <<poses[idx].position.y <<" "<<poses[idx].position.z);
         ROS_INFO_STREAM("quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w);
         fail_count = 0;
         retry_count = 0;
+
         eventQueue.riseEvent("/DETECTED_PANEL");
         if(solar_panel_detector_ != nullptr) delete solar_panel_detector_;
         solar_panel_detector_ = nullptr;
