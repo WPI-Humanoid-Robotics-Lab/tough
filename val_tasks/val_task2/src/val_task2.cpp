@@ -619,7 +619,6 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
 
     if ( taskCommonUtils::isGoalReached(current_pelvis_pose, solar_array_walk_goal_) ) {
         ROS_INFO("valTask2::walkSolarArrayTask : reached solar array");
-        task2_utils_->resumePointCloud();
         ros::Duration(1).sleep();
         // TODO: check if robot rechead the panel
         eventQueue.riseEvent("/REACHED_ARRAY");
@@ -628,6 +627,7 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
     else if (taskCommonUtils::isPoseChanged(pose_prev, solar_array_walk_goal_)) {
         ROS_INFO_STREAM("valTask2::walkSolarArrayTask : pose chaned to "<<solar_array_walk_goal_);
         walker_->walkToGoal(solar_array_walk_goal_, false);
+        task2_utils_->resumePointCloud();
         // sleep so that the walk starts
         ROS_INFO("valTask2::walkSolarArrayTask : Footsteps should be generated now");
         ros::Duration(4).sleep();

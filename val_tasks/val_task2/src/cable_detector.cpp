@@ -526,6 +526,7 @@ bool CableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr 
     float sin_theta = eigen_vectors.col(0)[1]/std::sqrt(std::pow(eigen_vectors.col(0)[0],2)+ std::pow(eigen_vectors.col(0)[1],2));
     float theta = std::atan2(sin_theta, cos_theta);
     geometry_msgs::Pose pose;
+    ROS_INFO("Yaw angle : %f", theta);
     pose.position.x = table_center.x + TABLE_OFFSET*cos(theta);
     pose.position.y = table_center.y + TABLE_OFFSET*sin(theta);
     pose.position.z = 0;
@@ -554,7 +555,7 @@ void CableDetector::extractCloudOfInterest(const pcl::PointCloud<pcl::PointXYZ>:
     minPoint[1]=-2;
     minPoint[2]=-1;
 
-    maxPoint[0]=4;
+    maxPoint[0]=3;
     maxPoint[1]=2;
     maxPoint[2]=0.5;
     Eigen::Vector3f boxTranslatation;
