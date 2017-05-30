@@ -19,7 +19,7 @@ CableTask::CableTask(ros::NodeHandle n, BUTTON_LOCATION button_side):nh_(n), arm
 
     // cartesian planners for the arm
     right_arm_planner_choke = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
-    right_arm_planner_cable = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_PALM_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    right_arm_planner_cable = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
 
     left_arm_planner_choke = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     left_arm_planner_cable = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_PALM_GROUP, VAL_COMMON_NAMES::WORLD_TF);
@@ -112,9 +112,9 @@ bool CableTask::grasp_choke(armSide side, const geometry_msgs::Pose &goal, float
     }
 
 
-    //    ROS_INFO("CableTask::grasp_choke: Calculated Traj");
-    //    wholebody_controller_->compileMsg(side, traj.joint_trajectory);
-    //    ros::Duration(executionTime*2).sleep();
+    ROS_INFO("CableTask::grasp_choke: Calculated Traj");
+    wholebody_controller_->compileMsg(side, traj.joint_trajectory);
+    ros::Duration(executionTime*2).sleep();
 
     //    geometry_msgs::Pose finalFramePose;
     //    ROS_INFO("CableTask::grasp_choke: Fecthing position of %s", endEffectorFrame.c_str());
@@ -128,24 +128,24 @@ bool CableTask::grasp_choke(armSide side, const geometry_msgs::Pose &goal, float
     //    ROS_INFO("CableTask::grasp_choke: Actual Finger Pose : %f %f %f", finalFramePose.position.x, finalFramePose.position.y, finalFramePose.position.z);
     //    ROS_INFO("CableTask::grasp_choke: Distance between final pose and goal is %f", sqrt(x_diff*x_diff + y_diff*y_diff + z_diff*z_diff));
 
-    //    //    if (sqrt(x_diff*x_diff + y_diff*y_diff + z_diff*z_diff) > 0.1){
-    //    //        return false;
-    //    //    }
+    //    if (sqrt(x_diff*x_diff + y_diff*y_diff + z_diff*z_diff) > 0.1){
+    //        return false;
+    //    }
 
 
 
-    //    gripper_.closeGripper(side);
-    //    ros::Duration(0.3).sleep();
+    gripper_.closeGripper(side);
+    ros::Duration(0.3).sleep();
 
-    //    // Setting arm position to dock
-    //    ROS_INFO("grasp_cable: Setting arm position to dock cable");
-    //    armData.clear();
-    //    armData.push_back(rightAfterGraspShoulderSeed_);
-    //    armTraj_.moveArmJoints(RIGHT,armData,executionTime);
-    //    ros::Duration(0.3).sleep();
+    // Setting arm position to dock
+    ROS_INFO("grasp_cable: Setting arm position to dock cable");
+    armData.clear();
+    armData.push_back(rightAfterGraspShoulderSeed_);
+    armTraj_.moveArmJoints(RIGHT,armData,executionTime);
+    ros::Duration(0.3).sleep();
 
-    //    chest_controller_->controlChest(0,0,0);
-    //    ros::Duration(0.3).sleep();
+    chest_controller_->controlChest(0,0,0);
+    ros::Duration(0.3).sleep();
     return true;
 }
 
@@ -170,26 +170,30 @@ bool CableTask::grasp_cable(const geometry_msgs::Pose &goal, float executionTime
     armTraj_.moveArmJoints(RIGHT, armData, executionTime);
     ros::Duration(executionTime).sleep();
 
-
-
     geometry_msgs::Pose rightOffset;
-    current_state_->getCurrentPose("/rightPalm",rightOffset,"/rightThumbRollLink");
+    current_state_->getCurrentPose("/rightMiddleFingerPitch1Link",rightOffset,"/rightThumbRollLink");
     geometry_msgs::Pose intermGoal;
-    current_state_->transformPose(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::R_PALM_TF);
-    //    intermGoal.position.x+=rightOffset.position.x;
-    //    intermGoal.position.y+=rightOffset.position.y;
-    //    intermGoal.position.z+=rightOffset.position.z;
-    current_state_->transformPose(intermGoal,intermGoal, VAL_COMMON_NAMES::R_PALM_TF, VAL_COMMON_NAMES::WORLD_TF);
+    //    intermGoal=goal;
+    current_state_->transformPose(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME);
+    intermGoal.position.x+=rightOffset.position.x;
+    intermGoal.position.y+=rightOffset.position.y;
+    intermGoal.position.z+=rightOffset.position.z;
+    current_state_->transformPose(intermGoal,intermGoal, VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME, VAL_COMMON_NAMES::WORLD_TF);
 
     taskCommonUtils::fixHandFramePalmDown(nh_, RIGHT, intermGoal);
 
     float offset=0.03;
     geometry_msgs::Pose final;
     final=intermGoal;
-    final.position.z+=offset;
+    final.position.z+=(2*offset);
 
     std::vector<geometry_msgs::Pose> waypoints;
     waypoints.push_back(final);
+
+    final=intermGoal;
+    final.position.z+=(offset/2);
+    waypoints.push_back(final);
+
     moveit_msgs::RobotTrajectory traj;
 
     // Sending waypoints to the planner
@@ -197,14 +201,42 @@ bool CableTask::grasp_cable(const geometry_msgs::Pose &goal, float executionTime
 
     // Opening grippers
     ROS_INFO("grasp_cable: Setting gripper position to open thumb");
-    std::vector<double> gripper1;
-    gripper1={1.35,0.5,0.0,0.0,0.0};
-    gripper_.controlGripper(RIGHT,gripper1);
-    ros::Duration(executionTime/2).sleep();
+    ROS_INFO("opening grippers");
+    std::vector<double> gripper0,gripper1,gripper2,gripper3;
+    gripper0={1.35, 1.35, 0.3, 0.0 ,0.0 };
+    gripper1={1.2, 0.2, 0.3, 0.0 ,0.0 };
+    gripper2={1.2, 0.6, 0.7, 0.0 ,0.0 };
+    gripper3={1.2, 0.6, 0.7, 0.9 ,1.0 };
+    gripper_.controlGripper(RIGHT,gripper0);
+    ros::Duration(0.1).sleep();
+    gripper_.controlGripper(RIGHT, gripper1);
+    ros::Duration(0.2).sleep();
+
 
     // Planning whole body motion
     wholebody_controller_->compileMsg(RIGHT,traj.joint_trajectory);
-    ros::Duration(executionTime*2).sleep();
+    ros::Duration(executionTime).sleep();
+
+    ROS_INFO("Grip Sequence 1");
+    gripper_.controlGripper(RIGHT, gripper1);
+    ros::Duration(0.1).sleep();
+    ROS_INFO("Grip Sequence 2");
+    gripper_.controlGripper(RIGHT, gripper2);
+    ros::Duration(0.1).sleep();
+    ROS_INFO("Grip Sequence 3");
+    gripper_.controlGripper(RIGHT, gripper3);
+    ros::Duration(0.1).sleep();
+
+    // Setting arm position to dock
+    ROS_INFO("grasp_cable: Setting arm position to dock cable");
+    armData.clear();
+    armData.push_back(rightAfterGraspShoulderSeed_);
+    armTraj_.moveArmJoints(RIGHT,armData,executionTime);
+    ros::Duration(0.3).sleep();
+
+    chest_controller_->controlChest(0,0,0);
+    ros::Duration(0.3).sleep();
+
 
     // Grasping the cable
     gripper_.closeGripper(RIGHT);

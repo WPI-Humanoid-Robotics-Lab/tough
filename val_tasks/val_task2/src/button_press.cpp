@@ -1,23 +1,29 @@
 #include <val_task2/button_press.h>
 
-button_press::button_press(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(nh), bd_(nh_)
+ButtonPress::ButtonPress(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(nh), bd_(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 
 
     /* Top Grip */
-//    leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-//    leftHandOrientation_.quaternion.x = 0.604;
-//    leftHandOrientation_.quaternion.y = 0.434;
-//    leftHandOrientation_.quaternion.z = -0.583;
-//    leftHandOrientation_.quaternion.w = 0.326;
+    //    leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    //    leftHandOrientation_.quaternion.x = 0.604;
+    //    leftHandOrientation_.quaternion.y = 0.434;
+    //    leftHandOrientation_.quaternion.z = -0.583;
+    //    leftHandOrientation_.quaternion.w = 0.326;
+
+    //Most recent//
+    //    leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    //    leftHandOrientation_.quaternion.x = 0.533;
+    //    leftHandOrientation_.quaternion.y = 0.373;
+    //    leftHandOrientation_.quaternion.z = -0.430;
+    //    leftHandOrientation_.quaternion.w = 0.627;
 
     leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    leftHandOrientation_.quaternion.x = 0.533;
-    leftHandOrientation_.quaternion.y = 0.373;
-    leftHandOrientation_.quaternion.z = -0.430;
-    leftHandOrientation_.quaternion.w = 0.627;
-
+    leftHandOrientation_.quaternion.x = 0.492;
+    leftHandOrientation_.quaternion.y = 0.504;
+    leftHandOrientation_.quaternion.z = -0.494;
+    leftHandOrientation_.quaternion.w = 0.509;
 
     /* Top Grip Flat Hand */
     rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
@@ -49,7 +55,7 @@ button_press::button_press(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(
 
 }
 
-button_press::~button_press()
+ButtonPress::~ButtonPress()
 {
     delete left_arm_planner_;
     delete right_arm_planner_;
@@ -57,7 +63,7 @@ button_press::~button_press()
     delete chest_controller_;
 }
 
-bool button_press::pressButton(const armSide side, geometry_msgs::Point &goal, float executionTime)
+bool ButtonPress::pressButton(const armSide side, geometry_msgs::Point &goal, float executionTime)
 {
     // setting initial values
     geometry_msgs::QuaternionStamped* finalOrientationStamped;
@@ -66,7 +72,7 @@ bool button_press::pressButton(const armSide side, geometry_msgs::Point &goal, f
     float xFingerOffset,yFingerOffset,zFingerOffset;
     geometry_msgs::Pose rightOffset,leftOffset;
     current_state_->getCurrentPose("/rightMiddleFingerPitch1Link",rightOffset,"/rightThumbRollLink");
-    current_state_->getCurrentPose("/leftPalm",leftOffset,"/leftThumbRollLink");
+    current_state_->getCurrentPose("/leftMiddleFingerPitch1Link",leftOffset,"/leftThumbRollLink");
     if(side == armSide::LEFT){
         armSeed = &leftShoulderSeed_;
         palmFrame = VAL_COMMON_NAMES::LEFT_PALM_GROUP;
@@ -133,7 +139,7 @@ bool button_press::pressButton(const armSide side, geometry_msgs::Point &goal, f
     waypoints.push_back(final);
 
     final.position=finalGoal;
-    final.position.z+=0.06; // to press the button
+    final.position.z+=0.08; // to press the button
     final.orientation= temp.quaternion;
 
     waypoints.push_back(final);
@@ -173,7 +179,7 @@ bool button_press::pressButton(const armSide side, geometry_msgs::Point &goal, f
     return true;
 }
 
-void button_press::getButtonPosition( geometry_msgs::Point &goal)
+void ButtonPress::getButtonPosition( geometry_msgs::Point &goal)
 {
     bd_.findButtons(goal);
 

@@ -31,6 +31,7 @@
 #include "val_task2/button_detector.h"
 #include "val_task2/cable_detector.h"
 #include <val_task2/val_task2_utils.h>
+#include <val_task2/button_press.h>
 
 using namespace decision_making;
 
@@ -71,6 +72,9 @@ class valTask2 {
     ButtonDetector* button_detector_;
     // cable detector
     CableDetector* cable_detector_;
+    // Button press
+    ButtonPress* button_press_;
+
 
     // chest controller
     chestTrajectory* chest_controller_;

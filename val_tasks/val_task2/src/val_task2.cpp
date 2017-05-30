@@ -53,6 +53,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     solar_array_fine_detector_  = nullptr;
     rover_in_map_blocker_       = nullptr;
     panel_grabber_              = nullptr;
+    button_press_               = nullptr;
 
     //utils
     task2_utils_    = new task2Utils(nh_);
@@ -60,7 +61,7 @@ valTask2::valTask2(ros::NodeHandle nh):
 
     // Variables
     map_update_count_ = 0;
-//    panel_grasping_hand_ = armSide::LEFT;
+    //    panel_grasping_hand_ = armSide::LEFT;
     // Subscribers
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask2::occupancy_grid_cb, this);
 }
@@ -176,7 +177,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
         if(rover_detector_->getRoverSide(roverSide)){
             setRoverSide(roverSide == ROVER_SIDE::RIGHT);
             // block rover in /map
-//            rover_in_map_blocker_ = new SolarArrayDetector(nh_, detectedPoses2D.back(),is_rover_on_right_);
+            //            rover_in_map_blocker_ = new SolarArrayDetector(nh_, detectedPoses2D.back(),is_rover_on_right_);
             //wait for the map to update. This is required to ensure the footsteps dont collide with rover
             //        ros::Duration(0.5).sleep();
             taskCommonUtils::moveToWalkSafePose(nh_);
@@ -345,11 +346,13 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
     {
         size_t idx = poses.size()-1;
         setSolarPanelHandlePose(poses[idx]);
-
+        task2_utils_->reOrientTowardsPanel(solar_panel_handle_pose_);
+        ros::Duration(2.0).sleep();
         ROS_INFO_STREAM("Position " << poses[idx].position.x<< " " <<poses[idx].position.y <<" "<<poses[idx].position.z);
         ROS_INFO_STREAM("quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w);
         fail_count = 0;
         retry_count = 0;
+
         eventQueue.riseEvent("/DETECTED_PANEL");
         if(solar_panel_detector_ != nullptr) delete solar_panel_detector_;
         solar_panel_detector_ = nullptr;
@@ -815,7 +818,7 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
      ************************************
      */
     if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
-     ROS_INFO("valTask2::placePanelTask : Placing the panel on table");
+        ROS_INFO("valTask2::placePanelTask : Placing the panel on table");
         task2_utils_->moveToPlacePanelPose(panel_grasping_hand_, false);
         ros::Duration(1).sleep();
         eventQueue.riseEvent("/PLACE_ON_GROUND_RETRY");
@@ -841,11 +844,11 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
     }
     else if (task2_utils_->getCurrentCheckpoint() > 2){
         ROS_INFO("valTask2::placePanelTask : Placed the panel successfully");
-         eventQueue.riseEvent("/PLACED_ON_GROUND");
+        eventQueue.riseEvent("/PLACED_ON_GROUND");
     }
     else {
         ROS_INFO("valTask2::placePanelTask : Panel placement failed");
-         eventQueue.riseEvent("/PLACED_ON_GROUND_FAILED");
+        eventQueue.riseEvent("/PLACED_ON_GROUND_FAILED");
     }
 
     // generate the event
@@ -889,6 +892,11 @@ decision_making::TaskResult valTask2::detectButtonTask(string name, const FSMCal
         retry_count = 0;
     }
 
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("valTask2::alignSolarArrayTask : waiting for transition");
+    }
+
     return TaskResult::SUCCESS();
 }
 
@@ -896,8 +904,92 @@ decision_making::TaskResult valTask2::deployPanelTask(string name, const FSMCall
 {
     ROS_INFO_STREAM("executing " << name);
 
-    // generate the event
-    eventQueue.riseEvent("/REACHED_ROVER");
+    if(button_press_ == nullptr) {
+        button_press_ = new ButtonPress(nh_);
+    }
+
+    static std::queue<geometry_msgs::Point> points;
+    static bool executeOnce =true;
+    if(executeOnce)
+    {
+        //clear the queue before starting
+        std::queue<geometry_msgs::Point> temp;
+        points= temp;
+
+        points.push(button_coordinates_);
+
+        // define 4 retry points before going back to detection
+        float offset=0.02;
+        geometry_msgs::Point buttonPelvis;
+        robot_state_->transformPoint(button_coordinates_,buttonPelvis,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+        std::vector<geometry_msgs::Point> retryPoints;
+
+        retryPoints.resize(4);
+        // First Retry Point
+        retryPoints[0]=buttonPelvis;
+        retryPoints[0].x+=offset;
+        robot_state_->transformPoint(retryPoints[0],retryPoints[0],VAL_COMMON_NAMES::PELVIS_TF);
+
+        // Second Retry Point
+        retryPoints[1]=buttonPelvis;
+        retryPoints[1].x-=offset;
+        robot_state_->transformPoint(retryPoints[1],retryPoints[1],VAL_COMMON_NAMES::PELVIS_TF);
+
+        // Third Retry Point
+        retryPoints[2]=buttonPelvis;
+        retryPoints[2].y+=offset;
+        robot_state_->transformPoint(retryPoints[2],retryPoints[2],VAL_COMMON_NAMES::PELVIS_TF);
+
+        // Fourth Retry Point
+        retryPoints[3]=buttonPelvis;
+        retryPoints[3].y-=offset;
+        robot_state_->transformPoint(retryPoints[3],retryPoints[3],VAL_COMMON_NAMES::PELVIS_TF);
+
+        // pushing all points in queue
+        points.push(retryPoints[0]);
+        points.push(retryPoints[1]);
+        points.push(retryPoints[2]);
+        points.push(retryPoints[3]);
+
+        // setting executing once to false to ensure it does not enter this loop again unless a new detection comes in.
+        executeOnce=false;
+    }
+
+    static int retry_count=0;
+
+    if(task2_utils_->getCurrentCheckpoint() == 3)
+    {
+        eventQueue.riseEvent("/DEPLOYED");
+    }
+    else if(!points.empty())
+    {
+        // choosing default side to be left at the moment. it might work with right hand as well.
+        button_press_->pressButton(LEFT,points.front());
+        points.pop();
+        executeOnce=false;
+        eventQueue.riseEvent("/DEPLOY_RETRY");
+    }
+    else if(points.empty() && retry_count <5)
+    {
+        retry_count++;
+        executeOnce=true;
+        eventQueue.riseEvent("/DETECT_AGAIN");
+    }
+    else if(retry_count >5)
+    {
+        executeOnce=true;
+        eventQueue.riseEvent("/DEPLOY_FAILED");
+    }
+    else
+    {
+        ROS_WARN("DEBUG the state : deployPanelTask. retried %d times", retry_count);
+        eventQueue.riseEvent("/DEPLOY_FAILED");
+    }
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("valTask2::alignSolarArrayTask : waiting for transition");
+    }
 
     return TaskResult::SUCCESS();
 }
