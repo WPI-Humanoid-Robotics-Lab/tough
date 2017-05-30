@@ -6,18 +6,24 @@ button_press::button_press(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(
 
 
     /* Top Grip */
-//    leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-//    leftHandOrientation_.quaternion.x = 0.604;
-//    leftHandOrientation_.quaternion.y = 0.434;
-//    leftHandOrientation_.quaternion.z = -0.583;
-//    leftHandOrientation_.quaternion.w = 0.326;
+    //    leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    //    leftHandOrientation_.quaternion.x = 0.604;
+    //    leftHandOrientation_.quaternion.y = 0.434;
+    //    leftHandOrientation_.quaternion.z = -0.583;
+    //    leftHandOrientation_.quaternion.w = 0.326;
+
+    //Most recent//
+    //    leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    //    leftHandOrientation_.quaternion.x = 0.533;
+    //    leftHandOrientation_.quaternion.y = 0.373;
+    //    leftHandOrientation_.quaternion.z = -0.430;
+    //    leftHandOrientation_.quaternion.w = 0.627;
 
     leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    leftHandOrientation_.quaternion.x = 0.533;
-    leftHandOrientation_.quaternion.y = 0.373;
-    leftHandOrientation_.quaternion.z = -0.430;
-    leftHandOrientation_.quaternion.w = 0.627;
-
+    leftHandOrientation_.quaternion.x = 0.492;
+    leftHandOrientation_.quaternion.y = 0.504;
+    leftHandOrientation_.quaternion.z = -0.494;
+    leftHandOrientation_.quaternion.w = 0.509;
 
     /* Top Grip Flat Hand */
     rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
@@ -133,7 +139,7 @@ bool button_press::pressButton(const armSide side, geometry_msgs::Point &goal, f
     waypoints.push_back(final);
 
     final.position=finalGoal;
-    final.position.z+=0.06; // to press the button
+    final.position.z+=0.08; // to press the button
     final.orientation= temp.quaternion;
 
     waypoints.push_back(final);
