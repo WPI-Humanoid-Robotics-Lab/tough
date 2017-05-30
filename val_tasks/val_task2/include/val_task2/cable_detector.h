@@ -32,6 +32,8 @@
 #include <pcl/filters/crop_box.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/surface/convex_hull.h>
+#include <pcl/common/pca.h>
+#include <pcl/segmentation/conditional_euclidean_clustering.h>
 
 #include <pcl/sample_consensus/sac_model_sphere.h>
 #include <pcl/sample_consensus/ransac.h>
@@ -40,6 +42,8 @@
 #include <iostream>
 #include <vector>
 #include <mutex>
+
+#define TABLE_OFFSET -0.4 //decrease this to move further way from table
 
 class CableDetector
 {
@@ -72,6 +76,7 @@ class CableDetector
 
     void visualize_direction(geometry_msgs::Point point1, geometry_msgs::Point point2);
     void visualize_point(geometry_msgs::Point point, double r, double g, double b);
+    void visualize_pose(geometry_msgs::Pose pose);
 
 public:
     CableDetector(ros::NodeHandle nh);
@@ -88,9 +93,10 @@ public:
     bool findCable(geometry_msgs::Point &);
 
     void cloudCB(const sensor_msgs::PointCloud2::Ptr& );
-    bool getStandPosition(geometry_msgs::Point & );
-    bool planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input);
-
+    bool getStandPosition(geometry_msgs::Pose & );
+    bool planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, geometry_msgs::Pose &output_pose);
+    void extractCloudOfInterest(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ> &output);
+    void getLargestCluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output);
 };
 
 #endif // CABLE_DETECTOR_H
