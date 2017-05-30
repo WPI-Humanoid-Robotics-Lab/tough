@@ -11,7 +11,7 @@
 #include "val_controllers/val_chest_navigation.h"
 
 
-class button_press
+class ButtonPress
 {
     armTrajectory armTraj_;
     ros::NodeHandle nh_;
@@ -44,8 +44,8 @@ public:
     geometry_msgs::QuaternionStamped leftHandOrientation() const;
     geometry_msgs::QuaternionStamped rightHandOrientation() const;
     void getButtonPosition( geometry_msgs::Point &goal);
-    button_press(ros::NodeHandle &);
-    ~button_press();
+    ButtonPress(ros::NodeHandle &);
+    ~ButtonPress();
 
 };
 

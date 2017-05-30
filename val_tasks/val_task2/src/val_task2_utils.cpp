@@ -42,12 +42,12 @@ void task2Utils::afterPanelGraspPose(const armSide side)
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
-        seed1 = &leftSeedGraspingHand_;
+        seed1 = &leftNearChestGrasp_;
         seed2 = &rightSeedNonGraspingHand_;
     }
     else
     {
-        seed1 = &rightSeedGraspingHand;
+        seed1 = &rightNearChestGrasp_;
         seed2 = &leftSeedNonGraspingHand_;
     }
 
@@ -129,19 +129,23 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     pelvis_controller_->controlPelvisHeight(1.1);
     ros::Duration(2).sleep();
 
-    const std::vector<float> *graspingHandPose, *nonGraspingHandPose;
+    const std::vector<float> *graspingHandPoseUp, *graspingHandPoseDown, *nonGraspingHandPose2, *nonGraspingHandPose1;
 
     if(graspingHand == armSide::LEFT){
-        graspingHandPose    = &leftPanelPlacementPose1_;
-        nonGraspingHandPose = &rightPanelPlacementSupport_;
+        graspingHandPoseUp     = &leftPanelPlacementUpPose1_;
+        graspingHandPoseDown   = &leftPanelPlacementDownPose1_;
+        nonGraspingHandPose1 = &rightPanelPlacementSupport1_;
+        nonGraspingHandPose2 = &rightPanelPlacementSupport2_;
         // take non-GraspingHand out
         arm_controller_->moveArmJoint(nonGraspingHand, 3, 0.5);
         ros::Duration(1).sleep();
     }
     else
     {
-        graspingHandPose    = &rightPanelPlacementPose1_;
-        nonGraspingHandPose = &leftPanelPlacementSupport_;
+        graspingHandPoseUp     = &rightPanelPlacementUpPose1_;
+        graspingHandPoseDown   = &rightPanelPlacementDownPose1_;
+        nonGraspingHandPose1 = &leftPanelPlacementSupport1_;
+        nonGraspingHandPose2 = &leftPanelPlacementSupport2_;
         // take non-GraspingHand out
         arm_controller_->moveArmJoint(nonGraspingHand, 3, -0.5);
         ros::Duration(1).sleep();
@@ -149,7 +153,7 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
 
     std::vector< std::vector<float> > armData;
     armData.clear();
-    armData.push_back(*graspingHandPose);
+    armData.push_back(*graspingHandPoseUp);
     arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
     ros::Duration(2).sleep();
 
@@ -158,14 +162,62 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
 
     //{-1.3, -1.4, 1.39, -0.9, -1.10, 0.5, 0.3};
     armData.clear();
-    armData.push_back({-1.2, -1.4, 1.39, -0.9, -1.10, 0.5, 0.4});
+    armData.push_back(*graspingHandPoseDown);
     arm_controller_->moveArmJoints(graspingHand, armData, 1.0f);
     ros::Duration(1).sleep();
 
-    armData.clear();
-    armData.push_back(*nonGraspingHandPose);
-    arm_controller_->moveArmJoints(nonGraspingHand, armData, 2.0f);
-    ros::Duration(2).sleep();
+    std::vector<armTrajectory::armJointData> pushPanel;
+    pushPanel.resize(2);
+    pushPanel[0].side = nonGraspingHand;
+    pushPanel[0].arm_pose = *nonGraspingHandPose1;
+    pushPanel[0].time = 1;
+
+    pushPanel[1].side = nonGraspingHand;
+    pushPanel[1].arm_pose = *nonGraspingHandPose2;
+    pushPanel[1].time = 2;
+
+    arm_controller_->moveArmJoints(pushPanel);
+    ros::Duration(3).sleep();
+
+}
+
+void task2Utils::reOrientTowardsPanel(geometry_msgs::Pose panelPose){
+
+    size_t nSteps;
+    armSide startStep;
+    std::vector<float> y_offset;
+    std::vector<float> x_offset = {0,0};
+
+    current_state_->transformPose(panelPose,panelPose,VAL_COMMON_NAMES::WORLD_TF,
+                                  VAL_COMMON_NAMES::PELVIS_TF);
+
+    double error = panelPose.position.y;
+    if (std::abs(error) < 0.1){
+        ROS_INFO("reOrientTowardsPanel: Not reorienting, the offset is less than 0.1");
+    }
+
+    else if (std::abs(error) > 0.49){
+        ROS_INFO("reOrientTowardsPanel: Offset more than 0.5");
+    }
+
+    else{
+        nSteps = (std::abs(error))/0.1;
+
+        if (error > 0){
+            startStep = LEFT;
+            y_offset  = {0.1,0.1};
+        }
+        else {
+            startStep = RIGHT;
+            y_offset = {-0.1,-0.1};
+        }
+
+        ROS_INFO("reOrientTowardsPanel: Walking %d steps",int(nSteps));
+
+        walk_->walkLocalPreComputedSteps(x_offset,y_offset,startStep);
+        ros::Duration(2.0).sleep();
+
+    }
 
 }
 

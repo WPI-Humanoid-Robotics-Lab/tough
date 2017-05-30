@@ -1,17 +1,17 @@
 #include "val_task3/steps_detector.h"
 
-steps_detector::steps_detector(ros::NodeHandle& nh) : nh_(nh), cloud_(new pcl::PointCloud<pcl::PointXYZ>)
+StepDetector::StepDetector(ros::NodeHandle& nh) : nh_(nh), cloud_(new pcl::PointCloud<pcl::PointXYZ>)
 {
-    pcl_sub_ = nh_.subscribe("/field/assembled_cloud2", 10, &steps_detector::stepsCB, this);
+    pcl_sub_ = nh_.subscribe("/field/assembled_cloud2", 10, &StepDetector::stepsCB, this);
     pcl_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/val_steps/cloud2", 1, true);
 }
 
-steps_detector::~steps_detector()
+StepDetector::~StepDetector()
 {
     pcl_sub_.shutdown();
 }
 
-void steps_detector::stepsCB(const sensor_msgs::PointCloud2::Ptr& input)
+void StepDetector::stepsCB(const sensor_msgs::PointCloud2::Ptr& input)
 {
     if (input->data.empty())
         return;
@@ -21,7 +21,7 @@ void steps_detector::stepsCB(const sensor_msgs::PointCloud2::Ptr& input)
     mtx_.unlock();
 }
 
-bool steps_detector::getStepsPosition(const std::vector<double>& coefficients, const geometry_msgs::Point& dir_vector, const geometry_msgs::Point& stair_loc, std::vector<pcl::PointXYZ>& step_points)
+bool StepDetector::getStepsPosition(const std::vector<double>& coefficients, const geometry_msgs::Point& dir_vector, const geometry_msgs::Point& stair_loc, std::vector<pcl::PointXYZ>& step_points)
 {
     bool steps_detected = false;
 
@@ -84,7 +84,7 @@ bool steps_detector::getStepsPosition(const std::vector<double>& coefficients, c
     return steps_detected;
 }
 
-void steps_detector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output)
+void StepDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output)
 {
     int count = 0;
     pcl::PointCloud<pcl::PointXYZ>::Ptr temp_output (new pcl::PointCloud<pcl::PointXYZ>);
@@ -108,7 +108,7 @@ void steps_detector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr
     temp_output->points.clear();
 }
 
-void steps_detector::zAxisSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output)
+void StepDetector::zAxisSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output)
 {
     std::sort(input->points.begin(), input->points.end(), comparePoints);
     pcl::PointXYZ temp_point = input->points[0];
@@ -123,7 +123,7 @@ void steps_detector::zAxisSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr
     }
 }
 
-void steps_detector::stepCentroids(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output)
+void StepDetector::stepCentroids(const pcl::PointCloud<pcl::PointXYZ>::Ptr& input, pcl::PointCloud<pcl::PointXYZ>::Ptr& output)
 {
     std::sort(input->points.begin(), input->points.end(), comparePoints);
     pcl::PointXYZ temp_point1 = {0 ,0 ,0};
@@ -182,7 +182,7 @@ void steps_detector::stepCentroids(const pcl::PointCloud<pcl::PointXYZ>::Ptr& in
     temp_cloud->points.clear();
 }
 
-void steps_detector::visualize_point(geometry_msgs::Point point)
+void StepDetector::visualize_point(geometry_msgs::Point point)
 {
     static int id = 0;
     visualization_msgs::Marker marker;

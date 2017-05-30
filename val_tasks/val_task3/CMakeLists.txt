@@ -66,6 +66,7 @@ add_library(${PROJECT_NAME}
          src/door_valve_detector.cpp
          src/val_task3_utils.cpp
          src/rotate_valve.cpp
+         src/door_opener.cpp
 )
 
 add_executable(stair_climb_node src/val_stairclimb.cpp)
@@ -81,10 +82,8 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} $
 add_executable(door_valve_detector_node       src/door_valve_detector_node.cpp)
 target_link_libraries(door_valve_detector_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PROJECT_NAME} ${PCL_LIBRARY_DIRS} ${PROJECT_NAME})
 
-
 add_executable(stair_detector_node        src/stair_detector_node.cpp)
 target_link_libraries(stair_detector_node ${catkin_LIBRARIES}   ${OpenCV_LIBRARIES}   ${PROJECT_NAME})
-
 
 add_executable(table_detector_node        src/table_detector_node.cpp)
 target_link_libraries(table_detector_node ${catkin_LIBRARIES}   ${PCL_LIBRARIES}   ${PROJECT_NAME})
@@ -97,6 +96,9 @@ target_link_libraries(leak_detector_grabber_node ${catkin_LIBRARIES} ${PROJECT_N
 
 add_executable(grab_valve_node src/grab_valve_node.cpp)
 target_link_libraries(grab_valve_node ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(door_opener_node src/door_opener_node.cpp)
+target_link_libraries(door_opener_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(val_task3_node            src/val_task3_node.cpp)
 
