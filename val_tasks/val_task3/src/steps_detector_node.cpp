@@ -20,12 +20,13 @@ int main(int argc, char** argv)
   stairLoc.x = 3.56882;
   stairLoc.y = -1.07728;
   stairLoc.z = 0.758028;
+//        sd.findStair(stairLoc, numSideBarDetected);
+//        coefficients = sd.coefficients();
+//        dirVector = sd.dirVector();
   std::vector<pcl::PointXYZ> steps_loc;
   while(ros::ok())
   {
-//      sd.findStair(stairLoc, numSideBarDetected);
-//      coefficients = sd.coefficients();
-//      dirVector = sd.dirVector();
+
 
 //      ROS_INFO_STREAM("Coefficients : " << coefficients[0] << "\t" << coefficients[1] << "\t" << coefficients[2] << "\t" << coefficients[3] << std::endl);
 //      ROS_INFO_STREAM("Direction Vector : " << dirVector << std::endl);

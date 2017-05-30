@@ -5,7 +5,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "button_press_node");
     ros::NodeHandle nh;
-    button_press bp_(nh);
+    ButtonPress bp_(nh);
     geometry_msgs::Point goal;
 
     if(argc == 5){

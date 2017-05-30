@@ -1,6 +1,6 @@
 #include <val_task2/button_press.h>
 
-button_press::button_press(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(nh), bd_(nh_)
+ButtonPress::ButtonPress(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(nh), bd_(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 
@@ -55,7 +55,7 @@ button_press::button_press(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(
 
 }
 
-button_press::~button_press()
+ButtonPress::~ButtonPress()
 {
     delete left_arm_planner_;
     delete right_arm_planner_;
@@ -63,7 +63,7 @@ button_press::~button_press()
     delete chest_controller_;
 }
 
-bool button_press::pressButton(const armSide side, geometry_msgs::Point &goal, float executionTime)
+bool ButtonPress::pressButton(const armSide side, geometry_msgs::Point &goal, float executionTime)
 {
     // setting initial values
     geometry_msgs::QuaternionStamped* finalOrientationStamped;
@@ -72,7 +72,7 @@ bool button_press::pressButton(const armSide side, geometry_msgs::Point &goal, f
     float xFingerOffset,yFingerOffset,zFingerOffset;
     geometry_msgs::Pose rightOffset,leftOffset;
     current_state_->getCurrentPose("/rightMiddleFingerPitch1Link",rightOffset,"/rightThumbRollLink");
-    current_state_->getCurrentPose("/leftPalm",leftOffset,"/leftThumbRollLink");
+    current_state_->getCurrentPose("/leftMiddleFingerPitch1Link",leftOffset,"/leftThumbRollLink");
     if(side == armSide::LEFT){
         armSeed = &leftShoulderSeed_;
         palmFrame = VAL_COMMON_NAMES::LEFT_PALM_GROUP;
@@ -179,7 +179,7 @@ bool button_press::pressButton(const armSide side, geometry_msgs::Point &goal, f
     return true;
 }
 
-void button_press::getButtonPosition( geometry_msgs::Point &goal)
+void ButtonPress::getButtonPosition( geometry_msgs::Point &goal)
 {
     bd_.findButtons(goal);
 
