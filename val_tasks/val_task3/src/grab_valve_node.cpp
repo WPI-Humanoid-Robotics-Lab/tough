@@ -9,11 +9,12 @@ int main(int argc, char **argv)
     ROS_INFO("Starting valve grabber");
     gripperControl gc(nh);
 
+
     ros::Publisher stopTraj= nh.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/stop_all_trajectories",1,true);
     ihmc_msgs::StopAllTrajectoryRosMessage stopMsg;
     stopMsg.unique_id=45;
 
-    if(argc == 4){
+    if(argc == 7){
         geometry_msgs::Point pt;
         pt.x = std::atof(argv[1]);
         pt.y = std::atof(argv[2]);
@@ -34,10 +35,10 @@ int main(int argc, char **argv)
                 rotate.grab_valve(pt);
                 std::vector<geometry_msgs::Pose> points;
                 geometry_msgs::Point cen;
-                cen.x=0.576;
-                cen.y=0.279;
-                cen.z=1.16;
 
+                cen.x=std::atof(argv[4]);
+                cen.y=std::atof(argv[5]);
+                cen.z=std::atof(argv[6]);
                 rotate.compute_traj(cen,0.18,points);
                 rotate.move_valve(points);
             }
