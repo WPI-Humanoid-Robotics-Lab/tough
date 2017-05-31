@@ -248,6 +248,7 @@ void task2Utils::taskStatusCB(const srcsim::Task &msg)
 void task2Utils::clearPointCloud() {
     std_msgs::Empty msg;
     reset_pointcloud_pub.publish(msg);
+    ros::Duration(0.3).sleep();
 }
 
 void task2Utils::clearBoxPointCloud() {

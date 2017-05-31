@@ -42,7 +42,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     walk_track_         = new walkTracking(nh_);
     chest_controller_   = new chestTrajectory(nh_);
     arm_controller_     = new armTrajectory(nh_);
-
+    head_controller_    = new HeadTrajectory(nh_);
 
 
     //initialize all detection pointers
@@ -54,14 +54,14 @@ valTask2::valTask2(ros::NodeHandle nh):
     rover_in_map_blocker_       = nullptr;
     panel_grabber_              = nullptr;
     button_press_               = nullptr;
-
+    cable_detector_             = nullptr;
     //utils
     task2_utils_    = new task2Utils(nh_);
     robot_state_    = RobotStateInformer::getRobotStateInformer(nh_);
 
     // Variables
     map_update_count_ = 0;
-    //    panel_grasping_hand_ = armSide::LEFT;
+        panel_grasping_hand_ = armSide::RIGHT;
     // Subscribers
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask2::occupancy_grid_cb, this);
 }
@@ -329,8 +329,13 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
         isFirstRun = false;
         solar_panel_detector_ = new SolarPanelDetect(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
         chest_controller_->controlChest(0, 0, 0);
+        //move arms to default position
         arm_controller_->moveToDefaultPose(armSide::RIGHT);
+        gripper_controller_->openGripper(armSide::RIGHT);
+        ros::Duration(0.2).sleep();
+
         arm_controller_->moveToDefaultPose(armSide::LEFT);
+        gripper_controller_->openGripper(armSide::LEFT);
         ros::Duration(0.2).sleep();
     }
 
@@ -483,7 +488,9 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         std::vector<float> x_offset={-0.3,-0.3};
         std::vector<float> y_offset={0.0,0.1};
         walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
-        ros::Duration(3).sleep();
+        ros::Duration(4).sleep();
+        // walk slowly for this turn
+        walker_->setWalkParms(1.0, 1.0, 0);
         /// @todo The following code should be a new state
         // reorient the robot.
         ROS_INFO("valTask2::pickPanelTask : Reorienting");
@@ -506,6 +513,7 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         ROS_INFO("Walking to x:%f y:%f theta:%f", pose2D.x,pose2D.y,pose2D.theta);
         walker_->walkToGoal(pose2D);
         ros::Duration(1).sleep();
+        walker_->setWalkParms(0.7, 0.7, 0);
         task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_);
         eventQueue.riseEvent("/PICKED_PANEL");
     }
@@ -672,16 +680,42 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
 {
     ROS_INFO_STREAM("valTask2::detectSolarArrayFineTask : executing " << name);
 
-    eventQueue.riseEvent("/DETECTED_ARRAY_FINE");
-    return TaskResult::SUCCESS();
+//    eventQueue.riseEvent("/DETECTED_ARRAY_FINE");
+//    return TaskResult::SUCCESS();
+
+    static int cable_retry_count = 0;
+    static int retry_count = 0;
 
     if(solar_array_fine_detector_ == nullptr) {
-        solar_array_fine_detector_ = new SolarArrayDetector(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
+        // Solar array fine detection depends on cable detector. hence a small loop in state machine to get the cable location
+        if (cable_detector_ == nullptr) {
+            head_controller_->moveHead(0,30, 0);
+            float q1 = panel_grasping_hand_ == armSide::LEFT ? -0.36 : 0.36;
+            arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
+            cable_detector_ = new CableDetector(nh_);
+        }
+
+        geometry_msgs::Point cable_location;
+        if (cable_retry_count > 5){
+            eventQueue.riseEvent("/DETECT_ARRAY_FINE_FAILED");
+            cable_retry_count = 0;
+            if(cable_detector_ != nullptr) delete cable_detector_;
+            cable_detector_ = nullptr;
+        }
+        else if(!cable_detector_->findCable(cable_location)){
+            cable_retry_count++;
+            eventQueue.riseEvent("/DETECT_ARRAY_FINE_RETRY");
+            return TaskResult::SUCCESS();
+        }
+        ROS_INFO("valTask2::detectSolarArrayFineTask : Cable location x:%f y:%f z:%f", cable_location.x, cable_location.y, cable_location.z);
+        solar_array_fine_detector_ = new ArrayTableDetector(nh_, cable_location);
         ros::Duration(0.2).sleep();
+
+        if(cable_detector_ != nullptr) delete cable_detector_;
+        cable_detector_ = nullptr;
+        head_controller_->moveHead(0, 0, 0);
     }
 
-    static int fail_count = 0;
-    static int retry_count = 0;
 
     // detect solar array
     std::vector<geometry_msgs::Pose> poses;
@@ -698,12 +732,17 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
         // get the theta
         pose2D.theta = tf::getYaw(poses[idx].orientation);
 
-        setSolarArrayWalkGoal(pose2D);
+        setSolarArrayFineWalkGoal(pose2D);
 
         ROS_INFO("valTask2::detectSolarArrayFineTask : Position x:%f y:%f z:%f",poses[idx].position.x,poses[idx].position.y,poses[idx].position.z);
         ROS_INFO("valTask2::detectSolarArrayFineTask : yaw:%f",pose2D.theta);
         retry_count = 0;
+        cable_retry_count = 0;
         eventQueue.riseEvent("/DETECTED_ARRAY_FINE");
+
+        if(solar_array_fine_detector_ != nullptr) delete solar_array_fine_detector_;
+        solar_array_fine_detector_ = nullptr;
+
     }
 
     else if(retry_count < 5) {
@@ -713,22 +752,15 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
         ros::Duration(3).sleep();
     }
     // if failed for more than 5 times, go to error state
-    else if (fail_count > 5)
+    else
     {
-        // reset the fail count
+
         ROS_INFO("valTask2::detectSolarArrayFineTask : Failed 5 times. transitioning to error state");
-        fail_count = 0;
+        cable_retry_count = 0;
+        retry_count = 0;
         eventQueue.riseEvent("/DETECT_ARRAY_FINE_FAILED");
         if(solar_array_fine_detector_ != nullptr) delete solar_array_fine_detector_;
         solar_array_fine_detector_ = nullptr;
-    }
-    // if failed retry detecting the panel
-    else
-    {
-        ROS_INFO("valTask2::detectSolarArrayFineTask : Failed attempt. trying again");
-        // increment the fail count
-        fail_count++;
-        eventQueue.riseEvent("/DETECT_ARRAY_FINE_RETRY");
     }
 
     while(!preemptiveWait(1000, eventQueue)){
@@ -737,16 +769,12 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
 
     return TaskResult::SUCCESS();
 
-
 }
 
 decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("valTask2::alignSolarArrayTask : executing " << name);
     static int fail_count = 0;
-
-    eventQueue.riseEvent("/ALIGNED_TO_ARRAY");
-    return TaskResult::SUCCESS();
 
     // walk to the goal location
     // the goal can be updated on the run time
@@ -1119,6 +1147,11 @@ void valTask2::setSolarPanelHandlePose(const geometry_msgs::Pose &pose)
 void valTask2::setSolarArrayWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal)
 {
     solar_array_walk_goal_ = panel_walk_goal;
+}
+
+void valTask2::setSolarArrayFineWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal)
+{
+    solar_array_fine_walk_goal_ = panel_walk_goal;
 }
 
 void valTask2::setSolarArraySide(const bool isSolarArrayOnRight)

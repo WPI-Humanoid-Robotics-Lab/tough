@@ -121,6 +121,11 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
 
 void ArrayTableDetector::extractCloudOfInterest(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ> &output)
 {
+    geometry_msgs::Point cableLocation;
+    cableLocation.x = cable_loc_.x;
+    cableLocation.y = cable_loc_.y;
+    robot_state_->transformPoint(cableLocation, cableLocation, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+
     geometry_msgs::Pose pelvisPose;
     geometry_msgs::Point cableLocation;
     cableLocation.x = cable_loc_.x;

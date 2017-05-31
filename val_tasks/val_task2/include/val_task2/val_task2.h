@@ -29,6 +29,7 @@
 #include "val_task2/val_solar_panel_detector.h"
 #include "val_task2/solar_panel_grasp.h"
 #include "val_task2/button_detector.h"
+#include "val_task2/array_table_detector.h"
 #include "val_task2/cable_detector.h"
 #include <val_task2/val_task2_utils.h>
 #include <val_task2/button_press.h>
@@ -67,7 +68,7 @@ class valTask2 {
     // Solar array detector is also used for blocking map.
     SolarArrayDetector* solar_array_detector_;
     // Solar array detector is also used for blocking map.
-    SolarArrayDetector* solar_array_fine_detector_;
+    ArrayTableDetector* solar_array_fine_detector_;
     // button detector
     ButtonDetector* button_detector_;
     // cable detector
@@ -151,6 +152,7 @@ class valTask2 {
     void setSolarPanelHandlePose(const geometry_msgs::Pose &pose);
     void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal);
     void setSolarArrayWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal);
+    void setSolarArrayFineWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal);
     void setSolarArraySide(const bool isSolarArrayOnRight);
     void setPanelGraspingHand(armSide side);
 };

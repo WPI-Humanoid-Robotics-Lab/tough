@@ -21,6 +21,7 @@ int main(int argc, char** argv)
     //while (!foundCable && numIterations < 20)
     {
 
+
         std::vector<geometry_msgs::Pose> detections;
         if(atd.getDetections(detections))
         {
