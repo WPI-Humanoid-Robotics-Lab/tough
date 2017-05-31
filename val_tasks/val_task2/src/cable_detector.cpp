@@ -101,16 +101,36 @@ bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
         {
             for (size_t l = 0; l < 10; l++ )
             {
-                pcl::PointXYZRGB temp_pclPoint;
                 pcl::PointXYZRGB temp_pclPoint0;
+
+                try
+                {
+                    temp_pclPoint0 = organizedCloud->at(int(points[0].x + r * std::cos(k * l * theta)), int(points[0].y + r * std::sin(k * l * theta)));
+                }
+                catch (const std::out_of_range& ex){
+                    ROS_ERROR("%s",ex.what());
+                    return false;
+                }
+
+                if (temp_pclPoint0.z > -2.0 && temp_pclPoint0.z < 2.0 )
+                {
+                    currentDetectionCloud0.push_back(pcl::PointXYZRGB(temp_pclPoint0));
+                }
+            }
+        }
+
+        for (size_t k = 0; k < 10; k++ )
+        {
+            for (size_t l = 0; l < 10; l++ )
+            {
+                pcl::PointXYZRGB temp_pclPoint;
                 pcl::PointXYZRGB temp_pclPoint1;
                 pcl::PointXYZRGB temp_pclPoint2;
                 try
                 {
-                    temp_pclPoint = organizedCloud->at(points[0].x + k/36, points[0].y + l );
-                    temp_pclPoint0 = organizedCloud->at(int(points[0].x + r * std::cos(k * l * theta)), int(points[0].y + r * std::sin(k * l * theta)));
-                    temp_pclPoint1 = organizedCloud->at(points[1].x + k/36, points[1].y + l);
-                    temp_pclPoint2 = organizedCloud->at(points[2].x + k/36, points[2].y + l);
+                    temp_pclPoint = organizedCloud->at(points[0].x + k, points[0].y + l );
+                    temp_pclPoint1 = organizedCloud->at(points[1].x + k, points[1].y + l);
+                    temp_pclPoint2 = organizedCloud->at(points[2].x + k, points[2].y + l);
                 }
                 catch (const std::out_of_range& ex){
                     ROS_ERROR("%s",ex.what());
@@ -120,11 +140,6 @@ bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
                 if (temp_pclPoint.z > -2.0 && temp_pclPoint.z < 2.0 )
                 {
                     currentDetectionCloud.push_back(pcl::PointXYZRGB(temp_pclPoint));
-                }
-
-                if (temp_pclPoint0.z > -2.0 && temp_pclPoint0.z < 2.0 )
-                {
-                    currentDetectionCloud0.push_back(pcl::PointXYZRGB(temp_pclPoint0));
                 }
 
                 if (temp_pclPoint1.z > -2.0 && temp_pclPoint1.z < 2.0 )
