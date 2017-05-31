@@ -90,7 +90,7 @@ bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
         foundCable = true;
         points = getOrientation(contours[findMaxContour(contours)], outImg);
         //ROS_INFO_STREAM(point << std::endl);
-        double theta = (1/3600.0) * 3.14159265359;
+        double theta = (1/3600.0) * M_PI;
         double r = std::sqrt(std::pow(points[1].x - points[0].x , 2) + std::pow(points[1].y - points[0].y , 2)) + 25.0;
         pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
         pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud0;
@@ -154,10 +154,12 @@ bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
             }
         }
         //  Calculating the Centroid of the handle Point cloud
-        pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
-        pcl::compute3DCentroid(currentDetectionCloud0, cloudCentroid0);
-        pcl::compute3DCentroid(currentDetectionCloud1, cloudCentroid1);
-        pcl::compute3DCentroid(currentDetectionCloud2, cloudCentroid2);
+
+        if (!pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid) || !pcl::compute3DCentroid(currentDetectionCloud0, cloudCentroid0)
+                || !pcl::compute3DCentroid(currentDetectionCloud1, cloudCentroid1) || !pcl::compute3DCentroid(currentDetectionCloud2, cloudCentroid2)){
+            ROS_INFO("CableDetector::getCableLocation : one of the centroids could not be computed");
+            return false;
+        }
     }
 
     if( foundCable )

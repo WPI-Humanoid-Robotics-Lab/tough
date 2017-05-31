@@ -17,7 +17,7 @@ int main(int argc, char** argv)
     while(ros::ok()){
         c1.findCable(CableLoc);
             //while (!foundCable && numIterations < 20)
-        //ROS_INFO("Cable detection failed. retrying");
+        ROS_INFO("Cable location x:%f y:%f z:%f", CableLoc.x, CableLoc.y, CableLoc.z);
         ros::spinOnce();
     }
 
