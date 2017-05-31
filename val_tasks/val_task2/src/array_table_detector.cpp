@@ -90,32 +90,20 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
     table_center.z = bb_center[2];
     ROS_INFO("CableDetector::planeSegmentation : Center of table x:%f y:%f z:%f. Area:%f",table_center.x,table_center.y,table_center.z, convHull.getTotalArea());
 
-    Eigen::Vector4f centroid;
-    geometry_msgs::PointStamped geom_point;
-    geometry_msgs::PointStamped geom_point1;
-    geometry_msgs::PointStamped geom_point2;
+    Eigen::Vector4f plane_parameters;
+    float curvature;
+    pcl::computePointNormal(*output_cloud, plane_parameters, curvature);
+    ROS_INFO_STREAM("Normal Params : " << plane_parameters << std::endl);
 
-    pcl::compute3DCentroid(*cloud_hull, centroid);
-    Eigen::Matrix3f covariance_matrix;
-
-    // Extract the eigenvalues and eigenvectors
-    Eigen::Vector3f eigen_values;
-    Eigen::Matrix3f eigen_vectors;
-
-    // Compute the 3x3 covariance matrix
-    pcl::computeCovarianceMatrix (*cloud_hull, centroid, covariance_matrix);
-    pcl::eigen33 (covariance_matrix, eigen_vectors, eigen_values);
-
-//    ROS_INFO_STREAM("Eigen Vector" << eigen_vectors << std::endl);
-
-    float cos_theta = eigen_vectors.col(0)[0]/std::sqrt(std::pow(eigen_vectors.col(0)[0],2) + std::pow(eigen_vectors.col(0)[1],2));
-    float sin_theta = eigen_vectors.col(0)[1]/std::sqrt(std::pow(eigen_vectors.col(0)[0],2)+ std::pow(eigen_vectors.col(0)[1],2));
+    float cos_theta = -plane_parameters(0)/std::sqrt(std::pow(plane_parameters(0),2) + std::pow(plane_parameters(1),2) );
+    float sin_theta = plane_parameters(1)/std::sqrt(std::pow(plane_parameters(0),2) + std::pow(plane_parameters(1),2) );
     float theta = std::atan2(sin_theta, cos_theta);
     geometry_msgs::Pose pose;
     ROS_INFO("Yaw angle : %f", theta);
-    pose.position.x = table_center.x + TABLE_OFFSET*cos(theta);
-    pose.position.y = table_center.y + TABLE_OFFSET*sin(theta);
+    pose.position.x = table_center.x + TABLE_OFFSET * cos_theta;
+    pose.position.y = table_center.y + TABLE_OFFSET * sin_theta;
     pose.position.z = 0;
+
     geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
     pose.orientation = quaternion;
     detections_.push_back(pose);
@@ -134,6 +122,10 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
 void ArrayTableDetector::extractCloudOfInterest(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ> &output)
 {
     geometry_msgs::Pose pelvisPose;
+    geometry_msgs::Point cableLocation;
+    cableLocation.x = cable_loc_.x;
+    cableLocation.y = cable_loc_.y;
+    robot_state_->transformPoint(cableLocation, cableLocation, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF );
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;
@@ -141,7 +133,7 @@ void ArrayTableDetector::extractCloudOfInterest(const pcl::PointCloud<pcl::Point
     minPoint[1]=-2;
     minPoint[2]=-1;
 
-    maxPoint[0]=3;
+    maxPoint[0]=cableLocation.x;
     maxPoint[1]=2;
     maxPoint[2]=0.5;
     Eigen::Vector3f boxTranslatation;
@@ -234,7 +226,7 @@ void ArrayTableDetector::visualizePose(const geometry_msgs::Pose &pose, double r
     marker.color.g = g;
     marker.color.b = b;
 
-    marker_pub_.publish(markers_);
+    marker_pub_.publish(marker);
 }
 
 bool ArrayTableDetector::getDetections(std::vector<geometry_msgs::Pose> &output)
