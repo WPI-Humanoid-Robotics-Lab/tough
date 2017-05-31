@@ -133,6 +133,11 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
 
 void ArrayTableDetector::extractCloudOfInterest(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ> &output)
 {
+    geometry_msgs::Point cableLocation;
+    cableLocation.x = cable_loc_.x;
+    cableLocation.y = cable_loc_.y;
+    robot_state_->transformPoint(cableLocation, cableLocation, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+
     geometry_msgs::Pose pelvisPose;
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
     Eigen::Vector4f minPoint;
@@ -141,7 +146,7 @@ void ArrayTableDetector::extractCloudOfInterest(const pcl::PointCloud<pcl::Point
     minPoint[1]=-2;
     minPoint[2]=-1;
 
-    maxPoint[0]=3;
+    maxPoint[0]=cableLocation.x;
     maxPoint[1]=2;
     maxPoint[2]=0.5;
     Eigen::Vector3f boxTranslatation;
@@ -234,7 +239,7 @@ void ArrayTableDetector::visualizePose(const geometry_msgs::Pose &pose, double r
     marker.color.g = g;
     marker.color.b = b;
 
-    marker_pub_.publish(markers_);
+    marker_pub_.publish(marker);
 }
 
 bool ArrayTableDetector::getDetections(std::vector<geometry_msgs::Pose> &output)
