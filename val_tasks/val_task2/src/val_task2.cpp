@@ -43,7 +43,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     chest_controller_   = new chestTrajectory(nh_);
     arm_controller_     = new armTrajectory(nh_);
     head_controller_    = new HeadTrajectory(nh_);
-
+    gripper_controller_ = new gripperControl(nh_);
 
     //initialize all detection pointers
     rover_detector_             = nullptr;
@@ -320,15 +320,24 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
 {
     ROS_INFO_STREAM("executing " << name);
     static bool isFirstRun = true;
+    static geometry_msgs::Point button_location;
+    BUTTON_LOCATION::LEFT;
     if(solar_panel_detector_ == nullptr) {
         if (!isFirstRun){
             ROS_INFO("Clearing pointcloud");
             task2_utils_->clearBoxPointCloud();
         }
+
+        // find button location
+
+
+
         task2_utils_->resumePointCloud();
         isFirstRun = false;
+
         solar_panel_detector_ = new SolarPanelDetect(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
         chest_controller_->controlChest(0, 0, 0);
+
         //move arms to default position
         arm_controller_->moveToDefaultPose(armSide::RIGHT);
         gripper_controller_->openGripper(armSide::RIGHT);
@@ -680,18 +689,20 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
 {
     ROS_INFO_STREAM("valTask2::detectSolarArrayFineTask : executing " << name);
 
-//    eventQueue.riseEvent("/DETECTED_ARRAY_FINE");
-//    return TaskResult::SUCCESS();
-
     static int cable_retry_count = 0;
     static int retry_count = 0;
-
+    static float q1;
     if(solar_array_fine_detector_ == nullptr) {
         // Solar array fine detection depends on cable detector. hence a small loop in state machine to get the cable location
         if (cable_detector_ == nullptr) {
-            head_controller_->moveHead(0,30, 0);
-            float q1 = panel_grasping_hand_ == armSide::LEFT ? -0.36 : 0.36;
+            ROS_INFO("valTask2::detectSolarArrayFineTask : Moving panel to see cable");
+            q1 = panel_grasping_hand_ == armSide::LEFT ? -0.36 : 0.36;
             arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
+            ros::Duration(0.5).sleep();
+            ROS_INFO("valTask2::detectSolarArrayFineTask : Tilting head down");
+            head_controller_->moveHead(0,30, 0);
+            ros::Duration(0.5).sleep();
+
             cable_detector_ = new CableDetector(nh_);
         }
 
@@ -708,6 +719,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
             return TaskResult::SUCCESS();
         }
         ROS_INFO("valTask2::detectSolarArrayFineTask : Cable location x:%f y:%f z:%f", cable_location.x, cable_location.y, cable_location.z);
+        arm_controller_->moveArmJoint(panel_grasping_hand_,1,-1*q1);
         solar_array_fine_detector_ = new ArrayTableDetector(nh_, cable_location);
         ros::Duration(0.2).sleep();
 

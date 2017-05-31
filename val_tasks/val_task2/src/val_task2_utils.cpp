@@ -50,12 +50,12 @@ void task2Utils::afterPanelGraspPose(const armSide side)
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
-        seed1 = &leftNearChestGrasp_;
+        seed1 = &leftNearChestPalmDown_;
         seed2 = &rightSeedNonGraspingHand_;
     }
     else
     {
-        seed1 = &rightNearChestGrasp_;
+        seed1 = &rightNearChestPalmDown_;
         seed2 = &leftSeedNonGraspingHand_;
     }
 
@@ -126,7 +126,7 @@ bool task2Utils::isPanelPicked(const armSide side)
 void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel)
 {
     if (rotatePanel) {
-        return moveToPlacePanelPose2(graspingHand);
+        return;
     }
 
     armSide nonGraspingHand = (armSide) !graspingHand;
@@ -166,10 +166,12 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     gripper_controller_->openGripper(graspingHand);
     ros::Duration(0.5).sleep();
 
-    armData.clear();
-    armData.push_back(*graspingHandPoseDown);
-    arm_controller_->moveArmJoints(graspingHand, armData, 1.0f);
-    ros::Duration(1).sleep();
+    if (isPanelPicked(graspingHand)){
+        armData.clear();
+        armData.push_back(*graspingHandPoseDown);
+        arm_controller_->moveArmJoints(graspingHand, armData, 1.0f);
+        ros::Duration(1).sleep();
+    }
 
     std::vector<armTrajectory::armJointData> pushPanel;
     pushPanel.resize(2);
@@ -183,6 +185,44 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
 
     arm_controller_->moveArmJoints(pushPanel);
     ros::Duration(3).sleep();
+
+}
+
+void task2Utils::rotatePanel(const armSide graspingHand)
+{
+    armSide nonGraspingHand = (armSide) !graspingHand;
+    gripper_controller_->closeGripper(graspingHand);
+
+    const std::vector<float> *graspingHandPoseUp;
+    float tempOffset;
+    if(graspingHand == armSide::LEFT){
+        graspingHandPoseUp = &leftNearChestPalmUp_;
+        tempOffset = 0.5;
+    }
+    else
+    {
+        graspingHandPoseUp = &rightNearChestPalmUp_;
+        tempOffset = -0.5;
+    }
+    // take non-GraspingHand out
+    arm_controller_->moveArmJoint(nonGraspingHand, 3, tempOffset);
+    ros::Duration(1).sleep();
+
+    // set armside for precalculated trajectory
+    for (int i = 0; i < reOrientPanelTraj_.size(); ++i){
+        reOrientPanelTraj_[i].side = graspingHand;
+    }
+
+    arm_controller_->moveArmJoints(reOrientPanelTraj_);
+    ros::Duration(3).sleep();
+
+    std::vector< std::vector<float> > armData;
+    armData.clear();
+    armData.push_back(*graspingHandPoseUp);
+    arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
+    ros::Duration(2).sleep();
+    arm_controller_->moveArmJoint(nonGraspingHand, 3, -1*tempOffset);
+    ros::Duration(1).sleep();
 
 }
 
@@ -231,10 +271,6 @@ int task2Utils::getCurrentCheckpoint() const{
     return current_checkpoint_;
 }
 
-
-void task2Utils::moveToPlacePanelPose2(const armSide graspingHand){
-
-}
 
 void task2Utils::taskStatusCB(const srcsim::Task &msg)
 {

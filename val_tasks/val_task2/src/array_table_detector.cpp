@@ -19,13 +19,13 @@ ArrayTableDetector::~ArrayTableDetector()
 
 bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 {
-    ROS_INFO("CableDetector::planeSegmentation : Detecting table");
+    ROS_INFO("ArrayTableDetector::planeSegmentation : Detecting table");
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
     //fetch the cloud which would have table. assuming robot is standing less than 2m away from th etable
     extractCloudOfInterest(input, *output_cloud);
-    ROS_INFO("CableDetector::planeSegmentation : Trimmed Cloud");
+    ROS_INFO("ArrayTableDetector::planeSegmentation : Trimmed Cloud");
 
     // Downsample the cloud for faster processing
     float leafsize  = 0.05;
@@ -34,7 +34,7 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
     grid.setInputCloud (output_cloud);
     grid.filter (*output_cloud);
 
-    ROS_INFO("CableDetector::planeSegmentation : Downsampled the cloud");
+    ROS_INFO("ArrayTableDetector::planeSegmentation : Downsampled the cloud");
 
     //apply passthrough filter on z
     float min_z = 0.02;
@@ -46,7 +46,7 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
     pass.setFilterLimits ( min_z, max_z);
     pass.filter (*output_cloud);
 
-    ROS_INFO("CableDetector::planeSegmentation : Passthrough filter on z applied");
+    ROS_INFO("ArrayTableDetector::planeSegmentation : Passthrough filter on z applied");
 
     pcl::SACSegmentation<pcl::PointXYZ> seg;
     seg.setOptimizeCoefficients(true);
@@ -64,11 +64,11 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
     extract.setNegative (false);
     extract.filter (*output_cloud);
 
-    ROS_INFO("CableDetector::planeSegmentation : Segmented the plane");
+    ROS_INFO("ArrayTableDetector::planeSegmentation : Segmented the plane");
 
     getLargestCluster(output_cloud, output_cloud);
 
-    ROS_INFO("CableDetector::planeSegmentation : Got the largest cluster");
+    ROS_INFO("ArrayTableDetector::planeSegmentation : Got the largest cluster");
 
     pcl::ConvexHull<pcl::PointXYZ> convHull;
     convHull.setDimension(2);
@@ -78,7 +78,7 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
     convHull.setInputCloud(output_cloud);
     convHull.reconstruct(*cloud_hull);
 
-    ROS_INFO("CableDetector::planeSegmentation : Reconstructed the hull");
+    ROS_INFO("ArrayTableDetector::planeSegmentation : Reconstructed the hull");
 
     pcl::PointXYZ  bb_min, bb_max;
     pcl::getMinMax3D(*cloud_hull, bb_min, bb_max);
@@ -88,18 +88,18 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
     table_center.x = bb_center[0];
     table_center.y = bb_center[1];
     table_center.z = bb_center[2];
-    ROS_INFO("CableDetector::planeSegmentation : Center of table x:%f y:%f z:%f. Area:%f",table_center.x,table_center.y,table_center.z, convHull.getTotalArea());
+    ROS_INFO("ArrayTableDetector::planeSegmentation : Center of table x:%f y:%f z:%f. Area:%f",table_center.x,table_center.y,table_center.z, convHull.getTotalArea());
 
     Eigen::Vector4f plane_parameters;
     float curvature;
     pcl::computePointNormal(*output_cloud, plane_parameters, curvature);
-    ROS_INFO_STREAM("Normal Params : " << plane_parameters << std::endl);
+    ROS_INFO("ArrayTableDetector::planeSegmentation : Normal Params : %f %f %f %f", plane_parameters[0], plane_parameters[1], plane_parameters[2], plane_parameters[3]);
 
     float cos_theta = -plane_parameters(0)/std::sqrt(std::pow(plane_parameters(0),2) + std::pow(plane_parameters(1),2) );
     float sin_theta = plane_parameters(1)/std::sqrt(std::pow(plane_parameters(0),2) + std::pow(plane_parameters(1),2) );
     float theta = std::atan2(sin_theta, cos_theta);
     geometry_msgs::Pose pose;
-    ROS_INFO("Yaw angle : %f", theta);
+    ROS_INFO("ArrayTableDetector::planeSegmentation : Yaw angle : %f", theta);
     pose.position.x = table_center.x + TABLE_OFFSET * cos_theta;
     pose.position.y = table_center.y + TABLE_OFFSET * sin_theta;
     pose.position.z = 0;
@@ -127,10 +127,6 @@ void ArrayTableDetector::extractCloudOfInterest(const pcl::PointCloud<pcl::Point
     robot_state_->transformPoint(cableLocation, cableLocation, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
 
     geometry_msgs::Pose pelvisPose;
-    geometry_msgs::Point cableLocation;
-    cableLocation.x = cable_loc_.x;
-    cableLocation.y = cable_loc_.y;
-    robot_state_->transformPoint(cableLocation, cableLocation, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF );
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;
@@ -185,7 +181,7 @@ void ArrayTableDetector::getLargestCluster(const pcl::PointCloud<pcl::PointXYZ>:
         for(pit = it->indices.begin(); pit != it->indices.end(); pit++) {
             cloud_cluster->points.push_back(input->points[*pit]);
         }
-        ROS_INFO("Number of Points in the Cluster = %d", (int)cloud_cluster->points.size());
+        ROS_INFO("ArrayTableDetector::getLargestCluster : Number of points in the cluster = %d", (int)cloud_cluster->points.size());
         *output = *cloud_cluster;
     }
 }
