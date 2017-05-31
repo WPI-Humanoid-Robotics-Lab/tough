@@ -125,12 +125,7 @@ void ArrayTableDetector::extractCloudOfInterest(const pcl::PointCloud<pcl::Point
     cableLocation.x = cable_loc_.x;
     cableLocation.y = cable_loc_.y;
     robot_state_->transformPoint(cableLocation, cableLocation, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-
     geometry_msgs::Pose pelvisPose;
-    geometry_msgs::Point cableLocation;
-    cableLocation.x = cable_loc_.x;
-    cableLocation.y = cable_loc_.y;
-    robot_state_->transformPoint(cableLocation, cableLocation, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF );
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;

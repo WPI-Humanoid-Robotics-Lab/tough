@@ -91,7 +91,7 @@ bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
         points = getOrientation(contours[findMaxContour(contours)], outImg);
         //ROS_INFO_STREAM(point << std::endl);
         double theta = (1/3600.0) * 3.14159265359;
-        double r = std::sqrt(std::pow(points[2].x - points[0].x , 2) + std::pow(points[2].y - points[0].y , 2)) + 30.0;
+        double r = std::sqrt(std::pow(points[1].x - points[0].x , 2) + std::pow(points[1].y - points[0].y , 2)) + 25.0;
         pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud;
         pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud0;
         pcl::PointCloud<pcl::PointXYZRGB> currentDetectionCloud1;
@@ -105,14 +105,14 @@ bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
 
                 try
                 {
-                    temp_pclPoint0 = organizedCloud->at(int(points[0].x + r * std::cos(k * l * theta)), int(points[0].y + r * std::sin(k * l * theta)));
+                    temp_pclPoint0 = organizedCloud->at(int(points[1].x + r * std::cos(k * l * theta)), int(points[1].y + r * std::sin(k * l * theta)));
                 }
                 catch (const std::out_of_range& ex){
                     ROS_ERROR("%s",ex.what());
                     return false;
                 }
-
-                if (temp_pclPoint0.z > -2.0 && temp_pclPoint0.z < 2.0 )
+                //ROS_INFO_STREAM("blue: "<< *(temp_pclPoint0.data + 5) << std::endl);
+                if (temp_pclPoint0.z > -2.0 && temp_pclPoint0.z < 2.0 && (*(temp_pclPoint0.data + 5)) < 0.7)
                 {
                     currentDetectionCloud0.push_back(pcl::PointXYZRGB(temp_pclPoint0));
                 }
@@ -209,16 +209,30 @@ bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
         new_point.z = geom_point.point.z;
         double geom_norm = std::pow(geom_point.point.x, 2) + std::pow(geom_point.point.y, 2);
         double dir_norm = std::pow(new_point.x, 2) + std::pow(new_point.y, 2);
-        if(dir_norm <= geom_norm)
+        if(dir_norm >= geom_norm)
         {
             new_point.x = geom_point.point.x - 1;
             C = (new_point.x - geom_point.point.x)*(dir_vec.x);
             new_point.y = geom_point.point.y - C/double(dir_vec.y);
         }
 
-//        dirVector_.x = new_point.x - geom_point.point.x;
-//        dirVector_.y = new_point.y - geom_point.point.y;
-//        dirVector_.z = new_point.z - geom_point.point.z;
+        dirVector_.x = new_point.x - geom_point.point.x;
+        dirVector_.y = new_point.y - geom_point.point.y;
+        dirVector_.z = 0.0;
+
+        float cos_theta = dirVector_.x / std::sqrt(std::pow(dirVector_.x , 2) + std::pow(dirVector_.y , 2) );
+        float sin_theta = dirVector_.y / std::sqrt(std::pow(dirVector_.x ,2) + std::pow(dirVector_.y ,2) );
+        float theta = std::atan2(sin_theta, cos_theta);
+
+        geometry_msgs::Pose pose;
+        ROS_INFO("Yaw angle : %f", theta);
+        pose.position.x = geom_point.point.x;
+        pose.position.y = geom_point.point.y;
+        pose.position.z = geom_point.point.z;
+
+        geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
+        pose.orientation = quaternion;
+        visualize_pose(pose);
 
         visualize_point(geom_point.point, 0.7, 0.5, 0.0);
         visualize_point(geom_point1.point, 1.0, 0.0, 1.0);
@@ -369,7 +383,6 @@ void CableDetector::visualize_point(geometry_msgs::Point point, double r, double
 
 void CableDetector::visualize_pose(geometry_msgs::Pose pose)
 {
-    std::cout<< "goal origin :\n"<< pose.position << std::endl;
     static int id = 0;
     visualization_msgs::Marker marker;
     // Set the frame ID and timestamp.  See the TF tutorials for information on these.
@@ -378,7 +391,7 @@ void CableDetector::visualize_pose(geometry_msgs::Pose pose)
 
     // Set the namespace and id for this marker.  This serves to create a unique ID
     // Any marker sent with the same namespace and id will overwrite the old one
-    marker.ns = std::to_string(frameID_);
+    marker.ns = "cable";
     marker.id = id++;
 
     // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
@@ -389,15 +402,14 @@ void CableDetector::visualize_pose(geometry_msgs::Pose pose)
 
     // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
     marker.pose = pose;
-    ROS_INFO("Z of Pose is %f", pose.position.z);
-    ROS_INFO("Z of marker is %f", marker.pose.position.z);
-    marker.scale.x = 0.4;
-    marker.scale.y = 0.05;
-    marker.scale.z = 0.05;
+
+    marker.scale.x = 0.1;
+    marker.scale.y = 0.01;
+    marker.scale.z = 0.01;
     marker.color.a = 1.0; // Don't forget to set the alpha!
-    marker.color.r = 0.0;
-    marker.color.g = 0.0;
-    marker.color.b = 1.0;
+    marker.color.r = 1.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
 
     markers_.markers.push_back(marker);
 }

@@ -43,6 +43,7 @@ class CableDetector
     src_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
     std::vector<cv::Point2d> eigenVecs_;
+    geometry_msgs::Point dirVector_;
     RobotStateInformer* robot_state_;
 
     void visualize_direction(geometry_msgs::Point point1, geometry_msgs::Point point2);
