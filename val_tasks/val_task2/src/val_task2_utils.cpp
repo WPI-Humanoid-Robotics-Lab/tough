@@ -132,8 +132,8 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     armSide nonGraspingHand = (armSide) !graspingHand;
 
     // raise pelvis
-    pelvis_controller_->controlPelvisHeight(1.1);
-    ros::Duration(2).sleep();
+//    pelvis_controller_->controlPelvisHeight(1.1);
+//    ros::Duration(2).sleep();
 
     const std::vector<float> *graspingHandPoseUp, *graspingHandPoseDown, *nonGraspingHandPose2, *nonGraspingHandPose1;
 

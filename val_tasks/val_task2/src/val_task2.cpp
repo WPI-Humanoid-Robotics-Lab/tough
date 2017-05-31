@@ -691,11 +691,14 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
 
     static int cable_retry_count = 0;
     static int retry_count = 0;
-    static float q1;
+    static float q1, q3;
     if(solar_array_fine_detector_ == nullptr) {
         // Solar array fine detection depends on cable detector. hence a small loop in state machine to get the cable location
         if (cable_detector_ == nullptr) {
             ROS_INFO("valTask2::detectSolarArrayFineTask : Moving panel to see cable");
+            q3 = panel_grasping_hand_ == armSide::LEFT ? 0.5 : -0.5;
+            arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
+            ros::Duration(0.5).sleep();
             q1 = panel_grasping_hand_ == armSide::LEFT ? -0.36 : 0.36;
             arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
             ros::Duration(0.5).sleep();
@@ -719,13 +722,18 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
             return TaskResult::SUCCESS();
         }
         ROS_INFO("valTask2::detectSolarArrayFineTask : Cable location x:%f y:%f z:%f", cable_location.x, cable_location.y, cable_location.z);
-        arm_controller_->moveArmJoint(panel_grasping_hand_,1,-1*q1);
+
+        q3 = panel_grasping_hand_ == armSide::LEFT ? -1.85 : 1.85;
+        q1 = panel_grasping_hand_ == armSide::LEFT ? -1.04 : 1.04;
+        arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
+        ros::Duration(0.2).sleep();
+        arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
         solar_array_fine_detector_ = new ArrayTableDetector(nh_, cable_location);
         ros::Duration(0.2).sleep();
 
         if(cable_detector_ != nullptr) delete cable_detector_;
         cable_detector_ = nullptr;
-        head_controller_->moveHead(0, 0, 0);
+//        head_controller_->moveHead(0, 0, 0);
     }
 
 
@@ -849,6 +857,13 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
 {
     ROS_INFO_STREAM("valTask2::placePanelTask : executing " << name);
     static bool handsPulledOff = false;
+    static bool execute_once = true;
+
+    if(execute_once){
+          pelvis_controller_->controlPelvisHeight(1.1);
+          ros::Duration(2).sleep();
+          execute_once = false;
+    }
 
     /************************************
      *  Get into panel placement pose
@@ -884,15 +899,15 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
     }
     else if (task2_utils_->getCurrentCheckpoint() > 2){
         ROS_INFO("valTask2::placePanelTask : Placed the panel successfully");
+        execute_once = true;
+        pelvis_controller_->controlPelvisHeight(0.9);
+        ros::Duration(1).sleep();
         eventQueue.riseEvent("/PLACED_ON_GROUND");
     }
     else {
         ROS_INFO("valTask2::placePanelTask : Panel placement failed");
         eventQueue.riseEvent("/PLACED_ON_GROUND_FAILED");
     }
-
-    // generate the event
-    eventQueue.riseEvent("/REACHED_ROVER");
 
     return TaskResult::SUCCESS();
 }
