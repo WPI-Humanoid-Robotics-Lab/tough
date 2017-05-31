@@ -14,36 +14,12 @@
 #include <visualization_msgs/MarkerArray.h>
 
 #include <tf/transform_broadcaster.h>
-
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/common/common.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/filters/passthrough.h>
-#include <pcl/filters/filter_indices.h>
-#include <pcl/filters/extract_indices.h>
-#include <pcl/filters/voxel_grid.h>
-#include <pcl/features/normal_3d.h>
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
-#include <pcl/segmentation/sac_segmentation.h>
-#include <pcl/segmentation/extract_clusters.h>
-#include <pcl/filters/crop_box.h>
-#include <pcl/filters/project_inliers.h>
-#include <pcl/surface/convex_hull.h>
-#include <pcl/common/pca.h>
-#include <pcl/segmentation/conditional_euclidean_clustering.h>
-
-#include <pcl/sample_consensus/sac_model_sphere.h>
-#include <pcl/sample_consensus/ransac.h>
 #include "val_controllers/robot_state.h"
 
 #include <iostream>
 #include <vector>
 #include <mutex>
 
-#define TABLE_OFFSET -0.4 //decrease this to move further way from table
 
 class CableDetector
 {
@@ -62,16 +38,11 @@ class CableDetector
     std::string side_;
 
     ros::NodeHandle nh_;
-    ros::Subscriber pcl_sub_;
-    ros::Publisher pcl_pub_;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_;
     ros::Publisher marker_pub_;
     src_perception::MultisenseImage ms_sensor_;
     src_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
-    geometry_msgs::Point cableLoc_;
     std::vector<cv::Point2d> eigenVecs_;
-    std::mutex mtx_;
     RobotStateInformer* robot_state_;
 
     void visualize_direction(geometry_msgs::Point point1, geometry_msgs::Point point2);
@@ -92,11 +63,7 @@ public:
     std::vector<cv::Point> getOrientation(const std::vector<cv::Point> &, cv::Mat &);
     bool findCable(geometry_msgs::Point &);
 
-    void cloudCB(const sensor_msgs::PointCloud2::Ptr& );
-    bool getStandPosition(geometry_msgs::Pose & );
-    bool planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, geometry_msgs::Pose &output_pose);
-    void extractCloudOfInterest(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ> &output);
-    void getLargestCluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output);
+
 };
 
 #endif // CABLE_DETECTOR_H
