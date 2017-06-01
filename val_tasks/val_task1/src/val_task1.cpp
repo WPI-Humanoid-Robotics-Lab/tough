@@ -1232,6 +1232,17 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
     ROS_INFO_STREAM("executing " << name);
 
     static int retry_count = 0;
+    static bool execute_once = true;
+
+    if(execute_once){
+        ROS_INFO("Walking 1 step back");
+        ros::Duration(0.5).sleep();
+        std::vector<float> x_offset={-0.3,-0.3};
+        std::vector<float> y_offset={0.0,0.1};
+        walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
+        ros::Duration(3).sleep();
+        execute_once = false;
+    }
     // generate the event
     if (finish_box_detector_ == nullptr){
         finish_box_detector_ = new FinishBoxDetector(nh_);
