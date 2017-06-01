@@ -451,7 +451,6 @@ bool ValkyrieWalker::placeLeg(armSide side, float offset)
 
     return true;
 
-
 }
 
 
@@ -467,7 +466,7 @@ bool ValkyrieWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::Footstep
     footstep_client_ = nh_.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("/plan_footsteps");
     // get start from robot position
 
-//    ihmc_msgs::FootstepDataRosMessage::Ptr startstep(new ihmc_msgs::FootstepDataRosMessage());
+    //    ihmc_msgs::FootstepDataRosMessage::Ptr startstep(new ihmc_msgs::FootstepDataRosMessage());
     //this->getCurrentStep(0,*startstep);
     geometry_msgs::Pose pelvisPose, leftFootPose, rightFootPose;
     current_state_->getCurrentPose(VAL_COMMON_NAMES::L_FOOT_TF,leftFootPose);

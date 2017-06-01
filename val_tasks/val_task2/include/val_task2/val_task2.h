@@ -33,6 +33,7 @@
 #include "val_task2/cable_detector.h"
 #include <val_task2/val_task2_utils.h>
 #include <val_task2/button_press.h>
+#include <val_task2/cable_task.h>
 
 using namespace decision_making;
 
@@ -75,6 +76,8 @@ class valTask2 {
     CableDetector* cable_detector_;
     // Button press
     ButtonPress* button_press_;
+    // Pick Cable Task
+    CableTask* cable_task_;
 
 
     // chest controller
@@ -110,7 +113,7 @@ class valTask2 {
 
     geometry_msgs::Point button_coordinates_;
 
-    geometry_msgs::Point cable_coordinates_;
+    geometry_msgs::Pose cable_coordinates_;
 
     armSide panel_grasping_hand_;
 
