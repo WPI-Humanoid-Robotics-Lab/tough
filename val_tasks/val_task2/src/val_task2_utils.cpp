@@ -29,6 +29,9 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     reOrientPanelTraj_[1].arm_pose = {-1.2, -1.04, 2.11, -0.85, 1.21, 0, 0.29};
     reOrientPanelTraj_[1].time = 2;
 
+    timeNow = boost::posix_time::second_clock::local_time();
+
+    logFile = ros::package::getPath("val_task2") + "/log/task2.csv";
 }
 
 task2Utils::~task2Utils()
@@ -238,9 +241,19 @@ void task2Utils::moveToPlacePanelPose2(const armSide graspingHand){
 
 void task2Utils::taskStatusCB(const srcsim::Task &msg)
 {
+
     if (msg.current_checkpoint != current_checkpoint_){
         current_checkpoint_ = msg.current_checkpoint;
+
+        std::ofstream outfile(logFile, std::ofstream::app);
+        std::stringstream data;
+
+        data << boost::posix_time::to_simple_string(timeNow) << "," << msg.task << ","
+             << msg.current_checkpoint << "," << msg.elapsed_time << std::endl;
         ROS_INFO("task2Utils::taskStatusCB : Current checkpoint : %d", current_checkpoint_);
+
+        outfile << data.str();
+        outfile.close();
     }
 
 }

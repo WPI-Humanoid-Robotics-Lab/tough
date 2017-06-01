@@ -13,6 +13,9 @@
 #include <val_controllers/val_head_navigation.h>
 #include <val_controllers/val_arm_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
+#include "ros/package.h"
+#include <fstream>
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 class task2Utils {
 private:
@@ -75,6 +78,8 @@ private:
     void moveToPlacePanelPose2(const armSide graspingHand);
     void taskStatusCB(const srcsim::Task &msg);
 
+    std::string logFile;
+
 public:
     task2Utils(ros::NodeHandle nh);
     ~task2Utils();
@@ -88,4 +93,5 @@ public:
     void clearBoxPointCloud();
     void reOrientTowardsPanel(geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
+    boost::posix_time::ptime timeNow;
 };
