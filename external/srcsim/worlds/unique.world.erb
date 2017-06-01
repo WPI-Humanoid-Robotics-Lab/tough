@@ -168,7 +168,6 @@
     $bling_count += 1
 
     "<insert_model>\n"\
-    "    <sdf version=\"1.6\">\n"\
     "    <include>\n"\
     "      <name>" + $bling + "_" + $bling_count.to_s() + "</name>\n"\
     "      <pose>\n"\
@@ -181,7 +180,6 @@
     "      </pose>\n"\
     "      <uri>model://" + $bling + "</uri>\n"\
     "    </include>\n"\
-    "    </sdf>\n"\
     "    </insert_model>\n"
   end
 
@@ -1112,8 +1110,6 @@
 
             <!-- Table -->
             <insert_model>
-              <sdf version="1.6">
-
                 <%
                   $table_frame = $habitat_frame *
                                  TMatrix(rand(-1.5..1.5),
@@ -1131,14 +1127,10 @@
                   </pose>
                   <uri>model://space_table</uri>
                 </include>
-
-              </sdf>
             </insert_model>
 
             <!-- Air leak detector -->
             <insert_model>
-              <sdf version="1.6">
-
                 <%
                   b = [-1, 1].sample
                   $air_leak_detector_frame = $table_frame *
@@ -1149,13 +1141,10 @@
                 %>
 
                 <%= fromFile("air_leak_detector.erb") %>
-
-              </sdf>
             </insert_model>
 
             <!-- Leak patch tool -->
             <insert_model>
-              <sdf version="1.6">
                 <%
                   $leak_patch_tool_frame = $table_frame *
                       TMatrix(-b*rand(0.1..0.6),
@@ -1174,14 +1163,11 @@
                   </pose>
                   <uri>model://leak_patch_tool</uri>
                 </include>
-              </sdf>
             </insert_model>
 
             <!-- Leak -->
             <insert_model>
-              <sdf version="1.6">
                 <%= fromFile("leak.erb") %>
-              </sdf>
             </insert_model>
 
             <!-- Bling -->

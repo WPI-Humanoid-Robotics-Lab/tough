@@ -61,6 +61,11 @@ namespace gazebo
     /// \return Index of current checkpoint.
     public: size_t CurrentCheckpointId() const;
 
+    /// \brief Return the completion time of a checkpoint.
+    /// \param[in] _index Index of the checkpoint
+    /// \return The competion time
+    public: common::Time GetCheckpointCompletion(size_t index) const;
+
     /// \brief Return this task's number.
     /// \return Task number.
     public: virtual size_t Number() const = 0;
@@ -70,9 +75,14 @@ namespace gazebo
     private: void OnStartBox(ConstIntPtr &_msg);
 
     /// \brief Vector of checkpoints for this task.
+    /// checkpoints[0]: Checkpoint 1
+    /// checkpoints[1]: Checkpoint 2
+    /// checkpoints[2]: Checkpoint 3
+    /// ...
     protected: std::vector<std::unique_ptr<Checkpoint> > checkpoints;
 
-    /// \brief Current checkpoint number
+    /// \brief Current checkpoint number, starting from 1. Zero means the task
+    /// hasn't started, Count+1 means that the task has finished.
     protected: size_t current = 0;
 
     /// \brief Vector of times when checkpoints were completed.

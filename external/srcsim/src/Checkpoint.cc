@@ -51,7 +51,7 @@ Checkpoint::Checkpoint(const sdf::ElementPtr &_sdf)
     auto elem = _sdf->GetElement("insert_model");
     while (elem)
     {
-      auto inner = elem->GetElement("sdf");
+      auto inner = elem->GetFirstElement();
       this->insertModels.push_back(inner->ToString(""));
 
       elem = elem->GetNextElement("insert_model");
@@ -82,12 +82,47 @@ void Checkpoint::Start()
 
   auto factoryPub = tmpGzNode->Advertise<msgs::Factory>("~/factory");
 
-  for (auto modelStr : this->insertModels)
+  for (const auto &modelStr : this->insertModels)
   {
+    auto sdfStr =
+        "<sdf version='" + std::string(SDF_VERSION) + "'>"
+        + modelStr
+        + "</sdf>";
+
+    // Get model name for debug message
+    std::string name;
+
+    sdf::SDFPtr modelSDF(new sdf::SDF);
+    modelSDF->SetFromString(sdfStr);
+
+    if (!modelSDF || !modelSDF->Root())
+    {
+      gzerr << "Failed to parse model SDF: " << std::endl << modelStr
+            << std::endl;
+      continue;
+    }
+
+    auto root = modelSDF->Root();
+
+    if (root->HasElement("include"))
+    {
+      name = root->GetElement("include")->Get<std::string>("uri");
+    }
+    else if (root->HasElement("model"))
+    {
+      name = root->GetElement("model")->Get<std::string>("name");
+    }
+    else
+    {
+      gzerr << "Failed to parse model SDF: " << std::endl << modelStr
+            << std::endl;
+      continue;
+    }
+
     msgs::Factory msg;
-    msg.set_sdf(modelStr);
+    msg.set_sdf(sdfStr);
     factoryPub->Publish(msg);
-    gzmsg << "Requested to insert a model" << std::endl;
+    gzmsg << "Requested to insert model [" << name << "]" << std::endl;
   }
   this->insertModels.clear();
   factoryPub.reset();

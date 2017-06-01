@@ -1,0 +1,195 @@
+#include "val_task3/rotate_valve.h"
+
+rotateValve::rotateValve(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
+{
+    current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+
+    /* Top Grip Flat Hand modified*/
+    leftHandOrientationTop_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationTop_.quaternion.x = 0.604;
+    leftHandOrientationTop_.quaternion.y = 0.434;
+    leftHandOrientationTop_.quaternion.z = -0.583;
+    leftHandOrientationTop_.quaternion.w = 0.326;
+
+    leftHandOrientationSide_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationSide_.quaternion.x = 0.155;
+    leftHandOrientationSide_.quaternion.y = -0.061;
+    leftHandOrientationSide_.quaternion.z = -0.696;
+    leftHandOrientationSide_.quaternion.w = 0.699;
+
+    leftHandOrientationSideUp_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationSideUp_.quaternion.x = 0.211;
+    leftHandOrientationSideUp_.quaternion.y = 0.248;
+    leftHandOrientationSideUp_.quaternion.z = -0.644;
+    leftHandOrientationSideUp_.quaternion.w = 0.692;
+
+    leftHandOrientationSideDown_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationSideDown_.quaternion.x = -0.341;
+    leftHandOrientationSideDown_.quaternion.y = -0.312;
+    leftHandOrientationSideDown_.quaternion.z = -0.655;
+    leftHandOrientationSideDown_.quaternion.w =  0.598;
+
+
+    // cartesian planners for the arm
+    left_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    wholebody_controller_ = new wholebodyManipulation(nh_);
+    chest_controller_ = new chestTrajectory(nh_);
+
+    marker_pub = nh_.advertise<visualization_msgs::MarkerArray>( "valve_path", 10, true);
+}
+
+bool rotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTime)
+{
+    // set initial gripper pose with index fingers rounded
+    // move to seed point somewhere above the valve
+    // move to goal point and grasp the valve
+
+    ROS_INFO("rotateValve: Setting gripper position");
+    std::vector<double> gripper1,gripper2,gripper3;
+    gripper1={1.2, -1.35, -0.1, -0.1 ,-0.1 };
+    gripper2={1.35, 0.0, -0.40, -0.40 ,-0.40 };
+    gripper_.controlGripper(LEFT,gripper1);
+    ros::Duration(executionTime/2).sleep();
+    gripper_.controlGripper(LEFT,gripper2);
+    ros::Duration(executionTime/2).sleep();
+
+    ROS_INFO("rotateValve: Setting left arm seed position");
+    std::vector< std::vector<float> > armData;
+    armData.clear();
+    armData.push_back(leftShoulderSeedInitial_);
+    armTraj_.moveArmJoints(LEFT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
+
+    geometry_msgs::QuaternionStamped temp  =leftHandOrientationTop_;
+    current_state_->transformQuaternion(temp,temp);
+
+    geometry_msgs::Point intermGoal;
+    current_state_->transformPoint(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    intermGoal.x+=0.03;
+    current_state_->transformPoint(intermGoal,intermGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+
+    geometry_msgs::Pose final;
+    std::vector<geometry_msgs::Pose> waypoints;
+    final.position=intermGoal;
+    final.position.z+=0.08;
+    final.orientation=temp.quaternion;
+
+
+    waypoints.push_back(final);
+    final.position=intermGoal;
+    final.orientation=temp.quaternion;
+    waypoints.push_back(final);
+
+    moveit_msgs::RobotTrajectory traj;
+
+    // Sending waypoints to the planner
+    left_arm_planner_->getTrajFromCartPoints(waypoints,traj,false);
+
+    //        // Planning whole body motion
+    wholebody_controller_->compileMsg(LEFT,traj.joint_trajectory);
+    ros::Duration(executionTime*1.5).sleep();
+
+    // Grasping the cable
+    ROS_INFO("rotateValve: Closing the gripper ");
+    gripper3={1.35, -0.60, -0.50, -0.50 ,-0.50 };
+    gripper_.controlGripper(LEFT,gripper3);
+    ros::Duration(executionTime/2).sleep();
+    gripper_.closeGripper(LEFT);
+    ros::Duration(executionTime/2).sleep();
+
+    return true;
+
+
+}
+
+bool rotateValve::compute_traj(geometry_msgs::Point center, float radius, std::vector<geometry_msgs::Pose> &points)
+{
+    // using center point and radius, find points of the circle
+    // plot using markers
+
+    int NumSteps=21;
+    geometry_msgs::Point centerPelvis;
+    current_state_->transformPoint(center,centerPelvis, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    geometry_msgs::Pose point;
+    for (int i = 0; i < NumSteps/3-1; ++i) {
+        point.position.y=centerPelvis.y + radius*cos(i*2*M_PI/NumSteps);
+        point.position.z=centerPelvis.z + radius*sin(i*2*M_PI/NumSteps);
+        point.position.x=centerPelvis.x;
+        point.orientation=leftHandOrientationSide_.quaternion;
+        if(i==((NumSteps/3)-2) ||i==((NumSteps/3)-3) ||i==((NumSteps/3)-4))
+        {
+            point.orientation=leftHandOrientationTop_.quaternion;
+        }
+        current_state_->transformPose(point,point, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+        points.push_back(point);
+    }
+    visualise_traj(points);
+    return true;
+
+}
+
+bool rotateValve::visualise_traj(std::vector<geometry_msgs::Pose> &points)
+{
+    visualization_msgs::MarkerArray markers = visualization_msgs::MarkerArray();
+    visualization_msgs::Marker marker;
+
+    for (int i = 0; i < points.size(); i++) {
+        visualization_msgs::Marker marker;
+        marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+        marker.header.stamp = ros::Time();
+        marker.ns = "valve-path";
+        marker.id = i;
+        marker.type = visualization_msgs::Marker::CUBE;
+        marker.action = visualization_msgs::Marker::ADD;
+        marker.pose = points[i];
+        marker.scale.x = 0.02;
+        marker.scale.y = 0.02;
+        marker.scale.z = 0.02;
+        marker.color.a = 0.6;
+        marker.color.r = 1.0;
+        marker.color.g = 0.0;
+        marker.color.b = 0.0;
+        marker.lifetime = ros::Duration(0);
+        markers.markers.push_back(marker);
+    }
+
+    marker_pub.publish( markers );
+    ros::Duration(0.2).sleep();
+    ROS_INFO("rotateValve: published trajectory markers");
+
+}
+
+bool rotateValve::move_valve(std::vector<geometry_msgs::Pose> poses, float executionTime)
+{
+    // using whole body controller follow the seed points
+    // leave grasp
+    // orient chest back to (0,0,0)
+
+    std::vector<geometry_msgs::Pose> waypoints;
+    for (int i = 0; i < poses.size(); ++i) {
+        waypoints.push_back(poses[poses.size()-i-1]);
+    }
+
+    moveit_msgs::RobotTrajectory traj;
+    left_arm_planner_->getTrajFromCartPoints(waypoints,traj,false);
+
+    // Planning whole body motion
+    wholebody_controller_->compileMsg(LEFT,traj.joint_trajectory);
+    ros::Duration(executionTime*2.0).sleep();
+
+    ROS_INFO("rotateValve: Done executing motion !!!");
+
+    ROS_INFO("rotateValve: Opening Grippers");
+    gripper_.openGripper(LEFT);
+    ros::Duration(executionTime/2).sleep();
+
+    std::vector< std::vector<float> > armData;
+    armData.clear();
+    armData.push_back({0.1,0.1,0.1,0.1,0.1,0.1,0.1});
+    armTraj_.moveArmJoints(LEFT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
+
+    ROS_INFO("rotateValve: Adjusting chest to zero position");
+    chest_controller_->controlChest(0,0,0);
+    ros::Duration(executionTime).sleep();
+}

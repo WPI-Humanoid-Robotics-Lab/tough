@@ -1,10 +1,10 @@
-#include <val_task2/cable_grabber.h>
+#include <val_task2/cable_task.h>
 #include <val_controllers/val_gripper_control.h>
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "cable_grabber");
     ros::NodeHandle nh;
-    cableGrabber cg(nh);
+    cableTask cg(nh);
     ROS_INFO("Starting cable grabber");
     gripperControl gc(nh);
 
@@ -21,7 +21,7 @@ int main(int argc, char **argv)
             side = RIGHT;
         }
         gc.openGripper(side);
-        cg.grasp_cable(side, pt);
+        cg.grasp_cable(pt);
     } else{
         ROS_INFO("Usage : %s <side> <goal_x> <goal_y> <goal_z>\n side = 0 or 1");
         return -1;

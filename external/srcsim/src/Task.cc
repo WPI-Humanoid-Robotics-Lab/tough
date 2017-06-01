@@ -119,7 +119,7 @@ void Task::Start(const common::Time &_time, const size_t _checkpoint)
 /////////////////////////////////////////////////
 void Task::Update(const common::Time &_time)
 {
-  if (this->current == 0)
+  if (this->current < 1 || this->current > this->checkpoints.size())
     return;
 
   // Terminate start transport
@@ -138,11 +138,9 @@ void Task::Update(const common::Time &_time)
   if (this->timedOut)
   {
     elapsed = this->timeout;
-    this->current = 0;
+    this->current = this->checkpoints.size() + 1;
   }
-
-  // Checkpoints
-  if (!this->timedOut && this->current != 0)
+  else
   {
     // Check if current checkpoint is complete
     if (this->checkpoints[this->current - 1]->Check())
@@ -166,10 +164,6 @@ void Task::Update(const common::Time &_time)
       {
         gzmsg << "Task [" << this->Number() << "] - Checkpoint ["
               << this->current << "] - Started (" << _time << ")" << std::endl;
-      }
-      else
-      {
-        this->current = 0;
       }
     }
   }
@@ -209,6 +203,16 @@ size_t Task::CheckpointCount() const
 size_t Task::CurrentCheckpointId() const
 {
   return this->current;
+}
+
+/////////////////////////////////////////////////
+common::Time Task::GetCheckpointCompletion(size_t index) const
+{
+  if (index < this->checkpointsCompletion.size())
+  {
+    return this->checkpointsCompletion[index];
+  }
+  return common::Time::Zero;
 }
 
 //////////////////////////////////////////////////

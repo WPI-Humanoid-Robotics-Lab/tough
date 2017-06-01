@@ -1285,7 +1285,7 @@ Visualization Manager:
       Marker Topic: /detected_table
       Name: MarkerArray
       Namespaces:
-        {}
+        0: true
       Queue Size: 100
       Value: true
     - Alpha: 1

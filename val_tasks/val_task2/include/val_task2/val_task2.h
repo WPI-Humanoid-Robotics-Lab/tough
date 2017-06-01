@@ -78,6 +78,9 @@ class valTask2 {
     HeadTrajectory* head_controller_;
     //grippers
     gripperControl* gripper_controller_;
+    //arm controllers
+    armTrajectory*  arm_controller_;
+
     //robot state informer
     RobotStateInformer* robot_state_;
 
@@ -100,6 +103,8 @@ class valTask2 {
     geometry_msgs::Point button_coordinates_;
 
     geometry_msgs::Point cable_coordinates_;
+
+    armSide panel_grasping_hand_;
 
     void initControllers();
     void initDetectors();
@@ -139,5 +144,5 @@ class valTask2 {
     void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal);
     void setSolarArrayWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal);
     void setSolarArraySide(const bool isSolarArrayOnRight);
-
+    void setPanelGraspingHand(armSide side);
 };

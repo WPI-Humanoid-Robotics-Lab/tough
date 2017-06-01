@@ -39,11 +39,16 @@ valTask2::valTask2(ros::NodeHandle nh):
     walker_ = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
     pelvis_controller_ = new pelvisTrajectory(nh_);
     walk_track_ = new walkTracking(nh_);
+    chest_controller_ = new chestTrajectory(nh_);
+    arm_controller_ = new armTrajectory(nh_);
+
+
 
     //initialize all detection pointers
     rover_detector_ = nullptr;
     rover_detector_fine_   = nullptr;
     solar_panel_detector_  = nullptr;
+    solar_array_detector_  = nullptr;
     rover_in_map_blocker_  = nullptr;
     panel_grabber_         = nullptr;
 
@@ -128,6 +133,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
     }
 
     static int retry_count = 0;
+    static int fail_count = 0;
     std::vector<std::vector<geometry_msgs::Pose> > roverPoseWaypoints;
     rover_detector_->getDetections(roverPoseWaypoints);
 
@@ -158,12 +164,13 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
         if(rover_detector_->getRoverSide(roverSide)){
             setRoverSide(roverSide == ROVER_SIDE::RIGHT);
             // block rover in /map
-            rover_in_map_blocker_ = new SolarArrayDetector(nh_, detectedPoses2D.back(),is_rover_on_right_);
+//            rover_in_map_blocker_ = new SolarArrayDetector(nh_, detectedPoses2D.back(),is_rover_on_right_);
             //wait for the map to update. This is required to ensure the footsteps dont collide with rover
             //        ros::Duration(0.5).sleep();
             taskCommonUtils::moveToWalkSafePose(nh_);
 
             retry_count = 0;
+            fail_count = 0;
             // update the plane coeffecients
             eventQueue.riseEvent("/DETECTED_ROVER");
             ROS_INFO("detected rover");
@@ -179,11 +186,18 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
         ++retry_count;
         ros::Duration(2).sleep();
         eventQueue.riseEvent("/DETECT_ROVER_RETRY");
+    }   else if (fail_count < 5)    {
+        // increment the fail count
+        fail_count++;
+        task2_utils_->clearPointCloud();
+        eventQueue.riseEvent("/DETECT_ROVER_RETRY");
     }
 
     // if failed for more than 5 times, go to error state
     else {
         // reset the fail count
+        fail_count = 0;
+        retry_count = 0;
         ROS_INFO("Rover detection failed");
         eventQueue.riseEvent("/DETECT_ROVER_FAILED");
         if(rover_detector_ != nullptr) delete rover_detector_;
@@ -232,8 +246,6 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
             ROS_INFO("reached The rover");
             ros::Duration(3).sleep(); // This is required for steps to complete
             ROS_INFO("Final few steps before we reach rover");
-            //            walker_->walkLocalPreComputedSteps({0.3,0.3},{0.0,0.0},RIGHT);
-            //            ros::Duration(1).sleep();
             eventQueue.riseEvent("/REACHED_ROVER");
             executeOnce = true;
             ros::Duration(1).sleep();
@@ -295,15 +307,18 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
 decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
-
-    // we reached here means we don't need the map blocker anymore.
-    if (rover_in_map_blocker_ != nullptr){
-        delete rover_in_map_blocker_;
-        rover_in_map_blocker_  = nullptr;
-    }
-
+    static bool isFirstRun = true;
     if(solar_panel_detector_ == nullptr) {
+        if (!isFirstRun){
+            ROS_INFO("Clearing pointcloud");
+            task2_utils_->clearPointCloud();
+        }
+        task2_utils_->resumePointCloud();
+        isFirstRun = false;
         solar_panel_detector_ = new SolarPanelDetect(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
+        chest_controller_->controlChest(0, 0, 0);
+        arm_controller_->moveToDefaultPose(armSide::RIGHT);
+        arm_controller_->moveToDefaultPose(armSide::LEFT);
         ros::Duration(0.2).sleep();
     }
 
@@ -322,6 +337,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
 
         ROS_INFO_STREAM("Position " << poses[idx].position.x<< " " <<poses[idx].position.y <<" "<<poses[idx].position.z);
         ROS_INFO_STREAM("quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w);
+        fail_count = 0;
         retry_count = 0;
         eventQueue.riseEvent("/DETECTED_PANEL");
         if(solar_panel_detector_ != nullptr) delete solar_panel_detector_;
@@ -339,6 +355,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
     {
         // reset the fail count
         fail_count = 0;
+        retry_count = 0;
         eventQueue.riseEvent("/DETECT_PANEL_FAILED");
         if(solar_panel_detector_ != nullptr) delete solar_panel_detector_;
         solar_panel_detector_ = nullptr;
@@ -361,6 +378,11 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
 decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+    // we reached here means we don't need the map blocker anymore.
+    if (rover_in_map_blocker_ != nullptr){
+        delete rover_in_map_blocker_;
+        rover_in_map_blocker_  = nullptr;
+    }
 
     /*
      * Executing -> when grasp_handles is called
@@ -372,7 +394,7 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
     static int retry_count = 0;
     static armSide side;
     if(panel_grabber_ == nullptr){
-        panel_grabber_ = new solar_panel_handle_grabber(nh_);
+        panel_grabber_ = new solar_panel_handle_grabber(nh_,BUTTON_LOCATION::RIGHT);
     }
 
     if(!executing){
@@ -394,10 +416,12 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
         }
 
         side = yaw < 0 ? armSide::LEFT : armSide::RIGHT;
+        setPanelGraspingHand(side);
+        //Pause the pointcloud to avoid obstacles on map due to panel
+        task2_utils_->pausePointCloud();
         if (panel_grabber_->grasp_handles(side, solar_panel_handle_pose_)) {
             ros::Duration(0.2).sleep(); //wait till grasp is complete
             ROS_INFO("Grasp is successful");
-            task2_utils_->afterPanelGraspPose(side);
             eventQueue.riseEvent("/GRASPED_PANEL");
         }
         else{
@@ -418,7 +442,7 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
         eventQueue.riseEvent("/GRASP_PANEL_FAILED");
     }
 
-    //    // generate the event
+    // generate the event
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
     }
@@ -429,9 +453,62 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
 decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+    static bool pickPanel= false;
+    static bool retry = 0;
+    if (!pickPanel){
+        ROS_INFO("Moving panel close to body");
+        task2_utils_->afterPanelGraspPose(panel_grasping_hand_);
+        pickPanel = true;
+        eventQueue.riseEvent("/PICK_PANEL_RETRY");
+    } else if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
+        ROS_INFO("Walking 1 step back");
+        ros::Duration(0.5).sleep();
+        std::vector<float> x_offset={-0.3,-0.3,0.0};
+        std::vector<float> y_offset={0.0,0.0,-0.1};
+        walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
+        ros::Duration(3).sleep();
+        /// @todo use goal waypoints to get away from rover. it can be detected in rover detection code
+        armSide startingSide;
+        geometry_msgs::Pose pose;
+        pose.position.x = 0.0;
+        pose.orientation.w = 1.0;
+        if (is_rover_on_right_){
+            pose.position.y = 0.5;
+            startingSide = armSide::LEFT;
+        } else{
+            pose.position.y = -0.5;
+            startingSide = armSide::RIGHT;
+        }
+        robot_state_->transformPose(pose, pose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+        geometry_msgs::Pose2D pose2D;
+        pose2D.x = pose.position.x;
+        pose2D.y = pose.position.y;
+        pose2D.theta = rover_walk_goal_waypoints_.front().theta;
+        ROS_INFO("Walking to x:%f y:%f theta:%f", pose2D.x,pose2D.y,pose2D.theta);
+        walker_->walkToGoal(pose2D);
+        //        walker_->walkLocalPreComputedSteps(x_offset,y_offset,startingSide);
+        ros::Duration(1).sleep();
+        task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_);
+        eventQueue.riseEvent("/PICKED_PANEL");
+    }
+    else if (retry < 5){
+        ROS_INFO("Panel is not in hand. retrying detection of panel");
+        ++retry;
+        pickPanel=false;
+        //grasp is done, but panel is not in hand
+        eventQueue.riseEvent("/PICK_PANEL_RETRY_GRASP");
+    }
+    else{
+        ROS_INFO("All attempts of picking up the panel failed");
+        retry = 0;
+        pickPanel=false;
+        eventQueue.riseEvent("/PICKUP_FAILED");
+    }
 
     // generate the event
-    eventQueue.riseEvent("/REACHED_ROVER");
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
 
     return TaskResult::SUCCESS();
 }
@@ -465,8 +542,8 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
 
         setSolarArrayWalkGoal(pose2D);
 
-        std::cout << "Position " << poses[idx].position.x<< " " <<poses[idx].position.y <<" "<<poses[idx].position.z<<std::endl;
-        std::cout << "yaw: " << pose2D.theta  <<std::endl;
+        ROS_INFO("Position x:%f y:%f z:%f",poses[idx].position.x,poses[idx].position.y,poses[idx].position.z);
+        ROS_INFO("yaw:%f",pose2D.theta);
         retry_count = 0;
         eventQueue.riseEvent("/DETECTED_ARRAY");
     }
@@ -481,6 +558,7 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
     else if (fail_count > 5)
     {
         // reset the fail count
+        ROS_INFO("Failed 5 times. transitioning to error state");
         fail_count = 0;
         eventQueue.riseEvent("/DETECT_ARRAY_FAILED");
         if(solar_array_detector_ != nullptr) delete solar_array_detector_;
@@ -489,6 +567,7 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
     // if failed retry detecting the panel
     else
     {
+        ROS_INFO("Failed attempt. trying again");
         // increment the fail count
         fail_count++;
         eventQueue.riseEvent("/DETECT_ARRAY_RETRY");
@@ -517,7 +596,7 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
 
     if ( taskCommonUtils::isGoalReached(current_pelvis_pose, solar_array_walk_goal_) ) {
         ROS_INFO("reached solar array");
-
+        task2_utils_->resumePointCloud();
         ros::Duration(1).sleep();
         // TODO: check if robot rechead the panel
         eventQueue.riseEvent("/REACHED_ARRAY");
@@ -747,10 +826,15 @@ void valTask2::setSolarPanelHandlePose(const geometry_msgs::Pose &pose)
 
 void valTask2::setSolarArrayWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal)
 {
-    solar_array_walk_goal_ = panel_walk_goal_;
+    solar_array_walk_goal_ = panel_walk_goal;
 }
 
 void valTask2::setSolarArraySide(const bool isSolarArrayOnRight)
 {
     is_array_on_right_ = isSolarArrayOnRight;
+}
+
+void valTask2::setPanelGraspingHand(armSide side)
+{
+    panel_grasping_hand_ = side;
 }
