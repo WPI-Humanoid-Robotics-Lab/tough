@@ -26,7 +26,6 @@ find_package(catkin REQUIRED COMPONENTS
   tf_conversions
   val_task_common
   val_moveit_planners
-
 )
 
 ## System dependencies are found with CMake's conventions

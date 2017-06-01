@@ -156,3 +156,24 @@ void taskCommonUtils::fixHandFramePalmUp(ros::NodeHandle nh, armSide side, geome
     current_state->transformPose(poseInPelvisFrame, poseInWorldFrame, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
 
 }
+bool taskCommonUtils::slowGrip(ros::NodeHandle nh,armSide side, std::vector<double> initial, std::vector<double> final, int iterations, float executionTime)
+{
+    std::vector<double> diff,step;
+    for (size_t i = 0; i < initial.size(); ++i) {
+        diff.push_back((final[i]-initial[i])/iterations);
+    }
+    gripperControl gripper_controller(nh);
+    for (size_t i = 1; i <= initial.size(); ++i) {
+        step.clear();
+        step.push_back(initial[0]+i*diff[0]);
+        step.push_back(initial[1]+i*diff[1]);
+        step.push_back(initial[2]+i*diff[2]);
+        step.push_back(initial[3]+i*diff[3]);
+        step.push_back(initial[4]+i*diff[4]);
+
+        gripper_controller.controlGripper(side,step);
+        ros::Duration(executionTime/iterations).sleep();
+    }
+    return true;
+
+}

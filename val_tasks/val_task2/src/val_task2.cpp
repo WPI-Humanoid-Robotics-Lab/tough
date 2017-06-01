@@ -55,6 +55,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     panel_grabber_              = nullptr;
     button_detector_            = nullptr;
     button_press_               = nullptr;
+    cable_task_                 = nullptr;
     cable_detector_             = nullptr;
     //utils
     task2_utils_    = new task2Utils(nh_);
@@ -1169,6 +1170,27 @@ decision_making::TaskResult valTask2::pickCableTask(string name, const FSMCallCo
      * else - fail
      */
     static int retry = 0;
+    if(cable_task_ ==nullptr)
+    {
+        cable_task_ = new CableTask(nh_);
+    }
+    static bool done =false;
+    static int retry=0;
+    if(task2_utils_->getCurrentCheckpoint() == 4 && done)
+    {
+        // go to next state
+        eventQueue.riseEvent("/DEPLOYED");
+    }
+    else if(retry <5)
+    {
+        cable_task_->grasp_choke(RIGHT,cable_coordinates_);
+        retry++;
+    }
+    else if(task2_utils_->getCurrentCheckpoint() == 5)
+    {
+        done=true;
+    }
+
 
         // generate the event
     eventQueue.riseEvent("/PICKUPCABLE_RETRY");

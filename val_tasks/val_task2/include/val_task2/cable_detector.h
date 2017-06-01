@@ -16,6 +16,7 @@
 #include <tf/transform_broadcaster.h>
 #include "val_controllers/robot_state.h"
 
+
 #include <iostream>
 #include <vector>
 #include <mutex>
@@ -61,7 +62,8 @@ public:
     size_t findMaxContour(const std::vector<std::vector<cv::Point> >& contours);
     bool getCableLocation(geometry_msgs::Point &);
     std::vector<cv::Point> getOrientation(const std::vector<cv::Point> &, cv::Mat &);
-    bool findCable(geometry_msgs::Point &);
+    bool findCable(geometry_msgs::Point &cableLoc);
+    bool findCable(geometry_msgs::Pose &cableLoc);
 
 
 };

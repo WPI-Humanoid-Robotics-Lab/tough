@@ -13,6 +13,7 @@
 #include <val_controllers/val_head_navigation.h>
 #include <val_controllers/val_arm_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
+#include <val_task2/cable_detector.h>
 
 class task2Utils {
 private:
@@ -37,7 +38,10 @@ private:
 
     ros::Subscriber task_status_sub_;
 
+    CableDetector* cable_detector_;
+
     int current_checkpoint_;
+    float table_height_;
 
     //before walking
     const std::vector<float> leftNearChestPalmDown_    = {-1.70, -1.04, 1.39, -1.85, -1.10, 0, 0};
@@ -91,4 +95,6 @@ public:
     void reOrientTowardsPanel(geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
     bool shakeTest(const armSide graspingHand);
+    bool isCableOnTable();
+    bool isCableInHand(armSide side);
 };

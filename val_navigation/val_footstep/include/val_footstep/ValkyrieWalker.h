@@ -115,6 +115,7 @@ public:
     bool curlLeg(armSide side, float radius);
     bool placeLeg(armSide side, float offset=0.1f);
     bool nudgeFoot(armSide side, float distance);
+    void getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage& foot);
 
 
 private:
@@ -132,7 +133,7 @@ private:
     std_msgs::String right_foot_frame_,left_foot_frame_;
 
     void footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage & msg);
-    void getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage& foot);
+
     void waitForSteps( int n);
     bool getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list);
     ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStep(int side, float x, float y);

@@ -279,7 +279,7 @@ std::vector<cv::Point> CableDetector::getOrientation(const std::vector<cv::Point
     return points;
 }
 
-bool CableDetector::findCable(geometry_msgs::Point& cableLoc)
+bool CableDetector::findCable(geometry_msgs::Point &cableLoc)
 {
     //VISUALIZATION - include a spinOnce here to visualize the eigenvectors
     markers_.markers.clear();
@@ -291,6 +291,11 @@ bool CableDetector::findCable(geometry_msgs::Point& cableLoc)
         }
     }
     return 0;
+}
+
+bool CableDetector::findCable(geometry_msgs::Pose  &cableLoc)
+{
+    ///@todo
 }
 
 void CableDetector::drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale)

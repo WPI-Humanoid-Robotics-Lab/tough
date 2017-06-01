@@ -1,10 +1,7 @@
 #include <val_task2/cable_task.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include "val_task_common/val_task_common_utils.h"
-#include "val_control_common/val_control_common.h"
 
-CableTask::CableTask(ros::NodeHandle n, BUTTON_LOCATION button_side):nh_(n), armTraj_(nh_), gripper_(nh_)
+
+CableTask::CableTask(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 
@@ -15,8 +12,6 @@ CableTask::CableTask(ros::NodeHandle n, BUTTON_LOCATION button_side):nh_(n), arm
     rightHandOrientationTop_.quaternion.z = 0.602;
     rightHandOrientationTop_.quaternion.w = 0.353;
 
-
-
     // cartesian planners for the arm
     right_arm_planner_choke = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     right_arm_planner_cable = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
@@ -26,6 +21,7 @@ CableTask::CableTask(ros::NodeHandle n, BUTTON_LOCATION button_side):nh_(n), arm
 
     wholebody_controller_ = new wholebodyManipulation(nh_);
     chest_controller_ =new chestTrajectory(nh_);
+
 }
 
 CableTask::~CableTask()
@@ -132,8 +128,10 @@ bool CableTask::grasp_choke(armSide side, const geometry_msgs::Pose &goal, float
     //        return false;
     //    }
 
-
-
+    std::vector<double> openGrip={0.0, 0.0, 0.0, 0.0, 0.0};
+    std::vector<double> closeGrip={1.3999, 0.55, 1.1, 0.9, 1.0};
+    taskCommonUtils::slowGrip(nh_,side,openGrip,closeGrip);
+    ros::Duration(0.3).sleep();
     gripper_.closeGripper(side);
     ros::Duration(0.3).sleep();
 
@@ -191,7 +189,7 @@ bool CableTask::grasp_cable(const geometry_msgs::Pose &goal, float executionTime
     waypoints.push_back(final);
 
     final=intermGoal;
-    final.position.z+=(offset/2);
+    final.position.z+=(offset/3);
     waypoints.push_back(final);
 
     moveit_msgs::RobotTrajectory traj;
@@ -204,7 +202,7 @@ bool CableTask::grasp_cable(const geometry_msgs::Pose &goal, float executionTime
     ROS_INFO("opening grippers");
     std::vector<double> gripper0,gripper1,gripper2,gripper3;
     gripper0={1.35, 1.35, 0.3, 0.0 ,0.0 };
-    gripper1={1.2, 0.2, 0.3, 0.0 ,0.0 };
+    gripper1={1.2, 0.4, 0.35, 0.0 ,0.0 };
     gripper2={1.2, 0.6, 0.7, 0.0 ,0.0 };
     gripper3={1.2, 0.6, 0.7, 0.9 ,1.0 };
     gripper_.controlGripper(RIGHT,gripper0);
@@ -217,15 +215,22 @@ bool CableTask::grasp_cable(const geometry_msgs::Pose &goal, float executionTime
     wholebody_controller_->compileMsg(RIGHT,traj.joint_trajectory);
     ros::Duration(executionTime).sleep();
 
-    ROS_INFO("Grip Sequence 1");
-    gripper_.controlGripper(RIGHT, gripper1);
-    ros::Duration(0.1).sleep();
-    ROS_INFO("Grip Sequence 2");
+    //    ROS_INFO("Grip Sequence 1");
+    //    gripper_.controlGripper(RIGHT, gripper1);
+    //    ros::Duration(0.1).sleep();
+    //    ROS_INFO("Grip Sequence 2");
+    //    gripper_.controlGripper(RIGHT, gripper2);
+    //    ros::Duration(0.1).sleep();
+    //    ROS_INFO("Grip Sequence 3");
+    //    gripper_.controlGripper(RIGHT, gripper3);
+    //    ros::Duration(0.1).sleep();
+
+    taskCommonUtils::slowGrip(nh_,RIGHT,gripper1,gripper2,10,4);
     gripper_.controlGripper(RIGHT, gripper2);
-    ros::Duration(0.1).sleep();
-    ROS_INFO("Grip Sequence 3");
+    ros::Duration(0.3).sleep();
+    taskCommonUtils::slowGrip(nh_,RIGHT,gripper2,gripper3,10,4);
     gripper_.controlGripper(RIGHT, gripper3);
-    ros::Duration(0.1).sleep();
+    ros::Duration(0.3).sleep();
 
     // Setting arm position to dock
     ROS_INFO("grasp_cable: Setting arm position to dock cable");
