@@ -335,19 +335,18 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
 
 decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("valTask2::detectPanelTask : executing " << name);
     static bool isFirstRun = true;
-    static geometry_msgs::Point button_location;
-    BUTTON_LOCATION::LEFT;
+
+    if(isFirstRun){
+        head_controller_->moveHead(0,40,0);
+        ros::Duration(2).sleep();
+    }
     if(solar_panel_detector_ == nullptr) {
         if (!isFirstRun){
-            ROS_INFO("Clearing pointcloud");
+            ROS_INFO("valTask2::detectPanelTask : Clearing pointcloud");
             task2_utils_->clearBoxPointCloud();
         }
-
-        // find button location
-
-
 
         task2_utils_->resumePointCloud();
         isFirstRun = false;
@@ -375,12 +374,19 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
     // if we get atleast two detections
     if (poses.size() > 1)
     {
+        if (button_detector_ == nullptr){
+            button_detector_ = new ButtonDetector(nh_);
+        }
         size_t idx = poses.size()-1;
         setSolarPanelHandlePose(poses[idx]);
         task2_utils_->reOrientTowardsPanel(solar_panel_handle_pose_);
         ros::Duration(2.0).sleep();
-        ROS_INFO_STREAM("Position " << poses[idx].position.x<< " " <<poses[idx].position.y <<" "<<poses[idx].position.z);
-        ROS_INFO_STREAM("quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w);
+
+        int retry = 0;
+        while (!button_detector_->findButtons(button_coordinates_temp_) && retry++ < 10);
+        ROS_INFO("valTask2::detectPanelTask : Button detected at x:%f y:%f z:%f", button_coordinates_temp_.x,button_coordinates_temp_.y,button_coordinates_temp_.z);
+        ROS_INFO_STREAM("valTask2::detectPanelTask : Position " << poses[idx].position.x<< " " <<poses[idx].position.y <<" "<<poses[idx].position.z);
+        ROS_INFO_STREAM("valTask2::detectPanelTask : quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w);
         fail_count = 0;
         retry_count = 0;
 
@@ -414,7 +420,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
     }
 
     while(!preemptiveWait(1000, eventQueue)){
-        ROS_INFO("waiting for transition");
+        ROS_INFO("valTask2::detectPanelTask : waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -422,7 +428,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
 
 decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("valTask2::graspPanelTask : executing " << name);
     // we reached here means we don't need the map blocker anymore.
     if (rover_in_map_blocker_ != nullptr){
         delete rover_in_map_blocker_;
@@ -439,17 +445,17 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
     static int retry_count = 0;
     static armSide side;
     if(panel_grabber_ == nullptr){
-        panel_grabber_ = new solar_panel_handle_grabber(nh_,BUTTON_LOCATION::RIGHT);
+        panel_grabber_ = new solar_panel_handle_grabber(nh_);
     }
 
     if(!executing){
-        ROS_INFO("Executing the grasp panel handle command");
+        ROS_INFO("valTask2::graspPanelTask : Executing the grasp panel handle command");
         executing = true;
         // grasp the handle
         geometry_msgs::Pose poseInPelvisFrame;
         robot_state_->transformPose(solar_panel_handle_pose_, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
         float yaw = tf::getYaw(poseInPelvisFrame.orientation);
-        ROS_INFO("Yaw Value : %f",yaw);
+        ROS_INFO("valTask2::graspPanelTask : Yaw Value : %f",yaw);
         // if the vector is pointing outwards, reorient it
         if (yaw > M_PI_2 || yaw < -M_PI_2){
             geometry_msgs::Pose tempYaw(solar_panel_handle_pose_);
@@ -462,6 +468,29 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
 
         side = yaw < 0 ? armSide::LEFT : armSide::RIGHT;
         setPanelGraspingHand(side);
+
+        if(button_coordinates_temp_.x == 0 && button_coordinates_temp_.y == 0){
+            // button cannot be seen it is assumed to be on the other side
+            is_rotation_required_ = side == armSide::LEFT ? false : true;
+        }
+        else{
+            geometry_msgs::Point handleInPelvisFrame;
+
+            robot_state_->transformPoint(solar_panel_handle_pose_.position, handleInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+            robot_state_->transformPoint(button_coordinates_temp_, button_coordinates_temp_, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+
+            if( button_coordinates_temp_.x > handleInPelvisFrame.x) {
+                is_rotation_required_ = side == armSide::LEFT ? false : true;
+            }
+            else if (handleInPelvisFrame.x == button_coordinates_temp_.x &&  button_coordinates_temp_.y > handleInPelvisFrame.y ){
+                is_rotation_required_ = false;
+            }
+            else{
+                // x is smaller
+                is_rotation_required_ = side == armSide::LEFT ? true : false;
+            }
+        }
+        ROS_INFO("Rotation is %s required", is_rotation_required_ ? "definitely" : "not" );
         //Pause the pointcloud to avoid obstacles on map due to panel
         task2_utils_->pausePointCloud();
         if (panel_grabber_->grasp_handles(side, solar_panel_handle_pose_)) {
@@ -555,6 +584,8 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         ros::Duration(1).sleep();
         walker_->setWalkParms(0.7, 0.7, 0);
         task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_);
+        head_controller_->moveHead(0,0,0);
+        ros::Duration(2).sleep();
         eventQueue.riseEvent("/PICKED_PANEL");
     }
     else if (retry < 5){
@@ -920,7 +951,7 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
      */
     if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
         ROS_INFO("valTask2::placePanelTask : Placing the panel on table");
-        task2_utils_->moveToPlacePanelPose(panel_grasping_hand_, false);
+        task2_utils_->moveToPlacePanelPose(panel_grasping_hand_, is_rotation_required_);
         ros::Duration(1).sleep();
         eventQueue.riseEvent("/PLACE_ON_GROUND_RETRY");
     }
@@ -1338,7 +1369,7 @@ decision_making::TaskResult valTask2::detectFinishBoxTask(string name, const FSM
             if(finish_box_detector_ != nullptr) delete finish_box_detector_;
             finish_box_detector_ = nullptr;
             //sleep is required to avoid moving to next state before subscriber is shutdown
-//            ros::Duration(2).sleep();
+            //            ros::Duration(2).sleep();
             break;
         }
         // this is to avoid detecting points that will always be in collision
@@ -1353,7 +1384,7 @@ decision_making::TaskResult valTask2::detectFinishBoxTask(string name, const FSM
         if(finish_box_detector_ != nullptr) delete finish_box_detector_;
         finish_box_detector_ = nullptr;
         //sleep is required to avoid moving to next state before subscriber is shutdown
-//        ros::Duration(2).sleep();
+        //        ros::Duration(2).sleep();
     }
 
     // wait infinetly until an external even occurs
