@@ -10,14 +10,16 @@ int main(int argc, char** argv)
     int numIterations = 0;
     bool foundStandPos = false;
     geometry_msgs::Point CableLoc;
-    geometry_msgs::Pose StandLoc;
+    geometry_msgs::Pose CablePose;
     CableDetector c1(nh);
 
     //while (!c1.findCable(CableLoc)){
     while(ros::ok()){
-        c1.findCable(CableLoc);
+        //c1.findCable(CableLoc);
+        c1.findCable(CablePose);
             //while (!foundCable && numIterations < 20)
         ROS_INFO("Cable location x:%f y:%f z:%f", CableLoc.x, CableLoc.y, CableLoc.z);
+        ROS_INFO("Cable location x:%f y:%f z:%f", CablePose.position.x, CablePose.position.y, CablePose.position.z);
         ros::spinOnce();
     }
 
