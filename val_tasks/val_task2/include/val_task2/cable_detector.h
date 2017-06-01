@@ -14,9 +14,13 @@
 #include <visualization_msgs/MarkerArray.h>
 
 #include <tf/transform_broadcaster.h>
+#include "val_controllers/robot_state.h"
+
 
 #include <iostream>
 #include <vector>
+#include <mutex>
+
 
 class CableDetector
 {
@@ -39,19 +43,36 @@ class CableDetector
     src_perception::MultisenseImage ms_sensor_;
     src_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
+    std::vector<cv::Point2d> eigenVecs_;
+    std::vector<cv::Point> convexHulls_;
+    geometry_msgs::PointStamped geom_point0_;
+    geometry_msgs::Pose pose_;
+    RobotStateInformer* robot_state_;
+
+    void visualize_direction(geometry_msgs::Point point1, geometry_msgs::Point point2);
     void visualize_point(geometry_msgs::Point point, double r, double g, double b);
+    void visualize_pose(geometry_msgs::Pose pose);
 
 public:
     CableDetector(ros::NodeHandle nh);
+    ~CableDetector();
+
     void setTrackbar();
     void showImage(cv::Mat, std::string caption="Cable Detection");
+    void drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale = 0.2);
     void colorSegment(cv::Mat &imgHSV, cv::Mat &outImg);
+
     size_t findMaxContour(const std::vector<std::vector<cv::Point> >& contours);
     bool getCableLocation(geometry_msgs::Point &);
-    std::vector<cv::Point> getOrientation(const std::vector<cv::Point> &, cv::Mat &);
-    void drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale = 0.2);
+    bool getCablePose(geometry_msgs::Pose& cablePose);
+    std::vector<cv::Point> getCentroid(const std::vector<cv::Point> &, cv::Mat &);
     bool findCable(geometry_msgs::Point &);
-    ~CableDetector();
+    bool findCable(geometry_msgs::Pose &);
+
+
+    geometry_msgs::Pose getPose() const;
+
+    geometry_msgs::PointStamped getOffsetPoint() const;
 
 };
 

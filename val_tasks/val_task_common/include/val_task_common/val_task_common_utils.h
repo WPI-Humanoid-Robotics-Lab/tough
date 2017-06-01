@@ -17,6 +17,7 @@ bool isGoalReached(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_ne
 bool isGoalReached(geometry_msgs::Pose pose_old, geometry_msgs::Pose2D pose_new);
 void moveToWalkSafePose(ros::NodeHandle &nh);
 void moveToInitPose(ros::NodeHandle &nh);
-void fixHandFramePose(ros::NodeHandle nh, armSide side, geometry_msgs::Pose &poseInWorldFrame);
+void fixHandFramePalmDown(ros::NodeHandle nh, armSide side, geometry_msgs::Pose &poseInWorldFrame);
 void fixHandFramePalmUp(ros::NodeHandle nh, armSide side, geometry_msgs::Pose &poseInWorldFrame);
+bool slowGrip(ros::NodeHandle nh,armSide side, std::vector<double> initial, std::vector<double> final, int iterations=5, float executionTime=2.0f);
 }

@@ -12,6 +12,7 @@
 
 #define Y_OFFSET 0.05
 
+
 class solar_panel_handle_grabber{
 public:
     solar_panel_handle_grabber(ros::NodeHandle n);

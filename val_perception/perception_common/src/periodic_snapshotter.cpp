@@ -42,7 +42,7 @@
 
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/filter.h>
-
+#include <pcl/filters/crop_box.h>
 #include <pcl/features/normal_3d.h>
 
 #include <pcl/registration/icp.h>
@@ -106,12 +106,14 @@ public:
 
 PeriodicSnapshotter::PeriodicSnapshotter()
 {
+    robot_state_  = RobotStateInformer::getRobotStateInformer(n_);
+
     snapshot_pub_              = n_.advertise<sensor_msgs::PointCloud2> ("snapshot_cloud2", 1);
-    registered_pointcloud_pub_ = n_.advertise<sensor_msgs::PointCloud2>("assembled_cloud2",10, true);
+    registered_pointcloud_pub_ = n_.advertise<sensor_msgs::PointCloud2>("assembled_cloud2",10);
     pointcloud_for_octomap_pub_= n_.advertise<sensor_msgs::PointCloud2>("assembled_octomap_cloud2",10, true);
     resetPointcloudSub_        = n_.subscribe("reset_pointcloud", 10, &PeriodicSnapshotter::resetPointcloudCB, this);
     pausePointcloudSub_        = n_.subscribe("pause_pointcloud", 10, &PeriodicSnapshotter::pausePointcloudCB, this);
-
+    boxFilterSub_              = n_.subscribe("clearbox_pointcloud", 10, &PeriodicSnapshotter::setBoxFilterCB, this);
     // Create the service client for calling the assembler
     client_       = n_.serviceClient<AssembleScans2>("assemble_scans2");
     snapshot_sub_ = n_.subscribe("snapshot_cloud2",10, &PeriodicSnapshotter::mergeClouds, this);
@@ -125,7 +127,7 @@ PeriodicSnapshotter::PeriodicSnapshotter()
     // Need to track if we've called the timerCallback at least once
     first_time_ = true;
     downsample_ = true;
-
+    enable_box_filter_ = false;
     sensor_msgs::PointCloud2::Ptr temp(new sensor_msgs::PointCloud2);
     prev_msg_        = temp;
     resetPointcloud_ = true;
@@ -277,17 +279,64 @@ void PeriodicSnapshotter::resetPointcloudCB(const std_msgs::Empty &msg)
 
 void PeriodicSnapshotter::pausePointcloud(bool pausePointcloud)
 {
-    state_request = pausePointcloud ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESET;
+    state_request = pausePointcloud ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESUME;
 }
 
 void PeriodicSnapshotter::pausePointcloudCB(const std_msgs::Bool &msg)
 {
     //reset will make sure that older scans are discarded
-    state_request = msg.data ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESET;
+    state_request = msg.data ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESUME;
+}
+
+void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Empty &msg)
+{
+    enable_box_filter_ = true;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_prev_msg(new pcl::PointCloud<pcl::PointXYZ>);
+    convertROStoPCL(prev_msg_, pcl_prev_msg);
+    geometry_msgs::Pose pelvisPose;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr tgt (new pcl::PointCloud<pcl::PointXYZ>);
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+    Eigen::Vector4f minPoint;
+    Eigen::Vector4f maxPoint;
+    minPoint[0]=-1;
+    minPoint[1]=-1;
+    minPoint[2]=-0.5;
+
+    maxPoint[0]=2;
+    maxPoint[1]=1;
+    maxPoint[2]=1;
+    Eigen::Vector3f boxTranslatation;
+    boxTranslatation[0]=pelvisPose.position.x;
+    boxTranslatation[1]=pelvisPose.position.y;
+    boxTranslatation[2]=pelvisPose.position.z;
+    Eigen::Vector3f boxRotation;
+    boxRotation[0]=0;  // rotation around x-axis
+    boxRotation[1]=0;  // rotation around y-axis
+    boxRotation[2]= tf::getYaw(pelvisPose.orientation);  //in radians rotation around z-axis. this rotates your cube 45deg around z-axis.
+
+
+    pcl::CropBox<pcl::PointXYZ> box_filter;
+    std::vector<int> indices;
+    indices.clear();
+    box_filter.setInputCloud(pcl_prev_msg);
+    box_filter.setMin(minPoint);
+    box_filter.setMax(maxPoint);
+    box_filter.setTranslation(boxTranslatation);
+    box_filter.setRotation(boxRotation);
+    box_filter.setNegative(true);
+    box_filter.filter(*tgt);
+    sensor_msgs::PointCloud2::Ptr merged_cloud(new sensor_msgs::PointCloud2());
+    convertPCLtoROS(tgt,merged_cloud);
+    prev_msg_ = merged_cloud;
+
+    registered_pointcloud_pub_.publish(merged_cloud);
+    enable_box_filter_ = false;
 }
 
 
 void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
+    if(enable_box_filter_ )
+        return;
 
     if (state_request == PCL_STATE_CONTROL::PAUSE){
         ROS_INFO("PeriodicSnapshotter::mergeClouds : Laser assembling paused");
@@ -340,6 +389,42 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
         sor.setMeanK (50);
         sor.setStddevMulThresh (1.0);
         sor.filter (*tgt);
+
+        //        if (enable_box_filter_){
+        //            geometry_msgs::Pose pelvisPose;
+        //            robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+        //            Eigen::Vector4f minPoint;
+        //            Eigen::Vector4f maxPoint;
+        //            minPoint[0]=-1;
+        //            minPoint[1]=-1;
+        //            minPoint[2]=-0.5;
+
+        //            maxPoint[0]=2;
+        //            maxPoint[1]=1;
+        //            maxPoint[2]=1;
+        //            Eigen::Vector3f boxTranslatation;
+        //            boxTranslatation[0]=pelvisPose.position.x;
+        //            boxTranslatation[1]=pelvisPose.position.y;
+        //            boxTranslatation[2]=pelvisPose.position.z;
+        //            Eigen::Vector3f boxRotation;
+        //            boxRotation[0]=0;  // rotation around x-axis
+        //            boxRotation[1]=0;  // rotation around y-axis
+        //            boxRotation[2]= tf::getYaw(pelvisPose.orientation);  //in radians rotation around z-axis. this rotates your cube 45deg around z-axis.
+
+
+        //            pcl::CropBox<pcl::PointXYZ> box_filter;
+        //            std::vector<int> indices;
+        //            indices.clear();
+        //            box_filter.setInputCloud(tgt);
+        //            box_filter.setMin(minPoint);
+        //            box_filter.setMax(maxPoint);
+        //            box_filter.setTranslation(boxTranslatation);
+        //            box_filter.setRotation(boxRotation);
+        //            box_filter.setNegative(true);
+        //            box_filter.filter(*tgt);
+        //            enable_box_filter_ = false;
+        //        }
+
 
         convertPCLtoROS(tgt,merged_cloud);
         // publish the merged message

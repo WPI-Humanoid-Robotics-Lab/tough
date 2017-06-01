@@ -4,8 +4,8 @@
 
 
 leakDetectorGrabber::leakDetectorGrabber(ros::NodeHandle nh):nh_(nh),
-              armTraj_(nh_), gripper_(nh_), wholebody_controller_(nh_)
-              {
+    armTraj_(nh_), gripper_(nh_), wholebody_controller_(nh_)
+{
     right_arm_planner_ = new cartesianPlanner("rightPalm");
     left_arm_planner_ = new cartesianPlanner("leftPalm");
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
@@ -41,7 +41,7 @@ void leakDetectorGrabber::graspDetector(armSide side, geometry_msgs::Pose &goal,
 
     //transform that point back to world frame
     current_state_->transformPose(intermGoal, intermGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-    taskCommonUtils::fixHandFramePose(nh_, side, intermGoal);
+    taskCommonUtils::fixHandFramePalmDown(nh_, side, intermGoal);
 
     ROS_INFO("Moving at an intermidate point before goal");
     ROS_INFO_STREAM("Intermidiate goal"<<intermGoal);
@@ -59,33 +59,33 @@ void leakDetectorGrabber::graspDetector(armSide side, geometry_msgs::Pose &goal,
     finalGoal.position.z  -= 0.02; //finger to center of palm in Z-axis of hand frame
 
     //transform that point back to world frame
-        current_state_->transformPose(finalGoal, finalGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
-        current_state_->transformPose(intermGoal, intermGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
-        taskCommonUtils::fixHandFramePose(nh_, side, finalGoal);
+    current_state_->transformPose(finalGoal, finalGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPose(intermGoal, intermGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
+        taskCommonUtils::fixHandFramePalmDown(nh_, side, finalGoal);
 
-        ROS_INFO("Moving towards goal");
-        ROS_INFO_STREAM("Final goal"<<finalGoal);
-        std::vector<geometry_msgs::Pose> waypoints;
+    ROS_INFO("Moving towards goal");
+    ROS_INFO_STREAM("Final goal"<<finalGoal);
+    std::vector<geometry_msgs::Pose> waypoints;
 
-        //gripper_.controlGripper(side,GRIPPER_STATE::OPEN_THUMB_IN);
+    //gripper_.controlGripper(side,GRIPPER_STATE::OPEN_THUMB_IN);
 
-        waypoints.push_back(intermGoal);
-        waypoints.push_back(finalGoal);
+    waypoints.push_back(intermGoal);
+    waypoints.push_back(finalGoal);
 
-        ROS_INFO_STREAM(finalGoal);
-        moveit_msgs::RobotTrajectory traj;
+    ROS_INFO_STREAM(finalGoal);
+    moveit_msgs::RobotTrajectory traj;
 
-        if(side == armSide::LEFT){
+    if(side == armSide::LEFT){
 
-            left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
-        }
-        else{
+        left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+    }
+    else{
 
-            right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
-        }
+        right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+    }
 
-        ROS_INFO("Calculated Traj");
-        wholebody_controller_.compileMsg(side, traj.joint_trajectory);
+    ROS_INFO("Calculated Traj");
+    wholebody_controller_.compileMsg(side, traj.joint_trajectory);
 
         ros::Duration(executionTime).sleep();
         //gripper_.controlGripper(side,GRIPPER_STATE::CUP);
