@@ -26,10 +26,10 @@
       </collision>
 
       <collision name="collision_contact">
-        <pose>0 0 0.35 0 0 0</pose>
+        <pose>0 0 0.25 0 0 0</pose>
         <geometry>
           <box>
-            <size>1.498 0.99 0.697</size>
+            <size>1.498 0.99 0.897</size>
           </box>
         </geometry>
         <surface>

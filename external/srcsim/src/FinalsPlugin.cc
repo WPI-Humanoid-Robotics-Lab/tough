@@ -224,17 +224,17 @@ bool FinalsPlugin::OnStartTaskRosRequest(srcsim::StartTask::Request &_req,
     this->current++;
   }
 
+  this->current = _req.task_id;
+
+  // Start task
+  this->tasks[this->current - 1]->Start(time, _req.checkpoint_id);
+
   // Start update
   if (!this->updateConnection)
   {
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
         std::bind(&FinalsPlugin::OnUpdate, this, std::placeholders::_1));
   }
-
-  this->current = _req.task_id;
-
-  // Start task
-  this->tasks[this->current - 1]->Start(time, _req.checkpoint_id);
 
   _res.success = true;
   return true;

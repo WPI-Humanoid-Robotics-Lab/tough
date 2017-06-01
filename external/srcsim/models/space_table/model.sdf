@@ -6,41 +6,41 @@
     <link name="link">
 
       <collision name="leg_1">
-        <pose>-0.764945 -0.284224 0.317189 0 0 0</pose>
+        <pose>-0.764945 -0.284224 0.217189 0 0 0</pose>
         <geometry>
           <cylinder>
            <radius>0.149455</radius>
-           <length>0.648382</length>
+           <length>0.848382</length>
           </cylinder>
         </geometry>
       </collision>
 
       <collision name="leg_2">
-        <pose>-0.764945 0.432866 0.317189 0 0 0</pose>
+        <pose>-0.764945 0.432866 0.217189 0 0 0</pose>
         <geometry>
           <cylinder>
            <radius>0.149455</radius>
-           <length>0.648382</length>
+           <length>0.848382</length>
           </cylinder>
         </geometry>
       </collision>
 
       <collision name="leg_3">
-        <pose>0.764945 -0.284224 0.317189 0 0 0</pose>
+        <pose>0.764945 -0.284224 0.217189 0 0 0</pose>
         <geometry>
           <cylinder>
            <radius>0.149455</radius>
-           <length>0.648382</length>
+           <length>0.848382</length>
           </cylinder>
         </geometry>
       </collision>
 
       <collision name="leg_4">
-        <pose>0.764945 0.432866 0.317189 0 0 0</pose>
+        <pose>0.764945 0.432866 0.217189 0 0 0</pose>
         <geometry>
           <cylinder>
            <radius>0.149455</radius>
-           <length>0.648382</length>
+           <length>0.848382</length>
           </cylinder>
         </geometry>
       </collision>

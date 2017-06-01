@@ -4,13 +4,13 @@
   <world name="SRC_finals">
 
     <physics type="ode">
-      <real_time_update_rate>500.0</real_time_update_rate>
-      <max_step_size>0.002</max_step_size>
+      <real_time_update_rate>1000.0</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
       <real_time_factor>1</real_time_factor>
       <ode>
         <solver>
           <type>quick</type>
-          <iters>300</iters>
+          <iters>150</iters>
           <precon_iters>0</precon_iters>
           <sor>1.400000</sor>
           <use_dynamic_moi_rescaling>1</use_dynamic_moi_rescaling>
@@ -105,12 +105,12 @@
     </include>
 
 
-    
+
 
     <!-- TASK 1 -->
 
     <!-- Task 1 start - Box plugin -->
-    
+
 
     <plugin name="boxT1Start" filename="libBoxContainsPlugin.so">
       <entity>valkyrie</entity>
@@ -142,9 +142,9 @@
 
 
     <!-- Satellite -->
-    
 
-    
+
+
 
 <model name="satellite_dish">
 
@@ -463,7 +463,7 @@
 
 
     <!-- Checkpoint 1 - Box plugin -->
-    
+
 
     <plugin name="boxT1CP1" filename="libBoxContainsPlugin.so">
       <entity>valkyrie</entity>
@@ -599,17 +599,17 @@
     </include>
 
 
-    
+
 
     <!-- /TASK 1 -->
-    
 
-    
+
+
 
     <!-- TASK 2 -->
 
     <!-- Task 2 start - Box plugin -->
-    
+
 
     <plugin name="boxT2Start" filename="libBoxContainsPlugin.so">
       <entity>valkyrie</entity>
@@ -656,7 +656,7 @@
 
 
     <!-- Rover -->
-    
+
 
     <include>
       <pose>
@@ -671,9 +671,9 @@
     </include>
 
     <!-- Solar panel -->
-    
 
-    
+
+
 
 <model name="solar_panel">
 
@@ -1226,7 +1226,7 @@
 
   </link>
 
-  
+
 
   <joint name="base_panel_01" type="revolute">
     <pose>0 0.0455 0.095 0 0 0</pose>
@@ -1320,7 +1320,7 @@
     </axis>
   </joint>
 
-  
+
   <joint name="button" type="prismatic">
     <pose>0 0 0.005 0 0 0</pose>
     <parent>panel_01</parent>
@@ -1460,13 +1460,13 @@
 
 
     <!-- Solar Array -->
-    
+
 
     <include>
       <pose>
         12.782846995805329
         2.3908059549089233
-        0
+        0.2
         0
         0
         -4.0574162479713433e-16
@@ -1475,9 +1475,9 @@
     </include>
 
     <!-- Cable -->
-    
 
-    
+
+
 
 <model name="solar_panel_cable">
 
@@ -1486,7 +1486,7 @@
   <pose>
     13.18284699580533
     2.990805954908923
-    0.85
+    1.05
     0
     0
     -1.570796326794897
@@ -1516,7 +1516,7 @@
     </visual>
   </link>
 
-  
+
 
   <link name="link_1">
     <pose>0.0 0 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -1606,7 +1606,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -1634,7 +1634,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_2">
     <pose>0.058778525229247314 0.08090169943749476 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -1724,7 +1724,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -1752,7 +1752,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_3">
     <pose>0.11755705045849463 0 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -1842,7 +1842,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -1870,7 +1870,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_4">
     <pose>0.17633557568774197 -0.08090169943749476 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -1960,7 +1960,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -1988,7 +1988,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_5">
     <pose>0.23511410091698925 0 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -2078,7 +2078,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2106,7 +2106,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_6">
     <pose>0.29389262614623657 0.08090169943749476 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -2196,7 +2196,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2224,7 +2224,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_7">
     <pose>0.35267115137548394 0 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -2314,7 +2314,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2342,7 +2342,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_8">
     <pose>0.41144967660473125 -0.08090169943749476 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -2432,7 +2432,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2460,7 +2460,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_9">
     <pose>0.4702282018339785 0 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -2550,7 +2550,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2578,7 +2578,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_10">
     <pose>0.5290067270632258 0.08090169943749476 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -2668,7 +2668,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2696,7 +2696,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_11">
     <pose>0.5877852522924731 0 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -2786,7 +2786,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2814,7 +2814,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_12">
     <pose>0.6465637775217205 -0.08090169943749476 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -2904,7 +2904,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -2932,7 +2932,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_13">
     <pose>0.7053423027509679 0 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -3022,7 +3022,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -3050,7 +3050,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_14">
     <pose>0.7641208279802151 0.08090169943749476 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -3140,7 +3140,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -3168,7 +3168,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_15">
     <pose>0.8228993532094625 0 0 0 1.5707963267948966 -0.9424777960769379</pose>
@@ -3258,7 +3258,7 @@
       </material>
     </visual>
 
-    
+
 
   </link>
 
@@ -3286,7 +3286,7 @@
     </physics>
   </joint>
 
-  
+
 
   <link name="link_16">
     <pose>0.8816778784387097 -0.08090169943749476 0 0 1.5707963267948966 0.9424777960769379</pose>
@@ -3376,13 +3376,97 @@
       </material>
     </visual>
 
-    
 
-    <collision name="plug_collision">
+
+    <collision name="plug_collision_1">
       <pose>0 0 0.1 0 0 0</pose>
       <geometry>
         <cylinder>
           <length>0.010000000000000002</length>
+          <radius>0.02</radius>
+        </cylinder>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+        <friction>
+          <ode>
+            <mu>1.0</mu>
+            <mu2>1.0</mu2>
+          </ode>
+        </friction>
+      </surface>
+    </collision>
+
+    <visual name="plug_visual_1">
+      <pose>0 0 0.1 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <length>0.010000000000000002</length>
+          <radius>0.02</radius>
+        </cylinder>
+      </geometry>
+      <material>
+        <ambient>0 0 0.3 1</ambient>
+        <emissive>0 0 0.5 1</emissive>
+        <diffuse>0 0 0.1 1</diffuse>
+        <specular>1 1 1 1</specular>
+      </material>
+    </visual>
+
+    <collision name="plug_collision_2">
+      <pose>0 0 0.1 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <length>0.020000000000000004</length>
+          <radius>0.015</radius>
+        </cylinder>
+      </geometry>
+      <surface>
+        <contact>
+          <ode>
+            <kp>1e5</kp>
+            <kd>1</kd>
+            <max_vel>0.1</max_vel>
+            <min_depth>0.0015</min_depth>
+          </ode>
+        </contact>
+        <friction>
+          <ode>
+            <mu>1.0</mu>
+            <mu2>1.0</mu2>
+          </ode>
+        </friction>
+      </surface>
+    </collision>
+
+    <visual name="plug_visual_2">
+      <pose>0 0 0.1 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <length>0.020000000000000004</length>
+          <radius>0.015</radius>
+        </cylinder>
+      </geometry>
+      <material>
+        <ambient>0 0 0.7 1</ambient>
+        <emissive>0 0 0.2 1</emissive>
+        <diffuse>0 0 0.1 1</diffuse>
+        <specular>1 1 1 1</specular>
+      </material>
+    </visual>
+
+    <collision name="plug_collision_3">
+      <pose>0 0 0.09000000000000001 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <length>0.05</length>
           <radius>0.011000000000000001</radius>
         </cylinder>
       </geometry>
@@ -3404,11 +3488,11 @@
       </surface>
     </collision>
 
-    <visual name="plug_visual">
-      <pose>0 0 0.1 0 0 0</pose>
+    <visual name="plug_visual_3">
+      <pose>0 0 0.09000000000000001 0 0 0</pose>
       <geometry>
         <cylinder>
-          <length>0.010000000000000002</length>
+          <length>0.05</length>
           <radius>0.011000000000000001</radius>
         </cylinder>
       </geometry>
@@ -3422,13 +3506,13 @@
 
     <sensor name="tip_sensor" type="contact">
       <contact>
-        <collision>plug_collision</collision>
+        <collision>plug_collision_3</collision>
         <collision>cylinder</collision>
         <collision>sphere</collision>
       </contact>
     </sensor>
 
-    
+
 
   </link>
 
@@ -3456,7 +3540,7 @@
     </physics>
   </joint>
 
-  
+
 
   <joint name="world" type="fixed">
     <child>link_0</child>
@@ -3474,7 +3558,7 @@
 
 
     <!-- Checkpoint 2 - Box plugin -->
-    
+
 
     <plugin name="boxT2CP2" filename="libBoxContainsPlugin.so">
       <entity>solar_panel</entity>
@@ -3482,7 +3566,7 @@
       <pose>
         12.782846995805329
         2.3908059549089233
-        0.9
+        1.1
         0
         0
         -4.0574162479713433e-16
@@ -3610,17 +3694,17 @@
     </include>
 
 
-    
+
 
     <!-- /TASK 2 -->
-    
 
-    
+
+
 
     <!-- TASK 3 -->
 
     <!-- Task 3 start - Box plugin -->
-    
+
 
     <plugin name="boxT3Start" filename="libBoxContainsPlugin.so">
       <entity>valkyrie</entity>
@@ -3667,9 +3751,9 @@
 
 
     <!-- Habitat -->
-    
 
-    
+
+
 
 <!-- Base model - static frame -->
 
@@ -3689,7 +3773,7 @@
 
     <!-- Stairs collisions -->
 
-    
+
 
     <collision name="step_0">
       <pose>-6.686 -5.597 0.1079 0 0 0</pose>
@@ -3700,7 +3784,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="step_1">
       <pose>-6.686 -5.3581 0.311 0 0 0</pose>
@@ -3711,7 +3795,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="step_2">
       <pose>-6.686 -5.1192 0.5141 0 0 0</pose>
@@ -3722,7 +3806,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="step_3">
       <pose>-6.686 -4.8803 0.7172 0 0 0</pose>
@@ -3733,7 +3817,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="step_4">
       <pose>-6.686 -4.641400000000001 0.9203 0 0 0</pose>
@@ -3744,7 +3828,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="step_5">
       <pose>-6.686 -4.4025 1.1234000000000002 0 0 0</pose>
@@ -3755,7 +3839,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="step_6">
       <pose>-6.686 -4.163600000000001 1.3264999999999998 0 0 0</pose>
@@ -3766,7 +3850,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="step_7">
       <pose>-6.686 -3.9247000000000005 1.5295999999999998 0 0 0</pose>
@@ -3777,11 +3861,11 @@
       </geometry>
     </collision>
 
-    
+
 
     <!-- floor collisions -->
 
-    
+
 
     <collision name="floor_1">
       <pose>2.0 0.155 1.71 0 0 0</pose>
@@ -3792,7 +3876,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="floor_2">
       <pose>0.0 0.155 1.71 0 0 0</pose>
@@ -3805,7 +3889,7 @@
 
     <!-- Rail collisions -->
 
-    
+
 
     <collision name="rail_1_left">
       <pose>-7.92 -4.838 1.828 0 -0.7133 1.5707963267948966</pose>
@@ -3816,7 +3900,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_1_right">
       <pose>-5.4505 -4.838 1.828 0 -0.7133 1.5707963267948966</pose>
@@ -3827,7 +3911,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_2_left">
       <pose>-7.92 -4.678 1.368 0 -0.709 1.5707963267948966</pose>
@@ -3838,7 +3922,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_2_right">
       <pose>-5.4505 -4.678 1.368 0 -0.709 1.5707963267948966</pose>
@@ -3849,7 +3933,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_3_left">
       <pose>-7.92 -2.13 2.625 0 0 1.5707963267948966</pose>
@@ -3860,7 +3944,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_3_right">
       <pose>-5.4305 -2.13 2.625 0 0 1.5707963267948966</pose>
@@ -3871,7 +3955,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_4_left">
       <pose>-7.92 -2.13 2.153 0 0 1.5707963267948966</pose>
@@ -3882,7 +3966,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_4_right">
       <pose>-5.4305 -2.13 2.153 0 0 1.5707963267948966</pose>
@@ -3893,7 +3977,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_5_left">
       <pose>-7.92 -3.64 2.153 0 0 1.5707963267948966</pose>
@@ -3904,7 +3988,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_5_right">
       <pose>-5.4505 -3.64 2.153 0 0 1.5707963267948966</pose>
@@ -3915,7 +3999,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_6_left">
       <pose>-7.92 -3.735 2.625 0 0 1.5707963267948966</pose>
@@ -3926,7 +4010,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_6_right">
       <pose>-5.4505 -3.735 2.625 0 0 1.5707963267948966</pose>
@@ -3937,7 +4021,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_7_left">
       <pose>-7.92 -5.88 0.555 0 0 1.5707963267948966</pose>
@@ -3948,7 +4032,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_7_right">
       <pose>-5.4505 -5.88 0.555 0 0 1.5707963267948966</pose>
@@ -3959,7 +4043,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_8_left">
       <pose>-7.92 -5.935 1.027 0 0 1.5707963267948966</pose>
@@ -3970,7 +4054,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_8_right">
       <pose>-5.4505 -5.935 1.027 0 0 1.5707963267948966</pose>
@@ -3981,7 +4065,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_9_left">
       <pose>-7.92 -5.65 0.335 0 0 1.5707963267948966</pose>
@@ -3992,7 +4076,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_9_right">
       <pose>-5.4505 -5.65 0.335 0 0 1.5707963267948966</pose>
@@ -4003,7 +4087,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_10_left">
       <pose>-7.92 -5.722 0.795 0 -0.325 1.5707963267948966</pose>
@@ -4014,7 +4098,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_10_right">
       <pose>-5.4505 -5.722 0.795 0 -0.325 1.5707963267948966</pose>
@@ -4025,7 +4109,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_11_left">
       <pose>-7.92 -3.738 1.89 0 0 1.5707963267948966</pose>
@@ -4036,7 +4120,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_11_right">
       <pose>-5.4505 -3.738 1.89 0 0 1.5707963267948966</pose>
@@ -4047,7 +4131,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_12_left">
       <pose>-7.92 -3.81 2.39 0 -0.325 1.5707963267948966</pose>
@@ -4058,7 +4142,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_12_right">
       <pose>-5.4505 -3.81 2.39 0 -0.325 1.5707963267948966</pose>
@@ -4069,7 +4153,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_13_left">
       <pose>-7.92 -2.842 2.12 0 0 1.5707963267948966</pose>
@@ -4080,7 +4164,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_13_right">
       <pose>-5.4305 -2.842 2.12 0 0 1.5707963267948966</pose>
@@ -4091,7 +4175,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_14_left">
       <pose>-7.92 -1.595 2.12 0 0 1.5707963267948966</pose>
@@ -4102,7 +4186,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_14_right">
       <pose>-5.4305 -1.595 2.12 0 0 1.5707963267948966</pose>
@@ -4113,7 +4197,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_15_left">
       <pose>-7.92 -6.15 0.568 0 0.29 1.5707963267948966</pose>
@@ -4124,7 +4208,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_15_right">
       <pose>-5.4505 -6.15 0.568 0 0.29 1.5707963267948966</pose>
@@ -4135,7 +4219,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_16_left">
       <pose>-7.92 -6.224 0.612 0 0.78 1.5707963267948966</pose>
@@ -4146,7 +4230,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_16_right">
       <pose>-5.4505 -6.224 0.612 0 0.78 1.5707963267948966</pose>
@@ -4157,7 +4241,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_17_left">
       <pose>-7.92 -6.271 0.691 0 1.3 1.5707963267948966</pose>
@@ -4168,7 +4252,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_17_right">
       <pose>-5.4505 -6.271 0.691 0 1.3 1.5707963267948966</pose>
@@ -4179,7 +4263,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_18_left">
       <pose>-7.92 -6.283 0.791 0 1.5707963267948966 1.5707963267948966</pose>
@@ -4190,7 +4274,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_18_right">
       <pose>-5.4505 -6.283 0.791 0 1.5707963267948966 1.5707963267948966</pose>
@@ -4201,7 +4285,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_19_left">
       <pose>-7.92 -6.271 0.891 0 1.86 1.5707963267948966</pose>
@@ -4212,7 +4296,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_19_right">
       <pose>-5.4505 -6.271 0.891 0 1.86 1.5707963267948966</pose>
@@ -4223,7 +4307,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_20_left">
       <pose>-7.92 -6.225 0.968 0 2.36 1.5707963267948966</pose>
@@ -4234,7 +4318,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_20_right">
       <pose>-5.4505 -6.225 0.968 0 2.36 1.5707963267948966</pose>
@@ -4245,7 +4329,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_21_left">
       <pose>-7.92 -6.15 1.014 0 -0.29 1.5707963267948966</pose>
@@ -4256,7 +4340,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_21_right">
       <pose>-5.4505 -6.15 1.014 0 -0.29 1.5707963267948966</pose>
@@ -4267,7 +4351,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_22_left">
       <pose>-7.92 -3.152 2.166 0 0.29 1.5707963267948966</pose>
@@ -4278,7 +4362,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_22_right">
       <pose>-5.4305 -3.152 2.166 0 0.29 1.5707963267948966</pose>
@@ -4289,7 +4373,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_23_left">
       <pose>-7.92 -3.226 2.21 0 0.78 1.5707963267948966</pose>
@@ -4300,7 +4384,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_23_right">
       <pose>-5.4305 -3.226 2.21 0 0.78 1.5707963267948966</pose>
@@ -4311,7 +4395,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_24_left">
       <pose>-7.92 -3.2729999999999997 2.289 0 1.3 1.5707963267948966</pose>
@@ -4322,7 +4406,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_24_right">
       <pose>-5.4305 -3.2729999999999997 2.289 0 1.3 1.5707963267948966</pose>
@@ -4333,7 +4417,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_25_left">
       <pose>-7.92 -3.285 2.3890000000000002 0 1.5707963267948966 1.5707963267948966</pose>
@@ -4344,7 +4428,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_25_right">
       <pose>-5.4305 -3.285 2.3890000000000002 0 1.5707963267948966 1.5707963267948966</pose>
@@ -4355,7 +4439,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_26_left">
       <pose>-7.92 -3.2729999999999997 2.489 0 1.86 1.5707963267948966</pose>
@@ -4366,7 +4450,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_26_right">
       <pose>-5.4305 -3.2729999999999997 2.489 0 1.86 1.5707963267948966</pose>
@@ -4377,7 +4461,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_27_left">
       <pose>-7.92 -3.2269999999999994 2.566 0 2.36 1.5707963267948966</pose>
@@ -4388,7 +4472,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_27_right">
       <pose>-5.4305 -3.2269999999999994 2.566 0 2.36 1.5707963267948966</pose>
@@ -4399,7 +4483,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_28_left">
       <pose>-7.92 -3.152 2.612 0 -0.29 1.5707963267948966</pose>
@@ -4410,7 +4494,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_28_right">
       <pose>-5.4305 -3.152 2.612 0 -0.29 1.5707963267948966</pose>
@@ -4421,7 +4505,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_29_left">
       <pose>-7.92 -3.515 2.166 0 -0.29 1.5707963267948966</pose>
@@ -4432,7 +4516,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_29_right">
       <pose>-5.4505 -3.515 2.166 0 -0.29 1.5707963267948966</pose>
@@ -4443,7 +4527,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_30_left">
       <pose>-7.92 -3.444 2.21 0 -0.78 1.5707963267948966</pose>
@@ -4454,7 +4538,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_30_right">
       <pose>-5.4505 -3.444 2.21 0 -0.78 1.5707963267948966</pose>
@@ -4465,7 +4549,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_31_left">
       <pose>-7.92 -3.397 2.289 0 -1.3 1.5707963267948966</pose>
@@ -4476,7 +4560,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_31_right">
       <pose>-5.4505 -3.397 2.289 0 -1.3 1.5707963267948966</pose>
@@ -4487,7 +4571,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_32_left">
       <pose>-7.92 -3.384 2.3890000000000002 0 -1.5707963267948966 1.5707963267948966</pose>
@@ -4498,7 +4582,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_32_right">
       <pose>-5.4505 -3.384 2.3890000000000002 0 -1.5707963267948966 1.5707963267948966</pose>
@@ -4509,7 +4593,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_33_left">
       <pose>-7.92 -3.396 2.489 0 -1.86 1.5707963267948966</pose>
@@ -4520,7 +4604,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_33_right">
       <pose>-5.4505 -3.396 2.489 0 -1.86 1.5707963267948966</pose>
@@ -4531,7 +4615,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_34_left">
       <pose>-7.92 -3.442 2.566 0 -2.36 1.5707963267948966</pose>
@@ -4542,7 +4626,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_34_right">
       <pose>-5.4505 -3.442 2.566 0 -2.36 1.5707963267948966</pose>
@@ -4553,7 +4637,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_35_left">
       <pose>-7.92 -3.52 2.612 0 0.29 1.5707963267948966</pose>
@@ -4564,7 +4648,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="rail_35_right">
       <pose>-5.4505 -3.52 2.612 0 0.29 1.5707963267948966</pose>
@@ -4577,7 +4661,7 @@
 
     <!-- Small module entrance door collisions -->
 
-    
+
 
     <collision name="entrance_left">
       <pose>-7.447 -1.175 2.9 0 0 0</pose>
@@ -4594,7 +4678,7 @@
       </surface>
     </collision>
 
-    
+
 
     <collision name="entrance_right">
       <pose>-5.923 -1.276 2.9 0 0 0</pose>
@@ -4611,7 +4695,7 @@
       </surface>
     </collision>
 
-    
+
 
     <!-- Small module wall collisions -->
 
@@ -4624,7 +4708,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="wall_2">
       <pose>-7.76 0.505 2.9 0 0 -0.525</pose>
@@ -4635,7 +4719,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="wall_3">
       <pose>-6.69 1.185 2.9 0 0 1.5707963267948966</pose>
@@ -4646,7 +4730,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="wall_4">
       <pose>-5.89 1.0 2.9 0 0 0.525</pose>
@@ -4657,7 +4741,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="wall_5">
       <pose>-5.93 -1.04 2.9 0 0 -0.525</pose>
@@ -4676,7 +4760,7 @@
 
     <!-- Passage collisions -->
 
-    
+
 
     <collision name="passage_left">
       <pose>-5.295 0.928 2.9 0 0 0</pose>
@@ -4687,7 +4771,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="passage_right">
       <pose>-5.295 -0.93 2.9 0 0 0</pose>
@@ -4700,7 +4784,7 @@
 
     <!-- Large module wall collisions -->
 
-    
+
 
     <collision name="wall_6">
       <pose>-4.905 1.798 2.9 0 0 0</pose>
@@ -4711,7 +4795,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="wall_7">
       <pose>-2.681 4.28 2.9 0 0 -1.047</pose>
@@ -4722,7 +4806,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="wall_8">
       <pose>2.46 4.28 2.9 0 0 1.049</pose>
@@ -4733,7 +4817,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="wall_9">
       <pose>5.0 1.798 2.9 0 0 0.0</pose>
@@ -4744,7 +4828,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="wall_10">
       <pose>5.0 -1.798 2.9 0 0 0.0</pose>
@@ -4755,7 +4839,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="wall_11">
       <pose>2.46 -4.28 2.9 0 0 -1.049</pose>
@@ -4766,7 +4850,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="wall_12">
       <pose>-2.46 -4.28 2.9 0 0 1.049</pose>
@@ -4777,7 +4861,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="wall_13">
       <pose>-5.0 -1.798 2.9 0 0 0.0</pose>
@@ -4790,7 +4874,7 @@
 
     <!-- Passage collisions -->
 
-    
+
 
     <collision name="passage_2_left">
       <pose>5.295 0.928 2.9 0 0 0</pose>
@@ -4801,7 +4885,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="passage_2_right">
       <pose>5.295 -0.93 2.9 0 0 0</pose>
@@ -4814,7 +4898,7 @@
 
     <!-- Long module -->
 
-    
+
 
     <collision name="wall_14">
       <pose>8.919 1.161 2.3537 -0.518 0 0.0</pose>
@@ -4825,7 +4909,7 @@
       </geometry>
     </collision>
 
-    
+
 
     <collision name="wall_15">
       <pose>8.919 -1.161 2.3537 0.518 0 0.0</pose>
@@ -5095,7 +5179,7 @@
 
 
     <!-- Checkpoint 1 - Climb the stairs -->
-    
+
 
     <plugin name="boxT3CP1" filename="libBoxContainsPlugin.so">
       <entity>valkyrie</entity>
@@ -5112,7 +5196,7 @@
     </plugin>
 
     <!-- Checkpoint 3 - Pass through the door -->
-    
+
 
     <plugin name="boxT3CP3" filename="libBoxContainsPlugin.so">
       <entity>valkyrie</entity>
@@ -5130,7 +5214,7 @@
 
 
     <!-- Lamp inside the habitat -->
-    
+
 
     <light name='habitat_lamp' type='spot'>
       <pose>
@@ -5160,7 +5244,7 @@
 
 
     <!-- Checkpoint 8 - Box plugin -->
-    
+
 
     <plugin name="boxT3CP8" filename="libBoxContainsPlugin.so">
       <entity>valkyrie</entity>
@@ -5177,12 +5261,12 @@
     </plugin>
 
     <!-- /TASK 3 -->
-    
+
 
     <!-- Finals plugin -->
     <plugin name="finals" filename="libFinalsPlugin.so">
 
-      
+
         <task1>
           <timeout>1800</timeout>
 
@@ -5219,9 +5303,9 @@
             </skip_robot_pose>
           </checkpoint4>
         </task1>
-      
 
-      
+
+
         <task2>
           <timeout>3600</timeout>
 
@@ -5240,7 +5324,7 @@
             <panel_pose>
               12.613659717239594
               2.2598176695067616
-              0.7
+              0.9
               0
               0
               0.40994928553219007
@@ -5285,9 +5369,9 @@
 
         </task2>
 
-      
 
-      
+
+
         <task3>
           <timeout>7200</timeout>
 
@@ -5317,14 +5401,13 @@
 
             <!-- Table -->
             <insert_model>
-              <sdf version="1.6">
 
-                
+
                 <include>
                   <pose>
                     24.181097559171395
                     -4.9638700588349565
-                    1.8
+                    2.0
                     0
                     0
                     2.3573131699755647
@@ -5332,23 +5415,21 @@
                   <uri>model://space_table</uri>
                 </include>
 
-              </sdf>
             </insert_model>
 
             <!-- Air leak detector -->
             <insert_model>
-              <sdf version="1.6">
 
-                
 
-                
+
+
 
 <model name="air_leak_detector">
 
   <pose>
     23.60819191778939
     -4.752344599534351
-    2.59448
+    2.79448
     0
     0
     -1.001923792390293
@@ -5442,32 +5523,28 @@
 
 
 
-              </sdf>
             </insert_model>
 
             <!-- Leak patch tool -->
             <insert_model>
-              <sdf version="1.6">
-                
+
 
                 <include>
                   <pose>
                     24.406018156962244
                     -5.278840463307848
-                    2.6
+                    2.8
                     0
                     0
                     -0.8718200518327203
                   </pose>
                   <uri>model://leak_patch_tool</uri>
                 </include>
-              </sdf>
             </insert_model>
 
             <!-- Leak -->
             <insert_model>
-              <sdf version="1.6">
-                
+
 
 <model name="leak">
   <static>true</static>
@@ -5504,13 +5581,11 @@
 </model>
 
 
-              </sdf>
             </insert_model>
 
             <!-- Bling -->
-            
+
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_16</name>
       <pose>
@@ -5523,12 +5598,10 @@
       </pose>
       <uri>model://mars_crate</uri>
     </include>
-    </sdf>
     </insert_model>
 
-            
+
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_17</name>
       <pose>
@@ -5541,15 +5614,13 @@
       </pose>
       <uri>model://mars_crate</uri>
     </include>
-    </sdf>
     </insert_model>
 
-            
+
 
             <!-- Bling -->
-            
+
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_long_18</name>
       <pose>
@@ -5562,15 +5633,13 @@
       </pose>
       <uri>model://mars_crate_long</uri>
     </include>
-    </sdf>
     </insert_model>
 
-            
+
 
             <!-- Bling -->
-            
+
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_19</name>
       <pose>
@@ -5583,15 +5652,13 @@
       </pose>
       <uri>model://mars_crate</uri>
     </include>
-    </sdf>
     </insert_model>
 
-            
+
 
             <!-- Bling -->
-            
+
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_long_20</name>
       <pose>
@@ -5604,12 +5671,10 @@
       </pose>
       <uri>model://mars_crate_long</uri>
     </include>
-    </sdf>
     </insert_model>
 
-            
+
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_long_21</name>
       <pose>
@@ -5622,12 +5687,10 @@
       </pose>
       <uri>model://mars_crate_long</uri>
     </include>
-    </sdf>
     </insert_model>
 
-            
+
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_long_22</name>
       <pose>
@@ -5640,15 +5703,13 @@
       </pose>
       <uri>model://mars_crate_long</uri>
     </include>
-    </sdf>
     </insert_model>
 
-            
+
 
             <!-- Bling -->
-            
+
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_long_23</name>
       <pose>
@@ -5661,15 +5722,13 @@
       </pose>
       <uri>model://mars_crate_long</uri>
     </include>
-    </sdf>
     </insert_model>
 
-            
+
 
             <!-- Bling -->
-            
+
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_long_24</name>
       <pose>
@@ -5682,12 +5741,10 @@
       </pose>
       <uri>model://mars_crate_long</uri>
     </include>
-    </sdf>
     </insert_model>
 
-            
+
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_long_25</name>
       <pose>
@@ -5700,12 +5757,10 @@
       </pose>
       <uri>model://mars_crate_long</uri>
     </include>
-    </sdf>
     </insert_model>
 
-            
+
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_long_26</name>
       <pose>
@@ -5718,15 +5773,13 @@
       </pose>
       <uri>model://mars_crate_long</uri>
     </include>
-    </sdf>
     </insert_model>
 
-            
+
 
             <!-- Bling -->
-            
+
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_long_27</name>
       <pose>
@@ -5739,12 +5792,10 @@
       </pose>
       <uri>model://mars_crate_long</uri>
     </include>
-    </sdf>
     </insert_model>
 
-            
+
             <insert_model>
-    <sdf version="1.6">
     <include>
       <name>mars_crate_long_28</name>
       <pose>
@@ -5757,10 +5808,9 @@
       </pose>
       <uri>model://mars_crate_long</uri>
     </include>
-    </sdf>
     </insert_model>
 
-            
+
 
             <skip_robot_pose>
               25.545863257082363
@@ -5778,62 +5828,62 @@
             <delete_model>solar_panel_cable</delete_model>
             <delete_model>solar_array</delete_model>
             <delete_model>mars_explorer</delete_model>
-            
+
               <delete_model>walkway_1</delete_model>
-            
+
               <delete_model>walkway_2</delete_model>
-            
+
               <delete_model>walkway_3</delete_model>
-            
+
               <delete_model>walkway_4</delete_model>
-            
+
               <delete_model>walkway_5</delete_model>
-            
+
               <delete_model>walkway_6</delete_model>
-            
+
               <delete_model>walkway_7</delete_model>
-            
+
               <delete_model>walkway_8</delete_model>
-            
+
               <delete_model>walkway_9</delete_model>
-            
+
               <delete_model>walkway_10</delete_model>
-            
+
               <delete_model>walkway_11</delete_model>
-            
+
               <delete_model>walkway_12</delete_model>
-            
+
               <delete_model>walkway_13</delete_model>
-            
-            
+
+
               <delete_model>bling_1</delete_model>
-            
+
               <delete_model>bling_2</delete_model>
-            
+
               <delete_model>bling_3</delete_model>
-            
+
               <delete_model>bling_4</delete_model>
-            
+
               <delete_model>bling_5</delete_model>
-            
+
               <delete_model>bling_6</delete_model>
-            
+
               <delete_model>bling_7</delete_model>
-            
+
               <delete_model>bling_8</delete_model>
-            
+
               <delete_model>bling_9</delete_model>
-            
+
               <delete_model>bling_10</delete_model>
-            
+
               <delete_model>bling_11</delete_model>
-            
+
               <delete_model>bling_12</delete_model>
-            
+
               <delete_model>bling_13</delete_model>
-            
+
               <delete_model>bling_14</delete_model>
-            
+
           </checkpoint4>
 
           <checkpoint5>
@@ -5873,7 +5923,7 @@
           </checkpoint8>
 
         </task3>
-      
+
 
     </plugin>
 

@@ -157,10 +157,10 @@
 
 
   # Print a bling inside the habitat based on previous calculated pose
-  # Uses: $table_pos_z, $bling_stack_num, $bling_height, $bling_frame
+  # Uses: $habitat_floor_z, $bling_stack_num, $bling_height, $bling_frame
   # Sets: $bling_count, $bling_frame
   def printHabitatBling
-    height = $table_pos_z + ($bling_stack_num-1)*$bling_height
+    height = $habitat_floor_z + ($bling_stack_num-1)*$bling_height
     angle = rand(-Math::PI*0.2..Math::PI*0.2)
 
     $bling_frame = $bling_frame * TMatrix(0, 0, angle)
@@ -168,7 +168,6 @@
     $bling_count += 1
 
     "<insert_model>\n"\
-    "    <sdf version=\"1.6\">\n"\
     "    <include>\n"\
     "      <name>" + $bling + "_" + $bling_count.to_s() + "</name>\n"\
     "      <pose>\n"\
@@ -181,7 +180,6 @@
     "      </pose>\n"\
     "      <uri>model://" + $bling + "</uri>\n"\
     "    </include>\n"\
-    "    </sdf>\n"\
     "    </insert_model>\n"
   end
 
@@ -330,7 +328,8 @@
     end
     $total_angle = new_total
 
-    $table_pos_z = 1.8
+    $habitat_floor_z = 1.8
+    $table_pos_z = $habitat_floor_z + 0.2
 
     # Take tile transform into account
     $current_frame = $current_frame * $current_walkway["tEntranceOrigin"]
@@ -369,13 +368,13 @@
   <world name="SRC_finals">
 
     <physics type="ode">
-      <real_time_update_rate>500.0</real_time_update_rate>
-      <max_step_size>0.002</max_step_size>
+      <real_time_update_rate>1000.0</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
       <real_time_factor>1</real_time_factor>
       <ode>
         <solver>
           <type>quick</type>
-          <iters>300</iters>
+          <iters>150</iters>
           <precon_iters>0</precon_iters>
           <sor>1.400000</sor>
           <use_dynamic_moi_rescaling>1</use_dynamic_moi_rescaling>
@@ -692,10 +691,11 @@
       array_frame = $current_frame *
                     $current_walkway[$slot] *
                     tArraySlotOrigin
+      $array_z_offset = 0.2
 
       t2cp2_panel_skip_frame = array_frame *
           TMatrix(rand(-0.4...-0.05), rand(-0.27...-0.12), rand(-Math::PI...Math::PI));
-      t2cp2_panel_skip_z_pos = 0.7
+      t2cp2_panel_skip_z_pos = 0.7 + $array_z_offset
 
       t2cp2_frame = array_frame * TMatrix(0, -1.2, Math::PI * 0.5);
       t2cp3_frame = t2cp2_frame
@@ -706,7 +706,7 @@
       <pose>
         <%= array_frame[0, 2] %>
         <%= array_frame[1, 2] %>
-        0
+        <%= $array_z_offset %>
         0
         0
         <%= Math::atan2(array_frame[1, 0], array_frame[0, 0]) %>
@@ -735,7 +735,7 @@
       <pose>
         <%= panel_goal_frame[0, 2] %>
         <%= panel_goal_frame[1, 2] %>
-        0.9
+        <%= 0.9 + $array_z_offset %>
         0
         0
         <%= Math::atan2(panel_goal_frame[1, 0], panel_goal_frame[0, 0]) %>
@@ -1110,8 +1110,6 @@
 
             <!-- Table -->
             <insert_model>
-              <sdf version="1.6">
-
                 <%
                   $table_frame = $habitat_frame *
                                  TMatrix(rand(-1.5..1.5),
@@ -1129,14 +1127,10 @@
                   </pose>
                   <uri>model://space_table</uri>
                 </include>
-
-              </sdf>
             </insert_model>
 
             <!-- Air leak detector -->
             <insert_model>
-              <sdf version="1.6">
-
                 <%
                   b = [-1, 1].sample
                   $air_leak_detector_frame = $table_frame *
@@ -1147,13 +1141,10 @@
                 %>
 
                 <%= fromFile("air_leak_detector.erb") %>
-
-              </sdf>
             </insert_model>
 
             <!-- Leak patch tool -->
             <insert_model>
-              <sdf version="1.6">
                 <%
                   $leak_patch_tool_frame = $table_frame *
                       TMatrix(-b*rand(0.1..0.6),
@@ -1172,14 +1163,11 @@
                   </pose>
                   <uri>model://leak_patch_tool</uri>
                 </include>
-              </sdf>
             </insert_model>
 
             <!-- Leak -->
             <insert_model>
-              <sdf version="1.6">
                 <%= fromFile("leak.erb") %>
-              </sdf>
             </insert_model>
 
             <!-- Bling -->
