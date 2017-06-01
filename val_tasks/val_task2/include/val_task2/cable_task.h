@@ -8,17 +8,17 @@
 #include <val_controllers/robot_state.h>
 #include "val_moveit_planners/val_cartesian_planner.h"
 #include "val_controllers/val_wholebody_manipulation.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include "val_task_common/val_task_common_utils.h"
+#include "val_control_common/val_control_common.h"
 
 #define Y_OFFSET 0.05
 
-enum class BUTTON_LOCATION{
-    LEFT=0,
-    RIGHT
-};
 
 class CableTask{
 public:
-    CableTask(ros::NodeHandle n, BUTTON_LOCATION button_side= BUTTON_LOCATION::LEFT);
+    CableTask(ros::NodeHandle n);
     ~CableTask();
    bool grasp_choke(armSide side, const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool grasp_cable(const geometry_msgs::Pose &goal, float executionTime=2.0f);
@@ -37,7 +37,7 @@ private:
    wholebodyManipulation* wholebody_controller_;
    geometry_msgs::QuaternionStamped rightHandOrientationTop_ ;
 
-   BUTTON_LOCATION button_side_;
+
    /*Top Grip*/
 //   const std::vector<float> leftShoulderSeed_ = {-0.23, -0.07, 0.75, -1.53, 1.21, -0.40, 0.0};
    /*Side Grip*/

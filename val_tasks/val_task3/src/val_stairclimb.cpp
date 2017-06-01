@@ -5,11 +5,15 @@
 StairClimb::StairClimb(ros::NodeHandle n)
 {
     walker_ = new ValkyrieWalker(n, 0.7, 0.7, 0, 0.18);
+    robot_state_=RobotStateInformer::getRobotStateInformer(n);
+    chest_controller_ = new chestTrajectory(n);
+
 }
 
 bool StairClimb::walkToSetPosition(geometry_msgs::Pose2D goal)
 {
     walker_->walkToGoal(goal);
+
 }
 
 bool StairClimb::takeStep(armSide side,float stepLength, float stepHeight)
@@ -26,7 +30,31 @@ bool StairClimb::takeStep(armSide side,float stepLength, float stepHeight)
 
     // Stage 1
     float raise_factor=1.5;
-    walker_->raiseLeg(side,stepHeight,stepLength);
+    float lower_factor=-0.5;
+
+    // fist leg movement
+    walker_->raiseLeg(side,raise_factor*stepHeight,0.0);
+    walker_->placeLeg(side,stepLength);
+    walker_->placeLeg(side,lower_factor*stepHeight);
+    walker_->load_eff(side,EE_LOADING::LOAD);
+
+    // second leg movement
+    float pitch_angle=20;
+    chest_controller_->controlChest(0,pitch_angle,0);
+
+
+}
+
+bool StairClimb::climbStairs(std::vector<float> horizontals, std::vector<float> verticals)
+{
+    // find current position and first stair position
+
+    ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
+    walker_->getCurrentStep(RIGHT, *current);
+
+    for (size_t i= 0; i < horizontals.size(); ++i) {
+        takeStep(RIGHT,horizontals[i],verticals[i]);
+    }
 
 }
 
