@@ -14,6 +14,9 @@
 #include <val_controllers/val_arm_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
 #include <val_task2/cable_detector.h>
+#include "ros/package.h"
+#include <fstream>
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 class task2Utils {
 private:
@@ -80,6 +83,8 @@ private:
 
     void taskStatusCB(const srcsim::Task &msg);
 
+    std::string logFile;
+
 public:
     task2Utils(ros::NodeHandle nh);
     ~task2Utils();
@@ -93,8 +98,9 @@ public:
     void resumePointCloud();
     void clearBoxPointCloud();
     void reOrientTowardsPanel(geometry_msgs::Pose panelPose);
-    int  getCurrentCheckpoint() const;
+    int getCurrentCheckpoint() const;
     bool shakeTest(const armSide graspingHand);
+    boost::posix_time::ptime timeNow;
     bool isCableOnTable(geometry_msgs::Pose &cable_coordinates);
     bool isCableInHand(armSide side);
     bool isCableTouchingSocket();
