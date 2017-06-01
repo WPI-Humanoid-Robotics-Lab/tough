@@ -44,14 +44,16 @@ private:
     float table_height_;
 
     //before walking
-    const std::vector<float> leftNearChestGrasp_    = {-1.70, -1.04, 1.39, -1.85, -1.10, 0, 0};
+    const std::vector<float> leftNearChestPalmDown_    = {-1.70, -1.04, 1.39, -1.85, -1.10, 0, 0};
+    const std::vector<float> leftNearChestPalmUp_    = {-1.70, -1.04, 1.39, -1.85, 1.10, 0, 0};
     const std::vector<float> leftSeedNonGraspingHand_ = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};
     //while walking
     const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.38, -1.29, 0.99, -1.35, -0.26, 0.0, 0.0};
 
 
     //before walking
-    const std::vector<float> rightNearChestGrasp_     = {-1.70, 1.04, 1.39, 1.85, -1.10, 0, 0};
+    const std::vector<float> rightNearChestPalmDown_     = {-1.70, 1.04, 1.39, 1.85, -1.10, 0, 0};
+    const std::vector<float> rightNearChestPalmUp_     = {-1.70, 1.04, 1.39, 1.85, 1.10, 0, 0};
     const std::vector<float> rightSeedNonGraspingHand_ = {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0};
     //while walking
     const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.38, 1.29, 0.99, 1.35, -0.26, 0.0, 0.0};
@@ -59,13 +61,13 @@ private:
     // panel placement poses
     const std::vector<float> leftPanelPlacementUpPose1_  = {-1.5, -1.4, 1.39, -0.9, -1.10, 0.5, 0};
     const std::vector<float> leftPanelPlacementDownPose1_= {-1.2, -1.4, 1.39, -0.9, -1.10, 0.5, 0.4};
-    const std::vector<float> leftPanelPlacementPose2_  = {};
+
     const std::vector<float> leftPanelPlacementSupport1_  = {-0.66, -1.4, 1.2, -1.49, 1.29, 0, 0.26};
     const std::vector<float> leftPanelPlacementSupport2_  = {-0.66, -1.4, 0.75, -1.49, 1.29, 0, 0.26};
 
     const std::vector<float> rightPanelPlacementUpPose1_ = {-1.5, 1.4, 1.39, 0.9, -1.10, -0.5, 0};
     const std::vector<float> rightPanelPlacementDownPose1_= {-1.2, 1.4, 1.39, 0.9, -1.10, -0.5, 0.4};
-    const std::vector<float> rightPanelPlacementPose2_ = {};
+
     const std::vector<float> rightPanelPlacementSupport1_  = {-0.66, 1.4, 1.2, 1.49, 1.29, 0, 0.26};
     const std::vector<float> rightPanelPlacementSupport2_  = {-0.66, 1.4, 0.75, 1.49, 1.29, 0, 0.26};
 
@@ -73,7 +75,9 @@ private:
     const std::vector<double> leftHandGrasp_          = {1.2, -0.6, -0.77, -0.9, -0.9};
     const std::vector<double> rightHandGrasp_         = {1.2,  0.6,  0.77,  0.9,  0.9};
 
-    void moveToPlacePanelPose2(const armSide graspingHand);
+    //Swapping sides of bag
+    std::vector<armTrajectory::armJointData> reOrientPanelTraj_;
+
     void taskStatusCB(const srcsim::Task &msg);
 
 public:
@@ -83,6 +87,7 @@ public:
     void movePanelToWalkSafePose(const armSide side);
     bool isPanelPicked(const armSide side);
     void moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel);
+    void rotatePanel(const armSide graspingHand);
     void clearPointCloud();
     void pausePointCloud();
     void resumePointCloud();

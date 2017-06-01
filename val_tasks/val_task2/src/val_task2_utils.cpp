@@ -25,6 +25,13 @@ task2Utils::task2Utils(ros::NodeHandle nh):
 
     task_status_sub_        = nh_.subscribe("/srcsim/finals/task", 10, &task2Utils::taskStatusCB, this);
 
+    reOrientPanelTraj_.resize(2);
+    reOrientPanelTraj_[0].arm_pose = {-1.2, -1.04, 2.11, -0.85, -1.1, 0, 0.29};
+    reOrientPanelTraj_[0].time = 1;
+
+    reOrientPanelTraj_[1].arm_pose = {-1.2, -1.04, 2.11, -0.85, 1.21, 0, 0.29};
+    reOrientPanelTraj_[1].time = 2;
+
 }
 
 task2Utils::~task2Utils()
@@ -46,12 +53,12 @@ void task2Utils::afterPanelGraspPose(const armSide side)
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
-        seed1 = &leftNearChestGrasp_;
+        seed1 = &leftNearChestPalmDown_;
         seed2 = &rightSeedNonGraspingHand_;
     }
     else
     {
-        seed1 = &rightNearChestGrasp_;
+        seed1 = &rightNearChestPalmDown_;
         seed2 = &leftSeedNonGraspingHand_;
     }
 
@@ -122,16 +129,14 @@ bool task2Utils::isPanelPicked(const armSide side)
 void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel)
 {
     if (rotatePanel) {
-        return moveToPlacePanelPose2(graspingHand);
+        return;
     }
 
     armSide nonGraspingHand = (armSide) !graspingHand;
-    // take non-GraspingHand out
-//    arm_controller_->moveToZeroPose(nonGraspingHand);
 
     // raise pelvis
-    pelvis_controller_->controlPelvisHeight(1.1);
-    ros::Duration(2).sleep();
+//    pelvis_controller_->controlPelvisHeight(1.1);
+//    ros::Duration(2).sleep();
 
     const std::vector<float> *graspingHandPoseUp, *graspingHandPoseDown, *nonGraspingHandPose2, *nonGraspingHandPose1;
 
@@ -164,11 +169,12 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     gripper_controller_->openGripper(graspingHand);
     ros::Duration(0.5).sleep();
 
-    //{-1.3, -1.4, 1.39, -0.9, -1.10, 0.5, 0.3};
-    armData.clear();
-    armData.push_back(*graspingHandPoseDown);
-    arm_controller_->moveArmJoints(graspingHand, armData, 1.0f);
-    ros::Duration(1).sleep();
+    if (isPanelPicked(graspingHand)){
+        armData.clear();
+        armData.push_back(*graspingHandPoseDown);
+        arm_controller_->moveArmJoints(graspingHand, armData, 1.0f);
+        ros::Duration(1).sleep();
+    }
 
     std::vector<armTrajectory::armJointData> pushPanel;
     pushPanel.resize(2);
@@ -182,6 +188,44 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
 
     arm_controller_->moveArmJoints(pushPanel);
     ros::Duration(3).sleep();
+
+}
+
+void task2Utils::rotatePanel(const armSide graspingHand)
+{
+    armSide nonGraspingHand = (armSide) !graspingHand;
+    gripper_controller_->closeGripper(graspingHand);
+
+    const std::vector<float> *graspingHandPoseUp;
+    float tempOffset;
+    if(graspingHand == armSide::LEFT){
+        graspingHandPoseUp = &leftNearChestPalmUp_;
+        tempOffset = 0.5;
+    }
+    else
+    {
+        graspingHandPoseUp = &rightNearChestPalmUp_;
+        tempOffset = -0.5;
+    }
+    // take non-GraspingHand out
+    arm_controller_->moveArmJoint(nonGraspingHand, 3, tempOffset);
+    ros::Duration(1).sleep();
+
+    // set armside for precalculated trajectory
+    for (int i = 0; i < reOrientPanelTraj_.size(); ++i){
+        reOrientPanelTraj_[i].side = graspingHand;
+    }
+
+    arm_controller_->moveArmJoints(reOrientPanelTraj_);
+    ros::Duration(3).sleep();
+
+    std::vector< std::vector<float> > armData;
+    armData.clear();
+    armData.push_back(*graspingHandPoseUp);
+    arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
+    ros::Duration(2).sleep();
+    arm_controller_->moveArmJoint(nonGraspingHand, 3, -1*tempOffset);
+    ros::Duration(1).sleep();
 
 }
 
@@ -263,10 +307,6 @@ bool task2Utils::isCableInHand(armSide side)
 }
 
 
-void task2Utils::moveToPlacePanelPose2(const armSide graspingHand){
-
-}
-
 void task2Utils::taskStatusCB(const srcsim::Task &msg)
 {
     if (msg.current_checkpoint != current_checkpoint_){
@@ -279,6 +319,7 @@ void task2Utils::taskStatusCB(const srcsim::Task &msg)
 void task2Utils::clearPointCloud() {
     std_msgs::Empty msg;
     reset_pointcloud_pub.publish(msg);
+    ros::Duration(0.3).sleep();
 }
 
 void task2Utils::clearBoxPointCloud() {

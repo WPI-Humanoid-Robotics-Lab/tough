@@ -4,22 +4,25 @@ int main(int argc, char** argv)
 {
     ros::init (argc,argv,"findCableDetector");
     ros::NodeHandle nh;
+    ros::Publisher pub;
+    ros::Rate loop(1);
+    pub = nh.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
     int numIterations = 0;
-    bool foundCable = false;
     bool foundStandPos = false;
     geometry_msgs::Point CableLoc;
-    geometry_msgs::Point StandLoc;
+    geometry_msgs::Pose StandLoc;
     CableDetector c1(nh);
-    foundCable = c1.findCable(CableLoc);
-    while(ros::ok())
-    //while (!foundCable && numIterations < 20)
-    {
 
-        foundStandPos = c1.getStandPosition(StandLoc);
-        //ROS_INFO(foundCable ? "***** Cable detected" : "xxxxx Cable not detected");
+    //while (!c1.findCable(CableLoc)){
+    while(ros::ok()){
+        c1.findCable(CableLoc);
+            //while (!foundCable && numIterations < 20)
+        ROS_INFO("Cable location x:%f y:%f z:%f", CableLoc.x, CableLoc.y, CableLoc.z);
         ros::spinOnce();
-        numIterations++;
     }
+
+
+
 
 }
 
