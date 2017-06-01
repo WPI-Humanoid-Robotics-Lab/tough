@@ -274,27 +274,25 @@ int task2Utils::getCurrentCheckpoint() const{
     return current_checkpoint_;
 }
 
-bool task2Utils::isCableOnTable()
+bool task2Utils::isCableOnTable(geometry_msgs::Pose &cable_coordinates)
 {
     // this function checks the z coordinate of the cable location and verifies if this matches the height of the table with some tolerance
-    if(cable_detector_ == nullptr)
-    cable_detector_= new CableDetector(nh_);
 
-    geometry_msgs::Pose cable_coordinates_;
     float tolerance =0.1; // experimental value
 
-    if( cable_detector_->findCable(cable_coordinates_)){
-        if(cable_coordinates_.position.z < table_height_ + tolerance && cable_coordinates_.position.z > table_height_ - tolerance)
-        {
-            return true;
-        }
-        else false;
+    if( cable_detector_->findCable(cable_coordinates)){
+       return ((cable_coordinates.position.z < table_height_ + tolerance) && (cable_coordinates.position.z > table_height_ - tolerance));
     }
 }
 
 bool task2Utils::isCableInHand(armSide side)
 {
      // this function rotates the hand slighly to detect the cable and brings it back to same position
+    /// @todo : 1. Move hand to a position which can be seen by stereo cams
+    /// 2. get the pose of hand frame
+    /// 3. get position of cable
+    /// 4. compare and return the result
+
     std::string jointName = side ==LEFT ? "leftForearmYaw" : "rightForearmYaw";
     float finalJointValue = side ==LEFT ? 1.2 : -1.2;
     float initialJointValue =current_state_->getJointPosition(jointName);
@@ -306,6 +304,11 @@ bool task2Utils::isCableInHand(armSide side)
 
 }
 
+bool task2Utils::isCableTouchingSocket()
+{
+    return taskMsg.checkpoints_completion.size() > 2;
+}
+
 bool task2Utils::shakeTest(const armSide graspingHand)
 {
     ROS_INFO("task2Utils::shakeTest : Closing, opening and reclosing grippers to see if the panel falls off");
@@ -315,6 +318,7 @@ bool task2Utils::shakeTest(const armSide graspingHand)
 
 void task2Utils::taskStatusCB(const srcsim::Task &msg)
 {
+    taskMsg = msg;
     if (msg.current_checkpoint != current_checkpoint_){
         current_checkpoint_ = msg.current_checkpoint;
         ROS_INFO("task2Utils::taskStatusCB : Current checkpoint : %d", current_checkpoint_);

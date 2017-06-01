@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include "val_task_common/val_task_common_utils.h"
 #include "val_control_common/val_control_common.h"
+#include "val_task2/val_task2_utils.h"
+#include "val_control_common/val_control_common.h"
 
 #define Y_OFFSET 0.05
 
@@ -22,7 +24,7 @@ public:
     ~CableTask();
    bool grasp_choke(armSide side, const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool grasp_cable(const geometry_msgs::Pose &goal, float executionTime=2.0f);
-
+   bool insert_cable(const geometry_msgs::Point &goal, float executionTime=2.0f);
 private:
    ros::NodeHandle nh_;
    tf::TransformListener listener_;
@@ -36,7 +38,8 @@ private:
    chestTrajectory* chest_controller_;
    wholebodyManipulation* wholebody_controller_;
    geometry_msgs::QuaternionStamped rightHandOrientationTop_ ;
-
+   task2Utils* task2_utils_;
+   valControlCommon* control_common_;
 
    /*Top Grip*/
 //   const std::vector<float> leftShoulderSeed_ = {-0.23, -0.07, 0.75, -1.53, 1.21, -0.40, 0.0};

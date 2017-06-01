@@ -57,6 +57,9 @@ valTask2::valTask2(ros::NodeHandle nh):
     button_press_               = nullptr;
     cable_task_                 = nullptr;
     cable_detector_             = nullptr;
+    socket_detector_            = nullptr;
+    finish_box_detector_        = nullptr;
+
     //utils
     task2_utils_    = new task2Utils(nh_);
     robot_state_    = RobotStateInformer::getRobotStateInformer(nh_);
@@ -64,9 +67,10 @@ valTask2::valTask2(ros::NodeHandle nh):
     // Variables
     map_update_count_ = 0;
     is_rotation_required_ = false;
-        panel_grasping_hand_ = armSide::RIGHT;
+    panel_grasping_hand_ = armSide::RIGHT;
     // Subscribers
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask2::occupancy_grid_cb, this);
+    visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask2::visited_map_cb, this);
 }
 
 // destructor
@@ -88,6 +92,10 @@ bool valTask2::preemptiveWait(double ms, decision_making::EventQueue& queue) {
     for (int i = 0; i < 100 && !queue.isTerminated(); i++)
         boost::this_thread::sleep(boost::posix_time::milliseconds(ms / 100.0));
     return queue.isTerminated();
+}
+void valTask2::visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg)
+{
+    visited_map_ = *msg;
 }
 
 // This functions are called based on the remaping in the main.
@@ -776,7 +784,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
 
         if(cable_detector_ != nullptr) delete cable_detector_;
         cable_detector_ = nullptr;
-//        head_controller_->moveHead(0, 0, 0);
+        //        head_controller_->moveHead(0, 0, 0);
     }
 
 
@@ -1121,7 +1129,7 @@ decision_making::TaskResult valTask2::detectCableTask(string name, const FSMCall
 
     static int retry_count = 0;
 
-    if (retry_count == 0){
+    if (retry_count == 0 ){
         //tilt head downwards to see the panel
         head_controller_->moveHead(0.0f, 40.0f, 0.0f, 2.0f);
         //wait for head to be in position
@@ -1129,14 +1137,11 @@ decision_making::TaskResult valTask2::detectCableTask(string name, const FSMCall
     }
 
     //detect cable
-    if( cable_detector_->findCable(cable_coordinates_)){
+    if( cable_detector_->findCable(cable_pose_)){
 
-        ROS_INFO_STREAM("valTask2::detectCableTask : Cable detected at "<<cable_coordinates_.position.x<< " , "<<cable_coordinates_.position.y<<" , "<<cable_coordinates_.position.z);
+        ROS_INFO_STREAM("valTask2::detectCableTask : Cable detected at "<<cable_pose_.position.x<< " , "<<cable_pose_.position.y<<" , "<<cable_pose_.position.z);
 
         retry_count = 0;
-        if (cable_detector_ != nullptr) delete cable_detector_;
-        cable_detector_ = nullptr;
-
         // generate the event
         eventQueue.riseEvent("/DETECTED_CABLE");
     }
@@ -1144,7 +1149,7 @@ decision_making::TaskResult valTask2::detectCableTask(string name, const FSMCall
         ROS_INFO("valTask2::detectCableTask : Did not detect cable, retrying");
         eventQueue.riseEvent("/DETECT_CABLE_RETRY");
     }
-    else{
+    else {
         ROS_INFO("valTask2::detectCableTask : Did not detect cable, failed");
         eventQueue.riseEvent("/DETECT_CABLE_FAILED");
         retry_count = 0;
@@ -1170,61 +1175,280 @@ decision_making::TaskResult valTask2::pickCableTask(string name, const FSMCallCo
      * else - fail
      */
     static int retry = 0;
-    if(cable_task_ ==nullptr)
+
+    if(cable_task_ == nullptr)
     {
         cable_task_ = new CableTask(nh_);
     }
-    static bool done =false;
-    static int retry=0;
-    if(task2_utils_->getCurrentCheckpoint() == 4 && done)
+
+    if (task2_utils_->isCableOnTable(cable_pose_)){
+
+        ROS_INFO("valTask2::pickCableTask : Picking up the cable");
+        cable_task_->grasp_choke(armSide::RIGHT,cable_pose_);
+        ros::Duration(1).sleep();
+    }
+
+    if(task2_utils_->getCurrentCheckpoint() == 4 && task2_utils_->isCableInHand(armSide::RIGHT))    //always use right hand for cable pickup
     {
+        ROS_INFO("valTask2::pickCableTask : Picked up cable");
         // go to next state
-        eventQueue.riseEvent("/DEPLOYED");
+        eventQueue.riseEvent("/CABLE_PICKED");
+
     }
     else if(retry <5)
     {
-        cable_task_->grasp_choke(RIGHT,cable_coordinates_);
+        ROS_INFO("valTask2::pickCableTask : Failed picking up the cable. Retrying detection");
         retry++;
+        // drop cable motion here
+        eventQueue.riseEvent("/PICKUPCABLE_RETRY");
     }
-    else if(task2_utils_->getCurrentCheckpoint() == 5)
+    else
     {
-        done=true;
+        ROS_INFO("valTask2::pickCableTask : Failed picking the cable.");
+        if (cable_detector_ != nullptr) delete cable_detector_;
+        cable_detector_ = nullptr;
+        eventQueue.riseEvent("/PICKUP_CABLE_FAILED");
     }
 
-
-        // generate the event
-    eventQueue.riseEvent("/PICKUPCABLE_RETRY");
-    eventQueue.riseEvent("/CABLE_PICKED");
-    eventQueue.riseEvent("/PICKUP_CABLE_FAILED");
+    // generate the event
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("valTask2::pickCableTask : waiting for transition");
+    }
 
     return TaskResult::SUCCESS();
+}
+
+TaskResult valTask2::detectSocketTask(string name, const FSMCallContext &context, EventQueue &eventQueue)
+{
+    ROS_INFO_STREAM("valTask2::detectSocketTask : executing " << name);
+    if (socket_detector_ == nullptr){
+        socket_detector_ = new plug_detector(nh_);
+    }
+
+    static int retry_count = 0;
+
+    if (retry_count == 0){
+        //tilt head downwards to see the panel
+        head_controller_->moveHead(0.0f, 40.0f, 0.0f);
+        //wait for head to be in position
+        ros::Duration(2).sleep();
+    }
+
+    //detect socket
+    if( socket_detector_->findPlug(socket_coordinates_)){
+
+        ROS_INFO_STREAM("valTask2::detectSocketTask : Socket detected at "<<socket_coordinates_.x<< " , "<<socket_coordinates_.y<<" , "<<socket_coordinates_.z);
+
+        // generate the event
+        eventQueue.riseEvent("/DETECTED_SOCKET");
+
+        if (socket_detector_ != nullptr) delete socket_detector_;
+        socket_detector_ = nullptr;
+    }
+    else if( retry_count++ < 10){
+        ROS_INFO("valTask2::detectSocketTask : Did not detect button, retrying");
+        eventQueue.riseEvent("/DETECT_SOCKET_RETRY");
+    }
+    else{
+        ROS_INFO("valTask2::detectSocketTask : Did not detect button, failed");
+        eventQueue.riseEvent("/DETECT_SOCKET_FAILED");
+        retry_count = 0;
+        if (socket_detector_ != nullptr) delete socket_detector_;
+        socket_detector_ = nullptr;
+    }
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("valTask2::alignSolarArrayTask : waiting for transition");
+    }
+
+    return TaskResult::SUCCESS();
+
 }
 
 decision_making::TaskResult valTask2::plugCableTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
 
-    // generate the event
-    eventQueue.riseEvent("/REACHED_ROVER");
+    if (cable_task_ != nullptr) delete cable_task_;
+    cable_task_ = nullptr;
 
+    static int retry=0;
+    static int fail =0;
+
+    //    Checkpoint 5: Plug the power cable into the solar panel
+    if(cable_task_->insert_cable(socket_coordinates_) && task2_utils_->getCurrentCheckpoint() == 5)
+    {
+        ROS_INFO("valTask2::plugCableTask plugged the cable succesfully. going to next state");
+        eventQueue.riseEvent("/CABLE_PLUGGED");
+    }
+    else if(task2_utils_->isCableInHand(armSide::RIGHT) && retry <5)
+    {
+        ROS_INFO("valTask2::plugCableTask cable is in hand. attempting to retry plugging the cable");
+        retry++;
+        eventQueue.riseEvent("/PLUGIN_CABLE_RETRY");
+    }
+    else if(fail <5)
+    {
+        ///@todo function to drop cable at seed point
+        ROS_INFO("valTask2::plugCableTask retried 5 times. going back to detect the cable");
+        fail++;
+        retry=0;
+        eventQueue.riseEvent("/REDETECT_CABLE");
+    }
+    else
+    {
+        ROS_INFO("valTask2::plugCableTask failed all attempts. going to error state");
+        eventQueue.riseEvent("/PLUGIN_CABLE_FAILED");
+    }
     return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult valTask2::detectfinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask2::detectFinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("valTask2::detectFinishBoxTask :executing " << name);
 
+    static int retry_count = 0;
     // generate the event
-    //eventQueue.riseEvent("/INIT_SUCESSUFL");
+    if (finish_box_detector_ == nullptr){
+        finish_box_detector_ = new FinishBoxDetector(nh_);
+        ros::Duration(2).sleep();   // map is updated every 2 sec
+    }
+
+    std::vector<geometry_msgs::Point> detections;
+    if(visited_map_.data.empty()){
+        retry_count++;
+        ROS_INFO("valTask2::detectFinishBoxTask: visited map is empty");
+        ros::Duration(3).sleep();   // this will execute only when visited map is not updated which should never happen
+        eventQueue.riseEvent("/DETECT_FINISH_RETRY");
+    } else  if(finish_box_detector_->getFinishBoxCenters(detections)){
+        for(size_t i = 0; i < detections.size(); ++i){
+            size_t index = MapGenerator::getIndex(detections[i].x, detections[i].y);
+            ROS_INFO("Index in map %d and size of visited map is %d", (int)index, (int)visited_map_.data.size());
+            if(visited_map_.data.at(index) == CELL_STATUS::VISITED){
+                continue;
+            }
+
+            next_finishbox_center_.x = detections[i].x;
+            next_finishbox_center_.y = detections[i].y;
+            next_finishbox_center_.theta = atan2(next_finishbox_center_.y, next_finishbox_center_.x);
+            ROS_INFO("detectFinishBoxTask: Successful");
+            eventQueue.riseEvent("/DETECT_FINISH_SUCESSFUL");
+            if(finish_box_detector_ != nullptr) delete finish_box_detector_;
+            finish_box_detector_ = nullptr;
+            //sleep is required to avoid moving to next state before subscriber is shutdown
+//            ros::Duration(2).sleep();
+            break;
+        }
+        // this is to avoid detecting points that will always be in collision
+        retry_count++;
+    }
+    else if(retry_count++ < 5){
+        ros::Duration(3).sleep();   // map is updated every 4 sec
+        eventQueue.riseEvent("/DETECT_FINISH_RETRY");
+    }
+    else{
+        eventQueue.riseEvent("/DETECT_FINISH_FAILED");
+        if(finish_box_detector_ != nullptr) delete finish_box_detector_;
+        finish_box_detector_ = nullptr;
+        //sleep is required to avoid moving to next state before subscriber is shutdown
+//        ros::Duration(2).sleep();
+    }
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("detectfinishBoxTask: waiting for transition");
+    }
 
     return TaskResult::SUCCESS();
+
 }
 
-decision_making::TaskResult valTask2::walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
-{
-    ROS_INFO_STREAM("executing " << name);
+decision_making::TaskResult valTask2::walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue) {
 
-    eventQueue.riseEvent("/WALK_TO_END");
+    ROS_INFO_STREAM("valTask2::walkToFinishTask : executing " << name);
+
+    static bool execute_once = true;
+
+    if (execute_once){
+        // set the robot to default state to walk
+        gripper_controller_->openGripper(armSide::RIGHT);
+        ros::Duration(0.2).sleep();
+        gripper_controller_->openGripper(armSide::LEFT);
+        ros::Duration(1).sleep();
+        pelvis_controller_->controlPelvisHeight(0.9);
+        ros::Duration(0.2).sleep();
+        chest_controller_->controlChest(0.0, 0.0, 0.0);
+        ros::Duration(0.2).sleep();
+        arm_controller_->moveToDefaultPose(armSide::LEFT);
+        ros::Duration(0.2).sleep();
+        arm_controller_->moveToDefaultPose(armSide::RIGHT);
+        ros::Duration(0.2).sleep();
+        execute_once = false;
+    }
+
+    static int fail_count = 0;
+
+    // walk to the goal location
+
+    static geometry_msgs::Pose2D pose_prev;
+
+    geometry_msgs::Pose current_pelvis_pose;
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+
+    // check if the pose is changed
+    if ( taskCommonUtils::isGoalReached(current_pelvis_pose, next_finishbox_center_)) {
+        ROS_INFO("walkToFinishTask: reached panel");
+        // TODO: check if robot rechead the panel
+        eventQueue.riseEvent("/WALK_TO_FINISH_SUCESSFUL");
+    }
+    // the goal can be updated on the run time
+    else if (taskCommonUtils::isPoseChanged(pose_prev, next_finishbox_center_))
+    {
+        ROS_INFO("walkToFinishTask: pose changed");
+        walker_->walkToGoal(next_finishbox_center_, false);
+        ROS_INFO("walkToFinishTask: Footsteps should be published now");
+        // sleep so that the walk starts
+        ros::Duration(4).sleep();
+
+        // update the previous pose
+        pose_prev = next_finishbox_center_;
+        eventQueue.riseEvent("/WALK_TO_FINISH_EXECUTING");
+    }
+
+    // if walking stay in the same state
+    else if (walk_track_->isWalking())
+    {
+        // no state change
+        ROS_INFO_THROTTLE(2, "walking");
+        eventQueue.riseEvent("/WALK_TO_FINISH_EXECUTING");
+    }
+    // if walk finished
+    // TODO change to see if we are at the goal
+    // if failed for more than 5 times, go to error state
+    else if (fail_count > 5)
+    {
+        // reset the fail count
+        fail_count = 0;
+        ROS_INFO("walkToFinishTask: walk failed");
+        eventQueue.riseEvent("/WALK_TO_FINISH_ERROR");
+    }
+    // if failed retry detecting the panel and then walk
+    // also handles MOVE_FAILED
+    else
+    {
+        // increment the fail count
+        fail_count++;
+        ROS_INFO("walkToFinishTask: walk retry");
+        eventQueue.riseEvent("/WALK_TO_FINISH_RETRY");
+    }
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("walkToFinishTask: waiting for transition");
+    }
+
     return TaskResult::SUCCESS();
 }
 

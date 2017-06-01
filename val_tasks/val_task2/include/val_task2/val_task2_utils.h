@@ -39,7 +39,7 @@ private:
     ros::Subscriber task_status_sub_;
 
     CableDetector* cable_detector_;
-
+    srcsim::Task taskMsg;
     int current_checkpoint_;
     float table_height_;
 
@@ -93,8 +93,9 @@ public:
     void resumePointCloud();
     void clearBoxPointCloud();
     void reOrientTowardsPanel(geometry_msgs::Pose panelPose);
-    int getCurrentCheckpoint() const;
+    int  getCurrentCheckpoint() const;
     bool shakeTest(const armSide graspingHand);
-    bool isCableOnTable();
+    bool isCableOnTable(geometry_msgs::Pose &cable_coordinates);
     bool isCableInHand(armSide side);
+    bool isCableTouchingSocket();
 };
