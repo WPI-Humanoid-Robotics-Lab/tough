@@ -43,7 +43,9 @@ class CableDetector
     src_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
     std::vector<cv::Point2d> eigenVecs_;
-    geometry_msgs::Point dirVector_;
+    std::vector<cv::Point> convexHulls_;
+    geometry_msgs::PointStamped geom_point0_;
+    geometry_msgs::Pose pose_;
     RobotStateInformer* robot_state_;
 
     void visualize_direction(geometry_msgs::Point point1, geometry_msgs::Point point2);
@@ -61,9 +63,15 @@ public:
 
     size_t findMaxContour(const std::vector<std::vector<cv::Point> >& contours);
     bool getCableLocation(geometry_msgs::Point &);
-    std::vector<cv::Point> getOrientation(const std::vector<cv::Point> &, cv::Mat &);
+    bool getCablePose(geometry_msgs::Pose& cablePose);
+    std::vector<cv::Point> getCentroid(const std::vector<cv::Point> &, cv::Mat &);
     bool findCable(geometry_msgs::Point &);
+    bool findCable(geometry_msgs::Pose &);
 
+
+    geometry_msgs::Pose getPose() const;
+
+    geometry_msgs::PointStamped getOffsetPoint() const;
 
 };
 
