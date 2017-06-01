@@ -27,6 +27,7 @@ void task2Node::registerStateMethods(void)
     LocalTasks::registrate("STATE_PICK_SOLAR_PANEL",           std::bind(&valTask2::pickPanelTask,           task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_DETECT_SOLAR_ARRAY",         std::bind(&valTask2::detectSolarArrayTask,    task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_WALK_TO_SOLAR_ARRAY",        std::bind(&valTask2::walkSolarArrayTask,      task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_ROTATE_PANEL",               std::bind(&valTask2::rotatePanelTask,         task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_DETECT_SOLAR_ARRAY_FINE",    std::bind(&valTask2::detectSolarArrayFineTask,task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_ALIGN_TO_SOLAR_ARRAY",       std::bind(&valTask2::alignSolarArrayTask,     task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_PLACE_SOLAR_PANEL_ON_GROUND",std::bind(&valTask2::placePanelTask,          task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -34,8 +35,9 @@ void task2Node::registerStateMethods(void)
     LocalTasks::registrate("STATE_DEPLOY_SOLAR_PANEL",         std::bind(&valTask2::deployPanelTask,         task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_DETECT_POWER_CABLE",         std::bind(&valTask2::detectCableTask,         task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_PICKUP_POWER_CABLE",         std::bind(&valTask2::pickCableTask,           task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_DETECT_SOCKET",              std::bind(&valTask2::detectSocketTask,         task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_PLUGIN_POWER_CABLE",         std::bind(&valTask2::plugCableTask,           task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-    LocalTasks::registrate("STATE_DETECT_FINISH",              std::bind(&valTask2::detectfinishBoxTask,     task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_DETECT_FINISH",              std::bind(&valTask2::detectFinishBoxTask,     task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_WALK_TO_FINISH",             std::bind(&valTask2::walkToFinishTask,        task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_END",                        std::bind(&valTask2::endTask,                 task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_ERROR",                      std::bind(&valTask2::errorTask,               task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));

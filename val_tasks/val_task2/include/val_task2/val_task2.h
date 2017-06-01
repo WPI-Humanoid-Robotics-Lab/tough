@@ -34,6 +34,9 @@
 #include <val_task2/val_task2_utils.h>
 #include <val_task2/button_press.h>
 #include <val_task2/cable_task.h>
+#include "val_task2/plug_detector.h"
+#include "val_task_common/finish_box_detector.h"
+#include "navigation_common/map_generator.h"
 
 using namespace decision_making;
 
@@ -78,7 +81,10 @@ class valTask2 {
     ButtonPress* button_press_;
     // Pick Cable Task
     CableTask* cable_task_;
-
+    // socket detector
+    plug_detector* socket_detector_;
+    // finish box detector
+    FinishBoxDetector* finish_box_detector_;
 
     // chest controller
     chestTrajectory* chest_controller_;
@@ -112,8 +118,11 @@ class valTask2 {
     bool is_array_on_right_;
 
     geometry_msgs::Point button_coordinates_;
+    geometry_msgs::Point button_coordinates_temp_; // this is used for deciding if rotation of panel is required
 
-    geometry_msgs::Pose cable_coordinates_;
+    geometry_msgs::Point socket_coordinates_;
+
+    geometry_msgs::Pose cable_pose_;
 
     armSide panel_grasping_hand_;
 
@@ -121,6 +130,15 @@ class valTask2 {
     void initDetectors();
 
     static valTask2* currentObject;
+
+    bool is_rotation_required_;
+    // Visited map
+    ros::Subscriber visited_map_sub_;
+    void visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg);
+    nav_msgs::OccupancyGrid visited_map_;
+
+    geometry_msgs::Pose2D next_finishbox_center_;
+
     public:
 
 
@@ -143,11 +161,13 @@ class valTask2 {
     decision_making::TaskResult deployPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectCableTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult pickCableTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectSocketTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult plugCableTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    decision_making::TaskResult detectfinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectFinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult rotatePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     geometry_msgs::Pose2D getPanelWalkGoal();
 
     void setRoverWalkGoal(const std::vector<geometry_msgs::Pose2D> &rover_walk_goal);
@@ -158,4 +178,5 @@ class valTask2 {
     void setSolarArrayFineWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal);
     void setSolarArraySide(const bool isSolarArrayOnRight);
     void setPanelGraspingHand(armSide side);
+    void setIsRotationRequired(bool value);
 };

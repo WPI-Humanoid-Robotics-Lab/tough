@@ -57,7 +57,7 @@ size_t CableDetector::findMaxContour(const std::vector<std::vector<cv::Point> >&
             largest_contour_index = i;
         }
     }
-
+    ROS_INFO_STREAM(" Largest Area "<< largest_area << std::endl);
     convexHulls_ = hull[largest_contour_index];
 
     return largest_contour_index;
@@ -439,7 +439,7 @@ void CableDetector::setTrackbar()
 
 void CableDetector::visualize_point(geometry_msgs::Point point, double r, double g, double b){
 
-    std::cout<< "goal origin :\n"<< point << std::endl;
+    //std::cout<< "goal origin :\n"<< point << std::endl;
     static int id = 0;
     visualization_msgs::Marker marker;
     // Set the frame ID and timestamp.  See the TF tutorials for information on these.
