@@ -13,6 +13,7 @@
 #include <val_controllers/val_head_navigation.h>
 #include <val_controllers/val_arm_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
+#include <val_task2/cable_detector.h>
 #include "ros/package.h"
 #include <fstream>
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -100,4 +101,5 @@ public:
     int getCurrentCheckpoint() const;
     boost::posix_time::ptime timeNow;
     bool isCableInHand(armSide side);
+    bool isCableOnTable();
 };
