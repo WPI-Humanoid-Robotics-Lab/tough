@@ -271,6 +271,12 @@ int task2Utils::getCurrentCheckpoint() const{
     return current_checkpoint_;
 }
 
+bool task2Utils::shakeTest(const armSide graspingHand)
+{
+    ROS_INFO("task2Utils::shakeTest : Closing, opening and reclosing grippers to see if the panel falls off");
+
+}
+
 
 void task2Utils::taskStatusCB(const srcsim::Task &msg)
 {

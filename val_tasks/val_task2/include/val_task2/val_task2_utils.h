@@ -90,4 +90,5 @@ public:
     void clearBoxPointCloud();
     void reOrientTowardsPanel(geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
+    bool shakeTest(const armSide graspingHand);
 };

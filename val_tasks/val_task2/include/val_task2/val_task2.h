@@ -110,7 +110,7 @@ class valTask2 {
 
     geometry_msgs::Point button_coordinates_;
 
-    geometry_msgs::Point cable_coordinates_;
+    geometry_msgs::Pose cable_coordinates_;
 
     armSide panel_grasping_hand_;
 
@@ -118,6 +118,9 @@ class valTask2 {
     void initDetectors();
 
     static valTask2* currentObject;
+
+    bool is_rotation_required_;
+
     public:
 
 
@@ -145,6 +148,7 @@ class valTask2 {
     decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult rotatePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     geometry_msgs::Pose2D getPanelWalkGoal();
 
     void setRoverWalkGoal(const std::vector<geometry_msgs::Pose2D> &rover_walk_goal);
@@ -155,4 +159,5 @@ class valTask2 {
     void setSolarArrayFineWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal);
     void setSolarArraySide(const bool isSolarArrayOnRight);
     void setPanelGraspingHand(armSide side);
+    void setIsRotationRequired(bool value);
 };
