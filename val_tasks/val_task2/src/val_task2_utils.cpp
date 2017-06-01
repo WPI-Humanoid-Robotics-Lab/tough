@@ -135,8 +135,8 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     armSide nonGraspingHand = (armSide) !graspingHand;
 
     // raise pelvis
-//    pelvis_controller_->controlPelvisHeight(1.1);
-//    ros::Duration(2).sleep();
+    //    pelvis_controller_->controlPelvisHeight(1.1);
+    //    ros::Duration(2).sleep();
 
     const std::vector<float> *graspingHandPoseUp, *graspingHandPoseDown, *nonGraspingHandPose2, *nonGraspingHandPose1;
 
@@ -278,7 +278,7 @@ bool task2Utils::isCableOnTable()
 {
     // this function checks the z coordinate of the cable location and verifies if this matches the height of the table with some tolerance
     if(cable_detector_ == nullptr)
-    cable_detector_= new CableDetector(nh_);
+        cable_detector_= new CableDetector(nh_);
 
     geometry_msgs::Pose cable_coordinates_;
     float tolerance =0.1; // experimental value
@@ -294,15 +294,23 @@ bool task2Utils::isCableOnTable()
 
 bool task2Utils::isCableInHand(armSide side)
 {
-     // this function rotates the hand slighly to detect the cable and brings it back to same position
-    std::string jointName = side ==LEFT ? "leftForearmYaw" : "rightForearmYaw";
-    float finalJointValue = side ==LEFT ? 1.2 : -1.2;
-    float initialJointValue =current_state_->getJointPosition(jointName);
+    // this function rotates the hand slighly to detect the cable and brings it back to same position
+    std::string arm = side == LEFT ? "left_arm" : "right_arm";
+    std::vector<float> jointPositions;
+    current_state_->getJointPositions(arm,jointPositions);
 
-    arm_controller_->moveArmJoint(side,4,finalJointValue);
-    ros::Duration(2).sleep();
-    /// @todo detection part
-    arm_controller_->moveArmJoint(side,4,initialJointValue);
+    std::vector< std::vector<float> > armData;
+    armData.push_back(righCableInHandSeed_);
+    arm_controller_->moveArmJoints(side, armData,2.0f);
+    ros::Duration(3).sleep();
+
+    ///@todo detection part goes here
+
+//    armData.clear();
+//    armData.push_back(jointPositions);
+//    arm_controller_->moveArmJoints(side, armData,2.0f);
+//    ros::Duration(0.2).sleep();
+
 
 }
 
