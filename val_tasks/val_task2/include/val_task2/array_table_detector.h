@@ -57,7 +57,6 @@ private:
     ros::Publisher pcl_pub_;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_;
     ros::Publisher marker_pub_;
-    visualization_msgs::Marker markers_;
     geometry_msgs::Point cable_loc_;
     std::mutex mtx_;
     RobotStateInformer* robot_state_;

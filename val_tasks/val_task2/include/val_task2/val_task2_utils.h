@@ -40,17 +40,22 @@ private:
 
     ros::Subscriber task_status_sub_;
 
+    CableDetector* cable_detector_;
+
     int current_checkpoint_;
+    float table_height_;
 
     //before walking
-    const std::vector<float> leftNearChestGrasp_    = {-1.70, -1.04, 1.39, -1.85, -1.10, 0, 0};
+    const std::vector<float> leftNearChestPalmDown_    = {-1.70, -1.04, 1.39, -1.85, -1.10, 0, 0};
+    const std::vector<float> leftNearChestPalmUp_    = {-1.70, -1.04, 1.39, -1.85, 1.10, 0, 0};
     const std::vector<float> leftSeedNonGraspingHand_ = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};
     //while walking
     const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.38, -1.29, 0.99, -1.35, -0.26, 0.0, 0.0};
 
 
     //before walking
-    const std::vector<float> rightNearChestGrasp_     = {-1.70, 1.04, 1.39, 1.85, -1.10, 0, 0};
+    const std::vector<float> rightNearChestPalmDown_     = {-1.70, 1.04, 1.39, 1.85, -1.10, 0, 0};
+    const std::vector<float> rightNearChestPalmUp_     = {-1.70, 1.04, 1.39, 1.85, 1.10, 0, 0};
     const std::vector<float> rightSeedNonGraspingHand_ = {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0};
     //while walking
     const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.38, 1.29, 0.99, 1.35, -0.26, 0.0, 0.0};
@@ -75,7 +80,6 @@ private:
     //Swapping sides of bag
     std::vector<armTrajectory::armJointData> reOrientPanelTraj_;
 
-    void moveToPlacePanelPose2(const armSide graspingHand);
     void taskStatusCB(const srcsim::Task &msg);
 
     std::string logFile;
@@ -87,6 +91,7 @@ public:
     void movePanelToWalkSafePose(const armSide side);
     bool isPanelPicked(const armSide side);
     void moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel);
+    void rotatePanel(const armSide graspingHand);
     void clearPointCloud();
     void pausePointCloud();
     void resumePointCloud();
@@ -94,4 +99,5 @@ public:
     void reOrientTowardsPanel(geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
     boost::posix_time::ptime timeNow;
+    bool isCableInHand(armSide side);
 };

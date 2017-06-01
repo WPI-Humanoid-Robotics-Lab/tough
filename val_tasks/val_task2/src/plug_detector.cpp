@@ -105,7 +105,11 @@ bool plug_detector::getPlugLocation(geometry_msgs::Point& plugLoc)
         }
 
         //  Calculating the Centroid of the handle Point cloud
-        pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
+        if (!pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid)){
+            ROS_INFO("PlugDetector::getPlugLocation : centroid could not be computed");
+            return false;
+        }
+
     }
     if( foundPlug )
     {

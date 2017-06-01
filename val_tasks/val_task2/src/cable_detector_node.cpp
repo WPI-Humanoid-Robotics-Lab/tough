@@ -10,38 +10,21 @@ int main(int argc, char** argv)
     int numIterations = 0;
     bool foundStandPos = false;
     geometry_msgs::Point CableLoc;
-    geometry_msgs::Pose StandLoc;
+    geometry_msgs::Pose CablePose;
     CableDetector c1(nh);
 
-    visualization_msgs::Marker marker;
-    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
-    marker.header.stamp = ros::Time::now();
-    marker.id = 1;
-    marker.type = visualization_msgs::Marker::ARROW;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.scale.x = 0.1;
-    marker.scale.y = 0.05;
-    marker.scale.z = 0.01;
-    marker.color.a = 1.0; // Don't forget to set the alpha!
-    marker.color.r = 1.0;
-    marker.color.g = 0.0;
-    marker.color.b = 0.0;
-
-    while (!c1.findCable(CableLoc)){
-        ROS_INFO("Cable detection failed. retrying");
-    }
-    while(ros::ok())
-    //while (!foundCable && numIterations < 20)
-    {
-
-        foundStandPos = c1.getStandPosition(StandLoc);
-        marker.pose = StandLoc;
-        pub.publish(marker);
-        ROS_INFO("Robot Pose: x:%f y:%f z:%f", StandLoc.position.x, StandLoc.position.y, StandLoc.position.z);
+    //while (!c1.findCable(CableLoc)){
+    while(ros::ok()){
+        //c1.findCable(CableLoc);
+        c1.findCable(CablePose);
+            //while (!foundCable && numIterations < 20)
+        ROS_INFO("Cable location x:%f y:%f z:%f", CableLoc.x, CableLoc.y, CableLoc.z);
+        ROS_INFO("Cable location x:%f y:%f z:%f", CablePose.position.x, CablePose.position.y, CablePose.position.z);
         ros::spinOnce();
-        loop.sleep();
-        numIterations++;
     }
+
+
+
 
 }
 

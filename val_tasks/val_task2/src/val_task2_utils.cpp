@@ -13,8 +13,11 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     arm_controller_      = new armTrajectory(nh_);
     walk_                = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
     current_state_       = RobotStateInformer::getRobotStateInformer(nh_);
+    cable_detector_      = nullptr;
+
 
     current_checkpoint_  = 0;
+    table_height_        = 0.8; //trial value
 
     reset_pointcloud_pub    = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
     pause_pointcloud_pub    = nh_.advertise<std_msgs::Bool>("/field/pause_pointcloud",1);
@@ -53,12 +56,12 @@ void task2Utils::afterPanelGraspPose(const armSide side)
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
-        seed1 = &leftNearChestGrasp_;
+        seed1 = &leftNearChestPalmDown_;
         seed2 = &rightSeedNonGraspingHand_;
     }
     else
     {
-        seed1 = &rightNearChestGrasp_;
+        seed1 = &rightNearChestPalmDown_;
         seed2 = &leftSeedNonGraspingHand_;
     }
 
@@ -129,14 +132,14 @@ bool task2Utils::isPanelPicked(const armSide side)
 void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel)
 {
     if (rotatePanel) {
-        return moveToPlacePanelPose2(graspingHand);
+        return;
     }
 
     armSide nonGraspingHand = (armSide) !graspingHand;
 
     // raise pelvis
-    pelvis_controller_->controlPelvisHeight(1.1);
-    ros::Duration(2).sleep();
+//    pelvis_controller_->controlPelvisHeight(1.1);
+//    ros::Duration(2).sleep();
 
     const std::vector<float> *graspingHandPoseUp, *graspingHandPoseDown, *nonGraspingHandPose2, *nonGraspingHandPose1;
 
@@ -169,10 +172,12 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     gripper_controller_->openGripper(graspingHand);
     ros::Duration(0.5).sleep();
 
-    armData.clear();
-    armData.push_back(*graspingHandPoseDown);
-    arm_controller_->moveArmJoints(graspingHand, armData, 1.0f);
-    ros::Duration(1).sleep();
+    if (isPanelPicked(graspingHand)){
+        armData.clear();
+        armData.push_back(*graspingHandPoseDown);
+        arm_controller_->moveArmJoints(graspingHand, armData, 1.0f);
+        ros::Duration(1).sleep();
+    }
 
     std::vector<armTrajectory::armJointData> pushPanel;
     pushPanel.resize(2);
@@ -186,6 +191,44 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
 
     arm_controller_->moveArmJoints(pushPanel);
     ros::Duration(3).sleep();
+
+}
+
+void task2Utils::rotatePanel(const armSide graspingHand)
+{
+    armSide nonGraspingHand = (armSide) !graspingHand;
+    gripper_controller_->closeGripper(graspingHand);
+
+    const std::vector<float> *graspingHandPoseUp;
+    float tempOffset;
+    if(graspingHand == armSide::LEFT){
+        graspingHandPoseUp = &leftNearChestPalmUp_;
+        tempOffset = 0.5;
+    }
+    else
+    {
+        graspingHandPoseUp = &rightNearChestPalmUp_;
+        tempOffset = -0.5;
+    }
+    // take non-GraspingHand out
+    arm_controller_->moveArmJoint(nonGraspingHand, 3, tempOffset);
+    ros::Duration(1).sleep();
+
+    // set armside for precalculated trajectory
+    for (int i = 0; i < reOrientPanelTraj_.size(); ++i){
+        reOrientPanelTraj_[i].side = graspingHand;
+    }
+
+    arm_controller_->moveArmJoints(reOrientPanelTraj_);
+    ros::Duration(3).sleep();
+
+    std::vector< std::vector<float> > armData;
+    armData.clear();
+    armData.push_back(*graspingHandPoseUp);
+    arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
+    ros::Duration(2).sleep();
+    arm_controller_->moveArmJoint(nonGraspingHand, 3, -1*tempOffset);
+    ros::Duration(1).sleep();
 
 }
 
@@ -234,10 +277,38 @@ int task2Utils::getCurrentCheckpoint() const{
     return current_checkpoint_;
 }
 
+bool task2Utils::isCableOnTable()
+{
+    // this function checks the z coordinate of the cable location and verifies if this matches the height of the table with some tolerance
+    if(cable_detector_ == nullptr)
+    cable_detector_= new CableDetector(nh_);
 
-void task2Utils::moveToPlacePanelPose2(const armSide graspingHand){
+    geometry_msgs::Pose cable_coordinates_;
+    float tolerance =0.1; // experimental value
+
+    if( cable_detector_->findCable(cable_coordinates_)){
+        if(cable_coordinates_.position.z < table_height_ + tolerance && cable_coordinates_.position.z > table_height_ - tolerance)
+        {
+            return true;
+        }
+        else false;
+    }
+}
+
+bool task2Utils::isCableInHand(armSide side)
+{
+     // this function rotates the hand slighly to detect the cable and brings it back to same position
+    std::string jointName = side ==LEFT ? "leftForearmYaw" : "rightForearmYaw";
+    float finalJointValue = side ==LEFT ? 1.2 : -1.2;
+    float initialJointValue =current_state_->getJointPosition(jointName);
+
+    arm_controller_->moveArmJoint(side,4,finalJointValue);
+    ros::Duration(2).sleep();
+    /// @todo detection part
+    arm_controller_->moveArmJoint(side,4,initialJointValue);
 
 }
+
 
 void task2Utils::taskStatusCB(const srcsim::Task &msg)
 {
@@ -261,6 +332,7 @@ void task2Utils::taskStatusCB(const srcsim::Task &msg)
 void task2Utils::clearPointCloud() {
     std_msgs::Empty msg;
     reset_pointcloud_pub.publish(msg);
+    ros::Duration(0.3).sleep();
 }
 
 void task2Utils::clearBoxPointCloud() {
