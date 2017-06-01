@@ -94,6 +94,6 @@ public:
     void clearBoxPointCloud();
     void reOrientTowardsPanel(geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
-    bool cableOnTable();
-    bool cableInHand(armSide side);
+    bool isCableOnTable();
+    bool isCableInHand(armSide side);
 };
