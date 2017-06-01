@@ -7,20 +7,18 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <val_common/val_common_names.h>
+#include <chrono>
+#include <ctime>
+#include <std_msgs/Empty.h>
 
 
 // minimum moment to determine the rotation direction
-#define  MINIMUM_MOVMENT_IN_RAD  0.0872665
+#define HANDLE_MINIMUM_MOVMENT_IN_RAD      0.0698132 //4 deg
+#define HANDLE_CONSTANT_THRESHOLD_IN_RAD   0.0174533 //1 deg
+#define HANDLE_CONSTANT_DEBOUNCE_TIME_SEC  10
 
 // control time ouit (real time)
-#define HANDLE_CONTROL_TIMEOUT_SEC 120 //sec
-
-// previous grasp state
-enum class prevGraspState {
-    NOT_INITIALISED = 0,
-    GRASP_PITCH_HANDLE,
-    GRASP_YAW_HANDLE
-};
+#define HANDLE_CONTROL_TIMEOUT_SEC 60 //sec
 
 // handle positions
 //!!! enum is not used as this will be used for vector acess
@@ -29,17 +27,29 @@ enum class prevGraspState {
 #define YAW_KNOB_CENTER      2
 #define YAW_KNOB_HANDLE      3
 
+// previous grasp state
+enum class prevGraspState {
+    NOT_INITIALISED = 0,
+    GRASP_PITCH_HANDLE,
+    GRASP_YAW_HANDLE
+};
+
 // pitch yaw selection
 enum class controlSelection {
-    PITCH = 0,
-    YAW
+    CONTROL_NOT_INITIALISED = 0,
+    CONTROL_PITCH ,
+    CONTROL_YAW
 };
 
 // Pitch/Yaw direction
 enum class valueDirection {
-    VALUE_CONSTANT = 0,
-    VALUE_INCREASING,
-    VALUE_DECREASING
+    VALUE_NOT_INITIALISED = 0,
+    VALUE_CONSTANT,
+    VALUE_TOWARDS_TO_GOAL,
+    VALUE_AWAY_TO_GOAL,
+    VALUE_TOGGLING,
+    VALUE_INCRSING,
+    VALUE_DECRASING
 };
 
 enum class valueConstant {
@@ -59,7 +69,7 @@ private:
     ros::Subscriber satellite_sub_;
     srcsim::Satellite msg_;
 
-    ros::Publisher marker_pub_;
+    ros::Publisher marker_pub_, reset_pointcloud_pub_;
     void satelliteMsgCB (const srcsim::Satellite &msg);
 
 public:
@@ -74,8 +84,9 @@ public:
     double getYawDiff (void);
     double getPitch (void);
     double getYaw (void);
-    valueDirection getValueDirection(double current_value, controlSelection control);
+    valueDirection getValueStatus(double current_value, controlSelection control);
     void getCircle3D (geometry_msgs::Point center, geometry_msgs::Point start,geometry_msgs::Quaternion orientation, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, handleDirection direction, float radius, int steps =10);
     void visulatise6DPoints(std::vector<geometry_msgs::Pose> &points);
     valueConstant isValueConstant(double current_value, controlSelection control);
+    void clearPointCloud();
 };

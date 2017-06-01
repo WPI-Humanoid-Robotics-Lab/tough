@@ -8,11 +8,13 @@ task1Utils::task1Utils(ros::NodeHandle nh):
 
     // marker publisher
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>( "handle_path", 10, true);
+
+    reset_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
 }
 
 task1Utils::~task1Utils()
 {
-  satellite_sub_.shutdown();
+    satellite_sub_.shutdown();
 }
 
 
@@ -63,69 +65,231 @@ double task1Utils::getYaw (void)
     return msg_.current_yaw;
 }
 
-valueDirection task1Utils::getValueDirection(double current_value, controlSelection control)
+valueDirection task1Utils::getValueStatus(double current_value, controlSelection control)
 {
-    valueDirection ret = valueDirection::VALUE_CONSTANT;
+    valueDirection ret = valueDirection::VALUE_NOT_INITIALISED;
+    // required direction
+    static valueDirection required_direction = valueDirection::VALUE_NOT_INITIALISED;
+    static double goal = 0;
+    static controlSelection prev_control = controlSelection::CONTROL_NOT_INITIALISED;
+    static bool execute_once = true;
+    static double prev_trigger_value = 0, prev_value = 0;
 
-    static double prev_value = 0;
-    static bool once = true;
+    //timer
+    static std::chrono::system_clock::time_point timer = std::chrono::system_clock::now();
 
-    // only on init
-    if (once)
+    // on init or if the control slection is changed
+    // set the trigger value
+    if (execute_once || (control != prev_control))
     {
-        // initialise preveious valuie and return
-        prev_value = current_value;
+        // initialise previous value and return
+        prev_trigger_value = current_value;
 
-        // reset the once flag
-        once = false;
+        // update the goal
+        goal = (control == controlSelection::CONTROL_PITCH) ? msg_.target_pitch : msg_.target_yaw;
 
-        ROS_INFO("initialised");
-    }
-    else if (fabs(fabs(current_value) - fabs(prev_value)) > MINIMUM_MOVMENT_IN_RAD) // moved atleast by 5 degrees
-    {
-        ROS_INFO("moved by 5deg");
-
-        if ((control == controlSelection::PITCH ? msg_.target_pitch : msg_.target_yaw) < prev_value)
+        //decide the direction to move
+        double current_value = (control == controlSelection::CONTROL_PITCH) ? msg_.current_pitch : msg_.current_yaw;
+        if (goal > current_value)
         {
-            ret = valueDirection::VALUE_INCREASING;
-            ROS_INFO("increasing");
+            // we should increase the value
+            required_direction = valueDirection::VALUE_INCRSING;
         }
         else
         {
-            ret = valueDirection::VALUE_DECREASING;
-            ROS_INFO("decreasing");
+            // decrease the value
+            required_direction = valueDirection::VALUE_DECRASING;
+        }
+
+        //reset the flag
+        execute_once = false;
+
+        ROS_INFO("initialised");
+
+        //reset timer
+        timer = std::chrono::system_clock::now();
+    }
+    // if value is not changed
+    else if ((current_value > prev_trigger_value && (current_value - prev_trigger_value <= HANDLE_CONSTANT_THRESHOLD_IN_RAD)) ||
+             (prev_trigger_value > current_value && (prev_trigger_value - current_value <= HANDLE_CONSTANT_THRESHOLD_IN_RAD)) ||
+//             (prev_value > current_value && (prev_value - current_value <= HANDLE_CONSTANT_THRESHOLD_IN_RAD)) ||
+//             (current_value > prev_value && (current_value - prev_value <= HANDLE_CONSTANT_THRESHOLD_IN_RAD)) ||
+             prev_value == current_value)
+    {
+        ROS_INFO("time debounce %f sec", std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - timer).count() );
+
+        if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - timer).count() > HANDLE_CONSTANT_DEBOUNCE_TIME_SEC){
+
+            // update return value as constant
+            ret = valueDirection::VALUE_CONSTANT;
+
+            //reset timer
+            timer = std::chrono::system_clock::now();
+
+            ROS_INFO("value is not changing");
+        }
+    }
+    // if the handels are moving, wait till it moves at least by 4 degree
+    else if (((current_value > prev_trigger_value) && (current_value - prev_trigger_value > HANDLE_MINIMUM_MOVMENT_IN_RAD)) ||
+             ((prev_trigger_value > current_value) && (prev_trigger_value - current_value > HANDLE_MINIMUM_MOVMENT_IN_RAD)))
+    {
+        ROS_INFO("moved by 4deg");
+
+        if ((required_direction == valueDirection::VALUE_INCRSING && current_value > prev_trigger_value) ||
+                (required_direction == valueDirection::VALUE_DECRASING && current_value < prev_trigger_value))
+        {
+            ret = valueDirection::VALUE_TOWARDS_TO_GOAL;
+            ROS_INFO("towards goal");
+        }
+        else
+        {
+            ret = valueDirection::VALUE_AWAY_TO_GOAL;
+            ROS_INFO("away from goal");
         }
 
         // set the once flag for next time
-        once = true;
-    }
-
-
-    return ret;
-}
-
-valueConstant task1Utils::isValueConstant (double current_value, controlSelection control)
-{
-    static int debounce_count = 0;
-    valueConstant ret = valueConstant::NOT_INITIALISED;
-
-    if (getValueDirection(current_value, control) == valueDirection::VALUE_CONSTANT)
-    {
-        debounce_count++;
-        ret = valueConstant::NOT_INITIALISED;
-    }
-    else if (debounce_count > 20)
-    {
-        debounce_count = 0;
-        ret = valueConstant::VALUE_NOT_CHANGING;
+        execute_once = true;
     }
     else
     {
-        ret = valueConstant::VALUE_CHANGING;
+        ret = valueDirection::VALUE_TOGGLING;
+        ROS_INFO("toggling");
     }
+
+
+
+    //    static double prev_trigger_value = 0, prev_value = 0;
+    //    static bool execute_once = true;
+    //    static std::chrono::system_clock::time_point timer = std::chrono::system_clock::now();
+    //    static controlSelection prev_control = controlSelection::CONTROL_PITCH;
+    //    static double goal = msg_.target_pitch;
+    //    static bool timer_start = true;
+
+    //    // on init or if the control slection is changed
+    //    // set the trigger value
+    //    if (execute_once || (control != prev_control))
+    //    {
+    //        // initialise previous value and return
+    //        prev_trigger_value = current_value;
+
+    //        // reset the once flag
+    //        execute_once = false;
+
+    //        // start timer
+    //        timer_start = true;
+
+    //        // update the goal
+    //        goal = (control == controlSelection::CONTROL_PITCH) ? msg_.target_pitch : msg_.target_yaw;
+
+    //        ROS_INFO("trigger value init ");
+    //    }
+    //    // if value is not changed
+    //    else if ((current_value > prev_trigger_value && (current_value - prev_trigger_value < HANDLE_CONSTANT_THRESHOLD_IN_RAD)) ||
+    //             (prev_trigger_value > current_value && (prev_trigger_value - current_value < HANDLE_CONSTANT_THRESHOLD_IN_RAD)) ||
+    //             prev_value == current_value)
+    //    {
+
+    //        if (timer_start)
+    //        {
+    //            //reset timer
+    //            timer = std::chrono::system_clock::now();
+
+    //            // reset the flag
+    //            timer_start = false;
+
+    //            ROS_INFO("timer started");
+    //        }
+
+    //        ROS_INFO("constant debounce count %f ", std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - timer).count() );
+
+    //        if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - timer).count() > HANDLE_CONSTANT_DEBOUNCE_TIME_SEC){
+
+    //            // update return value as constant
+    //            ret = valueDirection::VALUE_CONSTANT;
+
+    //            //rset the flag
+    //            timer_start = true;
+
+    //            ROS_INFO("value is not changing");
+    //        }
+    //    }
+    //    // if the value is increased
+    //    //    else if (goal > prev_trigger_value && current_value > prev_value)
+    //    //    {
+    //    //        // if moved at least by a threshold from the trigger point
+    //    //        if ((current_value > prev_trigger_value) && (current_value - prev_trigger_value > HANDLE_MINIMUM_MOVMENT_IN_RAD))
+    //    //        {
+    //    //            ret = valueDirection::VALUE_TOWARDS_TO_GOAL;
+    //    //            ROS_INFO("increasing");
+    //    //        }
+    //    //    }
+    //    //    // if the value is decreased
+    //    //    else if (prev_trigger_value > goal && current_value < prev_value)
+    //    //    {
+    //    //        // if moved at least by a threshold from the trigger point
+    //    //        if ((prev_trigger_value > current_value) && (prev_trigger_value - current_value > HANDLE_MINIMUM_MOVMENT_IN_RAD))
+    //    //        {
+    //    //            ret = valueDirection::VALUE_DECREASING;
+    //    //            ROS_INFO("decreasing");
+    //    //        }
+    //    //    }
+    //    else if (((current_value > prev_trigger_value) && (current_value - prev_trigger_value > HANDLE_MINIMUM_MOVMENT_IN_RAD)) ||
+    //            ((prev_trigger_value > current_value) && (prev_trigger_value - current_value > HANDLE_MINIMUM_MOVMENT_IN_RAD)))
+    //    {
+    //        ROS_INFO("moved by 5deg");
+
+    //        if (goal > prev_trigger_value)
+    //        {
+    //            ret = valueDirection::VALUE_TOWARDS_TO_GOAL;
+    //            ROS_INFO("towards goal");
+    //        }
+    //        else
+    //        {
+    //            ret = valueDirection::VALUE_AWAY_TO_GOAL;
+    //            ROS_INFO("away from goal");
+    //        }
+
+    //        // set the once flag for next time
+    //        execute_once = true;
+    //    }
+    //    else
+    //    {
+    //        ret = valueDirection::VALUE_TOGGLING;
+    //        ROS_INFO("toggling");
+    //    }
+
+
+    //update the previous control
+    prev_control = control;
+
+    // update previous value
+    prev_value = current_value;
 
     return ret;
 }
+
+//valueConstant task1Utils::isValueConstant (double current_value, controlSelection control)
+//{
+//    static int debounce_count = 0;
+//    valueConstant ret = valueConstant::NOT_INITIALISED;
+
+//    if (getValueDirection(current_value, control) == valueDirection::VALUE_CONSTANT)
+//    {
+//        debounce_count++;
+//        ret = valueConstant::NOT_INITIALISED;
+//    }
+//    else if (debounce_count > 20)
+//    {
+//        debounce_count = 0;
+//        ret = valueConstant::VALUE_NOT_CHANGING;
+//    }
+//    else
+//    {
+//        ret = valueConstant::VALUE_CHANGING;
+//    }
+
+//    return ret;
+//}
 
 void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point start, geometry_msgs::Quaternion orientation, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, handleDirection direction, float radius, int steps)
 {
@@ -139,14 +303,18 @@ void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point s
     float c = planeCoeffs.at(2);
     float d = planeCoeffs.at(3);
 
+    // clear the points
+    points.clear();
+
     // starting point
     geometry_msgs::Pose circle_point_pose;
     circle_point_pose.position.x = start.x;
     circle_point_pose.position.y = start.y;
     circle_point_pose.position.z = start.z;
     circle_point_pose.orientation = orientation;
-    // points.push_back(circle_point_pose);
+    points.push_back(circle_point_pose);
 
+    // diatnce from plane to the handle
     float dist = fabs(a*start.x  + b*start.y + c*start.z  + d )/sqrt(pow(a,2) + pow(b,2) + pow(c,2));
 
     geometry_msgs::Pose start_pose;
@@ -157,19 +325,24 @@ void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point s
     for (int i=0;i<steps; i++)
     {
         // angle to the first point
-        float alpha = atan2((start_pose.position.y - center.y),(start_pose.position.x - center.x));
+        double y = (start_pose.position.y - center.y);
+        double x = (start_pose.position.x - center.x);
+        ROS_INFO("y %f, x %f", y, x);
+        float alpha = atan2(y,x);
+        ROS_INFO("alpha %f ", alpha);
 
         if (direction == handleDirection::ANTICLOCK_WISE) {
             circle_point_pose.position.x = center.x + radius*cos(alpha - (float)(2*M_PI/steps));
             circle_point_pose.position.y = center.y + radius*sin(alpha - (float)(2*M_PI/steps));
         }
-        else if (direction == handleDirection::CLOCK_WISE){
+        else if (direction == handleDirection::CLOCK_WISE) {
             circle_point_pose.position.x = center.x + radius*cos(alpha + (float)(2*M_PI/steps));
             circle_point_pose.position.y = center.y + radius*sin(alpha + (float)(2*M_PI/steps));
         }
 
         //point.position.z = -(a*point.position.x  + b* point.position.y + d)/c;
         circle_point_pose.position.z = -(a*circle_point_pose.position.x  + b* circle_point_pose.position.y + d)/c + dist; //(d - dist+.05) )/c;
+        circle_point_pose.position.z -= 0.06;
 
         // orientation
         circle_point_pose.orientation = orientation;
@@ -177,6 +350,35 @@ void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point s
 
         start_pose = circle_point_pose;
     }
+
+    // sort the points
+    // convert to cylindrical cordinates
+    //    std::vector<double> r, f, z;
+    //    for (int i=0; i<points.size(); i++)
+    //    {
+    //        //r = (x2 + y2)1/2,    f = tan-1(y/x),     z = z.
+
+    //        f.push_back(atan2(points[i].position.y, points[i].position.x));
+    //        r.push_back((points[i].position.x + points[i].position.y)/2);
+    //        z.push_back(points[i].position.z);
+    //    }
+    //    //sort with f
+    //    std::sort(f.begin(), f.end());
+
+    //    // convert back to cartesian
+    //    points.clear();
+    //    for(int i=0; i<r.size(); i++)
+    //    {
+    //        //x = r cosf,     y = r sinf,     z = z,
+    //        geometry_msgs::Pose posetemp;
+    //        posetemp.position.x = r[i]*cos(f[i]);
+    //        posetemp.position.y = r[i]*sin(f[i]);
+    //        posetemp.position.z = z[i];
+    //        posetemp.orientation = orientation;
+
+    //        points.push_back(posetemp);
+    //    }
+
 }
 
 void task1Utils::visulatise6DPoints(std::vector<geometry_msgs::Pose> &points)
@@ -249,3 +451,8 @@ void task1Utils::visulatise6DPoints(std::vector<geometry_msgs::Pose> &points)
     ros::Duration(0.2).sleep();
 }
 
+void task1Utils::clearPointCloud()
+{
+    std_msgs::Empty msg;
+    reset_pointcloud_pub_.publish(msg);
+}

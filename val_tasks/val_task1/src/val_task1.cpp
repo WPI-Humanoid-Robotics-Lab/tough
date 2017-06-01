@@ -61,8 +61,8 @@ valTask1::valTask1(ros::NodeHandle nh):
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask1::visited_map_cb, this);
 
     // cartesian planners for the arm
-    left_arm_planner_ = new cartesianPlanner("leftPalm",  "/world"); // "leftMiddleFingerGroup", "/world");
-    right_arm_planner_ = new cartesianPlanner("rightPalm",  "/world"); // "rightMiddleFingerGroup", "/world");
+    left_arm_planner_ = new cartesianPlanner("leftMiddleFingerGroup", "/world"); //leftPalm
+    right_arm_planner_ = new cartesianPlanner("rightMiddleFingerGroup", "/world"); //rightPalm
 
     // upper body tracker
     upper_body_tracker_ = new upperBodyTracker(nh_);
@@ -526,6 +526,9 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
     static bool executing = false;
     static int retry_count = 0;
 
+    // set the pelvis height
+    //pelvis_controller_->controlPelvisHeight(0.85);
+
     if(!executing){
         ROS_INFO("Executing the grasp handle command");
         executing = true;
@@ -577,7 +580,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     //timer
     static std::chrono::system_clock::time_point timer_start = std::chrono::system_clock::now();
 
-    ROS_INFO("time in sec %d ", std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - timer_start).count());
+    ROS_INFO_THROTTLE(5, "time in sec %d ", std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - timer_start).count());
 
     // execute this part once
     if (execute_once)
@@ -586,7 +589,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         execute_once = false;
 
         // set the pelvis height
-        // pelvis_controller_->controlPelvisHeight(0.77);
+        //pelvis_controller_->controlPelvisHeight(0.85);
 
         // generate the way points for the knob (current pose(6DOF) of arm is used to generate the way points)
 
@@ -595,7 +598,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME, current_hand_pose);
 
         std::vector<geometry_msgs::Pose> waypoints;
-        task1_utils_->getCircle3D(handle_loc_[PITCH_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, 0.125, 10);
+        task1_utils_->getCircle3D(handle_loc_[PITCH_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, 0.125, 25);
         ROS_INFO("way points generatd");
 
         ///@todo: remove the visulaisation
@@ -616,8 +619,11 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
     // checks to handle the behaviour, which will also trigger necessary transitions
 
+    //close gripper
+    gripper_controller_->closeGripper(armSide::RIGHT);
+
     // if the handle is moving in wrong direction, flip the points
-    if(task1_utils_->getValueDirection(task1_utils_->getPitch(), controlSelection::PITCH) == valueDirection::VALUE_INCREASING)
+    if(task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_AWAY_TO_GOAL)
     {
         ROS_INFO("value is incresing");
 
@@ -683,7 +689,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         ROS_INFO("grasp lost");
     }
     // if the arm is not moving any more
-    else if (task1_utils_->isValueConstant(task1_utils_->getPitch(), controlSelection::PITCH) == valueConstant::VALUE_NOT_CHANGING)
+    else if (task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_CONSTANT)
     {
         // replan and execute from the current point,
         // set the execute once state
@@ -871,6 +877,9 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
     // set the grasp state
     prev_grasp_state_ = prevGraspState::GRASP_YAW_HANDLE;
 
+    // set the pelvis height
+    //pelvis_controller_->controlPelvisHeight(0.85);
+
     /*
          * Executing -> when grasp_handles is called
          * Retry -> grasp handles is called but it failed
@@ -938,7 +947,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         execute_once = false;
 
         // set the pelvis height
-        // pelvis_controller_->controlPelvisHeight(0.77);
+       // pelvis_controller_->controlPelvisHeight(0.85);
 
         // generate the way points for the knob (current pose(6DOF) of arm is used to generate the way points)
         //current pose of the hand
@@ -946,7 +955,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         robot_state_->getCurrentPose(VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME, current_hand_pose);
 
         std::vector<geometry_msgs::Pose> waypoints;
-        task1_utils_->getCircle3D(handle_loc_[YAW_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, 0.125, 15);
+        task1_utils_->getCircle3D(handle_loc_[YAW_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, 0.125, 25);
         ROS_INFO("way points generatd");
 
         ///@todo: remove the visulaisation
@@ -967,7 +976,11 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     }
 
     // checks to handle the behaviour, which will also trigger necessary transitions
-    if(task1_utils_->getValueDirection(task1_utils_->getYaw(), controlSelection::YAW) == valueDirection::VALUE_INCREASING)
+
+    //close gripper
+    gripper_controller_->closeGripper(armSide::LEFT);
+
+    if(task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_AWAY_TO_GOAL)
     {
         ROS_INFO("value is incresing");
 
@@ -1030,7 +1043,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         ROS_INFO("grasp lost");
     }
     // if the arm is not moving any more
-    else if (task1_utils_->isValueConstant(task1_utils_->getYaw(), controlSelection::YAW) == valueConstant::VALUE_NOT_CHANGING)
+    else if (task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_CONSTANT)
     {
         // replan and execute from the current point,
         // set the execute once state
@@ -1132,7 +1145,7 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
         }
 
         // reset the point cloud
-        taskCommonUtils::clearPointCloud(nh_);
+        task1_utils_->clearPointCloud();
 
         // create the object for the pcl detector
         geometry_msgs::Pose pose;
@@ -1154,9 +1167,11 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
     // if detection is sucessful
     if (handle_poses.size() > 1)
     {
+        ROS_INFO_STREAM("before update: " << handle_loc_[PITCH_KNOB_HANDLE] << " " << handle_loc_[PITCH_KNOB_HANDLE]);
         // update the local positions of the handles
         handle_loc_[PITCH_KNOB_HANDLE] = handle_poses[1];
         handle_loc_[YAW_KNOB_HANDLE] = handle_poses[0];
+        ROS_INFO_STREAM("after update: " << handle_loc_[PITCH_KNOB_HANDLE] << " " << handle_loc_[PITCH_KNOB_HANDLE]);
 
         //set execute once flag
         execute_once = true;
@@ -1168,10 +1183,13 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
         if (pcl_handle_detector_ != nullptr) delete pcl_handle_detector_;
         pcl_handle_detector_ = nullptr;
 
+        pelvis_controller_->controlPelvisHeight(1.0);
         // get the arms to default pose
         arm_controller_->moveToDefaultPose(armSide::LEFT);
         ros::Duration(1).sleep();
         arm_controller_->moveToDefaultPose(armSide::RIGHT);
+        ros::Duration(1).sleep();
+        pelvis_controller_->controlPelvisHeight(0.9);
 
         // state transition
         eventQueue.riseEvent(next_state_transition);
