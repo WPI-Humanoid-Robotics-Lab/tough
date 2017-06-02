@@ -10,6 +10,11 @@
 #include <chrono>
 #include <ctime>
 #include <std_msgs/Empty.h>
+#include <srcsim/Task.h>
+#include "ros/package.h"
+#include <fstream>
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 
 
 // minimum moment to determine the rotation direction
@@ -68,9 +73,13 @@ private:
     ros::NodeHandle nh_;
     ros::Subscriber satellite_sub_;
     srcsim::Satellite msg_;
+    ros::Subscriber task_status_sub_;
 
     ros::Publisher marker_pub_, reset_pointcloud_pub_;
     void satelliteMsgCB (const srcsim::Satellite &msg);
+    int current_checkpoint_;
+    srcsim::Task taskMsg;
+
 
 public:
     task1Utils(ros::NodeHandle nh);
@@ -88,4 +97,8 @@ public:
     void getCircle3D (geometry_msgs::Point center, geometry_msgs::Point start,geometry_msgs::Quaternion orientation, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, handleDirection direction, float radius, int steps =10);
     void visulatise6DPoints(std::vector<geometry_msgs::Pose> &points);
     void clearPointCloud();
+    void taskStatusSubCB(const srcsim::Task &msg);
+    int getCurrentCheckpoint() const;
+    boost::posix_time::ptime timeNow;
+    std::string logFile;
 };
