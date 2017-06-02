@@ -33,7 +33,7 @@ do
 
   sleep 150
   
-  roslaunch val_bringup whrl_task1.launch --screen > $data_log &
+  roslaunch val_bringup whrl.launch --screen > $data_log &
   # stdbuf -oL roslaunch val_bringup whrl_task1.launch --screen &> $data_log
 
   sleep 30
