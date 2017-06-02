@@ -117,15 +117,13 @@ bool valTask1::preemptiveWait(double ms, decision_making::EventQueue& queue) {
 // state machine state executions
 decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("valTask1::initTask : executing " << name);
     static int retry_count = 0;
 
-    // TODO
-    // if the map does not update fast enought and this is called greater then 10 time it will break
+    // reset map count for the first entry
     if(retry_count == 0){
         map_update_count_ = 0;
     }
-    // It is depenent on the timer timer right now.
 
     // the state transition can happen from an event externally or can be geenerated here
     ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
@@ -155,7 +153,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
     }
     else {
         retry_count = 0;
-        ROS_INFO("Failed to initialize");
+        ROS_INFO("valTask1::initTask : Failed to initialize");
         eventQueue.riseEvent("/INIT_FAILED");
     }
     return TaskResult::SUCCESS();
@@ -164,7 +162,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
 decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
 
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("valTask1::detectPanelCoarseTask : executing " << name);
 
     if(panel_detector_ == nullptr) {
         panel_detector_ = new PanelDetector(nh_, DETECTOR_TYPE::HANDLE_PANEL_COARSE);
@@ -176,7 +174,7 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
     // detect panel
     std::vector<geometry_msgs::Pose> poses;
     panel_detector_->getDetections(poses);
-    ROS_INFO("Size of poses : %d", (int)poses.size());
+    ROS_INFO("valTask1::detectPanelCoarseTask : Size of poses : %d", (int)poses.size());
     // if we get atleast one detection, LOL
     if (poses.size() > 1)
     {
@@ -187,31 +185,30 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
         pose2D.x = poses[idx].position.x;
         pose2D.y = poses[idx].position.y;
 
-        std::cout << "x " << pose2D.x << " y " << pose2D.y << std::endl;
+        ROS_INFO_STREAM("valTask1::detectPanelCoarseTask : x " << pose2D.x << " y " << pose2D.y);
 
         // get the theta
         pose2D.theta = tf::getYaw(poses[idx].orientation);
         setPanelWalkGoal(pose2D);
 
-        std::cout << "quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w <<std::endl;
-        std::cout << "yaw: " << pose2D.theta  <<std::endl;
+        ROS_INFO_STREAM("valTask1::detectPanelCoarseTask : quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w );
+        ROS_INFO_STREAM("valTask1::detectPanelCoarseTask : yaw: " << pose2D.theta );
         retry_count = 0;
         // update the plane coeffecients
         if(panel_detector_->getPanelPlaneModel(panel_coeff_)){
             eventQueue.riseEvent("/DETECTED_PANEL");
-            ROS_INFO("detected panel");
+            ROS_INFO("valTask1::detectPanelCoarseTask : detected panel");
             if(panel_detector_ != nullptr) delete panel_detector_;
-            ROS_INFO("I'm still alive");
             panel_detector_ = nullptr;
         }
         else{
-            ROS_INFO("Could not query plane equation");
+            ROS_INFO("valTask1::detectPanelCoarseTask : Could not query plane equation");
             ++retry_count;
             eventQueue.riseEvent("/DETECT_PANEL_RETRY");
         }
     }
     else if(retry_count < 5) {
-        ROS_INFO("sleep for 3 seconds for panel detection");
+        ROS_INFO("valTask1::detectPanelCoarseTask : sleep for 3 seconds for panel detection");
         ++retry_count;
         ros::Duration(3).sleep();
         eventQueue.riseEvent("/DETECT_PANEL_RETRY");
@@ -225,7 +222,7 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
         if(panel_detector_ != nullptr) delete panel_detector_;
         panel_detector_ = nullptr;
 
-        ROS_INFO("reset fail count");
+        ROS_INFO("valTask1::detectPanelCoarseTask : reset fail count");
     }
     // if failed retry detecting the panel
     else
@@ -234,7 +231,7 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
         fail_count++;
         eventQueue.riseEvent("/DETECT_PANEL_RETRY");
 
-        ROS_INFO("increment fail count");
+        ROS_INFO("valTask1::detectPanelCoarseTask : increment fail count");
     }
 
     while(!preemptiveWait(1000, eventQueue)){
