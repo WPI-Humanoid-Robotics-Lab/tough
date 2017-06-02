@@ -277,6 +277,42 @@ void task2Utils::reOrientTowardsPanel(geometry_msgs::Pose panelPose){
 
 }
 
+void task2Utils::reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose){
+
+    geometry_msgs::Pose poseInPelvisFrame;
+    current_state_->transformPose(cablePose, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+
+    float yaw = tf::getYaw(poseInPelvisFrame.orientation);
+
+    ROS_INFO("Yaw Value : %f",yaw);
+
+    // if the vector is pointing outwards, reorient it
+    if (yaw > M_PI_2 || yaw < -M_PI_2){
+        geometry_msgs::Pose tempYaw(cablePose);
+        SolarPanelDetect::invertYaw(tempYaw);
+
+        current_state_->transformPose(tempYaw, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+        yaw = tf::getYaw(poseInPelvisFrame.orientation);
+    }
+
+    ROS_INFO("reOrient towards cable: The current Yaw in pelvis frame is: %d", yaw);
+
+//    geometry_msgs::Pose cableOrientationPose;
+//    // Choose the cableOrientation pose based on the condition
+//    //side = yaw < 0 ? armSide::LEFT : armSide::RIGHT;
+
+//    geometry_msgs::Pose robotPose;
+//    current_state_->getCurrentPose(VAL_COMMON_NAMES::WORLD_TF,robotPose);
+
+//    geometry_msgs::Pose2D cableOrientationPose2D;
+//    cableOrientationPose2D.x = cableOrientationPose.position.x;
+//    cableOrientationPose2D.y = cableOrientationPose.position.y;
+//    cableOrientationPose2D.theta = tf::getYaw(robotPose.orientation);
+
+//    //Convert cableo... pose to world and call the walker
+//    walk_->walkToGoal(cableOrientationPose2D);
+
+}
 
 int task2Utils::getCurrentCheckpoint() const{
     return current_checkpoint_;

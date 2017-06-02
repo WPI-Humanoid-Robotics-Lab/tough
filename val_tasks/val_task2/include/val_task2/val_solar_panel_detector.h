@@ -47,12 +47,12 @@ private:
   ros::Publisher vis_pub;
 
 
-  // do we need this
   RobotStateInformer* robot_state_;
 
   geometry_msgs::Pose2D rover_loc_;
   bool isroverRight_;
   float rover_theta;
+  geometry_msgs::Pose current_pelvis_pose;
 
   std::vector<geometry_msgs::Pose> detections_;
   int detection_tries_;
@@ -69,8 +69,11 @@ private:
 
 
   void transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool isinverse);
-  void filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-  void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,geometry_msgs::Pose &pose);
+  void filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, geometry_msgs::Pose &pose);
+  void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, geometry_msgs::Pose &pose);
+  void getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, geometry_msgs::Pose &pose);
+  void boxfilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+  void PlaneSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
 public:
   SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight);

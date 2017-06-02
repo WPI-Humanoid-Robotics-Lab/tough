@@ -26,7 +26,6 @@
 #include "val_controllers/robot_state.h"
 #include "val_task2/val_rover_detection.h"
 #include "val_task2/val_solar_detection.h"
-#include "val_task2/val_solar_panel_detector.h"
 #include "val_task2/solar_panel_grasp.h"
 #include "val_task2/button_detector.h"
 #include "val_task2/array_table_detector.h"
