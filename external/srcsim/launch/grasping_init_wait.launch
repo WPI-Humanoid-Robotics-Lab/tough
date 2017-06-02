@@ -1,0 +1,3 @@
+<launch>
+  <node name="wait_for_controller" pkg="srcsim" type="wait_for_controller.sh" output="screen"/>
+</launch>

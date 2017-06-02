@@ -1,6 +1,7 @@
 #include <val_task2/val_task2_utils.h>
 #include <std_msgs/Bool.h>
 
+
 task2Utils::task2Utils(ros::NodeHandle nh):
     nh_(nh)
 {
@@ -12,9 +13,28 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     arm_controller_      = new armTrajectory(nh_);
     walk_                = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
     current_state_       = RobotStateInformer::getRobotStateInformer(nh_);
+    cable_detector_      = nullptr;
 
-    reset_pointcloud_pub = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
-    pause_pointcloud_pub = nh_.advertise<std_msgs::Bool>("/field/pause_pointcloud",1);
+
+    current_checkpoint_  = 0;
+    table_height_        = 0.8; //trial value
+
+    reset_pointcloud_pub    = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
+    pause_pointcloud_pub    = nh_.advertise<std_msgs::Bool>("/field/pause_pointcloud",1);
+    clearbox_pointcloud_pub = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
+
+    task_status_sub_        = nh_.subscribe("/srcsim/finals/task", 10, &task2Utils::taskStatusCB, this);
+
+    reOrientPanelTraj_.resize(2);
+    reOrientPanelTraj_[0].arm_pose = {-1.2, -1.04, 2.11, -0.85, -1.1, 0, 0.29};
+    reOrientPanelTraj_[0].time = 1;
+
+    reOrientPanelTraj_[1].arm_pose = {-1.2, -1.04, 2.11, -0.85, 1.21, 0, 0.29};
+    reOrientPanelTraj_[1].time = 2;
+
+    timeNow = boost::posix_time::second_clock::local_time();
+
+    logFile = ros::package::getPath("val_task2") + "/log/task2.csv";
 }
 
 task2Utils::~task2Utils()
@@ -36,12 +56,12 @@ void task2Utils::afterPanelGraspPose(const armSide side)
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
-        seed1 = &leftSeedGraspingHand_;
+        seed1 = &leftNearChestPalmDown_;
         seed2 = &rightSeedNonGraspingHand_;
     }
     else
     {
-        seed1 = &rightSeedGraspingHand;
+        seed1 = &rightNearChestPalmDown_;
         seed2 = &leftSeedNonGraspingHand_;
     }
 
@@ -65,27 +85,32 @@ void task2Utils::movePanelToWalkSafePose(const armSide side)
     ros::Duration(2).sleep();
 
     const std::vector<float> *seed1,*seed2;
+    const std::vector<double> *grasp;
     if(side == armSide::LEFT){
-        seed2 = &leftShoulderSeedPanelGraspWalk_;
+        //        when left hand is the provided side, we move right hand under the panel
+        seed2 = &rightShoulderSeedPanelGraspWalk_;
+        grasp = &leftHandGrasp_;
     }
     else
     {
-        seed2 = &rightShoulderSeedPanelGraspWalk_;
+        //        when right hand is the provided side, we move left hand under the panel
+        seed2 = &leftShoulderSeedPanelGraspWalk_;
+        grasp = &rightHandGrasp_;
     }
-    std::vector<double> grasp = {1.2, -0.6, -0.77, -0.9, -0.9};
-    gripper_controller_->controlGripper(side, grasp);
+
+    gripper_controller_->controlGripper(side, *grasp);
     ros::Duration(1).sleep();
+
     std::vector< std::vector<float> > armData;
     armData.clear();
     armData.push_back(*seed2);
 
-    arm_controller_->moveArmJoints(side, armData, 2.0f);
+    arm_controller_->moveArmJoints((armSide)!side, armData, 2.0f);
     ros::Duration(2).sleep();
 
 }
 
-//threshold is selected by experimentation
-#define THRESHOLD 55
+#define EFFORT_THRESHOLD 55 //threshold is selected by experimentation
 bool task2Utils::isPanelPicked(const armSide side)
 {
     std::string jointNames = side == armSide::LEFT ? "left_arm" : "right_arm";
@@ -97,29 +122,247 @@ bool task2Utils::isPanelPicked(const armSide side)
     }
     ROS_INFO("Total effort on arm is %f", total_effort);
 
-    if (total_effort > THRESHOLD){
+    if (total_effort > EFFORT_THRESHOLD){
         return true;
     }
 
     return false;
 }
 
-void task2Utils::clearPointCloud()
+void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel)
 {
-    std_msgs::Empty msg;
-    reset_pointcloud_pub.publish(msg);
+    armSide nonGraspingHand = (armSide) !graspingHand;
+
+    const std::vector<float> *graspingHandPoseUp, *graspingHandPoseDown;
+    const std::vector<float>  *nonGraspingHandPose2, *nonGraspingHandPose1;
+
+    if(graspingHand == armSide::LEFT){
+        if (rotatePanel){
+            graspingHandPoseUp     = &leftPanelPlacementUpPose1_;
+            graspingHandPoseDown   = &leftPanelPlacementDownPose1_;
+        }
+        else{
+            graspingHandPoseUp     = &leftPanelPlacementUpPose2_;
+            graspingHandPoseDown   = &leftPanelPlacementDownPose2_;
+        }
+        nonGraspingHandPose1 = &rightPanelPlacementSupport1_;
+        nonGraspingHandPose2 = &rightPanelPlacementSupport2_;
+        // take non-GraspingHand out
+        arm_controller_->moveArmJoint(nonGraspingHand, 3, 0.5);
+        ros::Duration(1).sleep();
+    }
+    else
+    {
+        if (rotatePanel){
+            graspingHandPoseUp     = &rightPanelPlacementUpPose1_;
+            graspingHandPoseDown   = &rightPanelPlacementDownPose1_;
+        }
+        else {
+            graspingHandPoseUp     = &rightPanelPlacementUpPose2_;
+            graspingHandPoseDown   = &rightPanelPlacementDownPose2_;
+        }
+        nonGraspingHandPose1 = &leftPanelPlacementSupport1_;
+        nonGraspingHandPose2 = &leftPanelPlacementSupport2_;
+        // take non-GraspingHand out
+        arm_controller_->moveArmJoint(nonGraspingHand, 3, -0.5);
+        ros::Duration(1).sleep();
+    }
+
+    std::vector< std::vector<float> > armData;
+    armData.clear();
+    armData.push_back(*graspingHandPoseUp);
+    arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
+    ros::Duration(2).sleep();
+
+    gripper_controller_->openGripper(graspingHand);
+    ros::Duration(0.5).sleep();
+
+    if (isPanelPicked(graspingHand)){
+        armData.clear();
+        armData.push_back(*graspingHandPoseDown);
+        arm_controller_->moveArmJoints(graspingHand, armData, 1.0f);
+        ros::Duration(1).sleep();
+    }
+
+    std::vector<armTrajectory::armJointData> pushPanel;
+    pushPanel.resize(2);
+    pushPanel[0].side = nonGraspingHand;
+    pushPanel[0].arm_pose = *nonGraspingHandPose1;
+    pushPanel[0].time = 1;
+
+    pushPanel[1].side = nonGraspingHand;
+    pushPanel[1].arm_pose = *nonGraspingHandPose2;
+    pushPanel[1].time = 2;
+
+    arm_controller_->moveArmJoints(pushPanel);
+    ros::Duration(3).sleep();
+
 }
 
-void task2Utils::pausePointCloud()
+void task2Utils::rotatePanel(const armSide graspingHand)
 {
+    armSide nonGraspingHand = (armSide) !graspingHand;
+    gripper_controller_->closeGripper(graspingHand);
+
+    const std::vector<float> *graspingHandPoseUp;
+    float tempOffset;
+    if(graspingHand == armSide::LEFT){
+        graspingHandPoseUp = &leftNearChestPalmUp_;
+        tempOffset = 0.5;
+    }
+    else
+    {
+        graspingHandPoseUp = &rightNearChestPalmUp_;
+        tempOffset = -0.5;
+    }
+    // take non-GraspingHand out
+    arm_controller_->moveArmJoint(nonGraspingHand, 3, tempOffset);
+    ros::Duration(1).sleep();
+
+    // set armside for precalculated trajectory
+    for (int i = 0; i < reOrientPanelTraj_.size(); ++i){
+        reOrientPanelTraj_[i].side = graspingHand;
+    }
+
+    arm_controller_->moveArmJoints(reOrientPanelTraj_);
+    ros::Duration(3).sleep();
+
+    std::vector< std::vector<float> > armData;
+    armData.clear();
+    armData.push_back(*graspingHandPoseUp);
+    arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
+    ros::Duration(2).sleep();
+    arm_controller_->moveArmJoint(nonGraspingHand, 3, -1*tempOffset);
+    ros::Duration(1).sleep();
+
+}
+
+void task2Utils::reOrientTowardsPanel(geometry_msgs::Pose panelPose){
+
+    size_t nSteps;
+    armSide startStep;
+    std::vector<float> y_offset;
+    std::vector<float> x_offset = {0,0};
+
+    current_state_->transformPose(panelPose,panelPose,VAL_COMMON_NAMES::WORLD_TF,
+                                  VAL_COMMON_NAMES::PELVIS_TF);
+
+    double error = panelPose.position.y;
+    if (std::abs(error) < 0.1){
+        ROS_INFO("reOrientTowardsPanel: Not reorienting, the offset is less than 0.1");
+    }
+
+    else if (std::abs(error) > 0.49){
+        ROS_INFO("reOrientTowardsPanel: Offset more than 0.5");
+    }
+
+    else{
+        nSteps = (std::abs(error))/0.1;
+
+        if (error > 0){
+            startStep = LEFT;
+            y_offset  = {0.1,0.1};
+        }
+        else {
+            startStep = RIGHT;
+            y_offset = {-0.1,-0.1};
+        }
+
+        ROS_INFO("reOrientTowardsPanel: Walking %d steps",int(nSteps));
+
+        walk_->walkLocalPreComputedSteps(x_offset,y_offset,startStep);
+        ros::Duration(2.0).sleep();
+
+    }
+
+}
+
+
+int task2Utils::getCurrentCheckpoint() const{
+    return current_checkpoint_;
+}
+
+bool task2Utils::isCableOnTable(geometry_msgs::Pose &cable_coordinates)
+{
+    // this function checks the z coordinate of the cable location and verifies if this matches the height of the table with some tolerance
+
+    float tolerance =0.1; // experimental value
+
+    if( cable_detector_->findCable(cable_coordinates)){
+       return ((cable_coordinates.position.z < table_height_ + tolerance) && (cable_coordinates.position.z > table_height_ - tolerance));
+    }
+}
+
+bool task2Utils::isCableInHand(armSide side)
+{
+     // this function rotates the hand slighly to detect the cable and brings it back to same position
+    /// @todo : 1. Move hand to a position which can be seen by stereo cams
+    /// 2. get the pose of hand frame
+    /// 3. get position of cable
+    /// 4. compare and return the result
+
+    std::string jointName = side ==LEFT ? "leftForearmYaw" : "rightForearmYaw";
+    float finalJointValue = side ==LEFT ? 1.2 : -1.2;
+    float initialJointValue =current_state_->getJointPosition(jointName);
+
+    arm_controller_->moveArmJoint(side,4,finalJointValue);
+    ros::Duration(2).sleep();
+    /// @todo detection part
+    arm_controller_->moveArmJoint(side,4,initialJointValue);
+
+}
+
+bool task2Utils::isCableTouchingSocket()
+{
+    return taskMsg.checkpoint_durations.size() > 2;
+}
+
+bool task2Utils::shakeTest(const armSide graspingHand)
+{
+    ROS_INFO("task2Utils::shakeTest : Closing, opening and reclosing grippers to see if the panel falls off");
+
+}
+
+
+void task2Utils::taskStatusCB(const srcsim::Task &msg)
+{
+    taskMsg = msg;
+    if (msg.current_checkpoint != current_checkpoint_){
+        current_checkpoint_ = msg.current_checkpoint;
+
+        std::ofstream outfile(logFile, std::ofstream::app);
+        std::stringstream data;
+
+        data << boost::posix_time::to_simple_string(timeNow) << "," << msg.task << ","
+             << msg.current_checkpoint << "," << msg.elapsed_time << std::endl;
+        ROS_INFO("task2Utils::taskStatusCB : Current checkpoint : %d", current_checkpoint_);
+
+        outfile << data.str();
+        outfile.close();
+    }
+
+}
+
+void task2Utils::clearPointCloud() {
+    std_msgs::Empty msg;
+    reset_pointcloud_pub.publish(msg);
+    ros::Duration(0.3).sleep();
+}
+
+void task2Utils::clearBoxPointCloud() {
+    std_msgs::Empty msg;
+    clearbox_pointcloud_pub.publish(msg);
+}
+
+void task2Utils::pausePointCloud() {
     std_msgs::Bool msg;
     msg.data = true;
     pause_pointcloud_pub.publish(msg);
 }
 
-void task2Utils::resumePointCloud()
-{
+void task2Utils::resumePointCloud() {
     std_msgs::Bool msg;
     msg.data = false;
     pause_pointcloud_pub.publish(msg);
 }
+

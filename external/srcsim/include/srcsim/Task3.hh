@@ -51,6 +51,10 @@ namespace gazebo
 
     /// \brief Check whether the robot is on the top of the stairs.
     public: bool Check();
+
+    /// \brief Reharness at start box
+    /// \param[in] _penalty Penalty time to add
+    public: void Restart(const common::Time &_penalty);
   };
 
   /// \brief Task 3, Checkpoint 2: Open the door

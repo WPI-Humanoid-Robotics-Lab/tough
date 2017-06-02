@@ -46,7 +46,6 @@ MapGenerator::MapGenerator(ros::NodeHandle &n):nh_(n) {
     currentState_  = RobotStateInformer::getRobotStateInformer(nh_);
     currentState_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pelvisPose);
     ros::Duration(0.2).sleep();
-    ROS_INFO_STREAM("******Pelvis pose :"<<pelvisPose.position);
 
     for (float x = -0.5f; x < 0.5f; x += MAP_RESOLUTION/10){
         for (float y = -0.5f; y < 0.5f; y += MAP_RESOLUTION/10){

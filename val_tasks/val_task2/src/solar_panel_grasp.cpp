@@ -4,14 +4,13 @@
 #include "val_task_common/val_task_common_utils.h"
 #include "val_control_common/val_control_common.h"
 
-solar_panel_handle_grabber::solar_panel_handle_grabber(ros::NodeHandle n, BUTTON_LOCATION button_side):nh_(n), armTraj_(nh_), gripper_(nh_)
+solar_panel_handle_grabber::solar_panel_handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     // cartesian planners for the arm
     left_arm_planner_ = new cartesianPlanner("leftMiddleFingerGroup", VAL_COMMON_NAMES::WORLD_TF);
     right_arm_planner_ = new cartesianPlanner("rightMiddleFingerGroup", VAL_COMMON_NAMES::WORLD_TF);
     wholebody_controller_ = new wholebodyManipulation(nh_);
-    button_side_ = button_side;
 }
 
 solar_panel_handle_grabber::~solar_panel_handle_grabber()
@@ -48,9 +47,9 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     std::vector< std::vector<float> > armData;
     armData.push_back(*seed);
 
-//    armTraj_.moveArmJoints(side, armData, executionTime);
-//    ros::Duration(executionTime*2).sleep();
-//    control_util.stopAllTrajectories();
+    //    armTraj_.moveArmJoints(side, armData, executionTime);
+    //    ros::Duration(executionTime*2).sleep();
+    //    control_util.stopAllTrajectories();
 
     //move arm to given point with known orientation and higher z
     geometry_msgs::Pose finalGoal, intermGoal;
@@ -91,14 +90,13 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     waypoints.push_back(intermGoal);
     waypoints.push_back(finalGoal);
 
-    finalGoal.position.z  += 0.2;
+    finalGoal.position.z  -= 0.01;
     waypoints.push_back(finalGoal);
-
     moveit_msgs::RobotTrajectory traj;
     if(side == armSide::LEFT)
     {
         if (left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false) < 0.98){
-         ROS_INFO("solar_panel_handle_grabber::grasp_handles : Trajectory is not planned 100% - retrying");
+            ROS_INFO("solar_panel_handle_grabber::grasp_handles : Trajectory is not planned 100% - retrying");
             return false;
         }
     }
@@ -106,14 +104,39 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     {
         if (right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
             ROS_INFO("solar_panel_handle_grabber::grasp_handles : Trajectory is not planned 100% - retrying");
-               return false;
-           }
+            return false;
+        }
     }
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : Calculated Traj");
     wholebody_controller_->compileMsg(side, traj.joint_trajectory);
     ros::Duration(executionTime*2).sleep();
 
+    ROS_INFO("solar_panel_handle_grabber::grasp_handles : Closing grippers");
+    gripper_.controlGripper(side,GRIPPER_STATE::CUP);
+    ros::Duration(0.3).sleep();
+
+    finalGoal.position.z  += 0.2;
+    waypoints.clear();
+    waypoints.push_back(finalGoal);
+
+    moveit_msgs::RobotTrajectory traj2;
+    if(side == armSide::LEFT)
+    {
+        if (left_arm_planner_->getTrajFromCartPoints(waypoints, traj2, false) < 0.98){
+            ROS_INFO("solar_panel_handle_grabber::grasp_handles : Trajectory is not planned 100% - retrying");
+            return false;
+        }
+    }
+    else
+    {
+        if (right_arm_planner_->getTrajFromCartPoints(waypoints, traj2, false)< 0.98){
+            ROS_INFO("solar_panel_handle_grabber::grasp_handles : Trajectory is not planned 100% - retrying");
+            return false;
+        }
+    }
+
     geometry_msgs::Pose finalFramePose;
+
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : Fecthing position of %s", endEffectorFrame.c_str());
     current_state_->getCurrentPose(endEffectorFrame,finalFramePose, VAL_COMMON_NAMES::WORLD_TF);
 
@@ -125,18 +148,9 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : Actual Finger Pose : %f %f %f", finalFramePose.position.x, finalFramePose.position.y, finalFramePose.position.z);
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : Distance between final pose and goal is %f", sqrt(x_diff*x_diff + y_diff*y_diff + z_diff*z_diff));
 
-//    if (sqrt(x_diff*x_diff + y_diff*y_diff + z_diff*z_diff) > 0.1){
-//        return false;
-//    }
+    //    if (sqrt(x_diff*x_diff + y_diff*y_diff + z_diff*z_diff) > 0.1){
+    //        return false;
+    //    }
 
-
-    ROS_INFO("solar_panel_handle_grabber::grasp_handles : Closing grippers");
-    if (button_side_ == BUTTON_LOCATION::LEFT){
-        gripper_.closeGripper(side);
-    }
-    else{
-        gripper_.controlGripper(side,GRIPPER_STATE::CUP);
-    }
-    ros::Duration(0.3).sleep();
     return true;
 }

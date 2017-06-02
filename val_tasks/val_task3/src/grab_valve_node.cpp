@@ -35,10 +35,10 @@ int main(int argc, char **argv)
                 rotate.grab_valve(pt);
                 std::vector<geometry_msgs::Pose> points;
                 geometry_msgs::Point cen;
+
                 cen.x=std::atof(argv[4]);
                 cen.y=std::atof(argv[5]);
                 cen.z=std::atof(argv[6]);
-
                 rotate.compute_traj(cen,0.18,points);
                 rotate.move_valve(points);
             }

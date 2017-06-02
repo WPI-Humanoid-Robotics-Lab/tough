@@ -25,16 +25,16 @@ int main(int argc, char **argv)
     float nudgeDistance;
     float offset;
 
-    geometry_msgs::Pose2D goal;
-    goal.x=0.0;
-    goal.y=0.0;
-    goal.theta=-1.57;
-    walk.walkToGoal(goal);
+//    geometry_msgs::Pose2D goal;
+//    goal.x=0.0;
+//    goal.y=0.0;
+//    goal.theta=-1.57;
+//    walk.walkToGoal(goal);
 
-    std::vector<float> x_offset,y_offset;
-    x_offset={0.2,0.2};
-    y_offset={0.0,0.0};
-    walk.walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
+//    std::vector<float> x_offset,y_offset;
+//    x_offset={0.2,0.2};
+//    y_offset={0.0,0.0};
+//    walk.walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
 
 
     while(ros::ok())

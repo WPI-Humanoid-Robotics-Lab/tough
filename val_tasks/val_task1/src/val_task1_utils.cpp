@@ -8,13 +8,27 @@ task1Utils::task1Utils(ros::NodeHandle nh):
 
     // marker publisher
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>( "handle_path", 10, true);
+
+    reset_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
+
+    task_status_sub_ = nh.subscribe("/srcsim/finals/task", 10, &task1Utils::taskStatusSubCB, this);
+
+    logFile = ros::package::getPath("val_task1") + "/log/task1.csv";
+
+    current_checkpoint_ = 0;
+
+    timeNow = boost::posix_time::second_clock::local_time();
+
 }
 
 task1Utils::~task1Utils()
 {
-
+    satellite_sub_.shutdown();
 }
 
+int task1Utils::getCurrentCheckpoint() const{
+    return current_checkpoint_;
+}
 
 void task1Utils::satelliteMsgCB(const srcsim::Satellite& msg)
 {
@@ -63,65 +77,113 @@ double task1Utils::getYaw (void)
     return msg_.current_yaw;
 }
 
-valueDirection task1Utils::getValueDirection(double current_value, controlSelection control)
+valueDirection task1Utils::getValueStatus(double current_value, controlSelection control)
 {
-    valueDirection ret = valueDirection::VALUE_CONSTANT;
+    valueDirection ret = valueDirection::VALUE_NOT_INITIALISED;
+    // required direction
+    static valueDirection required_direction = valueDirection::VALUE_NOT_INITIALISED;
+    static double goal = 0;
+    static controlSelection prev_control = controlSelection::CONTROL_NOT_INITIALISED;
+    static bool execute_once = true;
+    static double prev_trigger_value = 0, prev_value = 0;
 
-    static double prev_value = 0;
-    static bool once = true;
+    //timer
+    static std::chrono::system_clock::time_point debounce_timer = std::chrono::system_clock::now();
 
-    // only on init
-    if (once)
+    // flag to indicate to elapse the timer
+    bool is_timer_being_checked = false;
+
+    // on init or if the control slection is changed
+    // set the trigger value
+    if (execute_once || (control != prev_control))
     {
-        // initialise preveious valuie and return
-        prev_value = current_value;
+        // initialise previous value and return
+        prev_trigger_value = current_value;
 
-        // reset the once flag
-        once = false;
+        // update the goal
+        goal = (control == controlSelection::CONTROL_PITCH) ? msg_.target_pitch : msg_.target_yaw;
 
-        ROS_INFO("initialised");
-    }
-    else if (fabs(fabs(current_value) - fabs(prev_value)) > MINIMUM_MOVMENT_IN_RAD) // moved atleast by 5 degrees
-    {
-        ROS_INFO("moved by 5deg");
-
-        if ((control == controlSelection::PITCH ? msg_.target_pitch : msg_.target_yaw) < prev_value)
+        //decide the direction to move
+        double current_value = (control == controlSelection::CONTROL_PITCH) ? msg_.current_pitch : msg_.current_yaw;
+        if (goal > current_value)
         {
-            ret = valueDirection::VALUE_INCREASING;
-            ROS_INFO("increasing");
+            // we should increase the value
+            required_direction = valueDirection::VALUE_INCRSING;
         }
         else
         {
-            ret = valueDirection::VALUE_DECREASING;
-            ROS_INFO("decreasing");
+            // decrease the alue
+            required_direction = valueDirection::VALUE_DECRASING;
+        }
+
+        //reset the flah
+        execute_once = false;
+
+        ROS_INFO("initialised");
+
+        //reset timer
+        debounce_timer = std::chrono::system_clock::now();
+    }
+    // if value is not changed (changed with in a threshold of 1 degree)
+    else if ((current_value > prev_trigger_value && (current_value - prev_trigger_value <= HANDLE_CONSTANT_THRESHOLD_IN_RAD)) ||
+             (prev_trigger_value > current_value && (prev_trigger_value - current_value <= HANDLE_CONSTANT_THRESHOLD_IN_RAD)) ||
+              prev_value == current_value || prev_trigger_value == current_value)
+    {
+        // set the flag that timer is being checked
+        is_timer_being_checked = true;
+
+        ROS_INFO("time debounce %f sec", std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - debounce_timer).count() );
+
+        if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - debounce_timer).count() > HANDLE_CONSTANT_DEBOUNCE_TIME_SEC){
+
+            // update return value as constant
+            ret = valueDirection::VALUE_CONSTANT;
+
+            //reset the flag
+            is_timer_being_checked = false;
+
+            // update the trigger value
+            execute_once =  true;
+            ROS_INFO("value is not changing");
+        }
+    }
+    // if the handels are moving, wait till it moves at least by 4 degree
+    else if (((current_value > prev_trigger_value) && (current_value - prev_trigger_value > HANDLE_MINIMUM_MOVMENT_IN_RAD)) ||
+            ((prev_trigger_value > current_value) && (prev_trigger_value - current_value > HANDLE_MINIMUM_MOVMENT_IN_RAD)))
+    {
+        ROS_INFO("moved by 4deg");
+
+        if ((required_direction == valueDirection::VALUE_INCRSING && current_value > prev_trigger_value) ||
+            (required_direction == valueDirection::VALUE_DECRASING && current_value < prev_trigger_value))
+        {
+            ret = valueDirection::VALUE_TOWARDS_TO_GOAL;
+            ROS_INFO("towards goal");
+        }
+        else
+        {
+            ret = valueDirection::VALUE_AWAY_TO_GOAL;
+            ROS_INFO("away from goal");
         }
 
         // set the once flag for next time
-        once = true;
-    }
-
-
-    return ret;
-}
-
-valueConstant task1Utils::isValueConstant (double current_value, controlSelection control)
-{
-    static int debounce_count = 0;
-    valueConstant ret = valueConstant::NOT_INITIALISED;
-
-    if (getValueDirection(current_value, control) == valueDirection::VALUE_CONSTANT)
-    {
-        debounce_count++;
-        ret = valueConstant::NOT_INITIALISED;
-    }
-    else if (debounce_count > 20)
-    {
-        debounce_count = 0;
-        ret = valueConstant::VALUE_NOT_CHANGING;
+        execute_once = true;
     }
     else
     {
-        ret = valueConstant::VALUE_CHANGING;
+        ROS_INFO("toggling");
+        ret = valueDirection::VALUE_TOGGLING;
+    }
+
+    //update the previous control
+    prev_control = control;
+
+    // update previous value
+    prev_value = current_value;
+
+    // reset the timer if its not being checked
+    if (!is_timer_being_checked)
+    {
+        debounce_timer = std::chrono::system_clock::now();
     }
 
     return ret;
@@ -139,14 +201,18 @@ void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point s
     float c = planeCoeffs.at(2);
     float d = planeCoeffs.at(3);
 
+    // clear the points
+    points.clear();
+
     // starting point
     geometry_msgs::Pose circle_point_pose;
     circle_point_pose.position.x = start.x;
     circle_point_pose.position.y = start.y;
     circle_point_pose.position.z = start.z;
     circle_point_pose.orientation = orientation;
-    // points.push_back(circle_point_pose);
+    points.push_back(circle_point_pose);
 
+    // diatnce from plane to the handle
     float dist = fabs(a*start.x  + b*start.y + c*start.z  + d )/sqrt(pow(a,2) + pow(b,2) + pow(c,2));
 
     geometry_msgs::Pose start_pose;
@@ -157,19 +223,24 @@ void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point s
     for (int i=0;i<steps; i++)
     {
         // angle to the first point
-        float alpha = atan2((start_pose.position.y - center.y),(start_pose.position.x - center.x));
+        double y = (start_pose.position.y - center.y);
+        double x = (start_pose.position.x - center.x);
+        ROS_INFO("y %f, x %f", y, x);
+        float alpha = atan2(y,x);
+        ROS_INFO("alpha %f ", alpha);
 
         if (direction == handleDirection::ANTICLOCK_WISE) {
             circle_point_pose.position.x = center.x + radius*cos(alpha - (float)(2*M_PI/steps));
             circle_point_pose.position.y = center.y + radius*sin(alpha - (float)(2*M_PI/steps));
         }
-        else if (direction == handleDirection::CLOCK_WISE){
+        else if (direction == handleDirection::CLOCK_WISE) {
             circle_point_pose.position.x = center.x + radius*cos(alpha + (float)(2*M_PI/steps));
             circle_point_pose.position.y = center.y + radius*sin(alpha + (float)(2*M_PI/steps));
         }
 
         //point.position.z = -(a*point.position.x  + b* point.position.y + d)/c;
         circle_point_pose.position.z = -(a*circle_point_pose.position.x  + b* circle_point_pose.position.y + d)/c + dist; //(d - dist+.05) )/c;
+        circle_point_pose.position.z -= 0.06;
 
         // orientation
         circle_point_pose.orientation = orientation;
@@ -249,3 +320,27 @@ void task1Utils::visulatise6DPoints(std::vector<geometry_msgs::Pose> &points)
     ros::Duration(0.2).sleep();
 }
 
+void task1Utils::clearPointCloud()
+{
+    std_msgs::Empty msg;
+    reset_pointcloud_pub_.publish(msg);
+}
+
+void task1Utils::taskStatusSubCB(const srcsim::Task &msg){
+
+    taskMsg = msg;
+    if (msg.current_checkpoint != current_checkpoint_){
+        current_checkpoint_ = msg.current_checkpoint;
+
+        std::ofstream outfile(logFile, std::ofstream::app);
+        std::stringstream data;
+
+        data << boost::posix_time::to_simple_string(timeNow) << "," << msg.task << ","
+             << msg.current_checkpoint << "," << msg.elapsed_time << std::endl;
+        ROS_INFO("task1Utils::taskStatusCB : Current checkpoint : %d", current_checkpoint_);
+
+        outfile << data.str();
+        outfile.close();
+    }
+
+}

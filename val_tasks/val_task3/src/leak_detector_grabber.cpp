@@ -87,9 +87,10 @@ void leakDetectorGrabber::graspDetector(armSide side, geometry_msgs::Pose &goal,
     ROS_INFO("Calculated Traj");
     wholebody_controller_.compileMsg(side, traj.joint_trajectory);
 
-    ros::Duration(executionTime).sleep();
-    ROS_INFO("Closing grippers");
-    gripper_.closeGripper(side);
-    ros::Duration(0.3).sleep();
+        ros::Duration(executionTime).sleep();
+        //gripper_.controlGripper(side,GRIPPER_STATE::CUP);
+        ROS_INFO("Closing grippers");
+        //gripper_.closeGripper(side);
+        ros::Duration(0.3).sleep();
 }
 

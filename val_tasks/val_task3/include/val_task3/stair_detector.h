@@ -21,7 +21,7 @@
 #include <iostream>
 #include <vector>
 
-class stair_detector
+class StairDetector
 {
     cv::Mat current_image_, current_image_HSV_, current_disparity_, qMatrix_;
 
@@ -52,16 +52,16 @@ class stair_detector
     void visualize_direction(geometry_msgs::Point point1, geometry_msgs::Point point2);
 
 public:
-    stair_detector(ros::NodeHandle nh);
+    StairDetector(ros::NodeHandle nh);
     void setTrackbar();
     void showImage(cv::Mat, std::string caption="stair Detection");
     void colorSegment(cv::Mat &imgHSV, cv::Mat &outImg);
     void findMaxContour(const std::vector<std::vector<cv::Point> >& contours);
-    bool getStairLocation(geometry_msgs::Point &, uint&);
+    bool getStairLocation(geometry_msgs::Point &stairLocation, uint&);
     //cv::Point getOrientation(const std::vector<cv::Point> &, cv::Mat &);
     //void drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale = 0.2);
     bool findStair(geometry_msgs::Point &, uint&);
-    ~stair_detector();
+    ~StairDetector();
 
     std::vector<double> coefficients() const;
     std::vector<Eigen::Vector4f> endPoints() const;
