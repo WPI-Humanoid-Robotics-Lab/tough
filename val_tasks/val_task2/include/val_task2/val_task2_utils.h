@@ -17,6 +17,7 @@
 #include "ros/package.h"
 #include <fstream>
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include "val_task2/val_solar_panel_detector.h"
 
 class task2Utils {
 private:
@@ -98,6 +99,7 @@ public:
     void resumePointCloud();
     void clearBoxPointCloud();
     void reOrientTowardsPanel(geometry_msgs::Pose panelPose);
+    void reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
     bool shakeTest(const armSide graspingHand);
     boost::posix_time::ptime timeNow;
