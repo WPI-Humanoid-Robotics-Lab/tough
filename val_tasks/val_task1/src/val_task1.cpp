@@ -217,7 +217,7 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
     else if(retry_count < 5) {
         ROS_INFO("sleep for 3 seconds for panel detection");
         ++retry_count;
-        ros::Duration(1).sleep();
+        ros::Duration(3).sleep();
         eventQueue.riseEvent("/DETECT_PANEL_RETRY");
     }
     // if failed for more than 5 times, go to error state
