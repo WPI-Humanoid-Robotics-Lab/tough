@@ -117,7 +117,7 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
 
 
     ROS_INFO("opening grippers");
-    gripper_.openGripper(side);
+    gripper_.controlGripper(side, GRIPPER_STATE::OPEN_THUMB_IN);
 
     //move shoulder roll outwards
     ROS_INFO("Setting shoulder roll");
@@ -172,6 +172,6 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
 
     ros::Duration(executionTime).sleep();
     ROS_INFO("Closing grippers");
-    gripper_.closeGripper(side);
+    gripper_.controlGripper(side, GRIPPER_STATE::HANDLE_HOLD);
     ros::Duration(0.6).sleep();
 }

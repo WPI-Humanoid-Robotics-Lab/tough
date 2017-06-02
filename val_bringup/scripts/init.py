@@ -2,12 +2,13 @@
 import rospy
 from std_msgs.msg import Bool
 from std_msgs.msg import Float64
+from srcsim.msg import Harness
 import subprocess
 import time
 
 def callback(data):
     #robot detached from harness, wait for 5 sec and start all the nodes
-    if data.data:
+    if data.status == 5:
       pub = rospy.Publisher('/multisense/set_spindle_speed', Float64, queue_size=10)
       time.sleep(1)
       pub.publish(0.8)
@@ -18,7 +19,7 @@ def callback(data):
 def WaitForRobot():
     rospy.init_node('WaitForRobot', anonymous=True)
 
-    rospy.Subscriber("/valkyrie/harness/detach", Bool, callback)
+    rospy.Subscriber("/srcsim/finals/harness", Harness, callback)
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
 
