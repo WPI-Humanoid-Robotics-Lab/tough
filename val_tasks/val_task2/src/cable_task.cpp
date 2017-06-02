@@ -300,3 +300,86 @@ bool CableTask::insert_cable(const geometry_msgs::Point &goal, float executionTi
     }
     // use endtime to find the traj point that we reached and reverse the trajectory
 }
+
+bool CableTask::rotate_cable(const geometry_msgs::Pose &goal, float executionTime)
+{
+
+    valControlCommon control_util(nh_);
+
+    // setting initial poses
+    ROS_INFO("grasp_cable: Initial Pose");
+    std::vector< std::vector<float> > armData;
+    armData.push_back(leftShoulderSeedInitial_);
+    armTraj_.moveArmJoints(LEFT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
+
+    armData.clear();
+    armData.push_back(rightShoulderSeedInitial_);
+    armData.push_back(rightShoulderSeed_);
+    armTraj_.moveArmJoints(RIGHT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
+
+    // Opening grippers
+    ROS_INFO("grasp_cable: Setting gripper position to open thumb");
+    ROS_INFO("opening grippers");
+    std::vector<double> gripper0,gripper1,gripper2,gripper3;
+    gripper0={1.35, 1.35, 0.3, 0.0 ,0.0 };
+    gripper1={1.2, 0.4, 0.35, 0.0 ,0.0 };
+    gripper2={1.2, 0.6, 0.7, 0.0 ,0.0 };
+    gripper3={1.2, 0.6, 0.7, 0.9 ,1.0 };
+    gripper_.controlGripper(RIGHT,gripper0);
+    ros::Duration(0.1).sleep();
+    gripper_.controlGripper(RIGHT, gripper1);
+    ros::Duration(0.2).sleep();
+
+    geometry_msgs::Pose rightOffset;
+    current_state_->getCurrentPose("/rightMiddleFingerPitch1Link",rightOffset,"/rightThumbRollLink");
+    geometry_msgs::Pose intermGoal;
+
+    // offset for thumb
+    current_state_->transformPose(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME);
+    intermGoal.position.x+=rightOffset.position.x;
+    intermGoal.position.y+=rightOffset.position.y;
+    intermGoal.position.z+=rightOffset.position.z;
+    current_state_->transformPose(intermGoal,intermGoal, VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME, VAL_COMMON_NAMES::WORLD_TF);
+    taskCommonUtils::fixHandFramePalmDown(nh_, RIGHT, intermGoal);
+
+
+
+    // setting a sead position without movement of chest
+    intermGoal.position.z+=0.1;
+    armTraj_.moveArmInTaskSpace(RIGHT, intermGoal, executionTime);
+    ros::Duration(executionTime*2).sleep();
+    control_util.stopAllTrajectories();
+
+    geometry_msgs::Pose finalGoal;
+    finalGoal = goal;
+    finalGoal.position.z+=0.05;
+    // change in orientation
+    current_state_->transformPose(finalGoal,finalGoal, VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    finalGoal.orientation= rightHandOrientationTop_.quaternion;
+    current_state_->transformPose(finalGoal,finalGoal,VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+
+    std::vector<geometry_msgs::Pose> waypoints;
+
+    waypoints.push_back(intermGoal);
+    waypoints.push_back(finalGoal);
+
+    moveit_msgs::RobotTrajectory traj;
+
+
+    if (right_arm_planner_choke->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
+        ROS_INFO("CableTask::grasp_choke: Trajectory is not planned 100% - retrying");
+        return false;
+    }
+
+
+    ROS_INFO("CableTask::grasp_choke: Calculated Traj");
+    wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
+    ros::Duration(executionTime*2).sleep();
+
+    return true;
+
+}
+
+

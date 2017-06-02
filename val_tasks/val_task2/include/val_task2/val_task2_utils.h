@@ -113,4 +113,6 @@ public:
     bool isCableOnTable(geometry_msgs::Pose &cable_coordinates);
     bool isCableInHand(armSide side);
     bool isCableTouchingSocket();
+    geometry_msgs::Pose grasping_hand(armSide &side, geometry_msgs::Pose handle_pose);
+    bool isRotationReq(armSide side, geometry_msgs::Point handle_coordinates,geometry_msgs::Point button_coordinates);
 };
