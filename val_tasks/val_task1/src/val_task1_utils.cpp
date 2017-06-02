@@ -10,6 +10,15 @@ task1Utils::task1Utils(ros::NodeHandle nh):
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>( "handle_path", 10, true);
 
     reset_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
+
+    task_status_sub_ = nh.subscribe("/srcsim/finals/task", 10, &task1Utils::taskStatusSubCB, this);
+
+    logFile = ros::package::getPath("val_task1") + "/log/task1.csv";
+
+    current_checkpoint_ = 0;
+
+    timeNow = boost::posix_time::second_clock::local_time();
+
 }
 
 task1Utils::~task1Utils()
@@ -17,6 +26,9 @@ task1Utils::~task1Utils()
     satellite_sub_.shutdown();
 }
 
+int task1Utils::getCurrentCheckpoint() const{
+    return current_checkpoint_;
+}
 
 void task1Utils::satelliteMsgCB(const srcsim::Satellite& msg)
 {
@@ -312,4 +324,23 @@ void task1Utils::clearPointCloud()
 {
     std_msgs::Empty msg;
     reset_pointcloud_pub_.publish(msg);
+}
+
+void task1Utils::taskStatusSubCB(const srcsim::Task &msg){
+
+    taskMsg = msg;
+    if (msg.current_checkpoint != current_checkpoint_){
+        current_checkpoint_ = msg.current_checkpoint;
+
+        std::ofstream outfile(logFile, std::ofstream::app);
+        std::stringstream data;
+
+        data << boost::posix_time::to_simple_string(timeNow) << "," << msg.task << ","
+             << msg.current_checkpoint << "," << msg.elapsed_time << std::endl;
+        ROS_INFO("task1Utils::taskStatusCB : Current checkpoint : %d", current_checkpoint_);
+
+        outfile << data.str();
+        outfile.close();
+    }
+
 }
