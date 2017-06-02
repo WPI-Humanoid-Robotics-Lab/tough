@@ -1090,8 +1090,8 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
     if(execute_once){
         ROS_INFO("Walking 1 step back");
         ros::Duration(0.5).sleep();
-        std::vector<float> x_offset={-0.3,-0.3};
-        std::vector<float> y_offset={0.0,0.1};
+        std::vector<float> x_offset={-0.25,-0.25, -0.5, -0.5};
+        std::vector<float> y_offset={0.0, 0.0, 0.0, 0.1};
         walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
         ros::Duration(3).sleep();
         execute_once = false;
@@ -1136,6 +1136,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
         }
         // this is to avoid detecting points that will always be in collision
         retry_count++;
+        eventQueue.riseEvent("/DETECT_FINISH_RETRY");
     }
     else if(retry_count++ < 5){
         ros::Duration(3).sleep();
@@ -1281,9 +1282,9 @@ void valTask1::resetRobotToDefaults(int arm_pose)
 {
     // open grippers
     gripper_controller_->openGripper(armSide::RIGHT);
-    ros::Duration(1).sleep();
+    ros::Duration(0.2).sleep();
     gripper_controller_->openGripper(armSide::LEFT);
-    ros::Duration(1).sleep();
+    ros::Duration(0.2).sleep();
 
     // increse pelvis
     pelvis_controller_->controlPelvisHeight(0.9);
@@ -1297,14 +1298,14 @@ void valTask1::resetRobotToDefaults(int arm_pose)
     if (arm_pose == 0)
     {
         arm_controller_->moveToZeroPose(armSide::LEFT);
-        ros::Duration(1).sleep();
+        ros::Duration(0.2).sleep();
         arm_controller_->moveToZeroPose(armSide::RIGHT);
         ros::Duration(1).sleep();
     }
     else if (arm_pose == 1)
     {
         arm_controller_->moveToDefaultPose(armSide::LEFT);
-        ros::Duration(1).sleep();
+        ros::Duration(0.2).sleep();
         arm_controller_->moveToDefaultPose(armSide::RIGHT);
         ros::Duration(1).sleep();
     }

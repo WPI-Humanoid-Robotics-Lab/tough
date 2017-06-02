@@ -9,7 +9,7 @@ task1Utils::task1Utils(ros::NodeHandle nh):
     // marker publisher
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>( "handle_path", 10, true);
 
-    reset_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
+    reset_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
 
     task_status_sub_ = nh.subscribe("/srcsim/finals/task", 10, &task1Utils::taskStatusSubCB, this);
 

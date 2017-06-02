@@ -1,9 +1,52 @@
 ## SRC Sim
 
-### SRC Sim 0.X.X (2017-XX-XX)
+### SRC Sim 0.6.0 (2017-06-01)
 
-* Add publishing of Score message
-    * [Pull request 69](https://bitbucket.org/osrf/srcsim/pull-requests/69)
+* Task 1 changes
+    * No changes to tutorial needed
+    * Task 1: Enable / disable satellite plugin on demand
+        * [Pull request 85](https://bitbucket.org/osrf/srcsim/pull-requests/85)
+
+* Task 2 changes
+    * No changes to tutorial needed
+    * Task 2: Insert habitat lamp on demand
+        * [Pull request 86](https://bitbucket.org/osrf/srcsim/pull-requests/86)
+
+    * Higher array surface, different cable plug
+        * [Pull request 77](https://bitbucket.org/osrf/srcsim/pull-requests/77)
+
+* Task 3 changes
+    * No changes to tutorial needed
+    * Task 3: Simple shape collisions for valve
+        * [Pull request 84](https://bitbucket.org/osrf/srcsim/pull-requests/84)
+
+    * Higher table surface
+        * [Pull request 77](https://bitbucket.org/osrf/srcsim/pull-requests/77)
+
+* Others
+    * [Task 1 tutorial updated](https://bitbucket.org/osrf/srcsim/wiki/finals_task1)
+    * [Task 2 tutorial updated](https://bitbucket.org/osrf/srcsim/wiki/finals_task2)
+    * [Task 3 tutorial updated](https://bitbucket.org/osrf/srcsim/wiki/finals_task3)
+    * Add publishing of Score message
+        * [Pull request 69](https://bitbucket.org/osrf/srcsim/pull-requests/69)
+
+    * Time penalties on skip and reset
+        * [Pull request 82](https://bitbucket.org/osrf/srcsim/pull-requests/82)
+
+    * Add ROS subscriber to force current checkpoint completion (for debugging)
+        * [Pull request 83](https://bitbucket.org/osrf/srcsim/pull-requests/83)
+
+    * Re-harness
+        * [Pull request 79](https://bitbucket.org/osrf/srcsim/pull-requests/79)
+
+    * Wait for ihmc controller to be ready before launching grasp controller
+        * [Pull request 81](https://bitbucket.org/osrf/srcsim/pull-requests/81)
+
+    * Logging: remove <sdf> from <plugin>
+        * [Pull request 78](https://bitbucket.org/osrf/srcsim/pull-requests/78)
+
+    * Publish multisense transforms
+        * [Pull request 72](https://bitbucket.org/osrf/srcsim/pull-requests/72)
 
 ### SRC Sim 0.5.0 (2017-05-16)
 

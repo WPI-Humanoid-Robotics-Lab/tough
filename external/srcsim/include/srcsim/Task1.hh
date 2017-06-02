@@ -46,6 +46,10 @@ namespace gazebo
     /// \brief Check whether the robot is currently within the box volume in
     /// front of the satellite dish.
     public: bool Check();
+
+    /// \brief Reharness at start box
+    /// \param[in] _penalty Penalty time to add
+    public: void Restart(const common::Time &_penalty);
   };
 
   /// \brief Task 1, Checkpoint 2: Satellite pitch or yaw
