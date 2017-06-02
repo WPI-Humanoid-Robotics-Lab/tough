@@ -14,6 +14,9 @@
 #include <val_controllers/val_arm_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
 #include <val_task2/cable_detector.h>
+#include "ros/package.h"
+#include <fstream>
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 class task2Utils {
 private:
@@ -39,7 +42,7 @@ private:
     ros::Subscriber task_status_sub_;
 
     CableDetector* cable_detector_;
-
+    srcsim::Task taskMsg;
     int current_checkpoint_;
     float table_height_;
 
@@ -62,14 +65,23 @@ private:
     const std::vector<float> leftPanelPlacementUpPose1_  = {-1.5, -1.4, 1.39, -0.9, -1.10, 0.5, 0};
     const std::vector<float> leftPanelPlacementDownPose1_= {-1.2, -1.4, 1.39, -0.9, -1.10, 0.5, 0.4};
 
+    const std::vector<float> leftPanelPlacementUpPose2_  = {-1.5, -1.4, 1.39, -0.9, 1.10, -0.5, 0};
+    const std::vector<float> leftPanelPlacementDownPose2_= {-1.2, -1.4, 1.39, -0.9, 1.10, -0.5, 0};
+
     const std::vector<float> leftPanelPlacementSupport1_  = {-0.66, -1.4, 1.2, -1.49, 1.29, 0, 0.26};
     const std::vector<float> leftPanelPlacementSupport2_  = {-0.66, -1.4, 0.75, -1.49, 1.29, 0, 0.26};
 
-    const std::vector<float> rightPanelPlacementUpPose1_ = {-1.5, 1.4, 1.39, 0.9, -1.10, -0.5, 0};
+    const std::vector<float> rightPanelPlacementUpPose1_  = {-1.5, 1.4, 1.39, 0.9, -1.10, -0.5, 0};
     const std::vector<float> rightPanelPlacementDownPose1_= {-1.2, 1.4, 1.39, 0.9, -1.10, -0.5, 0.4};
 
-    const std::vector<float> rightPanelPlacementSupport1_  = {-0.66, 1.4, 1.2, 1.49, 1.29, 0, 0.26};
-    const std::vector<float> rightPanelPlacementSupport2_  = {-0.66, 1.4, 0.75, 1.49, 1.29, 0, 0.26};
+    const std::vector<float> rightPanelPlacementUpPose2_  = {-1.5, 1.4, 1.39, 0.9, 1.10, 0.5, 0};
+    const std::vector<float> rightPanelPlacementDownPose2_= {-1.2, 1.4, 1.39, 0.9, 1.10, 0.5, 0};
+
+    const std::vector<float> rightPanelPlacementSupport1_ = {-0.66, 1.4, 1.2, 1.49, 1.29, 0, 0.26};
+    const std::vector<float> rightPanelPlacementSupport2_ = {-0.66, 1.4, 0.75, 1.49, 1.29, 0, 0.26};
+
+    // cable in hand seed point
+    const std::vector<float> righCableInHandSeed_ = {-0.81,1.11,0.65,1.14,-0.26,-0.19,0.30};
 
     // Gripper commands
     const std::vector<double> leftHandGrasp_          = {1.2, -0.6, -0.77, -0.9, -0.9};
@@ -79,6 +91,8 @@ private:
     std::vector<armTrajectory::armJointData> reOrientPanelTraj_;
 
     void taskStatusCB(const srcsim::Task &msg);
+
+    std::string logFile;
 
 public:
     task2Utils(ros::NodeHandle nh);
@@ -94,6 +108,9 @@ public:
     void clearBoxPointCloud();
     void reOrientTowardsPanel(geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
-    bool isCableOnTable();
+    bool shakeTest(const armSide graspingHand);
+    boost::posix_time::ptime timeNow;
+    bool isCableOnTable(geometry_msgs::Pose &cable_coordinates);
     bool isCableInHand(armSide side);
+    bool isCableTouchingSocket();
 };

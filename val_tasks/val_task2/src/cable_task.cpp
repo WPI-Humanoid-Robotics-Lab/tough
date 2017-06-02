@@ -20,7 +20,10 @@ CableTask::CableTask(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
     left_arm_planner_cable = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_PALM_GROUP, VAL_COMMON_NAMES::WORLD_TF);
 
     wholebody_controller_ = new wholebodyManipulation(nh_);
-    chest_controller_ =new chestTrajectory(nh_);
+    chest_controller_     = new chestTrajectory(nh_);
+
+    task2_utils_    = new task2Utils(nh_);
+    control_common_ = new valControlCommon(nh_);
 
 }
 
@@ -247,4 +250,53 @@ bool CableTask::grasp_cable(const geometry_msgs::Pose &goal, float executionTime
     gripper_.closeGripper(RIGHT);
 
 
+}
+
+
+bool CableTask::insert_cable(const geometry_msgs::Point &goal, float executionTime)
+{
+    const float OFFSET=0.03; // z offset of cable from middlefinger
+
+    geometry_msgs::QuaternionStamped quat; // populate this value by experimentation
+    quat.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+
+    current_state_->transformQuaternion(quat, quat);
+
+    std::vector<geometry_msgs::Pose> waypoints;
+
+    for (float z=0.05; z > -0.06; z -= 0.01){
+        for (float x=-0.05; x < 0.06; x+= 0.01){
+            for (float y=-0.05; y < 0.06; y+= 0.01){
+                geometry_msgs::Pose waypoint;
+                waypoint.position.x = goal.x + x;
+                waypoint.position.y = goal.y + y;
+                waypoint.position.z = goal.z + z + OFFSET;
+                waypoint.orientation = quat.quaternion;
+                waypoints.push_back(waypoint);
+            }
+        }
+    }
+
+    moveit_msgs::RobotTrajectory traj;
+
+    // Sending waypoints to the planner
+    right_arm_planner_cable->getTrajFromCartPoints(waypoints,traj,false);
+    wholebody_controller_->compileMsg(RIGHT,traj.joint_trajectory);
+
+    ros::Time startTime= ros::Time::now();
+    ros::Time endTime;
+    bool cable_touching = false;
+    while((ros::Time::now() - startTime) < ros::Duration(15)){
+        // check effort values, but get  a threshold before doing that
+        if (task2_utils_->isCableTouchingSocket()){
+            cable_touching = true;
+            control_common_->stopAllTrajectories();
+            while(task2_utils_->isCableTouchingSocket() && task2_utils_->getCurrentCheckpoint() != 5){
+                ROS_INFO("Cable is touching the socket");
+            }
+            endTime = ros::Time::now();
+            break;
+        }
+    }
+    // use endtime to find the traj point that we reached and reverse the trajectory
 }

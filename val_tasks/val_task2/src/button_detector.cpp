@@ -96,7 +96,11 @@ bool ButtonDetector::getButtonLocation(geometry_msgs::Point& buttonLoc)
             }
         }
         //  Calculating the Centroid of the handle Point cloud
-        pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid);
+        if (!pcl::compute3DCentroid(currentDetectionCloud, cloudCentroid)){
+            ROS_INFO("ButtonDetector::getButtonLocation : centroid could not be computed");
+            return false;
+        }
+
     }
     if( foundButton )
     {
