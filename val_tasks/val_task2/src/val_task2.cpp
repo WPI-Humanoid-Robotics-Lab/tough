@@ -219,7 +219,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
     }   else if (fail_count < 5)    {
         // increment the fail count
         fail_count++;
-        task2_utils_->clearBoxPointCloud();
+        task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
         eventQueue.riseEvent("/DETECT_ROVER_RETRY");
     }
 
@@ -345,7 +345,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
     if(solar_panel_detector_ == nullptr) {
         if (!isFirstRun){
             ROS_INFO("valTask2::detectPanelTask : Clearing pointcloud");
-            task2_utils_->clearBoxPointCloud();
+            task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
         }
 
         task2_utils_->resumePointCloud();
@@ -370,7 +370,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
     // detect solar panel
     std::vector<geometry_msgs::Pose> poses;
     solar_panel_detector_->getDetections(poses);
-
+    ROS_INFO("Sixe of detections : %d", poses.size());
     // if we get atleast two detections
     if (poses.size() > 1)
     {
@@ -455,7 +455,7 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
         setPanelGraspingHand(hand);
         is_rotation_required_=task2_utils_->isRotationReq(hand,solar_panel_handle_pose_.position,button_coordinates_temp_);
 
-        ROS_INFO("valTask2::graspPanelTask : Rotation is %s required", is_rotation_required_ ? "definitely" : "not" );
+        ROS_INFO("valTask2::graspPanelTask : Rotation is %d ", is_rotation_required_);
 
         //Pause the pointcloud to avoid obstacles on map due to panel
         task2_utils_->pausePointCloud();
@@ -508,6 +508,7 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         std::vector<float> y_offset={0.0,0.1};
         walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
         ros::Duration(4).sleep();
+        task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::WAIST_UP);
     }
     else
     {
@@ -838,7 +839,7 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
 
     geometry_msgs::Pose current_pelvis_pose;
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
-    task2_utils_->clearBoxPointCloud();
+    task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
     if ( taskCommonUtils::isGoalReached(current_pelvis_pose, solar_array_fine_walk_goal_) ) {
         ROS_INFO("valTask2::alignSolarArrayTask : reached solar array");
         ros::Duration(1).sleep();

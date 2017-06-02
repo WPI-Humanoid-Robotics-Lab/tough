@@ -18,6 +18,12 @@
 #include <fstream>
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "val_task2/val_solar_panel_detector.h"
+#include <std_msgs/Int8.h>
+
+enum class CLEAR_BOX_CLOUD{
+    WAIST_UP=0,
+    FULL_BOX
+};
 
 class task2Utils {
 private:
@@ -106,7 +112,7 @@ public:
     void clearPointCloud();
     void pausePointCloud();
     void resumePointCloud();
-    void clearBoxPointCloud();
+    void clearBoxPointCloud(CLEAR_BOX_CLOUD state);
     void reOrientTowardsPanel(geometry_msgs::Pose panelPose);
     void reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
@@ -118,3 +124,5 @@ public:
     geometry_msgs::Pose grasping_hand(armSide &side, geometry_msgs::Pose handle_pose);
     bool isRotationReq(armSide side, geometry_msgs::Point handle_coordinates,geometry_msgs::Point button_coordinates);
 };
+
+

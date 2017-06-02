@@ -324,8 +324,8 @@ bool CableTask::rotate_cable(const geometry_msgs::Pose &goal, float executionTim
     ROS_INFO("opening grippers");
     std::vector<double> gripper0,gripper1,gripper2,gripper3;
     gripper0={1.35, 1.35, 0.3, 0.0 ,0.0 };
-    gripper1={1.2, 0.4, 0.35, 0.0 ,0.0 };
-    gripper2={1.2, 0.6, 0.7, 0.0 ,0.0 };
+    gripper1={1.2, 0.4, 0.35, 0.3 ,0.3 };
+    gripper2={1.2, 0.6, 0.7, 0.3 ,0.3 };
     gripper3={1.2, 0.6, 0.7, 0.9 ,1.0 };
     gripper_.controlGripper(RIGHT,gripper0);
     ros::Duration(0.1).sleep();
@@ -336,25 +336,18 @@ bool CableTask::rotate_cable(const geometry_msgs::Pose &goal, float executionTim
     current_state_->getCurrentPose("/rightMiddleFingerPitch1Link",rightOffset,"/rightThumbRollLink");
     geometry_msgs::Pose intermGoal;
 
-    // offset for thumb
-    current_state_->transformPose(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME);
-    intermGoal.position.x+=rightOffset.position.x;
-    intermGoal.position.y+=rightOffset.position.y;
-    intermGoal.position.z+=rightOffset.position.z;
-    current_state_->transformPose(intermGoal,intermGoal, VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME, VAL_COMMON_NAMES::WORLD_TF);
+    intermGoal= goal;
     taskCommonUtils::fixHandFramePalmDown(nh_, RIGHT, intermGoal);
 
-
-
     // setting a sead position without movement of chest
-    intermGoal.position.z+=0.1;
+    intermGoal.position.z+=0.06;
     armTraj_.moveArmInTaskSpace(RIGHT, intermGoal, executionTime);
     ros::Duration(executionTime*2).sleep();
     control_util.stopAllTrajectories();
 
     geometry_msgs::Pose finalGoal;
     finalGoal = goal;
-    finalGoal.position.z+=0.05;
+    finalGoal.position.z+=0.03;
     // change in orientation
     current_state_->transformPose(finalGoal,finalGoal, VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
     finalGoal.orientation= rightHandOrientationTop_.quaternion;
@@ -377,6 +370,8 @@ bool CableTask::rotate_cable(const geometry_msgs::Pose &goal, float executionTim
     ROS_INFO("CableTask::grasp_choke: Calculated Traj");
     wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
     ros::Duration(executionTime*2).sleep();
+
+    gripper_.closeGripper(RIGHT);
 
     return true;
 

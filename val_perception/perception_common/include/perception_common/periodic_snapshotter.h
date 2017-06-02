@@ -40,6 +40,7 @@
 #include <perception_common/PointCloudHelper.h>
 #include <val_common/val_common_names.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Int8.h>
 #include <val_controllers/robot_state.h>
 
 namespace laser_assembler
@@ -99,7 +100,7 @@ public:
     void pausePointcloud(bool pausePointcloud);
     void pausePointcloudCB(const std_msgs::Bool &msg);
 
-    void setBoxFilterCB(const std_msgs::Empty &msg);
+    void setBoxFilterCB(const std_msgs::Int8 &msg);
 private:
     ros::NodeHandle n_;
     ros::Publisher snapshot_pub_;

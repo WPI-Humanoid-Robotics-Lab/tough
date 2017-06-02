@@ -297,20 +297,20 @@ void task2Utils::reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_ms
 
     ROS_INFO("reOrient towards cable: The current Yaw in pelvis frame is: %d", yaw);
 
-//    geometry_msgs::Pose cableOrientationPose;
-//    // Choose the cableOrientation pose based on the condition
-//    //side = yaw < 0 ? armSide::LEFT : armSide::RIGHT;
+    //    geometry_msgs::Pose cableOrientationPose;
+    //    // Choose the cableOrientation pose based on the condition
+    //    //side = yaw < 0 ? armSide::LEFT : armSide::RIGHT;
 
-//    geometry_msgs::Pose robotPose;
-//    current_state_->getCurrentPose(VAL_COMMON_NAMES::WORLD_TF,robotPose);
+    //    geometry_msgs::Pose robotPose;
+    //    current_state_->getCurrentPose(VAL_COMMON_NAMES::WORLD_TF,robotPose);
 
-//    geometry_msgs::Pose2D cableOrientationPose2D;
-//    cableOrientationPose2D.x = cableOrientationPose.position.x;
-//    cableOrientationPose2D.y = cableOrientationPose.position.y;
-//    cableOrientationPose2D.theta = tf::getYaw(robotPose.orientation);
+    //    geometry_msgs::Pose2D cableOrientationPose2D;
+    //    cableOrientationPose2D.x = cableOrientationPose.position.x;
+    //    cableOrientationPose2D.y = cableOrientationPose.position.y;
+    //    cableOrientationPose2D.theta = tf::getYaw(robotPose.orientation);
 
-//    //Convert cableo... pose to world and call the walker
-//    walk_->walkToGoal(cableOrientationPose2D);
+    //    //Convert cableo... pose to world and call the walker
+    //    walk_->walkToGoal(cableOrientationPose2D);
 
 }
 
@@ -452,8 +452,13 @@ void task2Utils::clearPointCloud() {
     ros::Duration(0.3).sleep();
 }
 
-void task2Utils::clearBoxPointCloud() {
-    std_msgs::Empty msg;
+void task2Utils::clearBoxPointCloud(CLEAR_BOX_CLOUD state) {
+    std_msgs::Int8 msg;
+    if(state == CLEAR_BOX_CLOUD::WAIST_UP)
+    {
+        msg.data =1;
+    }else msg.data =0;
+
     clearbox_pointcloud_pub.publish(msg);
 }
 
