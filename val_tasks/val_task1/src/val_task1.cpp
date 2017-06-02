@@ -64,9 +64,6 @@ valTask1::valTask1(ros::NodeHandle nh):
     left_arm_planner_ = new cartesianPlanner("leftMiddleFingerGroup", "/world"); //leftPalm
     right_arm_planner_ = new cartesianPlanner("rightMiddleFingerGroup", "/world"); //rightPalm
 
-    // upper body tracker
-    upper_body_tracker_ = new upperBodyTracker(nh_);
-
     // val control common api;s
     control_helper_ = new valControlCommon(nh_);
 
@@ -97,7 +94,6 @@ valTask1::~valTask1(){
     if(wholebody_controller_ != nullptr)  delete wholebody_controller_;
     if(left_arm_planner_ != nullptr)      delete left_arm_planner_;
     if(right_arm_planner_ != nullptr)     delete right_arm_planner_;
-    if(upper_body_tracker_ != nullptr)    delete upper_body_tracker_;
     if(task1_utils_ != nullptr)           delete task1_utils_;
     if(control_helper_ != nullptr)        delete control_helper_;
 }
@@ -588,11 +584,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         // reset the execute flag
         execute_once = false;
 
-        // set the pelvis height
-        //pelvis_controller_->controlPelvisHeight(0.85);
-
         // generate the way points for the knob (current pose(6DOF) of arm is used to generate the way points)
-
         //current pose of the hand
         geometry_msgs::Pose current_hand_pose;
         robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME, current_hand_pose);
@@ -622,10 +614,10 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     //close gripper
     gripper_controller_->closeGripper(armSide::RIGHT);
 
-    // if the handle is moving in wrong direction, flip the points
+    // if the handle is moving in wrong direction, flip the points (assuming grasp is not lost)
     if(task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_AWAY_TO_GOAL)
     {
-        ROS_INFO("value is incresing");
+        ROS_INFO("handle moving in wrong direction, path will be flipped ");
 
         // stop all the trajectories
         control_helper_->stopAllTrajectories();
@@ -648,7 +640,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         ROS_INFO("pitch correct now");
 
         // wait until the pich correction becomes complete
-        ros::Duration(5).sleep();
+        ros::Duration(3).sleep();
 
         //check if its complete
         if (task1_utils_->isPitchCompleted())
@@ -688,7 +680,8 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
         ROS_INFO("grasp lost");
     }
-    // if the arm is not moving any more
+
+    // if the handle is not moving (assuming grasp is not lost)
     else if (task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_CONSTANT)
     {
         // replan and execute from the current point,
@@ -700,20 +693,6 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
         ROS_INFO("arm moment stopped, replanning rajectory with the current pose");
     }
-    //    // if the arm is not moving any more (ideally its back to the starting point)
-    //    ///@todo: not sure if this is required..!!!
-    //    /// how do we check if its at the same point..??
-    //    else if (!upper_body_tracker_->isArmMoving(armSide::RIGHT, 10))
-    //    {
-    //        // replan and execute from the current point,
-    //        // set the execute once state
-    //        execute_once = true;
-
-    //        // still stay in the same state
-    //        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
-
-    //        ROS_INFO("arm moment stopped, replanning rajectory with the current pose");
-    //    }
     // if timeout
     // i.e. arm is wobbling around a local minima
     ///@todo use ros timer, instead of system clock
@@ -758,113 +737,6 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
     }
-
-#if (0)
-    static double prev_position_error=9999;
-    static bool execute_once = true;
-    static int retry_count = 0;
-    static double pitch_correction_per_point;
-#define PITCH_TEST_ROTATION 10
-    double position_error = task1_utils_->getPitchDiff();
-
-    // generate the way points in cartersian space
-    std::vector<geometry_msgs::Pose> waypoints;
-    //desired pose (i.e. the grab pose)
-    geometry_msgs::Pose grab_pose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME,grab_pose);
-
-
-    if (execute_once){
-        //do the stuff that needs to be executed only once
-        //calculate (change in pitch)/(number of points)
-        execute_once = false;
-        ROS_INFO_STREAM("Finding pitch correction per point");
-
-        double error_before =  position_error;
-
-        task1_utils_->getCircle3D(handle_loc_[0], handle_loc_[1], grab_pose, panel_coeff_, waypoints, 0.125, 10);
-
-        ///@todo: remove the visulaisation
-        task1_utils_->visulatise6DPoints(waypoints);
-
-        // plan the trajectory
-        moveit_msgs::RobotTrajectory traj;
-        right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
-        traj.joint_trajectory.points.resize(PITCH_TEST_ROTATION);
-        ROS_INFO("trajectory points trimmed");
-
-        // execute the trajectory
-        wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
-        //        arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
-        ros::Duration(4).sleep();
-
-        //stop all trajectories
-        double error_after = task1_utils_->getPitchDiff();
-        /// @todo what happens when points are not generated correctly?
-
-        pitch_correction_per_point = (error_before - error_after) / PITCH_TEST_ROTATION;
-        ROS_INFO_STREAM("Pitch correction per point"<<pitch_correction_per_point);
-
-        prev_position_error = error_after;
-
-        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
-    }
-
-    if(task1_utils_->isPitchCompleted()){
-        //completed.
-        ROS_INFO_STREAM("Pitch correction checkpoint completed");
-        eventQueue.riseEvent("/PITCH_CORRECTION_SUCESSFUL");
-        //safely release the handle and move arm to a safe position
-    }
-    else if (task1_utils_->isPitchCorrectNow()){
-        // sleep for 3 sec and come back to this state
-        // stop all trajectories
-        ROS_INFO_STREAM("Pitch is correct. holding on to that position");
-        ros::Duration(3).sleep();
-        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
-    }
-    else if(fabs(position_error) < fabs(prev_position_error) ){
-        ROS_INFO_STREAM("Adjusting pitch");
-        prev_position_error = position_error;
-
-        int points_to_rotate = position_error*pitch_correction_per_point;
-        // generate these many points and rotate handle
-
-        task1_utils_->getCircle3D(handle_loc_[0], handle_loc_[1], grab_pose, panel_coeff_, waypoints, 0.125, 10);
-
-        ///@todo: remove the visulaisation
-        task1_utils_->visulatise6DPoints(waypoints);
-
-        // plan the trajectory
-        moveit_msgs::RobotTrajectory traj;
-        right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
-        traj.joint_trajectory.points.resize(points_to_rotate);
-
-        // execute the trajectory
-        wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
-        //    arm_controller_->moveArmTrajectory(armSide::RIGHT, traj.joint_trajectory);
-
-        ros::Duration(5).sleep();
-
-        //stop all trajectories
-        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
-    }
-    else if(fabs(position_error) >= fabs(prev_position_error) && retry_count++ < 5) {
-        //failed. change direction and retry
-        //want to reset execute_once?
-        ROS_INFO_STREAM("current error is more than previous error. retrying");
-        execute_once = true;
-        prev_position_error=9999;
-        eventQueue.riseEvent("/PITCH_CORRECTION_RETRY");
-    }
-    else{
-        //failed completely
-        ROS_INFO_STREAM("Pitch correction failed");
-        execute_once = true;
-        prev_position_error=9999;
-        eventQueue.riseEvent("/PITCH_CORRECTION_FAILED");
-    }
-#endif
 
     return TaskResult::SUCCESS();
 }
@@ -946,9 +818,6 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         // reset the execute flag
         execute_once = false;
 
-        // set the pelvis height
-       // pelvis_controller_->controlPelvisHeight(0.85);
-
         // generate the way points for the knob (current pose(6DOF) of arm is used to generate the way points)
         //current pose of the hand
         geometry_msgs::Pose current_hand_pose;
@@ -980,9 +849,10 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     //close gripper
     gripper_controller_->closeGripper(armSide::LEFT);
 
+    // if the handle is moving in wrong direction, flip the points (assuming grasp is not lost)
     if(task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_AWAY_TO_GOAL)
     {
-        ROS_INFO("value is incresing");
+         ROS_INFO("handle moving in wrong direction, path will be flipped ");
 
         // stop all the trajectories
         control_helper_->stopAllTrajectories();
@@ -1054,20 +924,6 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 
         ROS_INFO("arm moment stopped, replanning rajectory with the current pose");
     }
-    //    // if the arm is not moving any more (ideally its back to the starting point)
-    //    ///@todo: not sure if this is required..!!!
-    //    /// how do we check if its at the same point..??
-    //    else if (!upper_body_tracker_->isArmMoving(armSide::LEFT, 10))
-    //    {
-    //        // replan and execute from the current point,
-    //        // set the execute once state
-    //        execute_once = true;
-
-    //        // still stay in the same state
-    //        eventQueue.riseEvent("/YAW_CORRECTION_EXECUTING");
-
-    //        ROS_INFO("arm moment stopped, replanning rajectory with the current pose");
-    //    }
     // if timeout
     // i.e. arm is wobbling around a local minima
     ///@todo use ros timer, instead of system clock
@@ -1107,9 +963,6 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 
         ROS_INFO_THROTTLE(2, "executing");
     }
-
-    /// This state canot go to error state direclty, the transition to error will happen
-    /// from the rdetect handles state
 
     // generate the event externally (this a fail safe case, should not be required ideally)
     while(!preemptiveWait(1000, eventQueue)){
@@ -1263,11 +1116,18 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
                 continue;
             }
 
-            next_finishbox_center_.x = detections[i].x;
-            next_finishbox_center_.y = detections[i].y;
-            next_finishbox_center_.theta = atan2(next_finishbox_center_.y, next_finishbox_center_.x);
-            ROS_INFO("Successful");
+            // pose of the finish box
+            geometry_msgs::Pose2D finish_box_pose;
+
+            finish_box_pose.x = detections[i].x;
+            finish_box_pose.y = detections[i].y;
+            finish_box_pose.theta =  atan2(finish_box_pose.y, finish_box_pose.x);
+            // update the finish box pose
+            setFinishboxGoal(finish_box_pose);
+
+            ROS_INFO("finish box detected");
             eventQueue.riseEvent("/DETECT_FINISH_SUCESSFUL");
+
             if(finish_box_detector_ != nullptr) delete finish_box_detector_;
             finish_box_detector_ = nullptr;
             //sleep is required to avoid moving to next state before subscriber is shutdown
@@ -1303,14 +1163,7 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
     ROS_INFO_STREAM("executing " << name);
 
     // set the robot to default state to walk
-    pelvis_controller_->controlPelvisHeight(0.9);
-    ros::Duration(1).sleep();
-    chest_controller_->controlChest(0.0, 0.0, 0.0);
-    ros::Duration(1).sleep();
-    arm_controller_->moveToDefaultPose(armSide::LEFT);
-    ros::Duration(1).sleep();
-    arm_controller_->moveToDefaultPose(armSide::RIGHT);
-    ros::Duration(1).sleep();
+    resetRobotToDefaults();
 
     static int fail_count = 0;
 
@@ -1417,6 +1270,11 @@ void valTask1::setPanelWalkGoalFine(const geometry_msgs::Pose2D &panel_walk_goal
 void valTask1::setPanelCoeff(const std::vector<float> &panel_coeff)
 {
     panel_coeff_ = panel_coeff;
+}
+
+void valTask1::setFinishboxGoal(const geometry_msgs::Pose2D &next_finishbox_center)
+{
+    next_finishbox_center_ = next_finishbox_center;
 }
 
 // helper functions

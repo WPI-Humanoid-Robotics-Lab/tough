@@ -36,12 +36,12 @@ void task1Node::registerStateMethods(void)
 
 void task1Node::paramUpdateCallback(val_task1::task1_parametersConfig &config, uint32_t level)
 {
-    ROS_INFO("update the goal, x: %f, y: %f, theta: %f",  config.groups.panelwalkpose.x,  config.groups.panelwalkpose.y,  config.groups.panelwalkpose.theta);
+    ROS_INFO("update the goal, x: %f, y: %f, theta: %f",  config.groups.panelwalkpose.x_pw,  config.groups.panelwalkpose.y_pw,  config.groups.panelwalkpose.theta_pw);
 
     geometry_msgs::Pose2D goal;
-    goal.x = config.groups.panelwalkpose.x;
-    goal.y = config.groups.panelwalkpose.y;
-    goal.theta = config.groups.panelwalkpose.theta;
+    goal.x = config.groups.panelwalkpose.x_pw;
+    goal.y = config.groups.panelwalkpose.y_pw;
+    goal.theta = config.groups.panelwalkpose.theta_pw;
     //update the walk goal location
     task1_->setPanelWalkGoal(goal);
 }

@@ -88,8 +88,6 @@ class valTask1 {
     cartesianPlanner* left_arm_planner_;
     // grasp state variable
     prevGraspState prev_grasp_state_;
-    // upper body tracker
-    upperBodyTracker* upper_body_tracker_;
     // val control common api's
     valControlCommon* control_helper_;
     // pcl handle detector for redetcting
@@ -116,6 +114,7 @@ class valTask1 {
     void visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg);
     nav_msgs::OccupancyGrid visited_map_;
 
+    // goal location for the finish box
     geometry_msgs::Pose2D next_finishbox_center_;
 
     // helper functions
@@ -152,4 +151,5 @@ class valTask1 {
     void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal_coarse_);
     void setPanelWalkGoalFine(const geometry_msgs::Pose2D &panel_walk_goal);
     void setPanelCoeff(const std::vector<float> &panel_coeff);
+    void setFinishboxGoal (const geometry_msgs::Pose2D &next_finishbox_center);
 };

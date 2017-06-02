@@ -87,6 +87,5 @@ public:
     valueDirection getValueStatus(double current_value, controlSelection control);
     void getCircle3D (geometry_msgs::Point center, geometry_msgs::Point start,geometry_msgs::Quaternion orientation, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, handleDirection direction, float radius, int steps =10);
     void visulatise6DPoints(std::vector<geometry_msgs::Pose> &points);
-    valueConstant isValueConstant(double current_value, controlSelection control);
     void clearPointCloud();
 };
