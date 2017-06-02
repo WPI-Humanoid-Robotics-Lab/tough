@@ -13,6 +13,7 @@
 #include <srcsim/Task.h>
 #include "ros/package.h"
 #include <fstream>
+#include <cstdlib>
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 
@@ -98,7 +99,9 @@ public:
     void visulatise6DPoints(std::vector<geometry_msgs::Pose> &points);
     void clearPointCloud();
     void taskStatusSubCB(const srcsim::Task &msg);
+    void timerCB(const ros::TimerEvent& t);
     int getCurrentCheckpoint() const;
     boost::posix_time::ptime timeNow;
     std::string logFile;
+    ros::Timer timer_;
 };
