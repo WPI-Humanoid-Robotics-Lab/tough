@@ -47,7 +47,7 @@ do
   roslaunch val_task1 task1.launch --screen > $data_log2 &
   # stdbuf -oL roslaunch val_task2 task2.launch --screen --screen &> $data_log2
 
-  sleep 2000
+  sleep 2100
 
   echo -e "\e[32mINFO:\e[0m Stop Gazebo Log"
   gz log -d 0
