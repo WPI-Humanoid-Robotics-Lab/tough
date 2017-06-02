@@ -85,7 +85,7 @@ valueDirection task1Utils::getValueStatus(double current_value, controlSelection
     static double goal = 0;
     static controlSelection prev_control = controlSelection::CONTROL_NOT_INITIALISED;
     static bool execute_once = true;
-    static double prev_trigger_value = 0, prev_value = 0;
+    static double prev_trigger_value = 0;
 
     //timer
     static std::chrono::system_clock::time_point debounce_timer = std::chrono::system_clock::now();
@@ -125,14 +125,15 @@ valueDirection task1Utils::getValueStatus(double current_value, controlSelection
         debounce_timer = std::chrono::system_clock::now();
     }
     // if value is not changed (changed with in a threshold of 1 degree)
-    else if ((current_value > prev_trigger_value && (current_value - prev_trigger_value <= HANDLE_CONSTANT_THRESHOLD_IN_RAD)) ||
-             (prev_trigger_value > current_value && (prev_trigger_value - current_value <= HANDLE_CONSTANT_THRESHOLD_IN_RAD)) ||
-              prev_value == current_value || prev_trigger_value == current_value)
+    else if (((current_value > prev_trigger_value) && ((current_value - prev_trigger_value) <= HANDLE_CONSTANT_THRESHOLD_IN_RAD)) ||
+             ((prev_trigger_value > current_value) && ((prev_trigger_value - current_value) <= HANDLE_CONSTANT_THRESHOLD_IN_RAD)) ||
+             (prev_trigger_value == current_value))
     {
         // set the flag that timer is being checked
         is_timer_being_checked = true;
 
-        ROS_INFO("time debounce %f sec", std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - debounce_timer).count() );
+//        ROS_INFO("time debounce %f sec", std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - debounce_timer).count() );
+        ROS_INFO_THROTTLE(1, "valu constant debounce");
 
         if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - debounce_timer).count() > HANDLE_CONSTANT_DEBOUNCE_TIME_SEC){
 
@@ -177,11 +178,8 @@ valueDirection task1Utils::getValueStatus(double current_value, controlSelection
     //update the previous control
     prev_control = control;
 
-    // update previous value
-    prev_value = current_value;
-
     // reset the timer if its not being checked
-    if (!is_timer_being_checked)
+    if (is_timer_being_checked == false)
     {
         debounce_timer = std::chrono::system_clock::now();
     }
