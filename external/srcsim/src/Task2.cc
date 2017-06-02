@@ -18,6 +18,7 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/sensors/SensorManager.hh>
 
+#include "srcsim/HarnessManager.hh"
 #include "srcsim/Task2.hh"
 
 using namespace gazebo;
@@ -87,6 +88,15 @@ size_t Task2::Number() const
 bool Task2CP1::Check()
 {
   return this->CheckTouch("/task2/checkpoint1");
+}
+
+/////////////////////////////////////////////////
+void Task2CP1::Restart(const common::Time &_penalty)
+{
+  // This is the 1st CP of the task: reharness back at start box
+  HarnessManager::Instance()->NewGoal(this->robotStartPose);
+
+  Checkpoint::Restart(_penalty);
 }
 
 /////////////////////////////////////////////////

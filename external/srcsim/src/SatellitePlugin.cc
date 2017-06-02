@@ -91,17 +91,48 @@ void SatelliteDishPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   joint->Load(nullptr, _model->GetLink("base"), ignition::math::Pose3d());
   joint->Attach(nullptr, _model->GetLink("base"));
 
-  // Update loop
-  this->connections.push_back(event::Events::ConnectWorldUpdateBegin(
-      std::bind(&SatelliteDishPlugin::OnUpdate, this,
-      std::placeholders::_1)));
+  this->satTopic = _sdf->Get<std::string>("topic");
 
-  // ROS transport
-  this->rosNode.reset(new ros::NodeHandle());
+  // Start/stop "service"
+  this->gzNode = transport::NodePtr(new transport::Node());
+  this->gzNode->Init();
+  this->enableSub = this->gzNode->Subscribe("/task1/checkpoint2/enable",
+      &SatelliteDishPlugin::Enable, this);
 
-  auto topic = _sdf->Get<std::string>("topic");
-  this->satelliteRosPub =
-      this->rosNode->advertise<srcsim::Satellite>(topic, 1000);
+  // Start enabled or not
+  auto enabled = _sdf->HasElement("enabled") && _sdf->Get<bool>("enabled");
+  if (enabled)
+  {
+    ConstIntPtr msg;
+    this->Enable(msg);
+  }
+}
+
+//////////////////////////////////////////////////
+void SatelliteDishPlugin::Enable(ConstIntPtr &_msg)
+{
+  // Start
+  if (_msg->data() == 1u)
+  {
+    // ROS transport
+    this->rosNode.reset(new ros::NodeHandle());
+    this->satelliteRosPub =
+        this->rosNode->advertise<srcsim::Satellite>(this->satTopic, 1000);
+
+    // Update loop
+    this->connections.push_back(event::Events::ConnectWorldUpdateBegin(
+        std::bind(&SatelliteDishPlugin::OnUpdate, this,
+        std::placeholders::_1)));
+
+    gzmsg << "Started satellite plugin" << std::endl;
+  }
+  // Stop
+  else if (_msg->data() == 0u)
+  {
+    this->connections.clear();
+    this->rosNode.reset();
+    gzmsg << "Stopped satellite plugin" << std::endl;
+  }
 }
 
 /////////////////////////////////////////////////

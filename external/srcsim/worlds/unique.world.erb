@@ -167,7 +167,7 @@
 
     $bling_count += 1
 
-    "<insert_model>\n"\
+    "<insert_entity>\n"\
     "    <include>\n"\
     "      <name>" + $bling + "_" + $bling_count.to_s() + "</name>\n"\
     "      <pose>\n"\
@@ -180,7 +180,7 @@
     "      </pose>\n"\
     "      <uri>model://" + $bling + "</uri>\n"\
     "    </include>\n"\
-    "    </insert_model>\n"
+    "    </insert_entity>\n"
   end
 
   ###############################################
@@ -358,8 +358,8 @@
 
   # Data for box region detection
   box_height = 5.0
-  robot_z_pos = 1.1
-  robot_z_pos_habitat = 2.8
+  robot_z_pos = 1.257
+  robot_z_pos_habitat = 2.957
 
   # Starting point
   $current_frame = TMatrix(0.09, 0, Math::PI)
@@ -564,7 +564,7 @@
     %>
 
     <%
-      t1cp3_frame = $current_frame *
+      t1cp4_frame = $current_frame *
                     $current_walkway["tOriginExit"] *
                     TMatrix(0, -finish_walkway_length * 0.5, Math::PI * 0.5)
     %>
@@ -579,6 +579,16 @@
     %>
 
     <!-- TASK 2 -->
+
+    <%
+      # Get from task 1
+      if (task == '0')
+        t2cp1_start_frame = t1cp4_frame
+      # Or zero for task-2-only world
+      else
+        t2cp1_start_frame = TMatrix(0, 0, 0)
+      end
+    %>
 
     <!-- Task 2 start - Box plugin -->
     <%
@@ -715,14 +725,14 @@
     </include>
 
     <!-- Cable -->
-    <%
+<%
       tCableSlotOrigin = TMatrix(0.4, 1.15, -Math::PI / 2);
       $cable_frame = $current_frame *
                      $current_walkway[$slot] *
                      tCableSlotOrigin
-    %>
+%>
 
-    <%= fromFile("cable.erb") %>
+<%= fromFile("cable.erb") %>
 
     <!-- Checkpoint 2 - Box plugin -->
     <%
@@ -819,6 +829,16 @@
 
     <!-- TASK 3 -->
 
+    <%
+      # Get from task 2
+      if (task == '0')
+        t3cp1_start_frame = t2cp6_frame
+      # Or zero for task-3-only world
+      else
+        t3cp1_start_frame = TMatrix(0, 0, 0)
+      end
+    %>
+
     <!-- Task 3 start - Box plugin -->
     <%
       t3start_frame = $current_frame * $current_walkway["tOriginExit"] *
@@ -903,38 +923,12 @@
     </plugin>
 
 
-    <!-- Lamp inside the habitat -->
     <%
+      # Calculate lamp pose
       lamp_frame = $habitat_frame * TMatrix(-5.16, 0.238, Math::PI / 2.0)
       lamp_pos_z = 4.2
       lamp_roll = -1.462
     %>
-
-    <light name='habitat_lamp' type='spot'>
-      <pose>
-        <%= lamp_frame[0, 2] %>
-        <%= lamp_frame[1, 2] %>
-        <%= lamp_pos_z %>
-        <%= lamp_roll %>
-        0
-        <%= Math::atan2(lamp_frame[1, 0], lamp_frame[0, 0]) %>
-      </pose>
-      <diffuse>1 1 1 1</diffuse>
-      <specular>0.1 0.1 0.1 1</specular>
-      <attenuation>
-        <range>10</range>
-        <constant>0.5</constant>
-        <linear>0.01</linear>
-        <quadratic>0.001</quadratic>
-      </attenuation>
-      <cast_shadows>0</cast_shadows>
-      <direction>0 0 -1</direction>
-      <spot>
-        <inner_angle>0.6</inner_angle>
-        <outer_angle><%= Math::PI %></outer_angle>
-        <falloff>0.5</falloff>
-      </spot>
-    </light>
 
 
     <!-- Checkpoint 8 - Box plugin -->
@@ -993,14 +987,16 @@
             </skip_robot_pose>
           </checkpoint2>
 
+          <!-- checkpoint 3 copies checkpoint 2's skip pose -->
+
           <checkpoint4>
             <skip_robot_pose>
-              <%= t1cp3_frame[0, 2] %>
-              <%= t1cp3_frame[1, 2] %>
+              <%= t1cp4_frame[0, 2] %>
+              <%= t1cp4_frame[1, 2] %>
               <%= robot_z_pos %>
               0
               0
-              <%= Math::atan2(t1cp3_frame[1, 0], t1cp3_frame[0, 0]) %>
+              <%= Math::atan2(t1cp4_frame[1, 0], t1cp4_frame[0, 0]) %>
             </skip_robot_pose>
           </checkpoint4>
         </task1>
@@ -1015,6 +1011,22 @@
           <timeout>3600</timeout>
 
           <checkpoint1>
+            <start_robot_pose>
+              <%= t2cp1_start_frame[0, 2] %>
+              <%= t2cp1_start_frame[1, 2] %>
+              <%= robot_z_pos %>
+              0
+              0
+              <%= Math::atan2(t2cp1_start_frame[1, 0], t2cp1_start_frame[0, 0]) %>
+            </start_robot_pose>
+            <skip_robot_pose>
+              <%= t2cp1_start_frame[0, 2] %>
+              <%= t2cp1_start_frame[1, 2] %>
+              <%= robot_z_pos %>
+              0
+              0
+              <%= Math::atan2(t2cp1_start_frame[1, 0], t2cp1_start_frame[0, 0]) %>
+            </skip_robot_pose>
           </checkpoint1>
 
           <checkpoint2>
@@ -1048,6 +1060,14 @@
           </checkpoint3>
 
           <checkpoint4>
+            <skip_robot_pose>
+              <%= t2cp3_frame[0, 2] %>
+              <%= t2cp3_frame[1, 2] %>
+              <%= robot_z_pos %>
+              0
+              0
+              <%= Math::atan2(t2cp3_frame[1, 0], t2cp3_frame[0, 0]) %>
+            </skip_robot_pose>
           </checkpoint4>
 
           <checkpoint5>
@@ -1085,6 +1105,14 @@
           <timeout>7200</timeout>
 
           <checkpoint1>
+            <start_robot_pose>
+              <%= t3cp1_start_frame[0, 2] %>
+              <%= t3cp1_start_frame[1, 2] %>
+              <%= robot_z_pos %>
+              0
+              0
+              <%= Math::atan2(t3cp1_start_frame[1, 0], t3cp1_start_frame[0, 0]) %>
+            </start_robot_pose>
             <skip_robot_pose>
               <%= t3cp1_frame[0, 2] %>
               <%= t3cp1_frame[1, 2] %>
@@ -1108,8 +1136,39 @@
 
           <checkpoint3>
 
+            <!-- Lamp inside the habitat -->
+            <insert_entity>
+
+              <light name='habitat_lamp' type='spot'>
+                <pose>
+                  <%= lamp_frame[0, 2] %>
+                  <%= lamp_frame[1, 2] %>
+                  <%= lamp_pos_z %>
+                  <%= lamp_roll %>
+                  0
+                  <%= Math::atan2(lamp_frame[1, 0], lamp_frame[0, 0]) %>
+                </pose>
+                <diffuse>1 1 1 1</diffuse>
+                <specular>0.1 0.1 0.1 1</specular>
+                <attenuation>
+                  <range>10</range>
+                  <constant>0.5</constant>
+                  <linear>0.01</linear>
+                  <quadratic>0.001</quadratic>
+                </attenuation>
+                <cast_shadows>0</cast_shadows>
+                <direction>0 0 -1</direction>
+                <spot>
+                  <inner_angle>0.6</inner_angle>
+                  <outer_angle><%= Math::PI %></outer_angle>
+                  <falloff>0.5</falloff>
+                </spot>
+              </light>
+
+            </insert_entity>
+
             <!-- Table -->
-            <insert_model>
+            <insert_entity>
                 <%
                   $table_frame = $habitat_frame *
                                  TMatrix(rand(-1.5..1.5),
@@ -1127,10 +1186,10 @@
                   </pose>
                   <uri>model://space_table</uri>
                 </include>
-            </insert_model>
+            </insert_entity>
 
             <!-- Air leak detector -->
-            <insert_model>
+            <insert_entity>
                 <%
                   b = [-1, 1].sample
                   $air_leak_detector_frame = $table_frame *
@@ -1141,10 +1200,10 @@
                 %>
 
                 <%= fromFile("air_leak_detector.erb") %>
-            </insert_model>
+            </insert_entity>
 
             <!-- Leak patch tool -->
-            <insert_model>
+            <insert_entity>
                 <%
                   $leak_patch_tool_frame = $table_frame *
                       TMatrix(-b*rand(0.1..0.6),
@@ -1163,12 +1222,12 @@
                   </pose>
                   <uri>model://leak_patch_tool</uri>
                 </include>
-            </insert_model>
+            </insert_entity>
 
             <!-- Leak -->
-            <insert_model>
+            <insert_entity>
                 <%= fromFile("leak.erb") %>
-            </insert_model>
+            </insert_entity>
 
             <!-- Bling -->
             <%
@@ -1280,17 +1339,25 @@
           </checkpoint3>
 
           <checkpoint4>
-            <delete_model>satellite_dish</delete_model>
-            <delete_model>solar_panel</delete_model>
-            <delete_model>solar_panel_cable</delete_model>
-            <delete_model>solar_array</delete_model>
-            <delete_model>mars_explorer</delete_model>
+            <delete_entity>satellite_dish</delete_entity>
+            <delete_entity>solar_panel</delete_entity>
+            <delete_entity>solar_panel_cable</delete_entity>
+            <delete_entity>solar_array</delete_entity>
+            <delete_entity>mars_explorer</delete_entity>
             <% for i in 1..13 %>
-              <delete_model>walkway_<%= i %></delete_model>
+              <delete_entity>walkway_<%= i %></delete_entity>
             <% end %>
             <% for i in 1..14 %>
-              <delete_model>bling_<%= i %></delete_model>
+              <delete_entity>bling_<%= i %></delete_entity>
             <% end %>
+            <skip_robot_pose>
+              <%= t3cp5_frame[0, 2] %>
+              <%= t3cp5_frame[1, 2] %>
+              <%= robot_z_pos_habitat %>
+              0
+              0
+              <%= Math::atan2(t3cp5_frame[1, 0], t3cp5_frame[0, 0]) %>
+            </skip_robot_pose>
           </checkpoint4>
 
           <checkpoint5>
@@ -1305,6 +1372,14 @@
           </checkpoint5>
 
           <checkpoint6>
+            <skip_robot_pose>
+              <%= t3cp5_frame[0, 2] %>
+              <%= t3cp5_frame[1, 2] %>
+              <%= robot_z_pos_habitat %>
+              0
+              0
+              <%= Math::atan2(t3cp5_frame[1, 0], t3cp5_frame[0, 0]) %>
+            </skip_robot_pose>
           </checkpoint6>
 
           <checkpoint7>
