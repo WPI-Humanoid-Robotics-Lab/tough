@@ -138,8 +138,6 @@ bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
     return foundCable;
 }
 
-
-
 bool CableDetector::getCablePose(geometry_msgs::Pose& cablePose)
 {
     bool foundCable = false;
@@ -378,7 +376,45 @@ bool CableDetector::findCable(geometry_msgs::Point &cableLoc)
             return getCableLocation(cableLoc);
         }
     }
-    return 0;
+    return false;
+}
+
+bool CableDetector::isCableinHand()
+{
+    //VISUALIZATION - include a spinOnce here to visualize the eigenvectors
+    bool cable_in_hand = false;
+    markers_.markers.clear();
+    convexHulls_.clear();
+    if(ms_sensor_.giveImage(current_image_))
+    {
+        std::vector<std::vector<cv::Point> > contours;
+        std::vector<cv::Vec4i> hierarchy;
+        cv::Mat imgHSV, outImg;
+
+        cv::cvtColor(current_image_, imgHSV, cv::COLOR_BGR2HSV);
+        colorSegment(imgHSV, outImg);
+
+        // Find contours
+        cv::findContours(outImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+        ROS_INFO_STREAM(" Contour Size "<< contours.size() << std::endl);
+        if(!contours.empty())
+        {
+            double total_area = 0.0;
+            std::vector<std::vector<cv::Point>> hull(contours.size());
+            for( size_t i = 0; i< contours.size(); i++ )
+            {
+                cv::convexHull(contours[i], hull[i], false);
+                //  Find the total area of all contours
+                total_area += cv::contourArea( hull[i]);
+            }
+            ROS_INFO_STREAM(" Total Area "<< total_area << std::endl);
+            if(total_area > CONTOUR_AREA_THRESHOLD)
+                cable_in_hand = true;
+        }
+    }
+    ros::Duration(0.5).sleep();
+    ROS_INFO_STREAM(" Cable in hand? "<< cable_in_hand << std::endl);
+    return cable_in_hand;
 }
 
 bool CableDetector::findCable(geometry_msgs::Pose& cablePose)
@@ -393,7 +429,7 @@ bool CableDetector::findCable(geometry_msgs::Pose& cablePose)
             return getCablePose(cablePose);
         }
     }
-    return 0;
+    return false;
 }
 
 void CableDetector::drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale)
@@ -505,20 +541,15 @@ void CableDetector::visualize_pose(geometry_msgs::Pose pose)
     markers_.markers.push_back(marker);
 }
 
-
-
 geometry_msgs::Pose CableDetector::getPose() const
 {
     return pose_;
 }
 
-
-
 geometry_msgs::PointStamped CableDetector::getOffsetPoint() const
 {
     return geom_point0_;
 }
-
 
 void CableDetector::visualize_direction(geometry_msgs::Point point1, geometry_msgs::Point point2)
 {
@@ -554,7 +585,7 @@ void CableDetector::visualize_direction(geometry_msgs::Point point1, geometry_ms
 
 CableDetector::~CableDetector()
 {
-
+    marker_pub_.shutdown();
 }
 
 //-0.593457877636
