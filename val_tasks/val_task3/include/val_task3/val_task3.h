@@ -1,7 +1,7 @@
 #pragma once
 
 /*******************************************************
- * !!!!! important other wise created collision with std
+ * !!!!! important other wise creates collision with std
  * *****************************************************/
 #define DISABLE_DECISION_MAKING_LOG true
 
@@ -69,7 +69,25 @@ class valTask3{
     bool preemptiveWait(double ms, decision_making::EventQueue& queue);
 
     decision_making::TaskResult initTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult climbStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectDoorHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult openDoorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkthroughDoorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectLeakToolTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToLeakToolTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult pickLeakTool(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToDetectLeak(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectLeakTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectRepairToolTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToRepairToolTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult pickRepairTool(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToLeakTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult leakRepairTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToTableTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
 
 };
