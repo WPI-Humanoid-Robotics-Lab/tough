@@ -300,7 +300,6 @@ void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8 &msg)
     Eigen::Vector4f maxPoint;
     minPoint[0]=-1;
     minPoint[1]=-1;
-    minPoint[2]=-0.5;
     // this indicates that if the msg contains element 1 it, would clear point cloud from waist up
     if(msg.data == 1)
     {

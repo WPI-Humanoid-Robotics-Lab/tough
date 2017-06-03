@@ -325,8 +325,7 @@ bool CableTask::rotate_cable(const geometry_msgs::Pose &goal, float executionTim
     std::vector<double> gripper0,gripper1,gripper2,gripper3;
     gripper0={1.35, 1.35, 0.3, 0.0 ,0.0 };
     gripper1={1.2, 0.4, 0.35, 0.3 ,0.3 };
-    gripper2={1.2, 0.6, 0.7, 0.3 ,0.3 };
-    gripper3={1.2, 0.6, 0.7, 0.9 ,1.0 };
+
     gripper_.controlGripper(RIGHT,gripper0);
     ros::Duration(0.1).sleep();
     gripper_.controlGripper(RIGHT, gripper1);
@@ -371,7 +370,21 @@ bool CableTask::rotate_cable(const geometry_msgs::Pose &goal, float executionTim
     wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
     ros::Duration(executionTime*2).sleep();
 
+    std::vector<double> closeGrip={1.3999, 0.55, 1.1, 0.9, 1.0};
+    taskCommonUtils::slowGrip(nh_,RIGHT,gripper1,closeGrip);
+    ros::Duration(0.3).sleep();
     gripper_.closeGripper(RIGHT);
+    ros::Duration(0.3).sleep();
+
+    // Setting arm position to dock
+    ROS_INFO("grasp_cable: Setting arm position to dock cable");
+    armData.clear();
+    armData.push_back(rightAfterGraspShoulderSeed_);
+    armTraj_.moveArmJoints(RIGHT,armData,executionTime);
+    ros::Duration(0.3).sleep();
+
+    chest_controller_->controlChest(0,0,0);
+    ros::Duration(0.3).sleep();
 
     return true;
 

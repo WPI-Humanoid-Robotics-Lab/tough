@@ -123,7 +123,7 @@ void SolarPanelDetect::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
         return;
 
     getOrientation(cloud,pose);
-
+    detections_.push_back(pose);
 
 
     /*transformCloud(cloud,true);
