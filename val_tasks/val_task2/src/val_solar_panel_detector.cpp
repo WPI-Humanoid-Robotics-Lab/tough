@@ -159,7 +159,7 @@ void SolarPanelDetect::boxfilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
        Eigen::Vector4f maxPoint;
        minPoint[0]= 0 ;
        minPoint[1]=-0.3;
-       minPoint[2]= 0.41;
+       minPoint[2]= 0.44;
 
        maxPoint[0]=1;
        maxPoint[1]=+0.3;
