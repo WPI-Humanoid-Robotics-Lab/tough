@@ -510,7 +510,7 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         std::vector<float> y_offset={0.0,0.1};
         walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
         ros::Duration(4).sleep();
-        task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::WAIST_UP);
+        task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
     }
     else
     {
@@ -748,6 +748,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
 
         geometry_msgs::Point cable_location;
         if (cable_retry_count > 5){
+
             eventQueue.riseEvent("/DETECT_ARRAY_FINE_FAILED");
             cable_retry_count = 0;
             if(cable_detector_ != nullptr) delete cable_detector_;
@@ -765,6 +766,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
         arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
         ros::Duration(0.2).sleep();
         arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
+
         solar_array_fine_detector_ = new ArrayTableDetector(nh_, cable_location);
         ros::Duration(0.2).sleep();
 
