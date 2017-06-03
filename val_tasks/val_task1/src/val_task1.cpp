@@ -147,7 +147,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
 
     }
     else if (map_update_count_ < 2 && retry_count++ < 40) {
-        ROS_INFO("Wait for occupancy grid to be updated with atleast 2 messages");
+        ROS_INFO("valTask1::initTask : Retry Count : %d. Wait for occupancy grid to be updated with atleast 2 messages", retry_count);
         ros::Duration(2.0).sleep();
         eventQueue.riseEvent("/INIT_RETRY");
     }
@@ -202,13 +202,13 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
             panel_detector_ = nullptr;
         }
         else{
-            ROS_INFO("valTask1::detectPanelCoarseTask : Could not query plane equation");
+            ROS_INFO("valTask1::detectPanelCoarseTask : Could not query plane equation. Retry count : %d", retry_count);
             ++retry_count;
             eventQueue.riseEvent("/DETECT_PANEL_RETRY");
         }
     }
     else if(retry_count < 5) {
-        ROS_INFO("valTask1::detectPanelCoarseTask : sleep for 3 seconds for panel detection");
+        ROS_INFO("valTask1::detectPanelCoarseTask : sleep for 3 seconds for panel detection. Retry count : %d", retry_count);
         ++retry_count;
         ros::Duration(3).sleep();
         eventQueue.riseEvent("/DETECT_PANEL_RETRY");
