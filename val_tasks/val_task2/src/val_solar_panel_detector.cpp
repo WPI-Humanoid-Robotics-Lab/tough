@@ -159,7 +159,7 @@ void SolarPanelDetect::boxfilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
        Eigen::Vector4f maxPoint;
        minPoint[0]= 0 ;
        minPoint[1]=-0.3;
-       minPoint[2]= 0.44;
+       minPoint[2]= 0.48;  //0.46 also works, very few points lie on the rover plane
 
        maxPoint[0]=1;
        maxPoint[1]=+0.3;
@@ -189,10 +189,10 @@ void SolarPanelDetect::boxfilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 }
 
 
-void SolarPanelDetect::PlaneSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+void SolarPanelDetect::PlaneSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, pcl::PointIndices::Ptr &inliers, pcl::ModelCoefficients::Ptr &coefficients ){
 
-    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+//    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+//    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
     pcl::SACSegmentation<pcl::PointXYZ> seg;
 
     seg.setOptimizeCoefficients (true);
@@ -217,12 +217,55 @@ void SolarPanelDetect::PlaneSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cl
 
     ROS_INFO("Point cloud representing the planar component = %d", (int)cloud->points.size());
 
+
 }
+/*
+
+float SolarPanelDetect::getArea(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointIndices::Ptr &inliers, pcl::ModelCoefficients::Ptr &coefficients )
+{
+
+    //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_hull (new pcl::PointCloud<pcl::PointXYZ>);
+    //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_projected (new pcl::PointCloud<pcl::PointXYZ>);
+
+    //pcl::ProjectInliers<pcl::PointXYZ> proj;
+    //proj.setModelType (pcl::SACMODEL_PLANE);
+//    proj.setIndices (inliers);
+//    proj.setInputCloud (cloud);
+//    proj.setModelCoefficients (coefficients);
+//    proj.filter (*cloud_projected);
+
+//    pcl::ConvexHull<pcl::PointXYZ> chull;
+//    chull.setInputCloud (cloud_projected);
+
+//    chull.setComputeAreaVolume(1);
+//    chull.reconstruct (*cloud);
+
+//    return chull.getTotalArea();
+
+
+    float area= 0.0;
+    int num_points = cloud->points.size();
+    int j = 0;
+    Eigen::Vector3f va,vb,res;
+    res(0) = res(1) = res(2) = 0.0f;
+    for (int i = 0; i < num_points; ++i)
+    {
+        j = (i + 1) % num_points;
+        va = cloud->points[i].getVector3fMap();
+        vb = cloud->points[j].getVector3fMap();
+        res += va.cross(vb);
+    }
+    area=res.norm();
+    return area*0.5;
+}
+    */
 
 void SolarPanelDetect::getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, geometry_msgs::Pose &pose)
 {
     Eigen::Vector4f min_pt,max_pt;
     pcl::getMinMax3D(*cloud,min_pt,max_pt);
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
 
     ROS_INFO("max z : %.2f",max_pt(2));
 
@@ -237,9 +280,10 @@ void SolarPanelDetect::getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud
     ROS_INFO("cld size %d",(int)cloud->points.size());
     ROS_INFO("hey in orientation");
     // fitting the largest plane
-    PlaneSegmentation(cloud);
+    PlaneSegmentation(cloud,inliers,coefficients);
 
     // PCA
+//    transformCloud(cloud,tf::getYaw(current_pelvis_pose.orientation)+(M_PI/2),true);
     Eigen::Vector4f centroid;
     pcl::compute3DCentroid(*cloud, centroid);
 
@@ -249,36 +293,57 @@ void SolarPanelDetect::getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud
     Eigen::Vector3f eigenValues;
     pcl::eigen33(covarianceMatrix, eigenVectors, eigenValues);
 
+//    transformCloud(cloud,tf::getYaw(current_pelvis_pose.orientation)+(M_PI/2),false);
+
+    /*float area = getArea(cloud,inliers,coefficients);
+    ROS_INFO("Area of the plane %.4f",area);
+    ROS_INFO("Normalised Area of the plane %.4f",(area*100)/cloud->points.size());
+    */
+
+
     float cosTheta = eigenVectors.col(0)[0]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
     float sinTheta = eigenVectors.col(0)[1]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
     float theta = atan2(sinTheta, cosTheta);
 
+    transformCloud(cloud,theta,true);
+    pcl::getMinMax3D(*cloud,min_pt,max_pt);
+    ROS_INFO("range %.4f",fabs(max_pt(1)-min_pt(1)));
+    transformCloud(cloud,theta,false);
+
+
+//    if the area is  around 0.26 thendetected plane is the smaller side of the panel
+    if (fabs(max_pt(1)-min_pt(1)) < 0.3)
+//          if (area < 0.3)
+    {
+        cosTheta = eigenVectors.col(1)[0]/sqrt(pow(eigenVectors.col(1)[0],2)+pow(eigenVectors.col(1)[1],2));
+        sinTheta = eigenVectors.col(1)[1]/sqrt(pow(eigenVectors.col(1)[0],2)+pow(eigenVectors.col(1)[1],2));
+        theta = atan2(sinTheta, cosTheta);
+    }
+
+
     // so that arrow is always inwards that is quadrant I and II
     if(isroverRight_)
     {
+        ROS_INFO("rover is right");
         if (theta <0)
         {
-            theta-=M_PI;
+            theta+=M_PI;
         }
 
     }
     else
     {
-        if (theta >0)
+        if (theta>0)
         {
             theta+=M_PI;
         }
     }
 
-//    visualizept(centroid(0)+eigenVectors.col(0)[0],centroid(1)+eigenVectors.col(0)[1],centroid(2)+eigenVectors.col(0)[2]);
+//    visualizept(centroid(0)+eigenVectors.col(1)[0],centroid(1)+eigenVectors.col(1)[1],centroid(2)+eigenVectors.col(1)[2]);
 
     geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch,theta);
     pose.orientation = quaternion;
     visualizept(pose);
-
-
-
-
 
 }
 
@@ -500,12 +565,13 @@ void SolarPanelDetect::visualizept(float x,float y,float z)
 
 }
 
-void SolarPanelDetect::transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool isinverse)
+void SolarPanelDetect::transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, float theta, bool isinverse)
 {
 //    ROS_INFO("trasnforming cloud");
     Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-    transform.translation() << rover_loc_.x,rover_loc_.y,0.0;
-    transform.rotate (Eigen::AngleAxisf (rover_theta, Eigen::Vector3f::UnitZ()));
+    transform.translation() << current_pelvis_pose.position.x,current_pelvis_pose.position.y,0.0;
+//    transform.rotate (Eigen::AngleAxisf (tf::getYaw(current_pelvis_pose.orientation)+(M_PI/2), Eigen::Vector3f::UnitZ()));
+        transform.rotate (Eigen::AngleAxisf (theta, Eigen::Vector3f::UnitZ()));
 
     if (isinverse)
     {
