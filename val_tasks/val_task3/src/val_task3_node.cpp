@@ -31,7 +31,6 @@ void task3Node::registerStateMethods()
   LocalTasks::registrate("STATE_PICK_REPAIR_TOOL",             std::bind(&valTask3::pickRepairTool,       task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   LocalTasks::registrate("STATE_WALK_TO_LEAK_LOCATION",        std::bind(&valTask3::walkToLeakTask,       task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   LocalTasks::registrate("STATE_LEAK_REPAIR",                  std::bind(&valTask3::leakRepairTask,       task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-  LocalTasks::registrate("STATE_WALK_TO_TABLE",                std::bind(&valTask3::walkToTableTask,      task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   LocalTasks::registrate("STATE_DETECT_FINISH",                std::bind(&valTask3::detectFinishTask,     task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   LocalTasks::registrate("STATE_WALK_TO_FINISH",               std::bind(&valTask3::walkToFinishTask,     task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   LocalTasks::registrate("STATE_END",                          std::bind(&valTask3::endTask,              task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));

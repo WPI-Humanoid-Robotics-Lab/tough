@@ -254,18 +254,6 @@ decision_making::TaskResult valTask3::leakRepairTask(string name, const FSMCallC
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult valTask3::walkToTableTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
-
-  ROS_INFO_STREAM("executing " << name);
-
-  while(!preemptiveWait(1000, eventQueue)){
-
-      ROS_INFO("waiting for transition");
-  }
-
-  return TaskResult::SUCCESS();
-}
-
 decision_making::TaskResult valTask3::detectFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
   ROS_INFO_STREAM("executing " << name);
