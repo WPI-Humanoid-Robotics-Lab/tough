@@ -7,10 +7,17 @@ CableTask::CableTask(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
 
     /* Top Grip Flat Hand modified*/
     rightHandOrientationTop_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    rightHandOrientationTop_.quaternion.x = -0.459;
-    rightHandOrientationTop_.quaternion.y = 0.550;
-    rightHandOrientationTop_.quaternion.z = 0.602;
-    rightHandOrientationTop_.quaternion.w = 0.353;
+    rightHandOrientationTop_.quaternion.x = -0.430;
+    rightHandOrientationTop_.quaternion.y = 0.541;
+    rightHandOrientationTop_.quaternion.z = 0.481;
+    rightHandOrientationTop_.quaternion.w = 0.539;
+
+    /* Angled Grip Flat Hand modified*/
+    rightHandOrientationAngle_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    rightHandOrientationAngle_.quaternion.x = -0.353;
+    rightHandOrientationAngle_.quaternion.y = 0.600;
+    rightHandOrientationAngle_.quaternion.z = 0.401;
+    rightHandOrientationAngle_.quaternion.w = 0.595;
 
     // cartesian planners for the arm
     right_arm_planner_choke = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
@@ -306,87 +313,163 @@ bool CableTask::rotate_cable(const geometry_msgs::Pose &goal, float executionTim
 
     valControlCommon control_util(nh_);
 
-    // setting initial poses
-    ROS_INFO("grasp_cable: Initial Pose");
+    // Setting gripper positions
+    ROS_INFO("CableTask::grasp_choke : opening grippers");
+    gripper_.controlGripper(RIGHT, GRIPPER_STATE::OPEN);
+
     std::vector< std::vector<float> > armData;
     armData.push_back(leftShoulderSeedInitial_);
     armTraj_.moveArmJoints(LEFT, armData, executionTime);
-    ros::Duration(executionTime).sleep();
+    ros::Duration(0.2).sleep();
 
     armData.clear();
     armData.push_back(rightShoulderSeedInitial_);
-    armData.push_back(rightShoulderSeed_);
     armTraj_.moveArmJoints(RIGHT, armData, executionTime);
     ros::Duration(executionTime).sleep();
 
-    // Opening grippers
-    ROS_INFO("grasp_cable: Setting gripper position to open thumb");
-    ROS_INFO("opening grippers");
-    std::vector<double> gripper0,gripper1,gripper2,gripper3;
-    gripper0={1.35, 1.35, 0.3, 0.0 ,0.0 };
-    gripper1={1.2, 0.4, 0.35, 0.3 ,0.3 };
+    //move arm to given point with known orientation and higher z
+    geometry_msgs::Pose finalGoal, intermGoal;
 
-    gripper_.controlGripper(RIGHT,gripper0);
-    ros::Duration(0.1).sleep();
-    gripper_.controlGripper(RIGHT, gripper1);
-    ros::Duration(0.2).sleep();
-
-    geometry_msgs::Pose rightOffset;
-    current_state_->getCurrentPose("/rightMiddleFingerPitch1Link",rightOffset,"/rightThumbRollLink");
-    geometry_msgs::Pose intermGoal;
-
+    float offset =0.1;
     intermGoal= goal;
-    taskCommonUtils::fixHandFramePalmDown(nh_, RIGHT, intermGoal);
+    intermGoal.position.z+=offset;
+
+    current_state_->transformPose(intermGoal,intermGoal, VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    intermGoal.orientation=rightHandOrientationAngle_.quaternion;
+    current_state_->transformPose(intermGoal,intermGoal,VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
 
     // setting a sead position without movement of chest
-    intermGoal.position.z+=0.06;
     armTraj_.moveArmInTaskSpace(RIGHT, intermGoal, executionTime);
     ros::Duration(executionTime*2).sleep();
     control_util.stopAllTrajectories();
 
-    geometry_msgs::Pose finalGoal;
     finalGoal = goal;
-    finalGoal.position.z+=0.03;
-    // change in orientation
+    finalGoal.position.z-=0.01;
     current_state_->transformPose(finalGoal,finalGoal, VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
-    finalGoal.orientation= rightHandOrientationTop_.quaternion;
+    finalGoal.orientation=rightHandOrientationTop_.quaternion;
     current_state_->transformPose(finalGoal,finalGoal,VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
 
     std::vector<geometry_msgs::Pose> waypoints;
 
     waypoints.push_back(intermGoal);
+    intermGoal.position.z-=(0.01+offset);
+    waypoints.push_back(intermGoal);
     waypoints.push_back(finalGoal);
 
     moveit_msgs::RobotTrajectory traj;
-
 
     if (right_arm_planner_choke->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
         ROS_INFO("CableTask::grasp_choke: Trajectory is not planned 100% - retrying");
         return false;
     }
 
-
     ROS_INFO("CableTask::grasp_choke: Calculated Traj");
     wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
     ros::Duration(executionTime*2).sleep();
 
-    std::vector<double> closeGrip={1.3999, 0.55, 1.1, 0.9, 1.0};
-    taskCommonUtils::slowGrip(nh_,RIGHT,gripper1,closeGrip);
-    ros::Duration(0.3).sleep();
-    gripper_.closeGripper(RIGHT);
-    ros::Duration(0.3).sleep();
 
-    // Setting arm position to dock
-    ROS_INFO("grasp_cable: Setting arm position to dock cable");
-    armData.clear();
-    armData.push_back(rightAfterGraspShoulderSeed_);
-    armTraj_.moveArmJoints(RIGHT,armData,executionTime);
-    ros::Duration(0.3).sleep();
+//    std::vector<double> openGrip={0.0, 0.0, 0.0, 0.0, 0.0};
+//    std::vector<double> closeGrip={1.3999, 0.55, 1.1, 0.9, 1.0};
+//    taskCommonUtils::slowGrip(nh_,RIGHT,openGrip,closeGrip);
+//    ros::Duration(0.3).sleep();
+//    gripper_.closeGripper(RIGHT);
+//    ros::Duration(0.3).sleep();
+
+//    // Setting arm position to dock
+//    ROS_INFO("grasp_cable: Setting arm position to dock cable");
+//    armData.clear();
+//    armData.push_back(rightAfterGraspShoulderSeed_);
+//    armTraj_.moveArmJoints(RIGHT,armData,executionTime);
+//    ros::Duration(0.3).sleep();
 
     chest_controller_->controlChest(0,0,0);
     ros::Duration(0.3).sleep();
-
     return true;
+
+
+    //    valControlCommon control_util(nh_);
+
+    //    // setting initial poses
+    //    ROS_INFO("grasp_cable: Initial Pose");
+    //    std::vector< std::vector<float> > armData;
+    //    armData.push_back(leftShoulderSeedInitial_);
+    //    armTraj_.moveArmJoints(LEFT, armData, executionTime);
+    //    ros::Duration(executionTime).sleep();
+
+    //    armData.clear();
+    //    armData.push_back(rightShoulderSeedInitial_);
+    //    armData.push_back(rightShoulderSeed_);
+    //    armTraj_.moveArmJoints(RIGHT, armData, executionTime);
+    //    ros::Duration(executionTime).sleep();
+
+    //    // Opening grippers
+    //    ROS_INFO("grasp_cable: Setting gripper position to open thumb");
+    //    ROS_INFO("opening grippers");
+    //    std::vector<double> gripper0,gripper1,gripper2,gripper3;
+    //    gripper0={1.35, 1.35, 0.3, 0.0 ,0.0 };
+    //    gripper1={1.2, 0.4, 0.35, 0.3 ,0.3 };
+
+    //    gripper_.controlGripper(RIGHT,gripper0);
+    //    ros::Duration(0.1).sleep();
+    //    gripper_.controlGripper(RIGHT, gripper1);
+    //    ros::Duration(0.2).sleep();
+
+    //    geometry_msgs::Pose rightOffset;
+    //    current_state_->getCurrentPose("/rightMiddleFingerPitch1Link",rightOffset,"/rightThumbRollLink");
+    //    geometry_msgs::Pose intermGoal;
+
+    //    intermGoal= goal;
+    //    taskCommonUtils::fixHandFramePalmDown(nh_, RIGHT, intermGoal);
+
+    //    // setting a sead position without movement of chest
+    //    intermGoal.position.z+=0.06;
+    //    armTraj_.moveArmInTaskSpace(RIGHT, intermGoal, executionTime);
+    //    ros::Duration(executionTime*2).sleep();
+    //    control_util.stopAllTrajectories();
+
+    //    geometry_msgs::Pose finalGoal;
+    //    finalGoal = goal;
+    //    finalGoal.position.z+=0.03;
+    //    // change in orientation
+    //    current_state_->transformPose(finalGoal,finalGoal, VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    //    finalGoal.orientation= rightHandOrientationTop_.quaternion;
+    //    current_state_->transformPose(finalGoal,finalGoal,VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+
+    //    std::vector<geometry_msgs::Pose> waypoints;
+
+    //    waypoints.push_back(intermGoal);
+    //    waypoints.push_back(finalGoal);
+
+    //    moveit_msgs::RobotTrajectory traj;
+
+
+    //    if (right_arm_planner_choke->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
+    //        ROS_INFO("CableTask::grasp_choke: Trajectory is not planned 100% - retrying");
+    //        return false;
+    //    }
+
+
+    //    ROS_INFO("CableTask::grasp_choke: Calculated Traj");
+    //    wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
+    //    ros::Duration(executionTime*2).sleep();
+
+    //    std::vector<double> closeGrip={1.3999, 0.55, 1.1, 0.9, 1.0};
+    //    taskCommonUtils::slowGrip(nh_,RIGHT,gripper1,closeGrip);
+    //    ros::Duration(0.3).sleep();
+    //    gripper_.closeGripper(RIGHT);
+    //    ros::Duration(0.3).sleep();
+
+    //    // Setting arm position to dock
+    //    ROS_INFO("grasp_cable: Setting arm position to dock cable");
+    //    armData.clear();
+    //    armData.push_back(rightAfterGraspShoulderSeed_);
+    //    armTraj_.moveArmJoints(RIGHT,armData,executionTime);
+    //    ros::Duration(0.3).sleep();
+
+    //    chest_controller_->controlChest(0,0,0);
+    //    ros::Duration(0.3).sleep();
+
+    //    return true;
 
 }
 

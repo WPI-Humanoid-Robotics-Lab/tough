@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /PointCloud21
       Splitter Ratio: 0.5
     Tree Height: 600
   - Class: rviz/Selection
@@ -478,8 +477,8 @@ Visualization Manager:
     - Alpha: 0.05
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 2.33044
-        Min Value: -0.548606
+        Max Value: 3.3267
+        Min Value: -0.144417
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -859,14 +858,6 @@ Visualization Manager:
       Enabled: true
       Marker Topic: /handle_path
       Name: HandTrajectory
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /val_rover/Position
-      Name: Rover
       Namespaces:
         {}
       Queue Size: 100
@@ -1283,9 +1274,9 @@ Visualization Manager:
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /detected_table
-      Name: MarkerArray
+      Name: Cable
       Namespaces:
-        0: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -1318,6 +1309,14 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /val_rover/Position
+      Name: Rover
+      Namespaces:
+        Rover Position: true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -1342,22 +1341,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 5.4387
+      Distance: 6.43775
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 2.04754
-        Y: -2.17221
-        Z: 0.817709
+        X: 2.10157
+        Y: -0.29881
+        Z: 0.60128
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.524796
+      Pitch: 0.359796
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.69541
+      Yaw: 2.98541
     Saved: ~
 Window Geometry:
   Displays:
@@ -1377,5 +1376,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1855
-  X: 65
+  X: 1985
   Y: 24

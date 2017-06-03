@@ -242,32 +242,35 @@ void task2Utils::reOrientTowardsPanel(geometry_msgs::Pose panelPose){
     size_t nSteps;
     armSide startStep;
     std::vector<float> y_offset;
-    std::vector<float> x_offset = {0,0};
+    std::vector<float> x_offset;
 
     current_state_->transformPose(panelPose,panelPose,VAL_COMMON_NAMES::WORLD_TF,
                                   VAL_COMMON_NAMES::PELVIS_TF);
 
     double error = panelPose.position.y;
-    if (std::abs(error) < 0.1){
-        ROS_INFO("reOrientTowardsPanel: Not reorienting, the offset is less than 0.1");
+    if (std::abs(error) < 0.1 && std::abs(error) > 0.49 ){
+        ROS_INFO("reOrientTowardsPanel: Not reorienting, the offset is too less or beyond control");
     }
-
-    else if (std::abs(error) > 0.49){
-        ROS_INFO("reOrientTowardsPanel: Offset more than 0.5");
-    }
-
-    else{
+    else
+    {
         nSteps = (std::abs(error))/0.1;
 
         if (error > 0){
             startStep = LEFT;
-            y_offset  = {0.1,0.1};
+            for(size_t i = 0; i < nSteps; ++i){
+               y_offset.push_back(0.1);
+               y_offset.push_back(0.1);
+            }
         }
         else {
             startStep = RIGHT;
-            y_offset = {-0.1,-0.1};
+            for(size_t i = 0; i < nSteps; ++i){
+               y_offset.push_back(-0.1);
+               y_offset.push_back(-0.1);
+            }
         }
 
+        x_offset.resize(y_offset.size());
         ROS_INFO("reOrientTowardsPanel: Walking %d steps",int(nSteps));
 
         walk_->walkLocalPreComputedSteps(x_offset,y_offset,startStep);

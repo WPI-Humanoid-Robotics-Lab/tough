@@ -278,10 +278,15 @@ void SolarPanelDetect::getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud
     pass_z.filter(*cloud);
 
     ROS_INFO("cld size %d",(int)cloud->points.size());
-    ROS_INFO("hey in orientation");
+    //ROS_INFO("hey in orientation");
     // fitting the largest plane
-    PlaneSegmentation(cloud,inliers,coefficients);
 
+
+    if (cloud->points.empty()){
+        return;
+    }
+
+    PlaneSegmentation(cloud,inliers,coefficients);
     // PCA
 //    transformCloud(cloud,tf::getYaw(current_pelvis_pose.orientation)+(M_PI/2),true);
     Eigen::Vector4f centroid;

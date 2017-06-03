@@ -128,6 +128,11 @@ decision_making::TaskResult valTask2::initTask(string name, const FSMCallContext
         if(client.call(srv)) {
             //what do we do if this call fails or succeeds?
         }
+        else
+        {
+            ROS_ERROR("service not called");
+            eventQueue.riseEvent("/INIT_FAILED");
+        }
         // generate the event
         eventQueue.riseEvent("/INIT_SUCESSFUL");
 
@@ -364,13 +369,12 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
         ros::Duration(0.2).sleep();
     }
 
-    static int fail_count = 0;
     static int retry_count = 0;
 
     // detect solar panel
     std::vector<geometry_msgs::Pose> poses;
     solar_panel_detector_->getDetections(poses);
-    ROS_INFO("Sixe of detections : %d", poses.size());
+    ROS_INFO("Size of detections : %d", poses.size());
     // if we get atleast two detections
     if (poses.size() > 1)
     {
@@ -387,37 +391,35 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
         ROS_INFO("valTask2::detectPanelTask : Button detected at x:%f y:%f z:%f", button_coordinates_temp_.x,button_coordinates_temp_.y,button_coordinates_temp_.z);
         ROS_INFO_STREAM("valTask2::detectPanelTask : Position " << poses[idx].position.x<< " " <<poses[idx].position.y <<" "<<poses[idx].position.z);
         ROS_INFO_STREAM("valTask2::detectPanelTask : quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w);
-        fail_count = 0;
         retry_count = 0;
 
         eventQueue.riseEvent("/DETECTED_PANEL");
         if(solar_panel_detector_ != nullptr) delete solar_panel_detector_;
         solar_panel_detector_ = nullptr;
+
+        if(button_detector_ != nullptr) delete button_detector_;
+        button_detector_ = nullptr;
     }
 
-    else if(retry_count < 5) {
+    else if(retry_count < 10) {
         ROS_INFO("sleep for 3 seconds for panel detection");
         ++retry_count;
         eventQueue.riseEvent("/DETECT_PANEL_RETRY");
         ros::Duration(3).sleep();
     }
-    // if failed for more than 5 times, go to error state
-    else if (fail_count > 5)
+    // if failed for more than 10 times, go to error state
+    else
     {
-        // reset the fail count
-        fail_count = 0;
         retry_count = 0;
+        isFirstRun = true;
         eventQueue.riseEvent("/DETECT_PANEL_FAILED");
         if(solar_panel_detector_ != nullptr) delete solar_panel_detector_;
         solar_panel_detector_ = nullptr;
+
+        if(button_detector_ != nullptr) delete button_detector_;
+        button_detector_ = nullptr;
     }
-    // if failed retry detecting the panel
-    else
-    {
-        // increment the fail count
-        fail_count++;
-        eventQueue.riseEvent("/DETECT_PANEL_RETRY");
-    }
+
 
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("valTask2::detectPanelTask : waiting for transition");
@@ -508,7 +510,7 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         std::vector<float> y_offset={0.0,0.1};
         walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
         ros::Duration(4).sleep();
-        task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::WAIST_UP);
+        task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
     }
     else
     {
@@ -746,6 +748,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
 
         geometry_msgs::Point cable_location;
         if (cable_retry_count > 5){
+
             eventQueue.riseEvent("/DETECT_ARRAY_FINE_FAILED");
             cable_retry_count = 0;
             if(cable_detector_ != nullptr) delete cable_detector_;
@@ -763,6 +766,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
         arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
         ros::Duration(0.2).sleep();
         arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
+
         solar_array_fine_detector_ = new ArrayTableDetector(nh_, cable_location);
         ros::Duration(0.2).sleep();
 
