@@ -8,6 +8,7 @@
 #include <pcl/filters/passthrough.h>
 #include <tf/transform_listener.h>
 #include <pcl/ModelCoefficients.h>
+#include <pcl/features/normal_3d.h>
 #include <pcl/segmentation/sac_segmentation.h>
 
 class WalkwaySeedPointGenerator{

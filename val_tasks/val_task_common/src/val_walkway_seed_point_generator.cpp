@@ -28,14 +28,51 @@ void WalkwaySeedPointGenerator::generateSeedPoints(const pcl::PointCloud<pcl::Po
         return;
     ROS_INFO("Recieved a pointcloud");
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr new_cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
-    zAxisLimitFilter(cloud, cloud_filtered);
+
+    pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
+    ne.setInputCloud (cloud);
+
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
+    ne.setSearchMethod (tree);
+
+    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
+    ne.setRadiusSearch (0.03);
+    ne.compute (*cloud_normals);
 
     std::vector<int> index;
+    ROS_INFO_STREAM("before : " << cloud_normals->points.size() << std::endl);
+    pcl::removeNaNNormalsFromPointCloud(*cloud_normals, *cloud_normals, index);
+
+    for(size_t i = 0; i < index.size(); i++)
+    {
+        new_cloud->points.push_back(cloud->points[index[i]]);
+    }
+
+    double z = 0.0;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    for(size_t i = 0; i < cloud_normals->points.size(); i++)
+    {
+        //ROS_INFO_STREAM("points : " << cloud_normals->points[i].normal_z << std::endl);
+        z += fabs(cloud_normals->points[i].normal_z)/double(cloud_normals->points.size());
+        if(fabs(cloud_normals->points[i].normal_z) > 0.90)
+            output_cloud->points.push_back(new_cloud->points[i]);
+    }
+    ROS_INFO_STREAM("centroid : " << z << std::endl);
+    ROS_INFO_STREAM("size : " << output_cloud->points.size() << std::endl);
+
+    zAxisLimitFilter(output_cloud, cloud_filtered);
+
     pcl::removeNaNFromPointCloud(*cloud_filtered, *cloud_filtered, index);
 
     if(getLargestCluster(cloud_filtered)) {
         cloud_filtered->header = cloud->header;
+
+
+    //ROS_INFO_STREAM("after : " << cloud_normals->points.size() << std::endl);
+
+
 
 //        float leafsize = 0.25;
 //        pcl::VoxelGrid<pcl::PointXYZ> grid;
@@ -53,8 +90,8 @@ void WalkwaySeedPointGenerator::generateSeedPoints(const pcl::PointCloud<pcl::Po
 //        outrem.filter (*cloud_filtered);
 
 //        ROS_INFO("Cloud size after outlier filter : %d", (int)cloud_filtered->size());
-
         pointcloudPub_.publish(cloud_filtered);
+
     }
 
 }
@@ -93,7 +130,7 @@ bool WalkwaySeedPointGenerator::getLargestCluster(pcl::PointCloud<pcl::PointXYZ>
     std::vector<pcl::PointIndices> cluster_indices;
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
     ec.setClusterTolerance (CLUSTER_TOLERANCE);
-    ec.setMinClusterSize ((int)(0.1*cloudSize));    //get the cluster with atleast 10% of the total points. this can be 50%
+    ec.setMinClusterSize ((int)(0.51*cloudSize));    //get the cluster with atleast 10% of the total points. this can be 50%
     ec.setMaxClusterSize (cloudSize);
     ec.setSearchMethod (tree);
     ec.setInputCloud (cloud);
