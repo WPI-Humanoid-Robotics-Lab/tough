@@ -316,11 +316,11 @@ void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8 &msg)
     {
         // large box condition
         minPoint[0]=-1;
-        minPoint[1]=-1.5;
+        minPoint[1]=-1;
         minPoint[2]= -0.5;
 
         maxPoint[0]=4;
-        maxPoint[1]=1.5;
+        maxPoint[1]=1;
         maxPoint[2]=1;
     }
     else

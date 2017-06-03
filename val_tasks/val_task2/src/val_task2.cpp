@@ -350,7 +350,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
     if(solar_panel_detector_ == nullptr) {
         if (!isFirstRun){
             ROS_INFO("valTask2::detectPanelTask : Clearing pointcloud");
-            task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::LARGE_BOX);
+            task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
         }
 
         task2_utils_->resumePointCloud();
@@ -741,6 +741,7 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
         ros::Duration(0.5).sleep();
         head_controller_->moveHead(0,30,0);
+        ros::Duration(5).sleep();
 
         // possible head yaw rotations to better detect the cable
         //clear the queue before starting
@@ -760,15 +761,15 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
 
     geometry_msgs::Pose cable_pose;
     int retry = 0;
-    while (!cable_detector_->findCable(cable_pose) && retry++ < 5);
+    while (!cable_detector_->findCable(cable_pose) && retry++ < 15);
 
     if(cable_pose.position.x == 0 && !head_yaw_ranges.empty())
     {
         // wrong point detected. move head and try again
         head_controller_->moveHead(0,30,head_yaw_ranges.front());
-        ROS_INFO("valTask2::findCableIntermediateTask : Cable not found. Trying with %d angle",head_yaw_ranges.front());
+        ROS_INFO("valTask2::findCableIntermediateTask : Cable not found. Trying with %.6f angle",head_yaw_ranges.front());
         head_yaw_ranges.pop();
-        ros::Duration(0.5).sleep();
+        ros::Duration(5).sleep();
 
         eventQueue.riseEvent("/FIND_CABLE_RETRY");
     }
