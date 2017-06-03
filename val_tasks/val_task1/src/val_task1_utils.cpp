@@ -19,7 +19,7 @@ task1Utils::task1Utils(ros::NodeHandle nh):
 
     timeNow = boost::posix_time::second_clock::local_time();
 
-    timer_         = nh_.createTimer(ros::Duration(10), &task1Utils::timerCB, this);
+    timer_         = nh_.createTimer(ros::Duration(30*60), &task1Utils::timerCB, this);
 
 
 }
