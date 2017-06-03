@@ -28,50 +28,53 @@ void WalkwaySeedPointGenerator::generateSeedPoints(const pcl::PointCloud<pcl::Po
         return;
     ROS_INFO("Recieved a pointcloud");
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr new_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud1 (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud2 (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
 
-
+    ROS_INFO("Computing Normals to each point");
+    // Normals estimation
     pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
     ne.setInputCloud (cloud);
 
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
     ne.setSearchMethod (tree);
-
-    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
     ne.setRadiusSearch (0.03);
     ne.compute (*cloud_normals);
 
+    ROS_INFO("Removing NaN Normals");
     std::vector<int> index;
-    ROS_INFO_STREAM("before : " << cloud_normals->points.size() << std::endl);
     pcl::removeNaNNormalsFromPointCloud(*cloud_normals, *cloud_normals, index);
 
     for(size_t i = 0; i < index.size(); i++)
     {
-        new_cloud->points.push_back(cloud->points[index[i]]);
+        temp_cloud1->points.push_back(cloud->points[index[i]]);
     }
 
-    double z = 0.0;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    if(temp_cloud1->empty())
+    {
+        ROS_ERROR("There are no normals in the point cloud!");
+        return;
+    }
+
     for(size_t i = 0; i < cloud_normals->points.size(); i++)
     {
-        //ROS_INFO_STREAM("points : " << cloud_normals->points[i].normal_z << std::endl);
-        z += fabs(cloud_normals->points[i].normal_z)/double(cloud_normals->points.size());
-        if(fabs(cloud_normals->points[i].normal_z) > 0.90)
-            output_cloud->points.push_back(new_cloud->points[i]);
+        if(fabs(cloud_normals->points[i].normal_z) > SURFACE_NORMAL_THRESHOLD)
+            temp_cloud2->points.push_back(temp_cloud1->points[i]);
     }
-    ROS_INFO_STREAM("centroid : " << z << std::endl);
-    ROS_INFO_STREAM("size : " << output_cloud->points.size() << std::endl);
 
-    zAxisLimitFilter(output_cloud, cloud_filtered);
+    if(temp_cloud2->empty())
+    {
+        ROS_ERROR("There are no points above the threshold...");
+        return;
+    }
+
+    zAxisLimitFilter(temp_cloud2, cloud_filtered);
 
     pcl::removeNaNFromPointCloud(*cloud_filtered, *cloud_filtered, index);
 
     if(getLargestCluster(cloud_filtered)) {
         cloud_filtered->header = cloud->header;
-
-
-    //ROS_INFO_STREAM("after : " << cloud_normals->points.size() << std::endl);
-
 
 
 //        float leafsize = 0.25;

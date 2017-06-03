@@ -11,6 +11,8 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/segmentation/sac_segmentation.h>
 
+#define SURFACE_NORMAL_THRESHOLD 0.9  //1.0 for normals perpendicular to z-axis
+
 class WalkwaySeedPointGenerator{
 public:
     WalkwaySeedPointGenerator(ros::NodeHandle &n);
