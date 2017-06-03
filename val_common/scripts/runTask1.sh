@@ -36,7 +36,7 @@ do
   roslaunch val_bringup whrl.launch --screen > $data_log &
   # stdbuf -oL roslaunch val_bringup whrl_task1.launch --screen &> $data_log
 
-  sleep 30
+#  sleep 30
   
 
   echo -e "\e[32mINFO:\e[0m Start Gazebo Log"
@@ -44,10 +44,10 @@ do
   echo -e "\e[32mINFO:\e[0m Launching Task1"
   
 
-  roslaunch val_task1 task1.launch --screen > $data_log2 &
+  roslaunch val_task1 task1.launch --screen > $data_log2 
   # stdbuf -oL roslaunch val_task2 task2.launch --screen --screen &> $data_log2
 
-  sleep 2100
+#  sleep 2100
 
   echo -e "\e[32mINFO:\e[0m Stop Gazebo Log"
   gz log -d 0
