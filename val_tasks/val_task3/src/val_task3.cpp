@@ -67,45 +67,45 @@ decision_making::TaskResult valTask3::initTask(string name, const FSMCallContext
     ROS_INFO_STREAM("executing " << name);
     static int retry_count = 0;
 
-    if(retry_count == 0){
+//    if(retry_count == 0){
 
-        map_update_count_ = 0;
-        taskCommonUtils::moveToInitPose(nh_);
+//        map_update_count_ = 0;
+//        taskCommonUtils::moveToInitPose(nh_);
 
-    }
+//    }
 
-    ROS_INFO("Occupancy grid has been updated %s times, tried %d times", map_update_count_, retry_count);
+//    ROS_INFO("Occupancy grid has been updated %s times, tried %d times", map_update_count_, retry_count);
 
-    if (map_update_count_ > 1){
+//    if (map_update_count_ > 1){
 
-        retry_count = 0;
-        pelvis_controller_->controlPelvisHeight(0.9);
-        ros::Duration(1.0).sleep();
+//        retry_count = 0;
+//        pelvis_controller_->controlPelvisHeight(0.9);
+//        ros::Duration(1.0).sleep();
 
-        ros::ServiceClient client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
-        srcsim::StartTask  srv;
-        srv.request.checkpoint_id = 1;
-        srv.request.task_id       = 3;
+//        ros::ServiceClient client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
+//        srcsim::StartTask  srv;
+//        srv.request.checkpoint_id = 1;
+//        srv.request.task_id       = 3;
 
-        if (client.call(srv)){
+//        if (client.call(srv)){
 
-        }
+//        }
 
-        eventQueue.riseEvent("/INIT_SUCESSFUL");
-    }
+//        eventQueue.riseEvent("/INIT_SUCESSFUL");
+//    }
 
-    else if (map_update_count_ < 2 && retry_count++ < 40){
+//    else if (map_update_count_ < 2 && retry_count++ < 40){
 
-        ROS_INFO("Wait for occupancy grid to be updated with atleast 2 messages");
-        ros::Duration(2.0).sleep();
-        eventQueue.riseEvent("/INIT_RETRY");
-    }
+//        ROS_INFO("Wait for occupancy grid to be updated with atleast 2 messages");
+//        ros::Duration(2.0).sleep();
+//        eventQueue.riseEvent("/INIT_RETRY");
+//    }
 
-    else {
-        retry_count = 0;
-        ROS_INFO("Failed to initialize");
-        eventQueue.riseEvent("/INIT_FAILED");
-    }
+//    else {
+//        retry_count = 0;
+//        ROS_INFO("Failed to initialize");
+//        eventQueue.riseEvent("/INIT_FAILED");
+//    }
 
     while(!preemptiveWait(1000, eventQueue)){
 
