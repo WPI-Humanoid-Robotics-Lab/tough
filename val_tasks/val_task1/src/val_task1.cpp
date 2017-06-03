@@ -505,6 +505,57 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
     return TaskResult::SUCCESS();
 
 }
+decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContext& context, EventQueue& eventQueue){
+
+    ROS_INFO_STREAM("executing " << name);
+
+    geometry_msgs::Pose pose;
+
+    pose.position.x = panel_walk_goal_fine_.x;
+    pose.position.y = panel_walk_goal_fine_.y;
+    pose.position.z = 0;
+
+    tf::Quaternion q = tf::createQuaternionFromYaw(panel_walk_goal_fine_.theta);
+    tf::quaternionTFToMsg(q, pose.orientation);
+
+    pcl_handle_detector_ = new pcl_handle_detector(nh_, pose);
+    static int retry_count = 0;
+
+    std::vector<geometry_msgs::Point> pclHandlePoses;
+    pcl_handle_detector_->getDetections(pclHandlePoses);
+
+    //wait for the handles to be detected by pcl
+    ros::Duration(6).sleep();
+
+
+    if(pclHandlePoses.size() > 1){
+
+        ROS_INFO_STREAM("Handles detected by PCL at "<<pclHandlePoses[0]<< " : "<<pclHandlePoses[2]);
+
+        //Fix the array reversal issue
+        task1_utils_->fixHandleArray(handle_loc_,pclHandlePoses);
+
+        if(pcl_handle_detector_!= nullptr){
+            delete pcl_handle_detector_;
+        }
+        // generate the event
+        eventQueue.riseEvent("/FIXED_HANDLE");
+
+
+    }
+    else if( retry_count++ < 5){
+        ROS_INFO("Did not find the handles using Point Cloud, retrying");
+        eventQueue.riseEvent("/FIX_RETRY");
+    }
+    else{
+        ROS_INFO("Did not fix the handle, moving on");
+        eventQueue.riseEvent("/FIX_HANDLE_FAILED");
+        retry_count = 0;
+    }
+
+
+    return TaskResult::SUCCESS();
+}
 
 decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
@@ -852,7 +903,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     // if the handle is moving in wrong direction, flip the points (assuming grasp is not lost)
     if(task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_AWAY_TO_GOAL)
     {
-         ROS_INFO("handle moving in wrong direction, path will be flipped ");
+        ROS_INFO("handle moving in wrong direction, path will be flipped ");
 
         // stop all the trajectories
         control_helper_->stopAllTrajectories();
