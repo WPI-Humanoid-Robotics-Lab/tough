@@ -288,7 +288,7 @@ void PeriodicSnapshotter::pausePointcloudCB(const std_msgs::Bool &msg)
     state_request = msg.data ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESUME;
 }
 
-void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Empty &msg)
+void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8 &msg)
 {
     enable_box_filter_ = true;
     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_prev_msg(new pcl::PointCloud<pcl::PointXYZ>);
@@ -300,7 +300,12 @@ void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Empty &msg)
     Eigen::Vector4f maxPoint;
     minPoint[0]=-1;
     minPoint[1]=-1;
-    minPoint[2]=-0.5;
+    // this indicates that if the msg contains element 1 it, would clear point cloud from waist up
+    if(msg.data == 1)
+    {
+        minPoint[2]=0.0;
+    }
+    else minPoint[2]= -0.5;
 
     maxPoint[0]=2;
     maxPoint[1]=1;

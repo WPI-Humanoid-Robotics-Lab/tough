@@ -21,7 +21,7 @@ task2Utils::task2Utils(ros::NodeHandle nh):
 
     reset_pointcloud_pub    = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
     pause_pointcloud_pub    = nh_.advertise<std_msgs::Bool>("/field/pause_pointcloud",1);
-    clearbox_pointcloud_pub = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
+    clearbox_pointcloud_pub = nh_.advertise<std_msgs::Int8>("/field/clearbox_pointcloud",1);
 
     task_status_sub_        = nh_.subscribe("/srcsim/finals/task", 10, &task2Utils::taskStatusCB, this);
 
@@ -84,17 +84,17 @@ void task2Utils::movePanelToWalkSafePose(const armSide side)
     chest_controller_->controlChest(0,0,0);
     ros::Duration(2).sleep();
 
-    const std::vector<float> *seed1,*seed2;
+    const std::vector<float> *seed1;
     const std::vector<double> *grasp;
     if(side == armSide::LEFT){
         //        when left hand is the provided side, we move right hand under the panel
-        seed2 = &rightShoulderSeedPanelGraspWalk_;
+        seed1 = &rightShoulderSeedPanelGraspWalk_;
         grasp = &leftHandGrasp_;
     }
     else
     {
         //        when right hand is the provided side, we move left hand under the panel
-        seed2 = &leftShoulderSeedPanelGraspWalk_;
+        seed1 = &leftShoulderSeedPanelGraspWalk_;
         grasp = &rightHandGrasp_;
     }
 
@@ -103,7 +103,7 @@ void task2Utils::movePanelToWalkSafePose(const armSide side)
 
     std::vector< std::vector<float> > armData;
     armData.clear();
-    armData.push_back(*seed2);
+    armData.push_back(*seed1);
 
     arm_controller_->moveArmJoints((armSide)!side, armData, 2.0f);
     ros::Duration(2).sleep();
@@ -277,6 +277,42 @@ void task2Utils::reOrientTowardsPanel(geometry_msgs::Pose panelPose){
 
 }
 
+void task2Utils::reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose){
+
+    geometry_msgs::Pose poseInPelvisFrame;
+    current_state_->transformPose(cablePose, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+
+    float yaw = tf::getYaw(poseInPelvisFrame.orientation);
+
+    ROS_INFO("Yaw Value : %f",yaw);
+
+    // if the vector is pointing outwards, reorient it
+    if (yaw > M_PI_2 || yaw < -M_PI_2){
+        geometry_msgs::Pose tempYaw(cablePose);
+        SolarPanelDetect::invertYaw(tempYaw);
+
+        current_state_->transformPose(tempYaw, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+        yaw = tf::getYaw(poseInPelvisFrame.orientation);
+    }
+
+    ROS_INFO("reOrient towards cable: The current Yaw in pelvis frame is: %d", yaw);
+
+    //    geometry_msgs::Pose cableOrientationPose;
+    //    // Choose the cableOrientation pose based on the condition
+    //    //side = yaw < 0 ? armSide::LEFT : armSide::RIGHT;
+
+    //    geometry_msgs::Pose robotPose;
+    //    current_state_->getCurrentPose(VAL_COMMON_NAMES::WORLD_TF,robotPose);
+
+    //    geometry_msgs::Pose2D cableOrientationPose2D;
+    //    cableOrientationPose2D.x = cableOrientationPose.position.x;
+    //    cableOrientationPose2D.y = cableOrientationPose.position.y;
+    //    cableOrientationPose2D.theta = tf::getYaw(robotPose.orientation);
+
+    //    //Convert cableo... pose to world and call the walker
+    //    walk_->walkToGoal(cableOrientationPose2D);
+
+}
 
 int task2Utils::getCurrentCheckpoint() const{
     return current_checkpoint_;
@@ -289,7 +325,7 @@ bool task2Utils::isCableOnTable(geometry_msgs::Pose &cable_coordinates)
     float tolerance =0.1; // experimental value
 
     if( cable_detector_->findCable(cable_coordinates)){
-       return ((cable_coordinates.position.z < table_height_ + tolerance) && (cable_coordinates.position.z > table_height_ - tolerance));
+        return ((cable_coordinates.position.z < table_height_ + tolerance) && (cable_coordinates.position.z > table_height_ - tolerance));
     }
 }
 
@@ -307,10 +343,10 @@ bool task2Utils::isCableInHand(armSide side)
 
     ///@todo detection part goes here
 
-//    armData.clear();
-//    armData.push_back(jointPositions);
-//    arm_controller_->moveArmJoints(side, armData,2.0f);
-//    ros::Duration(0.2).sleep();
+    //    armData.clear();
+    //    armData.push_back(jointPositions);
+    //    arm_controller_->moveArmJoints(side, armData,2.0f);
+    //    ros::Duration(0.2).sleep();
 
 
 }
@@ -320,9 +356,73 @@ bool task2Utils::isCableTouchingSocket()
     return taskMsg.checkpoints_completion.size() > 2;
 }
 
+geometry_msgs::Pose task2Utils::grasping_hand(armSide &side, geometry_msgs::Pose handle_pose)
+{
+    geometry_msgs::Pose poseInPelvisFrame;
+    current_state_->transformPose(handle_pose, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    float yaw = tf::getYaw(poseInPelvisFrame.orientation);
+
+    if (yaw > M_PI_2 || yaw < -M_PI_2){
+        tfScalar r, p, y;
+        tf::Quaternion q;
+        tf::quaternionMsgToTF(handle_pose.orientation, q);
+        tf::Matrix3x3 rot(q);
+        rot.getRPY(r, p, y);
+        y = y-M_PI;
+        geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(r,p,y);
+        handle_pose.orientation = quaternion;
+        current_state_->transformPose(handle_pose, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+        yaw = tf::getYaw(poseInPelvisFrame.orientation);
+    }
+
+    side = yaw < 0 ? armSide::LEFT : armSide::RIGHT;
+    return handle_pose;
+}
+
+bool task2Utils::isRotationReq(armSide side, geometry_msgs::Point handle_coordinates,geometry_msgs::Point button_coordinates)
+{
+    bool is_rotation_required_;
+    if(button_coordinates.x == 0 && button_coordinates.y == 0){
+        // button cannot be seen it is assumed to be on the other side
+        is_rotation_required_ = side == armSide::LEFT ? false : true;
+    }
+    else{
+        current_state_->transformPoint(handle_coordinates, handle_coordinates, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+        current_state_->transformPoint(button_coordinates, button_coordinates, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+
+        if( button_coordinates.x > handle_coordinates.x) {
+            is_rotation_required_ = side == armSide::LEFT ? false : true;
+        }
+        else if (handle_coordinates.x == button_coordinates.x &&  button_coordinates.y > handle_coordinates.y ){
+            is_rotation_required_ = false;
+        }
+        else if (handle_coordinates.x == button_coordinates.x &&  button_coordinates.y < handle_coordinates.y ){
+            is_rotation_required_ = true;
+        }
+        else{
+            // x is smaller
+            is_rotation_required_ = side == armSide::LEFT ? true : false;
+        }
+    }
+    return is_rotation_required_;
+}
+
 bool task2Utils::shakeTest(const armSide graspingHand)
 {
     ROS_INFO("task2Utils::shakeTest : Closing, opening and reclosing grippers to see if the panel falls off");
+    //close
+    //open
+    //close
+
+    // If the bag is on the tip of the finger it would slip in or fall out giving a better grasp
+    gripper_controller_->closeGripper(graspingHand);
+    ros::Duration(0.2).sleep();
+    gripper_controller_->openGripper(graspingHand);
+    ros::Duration(0.2).sleep();
+    gripper_controller_->closeGripper(graspingHand);
+    ros::Duration(0.2).sleep();
+
+    return true;
 
 }
 
@@ -352,8 +452,13 @@ void task2Utils::clearPointCloud() {
     ros::Duration(0.3).sleep();
 }
 
-void task2Utils::clearBoxPointCloud() {
-    std_msgs::Empty msg;
+void task2Utils::clearBoxPointCloud(CLEAR_BOX_CLOUD state) {
+    std_msgs::Int8 msg;
+    if(state == CLEAR_BOX_CLOUD::WAIST_UP)
+    {
+        msg.data =1;
+    }else msg.data =0;
+
     clearbox_pointcloud_pub.publish(msg);
 }
 

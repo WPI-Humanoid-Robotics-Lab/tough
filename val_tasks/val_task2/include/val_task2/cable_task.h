@@ -25,6 +25,7 @@ public:
    bool grasp_choke(armSide side, const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool grasp_cable(const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool insert_cable(const geometry_msgs::Point &goal, float executionTime=2.0f);
+   bool rotate_cable(const geometry_msgs::Pose &goal, float executionTime=2.0f);
 private:
    ros::NodeHandle nh_;
    tf::TransformListener listener_;
