@@ -121,6 +121,7 @@ class valTask2 {
 
     geometry_msgs::Point socket_coordinates_;
 
+    geometry_msgs::Pose cable_pose_temp_; // used to array detection
     geometry_msgs::Pose cable_pose_;
 
     armSide panel_grasping_hand_;
@@ -154,6 +155,7 @@ class valTask2 {
     decision_making::TaskResult detectSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult walkSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectSolarArrayFineTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult findCableIntermediateTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult alignSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult placePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectButtonTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
@@ -178,4 +180,5 @@ class valTask2 {
     void setSolarArraySide(const bool isSolarArrayOnRight);
     void setPanelGraspingHand(armSide side);
     void setIsRotationRequired(bool value);
+    void setTempCablePose(geometry_msgs::Pose value);
 };

@@ -197,7 +197,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
 
         ROVER_SIDE roverSide;
         if(rover_detector_->getRoverSide(roverSide)){
-            setRoverSide(roverSide == ROVER_SIDE::RIGHT);
+            setRoverSide(roverSide == ROVER_SIDE::RIGHT); /// check
             // block rover in /map
             //            rover_in_map_blocker_ = new SolarArrayDetector(nh_, detectedPoses2D.back(),is_rover_on_right_);
             //wait for the map to update. This is required to ensure the footsteps dont collide with rover
@@ -722,59 +722,99 @@ decision_making::TaskResult valTask2::rotatePanelTask(string name, const FSMCall
     return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+decision_making::TaskResult valTask2::findCableIntermediateTask(string name, const FSMCallContext &context, EventQueue &eventQueue)
 {
-    ROS_INFO_STREAM("valTask2::detectSolarArrayFineTask : executing " << name);
+    ROS_INFO_STREAM("valTask2::findCableIntermediateTask : executing " << name);
 
-    static int cable_retry_count = 0;
-    static int retry_count = 0;
+    static std::queue<float> head_yaw_ranges;
+
+    static bool executingOnce = true;
     static float q1, q3;
-    if(solar_array_fine_detector_ == nullptr) {
-        // Solar array fine detection depends on cable detector. hence a small loop in state machine to get the cable location
-        if (cable_detector_ == nullptr) {
-            ROS_INFO("valTask2::detectSolarArrayFineTask : Moving panel to see cable");
-            q3 = panel_grasping_hand_ == armSide::LEFT ? 0.5 : -0.5;
-            arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
-            ros::Duration(0.5).sleep();
-            q1 = panel_grasping_hand_ == armSide::LEFT ? -0.36 : 0.36;
-            arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
-            ros::Duration(0.5).sleep();
-            ROS_INFO("valTask2::detectSolarArrayFineTask : Tilting head down");
-            head_controller_->moveHead(0,30, 0);
-            ros::Duration(0.5).sleep();
+    if(executingOnce)
+    {
+        // moving hands to get in position to detect the cable
+        ROS_INFO("valTask2::findCableIntermediateTask : Moving panel to see cable");
+        q3 = panel_grasping_hand_ == armSide::LEFT ? 0.5 : -0.5;
+        arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
+        ros::Duration(0.5).sleep();
+        q1 = panel_grasping_hand_ == armSide::LEFT ? -0.36 : 0.36;
+        arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
+        ros::Duration(0.5).sleep();
+        head_controller_->moveHead(0,30,0);
 
-            cable_detector_ = new CableDetector(nh_);
-        }
+        // possible head yaw rotations to better detect the cable
+        //clear the queue before starting
+        std::queue<float> temp;
+        head_yaw_ranges= temp;
+        head_yaw_ranges.push(-20.0);
+        head_yaw_ranges.push(-10.0);
+        head_yaw_ranges.push( 10.0);
+        head_yaw_ranges.push( 20.0);
 
-        geometry_msgs::Point cable_location;
-        if (cable_retry_count > 5){
+        executingOnce = false;
+    }
 
-            eventQueue.riseEvent("/DETECT_ARRAY_FINE_FAILED");
-            cable_retry_count = 0;
-            if(cable_detector_ != nullptr) delete cable_detector_;
-            cable_detector_ = nullptr;
-        }
-        else if(!cable_detector_->findCable(cable_location)){
-            cable_retry_count++;
-            eventQueue.riseEvent("/DETECT_ARRAY_FINE_RETRY");
-            return TaskResult::SUCCESS();
-        }
-        ROS_INFO("valTask2::detectSolarArrayFineTask : Cable location x:%f y:%f z:%f", cable_location.x, cable_location.y, cable_location.z);
+    if (cable_detector_ == nullptr) {
+        cable_detector_ = new CableDetector(nh_);
+    }
 
+    geometry_msgs::Pose cable_pose;
+    int retry = 0;
+    while (!cable_detector_->findCable(cable_pose) && retry++ < 5);
+
+    if(cable_pose.position.x == 0 && !head_yaw_ranges.empty())
+    {
+        // wrong point detected. move head and try again
+        head_controller_->moveHead(0,30,head_yaw_ranges.front());
+        ROS_INFO("valTask2::findCableIntermediateTask : Cable not found. Trying with %d angle",head_yaw_ranges.front());
+        head_yaw_ranges.pop();
+        ros::Duration(0.5).sleep();
+
+        eventQueue.riseEvent("/FIND_CABLE_RETRY");
+    }
+    else if (cable_pose.position.x == 0)
+    {
+        // state failed after detecting 5*4 times
+        ROS_INFO("valTask2::findCableIntermediateTask : Cable not found. Failed after 20 trials");
+        eventQueue.riseEvent("/FIND_CABLE_FAILED");
+
+        executingOnce= true;
+        if(cable_detector_ != nullptr) delete cable_detector_;
+        cable_detector_ = nullptr;
+    }
+    else
+    {
+        // cable found
+        setTempCablePose(cable_pose);
+        std::cout<<"Cable position x: "<<cable_pose_temp_.position.x<<"\t"<<"Cable position y: "<<cable_pose_temp_.position.y<<"\t"<<"Cable position z: "<<cable_pose_temp_.position.z<<"\n";
+        ROS_INFO("valTask2::findCableIntermediateTask : Cable found! Setting motion back. exiting");
+        // set the poses back
         q3 = panel_grasping_hand_ == armSide::LEFT ? -1.85 : 1.85;
         q1 = panel_grasping_hand_ == armSide::LEFT ? -1.04 : 1.04;
         arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
         ros::Duration(0.2).sleep();
         arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
-
-        solar_array_fine_detector_ = new ArrayTableDetector(nh_, cable_location);
-        ros::Duration(0.2).sleep();
-
+        eventQueue.riseEvent("/FOUND_CABLE");
+        executingOnce= true;
         if(cable_detector_ != nullptr) delete cable_detector_;
         cable_detector_ = nullptr;
-        //        head_controller_->moveHead(0, 0, 0);
     }
 
+
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("valTask2::detectSolarArrayTask : waiting for transition");
+    }
+    return TaskResult::SUCCESS();
+}
+
+decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+    ROS_INFO_STREAM("valTask2::detectSolarArrayFineTask : executing " << name);
+
+    static int retry_count = 0;
+    if(solar_array_fine_detector_ == nullptr) {
+        solar_array_fine_detector_ = new ArrayTableDetector(nh_, cable_pose_temp_.position);
+    }
 
     // detect solar array
     std::vector<geometry_msgs::Pose> poses;
@@ -792,11 +832,11 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
         pose2D.theta = tf::getYaw(poses[idx].orientation);
 
         setSolarArrayFineWalkGoal(pose2D);
-
+        ROS_INFO("valTask2::detectSolarArrayFineTask : detected panel");
         ROS_INFO("valTask2::detectSolarArrayFineTask : Position x:%f y:%f z:%f",poses[idx].position.x,poses[idx].position.y,poses[idx].position.z);
         ROS_INFO("valTask2::detectSolarArrayFineTask : yaw:%f",pose2D.theta);
         retry_count = 0;
-        cable_retry_count = 0;
+
         eventQueue.riseEvent("/DETECTED_ARRAY_FINE");
 
         if(solar_array_fine_detector_ != nullptr) delete solar_array_fine_detector_;
@@ -815,9 +855,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
     // if failed for more than 5 times, go to error state
     else
     {
-
         ROS_INFO("valTask2::detectSolarArrayFineTask : Failed 5 times. transitioning to error state");
-        cable_retry_count = 0;
         retry_count = 0;
         eventQueue.riseEvent("/DETECT_ARRAY_FINE_FAILED");
         if(solar_array_fine_detector_ != nullptr) delete solar_array_fine_detector_;
@@ -831,6 +869,8 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
     return TaskResult::SUCCESS();
 
 }
+
+
 
 decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
@@ -1509,4 +1549,9 @@ void valTask2::setPanelGraspingHand(armSide side)
 void valTask2::setIsRotationRequired(bool value)
 {
     is_rotation_required_ = value;
+}
+
+void valTask2::setTempCablePose(geometry_msgs::Pose value)
+{
+    cable_pose_temp_ = value;
 }
