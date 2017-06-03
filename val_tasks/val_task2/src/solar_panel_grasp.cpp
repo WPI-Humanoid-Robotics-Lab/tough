@@ -40,7 +40,13 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     valControlCommon control_util(nh_);
 
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : opening grippers");
-    gripper_.controlGripper(side, GRIPPER_STATE::OPEN_THUMB_IN_APPROACH);
+    if (side == RIGHT)
+    {
+        gripper_.controlGripper(RIGHT, {1.39,0.3,0.1,0.1,0.1});
+    }
+    else gripper_.controlGripper(LEFT, {1.39,-0.3,-0.1,-0.1,-0.1});
+    ros::Duration(0.2).sleep();
+
 
     //move shoulder roll outwards
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : Setting shoulder roll");

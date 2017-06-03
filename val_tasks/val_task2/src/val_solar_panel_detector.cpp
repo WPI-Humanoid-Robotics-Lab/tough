@@ -237,6 +237,10 @@ void SolarPanelDetect::getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud
     ROS_INFO("cld size %d",(int)cloud->points.size());
     ROS_INFO("hey in orientation");
     // fitting the largest plane
+    if (cloud->points.empty()){
+        return;
+    }
+
     PlaneSegmentation(cloud);
 
     // PCA

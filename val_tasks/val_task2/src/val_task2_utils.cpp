@@ -248,15 +248,11 @@ void task2Utils::reOrientTowardsPanel(geometry_msgs::Pose panelPose){
                                   VAL_COMMON_NAMES::PELVIS_TF);
 
     double error = panelPose.position.y;
-    if (std::abs(error) < 0.1){
-        ROS_INFO("reOrientTowardsPanel: Not reorienting, the offset is less than 0.1");
+    if (std::abs(error) < 0.1 && std::abs(error) > 0.49 ){
+        ROS_INFO("reOrientTowardsPanel: Not reorienting, the offset is too less or beyond control");
     }
-
-    else if (std::abs(error) > 0.49){
-        ROS_INFO("reOrientTowardsPanel: Offset more than 0.5, not reorinting");
-    }
-
-    else{
+    else
+    {
         nSteps = (std::abs(error))/0.1;
 
         if (error > 0){

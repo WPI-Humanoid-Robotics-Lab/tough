@@ -39,6 +39,7 @@ private:
    chestTrajectory* chest_controller_;
    wholebodyManipulation* wholebody_controller_;
    geometry_msgs::QuaternionStamped rightHandOrientationTop_ ;
+   geometry_msgs::QuaternionStamped rightHandOrientationAngle_ ;
    task2Utils* task2_utils_;
    valControlCommon* control_common_;
 
