@@ -350,7 +350,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
     if(solar_panel_detector_ == nullptr) {
         if (!isFirstRun){
             ROS_INFO("valTask2::detectPanelTask : Clearing pointcloud");
-            task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
+            task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::LARGE_BOX);
         }
 
         task2_utils_->resumePointCloud();

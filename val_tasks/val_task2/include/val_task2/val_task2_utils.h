@@ -22,7 +22,8 @@
 
 enum class CLEAR_BOX_CLOUD{
     WAIST_UP=0,
-    FULL_BOX
+    LARGE_BOX=1,
+    FULL_BOX=2
 };
 
 class task2Utils {

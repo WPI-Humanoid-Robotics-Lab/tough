@@ -460,7 +460,13 @@ void task2Utils::clearBoxPointCloud(CLEAR_BOX_CLOUD state) {
     if(state == CLEAR_BOX_CLOUD::WAIST_UP)
     {
         msg.data =1;
-    }else msg.data =0;
+    }
+    else if(state == CLEAR_BOX_CLOUD::LARGE_BOX)
+    {
+        msg.data =2;
+    }
+    else msg.data =5;
+
 
     clearbox_pointcloud_pub.publish(msg);
 }
