@@ -9,7 +9,7 @@
                                           leftThumbPitch2Link, leftThumbPitch3Link,leftShoulderPitchLink, leftShoulderRollLink, leftShoulderYawLink,
                                           leftElbowPitchLink, leftIndexFingerPitch1Link, leftMiddleFingerPitch1Link,leftPinkyPitch1Link,
                                           leftHipPitchLink, leftKneePitchLink,
-                                          upperNeckPitchLink, torso,
+                                          upperNeckPitchLink, torso, pelvis
                                           rightForearmLink, rightWristRollLink, rightPalm, rightThumbRollLink, rightThumbPitch1Link,
                                           rightThumbPitch2Link, rightThumbPitch3Link,rightShoulderPitchLink, rightShoulderRollLink, rightShoulderYawLink,
                                           rightElbowPitchLink, rightIndexFingerPitch1Link, rightMiddleFingerPitch1Link,rightPinkyPitch1Link,
