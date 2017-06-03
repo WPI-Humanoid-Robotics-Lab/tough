@@ -99,7 +99,7 @@ public:
     void visulatise6DPoints(std::vector<geometry_msgs::Pose> &points);
     void clearPointCloud();
     void taskStatusSubCB(const srcsim::Task &msg);
-    void timerCB(const ros::TimerEvent& t);
+    void terminator(const ros::TimerEvent& t);
     int getCurrentCheckpoint() const;
     boost::posix_time::ptime timeNow;
     std::string logFile;

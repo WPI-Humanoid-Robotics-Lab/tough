@@ -15,6 +15,7 @@
 #include "navigation_common/map_generator.h"
 #include "srcsim/StartTask.h"
 #include <val_controllers/robot_state.h>
+#include <cstdlib>
 
 #define foreach BOOST_FOREACH
 
@@ -1234,6 +1235,7 @@ decision_making::TaskResult valTask1::endTask(string name, const FSMCallContext&
     ROS_INFO_STREAM("executing " << name);
 
     eventQueue.riseEvent("/STOP_TIMEOUT");
+    int status = system("killall roscore rosmaster rosout gzserver gzclient roslaunch");
     return TaskResult::SUCCESS();
 }
 
@@ -1241,6 +1243,7 @@ decision_making::TaskResult valTask1::errorTask(string name, const FSMCallContex
 {
     ROS_INFO_STREAM("executing " << name);
 
+    int status = system("killall roscore rosmaster rosout gzserver gzclient roslaunch");
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");

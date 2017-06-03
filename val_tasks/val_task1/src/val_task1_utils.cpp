@@ -19,7 +19,7 @@ task1Utils::task1Utils(ros::NodeHandle nh):
 
     timeNow = boost::posix_time::second_clock::local_time();
 
-    timer_         = nh_.createTimer(ros::Duration(30*60), &task1Utils::timerCB, this);
+    timer_         = nh_.createTimer(ros::Duration(30*60), &task1Utils::terminator, this);
 
 
 }
@@ -346,7 +346,7 @@ void task1Utils::taskStatusSubCB(const srcsim::Task &msg){
 }
 
 
-void task1Utils::timerCB(const ros::TimerEvent& e){
+void task1Utils::terminator(const ros::TimerEvent& e){
 
     ROS_INFO("Killing! Kill! Kill! Fire in the Hole! Headshot!");
     int status = system("killall roscore rosmaster rosout gzserver gzclient roslaunch");
