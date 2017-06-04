@@ -22,6 +22,7 @@ RobotStateInformer::RobotStateInformer(ros::NodeHandle nh):nh_(nh){
 }
 
 RobotStateInformer::~RobotStateInformer(){
+    jointStateSub_.shutdown();
     delete currentObject_;
 }
 
@@ -267,7 +268,7 @@ bool RobotStateInformer::transformPoint(const geometry_msgs::Point &pt_in, geome
 bool RobotStateInformer::isGraspped(armSide side)
 {
     std::vector<float> jointPos,closeGrasp;
-    closeGrasp= side ==LEFT ? closeLeftGrasp :closeRightGrasp;
+    closeGrasp= side == LEFT ? closeLeftGrasp : closeRightGrasp;
 
     if(side ==RIGHT)
     {
@@ -301,11 +302,15 @@ bool RobotStateInformer::isGraspped(armSide side)
         jointPos.push_back(getJointPosition("leftThumbPitch3"));
         jointPos.push_back(getJointPosition("leftThumbRoll"));
     }
+
     float diffClose=0.0,diffOpen=0.0;
-    for (size_t i = 0; i < closeGrasp.size(); ++i) {
+
+    for (size_t i = 0; i < closeGrasp.size(); ++i)
+    {
         diffClose+=fabs(jointPos[i]-closeGrasp[i]);
         diffOpen+=fabs(jointPos[i]-openGrasp[i]);
     }
+
     if(fabs(diffOpen)<0.1)
     {
         return false;

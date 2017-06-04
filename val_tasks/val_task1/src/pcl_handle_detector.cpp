@@ -101,6 +101,9 @@ bool pcl_handle_detector::extractHandle(pcl::PointCloud<pcl::PointXYZ>::Ptr& clo
     box_filter.setNegative(false);
     box_filter.filter(*cloud);
 
+    if (cloud->empty()){
+        return false;
+    }
 
     // same as paneldetection ideally use the calculated values from there. (line 90-124)
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);

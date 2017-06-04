@@ -359,7 +359,7 @@ bool task2Utils::isCableInHand(armSide side)
 
 bool task2Utils::isCableTouchingSocket()
 {
-    //return taskMsg.checkpoints_completion.size() > 2;
+    return taskMsg.checkpoint_durations.size() > 2;
     return 1;
 }
 

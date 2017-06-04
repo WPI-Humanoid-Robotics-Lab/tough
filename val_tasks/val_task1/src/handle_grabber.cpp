@@ -35,8 +35,8 @@ handle_grabber::handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper
     rightHandOrientation_.quaternion.w = 0.332;
 
     // cartesian planners for the arm
-    left_arm_planner_ = new cartesianPlanner("leftPalm", VAL_COMMON_NAMES::WORLD_TF);
-    right_arm_planner_ = new cartesianPlanner("rightPalm", VAL_COMMON_NAMES::WORLD_TF);
+    left_arm_planner_ = new cartesianPlanner("leftPalm", VAL_COMMON_NAMES::WORLD_TF); //leftMiddleFingerGroup
+    right_arm_planner_ = new cartesianPlanner("rightPalm", VAL_COMMON_NAMES::WORLD_TF); //rightMiddleFingerGroup
     wholebody_controller_ = new wholebodyManipulation(nh_);
 }
 
@@ -117,7 +117,7 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
 
 
     ROS_INFO("opening grippers");
-    gripper_.openGripper(side);
+    gripper_.controlGripper(side, GRIPPER_STATE::OPEN);
 
     //move shoulder roll outwards
     ROS_INFO("Setting shoulder roll");
@@ -151,7 +151,8 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
     //move arm to final position with known orientation
 
     current_state_->transformPoint(goal,finalPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-    finalPoint.x -= 0.04; // this is to compensate for the distance between palm frame and center of palm
+    finalPoint.x -= 0.05; // this is to compensate for the distance between palm frame and center of palm
+//    finalPoint.y = side == armSide::LEFT ? (finalPoint.y-0.02) : (finalPoint.y+0.02);
 
     //transform that point back to world frame
     current_state_->transformPoint(finalPoint, finalPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
@@ -172,6 +173,6 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
 
     ros::Duration(executionTime).sleep();
     ROS_INFO("Closing grippers");
-    gripper_.closeGripper(side);
+    gripper_.controlGripper(side, GRIPPER_STATE::HANDLE_HOLD);
     ros::Duration(0.6).sleep();
 }

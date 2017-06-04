@@ -8,7 +8,6 @@
   <arg name="extra_gazebo_args" default=""/>
   <arg name="grasping_init" default="true"/>
   <arg name="grasping_init_wait_time" default="20"/>
-  <arg name="init" default="true" />
   <arg name="paused" default="false" />
   <arg name="use_local_build" default="false" />
   <arg name="verbose" default="true" />
@@ -36,11 +35,7 @@
   <include file="$(find ihmc_valkyrie_ros)/launch/val_wholebody_control_gazebo.launch"/>
 
   <group if="$(arg grasping_init)">
-    <node name="$(anon grasping_init)" pkg="val_deploy" type="delayed_roslaunch.sh" required="true" args="$(arg grasping_init_wait_time) srcsim grasping_init.launch" output="screen"/>
-  </group>
-
-  <group if="$(arg init)">
-    <node name="startup_robot" pkg="srcsim" type="init_robot.sh" args="$(arg walk_test)" output="screen"/>
+    <node name="$(anon grasping_init)" pkg="val_deploy" type="delayed_roslaunch.sh" required="true" args="$(arg grasping_init_wait_time) srcsim grasping_init_wait.launch" output="screen"/>
   </group>
 
   <!--

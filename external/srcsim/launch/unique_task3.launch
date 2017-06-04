@@ -1,16 +1,12 @@
 <launch>
   <!-- start with robot harnessed by default. -->
   <!-- set:
-         roslaunch srcsim unique_task3.launch init:=true
-       to automatically lower robot harnessed, start high level controller and detach harness. -->
-  <!-- set:
-         roslaunch srcsim unique_task3.launch init:=true walk_test:=walk
+         roslaunch srcsim unique_task3.launch walk_test:=walk
        to automatically walk forward after harness detach. -->
   <arg name="debug" default="false" />
   <arg name="extra_gazebo_args" default=""/>
   <arg name="grasping_init" default="true"/>
   <arg name="grasping_init_wait_time" default="20"/>
-  <arg name="init" default="false" />
   <arg name="paused" default="false" />
   <arg name="use_local_build" default="false" />
   <arg name="verbose" default="true" />
@@ -38,10 +34,6 @@
 
   <group if="$(arg grasping_init)">
     <node name="$(anon grasping_init)" pkg="val_deploy" type="delayed_roslaunch.sh" required="true" args="$(arg grasping_init_wait_time) srcsim grasping_init.launch" output="screen"/>
-  </group>
-
-  <group if="$(arg init)">
-    <node name="startup_robot" pkg="srcsim" type="init_robot.sh" args="$(arg walk_test)" output="screen"/>
   </group>
 
   <!--

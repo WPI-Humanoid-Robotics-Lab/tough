@@ -4,6 +4,26 @@
   # Requires the following global variables:
   # $habitat_frame
 
+  # Print surface params
+  def printSurface()
+    "      <surface>\n"\
+    "        <friction>\n"\
+    "          <ode>\n"\
+    "            <mu>1</mu>\n"\
+    "            <mu2>1</mu2>\n"\
+    "          </ode>\n"\
+    "        </friction>\n"\
+    "        <contact>\n"\
+    "          <ode>\n"\
+    "            <kp>1000000.0</kp>\n"\
+    "            <kd>100.0</kd>\n"\
+    "            <max_vel>0.01</max_vel>\n"\
+    "            <min_depth>0.001</min_depth>\n"\
+    "          </ode>\n"\
+    "        </contact>\n"\
+    "      </surface>\n"\
+  end
+
   # Door frame in world coordinates
   door_offset_x = -6.68
   door_offset_y = -1.215
@@ -1754,29 +1774,77 @@
         <izz>0.0695</izz>
       </inertia>
     </inertial>
-    <collision name="collision">
+
+    <collision name="center">
+      <pose>0 0.045 0 1.57 0 0</pose>
       <geometry>
-        <mesh>
-          <uri>model://src_habitat/meshes/wheel_valve_large.dae</uri>
-        </mesh>
+        <cylinder>
+          <length>0.09</length>
+          <radius>0.038</radius>
+        </cylinder>
       </geometry>
-      <surface>
-        <friction>
-          <ode>
-            <mu>1</mu>
-            <mu2>1</mu2>
-          </ode>
-        </friction>
-        <contact>
-          <ode>
-            <kp>1000000.0</kp>
-            <kd>100.0</kd>
-            <max_vel>0.01</max_vel>
-            <min_depth>0.001</min_depth>
-          </ode>
-        </contact>
-      </surface>
+<%=   printSurface %>
     </collision>
+
+<%
+     # Circle
+     circle_length = 0.092
+     circle_radius = 0.022
+
+     radius = 0.15
+     circle_y = 0.065
+
+     sides = 12
+
+     for col in 0..(sides - 1)
+       angle = Math::PI / (sides / 2) * col
+       circle_x = radius * Math::cos(angle)
+       circle_z = radius * Math::sin(angle)
+%>
+
+    <collision name="circle_<%= col %>">
+      <pose><%= circle_x %> <%= circle_y %> <%= circle_z %> 0 <%= -angle %> 0</pose>
+      <geometry>
+        <cylinder>
+          <length><%= circle_length %></length>
+          <radius><%= circle_radius %></radius>
+        </cylinder>
+      </geometry>
+<%=   printSurface %>
+    </collision>
+
+<%
+    end
+%>
+
+<%
+     # Cross
+     cross_size_x = 0.3
+     cross_size_y = 0.03
+     cross_size_z = 0.042
+
+     cross_x = 0.0
+     cross_y = 0.065
+     cross_z = 0.0
+
+     for col in 0..1
+       angle = Math::PI / 2.0 * col
+%>
+
+    <collision name="cross_<%= col %>">
+      <pose><%= cross_x %> <%= cross_y %> <%= cross_z %> 0 <%= -angle %> 0</pose>
+      <geometry>
+        <box>
+          <size><%= cross_size_x %> <%= cross_size_y %> <%= cross_size_z %></size>
+        </box>
+      </geometry>
+<%=   printSurface %>
+    </collision>
+
+<%
+    end
+%>
+
     <visual name="visual">
       <geometry>
         <mesh>

@@ -76,7 +76,6 @@ void taskCommonUtils::moveToWalkSafePose(ros::NodeHandle &nh)
     ros::Duration(0.2).sleep();
     arm_controller.moveToDefaultPose(armSide::LEFT);
     ros::Duration(0.2).sleep();
-
 }
 
 
@@ -129,7 +128,6 @@ void taskCommonUtils::fixHandFramePalmDown(ros::NodeHandle nh, armSide side, geo
 
 }
 
-
 void taskCommonUtils::fixHandFramePalmUp(ros::NodeHandle nh, armSide side, geometry_msgs::Pose &poseInWorldFrame)
 {
     RobotStateInformer *current_state = RobotStateInformer::getRobotStateInformer(nh);
@@ -154,7 +152,6 @@ void taskCommonUtils::fixHandFramePalmUp(ros::NodeHandle nh, armSide side, geome
     tf::Quaternion tfQuatOut = tf::createQuaternionFromRPY(roll, pitch, yaw);
     tf::quaternionTFToMsg(tfQuatOut, poseInPelvisFrame.orientation);
     current_state->transformPose(poseInPelvisFrame, poseInWorldFrame, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-
 }
 bool taskCommonUtils::slowGrip(ros::NodeHandle nh,armSide side, std::vector<double> initial, std::vector<double> final, int iterations, float executionTime)
 {

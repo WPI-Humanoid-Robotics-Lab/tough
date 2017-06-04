@@ -2,6 +2,7 @@
 *.swp
 *~
 *.orig
+*.log
 
 CMakeCache.txt
 CMakeFiles
