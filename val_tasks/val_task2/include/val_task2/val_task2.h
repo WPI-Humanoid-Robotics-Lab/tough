@@ -121,7 +121,7 @@ class valTask2 {
 
     geometry_msgs::Point socket_coordinates_;
 
-    geometry_msgs::Pose cable_pose_temp_; // used to array detection
+    geometry_msgs::Point cable_point_temp_; // used to array detection
     geometry_msgs::Pose cable_pose_;
 
     armSide panel_grasping_hand_;
@@ -180,5 +180,5 @@ class valTask2 {
     void setSolarArraySide(const bool isSolarArrayOnRight);
     void setPanelGraspingHand(armSide side);
     void setIsRotationRequired(bool value);
-    void setTempCablePose(geometry_msgs::Pose value);
+    void setTempCablePoint(geometry_msgs::Point value);
 };

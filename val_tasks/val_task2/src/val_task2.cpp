@@ -469,7 +469,7 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
         }
         else
         {
-            ROS_INFO("valTask2::graspPanelTask :Redecting panel because plan was not 100 %. retry count = %d",retry_count);
+            ROS_INFO("valTask2::graspPanelTask :100 %. retry count = %d",retry_count);
             eventQueue.riseEvent("/REDETECT_PANEL");
         }
     }
@@ -759,11 +759,11 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         cable_detector_ = new CableDetector(nh_);
     }
 
-    geometry_msgs::Pose cable_pose;
+    geometry_msgs::Point cable_point;
     int retry = 0;
-    while (!cable_detector_->findCable(cable_pose) && retry++ < 15);
+    while (!cable_detector_->findCable(cable_point) && retry++ < 5);
 
-    if(cable_pose.position.x == 0 && !head_yaw_ranges.empty())
+    if(cable_point.x == 0 && !head_yaw_ranges.empty())
     {
         // wrong point detected. move head and try again
         head_controller_->moveHead(0,30,head_yaw_ranges.front());
@@ -773,7 +773,7 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
 
         eventQueue.riseEvent("/FIND_CABLE_RETRY");
     }
-    else if (cable_pose.position.x == 0)
+    else if (cable_point.x == 0)
     {
         // state failed after detecting 5*4 times
         ROS_INFO("valTask2::findCableIntermediateTask : Cable not found. Failed after 20 trials");
@@ -786,8 +786,8 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
     else
     {
         // cable found
-        setTempCablePose(cable_pose);
-        std::cout<<"Cable position x: "<<cable_pose_temp_.position.x<<"\t"<<"Cable position y: "<<cable_pose_temp_.position.y<<"\t"<<"Cable position z: "<<cable_pose_temp_.position.z<<"\n";
+        setTempCablePoint(cable_point);
+        std::cout<<"Cable position x: "<<cable_point.x<<"\t"<<"Cable position y: "<<cable_point.y<<"\t"<<"Cable position z: "<<cable_point.z<<"\n";
         ROS_INFO("valTask2::findCableIntermediateTask : Cable found! Setting motion back. exiting");
         // set the poses back
         q3 = panel_grasping_hand_ == armSide::LEFT ? -1.85 : 1.85;
@@ -814,7 +814,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
 
     static int retry_count = 0;
     if(solar_array_fine_detector_ == nullptr) {
-        solar_array_fine_detector_ = new ArrayTableDetector(nh_, cable_pose_temp_.position);
+        solar_array_fine_detector_ = new ArrayTableDetector(nh_, cable_point_temp_);
     }
 
     // detect solar array
@@ -1552,7 +1552,7 @@ void valTask2::setIsRotationRequired(bool value)
     is_rotation_required_ = value;
 }
 
-void valTask2::setTempCablePose(geometry_msgs::Pose value)
+void valTask2::setTempCablePoint(geometry_msgs::Point value)
 {
-    cable_pose_temp_ = value;
+    cable_point_temp_ = value;
 }
