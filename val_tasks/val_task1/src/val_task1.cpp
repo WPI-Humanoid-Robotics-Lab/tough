@@ -42,6 +42,7 @@ valTask1::valTask1(ros::NodeHandle nh):
     // panel detection
     panel_detector_     = nullptr;
     finish_box_detector_= nullptr;
+    pcl_handle_detector_= nullptr;
     handle_detector_    = new HandleDetector(nh_);
     handle_grabber_     = new handle_grabber(nh_);
     move_handle_        = new move_handle(nh_);
@@ -507,30 +508,32 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
 }
 decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("valTask1::fixHandle : executing " << name);
 
-    geometry_msgs::Pose pose;
-
-    pose.position.x = panel_walk_goal_fine_.x;
-    pose.position.y = panel_walk_goal_fine_.y;
-    pose.position.z = 0;
-
-    tf::Quaternion q = tf::createQuaternionFromYaw(panel_walk_goal_fine_.theta);
-    tf::quaternionTFToMsg(q, pose.orientation);
-
-    pcl_handle_detector_ = new pcl_handle_detector(nh_, pose);
     static int retry_count = 0;
+
+    if (pcl_handle_detector_ == nullptr){
+        // need a pose to contruct pcl handle detector
+        geometry_msgs::Pose pose;
+        pose.position.x = panel_walk_goal_fine_.x;
+        pose.position.y = panel_walk_goal_fine_.y;
+        pose.position.z = 0;
+
+        tf::Quaternion q = tf::createQuaternionFromYaw(panel_walk_goal_fine_.theta);
+        tf::quaternionTFToMsg(q, pose.orientation);
+
+        pcl_handle_detector_ = new pcl_handle_detector(nh_, pose);
+    }
+
+
+
 
     std::vector<geometry_msgs::Point> pclHandlePoses;
     pcl_handle_detector_->getDetections(pclHandlePoses);
 
-    //wait for the handles to be detected by pcl
-    ros::Duration(6).sleep();
-
-
     if(pclHandlePoses.size() > 1){
 
-        ROS_INFO_STREAM("Handles detected by PCL at "<<pclHandlePoses[0]<< " : "<<pclHandlePoses[2]);
+        ROS_INFO_STREAM("valTask1::fixHandle : Handles detected by PCL at Yaw "<<pclHandlePoses[0]<< " : Pitch  "<<pclHandlePoses[1]);
 
         //Fix the array reversal issue
         task1_utils_->fixHandleArray(handle_loc_,pclHandlePoses);
@@ -543,16 +546,22 @@ decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContex
 
 
     }
-    else if( retry_count++ < 5){
-        ROS_INFO("Did not find the handles using Point Cloud, retrying");
+    else if( retry_count++ < 10){
+        ROS_INFO("valTask1::fixHandle : Did not find the handles using Point Cloud, retrying");
+        ros::Duration(3).sleep();
         eventQueue.riseEvent("/FIX_RETRY");
     }
     else{
-        ROS_INFO("Did not fix the handle, moving on");
+        ROS_INFO("valTask1::fixHandle : Did not fix the handle, moving on");
         eventQueue.riseEvent("/FIX_HANDLE_FAILED");
         retry_count = 0;
     }
 
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("valTask1::fixHandle : waiting for transition");
+    }
 
     return TaskResult::SUCCESS();
 }
