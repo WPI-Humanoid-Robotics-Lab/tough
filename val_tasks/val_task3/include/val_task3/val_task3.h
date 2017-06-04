@@ -54,9 +54,15 @@ class valTask3{
     unsigned int map_update_count_;
     void occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg);
 
-    geometry_msgs::Pose2D leak_detector_walk_goal_;
-    geometry_msgs::Pose2D leak_repair_walk_goal_;
-    geometry_msgs::Pose2D leak_position_walk_goal_;
+    // private vairiables storing the pose and locations
+    geometry_msgs::Pose2D stair_detect_walk_pose_;
+    geometry_msgs::Point  handle_center_;
+    geometry_msgs::Pose2D table_walk_pose_;
+    geometry_msgs::Point  leak_detector_loc_;
+    geometry_msgs::Pose2D leak_wall_pose_;
+    geometry_msgs::Point  leak_loc_;
+    geometry_msgs::Point  repair_tool_loc_;
+    geometry_msgs::Pose2D finish_box_pose_;
 
     static valTask3* currentObject;
 
@@ -88,4 +94,15 @@ class valTask3{
     decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    geometry_msgs::Pose2D stair_detect_walk_pose() const;
+
+    // setter getter api's
+    void setStairDetectWalkPose(const geometry_msgs::Pose2D &stair_detect_walk_pose);
+    void setHandleCenter(const geometry_msgs::Point &handle_center);
+    void setTableWalkPose(const geometry_msgs::Pose2D &table_walk_pose);
+    void setLeakDetectorLoc(const geometry_msgs::Point &leak_detector_loc);
+    void setLeakWallPose(const geometry_msgs::Pose2D &leak_wall_pose);
+    void setLeakLoc(const geometry_msgs::Point &leak_loc);
+    void setRepairToolLoc(const geometry_msgs::Point &repair_tool_loc);
+    void setFinishBoxPose(const geometry_msgs::Pose2D &finish_box_pose);
 };

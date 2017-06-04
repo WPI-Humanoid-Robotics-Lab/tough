@@ -267,13 +267,13 @@ double theta_sw;
     
 }stairwalkpose;
 
-class HANDLELOC
+class HANDLECENTER
 {
   public:
-    HANDLELOC()
+    HANDLECENTER()
     {
       state = true;
-      name = "handleLoc";
+      name = "handleCenter";
     }
 
     void setParams(task3_parametersConfig &config, const std::vector<AbstractParamDescriptionConstPtr> params)
@@ -285,19 +285,51 @@ class HANDLELOC
 
         if("x_hc"==(*_i)->name){x_hc = boost::any_cast<double>(val);}
         if("y_hc"==(*_i)->name){y_hc = boost::any_cast<double>(val);}
-        if("z_c"==(*_i)->name){z_c = boost::any_cast<double>(val);}
+        if("z_hc"==(*_i)->name){z_hc = boost::any_cast<double>(val);}
       }
     }
 
     double x_hc;
 double y_hc;
-double z_c;
+double z_hc;
 
     bool state;
     std::string name;
 
     
-}handleloc;
+}handlecenter;
+
+class TABLEWALKPOSE
+{
+  public:
+    TABLEWALKPOSE()
+    {
+      state = true;
+      name = "tableWalkPose";
+    }
+
+    void setParams(task3_parametersConfig &config, const std::vector<AbstractParamDescriptionConstPtr> params)
+    {
+      for (std::vector<AbstractParamDescriptionConstPtr>::const_iterator _i = params.begin(); _i != params.end(); ++_i)
+      {
+        boost::any val;
+        (*_i)->getValue(config, val);
+
+        if("x_tw"==(*_i)->name){x_tw = boost::any_cast<double>(val);}
+        if("y_tw"==(*_i)->name){y_tw = boost::any_cast<double>(val);}
+        if("theta_tw"==(*_i)->name){theta_tw = boost::any_cast<double>(val);}
+      }
+    }
+
+    double x_tw;
+double y_tw;
+double theta_tw;
+
+    bool state;
+    std::string name;
+
+    
+}tablewalkpose;
 
 class LEAKDETECTORLOC
 {
@@ -330,6 +362,38 @@ double z_ld;
 
     
 }leakdetectorloc;
+
+class LEAKWALLPOSE
+{
+  public:
+    LEAKWALLPOSE()
+    {
+      state = true;
+      name = "leakWallPose";
+    }
+
+    void setParams(task3_parametersConfig &config, const std::vector<AbstractParamDescriptionConstPtr> params)
+    {
+      for (std::vector<AbstractParamDescriptionConstPtr>::const_iterator _i = params.begin(); _i != params.end(); ++_i)
+      {
+        boost::any val;
+        (*_i)->getValue(config, val);
+
+        if("x_lw"==(*_i)->name){x_lw = boost::any_cast<double>(val);}
+        if("y_lw"==(*_i)->name){y_lw = boost::any_cast<double>(val);}
+        if("theta_lw"==(*_i)->name){theta_lw = boost::any_cast<double>(val);}
+      }
+    }
+
+    double x_lw;
+double y_lw;
+double theta_lw;
+
+    bool state;
+    std::string name;
+
+    
+}leakwallpose;
 
 class LEAKLOC
 {
@@ -442,30 +506,42 @@ double theta_fb;
 //#line 21 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       double y_hc;
 //#line 22 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      double z_c;
+      double z_hc;
 //#line 26 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      double x_ld;
+      double x_tw;
 //#line 27 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      double y_ld;
+      double y_tw;
 //#line 28 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      double z_ld;
+      double theta_tw;
 //#line 32 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      double x_l;
+      double x_ld;
 //#line 33 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      double y_l;
+      double y_ld;
 //#line 34 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      double z_l;
+      double z_ld;
 //#line 38 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      double x_rt;
+      double x_lw;
 //#line 39 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      double y_rt;
+      double y_lw;
 //#line 40 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      double z_rt;
-//#line 44 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      double x_fb;
+      double theta_lw;
 //#line 45 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      double y_fb;
+      double x_l;
 //#line 46 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      double y_l;
+//#line 47 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      double z_l;
+//#line 51 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      double x_rt;
+//#line 52 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      double y_rt;
+//#line 53 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      double z_rt;
+//#line 57 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      double x_fb;
+//#line 58 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      double y_fb;
+//#line 59 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       double theta_fb;
 //#line 218 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
 
@@ -642,7 +718,7 @@ task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::STAIRW
       Default.groups.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::STAIRWALKPOSE, task3_parametersConfig::DEFAULT>(stairWalkPose)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::STAIRWALKPOSE, task3_parametersConfig::DEFAULT>(stairWalkPose)));
-task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::HANDLELOC, task3_parametersConfig::DEFAULT> handleLoc("handleLoc", "", 0, 2, true, &task3_parametersConfig::DEFAULT::handleloc);
+task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::HANDLECENTER, task3_parametersConfig::DEFAULT> handleCenter("handleCenter", "", 0, 2, true, &task3_parametersConfig::DEFAULT::handlecenter);
 //#line 20 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __min__.x_hc = 0.0;
 //#line 20 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
@@ -650,7 +726,7 @@ task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::HANDLE
 //#line 20 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.x_hc = 2.828;
 //#line 20 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      handleLoc.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_hc", "double", 0, "x of door handle", "", &task3_parametersConfig::x_hc)));
+      handleCenter.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_hc", "double", 0, "x of door handle", "", &task3_parametersConfig::x_hc)));
 //#line 20 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_hc", "double", 0, "x of door handle", "", &task3_parametersConfig::x_hc)));
 //#line 21 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
@@ -660,55 +736,92 @@ task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::HANDLE
 //#line 21 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.y_hc = 0.292;
 //#line 21 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      handleLoc.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_hc", "double", 0, "y of door handle", "", &task3_parametersConfig::y_hc)));
+      handleCenter.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_hc", "double", 0, "y of door handle", "", &task3_parametersConfig::y_hc)));
 //#line 21 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_hc", "double", 0, "y of door handle", "", &task3_parametersConfig::y_hc)));
 //#line 22 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      __min__.z_c = -1.57;
+      __min__.z_hc = -1.57;
 //#line 22 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      __max__.z_c = 1.57;
+      __max__.z_hc = 1.57;
 //#line 22 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      __default__.z_c = 0.82;
+      __default__.z_hc = 0.82;
 //#line 22 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      handleLoc.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("z_c", "double", 0, "z of door handle", "", &task3_parametersConfig::z_c)));
+      handleCenter.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("z_hc", "double", 0, "z of door handle", "", &task3_parametersConfig::z_hc)));
 //#line 22 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
-      __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("z_c", "double", 0, "z of door handle", "", &task3_parametersConfig::z_c)));
+      __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("z_hc", "double", 0, "z of door handle", "", &task3_parametersConfig::z_hc)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      handleLoc.convertParams();
+      handleCenter.convertParams();
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      Default.groups.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::HANDLELOC, task3_parametersConfig::DEFAULT>(handleLoc)));
+      Default.groups.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::HANDLECENTER, task3_parametersConfig::DEFAULT>(handleCenter)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
-      __group_descriptions__.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::HANDLELOC, task3_parametersConfig::DEFAULT>(handleLoc)));
-task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::LEAKDETECTORLOC, task3_parametersConfig::DEFAULT> leakDetectorLoc("leakDetectorLoc", "", 0, 3, true, &task3_parametersConfig::DEFAULT::leakdetectorloc);
+      __group_descriptions__.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::HANDLECENTER, task3_parametersConfig::DEFAULT>(handleCenter)));
+task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::TABLEWALKPOSE, task3_parametersConfig::DEFAULT> tableWalkPose("tableWalkPose", "", 0, 3, true, &task3_parametersConfig::DEFAULT::tablewalkpose);
 //#line 26 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __min__.x_tw = 0.0;
+//#line 26 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __max__.x_tw = 10.0;
+//#line 26 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __default__.x_tw = 2.828;
+//#line 26 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      tableWalkPose.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_tw", "double", 0, "x of goal location", "", &task3_parametersConfig::x_tw)));
+//#line 26 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_tw", "double", 0, "x of goal location", "", &task3_parametersConfig::x_tw)));
+//#line 27 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __min__.y_tw = -1.0;
+//#line 27 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __max__.y_tw = 1.0;
+//#line 27 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __default__.y_tw = 0.292;
+//#line 27 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      tableWalkPose.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_tw", "double", 0, "y of goal location", "", &task3_parametersConfig::y_tw)));
+//#line 27 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_tw", "double", 0, "y of goal location", "", &task3_parametersConfig::y_tw)));
+//#line 28 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __min__.theta_tw = -1.57;
+//#line 28 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __max__.theta_tw = 1.57;
+//#line 28 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __default__.theta_tw = 0.82;
+//#line 28 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      tableWalkPose.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("theta_tw", "double", 0, "theta of goal location", "", &task3_parametersConfig::theta_tw)));
+//#line 28 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("theta_tw", "double", 0, "theta of goal location", "", &task3_parametersConfig::theta_tw)));
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      tableWalkPose.convertParams();
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      Default.groups.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::TABLEWALKPOSE, task3_parametersConfig::DEFAULT>(tableWalkPose)));
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      __group_descriptions__.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::TABLEWALKPOSE, task3_parametersConfig::DEFAULT>(tableWalkPose)));
+task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::LEAKDETECTORLOC, task3_parametersConfig::DEFAULT> leakDetectorLoc("leakDetectorLoc", "", 0, 4, true, &task3_parametersConfig::DEFAULT::leakdetectorloc);
+//#line 32 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __min__.x_ld = 0.0;
-//#line 26 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 32 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __max__.x_ld = 10.0;
-//#line 26 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 32 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.x_ld = 2.828;
-//#line 26 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 32 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       leakDetectorLoc.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_ld", "double", 0, "x of leak detector", "", &task3_parametersConfig::x_ld)));
-//#line 26 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 32 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_ld", "double", 0, "x of leak detector", "", &task3_parametersConfig::x_ld)));
-//#line 27 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 33 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __min__.y_ld = -1.0;
-//#line 27 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 33 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __max__.y_ld = 1.0;
-//#line 27 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 33 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.y_ld = 0.292;
-//#line 27 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 33 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       leakDetectorLoc.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_ld", "double", 0, "y of leak detector", "", &task3_parametersConfig::y_ld)));
-//#line 27 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 33 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_ld", "double", 0, "y of leak detector", "", &task3_parametersConfig::y_ld)));
-//#line 28 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 34 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __min__.z_ld = -1.57;
-//#line 28 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 34 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __max__.z_ld = 1.57;
-//#line 28 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 34 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.z_ld = 0.82;
-//#line 28 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 34 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       leakDetectorLoc.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("z_ld", "double", 0, "z of leak detector", "", &task3_parametersConfig::z_ld)));
-//#line 28 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 34 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("z_ld", "double", 0, "z of leak detector", "", &task3_parametersConfig::z_ld)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       leakDetectorLoc.convertParams();
@@ -716,36 +829,73 @@ task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::LEAKDE
       Default.groups.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::LEAKDETECTORLOC, task3_parametersConfig::DEFAULT>(leakDetectorLoc)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::LEAKDETECTORLOC, task3_parametersConfig::DEFAULT>(leakDetectorLoc)));
-task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::LEAKLOC, task3_parametersConfig::DEFAULT> leakLoc("leakLoc", "", 0, 4, true, &task3_parametersConfig::DEFAULT::leakloc);
-//#line 32 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::LEAKWALLPOSE, task3_parametersConfig::DEFAULT> leakWallPose("leakWallPose", "", 0, 5, true, &task3_parametersConfig::DEFAULT::leakwallpose);
+//#line 38 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __min__.x_lw = 0.0;
+//#line 38 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __max__.x_lw = 10.0;
+//#line 38 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __default__.x_lw = 2.828;
+//#line 38 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      leakWallPose.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_lw", "double", 0, "x of goal location", "", &task3_parametersConfig::x_lw)));
+//#line 38 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_lw", "double", 0, "x of goal location", "", &task3_parametersConfig::x_lw)));
+//#line 39 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __min__.y_lw = -1.0;
+//#line 39 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __max__.y_lw = 1.0;
+//#line 39 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __default__.y_lw = 0.292;
+//#line 39 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      leakWallPose.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_lw", "double", 0, "y of goal location", "", &task3_parametersConfig::y_lw)));
+//#line 39 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_lw", "double", 0, "y of goal location", "", &task3_parametersConfig::y_lw)));
+//#line 40 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __min__.theta_lw = -1.57;
+//#line 40 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __max__.theta_lw = 1.57;
+//#line 40 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __default__.theta_lw = 0.82;
+//#line 40 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      leakWallPose.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("theta_lw", "double", 0, "theta of goal location", "", &task3_parametersConfig::theta_lw)));
+//#line 40 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+      __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("theta_lw", "double", 0, "theta of goal location", "", &task3_parametersConfig::theta_lw)));
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      leakWallPose.convertParams();
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      Default.groups.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::LEAKWALLPOSE, task3_parametersConfig::DEFAULT>(leakWallPose)));
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      __group_descriptions__.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::LEAKWALLPOSE, task3_parametersConfig::DEFAULT>(leakWallPose)));
+task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::LEAKLOC, task3_parametersConfig::DEFAULT> leakLoc("leakLoc", "", 0, 6, true, &task3_parametersConfig::DEFAULT::leakloc);
+//#line 45 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __min__.x_l = 0.0;
-//#line 32 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 45 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __max__.x_l = 10.0;
-//#line 32 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 45 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.x_l = 2.828;
-//#line 32 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 45 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       leakLoc.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_l", "double", 0, "x of leak", "", &task3_parametersConfig::x_l)));
-//#line 32 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 45 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_l", "double", 0, "x of leak", "", &task3_parametersConfig::x_l)));
-//#line 33 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 46 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __min__.y_l = -1.0;
-//#line 33 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 46 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __max__.y_l = 1.0;
-//#line 33 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 46 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.y_l = 0.292;
-//#line 33 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 46 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       leakLoc.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_l", "double", 0, "y of leak", "", &task3_parametersConfig::y_l)));
-//#line 33 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 46 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_l", "double", 0, "y of leak", "", &task3_parametersConfig::y_l)));
-//#line 34 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 47 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __min__.z_l = -1.57;
-//#line 34 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 47 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __max__.z_l = 1.57;
-//#line 34 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 47 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.z_l = 0.82;
-//#line 34 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 47 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       leakLoc.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("z_l", "double", 0, "z of leak", "", &task3_parametersConfig::z_l)));
-//#line 34 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 47 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("z_l", "double", 0, "z of leak", "", &task3_parametersConfig::z_l)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       leakLoc.convertParams();
@@ -753,36 +903,36 @@ task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::LEAKLO
       Default.groups.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::LEAKLOC, task3_parametersConfig::DEFAULT>(leakLoc)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::LEAKLOC, task3_parametersConfig::DEFAULT>(leakLoc)));
-task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::REPAIRTOOLLOC, task3_parametersConfig::DEFAULT> repairToolLoc("repairToolLoc", "", 0, 5, true, &task3_parametersConfig::DEFAULT::repairtoolloc);
-//#line 38 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::REPAIRTOOLLOC, task3_parametersConfig::DEFAULT> repairToolLoc("repairToolLoc", "", 0, 7, true, &task3_parametersConfig::DEFAULT::repairtoolloc);
+//#line 51 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __min__.x_rt = 0.0;
-//#line 38 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 51 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __max__.x_rt = 10.0;
-//#line 38 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 51 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.x_rt = 2.828;
-//#line 38 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 51 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       repairToolLoc.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_rt", "double", 0, "x of repair tool", "", &task3_parametersConfig::x_rt)));
-//#line 38 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 51 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_rt", "double", 0, "x of repair tool", "", &task3_parametersConfig::x_rt)));
-//#line 39 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 52 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __min__.y_rt = -1.0;
-//#line 39 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 52 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __max__.y_rt = 1.0;
-//#line 39 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 52 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.y_rt = 0.292;
-//#line 39 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 52 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       repairToolLoc.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_rt", "double", 0, "y of repair tool", "", &task3_parametersConfig::y_rt)));
-//#line 39 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 52 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_rt", "double", 0, "y of repair tool", "", &task3_parametersConfig::y_rt)));
-//#line 40 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 53 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __min__.z_rt = -1.57;
-//#line 40 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 53 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __max__.z_rt = 1.57;
-//#line 40 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 53 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.z_rt = 0.82;
-//#line 40 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 53 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       repairToolLoc.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("z_rt", "double", 0, "z of repair tool", "", &task3_parametersConfig::z_rt)));
-//#line 40 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 53 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("z_rt", "double", 0, "z of repair tool", "", &task3_parametersConfig::z_rt)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       repairToolLoc.convertParams();
@@ -790,36 +940,36 @@ task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::REPAIR
       Default.groups.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::REPAIRTOOLLOC, task3_parametersConfig::DEFAULT>(repairToolLoc)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(task3_parametersConfig::AbstractGroupDescriptionConstPtr(new task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::REPAIRTOOLLOC, task3_parametersConfig::DEFAULT>(repairToolLoc)));
-task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::FINISHBOXWALKPOSE, task3_parametersConfig::DEFAULT> finishBoxWalkPose("finishBoxWalkPose", "", 0, 6, true, &task3_parametersConfig::DEFAULT::finishboxwalkpose);
-//#line 44 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+task3_parametersConfig::GroupDescription<task3_parametersConfig::DEFAULT::FINISHBOXWALKPOSE, task3_parametersConfig::DEFAULT> finishBoxWalkPose("finishBoxWalkPose", "", 0, 8, true, &task3_parametersConfig::DEFAULT::finishboxwalkpose);
+//#line 57 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __min__.x_fb = 0.0;
-//#line 44 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 57 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __max__.x_fb = 10.0;
-//#line 44 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 57 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.x_fb = 2.828;
-//#line 44 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 57 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       finishBoxWalkPose.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_fb", "double", 0, "x of goal location", "", &task3_parametersConfig::x_fb)));
-//#line 44 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 57 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("x_fb", "double", 0, "x of goal location", "", &task3_parametersConfig::x_fb)));
-//#line 45 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 58 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __min__.y_fb = -1.0;
-//#line 45 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 58 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __max__.y_fb = 1.0;
-//#line 45 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 58 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.y_fb = 0.292;
-//#line 45 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 58 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       finishBoxWalkPose.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_fb", "double", 0, "y of goal location", "", &task3_parametersConfig::y_fb)));
-//#line 45 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 58 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("y_fb", "double", 0, "y of goal location", "", &task3_parametersConfig::y_fb)));
-//#line 46 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 59 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __min__.theta_fb = -1.57;
-//#line 46 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 59 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __max__.theta_fb = 1.57;
-//#line 46 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 59 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __default__.theta_fb = 0.82;
-//#line 46 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 59 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       finishBoxWalkPose.abstract_parameters.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("theta_fb", "double", 0, "theta of goal location", "", &task3_parametersConfig::theta_fb)));
-//#line 46 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
+//#line 59 "/home/johannes/catkin_ws/src/space_robotics_challenge/val_tasks/val_task3/cfg/task3_parameters.cfg"
       __param_descriptions__.push_back(task3_parametersConfig::AbstractParamDescriptionConstPtr(new task3_parametersConfig::ParamDescription<double>("theta_fb", "double", 0, "theta of goal location", "", &task3_parametersConfig::theta_fb)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       finishBoxWalkPose.convertParams();
