@@ -39,6 +39,10 @@ include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_I
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
+## Generate dynamic reconfigure parameters in the 'cfg' folder
+generate_dynamic_reconfigure_options(
+  cfg/task3_parameters.cfg
+ )
 
 catkin_package(
  INCLUDE_DIRS include
@@ -50,7 +54,9 @@ catkin_package(
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake
   include
+  cfg/cpp
 )
 
 ## Declare a C++ library
@@ -106,7 +112,8 @@ add_executable(val_task3_node            src/val_task3_node.cpp)
 
 add_dependencies(val_task3_node
  ${${PROJECT_NAME}_EXPORTED_TARGETS}
- ${catkin_EXPORTED_TARGETS}_gencfg)
+ ${catkin_EXPORTED_TARGETS}_gencfg
+ ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(val_task3_node
    ${catkin_LIBRARIES}

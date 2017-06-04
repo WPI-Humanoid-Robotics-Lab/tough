@@ -88,5 +88,4 @@ class valTask3{
     decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-
 };
