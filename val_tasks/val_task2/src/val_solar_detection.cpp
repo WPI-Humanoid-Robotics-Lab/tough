@@ -82,10 +82,6 @@ void SolarArrayDetector::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 
 void SolarArrayDetector::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
-    if (cloud->points.empty()){
-        return;
-    }
-
     /*tf::Quaternion quat(rover_loc_.orientation.x,rover_loc_.orientation.y,rover_loc_.orientation.z,rover_loc_.orientation.w);
     tf::Matrix3x3 rotation(quat);
     tfScalar roll,pitch,yaw;
@@ -140,10 +136,6 @@ void SolarArrayDetector::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     box_filter.setNegative(false);
     box_filter.filter(rover_cloud);
 
-    if (rover_cloud.points.empty()){
-        return;
-    }
-
     // brute force projecting the points into xy plane(z=0)
     for (auto i = rover_cloud.points.begin() ;i!=rover_cloud.points.end();++i)
     {
@@ -181,9 +173,7 @@ void SolarArrayDetector::roverremove(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 
 void SolarArrayDetector::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
-    if (cloud->points.empty()){
-        return;
-    }
+
 
     float min_x,min_y,max_x,max_y;
     geometry_msgs::Point pt_in,pt_out;
@@ -234,9 +224,6 @@ void SolarArrayDetector::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& 
 void SolarArrayDetector::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
 
-    if (cloud->points.empty()){
-        return;
-    }
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
   pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
   pcl::SACSegmentation<pcl::PointXYZ> seg;
