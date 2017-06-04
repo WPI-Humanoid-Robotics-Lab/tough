@@ -248,12 +248,15 @@ void task2Utils::reOrientTowardsPanel(geometry_msgs::Pose panelPose){
                                   VAL_COMMON_NAMES::PELVIS_TF);
 
     double error = panelPose.position.y;
-    if (std::abs(error) < 0.1 && std::abs(error) > 0.49 ){
+    double abserror = std::fabs(error);
+    ROS_INFO_STREAM("Error is:" << error << "Absolute value for error is:" << abserror);
+    if (abserror < 0.1 && abserror > 0.49 ){
         ROS_INFO("reOrientTowardsPanel: Not reorienting, the offset is too less or beyond control");
     }
     else
     {
-        nSteps = (std::abs(error))/0.1;
+        nSteps = std::ceil(abserror/0.1);
+        ROS_INFO_STREAM("No of steps to walk is:" << nSteps);
 
         if (error > 0){
             startStep = LEFT;
@@ -356,7 +359,8 @@ bool task2Utils::isCableInHand(armSide side)
 
 bool task2Utils::isCableTouchingSocket()
 {
-    return taskMsg.checkpoints_completion.size() > 2;
+    //return taskMsg.checkpoints_completion.size() > 2;
+    return 1;
 }
 
 geometry_msgs::Pose task2Utils::grasping_hand(armSide &side, geometry_msgs::Pose handle_pose)
