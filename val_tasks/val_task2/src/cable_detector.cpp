@@ -369,13 +369,18 @@ bool CableDetector::findCable(geometry_msgs::Point &cableLoc)
     //VISUALIZATION - include a spinOnce here to visualize the eigenvectors
     markers_.markers.clear();
     convexHulls_.clear();
+    bool result;
     if(ms_sensor_.giveImage(current_image_))
     {
         if( ms_sensor_.giveDisparityImage(current_disparity_))
         {
-            return getCableLocation(cableLoc);
+            result= getCableLocation(cableLoc);
+            std::cout<<"Cable position x: "<<cableLoc.x<<"\t"<<"Cable position y: "<<cableLoc.y<<"\t"<<"Cable position z: "<<cableLoc.z<<"\n";
+            ros::Duration(0.1).sleep(); // this is required to avoid processing same image in next request
+            return result;
         }
     }
+    ROS_WARN("CableDetector::findCable : Cannot read image from multisense");
     return false;
 }
 

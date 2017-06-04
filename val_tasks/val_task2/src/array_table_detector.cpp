@@ -142,11 +142,11 @@ void ArrayTableDetector::extractCloudOfInterest(const pcl::PointCloud<pcl::Point
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;
     minPoint[0]=0;
-    minPoint[1]=-2;
+    minPoint[1]=cableLocation.y-2;
     minPoint[2]=-1;
 
     maxPoint[0]=cableLocation.x;
-    maxPoint[1]=2;
+    maxPoint[1]=cableLocation.y+2;
     maxPoint[2]=0.5;
     Eigen::Vector3f boxTranslatation;
     boxTranslatation[0]=pelvisPose.position.x;

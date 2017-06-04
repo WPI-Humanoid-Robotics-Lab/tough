@@ -99,6 +99,8 @@ class valTask2 {
     //robot state informer
     RobotStateInformer* robot_state_;
 
+    valControlCommon* control_common_;
+
     ros::Subscriber occupancy_grid_sub_;
     unsigned int map_update_count_;
     void occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg);

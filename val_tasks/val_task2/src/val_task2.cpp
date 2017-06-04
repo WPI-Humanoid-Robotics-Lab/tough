@@ -64,6 +64,8 @@ valTask2::valTask2(ros::NodeHandle nh):
     task2_utils_    = new task2Utils(nh_);
     robot_state_    = RobotStateInformer::getRobotStateInformer(nh_);
 
+    control_common_ = new valControlCommon(nh_);
+
     // Variables
     map_update_count_ = 0;
     is_rotation_required_ = false;
@@ -740,37 +742,49 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         q1 = panel_grasping_hand_ == armSide::LEFT ? -0.36 : 0.36;
         arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
         ros::Duration(0.5).sleep();
-        head_controller_->moveHead(0,30,0);
-        ros::Duration(5).sleep();
+
+        ROS_INFO("valTask2::findCableIntermediateTask : If controllers die, increase the delay here");
+        head_controller_->moveHead(0,30,0,1.5);
+        ros::Duration(2).sleep();
 
         // possible head yaw rotations to better detect the cable
         //clear the queue before starting
         std::queue<float> temp;
         head_yaw_ranges= temp;
+        head_yaw_ranges.push(-55.0);
+        head_yaw_ranges.push(-45.0);
+        head_yaw_ranges.push(-35.0);
         head_yaw_ranges.push(-20.0);
         head_yaw_ranges.push(-10.0);
         head_yaw_ranges.push( 10.0);
         head_yaw_ranges.push( 20.0);
-
+        head_yaw_ranges.push( 35.0);
+        head_yaw_ranges.push( 45.0);
+        head_yaw_ranges.push( 55.0);
         executingOnce = false;
+        control_common_->stopAllTrajectories();
     }
 
-    if (cable_detector_ == nullptr) {
+    if(cable_detector_ != nullptr) {
+        delete cable_detector_;
+    }
+    else {
         cable_detector_ = new CableDetector(nh_);
     }
 
     geometry_msgs::Point cable_point;
     int retry = 0;
     while (!cable_detector_->findCable(cable_point) && retry++ < 5);
+    std::cout<<"cable_point x: "<<cable_point.x<<" cable_point y: "<<cable_point.y<<" cable_point z: "<<cable_point.z<<"\n";
 
     if(cable_point.x == 0 && !head_yaw_ranges.empty())
     {
         // wrong point detected. move head and try again
-        head_controller_->moveHead(0,30,head_yaw_ranges.front());
+        head_controller_->moveHead(0,30,head_yaw_ranges.front(), 2.0f);
         ROS_INFO("valTask2::findCableIntermediateTask : Cable not found. Trying with %.6f angle",head_yaw_ranges.front());
         head_yaw_ranges.pop();
-        ros::Duration(5).sleep();
-
+        ros::Duration(2.5).sleep();
+        control_common_->stopAllTrajectories();
         eventQueue.riseEvent("/FIND_CABLE_RETRY");
     }
     else if (cable_point.x == 0)
@@ -795,6 +809,7 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
         ros::Duration(0.2).sleep();
         arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
+        ros::Duration(0.2).sleep();
         eventQueue.riseEvent("/FOUND_CABLE");
         executingOnce= true;
         if(cable_detector_ != nullptr) delete cable_detector_;

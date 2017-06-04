@@ -40,6 +40,7 @@ private:
    wholebodyManipulation* wholebody_controller_;
    geometry_msgs::QuaternionStamped rightHandOrientationTop_ ;
    geometry_msgs::QuaternionStamped rightHandOrientationAngle_ ;
+   geometry_msgs::QuaternionStamped quat; // populate this value by experimentation
    task2Utils* task2_utils_;
    valControlCommon* control_common_;
 
@@ -52,6 +53,7 @@ private:
    const std::vector<float> leftShoulderSeedInitial_ = {-0.23,0.0,0.65,-1.49,1.29,0.0,0.0};
    const std::vector<float> rightShoulderSeedInitial_ = {-0.23,0.0,0.65,1.49,1.29,0.0,0.0};
    const std::vector<float> rightAfterGraspShoulderSeed_ = {-0.57, 1.09, 0.65, 1.1, 1.18, -0.19, 0.31};
+   const std::vector<float> rightAfterGraspShoulderSeed2_ = {-0.57, 1.09, 0.65, 1.1, 0.30, -0.19, 0.31}; // more wrist yaw angle
    const std::vector<float> rightShoulderSeed_ = {-0.81,0.60,1.12,1.16,1.91,0.0,0.0};
    const std::vector<float> rightShoulderInHandSeed_ = {-0.81,1.11,0.65,1.14,-0.26,-0.19,0.30};
 };
