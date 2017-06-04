@@ -11,8 +11,9 @@ task1Utils::task1Utils(ros::NodeHandle nh):
 
     clearbox_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
     reset_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
+    task1_log_pub_         = nh_.advertise<std_msgs::String>("/field/task1_log",10);
 
-    task_status_sub_ = nh.subscribe("/srcsim/finals/task", 10, &task1Utils::taskStatusSubCB, this);
+    task_status_sub_ = nh.subscribe("/srcsim/finals/task1", 10, &task1Utils::taskStatusSubCB, this);
 
     logFile = ros::package::getPath("val_task1") + "/log/task1.csv";
 
@@ -378,4 +379,11 @@ void task1Utils::terminator(const ros::TimerEvent& e){
 
     ROS_INFO("Killing! Kill! Kill! Fire in the Hole! Headshot!");
     int status = system("killall roscore rosmaster rosout gzserver gzclient roslaunch");
+}
+
+void task1Utils::taskLogPub(std::string data){
+
+    std_msgs::String ms;
+    ms.data = data;
+    task1_log_pub_.publish(ms);
 }

@@ -15,6 +15,7 @@
 #include <fstream>
 #include <cstdlib>
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include <std_msgs/String.h>
 
 
 
@@ -76,7 +77,7 @@ private:
     srcsim::Satellite msg_;
     ros::Subscriber task_status_sub_;
 
-    ros::Publisher marker_pub_, clearbox_pointcloud_pub_, reset_pointcloud_pub_;
+    ros::Publisher marker_pub_, clearbox_pointcloud_pub_, reset_pointcloud_pub_, task1_log_pub_;
     void satelliteMsgCB (const srcsim::Satellite &msg);
     int current_checkpoint_;
     srcsim::Task taskMsg;
@@ -102,8 +103,12 @@ public:
     void taskStatusSubCB(const srcsim::Task &msg);
     void terminator(const ros::TimerEvent& t);
     void fixHandleArray(std::vector<geometry_msgs::Point> &handle_loc, std::vector<geometry_msgs::Point> &pclHandlePoses);
-    int getCurrentCheckpoint() const;
+    int getCurrentCheckpoint() const;    
     boost::posix_time::ptime timeNow;
     std::string logFile;
     ros::Timer timer_;
+
+
+    void taskLogPub(std::string data);
+
 };
