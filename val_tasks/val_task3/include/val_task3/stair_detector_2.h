@@ -24,6 +24,8 @@ class stair_detector_2
     ros::Publisher blacklist_pub_;
     ros::Subscriber pcl_sub_;
 
+    tf::TransformListener tf_listener_;
+
     src_perception::MultisensePointCloud point_cloud_listener_;
 
     std::vector<geometry_msgs::PoseStamped> vantage_poses_;
