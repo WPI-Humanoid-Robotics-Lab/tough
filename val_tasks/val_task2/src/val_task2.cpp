@@ -34,7 +34,7 @@ valTask2* valTask2::getValTask2(ros::NodeHandle nh){
 
 // constructor and destrcutor
 valTask2::valTask2(ros::NodeHandle nh):
-    nh_(nh)
+    nh_(nh), multisense_dummy_object(nh)
 {
     // object for the valkyrie walker
     walker_             = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
@@ -73,6 +73,9 @@ valTask2::valTask2(ros::NodeHandle nh):
     // Subscribers
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask2::occupancy_grid_cb, this);
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask2::visited_map_cb, this);
+
+    cv::Mat img;
+    multisense_dummy_object.giveImage(img);
 }
 
 // destructor
@@ -492,11 +495,11 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
 {
     ROS_INFO_STREAM("valTask2::pickPanelTask : executing " << name);
 
-    task2_utils_->afterPanelGraspPose(panel_grasping_hand_);
+    task2_utils_->shakeTest(panel_grasping_hand_);
 
     if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
         ROS_INFO("valTask2::pickPanelTask performing shake test");
-        task2_utils_->shakeTest(panel_grasping_hand_);
+        task2_utils_->afterPanelGraspPose(panel_grasping_hand_);
     }
     else
     {
@@ -574,6 +577,15 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
     if(solar_array_detector_ == nullptr) {
         solar_array_detector_ = new SolarArrayDetector(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
         ros::Duration(0.2).sleep();
+    }
+
+    if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
+        ROS_INFO("Panel is still in hand");
+    }
+    else
+    {
+        ROS_INFO("Dropped the bag on the way. @TODO");
+        eventQueue.riseEvent("/DETECT_ARRAY_FAILED");
     }
 
     static int fail_count = 0;
@@ -765,10 +777,7 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         control_common_->stopAllTrajectories();
     }
 
-    if(cable_detector_ != nullptr) {
-        delete cable_detector_;
-    }
-    else {
+    if(cable_detector_ == nullptr) {
         cable_detector_ = new CableDetector(nh_);
     }
 
