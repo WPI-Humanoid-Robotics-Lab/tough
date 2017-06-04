@@ -36,6 +36,7 @@
 #include "val_task2/plug_detector.h"
 #include "val_task_common/finish_box_detector.h"
 #include "navigation_common/map_generator.h"
+#include "perception_common/MultisensePointCloud.h"
 
 using namespace decision_making;
 
@@ -140,6 +141,8 @@ class valTask2 {
     nav_msgs::OccupancyGrid visited_map_;
 
     geometry_msgs::Pose2D next_finishbox_center_;
+
+    src_perception::MultisenseImage multisense_dummy_object;
 
     public:
 
