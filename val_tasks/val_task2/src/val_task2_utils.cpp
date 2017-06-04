@@ -469,6 +469,7 @@ void task2Utils::clearBoxPointCloud(CLEAR_BOX_CLOUD state) {
 
 
     clearbox_pointcloud_pub.publish(msg);
+    ros::Duration(0.3).sleep();
 }
 
 void task2Utils::pausePointCloud() {
