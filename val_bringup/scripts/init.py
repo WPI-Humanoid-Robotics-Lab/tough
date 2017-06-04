@@ -25,7 +25,12 @@ def WaitForRobot():
 
     rospy.Subscriber("/srcsim/finals/harness", Harness, callback)
     # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
 
 if __name__ == '__main__':
+    global execute
     WaitForRobot()
+    time.sleep(120)
+    if (not execute):
+        rospy.spin()
+    else:
+        subprocess.Popen(["killall", "roslaunch", "roscore", "rosout", "gzserver", "gzclient"])

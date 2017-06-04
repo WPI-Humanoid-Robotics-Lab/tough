@@ -43,6 +43,9 @@ using namespace decision_making;
 
 #define foreach BOOST_FOREACH
 
+#define CIRCLE_RADIUS 0.135
+#define CIRCLE_RESOLUTION 12
+
 FSM_HEADER(val_task1)
 
 class valTask1 {

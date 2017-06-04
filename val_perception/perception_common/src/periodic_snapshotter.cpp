@@ -384,11 +384,11 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
         */
 
         // Create the filtering object
-        pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-        sor.setInputCloud (result);
-        sor.setMeanK (50);
-        sor.setStddevMulThresh (1.0);
-        sor.filter (*tgt);
+//        pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+//        sor.setInputCloud (result);
+//        sor.setMeanK (50);
+//        sor.setStddevMulThresh (1.0);
+//        sor.filter (*tgt);
 
         //        if (enable_box_filter_){
         //            geometry_msgs::Pose pelvisPose;
@@ -426,7 +426,7 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
         //        }
 
 
-        convertPCLtoROS(tgt,merged_cloud);
+        convertPCLtoROS(result,merged_cloud);
         // publish the merged message
     }
 

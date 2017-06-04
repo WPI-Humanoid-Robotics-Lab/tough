@@ -345,6 +345,11 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
         retry_count = 0;
     }
 
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+    }
+
 
     return TaskResult::SUCCESS();
 }
@@ -422,6 +427,7 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
         // increment the fail count
         fail_count++;
         eventQueue.riseEvent("/DETECT_PANEL_FINE_RETRY");
+        ros::Duration(3).sleep();
     }
 
     while(!preemptiveWait(1000, eventQueue)){
@@ -647,7 +653,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME, current_hand_pose);
 
         std::vector<geometry_msgs::Pose> waypoints;
-        task1_utils_->getCircle3D(handle_loc_[PITCH_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, 0.135, 25);
+        task1_utils_->getCircle3D(handle_loc_[PITCH_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, CIRCLE_RADIUS, CIRCLE_RESOLUTION);
         ROS_INFO("way points generatd");
 
         ///@todo: remove the visulaisation
@@ -881,7 +887,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         robot_state_->getCurrentPose(VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME, current_hand_pose);
 
         std::vector<geometry_msgs::Pose> waypoints;
-        task1_utils_->getCircle3D(handle_loc_[YAW_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, 0.135, 25);
+        task1_utils_->getCircle3D(handle_loc_[YAW_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, CIRCLE_RADIUS, CIRCLE_RESOLUTION);
         ROS_INFO("way points generatd");
 
         ///@todo: remove the visulaisation
@@ -1055,7 +1061,7 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
         }
 
         // reset the point cloud
-        task1_utils_->clearBoxPointCloud();
+        task1_utils_->resetPointCloud();
 
         // create the object for the pcl detector
         geometry_msgs::Pose pose;

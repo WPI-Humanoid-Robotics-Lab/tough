@@ -117,7 +117,7 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
 
 
     ROS_INFO("opening grippers");
-    gripper_.controlGripper(side, GRIPPER_STATE::OPEN_THUMB_IN);
+    gripper_.controlGripper(side, GRIPPER_STATE::OPEN);
 
     //move shoulder roll outwards
     ROS_INFO("Setting shoulder roll");
@@ -152,6 +152,7 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
 
     current_state_->transformPoint(goal,finalPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
     finalPoint.x -= 0.05; // this is to compensate for the distance between palm frame and center of palm
+//    finalPoint.y = side == armSide::LEFT ? (finalPoint.y-0.02) : (finalPoint.y+0.02);
 
     //transform that point back to world frame
     current_state_->transformPoint(finalPoint, finalPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
