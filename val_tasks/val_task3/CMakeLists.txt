@@ -99,6 +99,9 @@ target_link_libraries(grab_valve_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 add_executable(door_opener_node src/door_opener_node.cpp)
 target_link_libraries(door_opener_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 
+add_executable(blind_goal_finder src/blind_goal_finder.cpp)
+target_link_libraries(blind_goal_finder ${catkin_LIBRARIES} ${PROJECT_NAME})
+
 add_executable(val_task3_node            src/val_task3_node.cpp)
 
 add_dependencies(val_task3_node
