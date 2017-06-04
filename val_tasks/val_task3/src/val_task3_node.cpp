@@ -1,4 +1,3 @@
-
 #include <val_task3/val_task3_node.h>
 
 task3Node::task3Node(ros::NodeHandle nh): nh_(nh)
@@ -37,6 +36,17 @@ void task3Node::registerStateMethods()
   LocalTasks::registrate("STATE_ERROR",                        std::bind(&valTask3::errorTask,            task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
+void task3Node::paramUpdateCallback(val_task3::task3_parametersConfig &config, uint32_t level)
+{
+    ROS_INFO("update the goal, x: %f, y: %f, theta: %f",  config.groups.stairwalkpose.x_sw ,  config.groups.stairwalkpose.y_sw,  config.groups.stairwalkpose.theta_sw);
+
+//    geometry_msgs::Pose2D goal;
+//    goal.x = config.groups.panelwalkpose.x_pw;
+//    goal.y = config.groups.panelwalkpose.y_pw;
+//    goal.theta = config.groups.panelwalkpose.theta_pw;
+//    //update the walk goal location
+//    task3_->setPanelWalkGoal(goal);
+}
 
 int main(int argc, char** argv){
 

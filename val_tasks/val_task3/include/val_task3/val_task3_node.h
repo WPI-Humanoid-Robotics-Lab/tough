@@ -10,7 +10,7 @@
 #include <geometry_msgs/Twist.h>
 #include <val_task3/val_task3.h>
 #include <dynamic_reconfigure/server.h>
-
+#include "val_task3/task3_parametersConfig.h"
 
 class task3Node{
 
@@ -18,10 +18,12 @@ public:
     task3Node(ros::NodeHandle nh);
     ~task3Node();
 
+    void paramUpdateCallback(val_task3::task3_parametersConfig &config, uint32_t level);
     void registerStateMethods();
 
 private:
     ros::NodeHandle nh_;
-    valTask3* task3_;
 
+    // task3 object
+    valTask3* task3_;
 };

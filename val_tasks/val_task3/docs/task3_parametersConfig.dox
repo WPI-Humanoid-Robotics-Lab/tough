@@ -1,0 +1,23 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~x_sw" : \b [double] x of goal location min: 0.0, default: 2.828, max: 10.0
+- \b "~y_sw" : \b [double] y of goal location min: -1.0, default: 0.292, max: 1.0
+- \b "~theta_sw" : \b [double] theta of goal location min: -1.57, default: 0.82, max: 1.57
+- \b "~x_hc" : \b [double] x of door handle min: 0.0, default: 2.828, max: 10.0
+- \b "~y_hc" : \b [double] y of door handle min: -1.0, default: 0.292, max: 1.0
+- \b "~z_c" : \b [double] z of door handle min: -1.57, default: 0.82, max: 1.57
+- \b "~x_ld" : \b [double] x of leak detector min: 0.0, default: 2.828, max: 10.0
+- \b "~y_ld" : \b [double] y of leak detector min: -1.0, default: 0.292, max: 1.0
+- \b "~z_ld" : \b [double] z of leak detector min: -1.57, default: 0.82, max: 1.57
+- \b "~x_l" : \b [double] x of leak min: 0.0, default: 2.828, max: 10.0
+- \b "~y_l" : \b [double] y of leak min: -1.0, default: 0.292, max: 1.0
+- \b "~z_l" : \b [double] z of leak min: -1.57, default: 0.82, max: 1.57
+- \b "~x_rt" : \b [double] x of repair tool min: 0.0, default: 2.828, max: 10.0
+- \b "~y_rt" : \b [double] y of repair tool min: -1.0, default: 0.292, max: 1.0
+- \b "~z_rt" : \b [double] z of repair tool min: -1.57, default: 0.82, max: 1.57
+- \b "~x_fb" : \b [double] x of goal location min: 0.0, default: 2.828, max: 10.0
+- \b "~y_fb" : \b [double] y of goal location min: -1.0, default: 0.292, max: 1.0
+- \b "~theta_fb" : \b [double] theta of goal location min: -1.57, default: 0.82, max: 1.57
+
