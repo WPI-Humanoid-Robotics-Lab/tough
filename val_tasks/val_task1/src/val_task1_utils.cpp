@@ -19,7 +19,7 @@ task1Utils::task1Utils(ros::NodeHandle nh):
 
     timeNow = boost::posix_time::second_clock::local_time();
 
-    timer_         = nh_.createTimer(ros::Duration(30*60), &task1Utils::terminator, this);
+    timer_         = nh_.createTimer(ros::Duration(30*60), &task1Utils::timerCB, this);
 
 
 }
@@ -135,7 +135,7 @@ valueDirection task1Utils::getValueStatus(double current_value, controlSelection
         // set the flag that timer is being checked
         is_timer_being_checked = true;
 
-//        ROS_INFO("time debounce %f sec", std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - debounce_timer).count() );
+        //        ROS_INFO("time debounce %f sec", std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - debounce_timer).count() );
         ROS_INFO_THROTTLE(1, "valu constant debounce");
 
         if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - debounce_timer).count() > HANDLE_CONSTANT_DEBOUNCE_TIME_SEC){
@@ -153,12 +153,12 @@ valueDirection task1Utils::getValueStatus(double current_value, controlSelection
     }
     // if the handels are moving, wait till it moves at least by 4 degree
     else if (((current_value > prev_trigger_value) && (current_value - prev_trigger_value > HANDLE_MINIMUM_MOVMENT_IN_RAD)) ||
-            ((prev_trigger_value > current_value) && (prev_trigger_value - current_value > HANDLE_MINIMUM_MOVMENT_IN_RAD)))
+             ((prev_trigger_value > current_value) && (prev_trigger_value - current_value > HANDLE_MINIMUM_MOVMENT_IN_RAD)))
     {
         ROS_INFO("moved by 4deg");
 
         if ((required_direction == valueDirection::VALUE_INCRSING && current_value > prev_trigger_value) ||
-            (required_direction == valueDirection::VALUE_DECRASING && current_value < prev_trigger_value))
+                (required_direction == valueDirection::VALUE_DECRASING && current_value < prev_trigger_value))
         {
             ret = valueDirection::VALUE_TOWARDS_TO_GOAL;
             ROS_INFO("towards goal");
@@ -319,6 +319,29 @@ void task1Utils::visulatise6DPoints(std::vector<geometry_msgs::Pose> &points)
 
     marker_pub_.publish(marker_array);
     ros::Duration(0.2).sleep();
+}
+
+void task1Utils::fixHandleArray(std::vector<geometry_msgs::Point> &handle_loc, std::vector<geometry_msgs::Point> &pclHandlePoses){
+
+    geometry_msgs::Point temp;
+    ROS_INFO_STREAM("Handle Locs before "<< handle_loc[0] << "\t" << handle_loc[1] << "\t" << handle_loc[2]<<"\t" << handle_loc[3]<< std::endl);
+    double norm1 = std::sqrt(std::pow(handle_loc[1].x - pclHandlePoses[1].x , 2) + std::pow(handle_loc[1].y - pclHandlePoses[1].y , 2) + std::pow(handle_loc[1].z - pclHandlePoses[1].z , 2));
+    double norm2 = std::sqrt(std::pow(handle_loc[3].x - pclHandlePoses[0].x , 2) + std::pow(handle_loc[3].y - pclHandlePoses[0].y , 2) + std::pow(handle_loc[3].z - pclHandlePoses[0].z , 2));
+    ROS_INFO_STREAM("normLeft "<< norm1 << std::endl << " normRight" <<norm2<<std::endl);
+
+    if(norm1 > 0.05 )
+    {
+        temp = handle_loc[1];
+        handle_loc[1] = handle_loc[0];
+        handle_loc[0] = temp;
+    }
+
+    if(norm2 > 0.05 )
+    {
+        temp = handle_loc[3];
+        handle_loc[3] = handle_loc[2];
+        handle_loc[2] = temp;
+    }
 }
 
 void task1Utils::clearPointCloud()

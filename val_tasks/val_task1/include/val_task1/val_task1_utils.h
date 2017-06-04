@@ -100,6 +100,7 @@ public:
     void clearPointCloud();
     void taskStatusSubCB(const srcsim::Task &msg);
     void terminator(const ros::TimerEvent& t);
+    void fixHandleArray(std::vector<geometry_msgs::Point> &handle_loc, std::vector<geometry_msgs::Point> &pclHandlePoses);
     int getCurrentCheckpoint() const;
     boost::posix_time::ptime timeNow;
     std::string logFile;

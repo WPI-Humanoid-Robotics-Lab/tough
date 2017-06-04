@@ -23,6 +23,7 @@ void task1Node::registerStateMethods(void)
     LocalTasks::registrate("STATE_DETECT_HANDLE_CENTER",std::bind(&valTask1::detectHandleCenterTask,task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_DETECT_PANEL_FINE",   std::bind(&valTask1::detectPanelFineTask,   task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_WALK_TO_PANEL",       std::bind(&valTask1::walkToPanel,           task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_FIX_HANDLE_DETECTION",std::bind(&valTask1::fixHandle,             task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_GRASP_PITCH_HANDLE",  std::bind(&valTask1::graspPitchHandleTask,  task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_CORRECT_PITCH",       std::bind(&valTask1::controlPitchTask,      task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_GRASP_YAW_HANDLE",    std::bind(&valTask1::graspYawHandleTask,    task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
