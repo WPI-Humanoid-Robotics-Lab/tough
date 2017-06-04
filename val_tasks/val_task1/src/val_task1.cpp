@@ -628,7 +628,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
     static bool execute_once = true;
     static int retry_count = 0;
-    static handleDirection rot_dir = handleDirection::ANTICLOCK_WISE;
+    static handleDirection rot_dir = handleDirection::CLOCK_WISE;
 
     //timer
     static std::chrono::system_clock::time_point timer_start = std::chrono::system_clock::now();
@@ -864,7 +864,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 
     static bool execute_once = true;
     static int retry_count = 0;
-    static handleDirection rot_dir = handleDirection::CLOCK_WISE;
+    static handleDirection rot_dir = handleDirection::ANTICLOCK_WISE;
 
     //timer
     static std::chrono::system_clock::time_point timer_start = std::chrono::system_clock::now();

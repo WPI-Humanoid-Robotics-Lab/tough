@@ -20,9 +20,7 @@ task1Utils::task1Utils(ros::NodeHandle nh):
 
     timeNow = boost::posix_time::second_clock::local_time();
 
-    timer_         = nh_.createTimer(ros::Duration(30*60), &task1Utils::timerCB, this);
-
-
+    timer_ = nh_.createTimer(ros::Duration(30*60), &task1Utils::terminator, this);
 }
 
 task1Utils::~task1Utils()
@@ -219,8 +217,8 @@ void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point s
 
     geometry_msgs::Pose start_pose;
     start_pose.position.x = start.x;
-    start_pose.position.y = start.z;
-    start_pose.position.y = start.z;
+    start_pose.position.y = start.y;
+    start_pose.position.z = start.z;
 
     for (int i=0;i<steps; i++)
     {
@@ -231,11 +229,11 @@ void task1Utils::getCircle3D(geometry_msgs::Point center, geometry_msgs::Point s
         float alpha = atan2(y,x);
         ROS_INFO("alpha %f ", alpha);
 
-        if (direction == handleDirection::ANTICLOCK_WISE) {
+        if (direction == handleDirection::CLOCK_WISE) {
             circle_point_pose.position.x = center.x + radius*cos(alpha - (float)(2*M_PI/steps));
             circle_point_pose.position.y = center.y + radius*sin(alpha - (float)(2*M_PI/steps));
         }
-        else if (direction == handleDirection::CLOCK_WISE) {
+        else if (direction == handleDirection::ANTICLOCK_WISE) {
             circle_point_pose.position.x = center.x + radius*cos(alpha + (float)(2*M_PI/steps));
             circle_point_pose.position.y = center.y + radius*sin(alpha + (float)(2*M_PI/steps));
         }
@@ -381,7 +379,3 @@ void task1Utils::terminator(const ros::TimerEvent& e){
     ROS_INFO("Killing! Kill! Kill! Fire in the Hole! Headshot!");
     int status = system("killall roscore rosmaster rosout gzserver gzclient roslaunch");
 }
-
-
-
-
