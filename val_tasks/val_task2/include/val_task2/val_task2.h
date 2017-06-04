@@ -26,7 +26,6 @@
 #include "val_controllers/robot_state.h"
 #include "val_task2/val_rover_detection.h"
 #include "val_task2/val_solar_detection.h"
-#include "val_task2/val_solar_panel_detector.h"
 #include "val_task2/solar_panel_grasp.h"
 #include "val_task2/button_detector.h"
 #include "val_task2/array_table_detector.h"
@@ -37,6 +36,7 @@
 #include "val_task2/plug_detector.h"
 #include "val_task_common/finish_box_detector.h"
 #include "navigation_common/map_generator.h"
+#include "perception_common/MultisensePointCloud.h"
 
 using namespace decision_making;
 
@@ -100,6 +100,8 @@ class valTask2 {
     //robot state informer
     RobotStateInformer* robot_state_;
 
+    valControlCommon* control_common_;
+
     ros::Subscriber occupancy_grid_sub_;
     unsigned int map_update_count_;
     void occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg);
@@ -122,6 +124,7 @@ class valTask2 {
 
     geometry_msgs::Point socket_coordinates_;
 
+    geometry_msgs::Point cable_point_temp_; // used to array detection
     geometry_msgs::Pose cable_pose_;
 
     armSide panel_grasping_hand_;
@@ -139,6 +142,8 @@ class valTask2 {
 
     geometry_msgs::Pose2D next_finishbox_center_;
 
+    src_perception::MultisenseImage multisense_dummy_object;
+
     public:
 
 
@@ -155,6 +160,7 @@ class valTask2 {
     decision_making::TaskResult detectSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult walkSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectSolarArrayFineTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult findCableIntermediateTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult alignSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult placePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectButtonTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
@@ -179,4 +185,5 @@ class valTask2 {
     void setSolarArraySide(const bool isSolarArrayOnRight);
     void setPanelGraspingHand(armSide side);
     void setIsRotationRequired(bool value);
+    void setTempCablePoint(geometry_msgs::Point value);
 };

@@ -288,7 +288,7 @@ void PeriodicSnapshotter::pausePointcloudCB(const std_msgs::Bool &msg)
     state_request = msg.data ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESUME;
 }
 
-void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Empty &msg)
+void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8 &msg)
 {
     enable_box_filter_ = true;
     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_prev_msg(new pcl::PointCloud<pcl::PointXYZ>);
@@ -300,11 +300,41 @@ void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Empty &msg)
     Eigen::Vector4f maxPoint;
     minPoint[0]=-1;
     minPoint[1]=-1;
-    minPoint[2]=-0.5;
+    // this indicates that if the msg contains element 1 it, would clear point cloud from waist up
+    if(msg.data == 1)
+    {
+        // waist up condition
+        minPoint[0]=-1;  //x
+        minPoint[1]=-1;  //y
+        minPoint[2]=0.0; //z
 
-    maxPoint[0]=2;
-    maxPoint[1]=1;
-    maxPoint[2]=1;
+        maxPoint[0]=2;
+        maxPoint[1]=1;
+        maxPoint[2]=1;
+    }
+    else if(msg.data == 2)
+    {
+        // large box condition
+        minPoint[0]=-1.0;
+        minPoint[1]=-1.5;
+        minPoint[2]= -0.5;
+
+        maxPoint[0]=4;
+        maxPoint[1]=1.5;
+        maxPoint[2]=1.5;
+    }
+    else
+    {
+        // full box condition
+        minPoint[0]=-1;
+        minPoint[1]=-1;
+        minPoint[2]= -0.5;
+
+        maxPoint[0]=2;
+        maxPoint[1]=1;
+        maxPoint[2]=1;
+    }
+
     Eigen::Vector3f boxTranslatation;
     boxTranslatation[0]=pelvisPose.position.x;
     boxTranslatation[1]=pelvisPose.position.y;

@@ -32,6 +32,8 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/filters/crop_box.h>
+#include <pcl/surface/convex_hull.h>
+#include <pcl/filters/project_inliers.h>
 
 #include <pcl/sample_consensus/sac_model_sphere.h>
 #include <pcl/sample_consensus/ransac.h>
@@ -47,12 +49,12 @@ private:
   ros::Publisher vis_pub;
 
 
-  // do we need this
   RobotStateInformer* robot_state_;
 
   geometry_msgs::Pose2D rover_loc_;
   bool isroverRight_;
   float rover_theta;
+  geometry_msgs::Pose current_pelvis_pose;
 
   std::vector<geometry_msgs::Pose> detections_;
   int detection_tries_;
@@ -66,11 +68,15 @@ private:
   void setRoverTheta();
   void visualizept(geometry_msgs::Pose pose);
   void visualizept(float x,float y,float z);
+//  float getArea(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointIndices::Ptr &inliers, pcl::ModelCoefficients::Ptr &coefficients);
 
-
-  void transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool isinverse);
-  void filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-  void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,geometry_msgs::Pose &pose);
+  void transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, float theta, bool isinverse);
+  void filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, geometry_msgs::Pose &pose);
+  void getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, geometry_msgs::Pose &pose);
+  void getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, geometry_msgs::Pose &pose);
+  void boxfilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+//  void PlaneSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+  void PlaneSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, pcl::PointIndices::Ptr &inliers, pcl::ModelCoefficients::Ptr &coefficients );
 
 public:
   SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight);

@@ -21,6 +21,7 @@
 #include <vector>
 #include <mutex>
 
+#define CONTOUR_AREA_THRESHOLD 6000.0
 
 class CableDetector
 {
@@ -68,12 +69,11 @@ public:
     std::vector<cv::Point> getCentroid(const std::vector<cv::Point> &, cv::Mat &);
     bool findCable(geometry_msgs::Point &);
     bool findCable(geometry_msgs::Pose &);
-
+    bool isCableinHand();
 
     geometry_msgs::Pose getPose() const;
 
     geometry_msgs::PointStamped getOffsetPoint() const;
-
 };
 
 #endif // CABLE_DETECTOR_H

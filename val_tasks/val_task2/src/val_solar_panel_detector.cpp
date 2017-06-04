@@ -22,6 +22,11 @@ SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rov
     vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_solar_panel/visualization_marker", 1 );
     rover_loc_  =rover_loc;
     isroverRight_ = isroverRight;
+    robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+    ROS_INFO("pose : x %.2f y %.2f z %.2f yaw %.2f ",current_pelvis_pose.position.x,current_pelvis_pose.position.y,current_pelvis_pose.position.z,tf::getYaw(current_pelvis_pose.orientation));
+
+
 //    ROS_INFO("rover loc const %f %f right: %d",rover_loc_.position.x,rover_loc_.position.y,(int)isroverRight_);
     setRoverTheta();
     setoffset();
@@ -96,13 +101,32 @@ void SolarPanelDetect::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
     }
     ++detection_tries_;
 
+    geometry_msgs::Pose pose;
+
+
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     sensor_msgs::PointCloud2 output;
     pcl::fromROSMsg(*input, *cloud);
 
 
     // instead of transforming the points for pass through filter the entire cloud is tranformed
-    transformCloud(cloud,true);
+    boxfilter(cloud);
+    if(cloud->empty())
+    {
+        ROS_INFO("box fiter empty");
+        return;
+    }
+
+    filter_solar_panel(cloud,pose);
+
+    if(cloud->empty())
+        return;
+
+    getOrientation(cloud,pose);
+    detections_.push_back(pose);
+
+
+    /*transformCloud(cloud,true);
     PassThroughFilter(cloud);
     if(cloud->empty())
         return;
@@ -115,7 +139,7 @@ void SolarPanelDetect::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
     getPosition(cloud,pose);
     detections_.push_back(pose);
 
-
+*/
 //    visualizept(cloud->points[solar_panel_index[0]].x,cloud->points[solar_panel_index[0]].y,cloud->points[solar_panel_index[0]].z);
 
 
@@ -126,7 +150,209 @@ void SolarPanelDetect::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 
 }
 
-void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,geometry_msgs::Pose &pose)
+void SolarPanelDetect::boxfilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+{
+
+       geometry_msgs::Pose pelvisPose;
+       robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+       Eigen::Vector4f minPoint;
+       Eigen::Vector4f maxPoint;
+       minPoint[0]= 0 ;
+       minPoint[1]=-0.3;
+       minPoint[2]= 0.48;  //0.46 also works, very few points lie on the rover plane
+
+       maxPoint[0]=1;
+       maxPoint[1]=+0.3;
+       maxPoint[2]=1;
+
+       Eigen::Vector3f boxTranslatation;
+       boxTranslatation[0]=pelvisPose.position.x;
+       boxTranslatation[1]=pelvisPose.position.y;
+       boxTranslatation[2]=0*pelvisPose.position.z;
+       Eigen::Vector3f boxRotation;
+       boxRotation[0]=0;  // rotation around x-axis
+       boxRotation[1]=0;  // rotation around y-axis
+       boxRotation[2]= tf::getYaw(pelvisPose.orientation);  //in radians rotation around z-axis. this rotates your cube 45deg around z-axis.
+
+
+       pcl::CropBox<pcl::PointXYZ> box_filter;
+       std::vector<int> indices;
+       indices.clear();
+       box_filter.setInputCloud(cloud);
+       box_filter.setMin(minPoint);
+       box_filter.setMax(maxPoint);
+       box_filter.setTranslation(boxTranslatation);
+       box_filter.setRotation(boxRotation);
+       box_filter.setNegative(false);
+       box_filter.filter(*cloud);
+       ROS_INFO("box filter");
+}
+
+
+void SolarPanelDetect::PlaneSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, pcl::PointIndices::Ptr &inliers, pcl::ModelCoefficients::Ptr &coefficients ){
+
+//    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+//    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
+
+    seg.setOptimizeCoefficients (true);
+    seg.setModelType (pcl::SACMODEL_PLANE);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setMaxIterations (100);
+    seg.setDistanceThreshold (0.008);
+    seg.setInputCloud (cloud);
+    seg.segment (*inliers, *coefficients);
+    ROS_INFO("a : %0.4f, b : %0.4f, c : %0.4f, d: %.4f",coefficients->values[0], coefficients->values[1], coefficients->values[2], coefficients->values[3]);
+
+    /*panel_plane_model_[0] = coefficients->values[0]; // a
+    panel_plane_model_[1] = coefficients->values[1]; // b
+    panel_plane_model_[2] = coefficients->values[2]; // c
+    panel_plane_model_[3] = coefficients->values[3]; // d
+    */
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    extract.setInputCloud (cloud);
+    extract.setIndices (inliers);
+    extract.setNegative (false);
+    extract.filter (*cloud);
+
+    ROS_INFO("Point cloud representing the planar component = %d", (int)cloud->points.size());
+
+
+}
+/*
+
+float SolarPanelDetect::getArea(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointIndices::Ptr &inliers, pcl::ModelCoefficients::Ptr &coefficients )
+{
+
+    //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_hull (new pcl::PointCloud<pcl::PointXYZ>);
+    //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_projected (new pcl::PointCloud<pcl::PointXYZ>);
+
+    //pcl::ProjectInliers<pcl::PointXYZ> proj;
+    //proj.setModelType (pcl::SACMODEL_PLANE);
+//    proj.setIndices (inliers);
+//    proj.setInputCloud (cloud);
+//    proj.setModelCoefficients (coefficients);
+//    proj.filter (*cloud_projected);
+
+//    pcl::ConvexHull<pcl::PointXYZ> chull;
+//    chull.setInputCloud (cloud_projected);
+
+//    chull.setComputeAreaVolume(1);
+//    chull.reconstruct (*cloud);
+
+//    return chull.getTotalArea();
+
+
+    float area= 0.0;
+    int num_points = cloud->points.size();
+    int j = 0;
+    Eigen::Vector3f va,vb,res;
+    res(0) = res(1) = res(2) = 0.0f;
+    for (int i = 0; i < num_points; ++i)
+    {
+        j = (i + 1) % num_points;
+        va = cloud->points[i].getVector3fMap();
+        vb = cloud->points[j].getVector3fMap();
+        res += va.cross(vb);
+    }
+    area=res.norm();
+    return area*0.5;
+}
+    */
+
+void SolarPanelDetect::getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, geometry_msgs::Pose &pose)
+{
+    Eigen::Vector4f min_pt,max_pt;
+    pcl::getMinMax3D(*cloud,min_pt,max_pt);
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+
+    ROS_INFO("max z : %.2f",max_pt(2));
+
+    // filtering around max z value
+    pcl::PassThrough<pcl::PointXYZ> pass_z;
+    pass_z.setInputCloud(cloud);
+    pass_z.setFilterFieldName("z");
+//    pass_z.setFilterLimits(max_pt(2)-0.08,max_pt(2));
+    pass_z.setFilterLimits(0,max_pt(2)-0.15);
+    pass_z.filter(*cloud);
+
+    ROS_INFO("cld size %d",(int)cloud->points.size());
+    //ROS_INFO("hey in orientation");
+    // fitting the largest plane
+
+
+    if (cloud->points.empty()){
+        return;
+    }
+
+    PlaneSegmentation(cloud,inliers,coefficients);
+    // PCA
+//    transformCloud(cloud,tf::getYaw(current_pelvis_pose.orientation)+(M_PI/2),true);
+    Eigen::Vector4f centroid;
+    pcl::compute3DCentroid(*cloud, centroid);
+
+    Eigen::Matrix3f covarianceMatrix;
+    pcl::computeCovarianceMatrix(*cloud, centroid, covarianceMatrix);
+    Eigen::Matrix3f eigenVectors;
+    Eigen::Vector3f eigenValues;
+    pcl::eigen33(covarianceMatrix, eigenVectors, eigenValues);
+
+//    transformCloud(cloud,tf::getYaw(current_pelvis_pose.orientation)+(M_PI/2),false);
+
+    /*float area = getArea(cloud,inliers,coefficients);
+    ROS_INFO("Area of the plane %.4f",area);
+    ROS_INFO("Normalised Area of the plane %.4f",(area*100)/cloud->points.size());
+    */
+
+
+    float cosTheta = eigenVectors.col(0)[0]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
+    float sinTheta = eigenVectors.col(0)[1]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
+    float theta = atan2(sinTheta, cosTheta);
+
+    transformCloud(cloud,theta,true);
+    pcl::getMinMax3D(*cloud,min_pt,max_pt);
+    ROS_INFO("range %.4f",fabs(max_pt(1)-min_pt(1)));
+    transformCloud(cloud,theta,false);
+
+
+//    if the area is  around 0.26 thendetected plane is the smaller side of the panel
+    if (fabs(max_pt(1)-min_pt(1)) < 0.3)
+//          if (area < 0.3)
+    {
+        cosTheta = eigenVectors.col(1)[0]/sqrt(pow(eigenVectors.col(1)[0],2)+pow(eigenVectors.col(1)[1],2));
+        sinTheta = eigenVectors.col(1)[1]/sqrt(pow(eigenVectors.col(1)[0],2)+pow(eigenVectors.col(1)[1],2));
+        theta = atan2(sinTheta, cosTheta);
+    }
+
+
+    // so that arrow is always inwards that is quadrant I and II
+    if(isroverRight_)
+    {
+        ROS_INFO("rover is right");
+        if (theta <0)
+        {
+            theta+=M_PI;
+        }
+
+    }
+    else
+    {
+        if (theta>0)
+        {
+            theta+=M_PI;
+        }
+    }
+
+//    visualizept(centroid(0)+eigenVectors.col(1)[0],centroid(1)+eigenVectors.col(1)[1],centroid(2)+eigenVectors.col(1)[2]);
+
+    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch,theta);
+    pose.orientation = quaternion;
+    visualizept(pose);
+
+}
+
+void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,geometry_msgs::Pose &pose)
 {
     // find centroid and apply pca
     Eigen::Vector4f centroid;
@@ -191,29 +417,38 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,ge
 
 }
 
-
-void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+// NOTE: cloud is not by reference
+void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, geometry_msgs::Pose &pose)
 {
     Eigen::Vector4f min_pt,max_pt;
     pcl::getMinMax3D(*cloud,min_pt,max_pt);
 
 //    ROS_INFO("max z : %.2f",max_pt(2));  //max pt in z should alway between 0.9 and 1 (0.94/0.95 to be exact)
 
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pos_cloud(new pcl::PointCloud<pcl::PointXYZ>);
     // filtering around max z value
     pcl::PassThrough<pcl::PointXYZ> pass_z;
     pass_z.setInputCloud(cloud);
     pass_z.setFilterFieldName("z");
 //    pass_z.setFilterLimits(max_pt(2)-0.08,max_pt(2));
     pass_z.setFilterLimits(max_pt(2)-0.06,max_pt(2));
-    pass_z.filter(*cloud);
+    pass_z.filter(*pos_cloud);
 
-    if(cloud->empty())
+    if(pos_cloud->empty())
+    {
+        ROS_WARN("Panel handle Pass through filter Empty");
         return;
+    }
 
-//    ROS_INFO("cloud size before clustering %d",(int)cloud->points.size());
+    ROS_INFO("cloud size before clustering %d",(int)pos_cloud->points.size());
+
+    getPosition(pos_cloud,pose);
+
+
+    /*
 
     //getting a pt in the handle
-    for(int i = 0; i!=cloud->points.size();++i)
+    for(int i = 0; i<=cloud->points.size();++i)
     {
         //ROS_WARN("pt z : %.2f",cloud->points[i].z);
 //        this condition might be the reason for choosing the cluster wrongly (occasionally)
@@ -237,7 +472,7 @@ void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
     ec.setClusterTolerance (0.1);
     ec.setMinClusterSize (10);  // magic number : 10   there should be atleast 10 point over the solar panel.
-    ec.setMaxClusterSize (cloudSize-10); // same magic number
+    ec.setMaxClusterSize (cloudSize);
     ec.setSearchMethod (tree);
     ec.setInputCloud (cloud);
     ec.extract (cluster_indices);
@@ -274,7 +509,10 @@ void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
         solar_panel_cloud->points.push_back(cloud->points[*i]);
 
     }
-    cloud = solar_panel_cloud;
+//    getPosition(solar_panel_cloud,pose);
+//    cloud = solar_panel_cloud;
+
+*/
 
 
 }
@@ -332,12 +570,14 @@ void SolarPanelDetect::visualizept(float x,float y,float z)
 
 }
 
-void SolarPanelDetect::transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool isinverse)
+void SolarPanelDetect::transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, float theta, bool isinverse)
 {
 //    ROS_INFO("trasnforming cloud");
     Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-    transform.translation() << rover_loc_.x,rover_loc_.y,0.0;
-    transform.rotate (Eigen::AngleAxisf (rover_theta, Eigen::Vector3f::UnitZ()));
+    transform.translation() << current_pelvis_pose.position.x,current_pelvis_pose.position.y,0.0;
+//    transform.rotate (Eigen::AngleAxisf (tf::getYaw(current_pelvis_pose.orientation)+(M_PI/2), Eigen::Vector3f::UnitZ()));
+        transform.rotate (Eigen::AngleAxisf (theta, Eigen::Vector3f::UnitZ()));
+
     if (isinverse)
     {
         transform = transform.inverse();
@@ -348,6 +588,7 @@ void SolarPanelDetect::transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud
 
 void SolarPanelDetect::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
+
 
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
