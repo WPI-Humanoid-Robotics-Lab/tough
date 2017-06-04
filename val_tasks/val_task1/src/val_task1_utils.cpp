@@ -9,6 +9,7 @@ task1Utils::task1Utils(ros::NodeHandle nh):
     // marker publisher
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>( "handle_path", 10, true);
 
+    clearbox_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
     reset_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
 
     task_status_sub_ = nh.subscribe("/srcsim/finals/task", 10, &task1Utils::taskStatusSubCB, this);
@@ -321,7 +322,13 @@ void task1Utils::visulatise6DPoints(std::vector<geometry_msgs::Pose> &points)
     ros::Duration(0.2).sleep();
 }
 
-void task1Utils::clearPointCloud()
+void task1Utils::clearBoxPointCloud()
+{
+    std_msgs::Empty msg;
+    clearbox_pointcloud_pub_.publish(msg);
+}
+
+void task1Utils::resetPointCloud()
 {
     std_msgs::Empty msg;
     reset_pointcloud_pub_.publish(msg);

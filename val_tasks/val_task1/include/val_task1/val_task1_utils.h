@@ -76,7 +76,7 @@ private:
     srcsim::Satellite msg_;
     ros::Subscriber task_status_sub_;
 
-    ros::Publisher marker_pub_, reset_pointcloud_pub_;
+    ros::Publisher marker_pub_, clearbox_pointcloud_pub_, reset_pointcloud_pub_;
     void satelliteMsgCB (const srcsim::Satellite &msg);
     int current_checkpoint_;
     srcsim::Task taskMsg;
@@ -97,7 +97,8 @@ public:
     valueDirection getValueStatus(double current_value, controlSelection control);
     void getCircle3D (geometry_msgs::Point center, geometry_msgs::Point start,geometry_msgs::Quaternion orientation, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, handleDirection direction, float radius, int steps =10);
     void visulatise6DPoints(std::vector<geometry_msgs::Pose> &points);
-    void clearPointCloud();
+    void clearBoxPointCloud();
+    void resetPointCloud();
     void taskStatusSubCB(const srcsim::Task &msg);
     void terminator(const ros::TimerEvent& t);
     int getCurrentCheckpoint() const;

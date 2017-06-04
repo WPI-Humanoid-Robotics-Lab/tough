@@ -6,15 +6,19 @@ from srcsim.msg import Harness
 import subprocess
 import time
 
+execute = True
+
 def callback(data):
+    global execute
     #robot detached from harness, wait for 5 sec and start all the nodes
-    if data.status == 5:
+    if data.status == 5 and execute:
       pub = rospy.Publisher('/multisense/set_spindle_speed', Float64, queue_size=10)
       time.sleep(1)
       pub.publish(0.8)
       subprocess.Popen(["roslaunch", "val_perception_bringup", "field_laser_assembler.launch"])
-      subprocess.Popen(["roslaunch", "val_perception_bringup", "field_octomap.launch"])
+#      subprocess.Popen(["roslaunch", "val_perception_bringup", "field_octomap.launch"])
       subprocess.Popen(["roslaunch", "val_footstep", "val_footstep.launch"])
+      execute = False
 
 def WaitForRobot():
     rospy.init_node('WaitForRobot', anonymous=True)
