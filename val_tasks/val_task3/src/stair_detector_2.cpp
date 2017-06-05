@@ -424,7 +424,7 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
     
     // Add the first pose as the point on the ground right in front of the staircase. Note that because the robot is 
     // standing on the walkway, not the ground, this pose doesn't follow the pattern used in the for loop
-    Eigen::Translation3f base_pose_ground((i - 0.5f) * STEP_DEPTH, 0, 0);
+    Eigen::Translation3f base_pose_ground(-0.5f * STEP_DEPTH, 0, 0);
     Eigen::Affine3f step_pose_ground = best_stair_pose * base_pose_ground;
     step_poses.push_back(geometry_msgs::Pose());
     step_poses.back().position.x = step_pose_ground.translation().x();
