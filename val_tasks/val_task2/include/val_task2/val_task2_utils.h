@@ -106,7 +106,7 @@ private:
 public:
     task2Utils(ros::NodeHandle nh);
     ~task2Utils();
-    void afterPanelGraspPose(const armSide side);
+    bool afterPanelGraspPose(const armSide side);
     void movePanelToWalkSafePose(const armSide side);
     bool isPanelPicked(const armSide side);
     void moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel);

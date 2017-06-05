@@ -7,7 +7,9 @@ int main(int argc, char** argv)
     int numIterations = 0;
     bool foundPlug = false;
     geometry_msgs::Point PlugLoc;
-    plug_detector p1(nh);
+
+    src_perception::MultisenseImage* ms_sensor = new src_perception::MultisenseImage(nh);
+    SocketDetector p1(nh,ms_sensor);
 
     //while(ros::ok())
     while (!foundPlug && numIterations < 20)

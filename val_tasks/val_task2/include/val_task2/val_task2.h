@@ -82,7 +82,7 @@ class valTask2 {
     // Pick Cable Task
     CableTask* cable_task_;
     // socket detector
-    plug_detector* socket_detector_;
+    SocketDetector* socket_detector_;
     // finish box detector
     FinishBoxDetector* finish_box_detector_;
 

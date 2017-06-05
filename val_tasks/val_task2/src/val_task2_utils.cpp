@@ -47,12 +47,11 @@ task2Utils::~task2Utils()
     delete walk_                ;
 }
 
-void task2Utils::afterPanelGraspPose(const armSide side)
+bool task2Utils::afterPanelGraspPose(const armSide side)
 {
-    // reorient the chest
+    // reorienting the chest would bring the panel above the rover
     chest_controller_->controlChest(0,0,0);
     ros::Duration(2).sleep();
-
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
@@ -68,14 +67,21 @@ void task2Utils::afterPanelGraspPose(const armSide side)
     std::vector< std::vector<float> > armData;
 
     armData.clear();
+    armData.push_back(*seed1);
+    arm_controller_->moveArmJoints(side, armData, 2.0f);
+    ros::Duration(2).sleep();
+
+    if (!isPanelPicked(side))
+        return false;
+
+    armData.clear();
     armData.push_back(*seed2);
     arm_controller_->moveArmJoints((armSide)(!side), armData, 2.0f);
     ros::Duration(0.5).sleep();
 
-    armData.clear();
-    armData.push_back(*seed1);
-    arm_controller_->moveArmJoints(side, armData, 2.0f);
-    ros::Duration(2).sleep();
+    return true;
+
+
 }
 
 void task2Utils::movePanelToWalkSafePose(const armSide side)
@@ -283,6 +289,7 @@ void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offs
 
 }
 
+// this function is not being used anywhere. maybe it's not needed. ///@todo delete
 void task2Utils::reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose){
 
     geometry_msgs::Pose poseInPelvisFrame;
