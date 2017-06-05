@@ -11,7 +11,7 @@ task1Utils::task1Utils(ros::NodeHandle nh):
 
     clearbox_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
     reset_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
-    task1_log_pub_         = nh_.advertise<std_msgs::String>("/field/task1_log",10);
+    task1_log_pub_         = nh_.advertise<std_msgs::String>("/field/log",10);
 
     task_status_sub_ = nh.subscribe("/srcsim/finals/task1", 10, &task1Utils::taskStatusSubCB, this);
 

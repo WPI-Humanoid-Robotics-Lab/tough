@@ -119,6 +119,8 @@ bool valTask1::preemptiveWait(double ms, decision_making::EventQueue& queue) {
 decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("valTask1::initTask : executing " << name);
+    task1_utils_->taskLogPub("valTask1::initTask : executing " + name);
+
     static int retry_count = 0;
 
     // reset map count for the first entry
@@ -128,6 +130,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
 
     // the state transition can happen from an event externally or can be geenerated here
     ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
+    task1_utils_->taskLogPub("Occupancy grid has been updated : " + std::to_string(map_update_count_) + " times and tried : " + std::to_string(retry_count));
     if (map_update_count_ > 1) {
         // move to a configuration that is robust while walking
         retry_count = 0;
@@ -149,12 +152,14 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
     }
     else if (map_update_count_ < 2 && retry_count++ < 40) {
         ROS_INFO("valTask1::initTask : Retry Count : %d. Wait for occupancy grid to be updated with atleast 2 messages", retry_count);
+        task1_utils_->taskLogPub("valTask1::initTask : Retry Count : " + std::to_string(retry_count) + " Wait for occupancy grid to be updated with atleast 2 messages");
         ros::Duration(2.0).sleep();
         eventQueue.riseEvent("/INIT_RETRY");
     }
     else {
         retry_count = 0;
         ROS_INFO("valTask1::initTask : Failed to initialize");
+        task1_utils_->taskLogPub("valTask1::initTask : Failed to initialize");
         eventQueue.riseEvent("/INIT_FAILED");
     }
     return TaskResult::SUCCESS();
@@ -164,6 +169,7 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
 {
 
     ROS_INFO_STREAM("valTask1::detectPanelCoarseTask : executing " << name);
+    task1_utils_->taskLogPub("executing " + name);
 
     if(panel_detector_ == nullptr) {
         panel_detector_ = new PanelDetector(nh_, DETECTOR_TYPE::HANDLE_PANEL_COARSE);
@@ -176,6 +182,7 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
     std::vector<geometry_msgs::Pose> poses;
     panel_detector_->getDetections(poses);
     ROS_INFO("valTask1::detectPanelCoarseTask : Size of poses : %d", (int)poses.size());
+    task1_utils_->taskLogPub("valTask1::detectPanelCoarseTask : Size of poses : " + std::to_string(poses.size()));
     // if we get atleast one detection, LOL
     if (poses.size() > 1)
     {
@@ -187,29 +194,35 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
         pose2D.y = poses[idx].position.y;
 
         ROS_INFO_STREAM("valTask1::detectPanelCoarseTask : x " << pose2D.x << " y " << pose2D.y);
-
+        task1_utils_->taskLogPub("valTask1::detectPanelCoarseTask : x : " + std::to_string(pose2D.x) + " y: " + std::to_string(pose2D.y));
         // get the theta
         pose2D.theta = tf::getYaw(poses[idx].orientation);
         setPanelWalkGoal(pose2D);
 
         ROS_INFO_STREAM("valTask1::detectPanelCoarseTask : quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w );
         ROS_INFO_STREAM("valTask1::detectPanelCoarseTask : yaw: " << pose2D.theta );
+
+        task1_utils_->taskLogPub("valTask1::detectPanelCoarseTask : quat " + std::to_string(poses[idx].orientation.x) + "  " + std::to_string(poses[idx].orientation.y) + " "  + std::to_string(poses[idx].orientation.z)  + " " + std::to_string(poses[idx].orientation.w) );
+        task1_utils_->taskLogPub("valTask1::detectPanelCoarseTask : yaw : " + std::to_string(pose2D.theta ));
         retry_count = 0;
         // update the plane coeffecients
         if(panel_detector_->getPanelPlaneModel(panel_coeff_)){
             eventQueue.riseEvent("/DETECTED_PANEL");
             ROS_INFO("valTask1::detectPanelCoarseTask : detected panel");
+            task1_utils_->taskLogPub("valTask1::detectPanelCoarseTask : detected panel");
             if(panel_detector_ != nullptr) delete panel_detector_;
             panel_detector_ = nullptr;
         }
         else{
             ROS_INFO("valTask1::detectPanelCoarseTask : Could not query plane equation. Retry count : %d", retry_count);
+            task1_utils_->taskLogPub("valTask1::detectPanelCoarseTask : Could not query plane equation. Retry count : " + std::to_string(retry_count));
             ++retry_count;
             eventQueue.riseEvent("/DETECT_PANEL_RETRY");
         }
     }
     else if(retry_count < 5) {
         ROS_INFO("valTask1::detectPanelCoarseTask : sleep for 3 seconds for panel detection. Retry count : %d", retry_count);
+        task1_utils_->taskLogPub("valTask1::detectPanelCoarseTask : sleep for 3 seconds for panel detection. Retry count : " + std::to_string(retry_count));
         ++retry_count;
         ros::Duration(3).sleep();
         eventQueue.riseEvent("/DETECT_PANEL_RETRY");
@@ -224,6 +237,7 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
         panel_detector_ = nullptr;
 
         ROS_INFO("valTask1::detectPanelCoarseTask : reset fail count");
+        task1_utils_->taskLogPub("valTask1::detectPanelCoarseTask : reset fail count");
     }
     // if failed retry detecting the panel
     else
@@ -233,10 +247,12 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
         eventQueue.riseEvent("/DETECT_PANEL_RETRY");
 
         ROS_INFO("valTask1::detectPanelCoarseTask : increment fail count");
+        task1_utils_->taskLogPub("valTask1::detectPanelCoarseTask : increment fail count");
     }
 
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -246,6 +262,7 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
 decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM_ONCE("executing " << name);
+    task1_utils_->taskLogPub("executing " + name);
 
     static int fail_count = 0;
 
@@ -260,6 +277,7 @@ decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMC
     if (taskCommonUtils::isGoalReached(current_pelvis_pose, panel_walk_goal_coarse_))
     {
         ROS_INFO("reached panel");
+        task1_utils_->taskLogPub("reached panel");
 
         // TODO: check if robot rechead the panel
         eventQueue.riseEvent("/REACHED_PANEL");
@@ -270,9 +288,11 @@ decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMC
     else if (taskCommonUtils::isPoseChanged(pose_prev, panel_walk_goal_coarse_))
     {
         ROS_INFO_STREAM("pose changed to "<<panel_walk_goal_coarse_);
+        task1_utils_->taskLogPub("pose changed to x : " + std::to_string(panel_walk_goal_coarse_.x) + " y : " + std::to_string(panel_walk_goal_coarse_.y) + " z : " + std::to_string(panel_walk_goal_coarse_.theta));
         walker_->walkToGoal(panel_walk_goal_coarse_, false);
         // sleep so that the walk starts
         ROS_INFO("Footsteps should be generated now");
+        task1_utils_->taskLogPub("Footsteps should be generated now");
         ros::Duration(4).sleep();
 
         // update the previous pose
@@ -294,6 +314,7 @@ decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMC
         // reset the fail count
         fail_count = 0;
         ROS_INFO("walk failed");
+        task1_utils_->taskLogPub("walk failed");
         eventQueue.riseEvent("/WALK_FAILED");
     }
     // if failed retry detecting the panel and then walk
@@ -303,12 +324,14 @@ decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMC
         // increment the fail count
         fail_count++;
         ROS_INFO("walk retry");
+        task1_utils_->taskLogPub("walk retry");
         eventQueue.riseEvent("/WALK_RETRY");
     }
 
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -317,6 +340,8 @@ decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMC
 decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+    task1_utils_->taskLogPub("executing " + name);
+
     //tilt head downwards to see the panel
     head_controller_->moveHead(0.0f, 30.0f, 0.0f, 2.0f);
     static int retry_count = 0;
@@ -327,7 +352,7 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
     if( handle_detector_->findHandles(handle_loc_)){
 
         ROS_INFO_STREAM("Handles detected at "<<handle_loc_[0]<< " : "<<handle_loc_[2]);
-
+        task1_utils_->taskLogPub("Handles detected at:");
         // generate the event
         eventQueue.riseEvent("/DETECTED_HANDLE");
 
@@ -337,10 +362,12 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
     }
     else if( retry_count++ < 10){
         ROS_INFO("Did not detect handle, retrying");
+        task1_utils_->taskLogPub("Did not detect handle, retrying");
         eventQueue.riseEvent("/DETECT_HANDLE_RETRY");
     }
     else{
         ROS_INFO("Did not detect handle, failed");
+        task1_utils_->taskLogPub("Did not detect handle, failed");
         eventQueue.riseEvent("/DETECT_HANDLE_FAILED");
         retry_count = 0;
     }
@@ -348,6 +375,7 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
 
@@ -358,6 +386,7 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
 {
 
     ROS_INFO_STREAM("executing " << name);
+    task1_utils_->taskLogPub("executing " + name);
 
     if(panel_detector_ == nullptr) {
         panel_detector_ = new PanelDetector(nh_, DETECTOR_TYPE::HANDLE_PANEL_FINE);
@@ -398,6 +427,7 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
         }
         else{
             ROS_INFO("Could not query plane equation");
+            task1_utils_->taskLogPub("Could not query plane equation");
             ++retry_count;
             eventQueue.riseEvent("/DETECT_PANEL_FINE_RETRY");
         }
@@ -405,6 +435,7 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
 
     else if(retry_count < 5) {
         ROS_INFO("sleep for 3 seconds for panel detection");
+        task1_utils_->taskLogPub("sleep for 3 seconds for panel detection");
         ++retry_count;
         eventQueue.riseEvent("/DETECT_PANEL_FINE_RETRY");
         ros::Duration(3).sleep();
@@ -432,6 +463,7 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
 
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -440,6 +472,7 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
 decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM_ONCE("executing " << name);
+    task1_utils_->taskLogPub("executing " + name);
 
     static int fail_count = 0;
 
@@ -455,6 +488,7 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
     {
 
         ROS_INFO("reached panel");
+        task1_utils_->taskLogPub("reached panel");
         // TODO: check if robot rechead the panel
         eventQueue.riseEvent("/REACHED_PANEL_FINE");
         // required for robot to stablize as goal tolerance is high
@@ -463,11 +497,14 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
     else if (taskCommonUtils::isPoseChanged(pose_prev, panel_walk_goal_fine_))
     {
         ROS_INFO("pose changed");
+        task1_utils_->taskLogPub("pose changed");
         //reset chest before moving close to panel
         chest_controller_->controlChest(0, 0, 0);
         ROS_INFO("Adjusted Chest");
+        task1_utils_->taskLogPub("Adjusted Pose");
         walker_->walkToGoal(panel_walk_goal_fine_, false);
         ROS_INFO("Footsteps should be published now");
+        task1_utils_->taskLogPub("Footsteps should be published now");
         // sleep so that the walk starts
         ros::Duration(4).sleep();
 
@@ -489,6 +526,7 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
         // reset the fail count
         fail_count = 0;
         ROS_INFO("walk failed");
+        task1_utils_->taskLogPub("walk failed");
         eventQueue.riseEvent("/WALK_TO_PANEL_FAILED");
     }
     // if failed retry detecting the panel and then walk
@@ -498,12 +536,14 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
         // increment the fail count
         fail_count++;
         ROS_INFO("walk retry");
+        task1_utils_->taskLogPub("walk retry");
         eventQueue.riseEvent("/WALK_TO_PANEL_RETRY");
     }
 
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -512,6 +552,7 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
 decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
     ROS_INFO_STREAM("valTask1::fixHandle : executing " << name);
+    task1_utils_->taskLogPub("valTask1::fixHandle : executing " + name);
 
     static int retry_count = 0;
 
@@ -537,7 +578,7 @@ decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContex
     if(pclHandlePoses.size() > 1){
 
         ROS_INFO_STREAM("valTask1::fixHandle : Handles detected by PCL at Yaw "<<pclHandlePoses[0]<< " : Pitch  "<<pclHandlePoses[1]);
-
+        task1_utils_->taskLogPub("Handles detected by PCL");
         //Fix the array reversal issue
         task1_utils_->fixHandleArray(handle_loc_,pclHandlePoses);
 
@@ -551,11 +592,13 @@ decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContex
     }
     else if( retry_count++ < 10){
         ROS_INFO("valTask1::fixHandle : Did not find the handles using Point Cloud, retrying");
+        task1_utils_->taskLogPub("valTask1::fixHandle : Did not find the handles using Point Cloud, retrying");
         ros::Duration(3).sleep();
         eventQueue.riseEvent("/FIX_RETRY");
     }
     else{
         ROS_INFO("valTask1::fixHandle : Did not fix the handle, moving on");
+        task1_utils_->taskLogPub("valTask1::fixHandle : Did not find the handles using Point Cloud, moving on");
         eventQueue.riseEvent("/FIX_HANDLE_FAILED");
         retry_count = 0;
     }
@@ -564,6 +607,7 @@ decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContex
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("valTask1::fixHandle : waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -572,6 +616,7 @@ decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContex
 decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+    task1_utils_->taskLogPub("valTask1::graspPitchHandleTask : executing " + name);
 
     // set the grasp state
     prev_grasp_state_ = prevGraspState::GRASP_PITCH_HANDLE;
@@ -590,6 +635,7 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
 
     if(!executing){
         ROS_INFO("Executing the grasp handle command");
+        task1_utils_->taskLogPub("Executing the grasp handle command");
         executing = true;
         // move the chest, so we get maximum manipulability
         //        chest_controller_->controlChest(0, 10, 40);
@@ -607,22 +653,26 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
     }
     else if (robot_state_->isGraspped(armSide::RIGHT)){
         ROS_INFO("Grasp is successful");
+        task1_utils_->taskLogPub("Grasp is successfu");
         eventQueue.riseEvent("/GRASPED_PITCH_HANDLE");
     }
     else if (retry_count < 5 ){
         ROS_INFO("Grasp Failed, retrying");
+        task1_utils_->taskLogPub("Grasp Failed, retrying");
         executing = false;
         ++retry_count;
         eventQueue.riseEvent("/GRASP_PITCH_HANDLE_RETRY");
     }
     else {
         ROS_INFO("Failed all conditions. state error");
+        task1_utils_->taskLogPub("Failed all conditions. state error");
         eventQueue.riseEvent("/GRASP_PITCH_HANDLE_FAILED");
     }
 
     // generate the event
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -631,6 +681,7 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
 decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM_ONCE("executing " << name);
+    task1_utils_->taskLogPub("valTask1::controlPitchTask : executing " + name);
 
     static bool execute_once = true;
     static int retry_count = 0;
@@ -655,7 +706,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         std::vector<geometry_msgs::Pose> waypoints;
         task1_utils_->getCircle3D(handle_loc_[PITCH_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, CIRCLE_RADIUS, CIRCLE_RESOLUTION);
         ROS_INFO("way points generatd");
-
+        task1_utils_->taskLogPub("way points generatd");
         ///@todo: remove the visulaisation
         task1_utils_->visulatise6DPoints(waypoints);
 
@@ -663,10 +714,11 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         moveit_msgs::RobotTrajectory traj;
         right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
         ROS_INFO("trajectory generated");
-
+        task1_utils_->taskLogPub("trajectory generated");
         // execute the trajectory
         wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
         ROS_INFO("trajectory sent to controllers");
+        task1_utils_->taskLogPub("trajectory sent to controllers");
 
         // start the timer
         timer_start = std::chrono::system_clock::now();
@@ -681,7 +733,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     if(task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_AWAY_TO_GOAL)
     {
         ROS_INFO("handle moving in wrong direction, path will be flipped ");
-
+        task1_utils_->taskLogPub("handle moving in wrong direction, path will be flipped ");
         // stop all the trajectories
         control_helper_->stopAllTrajectories();
 
@@ -701,6 +753,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         control_helper_->stopAllTrajectories();
 
         ROS_INFO("pitch correct now");
+        task1_utils_->taskLogPub("pitch correct now");
 
         // wait until the pich correction becomes complete
         ros::Duration(3).sleep();
@@ -721,12 +774,14 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
             retry_count = 0;
 
             ROS_INFO("pitch completed now");
+            task1_utils_->taskLogPub("pitch completed now");
         }
         else
         {
             // still stay in the same state
             eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
             ROS_INFO("correct but not finished");
+            task1_utils_->taskLogPub("correct but not finished");
         }
     }
     // if we lost the grasp while executing the trajectory
@@ -742,6 +797,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         execute_once = true;
 
         ROS_INFO("grasp lost");
+        task1_utils_->taskLogPub("grasp lost");
     }
 
     // if the handle is not moving (assuming grasp is not lost)
@@ -755,6 +811,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
 
         ROS_INFO("arm moment stopped, replanning rajectory with the current pose");
+        task1_utils_->taskLogPub("arm moment stopped, replanning rajectory with the current pose");
     }
     // if timeout
     // i.e. arm is wobbling around a local minima
@@ -762,6 +819,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     else if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - timer_start).count() > HANDLE_CONTROL_TIMEOUT_SEC) // real time
     {
         ROS_INFO("timeout");
+        task1_utils_->taskLogPub("timeout");
 
         // stop all the trajectories
         control_helper_->stopAllTrajectories();
@@ -799,6 +857,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     // generate the event externally (this a fail safe case, should not be required ideally)
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -808,6 +867,7 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
 {
 
     ROS_INFO_STREAM("executing " << name);
+    task1_utils_->taskLogPub("valTask1::graspYawTask : executing " + name);
 
     // set the grasp state
     prev_grasp_state_ = prevGraspState::GRASP_YAW_HANDLE;
@@ -826,6 +886,7 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
 
     if(!executing){
         ROS_INFO("Executing the grasp handle command");
+        task1_utils_->taskLogPub("Executing the grasp handle command");
         executing = true;
 
         // grasp the handle
@@ -841,22 +902,26 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
     }
     else if (robot_state_->isGraspped(armSide::LEFT)){
         ROS_INFO("Grasp is successful");
+        task1_utils_->taskLogPub("Grasp is successful");
         eventQueue.riseEvent("/GRASPED_YAW_HANDLE");
     }
     else if (retry_count < 5 ){
         ROS_INFO("Grasp Failed, retrying");
+        task1_utils_->taskLogPub("Grasp Failed, retrying");
         executing = false;
         ++retry_count;
         eventQueue.riseEvent("/GRASP_YAW_HANDLE_RETRY");
     }
     else {
         ROS_INFO("Failed all conditions. state error");
+        task1_utils_->taskLogPub("Failed all conditions. state error");
         eventQueue.riseEvent("/GRASP_YAW_HANDLE_FAILED");
     }
 
     // generate the event
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -867,6 +932,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 {
 
     ROS_INFO_STREAM_ONCE("executing " << name);
+    task1_utils_->taskLogPub("valTask1::controlYaw : executing " + name);
 
     static bool execute_once = true;
     static int retry_count = 0;
@@ -889,6 +955,8 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         std::vector<geometry_msgs::Pose> waypoints;
         task1_utils_->getCircle3D(handle_loc_[YAW_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, CIRCLE_RADIUS, CIRCLE_RESOLUTION);
         ROS_INFO("way points generatd");
+        task1_utils_->taskLogPub("way points generatd");
+
 
         ///@todo: remove the visulaisation
         task1_utils_->visulatise6DPoints(waypoints);
@@ -897,10 +965,12 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         moveit_msgs::RobotTrajectory traj;
         left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
         ROS_INFO("trajectory generated");
+        task1_utils_->taskLogPub("trajectory generated");
 
         // execute the trajectory
         wholebody_controller_->compileMsg(armSide::LEFT, traj.joint_trajectory);
         ROS_INFO("trajectory sent to controllers");
+        task1_utils_->taskLogPub("trajectory sent to controllers");
 
         // start the timer
         timer_start = std::chrono::system_clock::now();
@@ -916,6 +986,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     if(task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_AWAY_TO_GOAL)
     {
         ROS_INFO("handle moving in wrong direction, path will be flipped ");
+        task1_utils_->taskLogPub("handle moving in wrong direction, path will be flipped ");
 
         // stop all the trajectories
         control_helper_->stopAllTrajectories();
@@ -936,6 +1007,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         control_helper_->stopAllTrajectories();
 
         ROS_INFO("yaw correct now");
+        task1_utils_->taskLogPub("yaw correct now");
 
         // wait until the pich correction becomes complete
         ros::Duration(5).sleep();
@@ -956,12 +1028,14 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
             retry_count = 0;
 
             ROS_INFO("yaw completed now");
+            task1_utils_->taskLogPub("yaw completed now");
         }
         else
         {
             // still stay in the same state
             eventQueue.riseEvent("/YAW_CORRECTION_EXECUTING");
             ROS_INFO("correct but not finished");
+            task1_utils_->taskLogPub("correct but not finished");
         }
     }
     // if we lost the grasp while executing the trajectory
@@ -974,6 +1048,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         execute_once = true;
 
         ROS_INFO("grasp lost");
+        task1_utils_->taskLogPub("grasp lost");
     }
     // if the arm is not moving any more
     else if (task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_CONSTANT)
@@ -986,6 +1061,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         eventQueue.riseEvent("/YAW_CORRECTION_EXECUTING");
 
         ROS_INFO("arm moment stopped, replanning rajectory with the current pose");
+        task1_utils_->taskLogPub("arm moment stopped, replanning rajectory with the current pose");
     }
     // if timeout
     // i.e. arm is wobbling around a local minima
@@ -1030,6 +1106,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     // generate the event externally (this a fail safe case, should not be required ideally)
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -1037,7 +1114,8 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 
 decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("valTask1::redetectHandleTask: executing " << name);
+    task1_utils_->taskLogPub("valTask1::redetectHandleTask : executing " + name);
 
     static std::string next_state_transition;
     static int retry_count = 0;
@@ -1137,6 +1215,7 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
     // generate the event externally (this a fail safe case, should not be required ideally)
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -1145,13 +1224,15 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
 
 decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("valTask1::detectfinishBoxTask : executing " << name);
+    task1_utils_->taskLogPub("valTask1::detectfinishBoxTask : executing " + name);
 
     static int retry_count = 0;
     static bool execute_once = true;
 
     if(execute_once){
         ROS_INFO("Walking 1 step back");
+        task1_utils_->taskLogPub("Walking 1 step back");
         ros::Duration(0.5).sleep();
         std::vector<float> x_offset={-0.25,-0.25, -0.5, -0.5};
         std::vector<float> y_offset={0.0, 0.0, 0.0, 0.1};
@@ -1170,12 +1251,14 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
     if(visited_map_.data.empty()){
         retry_count++;
         ROS_INFO("visited map is empty");
+        task1_utils_->taskLogPub("visited map is empty");
         ros::Duration(3).sleep();
         eventQueue.riseEvent("/DETECT_FINISH_RETRY");
     } else  if(finish_box_detector_->getFinishBoxCenters(detections)){
         for(size_t i = 0; i < detections.size(); ++i){
             size_t index = MapGenerator::getIndex(detections[i].x, detections[i].y);
             ROS_INFO("Index in map %d and size of visited map is %d", (int)index, (int)visited_map_.data.size());
+            task1_utils_->taskLogPub("Index in map is : " + std::to_string(index) + " and size of visited map is :  " + std::to_string(visited_map_.data.size()));
             if(visited_map_.data.at(index) == CELL_STATUS::VISITED){
                 continue;
             }
@@ -1190,6 +1273,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
             setFinishboxGoal(finish_box_pose);
 
             ROS_INFO("finish box detected");
+            task1_utils_->taskLogPub("finish box detected");
             eventQueue.riseEvent("/DETECT_FINISH_SUCESSFUL");
 
             if(finish_box_detector_ != nullptr) delete finish_box_detector_;
@@ -1217,6 +1301,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -1224,7 +1309,9 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
 
 decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("valTask1::walkToFinishTask : executing " << name);
+
+    task1_utils_->taskLogPub("valTask1::walkToFinishTask : executing : " + name);
 
     // set the robot to default state to walk
     resetRobotToDefaults();
@@ -1241,6 +1328,7 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
     // check if the pose is changed
     if ( taskCommonUtils::isGoalReached(current_pelvis_pose, next_finishbox_center_)) {
         ROS_INFO("reached panel");
+        task1_utils_->taskLogPub("reached panel");
         // TODO: check if robot rechead the panel
         eventQueue.riseEvent("/WALK_TO_FINISH_SUCESSFUL");
     }
@@ -1248,11 +1336,14 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
     else if (taskCommonUtils::isPoseChanged(pose_prev, next_finishbox_center_))
     {
         ROS_INFO("pose changed");
+        task1_utils_->taskLogPub("pose changed");
         //reset chest before moving close to panel
         chest_controller_->controlChest(0, 0, 0);
         ROS_INFO("Adjusted Chest");
+        task1_utils_->taskLogPub("Adjusted Chest");
         walker_->walkToGoal(next_finishbox_center_, false);
         ROS_INFO("Footsteps should be published now");
+        task1_utils_->taskLogPub("Footsteps should be published now");
         // sleep so that the walk starts
         ros::Duration(2).sleep();
 
@@ -1276,6 +1367,7 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
         // reset the fail count
         fail_count = 0;
         ROS_INFO("walk failed");
+        task1_utils_->taskLogPub("walk failed");
         eventQueue.riseEvent("/WALK_TO_FINISH_ERROR");
     }
     // if failed retry detecting the panel and then walk
@@ -1285,12 +1377,14 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
         // increment the fail count
         fail_count++;
         ROS_INFO("walk retry");
+        task1_utils_->taskLogPub("walk retry");
         eventQueue.riseEvent("/WALK_TO_FINISH_RETRY");
     }
 
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -1299,6 +1393,7 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
 decision_making::TaskResult valTask1::endTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+    task1_utils_->taskLogPub("valTask1::endTask : executing " + name);
 
     eventQueue.riseEvent("/STOP_TIMEOUT");
     return TaskResult::SUCCESS();
@@ -1307,10 +1402,12 @@ decision_making::TaskResult valTask1::endTask(string name, const FSMCallContext&
 decision_making::TaskResult valTask1::errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+    task1_utils_->taskLogPub(" valTask1::errorTask : executing " + name);
 
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
 
     return TaskResult::SUCCESS();
