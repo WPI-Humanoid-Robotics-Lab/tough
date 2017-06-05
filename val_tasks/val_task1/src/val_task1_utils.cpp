@@ -343,6 +343,31 @@ void task1Utils::fixHandleArray(std::vector<geometry_msgs::Point> &handle_loc, s
         handle_loc[3] = handle_loc[2];
         handle_loc[2] = temp;
     }
+
+    const geometry_msgs::Point &pitchHandle = handle_loc[PITCH_KNOB_HANDLE];
+    geometry_msgs::Point &pitchCenter = handle_loc[PITCH_KNOB_CENTER];
+
+    double y = (pitchHandle.y - pitchCenter.y);
+    double x = (pitchHandle.x - pitchCenter.x);
+    float theta = atan2(y,x);
+    float currentDistance = sqrt(pow((pitchHandle.x - pitchCenter.x), 2) + pow((pitchHandle.y - pitchCenter.y),2));
+    float diff = 0.125 - currentDistance;
+    if (diff > 0){
+        pitchCenter.x += diff*cos(theta);
+        pitchCenter.y += diff*sin(theta);
+    }
+
+    const geometry_msgs::Point &yawHandle = handle_loc[YAW_KNOB_HANDLE];
+    geometry_msgs::Point &yawCenter = handle_loc[YAW_KNOB_CENTER];
+    y = (yawHandle.y - yawCenter.y);
+    x = (yawHandle.x - yawCenter.x);
+    theta = atan2(y,x);
+    currentDistance = sqrt(pow((yawHandle.x - yawCenter.x), 2) + pow((yawHandle.y - yawCenter.y),2));
+    diff = 0.125 - currentDistance;
+    if (diff > 0){
+        yawCenter.x += diff*cos(theta);
+        yawCenter.y += diff*sin(theta);
+    }
 }
 
 void task1Utils::clearBoxPointCloud()
