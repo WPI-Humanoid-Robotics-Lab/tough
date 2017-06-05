@@ -19,6 +19,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "val_task2/val_solar_panel_detector.h"
 #include <std_msgs/Int8.h>
+#include <math.h>
 
 enum class CLEAR_BOX_CLOUD{
     WAIST_UP=0,

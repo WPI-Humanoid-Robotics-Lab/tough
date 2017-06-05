@@ -251,15 +251,15 @@ class DEFAULT
         boost::any val;
         (*_i)->getValue(config, val);
 
-        if("x"==(*_i)->name){x = boost::any_cast<double>(val);}
-        if("y"==(*_i)->name){y = boost::any_cast<double>(val);}
-        if("theta"==(*_i)->name){theta = boost::any_cast<double>(val);}
+        if("x_pw"==(*_i)->name){x_pw = boost::any_cast<double>(val);}
+        if("y_pw"==(*_i)->name){y_pw = boost::any_cast<double>(val);}
+        if("theta_pw"==(*_i)->name){theta_pw = boost::any_cast<double>(val);}
       }
     }
 
-    double x;
-double y;
-double theta;
+    double x_pw;
+double y_pw;
+double theta_pw;
 
     bool state;
     std::string name;
@@ -267,16 +267,166 @@ double theta;
     
 }panelwalkpose;
 
+class PANELFINALPOSE
+{
+  public:
+    PANELFINALPOSE()
+    {
+      state = true;
+      name = "panelFinalPose";
+    }
+
+    void setParams(task1_parametersConfig &config, const std::vector<AbstractParamDescriptionConstPtr> params)
+    {
+      for (std::vector<AbstractParamDescriptionConstPtr>::const_iterator _i = params.begin(); _i != params.end(); ++_i)
+      {
+        boost::any val;
+        (*_i)->getValue(config, val);
+
+        if("x_pf"==(*_i)->name){x_pf = boost::any_cast<double>(val);}
+        if("y_pf"==(*_i)->name){y_pf = boost::any_cast<double>(val);}
+        if("theta_pf"==(*_i)->name){theta_pf = boost::any_cast<double>(val);}
+      }
+    }
+
+    double x_pf;
+double y_pf;
+double theta_pf;
+
+    bool state;
+    std::string name;
+
+    
+}panelfinalpose;
+
+class FINISHBOXWALKPOSE
+{
+  public:
+    FINISHBOXWALKPOSE()
+    {
+      state = true;
+      name = "finishBoxWalkPose";
+    }
+
+    void setParams(task1_parametersConfig &config, const std::vector<AbstractParamDescriptionConstPtr> params)
+    {
+      for (std::vector<AbstractParamDescriptionConstPtr>::const_iterator _i = params.begin(); _i != params.end(); ++_i)
+      {
+        boost::any val;
+        (*_i)->getValue(config, val);
+
+        if("x_fb"==(*_i)->name){x_fb = boost::any_cast<double>(val);}
+        if("y_fb"==(*_i)->name){y_fb = boost::any_cast<double>(val);}
+        if("theta_fb"==(*_i)->name){theta_fb = boost::any_cast<double>(val);}
+      }
+    }
+
+    double x_fb;
+double y_fb;
+double theta_fb;
+
+    bool state;
+    std::string name;
+
+    
+}finishboxwalkpose;
+
+class HANDLELOC
+{
+  public:
+    HANDLELOC()
+    {
+      state = true;
+      name = "handleLoc";
+    }
+
+    void setParams(task1_parametersConfig &config, const std::vector<AbstractParamDescriptionConstPtr> params)
+    {
+      for (std::vector<AbstractParamDescriptionConstPtr>::const_iterator _i = params.begin(); _i != params.end(); ++_i)
+      {
+        boost::any val;
+        (*_i)->getValue(config, val);
+
+        if("p_c_x"==(*_i)->name){p_c_x = boost::any_cast<double>(val);}
+        if("p_c_y"==(*_i)->name){p_c_y = boost::any_cast<double>(val);}
+        if("p_c_z"==(*_i)->name){p_c_z = boost::any_cast<double>(val);}
+        if("p_h_x"==(*_i)->name){p_h_x = boost::any_cast<double>(val);}
+        if("p_h_y"==(*_i)->name){p_h_y = boost::any_cast<double>(val);}
+        if("p_h_z"==(*_i)->name){p_h_z = boost::any_cast<double>(val);}
+        if("y_c_x"==(*_i)->name){y_c_x = boost::any_cast<double>(val);}
+        if("y_c_y"==(*_i)->name){y_c_y = boost::any_cast<double>(val);}
+        if("y_c_z"==(*_i)->name){y_c_z = boost::any_cast<double>(val);}
+        if("y_h_x"==(*_i)->name){y_h_x = boost::any_cast<double>(val);}
+        if("y_h_y"==(*_i)->name){y_h_y = boost::any_cast<double>(val);}
+        if("y_h_z"==(*_i)->name){y_h_z = boost::any_cast<double>(val);}
+      }
+    }
+
+    double p_c_x;
+double p_c_y;
+double p_c_z;
+double p_h_x;
+double p_h_y;
+double p_h_z;
+double y_c_x;
+double y_c_y;
+double y_c_z;
+double y_h_x;
+double y_h_y;
+double y_h_z;
+
+    bool state;
+    std::string name;
+
+    
+}handleloc;
+
 }groups;
 
 
 
-//#line 14 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      double x;
-//#line 15 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      double y;
-//#line 16 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      double theta;
+//#line 14 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double x_pw;
+//#line 15 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double y_pw;
+//#line 16 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double theta_pw;
+//#line 20 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double x_pf;
+//#line 21 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double y_pf;
+//#line 22 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double theta_pf;
+//#line 26 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double x_fb;
+//#line 27 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double y_fb;
+//#line 28 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double theta_fb;
+//#line 32 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double p_c_x;
+//#line 33 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double p_c_y;
+//#line 34 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double p_c_z;
+//#line 36 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double p_h_x;
+//#line 37 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double p_h_y;
+//#line 38 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double p_h_z;
+//#line 40 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double y_c_x;
+//#line 41 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double y_c_y;
+//#line 42 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double y_c_z;
+//#line 44 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double y_h_x;
+//#line 45 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double y_h_y;
+//#line 46 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      double y_h_z;
 //#line 218 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
 
     bool __fromMessage__(dynamic_reconfigure::Config &msg)
@@ -416,42 +566,243 @@ double theta;
     {
 task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT, task1_parametersConfig> Default("Default", "", 0, 0, true, &task1_parametersConfig::groups);
 task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELWALKPOSE, task1_parametersConfig::DEFAULT> panelWalkPose("panelWalkPose", "", 0, 1, true, &task1_parametersConfig::DEFAULT::panelwalkpose);
-//#line 14 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __min__.x = 0.0;
-//#line 14 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __max__.x = 10.0;
-//#line 14 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __default__.x = 2.828;
-//#line 14 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x", "double", 0, "x of goal location", "", &task1_parametersConfig::x)));
-//#line 14 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x", "double", 0, "x of goal location", "", &task1_parametersConfig::x)));
-//#line 15 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __min__.y = -1.0;
-//#line 15 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __max__.y = 1.0;
-//#line 15 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __default__.y = 0.292;
-//#line 15 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y", "double", 0, "y of goal location", "", &task1_parametersConfig::y)));
-//#line 15 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y", "double", 0, "y of goal location", "", &task1_parametersConfig::y)));
-//#line 16 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __min__.theta = -1.57;
-//#line 16 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __max__.theta = 1.57;
-//#line 16 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __default__.theta = 0.82;
-//#line 16 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta)));
-//#line 16 "/home/ninja/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
-      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta)));
+//#line 14 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.x_pw = 0.0;
+//#line 14 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.x_pw = 10.0;
+//#line 14 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.x_pw = 2.828;
+//#line 14 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x_pw", "double", 0, "x of goal location", "", &task1_parametersConfig::x_pw)));
+//#line 14 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x_pw", "double", 0, "x of goal location", "", &task1_parametersConfig::x_pw)));
+//#line 15 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.y_pw = -1.0;
+//#line 15 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.y_pw = 1.0;
+//#line 15 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.y_pw = 0.292;
+//#line 15 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_pw", "double", 0, "y of goal location", "", &task1_parametersConfig::y_pw)));
+//#line 15 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_pw", "double", 0, "y of goal location", "", &task1_parametersConfig::y_pw)));
+//#line 16 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.theta_pw = -1.57;
+//#line 16 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.theta_pw = 1.57;
+//#line 16 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.theta_pw = 0.82;
+//#line 16 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta_pw", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta_pw)));
+//#line 16 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta_pw", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta_pw)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       panelWalkPose.convertParams();
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       Default.groups.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELWALKPOSE, task1_parametersConfig::DEFAULT>(panelWalkPose)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELWALKPOSE, task1_parametersConfig::DEFAULT>(panelWalkPose)));
+task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELFINALPOSE, task1_parametersConfig::DEFAULT> panelFinalPose("panelFinalPose", "", 0, 2, true, &task1_parametersConfig::DEFAULT::panelfinalpose);
+//#line 20 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.x_pf = 0.0;
+//#line 20 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.x_pf = 10.0;
+//#line 20 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.x_pf = 2.828;
+//#line 20 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      panelFinalPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x_pf", "double", 0, "x of goal location", "", &task1_parametersConfig::x_pf)));
+//#line 20 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x_pf", "double", 0, "x of goal location", "", &task1_parametersConfig::x_pf)));
+//#line 21 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.y_pf = -1.0;
+//#line 21 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.y_pf = 1.0;
+//#line 21 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.y_pf = 0.292;
+//#line 21 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      panelFinalPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_pf", "double", 0, "y of goal location", "", &task1_parametersConfig::y_pf)));
+//#line 21 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_pf", "double", 0, "y of goal location", "", &task1_parametersConfig::y_pf)));
+//#line 22 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.theta_pf = -1.57;
+//#line 22 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.theta_pf = 1.57;
+//#line 22 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.theta_pf = 0.82;
+//#line 22 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      panelFinalPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta_pf", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta_pf)));
+//#line 22 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta_pf", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta_pf)));
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      panelFinalPose.convertParams();
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      Default.groups.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELFINALPOSE, task1_parametersConfig::DEFAULT>(panelFinalPose)));
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      __group_descriptions__.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELFINALPOSE, task1_parametersConfig::DEFAULT>(panelFinalPose)));
+task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::FINISHBOXWALKPOSE, task1_parametersConfig::DEFAULT> finishBoxWalkPose("finishBoxWalkPose", "", 0, 3, true, &task1_parametersConfig::DEFAULT::finishboxwalkpose);
+//#line 26 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.x_fb = 0.0;
+//#line 26 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.x_fb = 10.0;
+//#line 26 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.x_fb = 2.828;
+//#line 26 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      finishBoxWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x_fb", "double", 0, "x of goal location", "", &task1_parametersConfig::x_fb)));
+//#line 26 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x_fb", "double", 0, "x of goal location", "", &task1_parametersConfig::x_fb)));
+//#line 27 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.y_fb = -1.0;
+//#line 27 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.y_fb = 1.0;
+//#line 27 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.y_fb = 0.292;
+//#line 27 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      finishBoxWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_fb", "double", 0, "y of goal location", "", &task1_parametersConfig::y_fb)));
+//#line 27 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_fb", "double", 0, "y of goal location", "", &task1_parametersConfig::y_fb)));
+//#line 28 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.theta_fb = -1.57;
+//#line 28 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.theta_fb = 1.57;
+//#line 28 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.theta_fb = 0.82;
+//#line 28 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      finishBoxWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta_fb", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta_fb)));
+//#line 28 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta_fb", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta_fb)));
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      finishBoxWalkPose.convertParams();
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      Default.groups.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::FINISHBOXWALKPOSE, task1_parametersConfig::DEFAULT>(finishBoxWalkPose)));
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      __group_descriptions__.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::FINISHBOXWALKPOSE, task1_parametersConfig::DEFAULT>(finishBoxWalkPose)));
+task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::HANDLELOC, task1_parametersConfig::DEFAULT> handleLoc("handleLoc", "", 0, 4, true, &task1_parametersConfig::DEFAULT::handleloc);
+//#line 32 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.p_c_x = 0.0;
+//#line 32 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.p_c_x = 1.1;
+//#line 32 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.p_c_x = 2.828;
+//#line 32 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_c_x", "double", 0, "x of pitch knob center", "", &task1_parametersConfig::p_c_x)));
+//#line 32 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_c_x", "double", 0, "x of pitch knob center", "", &task1_parametersConfig::p_c_x)));
+//#line 33 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.p_c_y = -1.0;
+//#line 33 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.p_c_y = 1.1;
+//#line 33 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.p_c_y = 0.292;
+//#line 33 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_c_y", "double", 0, "y of pitch knob center", "", &task1_parametersConfig::p_c_y)));
+//#line 33 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_c_y", "double", 0, "y of pitch knob center", "", &task1_parametersConfig::p_c_y)));
+//#line 34 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.p_c_z = 0.0;
+//#line 34 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.p_c_z = 1.1;
+//#line 34 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.p_c_z = 0.89;
+//#line 34 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_c_z", "double", 0, "z of pitch knob center", "", &task1_parametersConfig::p_c_z)));
+//#line 34 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_c_z", "double", 0, "z of pitch knob center", "", &task1_parametersConfig::p_c_z)));
+//#line 36 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.p_h_x = 0.0;
+//#line 36 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.p_h_x = 1.1;
+//#line 36 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.p_h_x = 2.828;
+//#line 36 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_h_x", "double", 0, "x of pitch knob handle", "", &task1_parametersConfig::p_h_x)));
+//#line 36 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_h_x", "double", 0, "x of pitch knob handle", "", &task1_parametersConfig::p_h_x)));
+//#line 37 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.p_h_y = -1.0;
+//#line 37 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.p_h_y = 1.1;
+//#line 37 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.p_h_y = 0.292;
+//#line 37 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_h_y", "double", 0, "y of pitch knob handle", "", &task1_parametersConfig::p_h_y)));
+//#line 37 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_h_y", "double", 0, "y of pitch knob handle", "", &task1_parametersConfig::p_h_y)));
+//#line 38 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.p_h_z = 0.0;
+//#line 38 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.p_h_z = 1.1;
+//#line 38 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.p_h_z = 0.89;
+//#line 38 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_h_z", "double", 0, "z of pitch knob handle", "", &task1_parametersConfig::p_h_z)));
+//#line 38 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_h_z", "double", 0, "z of pitch knob handle", "", &task1_parametersConfig::p_h_z)));
+//#line 40 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.y_c_x = 0.0;
+//#line 40 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.y_c_x = 1.1;
+//#line 40 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.y_c_x = 2.828;
+//#line 40 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_c_x", "double", 0, "x of yaw knob center", "", &task1_parametersConfig::y_c_x)));
+//#line 40 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_c_x", "double", 0, "x of yaw knob center", "", &task1_parametersConfig::y_c_x)));
+//#line 41 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.y_c_y = -1.0;
+//#line 41 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.y_c_y = 1.1;
+//#line 41 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.y_c_y = 0.292;
+//#line 41 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_c_y", "double", 0, "y of yaw knob center", "", &task1_parametersConfig::y_c_y)));
+//#line 41 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_c_y", "double", 0, "y of yaw knob center", "", &task1_parametersConfig::y_c_y)));
+//#line 42 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.y_c_z = 0.0;
+//#line 42 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.y_c_z = 1.1;
+//#line 42 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.y_c_z = 0.89;
+//#line 42 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_c_z", "double", 0, "z of yaw knob center", "", &task1_parametersConfig::y_c_z)));
+//#line 42 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_c_z", "double", 0, "z of yaw knob center", "", &task1_parametersConfig::y_c_z)));
+//#line 44 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.y_h_x = 0.0;
+//#line 44 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.y_h_x = 1.1;
+//#line 44 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.y_h_x = 2.828;
+//#line 44 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_h_x", "double", 0, "x of yaw knob handle", "", &task1_parametersConfig::y_h_x)));
+//#line 44 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_h_x", "double", 0, "x of yaw knob handle", "", &task1_parametersConfig::y_h_x)));
+//#line 45 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.y_h_y = -1.0;
+//#line 45 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.y_h_y = 1.1;
+//#line 45 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.y_h_y = 0.292;
+//#line 45 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_h_y", "double", 0, "y of yaw knob handle", "", &task1_parametersConfig::y_h_y)));
+//#line 45 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_h_y", "double", 0, "y of yaw knob handle", "", &task1_parametersConfig::y_h_y)));
+//#line 46 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __min__.y_h_z = 0.0;
+//#line 46 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __max__.y_h_z = 1.1;
+//#line 46 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __default__.y_h_z = 0.89;
+//#line 46 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_h_z", "double", 0, "z of yaw knob handle", "", &task1_parametersConfig::y_h_z)));
+//#line 46 "/home/srishti/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+      __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_h_z", "double", 0, "z of yaw knob handle", "", &task1_parametersConfig::y_h_z)));
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      handleLoc.convertParams();
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      Default.groups.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::HANDLELOC, task1_parametersConfig::DEFAULT>(handleLoc)));
+//#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
+      __group_descriptions__.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::HANDLELOC, task1_parametersConfig::DEFAULT>(handleLoc)));
 //#line 245 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       Default.convertParams();
 //#line 245 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"

@@ -23,6 +23,7 @@ void task1Node::registerStateMethods(void)
     LocalTasks::registrate("STATE_DETECT_HANDLE_CENTER",std::bind(&valTask1::detectHandleCenterTask,task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_DETECT_PANEL_FINE",   std::bind(&valTask1::detectPanelFineTask,   task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_WALK_TO_PANEL",       std::bind(&valTask1::walkToPanel,           task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_FIX_HANDLE_DETECTION",std::bind(&valTask1::fixHandle,             task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_GRASP_PITCH_HANDLE",  std::bind(&valTask1::graspPitchHandleTask,  task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_CORRECT_PITCH",       std::bind(&valTask1::controlPitchTask,      task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_GRASP_YAW_HANDLE",    std::bind(&valTask1::graspYawHandleTask,    task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -36,12 +37,12 @@ void task1Node::registerStateMethods(void)
 
 void task1Node::paramUpdateCallback(val_task1::task1_parametersConfig &config, uint32_t level)
 {
-    ROS_INFO("update the goal, x: %f, y: %f, theta: %f",  config.groups.panelwalkpose.x,  config.groups.panelwalkpose.y,  config.groups.panelwalkpose.theta);
+    ROS_INFO("update the goal, x: %f, y: %f, theta: %f",  config.groups.panelwalkpose.x_pw,  config.groups.panelwalkpose.y_pw,  config.groups.panelwalkpose.theta_pw);
 
     geometry_msgs::Pose2D goal;
-    goal.x = config.groups.panelwalkpose.x;
-    goal.y = config.groups.panelwalkpose.y;
-    goal.theta = config.groups.panelwalkpose.theta;
+    goal.x = config.groups.panelwalkpose.x_pw;
+    goal.y = config.groups.panelwalkpose.y_pw;
+    goal.theta = config.groups.panelwalkpose.theta_pw;
     //update the walk goal location
     task1_->setPanelWalkGoal(goal);
 }

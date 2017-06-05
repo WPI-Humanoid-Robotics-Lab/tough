@@ -16,93 +16,119 @@
 */
 
 #include <gazebo/common/Console.hh>
-#include <gazebo/physics/Model.hh>
 #include <gazebo/physics/PhysicsIface.hh>
 #include <gazebo/physics/World.hh>
 
 #include "srcsim/Checkpoint.hh"
+#include "srcsim/HarnessManager.hh"
 
 using namespace gazebo;
 
 /////////////////////////////////////////////////
 Checkpoint::Checkpoint(const sdf::ElementPtr &_sdf)
 {
-  // Get robot pose
+  // Get robot skip pose
   if (_sdf && _sdf->HasElement("skip_robot_pose"))
   {
     this->robotSkipPose = _sdf->Get<ignition::math::Pose3d>("skip_robot_pose");
   }
 
-  // Get models to delete when checkpoint begins
-  if (_sdf && _sdf->HasElement("delete_model"))
+  // Get robot start pose
+  if (_sdf && _sdf->HasElement("start_robot_pose"))
   {
-    auto elem = _sdf->GetElement("delete_model");
+    this->robotStartPose = _sdf->Get<ignition::math::Pose3d>("start_robot_pose");
+  }
+
+  // Get models to delete when checkpoint begins
+  if (_sdf && _sdf->HasElement("delete_entity"))
+  {
+    auto elem = _sdf->GetElement("delete_entity");
     while (elem)
     {
-      this->deleteModels.push_back(elem->Get<std::string>());
+      this->deleteEntities.push_back(elem->Get<std::string>());
 
-      elem = elem->GetNextElement("delete_model");
+      elem = elem->GetNextElement("delete_entity");
     }
   }
 
   // Get models to insert when checkpoint begins
-  if (_sdf && _sdf->HasElement("insert_model"))
+  if (_sdf && _sdf->HasElement("insert_entity"))
   {
-    auto elem = _sdf->GetElement("insert_model");
+    auto elem = _sdf->GetElement("insert_entity");
     while (elem)
     {
       auto inner = elem->GetFirstElement();
-      this->insertModels.push_back(inner->ToString(""));
+      this->insertEntities.push_back(inner->ToString(""));
 
-      elem = elem->GetNextElement("insert_model");
+      elem = elem->GetNextElement("insert_entity");
     }
   }
 }
 
 /////////////////////////////////////////////////
+common::Time Checkpoint::StartTime() const
+{
+  return this->startTime;
+}
+
+/////////////////////////////////////////////////
 void Checkpoint::Start()
 {
-  if (this->insertModels.empty() && this->deleteModels.empty())
+  auto world = physics::get_world();
+  if (!world)
+  {
+    gzerr << "Failed to get world pointer, can't start checkpoint."
+        << std::endl;
+    return;
+  }
+
+  // Now the checkpoint starts
+  this->startTime = world->GetSimTime();
+
+  // Insert / delete entities
+  if (this->insertEntities.empty() && this->deleteEntities.empty())
     return;
 
   auto tmpGzNode = transport::NodePtr(new transport::Node());
   tmpGzNode->Init();
 
-  // Delete models
-  for (auto modelName : this->deleteModels)
+  // Delete entities
+  for (auto entityName : this->deleteEntities)
   {
-    transport::requestNoReply(tmpGzNode, "entity_delete", modelName);
-    gzmsg << "Requested to delete [" << modelName << "]" << std::endl;
+    transport::requestNoReply(tmpGzNode, "entity_delete", entityName);
+    gzmsg << "Requested to delete [" << entityName << "]" << std::endl;
   }
-  this->deleteModels.clear();
+  this->deleteEntities.clear();
 
-  // Insert models
-  if (this->insertModels.empty())
+  // Insert entities
+  if (this->insertEntities.empty())
     return;
 
   auto factoryPub = tmpGzNode->Advertise<msgs::Factory>("~/factory");
+  auto lightFactoryPub = tmpGzNode->Advertise<msgs::Light>("~/factory/light");
 
-  for (const auto &modelStr : this->insertModels)
+  for (const auto &entityStr : this->insertEntities)
   {
     auto sdfStr =
         "<sdf version='" + std::string(SDF_VERSION) + "'>"
-        + modelStr
+        + entityStr
         + "</sdf>";
 
-    // Get model name for debug message
+    // Get entity name for debug message
     std::string name;
 
-    sdf::SDFPtr modelSDF(new sdf::SDF);
-    modelSDF->SetFromString(sdfStr);
+    sdf::SDFPtr entitySDF(new sdf::SDF);
+    entitySDF->SetFromString(sdfStr);
 
-    if (!modelSDF || !modelSDF->Root())
+    if (!entitySDF || !entitySDF->Root())
     {
-      gzerr << "Failed to parse model SDF: " << std::endl << modelStr
+      gzerr << "Failed to parse entity SDF: " << std::endl << entityStr
             << std::endl;
       continue;
     }
 
-    auto root = modelSDF->Root();
+    auto root = entitySDF->Root();
+    sdf::ElementPtr light;
 
     if (root->HasElement("include"))
     {
@@ -112,19 +138,32 @@ void Checkpoint::Start()
     {
       name = root->GetElement("model")->Get<std::string>("name");
     }
+    else if (root->HasElement("light"))
+    {
+      light = root->GetElement("light");
+      name = light->Get<std::string>("name");
+    }
     else
     {
-      gzerr << "Failed to parse model SDF: " << std::endl << modelStr
+      gzerr << "Invalid entity SDF: " << std::endl << entityStr
             << std::endl;
       continue;
     }
 
-    msgs::Factory msg;
-    msg.set_sdf(sdfStr);
-    factoryPub->Publish(msg);
-    gzmsg << "Requested to insert model [" << name << "]" << std::endl;
+    if (!light)
+    {
+      msgs::Factory msg;
+      msg.set_sdf(sdfStr);
+      factoryPub->Publish(msg);
+    }
+    else
+    {
+      msgs::Light msg = msgs::LightFromSDF(light);
+      lightFactoryPub->Publish(msg);
+    }
+    gzmsg << "Requested to insert entity [" << name << "]" << std::endl;
   }
-  this->insertModels.clear();
+  this->insertEntities.clear();
   factoryPub.reset();
   tmpGzNode->Fini();
   tmpGzNode.reset();
@@ -140,22 +179,19 @@ void Checkpoint::Skip()
     return;
 
   // Teleport robot
-  // TODO: Reset joints
-  auto world = physics::get_world();
-  if (!world)
-  {
-    gzerr << "Failed to get world pointer, robot won't be teleported."
-        << std::endl;
-    return;
-  }
-  auto robot = world->GetModel("valkyrie");
-  if (!robot)
-  {
-    gzerr << "Failed to get model pointer, robot won't be teleported."
-        << std::endl;
-    return;
-  }
-  robot->SetWorldPose(this->robotSkipPose);
+  HarnessManager::Instance()->NewGoal(this->robotSkipPose);
+}
+
+/////////////////////////////////////////////////
+void Checkpoint::Restart(const common::Time &_penalty)
+{
+  this->totalPenalty += _penalty;
+}
+
+/////////////////////////////////////////////////
+common::Time Checkpoint::PenaltyTime() const
+{
+  return this->totalPenalty;
 }
 
 /////////////////////////////////////////////////

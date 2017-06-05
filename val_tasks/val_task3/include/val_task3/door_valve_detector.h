@@ -32,10 +32,20 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/common/transforms.h>
 #include <pcl/sample_consensus/sac_model_sphere.h>
+#include <pcl/sample_consensus/sac_model_circle.h>
 #include <pcl/sample_consensus/ransac.h>
+
+#include <pcl/filters/statistical_outlier_removal.h>
 
 #include "val_controllers/robot_state.h"
 #include <visualization_msgs/MarkerArray.h>
+
+struct model_param
+{
+    std::vector<float> center;
+    float radius;
+    std::vector<float> norm;
+};
 
 class DoorValvedetector{
 private:
@@ -49,14 +59,18 @@ private:
 
   float min_x,max_x,min_y,max_y,min_z,max_z;
 
-
-
+  model_param circle_param;
 
 
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
   void PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-  void setOffset(float minX = 0.2, float maxX = 2.0,float minY = -0.7 , float maxY = 0.7 ,float minZ= 0.5, float maxZ=1.5);
+  void setOffset(float minX = 0.2, float maxX = 2.0,float minY = -0.7 , float maxY = 0.7 ,float minZ= 0.7, float maxZ=1.5);
   void transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool isinverse);
+  void filter_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+  void fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+  void visualize();
+  void clustering(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+
 
 public:
 

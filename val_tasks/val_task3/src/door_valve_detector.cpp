@@ -5,8 +5,7 @@ DoorValvedetector::DoorValvedetector(ros::NodeHandle nh)
 {
     pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &DoorValvedetector::cloudCB, this);
     pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_door/cloud2", 1);
-    vis_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/val_door/Position", 1 );
-
+    vis_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/val_door/markers", 1 );
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
     setOffset();
 
@@ -63,11 +62,20 @@ void DoorValvedetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
     pass_z.setFilterFieldName("z");
     pass_z.setFilterLimits(2,10);
     pass_z.filter(*cloud);
-
 */
     transformCloud(cloud,0);
     PassThroughFilter(cloud);
-//    transformCloud(cloud,1);
+    if(cloud->empty())
+        return;
+    filter_cloud(cloud);
+    if(cloud->empty())
+        return;
+    transformCloud(cloud,1);
+    fitting(cloud);
+    if(cloud->empty())
+        return;
+    clustering(cloud);
+    visualize();
 
     ros::Time endTime = ros::Time::now();
 
@@ -80,7 +88,163 @@ void DoorValvedetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
     pcl_filtered_pub_.publish(output);
 
 }
+void DoorValvedetector::clustering(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+{
+    ROS_INFO("clustering");
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+    tree->setInputCloud (cloud);
+    int cloudSize = (int)cloud->points.size();
+    std::vector<pcl::PointIndices> cluster_indices;
+    pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+    ec.setClusterTolerance (0.1);
+    ec.setMinClusterSize (50);  // magic number : 50   there should be atleast 10 point over the solar panel.
+    ec.setMaxClusterSize (cloudSize-50); // same magic number
+    ec.setSearchMethod (tree);
+    ec.setInputCloud (cloud);
+    ec.extract (cluster_indices);
 
+    std::vector<pcl::PointIndices>::const_iterator it;
+    std::vector<int>::const_iterator pit;
+
+    ROS_INFO("number of clusters: %d",(int)cluster_indices.size());
+
+    if(!(int)cluster_indices.size())
+        return;
+    // if cluster is zero then dont process further
+
+    std::vector<float> euc_dist;
+    for(it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
+    {
+        for(pit = it->indices.begin(); pit != it->indices.end(); pit++)
+        {
+            float dist = pow(cloud->points[*pit].x-circle_param.center[0],2)+pow(cloud->points[*pit].y-circle_param.center[1],2)+pow(cloud->points[*pit].z-circle_param.center[2],2);
+            euc_dist.push_back(dist);
+            break;
+        }
+    }
+    int index = std::min_element(euc_dist.begin(),euc_dist.end())-euc_dist.begin();
+//    for(auto i = euc_dist.begin();i!=euc_dist.end();++i)
+//    {
+//        ROS_INFO("dist %.2f",*i);
+//    }
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr door_valve_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    for (auto i = cluster_indices[index].indices.begin();i!=cluster_indices[index].indices.end();++i)
+    {
+        door_valve_cloud ->points.push_back(cloud->points[*i]);
+
+    }
+    cloud = door_valve_cloud;
+
+}
+
+void DoorValvedetector::filter_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+{
+
+    Eigen::Vector4f min_pt,max_pt;
+    pcl::getMinMax3D(*cloud,min_pt,max_pt);
+
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+      sor.setInputCloud (cloud);
+      sor.setMeanK (50);
+      sor.setStddevMulThresh (1.0);
+      sor.filter (*cloud);
+
+    // filtering around min x value
+    pcl::PassThrough<pcl::PointXYZ> pass_x;
+    pass_x.setInputCloud(cloud);
+    pass_x.setFilterFieldName("x");
+    pass_x.setFilterLimits(min_pt(0),min_pt(0)+0.05);
+    pass_x.filter(*cloud);
+
+}
+void DoorValvedetector::fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+{
+    // fitting a circle
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
+
+    seg.setOptimizeCoefficients (true);
+    seg.setModelType (pcl::SACMODEL_CIRCLE3D);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setMaxIterations (100);
+    seg.setRadiusLimits(0.2,0.3);
+    //seg.setAxis(ax);
+    seg.setDistanceThreshold (0.008);
+    seg.setInputCloud (cloud);
+    seg.segment (*inliers, *coefficients);
+    ROS_INFO("x : %0.4f, y : %0.4f, z : %0.4f, r: %.4f ",coefficients->values[0], coefficients->values[1], coefficients->values[2], coefficients->values[3]);
+
+    /*
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    extract.setInputCloud (cloud);
+    extract.setIndices (inliers);
+    extract.setNegative (false);
+    extract.filter (*cloud);
+    */
+    for(int i=0;i<3;++i)
+        circle_param.center.push_back(coefficients->values[i]);
+    circle_param.radius = coefficients->values[3];
+    for(int i=0;i<3;++i)
+        circle_param.norm.push_back(coefficients->values[i+4]);
+}
+
+void DoorValvedetector::visualize()
+{
+    float cosTheta2 = circle_param.norm[0]/sqrt(pow(circle_param.norm[0],2)+pow(circle_param.norm[1],2));
+    float sinTheta2 = circle_param.norm[1]/sqrt(pow(circle_param.norm[0],2)+pow(circle_param.norm[1],2));
+    float theta2 = atan2(sinTheta2, cosTheta2);
+    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta2);
+
+    visualization_msgs::MarkerArray mk_array;
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = "world";
+    marker.header.stamp = ros::Time();
+    marker.ns = "Normal Vector";
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::ARROW;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.position.x = circle_param.center[0];
+    marker.pose.position.y = circle_param.center[1];
+    marker.pose.position.z = circle_param.center[2];
+    marker.pose.orientation = quaternion;
+    marker.scale.x = 0.6;
+    marker.scale.y = 0.05;
+    marker.scale.z = 0.05;
+    marker.color.a = 1.0;
+    marker.color.r = 1.0;
+    marker.color.g = 0.0;
+    marker.color.b = 0.0;
+    marker.lifetime = ros::Duration(5);
+
+    mk_array.markers.push_back(marker);
+
+
+    marker.type = visualization_msgs::Marker::SPHERE;
+    marker.scale.x = 0.05;
+    marker.scale.y = 0.05;
+    marker.scale.z = 0.05;
+    marker.ns = "Center";
+    marker.pose.position.x = circle_param.center[0];
+    marker.pose.position.y = circle_param.center[1];
+    marker.pose.position.z = circle_param.center[2];
+    marker.color.r = 0.0;
+    marker.color.g = 0.0;
+    marker.color.b = 1.0;
+    mk_array.markers.push_back(marker);
+
+    marker.ns = "Sample Radius pt";
+    marker.pose.position.x = circle_param.center[0];
+    marker.pose.position.y = circle_param.center[1];
+    marker.pose.position.z = circle_param.center[2]+circle_param.radius;
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
+    mk_array.markers.push_back(marker);
+
+    vis_pub_.publish(mk_array);
+}
 
 void DoorValvedetector::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
@@ -166,276 +330,3 @@ void DoorValvedetector::transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& clou
     ROS_INFO("trasnforming cloud");
 }
 
-
-/*
-void RoverDetector::getPosition(const pcl::PointCloud<pcl::PointXYZ>::Ptr& lowerBoxCloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr& upperBoxCloud, std::vector<geometry_msgs::Pose>& detectedPoses){
-
-    detectedPoses.clear();
-    detectedPoses.resize(3); // 3 detections - coarse, fine, finer
-
-    Eigen::Vector4f lowerBoxCentroid;
-    pcl::compute3DCentroid(*lowerBoxCloud, lowerBoxCentroid);
-    geometry_msgs::Point lowerBoxPosition;
-    lowerBoxPosition.x = lowerBoxCentroid(0);
-    lowerBoxPosition.y = lowerBoxCentroid(1);
-    lowerBoxPosition.z = lowerBoxCentroid(2);
-
-    Eigen::Vector4f upperBoxCentroid;
-    pcl::compute3DCentroid(*upperBoxCloud, upperBoxCentroid);
-    geometry_msgs::Point upperBoxPosition;
-    upperBoxPosition.x = upperBoxCentroid(0);
-    upperBoxPosition.y = upperBoxCentroid(1);
-    upperBoxPosition.z = upperBoxCentroid(2);
-
-    //    ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", upperBoxPosition.x, upperBoxPosition.y, upperBoxPosition.z);
-
-    //  Using Priciple Component Analysis for computing the Orientation of the Panel
-    Eigen::Matrix3f covarianceMatrix;
-    pcl::computeCovarianceMatrix(*upperBoxCloud, upperBoxCentroid, covarianceMatrix);
-    Eigen::Matrix3f eigenVectors;
-    Eigen::Vector3f eigenValues;
-    pcl::eigen33(covarianceMatrix, eigenVectors, eigenValues);
-
-    //    std::cout<<"The EigenValues are : " << eigenValues << std::endl;
-    //    std::cout<<"The EigenVectors are : " << eigenVectors << std::endl;
-
-
-    geometry_msgs::Point point1;
-    point1.x = eigenVectors.col(2)[0] + upperBoxPosition.x;
-    point1.y = eigenVectors.col(2)[1] + upperBoxPosition.y;
-    point1.z = eigenVectors.col(2)[2] + upperBoxPosition.z;
-
-    geometry_msgs::Point maxPoint;
-    geometry_msgs::Point minPoint;
-
-    maxPoint.x = std::max(upperBoxPosition.x, point1.x);
-    maxPoint.y = std::max(upperBoxPosition.y, point1.y);
-    maxPoint.z = std::max(upperBoxPosition.z, point1.z);
-
-    minPoint.x = std::min(upperBoxPosition.x, point1.x);
-    minPoint.y = std::min(upperBoxPosition.y, point1.y);
-    minPoint.z = std::min(upperBoxPosition.z, point1.z);
-
-    float theta = 0;
-    float cosTheta = 0;
-    float sinTheta = 0;
-
-    cosTheta = (maxPoint.y - minPoint.y)/(sqrt(pow((maxPoint.x - minPoint.x),2) + pow((maxPoint.y - minPoint.y),2) + pow((maxPoint.z - minPoint.z),2)));
-    sinTheta= (maxPoint.x - minPoint.x)/(sqrt(pow((maxPoint.x - minPoint.x),2) + pow((maxPoint.y - minPoint.y),2) + pow((maxPoint.z - minPoint.z),2)));
-    //    sinTheta = sqrt(1 - (pow(cosTheta, 2)));
-
-    double yzSlope = (upperBoxPosition.z - lowerBoxPosition.z)/(upperBoxPosition.y - lowerBoxPosition.y);
-
-    bool noSlope = (fabs((upperBoxPosition.y - point1.y) < 0.01));
-
-    double xySlope = 0.0;
-
-    if(!noSlope){
-        xySlope = (upperBoxPosition.x - point1.x)/(upperBoxPosition.y - point1.y);
-    }
-
-    if(yzSlope > 0){
-        if(!noSlope){
-            if(xySlope < 0){
-                theta = atan2(sinTheta, cosTheta);
-            }
-            else if(xySlope > 0){
-                theta = atan2(sinTheta, cosTheta)  + 1.5708;
-            }
-        }
-        else if (xySlope == 0){
-            theta = atan2(sinTheta, cosTheta);
-        }
-    }
-    else{
-        if(!noSlope){
-            if(xySlope > 0){
-                theta = atan2(sinTheta, cosTheta) * -1.0 ;
-            }
-            else if(xySlope < 0){
-                theta = atan2(sinTheta, cosTheta) * -1.0 - 1.5708;
-            }
-        }
-        else if (xySlope == 0){
-            theta = atan2(sinTheta, cosTheta) * -1.0;
-        }
-    }
-
-
-    //    ROS_INFO("The Orientation is given by := %0.2f", theta);
-
-    //    double offset = finePose_ ? 6.45 : 6.45;
-    double xOffset[3] = {6.45, 6.35, 6.05};
-    double thetaOffset[3] = {M_PI_2, M_PI_4, 0.0};
-    double yOffset[3] = {-0.6 , -0.2, -0.2};
-    for (int i =0; i < 3; ++i){
-        detectedPoses[i].position.x = upperBoxPosition.x - (xOffset[i]*cos(theta));
-        detectedPoses[i].position.y = upperBoxPosition.y - (xOffset[i]*sin(theta));
-        detectedPoses[i].position.z = 0.0;
-
-        //    ROS_INFO("Offset values to Footstep Planner are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
-        geometry_msgs::Quaternion quaternion;
-        ROS_INFO("slopeyz %.2f, theta %.2f",yzSlope,theta);
-
-        float angle;
-
-        if(yzSlope>0)  {//rover on the left
-            //            angle = finePose_ ? theta : theta-1.5708;
-            angle = theta - thetaOffset[i];
-            quaternion = tf::createQuaternionMsgFromYaw(angle);
-            roverSide_ = ROVER_SIDE::LEFT;
-        }
-        else {
-            //rover on the right
-            //            angle = finePose_ ? theta : theta+1.5708;
-            angle = theta + thetaOffset[i];
-            quaternion = tf::createQuaternionMsgFromYaw(angle);
-            roverSide_ = ROVER_SIDE::RIGHT;
-        }
-
-
-
-        //    float yOffset = finePose_ ? -0.2 : -0.6;
-        detectedPoses[i].position.x = detectedPoses[i].position.x + yOffset[i] * cos(angle);
-        detectedPoses[i].position.y = detectedPoses[i].position.y + yOffset[i] * sin(angle);
-
-        detectedPoses[i].orientation = quaternion;
-    }
-
-    visualization_msgs::MarkerArray markerArray;
-    int id=0;
-    for(auto pose : detectedPoses){
-            visualization_msgs::Marker marker;
-
-            marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
-            marker.header.stamp = ros::Time();
-            marker.ns = "Rover Position";
-            marker.id = id++;
-            marker.type = visualization_msgs::Marker::ARROW;
-            marker.action = visualization_msgs::Marker::ADD;
-
-            marker.pose.position.x = pose.position.x;
-            marker.pose.position.y = pose.position.y;
-            marker.pose.position.z = pose.position.z;
-
-            marker.pose.orientation.x = pose.orientation.x;
-            marker.pose.orientation.y = pose.orientation.y;
-            marker.pose.orientation.z = pose.orientation.z;
-            marker.pose.orientation.w = pose.orientation.w;
-
-            marker.scale.x = 0.6;
-            marker.scale.y = 0.05;
-            marker.scale.z = 0.05;
-            marker.color.a = 1.0;
-            marker.color.r = 1.0;
-            marker.color.g = 0.0;
-            marker.color.b = 0.0;
-            marker.lifetime = ros::Duration(0);
-        markerArray.markers.push_back(marker);
-    }
-    vis_pub_.publish(markerArray);
-
-}
-
-bool RoverDetector::getDetections(std::vector<std::vector<geometry_msgs::Pose> > &ret_val)
-{
-    ret_val.clear();
-    ret_val = detections_;
-    return !ret_val.empty();
-
-}
-
-int RoverDetector::getDetectionTries() const
-{
-    return detection_tries_;
-
-}
-
-bool RoverDetector::getRoverSide(ROVER_SIDE &side) const
-{
-    side = roverSide_ ;
-    return roverSide_ != ROVER_SIDE::UNKOWN;
-
-}
-
-
-void RoverDetector::planeDetection(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
-
-    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-    pcl::SACSegmentation<pcl::PointXYZ> seg;
-
-    seg.setOptimizeCoefficients (true);
-    seg.setModelType (pcl::SACMODEL_PLANE);
-    seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setMaxIterations (100);
-    seg.setDistanceThreshold (0.01);
-    seg.setInputCloud (cloud);
-    seg.segment (*inliers, *coefficients);
-
-    pcl::ExtractIndices<pcl::PointXYZ> extract;
-
-    extract.setInputCloud (cloud);
-    extract.setIndices (inliers);
-    extract.setNegative (false);
-    extract.filter (*cloud);
-
-    //  ROS_INFO("Point cloud representing the planar component = %d", (int)cloud->points.size());
-
-}
-
-
-
-
-void RoverDetector::segmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
-
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out (new pcl::PointCloud<pcl::PointXYZ>);
-
-    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
-    tree->setInputCloud (cloud);
-
-    int cloudSize = (int)cloud->points.size();
-
-    //  ROS_INFO("Minimum Size = %d", (int)(0.2*cloudSize));
-    //  ROS_INFO("Maximum Size = %d", cloudSize);
-
-    std::vector<pcl::PointIndices> cluster_indices;
-    pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-    ec.setClusterTolerance (0.1);
-    ec.setMinClusterSize ((int)(0.3*cloudSize));
-    ec.setMaxClusterSize (cloudSize);
-    ec.setSearchMethod (tree);
-    ec.setInputCloud (cloud);
-    ec.extract (cluster_indices);
-
-    int numClusters = cluster_indices.size();
-
-    //  ROS_INFO("Number of Clusters  = %d", numClusters);
-
-    std::vector<pcl::PointIndices>::const_iterator it;
-    std::vector<int>::const_iterator pit;
-
-    int index = 0;
-    double x = 0;
-    double y = 0;
-    double z = 0;
-
-    pcl::PointCloud<pcl::PointXYZ>::Ptr centroid_points (new pcl::PointCloud<pcl::PointXYZ>);
-
-    for(it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
-
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
-        for(pit = it->indices.begin(); pit != it->indices.end(); pit++) {
-            cloud_cluster->points.push_back(cloud->points[*pit]);
-        }
-
-        //      ROS_INFO("Number of Points in the Cluster = %d", (int)cloud_cluster->points.size());
-
-        *cloud = *cloud_cluster;
-
-    }
-
-    // ROS_WARN(" %d ", (int)centroid_points->points.size());
-
-}
-*/
