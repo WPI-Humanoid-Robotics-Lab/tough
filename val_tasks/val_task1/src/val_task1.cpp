@@ -262,7 +262,7 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
 decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM_ONCE("executing " << name);
-    task1_utils_->taskLogPub("executing " + name);
+
 
     static int fail_count = 0;
 
@@ -352,7 +352,8 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
     if( handle_detector_->findHandles(handle_loc_)){
 
         ROS_INFO_STREAM("Handles detected at "<<handle_loc_[0]<< " : "<<handle_loc_[2]);
-        task1_utils_->taskLogPub("Handles detected at:");
+        task1_utils_->taskLogPub("Handles detected at x : "  + std::to_string(handle_loc_[0].x) + " y: " + std::to_string(handle_loc_[0].y)
+                + "and x: " + std::to_string(handle_loc_[2].x)  + " y: " + std::to_string(handle_loc_[2].y));
         // generate the event
         eventQueue.riseEvent("/DETECTED_HANDLE");
 
@@ -472,7 +473,7 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
 decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM_ONCE("executing " << name);
-    task1_utils_->taskLogPub("executing " + name);
+
 
     static int fail_count = 0;
 
