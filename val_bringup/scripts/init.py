@@ -29,7 +29,7 @@ def WaitForRobot():
 if __name__ == '__main__':
     global execute
     WaitForRobot()
-    time.sleep(120)
+    time.sleep(180)
     if (not execute):
         rospy.spin()
     else:

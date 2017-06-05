@@ -115,12 +115,12 @@ public:
     void pausePointCloud();
     void resumePointCloud();
     void clearBoxPointCloud(CLEAR_BOX_CLOUD state);
-    void reOrientTowardsPanel(geometry_msgs::Pose panelPose);
+    void reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset=0.0);
     void reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
     bool shakeTest(const armSide graspingHand);
     boost::posix_time::ptime timeNow;
-    bool isCableOnTable(geometry_msgs::Pose &cable_coordinates);
+    bool isCableOnTable(geometry_msgs::Pose &cable_pose);
     bool isCableInHand(armSide side);
     bool isCableTouchingSocket();
     geometry_msgs::Pose grasping_hand(armSide &side, geometry_msgs::Pose handle_pose);

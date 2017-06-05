@@ -7,10 +7,11 @@
 #define DISABLE_DRAWINGS true
 #define DISABLE_TRACKBAR true
 
-CableDetector::CableDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
+CableDetector::CableDetector(ros::NodeHandle nh, src_perception::MultisenseImage *ms_sensor) : nh_(nh), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-    ms_sensor_.giveQMatrix(qMatrix_);
+    ms_sensor_ = ms_sensor;
+    ms_sensor_->giveQMatrix(qMatrix_);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_cable",1);
     eigenVecs_.reserve(2);
 }
@@ -370,9 +371,9 @@ bool CableDetector::findCable(geometry_msgs::Point &cableLoc)
     markers_.markers.clear();
     convexHulls_.clear();
     bool result;
-    if(ms_sensor_.giveImage(current_image_))
+    if(ms_sensor_->giveImage(current_image_))
     {
-        if( ms_sensor_.giveDisparityImage(current_disparity_))
+        if( ms_sensor_->giveDisparityImage(current_disparity_))
         {
             result= getCableLocation(cableLoc);
             std::cout<<"Cable position x: "<<cableLoc.x<<"\t"<<"Cable position y: "<<cableLoc.y<<"\t"<<"Cable position z: "<<cableLoc.z<<"\n";
@@ -390,7 +391,7 @@ bool CableDetector::isCableinHand()
     bool cable_in_hand = false;
     markers_.markers.clear();
     convexHulls_.clear();
-    if(ms_sensor_.giveImage(current_image_))
+    if(ms_sensor_->giveImage(current_image_))
     {
         std::vector<std::vector<cv::Point> > contours;
         std::vector<cv::Vec4i> hierarchy;
@@ -427,14 +428,16 @@ bool CableDetector::findCable(geometry_msgs::Pose& cablePose)
     //VISUALIZATION - include a spinOnce here to visualize the eigenvectors
     markers_.markers.clear();
     convexHulls_.clear();
-    if(ms_sensor_.giveImage(current_image_))
+    if(ms_sensor_->giveImage(current_image_))
     {
-        if( ms_sensor_.giveDisparityImage(current_disparity_))
+        if( ms_sensor_->giveDisparityImage(current_disparity_))
         {
             return getCablePose(cablePose);
         }
     }
+    ROS_WARN("CableDetector::findCable pose: Cannot read image from multisense");
     return false;
+
 }
 
 void CableDetector::drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale)

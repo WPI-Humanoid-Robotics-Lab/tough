@@ -1,4 +1,5 @@
 #include <val_task1/val_task1_utils.h>
+#include <std_msgs/Int8.h>
 
 task1Utils::task1Utils(ros::NodeHandle nh):
     nh_(nh)
@@ -10,8 +11,8 @@ task1Utils::task1Utils(ros::NodeHandle nh):
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>( "handle_path", 10, true);
 
     clearbox_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
-    reset_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
-    task1_log_pub_         = nh_.advertise<std_msgs::String>("/field/task1_log",10);
+    reset_pointcloud_pub_ = nh_.advertise<std_msgs::Int8>("/field/clearbox_pointcloud",1);
+    task1_log_pub_         = nh_.advertise<std_msgs::String>("/field/log",10);
 
     task_status_sub_ = nh.subscribe("/srcsim/finals/task1", 10, &task1Utils::taskStatusSubCB, this);
 
@@ -346,7 +347,8 @@ void task1Utils::fixHandleArray(std::vector<geometry_msgs::Point> &handle_loc, s
 
 void task1Utils::clearBoxPointCloud()
 {
-    std_msgs::Empty msg;
+    std_msgs::Int8 msg;
+    msg.data = 0;
     clearbox_pointcloud_pub_.publish(msg);
 }
 

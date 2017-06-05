@@ -34,6 +34,7 @@ bool taskCommonUtils::isGoalReached(geometry_msgs::Pose2D pose_old, geometry_msg
 
     else if (fabs(fmod(pose_new.theta,(2*M_PI)) - fmod(pose_new.theta,(2*M_PI))) > GOAL_ANGLE_TOLERANCE)
     {
+        ROS_WARN("taskCommonUtils::isGoalReached : Angle Tolerance exceeded");
         ret = false;
     }
 

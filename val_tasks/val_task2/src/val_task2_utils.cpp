@@ -17,7 +17,7 @@ task2Utils::task2Utils(ros::NodeHandle nh):
 
 
     current_checkpoint_  = 0;
-    table_height_        = 0.8; //trial value
+    table_height_        = 0.826; //trial value
 
     reset_pointcloud_pub    = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
     pause_pointcloud_pub    = nh_.advertise<std_msgs::Bool>("/field/pause_pointcloud",1);
@@ -237,17 +237,17 @@ void task2Utils::rotatePanel(const armSide graspingHand)
 
 }
 
-void task2Utils::reOrientTowardsPanel(geometry_msgs::Pose panelPose){
+void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset){
 
     size_t nSteps;
     armSide startStep;
     std::vector<float> y_offset;
     std::vector<float> x_offset;
 
-    current_state_->transformPose(panelPose,panelPose,VAL_COMMON_NAMES::WORLD_TF,
-                                  VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPoint(goal_point,goal_point,VAL_COMMON_NAMES::WORLD_TF,
+                                   VAL_COMMON_NAMES::PELVIS_TF);
 
-    double error = panelPose.position.y;
+    double error = goal_point.y+offset;
     double abserror = std::fabs(error);
     ROS_INFO_STREAM("Error is:" << error << "Absolute value for error is:" << abserror);
     if (abserror < 0.1 || abserror > 0.49 ){
@@ -261,15 +261,15 @@ void task2Utils::reOrientTowardsPanel(geometry_msgs::Pose panelPose){
         if (error > 0){
             startStep = LEFT;
             for(size_t i = 0; i < nSteps; ++i){
-               y_offset.push_back(0.1);
-               y_offset.push_back(0.1);
+                y_offset.push_back(0.1);
+                y_offset.push_back(0.1);
             }
         }
         else {
             startStep = RIGHT;
             for(size_t i = 0; i < nSteps; ++i){
-               y_offset.push_back(-0.1);
-               y_offset.push_back(-0.1);
+                y_offset.push_back(-0.1);
+                y_offset.push_back(-0.1);
             }
         }
 
@@ -324,15 +324,13 @@ int task2Utils::getCurrentCheckpoint() const{
     return current_checkpoint_;
 }
 
-bool task2Utils::isCableOnTable(geometry_msgs::Pose &cable_coordinates)
+bool task2Utils::isCableOnTable(geometry_msgs::Pose &cable_pose)
 {
     // this function checks the z coordinate of the cable location and verifies if this matches the height of the table with some tolerance
 
     float tolerance =0.1; // experimental value
+    return ((cable_pose.position.z < table_height_ + tolerance) && (cable_pose.position.z > table_height_ - tolerance));
 
-    if( cable_detector_->findCable(cable_coordinates)){
-        return ((cable_coordinates.position.z < table_height_ + tolerance) && (cable_coordinates.position.z > table_height_ - tolerance));
-    }
 }
 
 bool task2Utils::isCableInHand(armSide side)
@@ -354,6 +352,7 @@ bool task2Utils::isCableInHand(armSide side)
     //    arm_controller_->moveArmJoints(side, armData,2.0f);
     //    ros::Duration(0.2).sleep();
 
+    return true;
 
 }
 
