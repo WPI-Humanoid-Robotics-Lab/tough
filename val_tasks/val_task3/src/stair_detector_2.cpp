@@ -421,6 +421,39 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
     // Now that we finally have a reliable stair pose (assumed to be the very center of the bottommost step), base the
     // pose of the individual steps off it
     std::vector<geometry_msgs::Pose> step_poses;
+    
+    // Add the first pose as the point on the ground right in front of the staircase. Note that because the robot is 
+    // standing on the walkway, not the ground, this pose doesn't follow the pattern used in the for loop
+    Eigen::Translation3f base_pose_ground((i - 0.5f) * STEP_DEPTH, 0, 0);
+    Eigen::Affine3f step_pose_ground = best_stair_pose * base_pose_ground;
+    step_poses.push_back(geometry_msgs::Pose());
+    step_poses.back().position.x = step_pose_ground.translation().x();
+    step_poses.back().position.y = step_pose_ground.translation().y();
+    step_poses.back().position.z = step_pose_ground.translation().z();
+
+    Eigen::Quaternionf step_quat_ground(step_pose_ground.linear());
+    step_poses.back().orientation.x = step_quat_ground.x();
+    step_poses.back().orientation.y = step_quat_ground.y();
+    step_poses.back().orientation.z = step_quat_ground.z();
+    step_poses.back().orientation.w = step_quat_ground.w();
+    
+    visualization_msgs::Marker stair_pose_ground_m;
+    pcl_conversions::fromPCL(filtered_cloud->header, stair_pose_m.header);
+    stair_pose_ground_m.ns = "stairs_pose" ;
+    stair_pose_ground_m.id = 0;
+    stair_pose_ground_m.type = visualization_msgs::Marker::ARROW;
+    stair_pose_ground_m.pose = step_poses.back();
+    stair_pose_ground_m.scale.x = 1;
+    stair_pose_ground_m.scale.y = 0.05;
+    stair_pose_ground_m.scale.z = 0.05;
+    stair_pose_ground_m.color.r = 0;
+    stair_pose_ground_m.color.g = 1;
+    stair_pose_ground_m.color.b = 1;
+    stair_pose_ground_m.color.a = 1;
+    ma.markers.push_back(stair_pose_ground_m);
+
+
+    // Add the remaining poses on the steps
     for (int i = 0; i < 9; i++) {
         Eigen::Translation3f base_pose((i + 0.5f) * STEP_DEPTH, 0, (i + 0.5f) * STEP_HEIGHT);
         Eigen::Affine3f step_pose = best_stair_pose * base_pose;
@@ -439,7 +472,7 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
         visualization_msgs::Marker stair_pose_m;
         pcl_conversions::fromPCL(filtered_cloud->header, stair_pose_m.header);
         stair_pose_m.ns = "stairs_pose" ;
-        stair_pose_m.id = i;
+        stair_pose_m.id = i + 1;
         stair_pose_m.type = visualization_msgs::Marker::ARROW;
         stair_pose_m.pose = step_poses.back();
         stair_pose_m.scale.x = 1;
