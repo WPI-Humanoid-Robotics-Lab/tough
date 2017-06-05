@@ -8,6 +8,7 @@
 #define DISTANCE_TOLERANCE      0.02      // 2cm
 #define ANGLE_TOLERANCE         0.0174533   // 1 degree
 #define GOAL_DISTANCE_TOLERANCE 0.05      // 5cm
+/// @todo : verify goal angle tolerance. 3degrees seems to be too less in some cases
 #define GOAL_ANGLE_TOLERANCE    ANGLE_TOLERANCE*3   // 3 degrees
 
 namespace taskCommonUtils {

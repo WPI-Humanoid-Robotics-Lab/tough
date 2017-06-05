@@ -9,6 +9,12 @@
 HandleDetector::HandleDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
     ms_sensor_.giveQMatrix(qMatrix_);
+
+    // Initialize the subscribers so that we don't spend time waiting for it to initialize later
+    cv::Mat img;
+    ms_sensor_.giveImage(img);
+    ms_sensor_.giveDisparityImage(img);
+
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_handles",1);
 }
 

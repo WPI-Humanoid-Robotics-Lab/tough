@@ -1061,7 +1061,7 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
         }
 
         // reset the point cloud
-        task1_utils_->resetPointCloud();
+        task1_utils_->clearBoxPointCloud();
 
         // create the object for the pcl detector
         geometry_msgs::Pose pose;
