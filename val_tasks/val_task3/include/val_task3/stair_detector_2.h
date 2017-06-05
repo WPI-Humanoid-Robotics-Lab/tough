@@ -28,7 +28,7 @@ class stair_detector_2
 
     src_perception::MultisensePointCloud point_cloud_listener_;
 
-    std::vector<geometry_msgs::PoseStamped> vantage_poses_;
+    std::vector<std::vector<geometry_msgs::Pose>> detections_;
 
 public:
 
@@ -42,7 +42,7 @@ public:
     stair_detector_2(ros::NodeHandle nh);
 
     void cloudCB(const stair_detector_2::PointCloud::ConstPtr &cloud);
-    bool findStair();
+    std::vector<std::vector<geometry_msgs::Pose>> getDetections() const;
 
     ~stair_detector_2();
 
@@ -58,8 +58,6 @@ private:
 
     std::vector<pcl::PointIndices> findStairClusters(const Eigen::Vector3f &avg_normal,
                                                      const PointCloud::ConstPtr &filtered_cloud) const;
-
-    void publishClusters(const PointCloud::ConstPtr &cloud, const std::vector<pcl::PointIndices> &clusters) const;
 
     Eigen::Vector3f modelToVector(const pcl::ModelCoefficients &model) const;
 

@@ -2,18 +2,23 @@
 // Created by will on 5/31/17.
 //
 
+// ROS
 #include <ros/ros.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <eigen_conversions/eigen_msg.h>
+
+// PCL
 #include <pcl/octree/octree_pointcloud_voxelcentroid.h>
 #include <pcl/octree/octree_impl.h>
-
 #include <pcl/filters/crop_box.h>
 #include <pcl/segmentation/sac_segmentation.h>
-#include <val_task3/stair_detector_2.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/common/pca.h>
 #include <pcl/segmentation/extract_clusters.h>
+
+// Local
 #include <perception_common/perception_common_names.h>
+#include <val_task3/stair_detector_2.h>
 
 
 #define N_STAIR_ANGLE_BUCKETS 180
@@ -139,29 +144,11 @@ std::size_t stair_detector_2::estimateStairPose(const PointCloud::ConstPtr &filt
     stairs_pose.linear().col(2) = rot_mat.col(1);
     stairs_pose.linear().col(1) = rot_mat.col(0);
 
-//    // Make sure x points away from the robot
-//    geometry_msgs::PointStamped foot_foot_frame, foot_world;
-//    foot_foot_frame.header.stamp = ros::Time(0);
-//    foot_foot_frame.header.frame_id = "leftFoot";
-//    try {
-//        tf_listener_.transformPoint(filtered_cloud->header.frame_id, foot_foot_frame, foot_world);
-//    } catch (const tf::TransformException &e) {
-//        ROS_DEBUG("Candidate step pose abandoned because the robot foot position could not be cound");
-//        return 0;
-//    }
-//
-//    if ((stairs_pose.inverse() * Eigen::Vector3f(foot_world.point.x, foot_world.point.y, foot_world.point.z)).x() > 0) {
-//        ROS_DEBUG("Flipping X to point away from robot");
-//        stairs_pose.rotate(Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitZ()));
-//    }
-
     // Make sure z points up and not down
     if ((stairs_pose.linear() * Eigen::Vector3f::UnitZ()).z() < 0) {
         ROS_DEBUG("Flipping Z to point up");
         stairs_pose.rotate(Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitX()));
     }
-
-//    this->points_pub_.publish(step_shape);
 
     return stair_cluster->indices.size();
 }
@@ -221,8 +208,6 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
     nsac.setModelType(pcl::SACMODEL_NORMAL_PLANE);
     nsac.setMethodType(pcl::SAC_RANSAC);
     nsac.setDistanceThreshold(0.06);
-//    nsac.setProbability(0.80);
-//    nsac.setNormalDistanceWeight(0.5);
     nsac.setInputCloud(filtered_cloud);
     nsac.setInputNormals(filtered_normals);
 
@@ -288,47 +273,13 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
         // leaky buckets -- each increments its neighbors too
         const std::size_t prev_bucket = (bucket - 1) % N_STAIR_ANGLE_BUCKETS;
         const std::size_t next_bucket = (bucket + 1) % N_STAIR_ANGLE_BUCKETS;
-        stair_angle_buckets.at(bucket) += 1; // TODO: Angles farther from the xy plane contribute less
+        stair_angle_buckets.at(bucket) += 1;
         stair_angle_buckets.at(prev_bucket) += 1;
         stair_angle_buckets.at(next_bucket) += 1;
     }
 
-    publishClusters(filtered_cloud, clusters);
-
-    visualization_msgs::MarkerArray ma;
-
     for (std::size_t i = 0; i < clusters.size(); i++) {
         Eigen::Vector3f coef = modelToVector(models[i]);
-
-        visualization_msgs::Marker normals_marker;
-        pcl_conversions::fromPCL(filtered_cloud->header, normals_marker.header);
-        normals_marker.ns = "normals_arrows";
-        normals_marker.id = static_cast<int>(i);
-        normals_marker.type = visualization_msgs::Marker::ARROW;
-        normals_marker.points.push_back(geometry_msgs::Point());
-        normals_marker.points.back().x = 0;
-        normals_marker.points.back().y = 0;
-        normals_marker.points.back().z = 0;
-        normals_marker.points.push_back(geometry_msgs::Point());
-        normals_marker.points.back().x = coef.x();
-        normals_marker.points.back().y = coef.y();
-        normals_marker.points.back().z = coef.z();
-        normals_marker.scale.x = 0.01;
-        normals_marker.scale.y = 0.02;
-        normals_marker.color.r = 0;
-        normals_marker.color.g = 0;
-        normals_marker.color.b = 0.5;
-        normals_marker.color.a = 1;
-        ma.markers.push_back(normals_marker);
-    }
-
-    for (std::size_t i = clusters.size(); i < 500; i++) {
-        visualization_msgs::Marker delete_normals_marker;
-        pcl_conversions::fromPCL(filtered_cloud->header, delete_normals_marker.header);
-        delete_normals_marker.ns = "normals_arrows";
-        delete_normals_marker.id = static_cast<int>(i);
-        delete_normals_marker.action = visualization_msgs::Marker::DELETE;
-        ma.markers.push_back(delete_normals_marker);
     }
 
     std::vector<std::size_t> threshold_buckets;
@@ -345,7 +296,6 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
 
     if (threshold_buckets.empty()) {
         ROS_DEBUG_STREAM("Abandoning stair detection attempt, stair angle could not be determined");
-        marker_pub_.publish(ma);
         return false;
     }
 
@@ -385,34 +335,10 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
             max_n_supporting_samples = n_supporting_samples;
             best_stair_pose = stair_pose;
         }
-
-        Eigen::Vector3f stair_pose_dir = stair_pose.linear() * Eigen::Vector3f::UnitX();
-
-        visualization_msgs::Marker normals_marker;
-        pcl_conversions::fromPCL(filtered_cloud->header, normals_marker.header);
-        normals_marker.ns = "normals_arrows";
-        normals_marker.id = static_cast<int>(normals_marker_counter++);
-        normals_marker.type = visualization_msgs::Marker::ARROW;
-        normals_marker.points.push_back(geometry_msgs::Point());
-        normals_marker.points.back().x = 0;
-        normals_marker.points.back().y = 0;
-        normals_marker.points.back().z = 0;
-        normals_marker.points.push_back(geometry_msgs::Point());
-        normals_marker.points.back().x = stair_pose_dir.x();
-        normals_marker.points.back().y = stair_pose_dir.y();
-        normals_marker.points.back().z = stair_pose_dir.z();
-        normals_marker.scale.x = 0.01;
-        normals_marker.scale.y = 0.02;
-        normals_marker.color.r = 0;
-        normals_marker.color.g = 0.5;
-        normals_marker.color.b = 0;
-        normals_marker.color.a = 1;
-        ma.markers.push_back(normals_marker);
     }
 
     if (max_n_supporting_samples == 0) {
         ROS_DEBUG_STREAM("Abandoning stair detection attempt, stair pose could not be determined");
-        marker_pub_.publish(ma);
         return false;
     }
 
@@ -426,66 +352,21 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
     // standing on the walkway, not the ground, this pose doesn't follow the pattern used in the for loop
     Eigen::Translation3f base_pose_ground(-0.5f * STEP_DEPTH, 0, 0);
     Eigen::Affine3f step_pose_ground = best_stair_pose * base_pose_ground;
-    step_poses.push_back(geometry_msgs::Pose());
-    step_poses.back().position.x = step_pose_ground.translation().x();
-    step_poses.back().position.y = step_pose_ground.translation().y();
-    step_poses.back().position.z = step_pose_ground.translation().z();
-
-    Eigen::Quaternionf step_quat_ground(step_pose_ground.linear());
-    step_poses.back().orientation.x = step_quat_ground.x();
-    step_poses.back().orientation.y = step_quat_ground.y();
-    step_poses.back().orientation.z = step_quat_ground.z();
-    step_poses.back().orientation.w = step_quat_ground.w();
-    
-    visualization_msgs::Marker stair_pose_ground_m;
-    pcl_conversions::fromPCL(filtered_cloud->header, stair_pose_m.header);
-    stair_pose_ground_m.ns = "stairs_pose" ;
-    stair_pose_ground_m.id = 0;
-    stair_pose_ground_m.type = visualization_msgs::Marker::ARROW;
-    stair_pose_ground_m.pose = step_poses.back();
-    stair_pose_ground_m.scale.x = 1;
-    stair_pose_ground_m.scale.y = 0.05;
-    stair_pose_ground_m.scale.z = 0.05;
-    stair_pose_ground_m.color.r = 0;
-    stair_pose_ground_m.color.g = 1;
-    stair_pose_ground_m.color.b = 1;
-    stair_pose_ground_m.color.a = 1;
-    ma.markers.push_back(stair_pose_ground_m);
-
+    geometry_msgs::Pose step_pose_ground_ros;
+    tf::poseEigenToMsg(step_pose_ground.cast<double>(), step_pose_ground_ros);
+    step_poses.push_back(step_pose_ground_ros);
 
     // Add the remaining poses on the steps
     for (int i = 0; i < 9; i++) {
         Eigen::Translation3f base_pose((i + 0.5f) * STEP_DEPTH, 0, (i + 0.5f) * STEP_HEIGHT);
         Eigen::Affine3f step_pose = best_stair_pose * base_pose;
 
-        step_poses.push_back(geometry_msgs::Pose());
-        step_poses.back().position.x = step_pose.translation().x();
-        step_poses.back().position.y = step_pose.translation().y();
-        step_poses.back().position.z = step_pose.translation().z();
-
-        Eigen::Quaternionf step_quat(step_pose.linear());
-        step_poses.back().orientation.x = step_quat.x();
-        step_poses.back().orientation.y = step_quat.y();
-        step_poses.back().orientation.z = step_quat.z();
-        step_poses.back().orientation.w = step_quat.w();
-
-        visualization_msgs::Marker stair_pose_m;
-        pcl_conversions::fromPCL(filtered_cloud->header, stair_pose_m.header);
-        stair_pose_m.ns = "stairs_pose" ;
-        stair_pose_m.id = i + 1;
-        stair_pose_m.type = visualization_msgs::Marker::ARROW;
-        stair_pose_m.pose = step_poses.back();
-        stair_pose_m.scale.x = 1;
-        stair_pose_m.scale.y = 0.05;
-        stair_pose_m.scale.z = 0.05;
-        stair_pose_m.color.r = 0;
-        stair_pose_m.color.g = 1;
-        stair_pose_m.color.b = 1;
-        stair_pose_m.color.a = 1;
-        ma.markers.push_back(stair_pose_m);
+        geometry_msgs::Pose step_pose_ros;
+        tf::poseEigenToMsg(step_pose.cast<double>(), step_pose_ros);
+        step_poses.push_back(step_pose_ros);
     }
 
-    marker_pub_.publish(ma);
+    detections_.push_back(step_poses);
 
     return true;
 }
@@ -545,29 +426,6 @@ std::vector<pcl::PointIndices> stair_detector_2::findStairClusters(const Eigen::
     return clusters;
 }
 
-void stair_detector_2::publishClusters(const PointCloud::ConstPtr &cloud, const std::vector<pcl::PointIndices> &clusters) const {
-    pcl::PointCloud<pcl::PointXYZRGB> pub_cld;
-    pub_cld.header = cloud->header;
-    for (const pcl::PointIndices &cluster : clusters) {
-        uint8_t r = std::rand() % 255;
-        uint8_t g = std::rand() % 255;
-        uint8_t b = std::rand() % 255;
-
-        for (const int &idx : cluster.indices) {
-            pcl::PointXYZRGB pt;
-            pt.x = cloud->at(idx).x;
-            pt.y = cloud->at(idx).y;
-            pt.z = cloud->at(idx).z;
-            pt.r = r;
-            pt.g = g;
-            pt.b = b;
-
-            pub_cld.push_back(pt);
-        }
-    }
-    points_pub_.publish(pub_cld);
-}
-
 Eigen::Vector3f stair_detector_2::modelToVector(const pcl::ModelCoefficients &model) const {
     Eigen::Vector3f coef(model.values[0], model.values[1], model.values[2]);
     ROS_WARN_STREAM_COND(std::abs(1 - coef.norm()) > 0.01,
@@ -577,8 +435,8 @@ Eigen::Vector3f stair_detector_2::modelToVector(const pcl::ModelCoefficients &mo
     return coef;
 }
 
-bool stair_detector_2::findStair() {
-    return false;
+std::vector<std::vector<geometry_msgs::Pose>> stair_detector_2::getDetections() const {
+    return detections_;
 }
 
 stair_detector_2::~stair_detector_2()
