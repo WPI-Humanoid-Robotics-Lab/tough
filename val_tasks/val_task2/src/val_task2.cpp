@@ -80,11 +80,33 @@ valTask2::valTask2(ros::NodeHandle nh):
 
 // destructor
 valTask2::~valTask2(){
-    delete walker_;
-    delete pelvis_controller_;
-    delete walk_track_;
-    delete chest_controller_;
-    delete arm_controller_;
+    // shutdown the subscribers
+    occupancy_grid_sub_.shutdown();
+    visited_map_sub_.shutdown();
+
+    // dereference the pointers
+    if (walker_ != nullptr)                    delete walker_;
+    if (pelvis_controller_ != nullptr)         delete pelvis_controller_;
+    if (walk_track_ != nullptr)                delete walk_track_;
+    if (chest_controller_ != nullptr)          delete chest_controller_;
+    if (arm_controller_ != nullptr)            delete arm_controller_;
+    if (head_controller_ != nullptr)           delete head_controller_;
+    if (gripper_controller_ != nullptr)        delete gripper_controller_;
+    if (rover_detector_ != nullptr)            delete rover_detector_;
+    if (rover_detector_fine_ != nullptr)       delete rover_detector_fine_;
+    if (solar_panel_detector_ != nullptr)      delete solar_panel_detector_;
+    if (solar_array_detector_ != nullptr)      delete solar_array_detector_;
+    if (solar_array_fine_detector_ != nullptr) delete solar_array_fine_detector_;
+    if (rover_in_map_blocker_ != nullptr)      delete rover_in_map_blocker_;
+    if (panel_grabber_ != nullptr)             delete panel_grabber_;
+    if (button_detector_ != nullptr)           delete button_detector_;
+    if (button_press_ != nullptr)              delete button_press_;
+    if (cable_task_ != nullptr)                delete cable_task_;
+    if (cable_detector_ != nullptr)            delete cable_detector_;
+    if (socket_detector_ != nullptr)           delete socket_detector_;
+    if (finish_box_detector_ != nullptr)       delete finish_box_detector_;
+    if (task2_utils_ != nullptr)               delete task2_utils_;
+    if (control_common_ != nullptr)            delete control_common_;
 }
 
 void valTask2::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
