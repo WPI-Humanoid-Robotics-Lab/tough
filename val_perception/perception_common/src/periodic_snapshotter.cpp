@@ -298,8 +298,7 @@ void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8 &msg)
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;
-    minPoint[0]=-1;
-    minPoint[1]=-1;
+
     // this indicates that if the msg contains element 1 it, would clear point cloud from waist up
     if(msg.data == 1)
     {
