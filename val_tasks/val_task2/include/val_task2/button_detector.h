@@ -35,7 +35,7 @@ class ButtonDetector
     int frameID_ = 0;
 
     ros::NodeHandle nh_;
-    src_perception::MultisenseImage ms_sensor_;
+    src_perception::MultisenseImage* ms_sensor_;
 
     ros::Publisher marker_pub_;
     visualization_msgs::MarkerArray markers_;
@@ -47,7 +47,7 @@ public:
     size_t findMaxContour(const std::vector<std::vector<cv::Point> >&);
     bool getButtonLocation(geometry_msgs::Point &buttonLoc);
     bool findButtons(geometry_msgs::Point&);
-    ButtonDetector(ros::NodeHandle nh);
+    ButtonDetector(ros::NodeHandle nh, src_perception::MultisenseImage* ms_sensor);
     ~ButtonDetector();
 
 };
