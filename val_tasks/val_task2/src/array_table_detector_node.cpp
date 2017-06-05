@@ -11,7 +11,8 @@ int main(int argc, char** argv)
 
     geometry_msgs::Point CableLoc;
     geometry_msgs::Pose StandLoc;
-    CableDetector c1(nh);
+    src_perception::MultisenseImage* ms_sensor = new src_perception::MultisenseImage(nh);
+    CableDetector c1(nh, ms_sensor);
 
     while (!c1.findCable(CableLoc)){
         ROS_INFO("Cable detection failed. retrying");

@@ -142,7 +142,7 @@ class valTask2 {
 
     geometry_msgs::Pose2D next_finishbox_center_;
 
-    src_perception::MultisenseImage multisense_dummy_object;
+    src_perception::MultisenseImage* ms_sensor_;
 
     public:
 

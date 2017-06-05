@@ -5,10 +5,11 @@
 
 #define DISABLE_DRAWINGS true
 
-ButtonDetector::ButtonDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_)
+ButtonDetector::ButtonDetector(ros::NodeHandle nh, src_perception::MultisenseImage* ms_sensor): nh_(nh)
 {
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_buttons",1);
-    ms_sensor_.giveQMatrix(qMatrix_);
+    ms_sensor_ = ms_sensor;
+    ms_sensor_->giveQMatrix(qMatrix_);
 }
 
 void ButtonDetector::showImage(cv::Mat image, std::string caption)
@@ -134,9 +135,9 @@ bool ButtonDetector::findButtons(geometry_msgs::Point &buttonLoc)
 {
     markers_.markers.clear();
 
-    if(ms_sensor_.giveImage(current_image_))
+    if(ms_sensor_->giveImage(current_image_))
     {
-        if( ms_sensor_.giveDisparityImage(current_disparity_))
+        if( ms_sensor_->giveDisparityImage(current_disparity_))
         {
             return getButtonLocation(buttonLoc);
         }

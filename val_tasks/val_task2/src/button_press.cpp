@@ -1,6 +1,6 @@
 #include <val_task2/button_press.h>
 
-ButtonPress::ButtonPress(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(nh), bd_(nh_)
+ButtonPress::ButtonPress(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(nh)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 
@@ -181,7 +181,8 @@ bool ButtonPress::pressButton(const armSide side, geometry_msgs::Point &goal, fl
 
 void ButtonPress::getButtonPosition( geometry_msgs::Point &goal)
 {
-    bd_.findButtons(goal);
+//    bd_.findButtons(goal);
+    ROS_ERROR("Don't do it");
 
 }
 

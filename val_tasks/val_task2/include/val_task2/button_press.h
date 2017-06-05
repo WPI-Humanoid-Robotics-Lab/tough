@@ -15,7 +15,7 @@ class ButtonPress
 {
     armTrajectory armTraj_;
     ros::NodeHandle nh_;
-    ButtonDetector bd_;
+//    ButtonDetector bd_;
     gripperControl gripper_;
     RobotStateInformer *current_state_;
     geometry_msgs::QuaternionStamped leftHandOrientation_ ;

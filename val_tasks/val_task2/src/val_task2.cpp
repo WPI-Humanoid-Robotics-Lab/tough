@@ -34,7 +34,7 @@ valTask2* valTask2::getValTask2(ros::NodeHandle nh){
 
 // constructor and destrcutor
 valTask2::valTask2(ros::NodeHandle nh):
-    nh_(nh), multisense_dummy_object(nh)
+    nh_(nh)
 {
     // object for the valkyrie walker
     walker_             = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
@@ -55,11 +55,14 @@ valTask2::valTask2(ros::NodeHandle nh):
     panel_grabber_              = nullptr;
     button_press_               = nullptr;
     cable_task_                 = nullptr;
-    cable_detector_             = nullptr;
     socket_detector_            = nullptr;
     finish_box_detector_        = nullptr;
-    button_detector_            = new ButtonDetector(nh_);
-    cable_detector_             = new CableDetector(nh_);
+
+    // use a single multisense object for all stereo detectors. It doesn't work otherwise :(
+    ms_sensor_ = new src_perception::MultisenseImage(nh_);
+    button_detector_            = new ButtonDetector(nh_, ms_sensor_);
+    cable_detector_             = new CableDetector(nh_, ms_sensor_);
+
     //utils
     task2_utils_    = new task2Utils(nh_);
     robot_state_    = RobotStateInformer::getRobotStateInformer(nh_);
@@ -75,7 +78,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask2::visited_map_cb, this);
 
     cv::Mat img;
-    multisense_dummy_object.giveImage(img);
+    ms_sensor_->giveImage(img);
 }
 
 // destructor
@@ -786,10 +789,6 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         control_common_->stopAllTrajectories();
     }
 
-    if(cable_detector_ == nullptr) {
-        cable_detector_ = new CableDetector(nh_);
-    }
-
     geometry_msgs::Point cable_point;
     int retry = 0;
     while (!cable_detector_->findCable(cable_point) && retry++ < 5);
@@ -1130,7 +1129,7 @@ decision_making::TaskResult valTask2::deployPanelTask(string name, const FSMCall
 
     static int retry_count=0;
 
-    if(task2_utils_->getCurrentCheckpoint() == 3)
+    if(task2_utils_->getCurrentCheckpoint() > 3)
     {
         ROS_INFO("valTask2::deployPanelTask : Panel deployed successfully");
         eventQueue.riseEvent("/DEPLOYED");
@@ -1246,7 +1245,7 @@ decision_making::TaskResult valTask2::pickCableTask(string name, const FSMCallCo
         ros::Duration(1).sleep();
     }
 
-    if(task2_utils_->getCurrentCheckpoint() == 4 && task2_utils_->isCableInHand(armSide::RIGHT))    //always use right hand for cable pickup
+    if(task2_utils_->getCurrentCheckpoint() > 4 && task2_utils_->isCableInHand(armSide::RIGHT))    //always use right hand for cable pickup
     {
         ROS_INFO("valTask2::pickCableTask : Picked up cable");
         // go to next state
@@ -1336,7 +1335,7 @@ decision_making::TaskResult valTask2::plugCableTask(string name, const FSMCallCo
     static int fail =0;
 
     //    Checkpoint 5: Plug the power cable into the solar panel
-    if(cable_task_->insert_cable(socket_coordinates_) && task2_utils_->getCurrentCheckpoint() == 5)
+    if(cable_task_->insert_cable(socket_coordinates_) && task2_utils_->getCurrentCheckpoint() > 5)
     {
         ROS_INFO("valTask2::plugCableTask plugged the cable succesfully. going to next state");
         eventQueue.riseEvent("/CABLE_PLUGGED");
