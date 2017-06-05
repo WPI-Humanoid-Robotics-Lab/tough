@@ -438,7 +438,7 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
     step_poses.back().orientation.w = step_quat_ground.w();
     
     visualization_msgs::Marker stair_pose_ground_m;
-    pcl_conversions::fromPCL(filtered_cloud->header, stair_pose_m.header);
+    pcl_conversions::fromPCL(filtered_cloud->header, stair_pose_ground_m.header);
     stair_pose_ground_m.ns = "stairs_pose" ;
     stair_pose_ground_m.id = 0;
     stair_pose_ground_m.type = visualization_msgs::Marker::ARROW;
