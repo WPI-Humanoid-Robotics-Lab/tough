@@ -326,18 +326,22 @@ void task1Utils::fixHandleArray(std::vector<geometry_msgs::Point> &handle_loc, s
 
     geometry_msgs::Point temp;
     ROS_INFO_STREAM("Handle Locs before "<< handle_loc[0] << "\t" << handle_loc[1] << "\t" << handle_loc[2]<<"\t" << handle_loc[3]<< std::endl);
-    double norm1 = std::sqrt(std::pow(handle_loc[1].x - pclHandlePoses[1].x , 2) + std::pow(handle_loc[1].y - pclHandlePoses[1].y , 2) + std::pow(handle_loc[1].z - pclHandlePoses[1].z , 2));
-    double norm2 = std::sqrt(std::pow(handle_loc[3].x - pclHandlePoses[0].x , 2) + std::pow(handle_loc[3].y - pclHandlePoses[0].y , 2) + std::pow(handle_loc[3].z - pclHandlePoses[0].z , 2));
-    ROS_INFO_STREAM("normLeft "<< norm1 << std::endl << " normRight" <<norm2<<std::endl);
+    double norm1_handle = std::sqrt(std::pow(handle_loc[1].x - pclHandlePoses[1].x , 2) + std::pow(handle_loc[1].y - pclHandlePoses[1].y , 2) + std::pow(handle_loc[1].z - pclHandlePoses[1].z , 2));
+    double norm1_centre = std::sqrt(std::pow(handle_loc[0].x - pclHandlePoses[1].x , 2) + std::pow(handle_loc[0].y - pclHandlePoses[1].y , 2) + std::pow(handle_loc[0].z - pclHandlePoses[1].z , 2));
+    double norm2_handle = std::sqrt(std::pow(handle_loc[3].x - pclHandlePoses[0].x , 2) + std::pow(handle_loc[3].y - pclHandlePoses[0].y , 2) + std::pow(handle_loc[3].z - pclHandlePoses[0].z , 2));
+    double norm2_centre = std::sqrt(std::pow(handle_loc[2].x - pclHandlePoses[0].x , 2) + std::pow(handle_loc[2].y - pclHandlePoses[0].y , 2) + std::pow(handle_loc[2].z - pclHandlePoses[0].z , 2));
 
-    if(norm1 > 0.05 )
+    ROS_INFO_STREAM("Left handle norm :  "<< norm1_handle << std::endl << " Right Handle Norm : " <<norm2_handle <<std::endl << " Left Centre Norm: "
+                    << norm1_centre << std::endl << "Right Centre Norm : " << norm2_centre << std::endl);
+
+    if(norm1_handle > 0.05 && norm1_centre < 0.05)
     {
         temp = handle_loc[1];
         handle_loc[1] = handle_loc[0];
         handle_loc[0] = temp;
     }
 
-    if(norm2 > 0.05 )
+    if(norm2_handle > 0.05 && norm2_centre < 0.05)
     {
         temp = handle_loc[3];
         handle_loc[3] = handle_loc[2];
