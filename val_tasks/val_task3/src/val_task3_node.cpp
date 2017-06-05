@@ -1,5 +1,7 @@
 #include <val_task3/val_task3_node.h>
 
+#define foreach BOOST_FOREACH
+
 task3Node::task3Node(ros::NodeHandle nh): nh_(nh)
 {
   task3_ = valTask3::getValTask3(nh);
