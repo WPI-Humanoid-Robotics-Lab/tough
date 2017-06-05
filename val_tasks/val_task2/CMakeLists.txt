@@ -68,6 +68,7 @@ include_directories(include
             src/plug_detector.cpp
             src/val_solar_detection.cpp
             src/val_solar_panel_detector.cpp
+         src/solar_panel_detection_2.cpp
             src/val_task2_utils.cpp
             src/cable_task.cpp
             src/array_table_detector.cpp
@@ -78,6 +79,9 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 
 add_executable(solar_panel_detector_node       src/val_solar_panel_detector_node.cpp)
 target_link_libraries(solar_panel_detector_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PROJECT_NAME} ${PCL_LIBRARY_DIRS} ${PROJECT_NAME})
+
+add_executable(solar_panel_detection_2_node       src/solar_panel_detection_2_node.cpp)
+target_link_libraries(solar_panel_detection_2_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PROJECT_NAME} ${PCL_LIBRARY_DIRS} ${PROJECT_NAME})
 
 
 add_executable(rover_detection_node       src/val_rover_detection_node.cpp)

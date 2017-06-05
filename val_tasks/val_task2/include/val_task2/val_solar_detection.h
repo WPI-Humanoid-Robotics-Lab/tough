@@ -46,6 +46,7 @@ private:
 
   ros::Publisher pcl_filtered_pub;
   ros::Publisher rover_cloud_pub;
+  ros::Publisher dbg_points_pub_;
 
 
   ros::Publisher vis_pub_array ;
