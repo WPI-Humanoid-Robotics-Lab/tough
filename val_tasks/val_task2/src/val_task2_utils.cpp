@@ -250,12 +250,12 @@ void task2Utils::reOrientTowardsPanel(geometry_msgs::Pose panelPose){
     double error = panelPose.position.y;
     double abserror = std::fabs(error);
     ROS_INFO_STREAM("Error is:" << error << "Absolute value for error is:" << abserror);
-    if (abserror < 0.1 && abserror > 0.49 ){
+    if (abserror < 0.1 || abserror > 0.49 ){
         ROS_INFO("reOrientTowardsPanel: Not reorienting, the offset is too less or beyond control");
     }
     else
     {
-        nSteps = std::ceil(abserror/0.1);
+        nSteps = int(((abserror/0.1)+0.5));
         ROS_INFO_STREAM("No of steps to walk is:" << nSteps);
 
         if (error > 0){
