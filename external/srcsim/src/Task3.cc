@@ -23,6 +23,7 @@
 
 #include <srcsim/Leak.h>
 
+#include "srcsim/HarnessManager.hh"
 #include "srcsim/Task3.hh"
 
 using namespace gazebo;
@@ -107,6 +108,15 @@ size_t Task3::Number() const
 bool Task3CP1::Check()
 {
   return this->CheckBox("/task3/checkpoint1");
+}
+
+/////////////////////////////////////////////////
+void Task3CP1::Restart(const common::Time &_penalty)
+{
+  // This is the 1st CP of the task: reharness back at start box
+  HarnessManager::Instance()->NewGoal(this->robotStartPose);
+
+  Checkpoint::Restart(_penalty);
 }
 
 /////////////////////////////////////////////////

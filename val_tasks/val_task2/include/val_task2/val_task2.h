@@ -36,6 +36,7 @@
 #include "val_task2/plug_detector.h"
 #include "val_task_common/finish_box_detector.h"
 #include "navigation_common/map_generator.h"
+#include "perception_common/MultisensePointCloud.h"
 
 using namespace decision_making;
 
@@ -81,7 +82,7 @@ class valTask2 {
     // Pick Cable Task
     CableTask* cable_task_;
     // socket detector
-    plug_detector* socket_detector_;
+    SocketDetector* socket_detector_;
     // finish box detector
     FinishBoxDetector* finish_box_detector_;
 
@@ -98,6 +99,8 @@ class valTask2 {
 
     //robot state informer
     RobotStateInformer* robot_state_;
+
+    valControlCommon* control_common_;
 
     ros::Subscriber occupancy_grid_sub_;
     unsigned int map_update_count_;
@@ -138,6 +141,8 @@ class valTask2 {
     nav_msgs::OccupancyGrid visited_map_;
 
     geometry_msgs::Pose2D next_finishbox_center_;
+
+    src_perception::MultisenseImage* ms_sensor_;
 
     public:
 

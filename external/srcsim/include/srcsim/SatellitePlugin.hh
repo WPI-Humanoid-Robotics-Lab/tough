@@ -23,6 +23,7 @@
 #include <gazebo/common/UpdateInfo.hh>
 #include <gazebo/physics/Joint.hh>
 #include <gazebo/physics/JointController.hh>
+#include <gazebo/transport/Node.hh>
 
 namespace gazebo
 {
@@ -33,6 +34,10 @@ namespace gazebo
 
     // Documentation inherited
     public: void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+
+    /// \brief Callback for enable "service".
+    /// \param[in] _msg 0 to stop, 1 to start
+    public: void Enable(ConstIntPtr &_msg);
 
     /// \brief Called on every world update.
     /// \param[in] _info Info about the world.
@@ -55,6 +60,9 @@ namespace gazebo
 
     /// \brief Angle tolerance in degrees.
     private: double tolerance;
+
+    /// \brief Topic for satellite messages.
+    private: std::string satTopic;
 
     /// \brief Pointer to the yaw wheel joint.
     private: physics::JointPtr yawWheel;
@@ -85,6 +93,12 @@ namespace gazebo
 
     /// \brief Ros satellite publisher
     private: ros::Publisher satelliteRosPub;
+
+    /// \brief Gazebo transport node for communication.
+    private: transport::NodePtr gzNode;
+
+    /// \brief Subscriber to enable messages.
+    private: transport::SubscriberPtr enableSub;
 
     /// \brief List of connections
     private: std::vector<event::ConnectionPtr> connections;

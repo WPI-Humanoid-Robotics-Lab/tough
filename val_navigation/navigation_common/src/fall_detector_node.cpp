@@ -14,6 +14,7 @@ int main(int argc, char **argv)
         if(fall_detector.isRobotFallen())
         {
             ROS_ERROR("!!!!!!!!!!!!!!!!!!!!....Robot Fallen....!!!!!!!!!!!!!!!!!!!!");
+            int status = system("killall roscore rosmaster rosout gzserver gzclient roslaunch");
         }
 
         rate.sleep();

@@ -41,7 +41,7 @@ armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
 }
 
 armTrajectory::~armTrajectory(){
-    //delete tf_listener_;
+    armTrajectorySunscriber.shutdown();
 }
 
 

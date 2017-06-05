@@ -7,13 +7,14 @@
 #define DISABLE_DRAWINGS true
 #define DISABLE_TRACKBAR true
 
-plug_detector::plug_detector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
+SocketDetector::SocketDetector(ros::NodeHandle nh, src_perception::MultisenseImage* ms_sensor) : nh_(nh), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
-    ms_sensor_.giveQMatrix(qMatrix_);
+    ms_sensor_ = ms_sensor;
+    ms_sensor_->giveQMatrix(qMatrix_);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_plug",1);
 }
 
-void plug_detector::showImage(cv::Mat image, std::string caption)
+void SocketDetector::showImage(cv::Mat image, std::string caption)
 {
 #ifdef DISABLE_DRAWINGS
     return;
@@ -23,7 +24,7 @@ void plug_detector::showImage(cv::Mat image, std::string caption)
     cv::waitKey(3);
 }
 
-void plug_detector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
+void SocketDetector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
 {
     cv::inRange(imgHSV,cv::Scalar(hsv_[0], hsv_[2], hsv_[4]), cv::Scalar(hsv_[1], hsv_[3], hsv_[5]), outImg);
     cv::morphologyEx(outImg, outImg, cv::MORPH_OPEN, getStructuringElement( cv::MORPH_ELLIPSE,cv::Size(3,3)));
@@ -37,7 +38,7 @@ void plug_detector::colorSegment(cv::Mat &imgHSV, cv::Mat &outImg)
     cv::waitKey(3);
 }
 
-size_t plug_detector::findMaxContour(const std::vector<std::vector<cv::Point> >& contours)
+size_t SocketDetector::findMaxContour(const std::vector<std::vector<cv::Point> >& contours)
 {
     int largest_area = 0;
     int largest_contour_index = 0;
@@ -61,7 +62,7 @@ size_t plug_detector::findMaxContour(const std::vector<std::vector<cv::Point> >&
     return largest_contour_index;
 }
 
-bool plug_detector::getPlugLocation(geometry_msgs::Point& plugLoc)
+bool SocketDetector::getPlugLocation(geometry_msgs::Point& plugLoc)
 {
     bool foundPlug = false;
     src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
@@ -138,13 +139,13 @@ bool plug_detector::getPlugLocation(geometry_msgs::Point& plugLoc)
     return foundPlug;
 }
 
-bool plug_detector::findPlug(geometry_msgs::Point& plugLoc)
+bool SocketDetector::findPlug(geometry_msgs::Point& plugLoc)
 {
     //VISUALIZATION - include a spinOnce here to visualize the eigenvectors
     markers_.markers.clear();
-    if(ms_sensor_.giveImage(current_image_))
+    if(ms_sensor_->giveImage(current_image_))
     {
-        if( ms_sensor_.giveDisparityImage(current_disparity_))
+        if( ms_sensor_->giveDisparityImage(current_disparity_))
         {
             return getPlugLocation(plugLoc);
         }
@@ -152,7 +153,7 @@ bool plug_detector::findPlug(geometry_msgs::Point& plugLoc)
     return 0;
 }
 
-void plug_detector::setTrackbar()
+void SocketDetector::setTrackbar()
 {
     cv::namedWindow("binary thresholding");
     cv::createTrackbar("hl", "binary thresholding", &hsv_[0], 180);
@@ -170,7 +171,7 @@ void plug_detector::setTrackbar()
     cv::getTrackbarPos("vu", "binary thresholding");
 }
 
-void plug_detector::visualize_point(geometry_msgs::Point point){
+void SocketDetector::visualize_point(geometry_msgs::Point point){
 
     std::cout<< "goal origin :\n"<< point << std::endl;
     static int id = 0;
@@ -205,7 +206,7 @@ void plug_detector::visualize_point(geometry_msgs::Point point){
     markers_.markers.push_back(marker);
 }
 
-plug_detector::~plug_detector()
+SocketDetector::~SocketDetector()
 {
 
 }

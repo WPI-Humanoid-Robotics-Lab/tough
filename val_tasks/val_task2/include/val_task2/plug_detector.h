@@ -19,7 +19,7 @@
 #include <iostream>
 #include <vector>
 
-class plug_detector
+class SocketDetector
 {
     cv::Mat current_image_, current_image_HSV_, current_disparity_, qMatrix_;
 
@@ -40,13 +40,13 @@ class plug_detector
 
     ros::NodeHandle nh_;
     ros::Publisher marker_pub_;
-    src_perception::MultisenseImage ms_sensor_;
+    src_perception::MultisenseImage* ms_sensor_;
     src_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
     void visualize_point(geometry_msgs::Point point);
 
 public:
-    plug_detector(ros::NodeHandle nh);
+    SocketDetector(ros::NodeHandle nh, src_perception::MultisenseImage *ms_sensor);
     void setTrackbar();
     void showImage(cv::Mat, std::string caption="Plug Detection");
     void colorSegment(cv::Mat &imgHSV, cv::Mat &outImg);
@@ -55,7 +55,7 @@ public:
     cv::Point getOrientation(const std::vector<cv::Point> &, cv::Mat &);
     void drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale = 0.2);
     bool findPlug(geometry_msgs::Point &);
-    ~plug_detector();
+    ~SocketDetector();
 
 };
 

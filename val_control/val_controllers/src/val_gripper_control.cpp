@@ -62,7 +62,9 @@ void gripperControl::controlGripper(const armSide side, GRIPPER_STATE state)
     case GRIPPER_STATE::CUP:
         msg.data = side == LEFT? CUP_LEFT_GRIPPER : CUP_RIGHT_GRIPPER;
         break;
-
+    case GRIPPER_STATE::HANDLE_HOLD:
+        msg.data = side == LEFT? HANDLE_HOLD_LEFT_GRIPPER : HANDLE_HOLD_RIGHT_GRIPPER;
+        break;
     default:
         break;
     }

@@ -7,7 +7,8 @@ int main(int argc, char** argv)
     int numIterations = 0;
     bool foundButton = false;
     geometry_msgs::Point ButtonLoc;
-    ButtonDetector b1(nh);
+    src_perception::MultisenseImage* ms_sensor = new src_perception::MultisenseImage(nh);
+    ButtonDetector b1(nh, ms_sensor);
 
     //while(ros::ok())
     while (!foundButton && numIterations < 20)

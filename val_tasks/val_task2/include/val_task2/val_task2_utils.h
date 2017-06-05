@@ -19,6 +19,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "val_task2/val_solar_panel_detector.h"
 #include <std_msgs/Int8.h>
+#include <math.h>
 
 enum class CLEAR_BOX_CLOUD{
     WAIST_UP=0,
@@ -105,7 +106,7 @@ private:
 public:
     task2Utils(ros::NodeHandle nh);
     ~task2Utils();
-    void afterPanelGraspPose(const armSide side);
+    bool afterPanelGraspPose(const armSide side);
     void movePanelToWalkSafePose(const armSide side);
     bool isPanelPicked(const armSide side);
     void moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel);
@@ -114,12 +115,12 @@ public:
     void pausePointCloud();
     void resumePointCloud();
     void clearBoxPointCloud(CLEAR_BOX_CLOUD state);
-    void reOrientTowardsPanel(geometry_msgs::Pose panelPose);
+    void reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset=0.0);
     void reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
     bool shakeTest(const armSide graspingHand);
     boost::posix_time::ptime timeNow;
-    bool isCableOnTable(geometry_msgs::Pose &cable_coordinates);
+    bool isCableOnTable(geometry_msgs::Pose &cable_pose);
     bool isCableInHand(armSide side);
     bool isCableTouchingSocket();
     geometry_msgs::Pose grasping_hand(armSide &side, geometry_msgs::Pose handle_pose);

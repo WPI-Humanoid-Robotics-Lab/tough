@@ -41,7 +41,7 @@
     <!-- A global light source -->
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
-      <pose>0 0 1000 0.13354950705196278 -1.5478276144208802 0</pose>
+      <pose>0 0 1000 -0.11143662174684987 -0.8707398172430749 0</pose>
       <diffuse>0.8 0.8 0.8 1</diffuse>
       <specular>0.2 0.2 0.2 1</specular>
       <attenuation>
@@ -77,40 +77,40 @@
 
     <!-- Bling -->
     <include>
-      <name>mars_rock_2_1</name>
+      <name>bling_1</name>
       <pose>
-      0.0900000000000003
-      2.024
+      0.08999999999999972
+      -2.324
       0
       0
       0
-      -2.4492935982947064e-16
+      -2.3561944901923453
       </pose>
-      <uri>model://mars_rock_2</uri>
+      <uri>model://mars_crate_long</uri>
     </include>
 
 
     <!-- Bling -->
     <include>
-      <name>mars_rock_1_2</name>
+      <name>bling_2</name>
       <pose>
-      0.08999999999999976
-      -1.924
+      0.09000000000000027
+      1.924
       0
       0
       0
-      3.141592653589793
+      -2.4492935982947064e-16
       </pose>
       <uri>model://mars_rock_1</uri>
     </include>
 
 
-    
+
 
     <!-- TASK 1 -->
 
     <!-- Task 1 start - Box plugin -->
-    
+
 
     <plugin name="boxT1Start" filename="libBoxContainsPlugin.so">
       <entity>valkyrie</entity>
@@ -142,9 +142,9 @@
 
 
     <!-- Satellite -->
-    
 
-    
+
+
 
 <model name="satellite_dish">
 
@@ -417,7 +417,7 @@
     <axis>
       <xyz>0 0 -1</xyz>
       <dynamics>
-        <friction>2.2025260686828436</friction>
+        <friction>2.1350530850627893</friction>
       </dynamics>
     </axis>
   </joint>
@@ -428,7 +428,7 @@
     <axis>
       <xyz>0 0 -1</xyz>
       <dynamics>
-        <friction>2.9510399395121487</friction>
+        <friction>2.2079557643358045</friction>
       </dynamics>
     </axis>
   </joint>
@@ -442,11 +442,11 @@
 
     <yaw_ratio>0.1</yaw_ratio>
     <yaw_pid>1000 0 10</yaw_pid>
-    <yaw_target>-1.3327347452859146</yaw_target>
+    <yaw_target>-0.0707670122966555</yaw_target>
 
     <pitch_ratio>0.1</pitch_ratio>
     <pitch_pid>1000 100 10</pitch_pid>
-    <pitch_target>0.26677445925687693</pitch_target>
+    <pitch_target>0.9189273569336316</pitch_target>
 
     <!-- Tolerance in degrees -->
     <tolerance>5</tolerance>
@@ -463,7 +463,7 @@
 
 
     <!-- Checkpoint 1 - Box plugin -->
-    
+
 
     <plugin name="boxT1CP1" filename="libBoxContainsPlugin.so">
       <entity>valkyrie</entity>
@@ -481,16 +481,16 @@
 
     <!-- Bling -->
     <include>
-      <name>mars_rock_3_3</name>
+      <name>bling_3</name>
       <pose>
-      2.376000000000001
-      1.8619999999999997
+      2.3760000000000003
+      1.5619999999999998
       0
       0
       0
-      -2.4492935982947064e-16
+      0.785398163397448
       </pose>
-      <uri>model://mars_rock_3</uri>
+      <uri>model://mars_crate_long</uri>
     </include>
 
 
@@ -511,29 +511,29 @@
 
     <!-- Bling -->
     <include>
-      <name>mars_crate_long_4</name>
+      <name>bling_4</name>
       <pose>
-      4.558050159477537
-      0.026215332949237502
+      2.6318912875253813
+      -1.8999435390029178
       0
       0
       0
-      -2.220446049250313e-16
+      2.356194490192345
       </pose>
-      <uri>model://mars_crate_long</uri>
+      <uri>model://mars_rock_1</uri>
     </include>
 
 
     <!-- Bling -->
     <include>
-      <name>mars_rock_3_5</name>
+      <name>bling_5</name>
       <pose>
-      2.1369165406947976
-      -2.394918285833501
+      4.7701821938335005
+      0.23834736730520178
       0
       0
       0
-      2.356194490192345
+      -0.7853981633974484
       </pose>
       <uri>model://mars_rock_3</uri>
     </include>
@@ -555,7 +555,7 @@
 
 
     <!-- Checkpoint 4 - Box plugin -->
-    <plugin name="boxT1CP3" filename="libBoxContainsPlugin.so">
+    <plugin name="boxT1CP4" filename="libBoxContainsPlugin.so">
       <entity>valkyrie</entity>
       <namespace>task1/checkpoint4</namespace>
       <pose>
@@ -571,47 +571,47 @@
 
     <!-- Bling -->
     <include>
-      <name>mars_crate_long_6</name>
+      <name>bling_6</name>
       <pose>
-      6.713311628534133
-      -4.338047720534135
+      6.430468916059514
+      -4.055205008059516
       0
       0
       0
-      -1.570796326794897
+      -2.3561944901923453
       </pose>
-      <uri>model://mars_crate_long</uri>
+      <uri>model://mars_crate</uri>
     </include>
 
 
     <!-- Bling -->
     <include>
-      <name>mars_crate_long_7</name>
+      <name>bling_7</name>
       <pose>
-      3.4266793095790598
-      -4.338047720534134
+      3.2145472752230955
+      -4.550179754890098
       0
       0
       0
-      3.141592653589793
+      2.356194490192345
       </pose>
-      <uri>model://mars_crate_long</uri>
+      <uri>model://mars_rock_3</uri>
     </include>
 
 
-    
+
 
     <!-- /TASK 1 -->
-    
 
-    
 
-    
+
+
+
 
     <!-- Finals plugin -->
     <plugin name="finals" filename="libFinalsPlugin.so">
 
-      
+
         <task1>
           <timeout>1800</timeout>
 
@@ -619,7 +619,7 @@
             <skip_robot_pose>
               2.687517287525381
               0.3267572875253808
-              1.1
+              1.257
               0
               0
               0.7853981633974481
@@ -630,29 +630,31 @@
             <skip_robot_pose>
               2.687517287525381
               0.3267572875253808
-              1.1
+              1.257
               0
               0
               0.7853981633974481
             </skip_robot_pose>
           </checkpoint2>
 
+          <!-- checkpoint 3 copies checkpoint 2's skip pose -->
+
           <checkpoint4>
             <skip_robot_pose>
               5.069995469056597
               -2.6947315610565976
-              1.1
+              1.257
               0
               0
               0.7853981633974481
             </skip_robot_pose>
           </checkpoint4>
         </task1>
-      
 
-      
 
-      
+
+
+
 
     </plugin>
 

@@ -298,8 +298,7 @@ void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8 &msg)
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;
-    minPoint[0]=-1;
-    minPoint[1]=-1;
+
     // this indicates that if the msg contains element 1 it, would clear point cloud from waist up
     if(msg.data == 1)
     {
@@ -414,11 +413,11 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
         */
 
         // Create the filtering object
-        pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-        sor.setInputCloud (result);
-        sor.setMeanK (50);
-        sor.setStddevMulThresh (1.0);
-        sor.filter (*tgt);
+//        pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+//        sor.setInputCloud (result);
+//        sor.setMeanK (50);
+//        sor.setStddevMulThresh (1.0);
+//        sor.filter (*tgt);
 
         //        if (enable_box_filter_){
         //            geometry_msgs::Pose pelvisPose;
@@ -456,7 +455,7 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
         //        }
 
 
-        convertPCLtoROS(tgt,merged_cloud);
+        convertPCLtoROS(result,merged_cloud);
         // publish the merged message
     }
 

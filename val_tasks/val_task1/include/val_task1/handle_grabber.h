@@ -16,7 +16,7 @@ class handle_grabber{
 public:
     handle_grabber(ros::NodeHandle n);
     ~handle_grabber();
-   void grasp_handles(const armSide side, const geometry_msgs::Point &goal, float executionTime=2.0f);
+   void grasp_handles(const armSide side, const geometry_msgs::Point &goal, float executionTime=1.5f);
    void adjust_pose(const armSide side, const geometry_msgs::Point &goal, float executionTime=1.0f);
 
    geometry_msgs::QuaternionStamped leftHandOrientation() const;
