@@ -1,3 +1,5 @@
+# pragma once
+
 #include <time.h>
 #include <numeric>
 #include <boost/bind.hpp>

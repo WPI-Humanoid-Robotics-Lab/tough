@@ -26,7 +26,8 @@
 #include "val_controllers/val_head_navigation.h"
 #include "val_controllers/val_gripper_control.h"
 #include "val_controllers/robot_state.h"
-
+#include <val_controllers/val_wholebody_manipulation.h>
+#include <mutex>
 
 using namespace decision_making;
 
@@ -47,6 +48,9 @@ class valTask3{
     pelvisTrajectory*   pelvis_controller_;
     HeadTrajectory*     head_controller_;
     gripperControl*     gripper_controller_;
+    // arm
+    armTrajectory*      arm_controller_;
+    wholebodyManipulation* wholebody_controller_;
     RobotStateInformer* robot_state_;
 
     //map and occupancy grid
@@ -64,7 +68,9 @@ class valTask3{
     geometry_msgs::Point  repair_tool_loc_;
     geometry_msgs::Pose2D finish_box_pose_;
 
-    static valTask3* currentObject;
+    static valTask3 *currentObject;
+
+    void resetRobotToDefaults(int arm_pose=1);
 
     public:
 

@@ -1,4 +1,5 @@
 #include <val_task1/val_task1_utils.h>
+#include <std_msgs/Int8.h>
 
 task1Utils::task1Utils(ros::NodeHandle nh):
     nh_(nh)
@@ -9,9 +10,9 @@ task1Utils::task1Utils(ros::NodeHandle nh):
     // marker publisher
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>( "handle_path", 10, true);
 
-    clearbox_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
-    reset_pointcloud_pub_ = nh_.advertise<std_msgs::Empty>("/field/clearbox_pointcloud",1);
-    task1_log_pub_         = nh_.advertise<std_msgs::String>("/field/log",10);
+    clearbox_pointcloud_pub_ = nh_.advertise<std_msgs::Int8>("/field/clearbox_pointcloud",1);
+    reset_pointcloud_pub_    = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
+    task1_log_pub_           = nh_.advertise<std_msgs::String>("/field/log",10);
 
     task_status_sub_ = nh.subscribe("/srcsim/finals/task1", 10, &task1Utils::taskStatusSubCB, this);
 
@@ -325,28 +326,58 @@ void task1Utils::fixHandleArray(std::vector<geometry_msgs::Point> &handle_loc, s
 
     geometry_msgs::Point temp;
     ROS_INFO_STREAM("Handle Locs before "<< handle_loc[0] << "\t" << handle_loc[1] << "\t" << handle_loc[2]<<"\t" << handle_loc[3]<< std::endl);
-    double norm1 = std::sqrt(std::pow(handle_loc[1].x - pclHandlePoses[1].x , 2) + std::pow(handle_loc[1].y - pclHandlePoses[1].y , 2) + std::pow(handle_loc[1].z - pclHandlePoses[1].z , 2));
-    double norm2 = std::sqrt(std::pow(handle_loc[3].x - pclHandlePoses[0].x , 2) + std::pow(handle_loc[3].y - pclHandlePoses[0].y , 2) + std::pow(handle_loc[3].z - pclHandlePoses[0].z , 2));
-    ROS_INFO_STREAM("normLeft "<< norm1 << std::endl << " normRight" <<norm2<<std::endl);
+    double norm1_handle = std::sqrt(std::pow(handle_loc[1].x - pclHandlePoses[1].x , 2) + std::pow(handle_loc[1].y - pclHandlePoses[1].y , 2) + std::pow(handle_loc[1].z - pclHandlePoses[1].z , 2));
+    double norm1_centre = std::sqrt(std::pow(handle_loc[0].x - pclHandlePoses[1].x , 2) + std::pow(handle_loc[0].y - pclHandlePoses[1].y , 2) + std::pow(handle_loc[0].z - pclHandlePoses[1].z , 2));
+    double norm2_handle = std::sqrt(std::pow(handle_loc[3].x - pclHandlePoses[0].x , 2) + std::pow(handle_loc[3].y - pclHandlePoses[0].y , 2) + std::pow(handle_loc[3].z - pclHandlePoses[0].z , 2));
+    double norm2_centre = std::sqrt(std::pow(handle_loc[2].x - pclHandlePoses[0].x , 2) + std::pow(handle_loc[2].y - pclHandlePoses[0].y , 2) + std::pow(handle_loc[2].z - pclHandlePoses[0].z , 2));
 
-    if(norm1 > 0.05 )
+    ROS_INFO_STREAM("Left handle norm :  "<< norm1_handle << std::endl << " Right Handle Norm : " <<norm2_handle <<std::endl << " Left Centre Norm: "
+                    << norm1_centre << std::endl << "Right Centre Norm : " << norm2_centre << std::endl);
+
+    if(norm1_handle > 0.05 && norm1_centre < 0.05)
     {
         temp = handle_loc[1];
         handle_loc[1] = handle_loc[0];
         handle_loc[0] = temp;
     }
 
-    if(norm2 > 0.05 )
+    if(norm2_handle > 0.05 && norm2_centre < 0.05)
     {
         temp = handle_loc[3];
         handle_loc[3] = handle_loc[2];
         handle_loc[2] = temp;
     }
+
+    const geometry_msgs::Point &pitchHandle = handle_loc[PITCH_KNOB_HANDLE];
+    geometry_msgs::Point &pitchCenter = handle_loc[PITCH_KNOB_CENTER];
+
+    double y = (pitchHandle.y - pitchCenter.y);
+    double x = (pitchHandle.x - pitchCenter.x);
+    float theta = atan2(y,x);
+    float currentDistance = sqrt(pow((pitchHandle.x - pitchCenter.x), 2) + pow((pitchHandle.y - pitchCenter.y),2));
+    float diff = 0.125 - currentDistance;
+    if (diff > 0){
+        pitchCenter.x += diff*cos(theta);
+        pitchCenter.y += diff*sin(theta);
+    }
+
+    const geometry_msgs::Point &yawHandle = handle_loc[YAW_KNOB_HANDLE];
+    geometry_msgs::Point &yawCenter = handle_loc[YAW_KNOB_CENTER];
+    y = (yawHandle.y - yawCenter.y);
+    x = (yawHandle.x - yawCenter.x);
+    theta = atan2(y,x);
+    currentDistance = sqrt(pow((yawHandle.x - yawCenter.x), 2) + pow((yawHandle.y - yawCenter.y),2));
+    diff = 0.125 - currentDistance;
+    if (diff > 0){
+        yawCenter.x += diff*cos(theta);
+        yawCenter.y += diff*sin(theta);
+    }
 }
 
 void task1Utils::clearBoxPointCloud()
 {
-    std_msgs::Empty msg;
+    std_msgs::Int8 msg;
+    msg.data = 0;
     clearbox_pointcloud_pub_.publish(msg);
 }
 
