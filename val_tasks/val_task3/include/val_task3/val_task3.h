@@ -1,7 +1,7 @@
 #pragma once
 
 /*******************************************************
- * !!!!! important other wise created collision with std
+ * !!!!! important other wise creates collision with std
  * *****************************************************/
 #define DISABLE_DECISION_MAKING_LOG true
 
@@ -54,9 +54,15 @@ class valTask3{
     unsigned int map_update_count_;
     void occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg);
 
-    geometry_msgs::Pose2D leak_detector_walk_goal_;
-    geometry_msgs::Pose2D leak_repair_walk_goal_;
-    geometry_msgs::Pose2D leak_position_walk_goal_;
+    // private vairiables storing the pose and locations
+    geometry_msgs::Pose2D stair_detect_walk_pose_;
+    geometry_msgs::Point  handle_center_;
+    geometry_msgs::Pose2D table_walk_pose_;
+    geometry_msgs::Point  leak_detector_loc_;
+    geometry_msgs::Pose2D leak_wall_pose_;
+    geometry_msgs::Point  leak_loc_;
+    geometry_msgs::Point  repair_tool_loc_;
+    geometry_msgs::Pose2D finish_box_pose_;
 
     static valTask3* currentObject;
 
@@ -69,7 +75,34 @@ class valTask3{
     bool preemptiveWait(double ms, decision_making::EventQueue& queue);
 
     decision_making::TaskResult initTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult climbStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectDoorHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult openDoorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkthroughDoorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectLeakToolTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToLeakToolTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult pickLeakTool(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToDetectLeak(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectLeakTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectRepairToolTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToRepairToolTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult pickRepairTool(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToLeakTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult leakRepairTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    geometry_msgs::Pose2D stair_detect_walk_pose() const;
 
+    // setter getter api's
+    void setStairDetectWalkPose(const geometry_msgs::Pose2D &stair_detect_walk_pose);
+    void setHandleCenter(const geometry_msgs::Point &handle_center);
+    void setTableWalkPose(const geometry_msgs::Pose2D &table_walk_pose);
+    void setLeakDetectorLoc(const geometry_msgs::Point &leak_detector_loc);
+    void setLeakWallPose(const geometry_msgs::Pose2D &leak_wall_pose);
+    void setLeakLoc(const geometry_msgs::Point &leak_loc);
+    void setRepairToolLoc(const geometry_msgs::Point &repair_tool_loc);
+    void setFinishBoxPose(const geometry_msgs::Pose2D &finish_box_pose);
 };
