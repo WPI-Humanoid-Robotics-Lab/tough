@@ -435,7 +435,9 @@ bool CableDetector::findCable(geometry_msgs::Pose& cablePose)
             return getCablePose(cablePose);
         }
     }
+    ROS_WARN("CableDetector::findCable pose: Cannot read image from multisense");
     return false;
+
 }
 
 void CableDetector::drawAxis(cv::Mat& img, cv::Point p, cv::Point q, cv::Scalar colour, const float scale)
