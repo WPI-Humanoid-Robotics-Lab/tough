@@ -814,6 +814,7 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
     geometry_msgs::Point cable_point;
     int retry = 0;
     while (!cable_detector_->findCable(cable_point) && retry++ < 5);
+    std::cout<<"valTask2::findCableIntermediateTask : retry count : "<<retry<<"\n";
     std::cout<<"cable_point x: "<<cable_point.x<<" cable_point y: "<<cable_point.y<<" cable_point z: "<<cable_point.z<<"\n";
 
     if(cable_point.x == 0 && !head_yaw_ranges.empty())
@@ -1047,51 +1048,75 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
 
 decision_making::TaskResult valTask2::detectButtonTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("executing " << name);
+    ROS_INFO_STREAM("valTask2::detectButtonTask: executing " << name);
 
-//    if(button_detector_ == nullptr) {
-//        button_detector_ = new ButtonDetector(nh_);
-//    }
+    static std::queue<float> head_yaw_ranges;
 
-    static int retry_count = 0;
-
-    if (retry_count == 0){
-        //tilt head downwards to see the panel
-        head_controller_->moveHead(0.0f, 40.0f, 0.0f);
-        //wait for head to be in position
+    static bool executingOnce = true;
+    if(executingOnce)
+    {
+        head_controller_->moveHead(0,30,0,1.5);
         ros::Duration(2).sleep();
+
+        // possible head yaw rotations to better detect the cable
+        //clear the queue before starting
+        std::queue<float> temp;
+        head_yaw_ranges= temp;
+        head_yaw_ranges.push(-55.0);
+        head_yaw_ranges.push(-45.0);
+        head_yaw_ranges.push(-35.0);
+        head_yaw_ranges.push(-20.0);
+        head_yaw_ranges.push(-10.0);
+        head_yaw_ranges.push( 10.0);
+        head_yaw_ranges.push( 20.0);
+        head_yaw_ranges.push( 35.0);
+        head_yaw_ranges.push( 45.0);
+        head_yaw_ranges.push( 55.0);
+        executingOnce = false;
+        control_common_->stopAllTrajectories();
     }
 
-    //detect button
-    if( button_detector_->findButtons(button_coordinates_)){
 
-        ROS_INFO_STREAM("Button detected at "<<button_coordinates_.x<< " , "<<button_coordinates_.y<<" , "<<button_coordinates_.z);
+    int retry = 0;
+    while (!button_detector_->findButtons(button_coordinates_) && retry++ < 5);
+    std::cout<<"valTask2::detectButtonTask : retry count : "<<retry<<"\n";
+    std::cout<<"button x: "<<button_coordinates_.x<<" button y: "<<button_coordinates_.y<<" button z: "<<button_coordinates_.z<<"\n";
 
-        // generate the event
-        eventQueue.riseEvent("/BUTTON_DETECTED");
-
-//        if (button_detector_ != nullptr) delete button_detector_;
-//        button_detector_ = nullptr;
-    }
-    else if( retry_count++ < 10){
-        ROS_INFO("Did not detect button, retrying");
+    if(button_coordinates_.x == 0 && !head_yaw_ranges.empty())
+    {
+        // wrong point detected. move head and try again
+        head_controller_->moveHead(0,30,head_yaw_ranges.front(), 2.0f);
+        ROS_INFO("valTask2::detectButtonTask : Button not found. Trying with %.6f angle",head_yaw_ranges.front());
+        head_yaw_ranges.pop();
+        ros::Duration(2.5).sleep();
+        control_common_->stopAllTrajectories();
         eventQueue.riseEvent("/DETECT_BUTTON_RETRY");
     }
-    else{
-        ROS_INFO("Did not detect button, failed");
+    else if (button_coordinates_.x == 0)
+    {
+        // state failed after detecting 5*4 times
+        ROS_INFO("valTask2::detectButtonTask : Button not found. Failed after 20 trials");
         eventQueue.riseEvent("/BUTTON_DETECTION_FAILED");
-        retry_count = 0;
-//        if (button_detector_ != nullptr) delete button_detector_;
-//        button_detector_ = nullptr;
+        executingOnce= true;
+
+    }
+    else
+    {
+        // button found
+
+        std::cout<<"button x: "<<button_coordinates_.x<<" button y: "<<button_coordinates_.y<<" button z: "<<button_coordinates_.z<<"\n";
+        eventQueue.riseEvent("/BUTTON_DETECTED");
+        executingOnce= true;
     }
 
-    // wait infinetly until an external even occurs
+
     while(!preemptiveWait(1000, eventQueue)){
-        ROS_INFO("valTask2::alignSolarArrayTask : waiting for transition");
+        ROS_INFO("valTask2::detectSolarArrayTask : waiting for transition");
     }
-
     return TaskResult::SUCCESS();
 }
+
+
 
 decision_making::TaskResult valTask2::deployPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
@@ -1300,50 +1325,71 @@ decision_making::TaskResult valTask2::pickCableTask(string name, const FSMCallCo
 
 TaskResult valTask2::detectSocketTask(string name, const FSMCallContext &context, EventQueue &eventQueue)
 {
-    ROS_INFO_STREAM("valTask2::detectSocketTask : executing " << name);
-    if (socket_detector_ == nullptr){
-        socket_detector_ = new plug_detector(nh_);
-    }
+    ROS_INFO_STREAM("valTask2::detectSocketTask: executing " << name);
 
-    static int retry_count = 0;
+    static std::queue<float> head_yaw_ranges;
 
-    if (retry_count == 0){
-        //tilt head downwards to see the panel
-        head_controller_->moveHead(0.0f, 40.0f, 0.0f);
-        //wait for head to be in position
+    static bool executingOnce = true;
+    if(executingOnce)
+    {
+        head_controller_->moveHead(0,30,0,1.5);
         ros::Duration(2).sleep();
+
+        // possible head yaw rotations to better detect the cable
+        //clear the queue before starting
+        std::queue<float> temp;
+        head_yaw_ranges= temp;
+        head_yaw_ranges.push(-55.0);
+        head_yaw_ranges.push(-45.0);
+        head_yaw_ranges.push(-35.0);
+        head_yaw_ranges.push(-20.0);
+        head_yaw_ranges.push(-10.0);
+        head_yaw_ranges.push( 10.0);
+        head_yaw_ranges.push( 20.0);
+        head_yaw_ranges.push( 35.0);
+        head_yaw_ranges.push( 45.0);
+        head_yaw_ranges.push( 55.0);
+        executingOnce = false;
+        control_common_->stopAllTrajectories();
     }
 
-    //detect socket
-    if( socket_detector_->findPlug(socket_coordinates_)){
 
-        ROS_INFO_STREAM("valTask2::detectSocketTask : Socket detected at "<<socket_coordinates_.x<< " , "<<socket_coordinates_.y<<" , "<<socket_coordinates_.z);
+    int retry = 0;
+    while (!socket_detector_->findPlug(socket_coordinates_) && retry++ < 5);
+    std::cout<<"valTask2::detectSocketTask:: retry count : "<<retry<<"\n";
+    std::cout<<"socket x: "<<socket_coordinates_.x<<" socket y: "<<socket_coordinates_.y<<" socket z: "<<socket_coordinates_.z<<"\n";
 
-        // generate the event
-        eventQueue.riseEvent("/DETECTED_SOCKET");
-
-        if (socket_detector_ != nullptr) delete socket_detector_;
-        socket_detector_ = nullptr;
-    }
-    else if( retry_count++ < 10){
-        ROS_INFO("valTask2::detectSocketTask : Did not detect button, retrying");
+    if(socket_coordinates_.x == 0 && !head_yaw_ranges.empty())
+    {
+        // wrong point detected. move head and try again
+        head_controller_->moveHead(0,30,head_yaw_ranges.front(), 2.0f);
+        ROS_INFO("valTask2::detectSocketTask: Socket not found. Trying with %.6f angle",head_yaw_ranges.front());
+        head_yaw_ranges.pop();
+        ros::Duration(2.5).sleep();
+        control_common_->stopAllTrajectories();
         eventQueue.riseEvent("/DETECT_SOCKET_RETRY");
     }
-    else{
-        ROS_INFO("valTask2::detectSocketTask : Did not detect button, failed");
+    else if (socket_coordinates_.x == 0)
+    {
+        // state failed after detecting 5*4 times
+        ROS_INFO("valTask2::detectSocketTask : Socket not found. Failed after 20 trials");
         eventQueue.riseEvent("/DETECT_SOCKET_FAILED");
-        retry_count = 0;
-        if (socket_detector_ != nullptr) delete socket_detector_;
-        socket_detector_ = nullptr;
+        executingOnce= true;
+
+    }
+    else
+    {
+        // socket found
+
+        std::cout<<"socket x: "<<socket_coordinates_.x<<" socket y: "<<socket_coordinates_.y<<" socket z: "<<socket_coordinates_.z<<"\n";
+        eventQueue.riseEvent("/DETECTED_SOCKET");
+        executingOnce= true;
     }
 
-    // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
-        ROS_INFO("valTask2::alignSolarArrayTask : waiting for transition");
+        ROS_INFO("valTask2::detectSocketTask : waiting for transition");
     }
-
     return TaskResult::SUCCESS();
-
 }
 
 decision_making::TaskResult valTask2::plugCableTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
