@@ -58,19 +58,24 @@ private:
     float table_height_;
 
     //before walking
-    const std::vector<float> leftNearChestPalmDown_    = {-1.70, -1.04, 1.39, -1.85, -1.50, 0, 0};
-    const std::vector<float> leftNearChestPalmUp_    = {-1.70, -1.04, 1.39, -1.85, 1.50, 0, 0};
+    //used for rotating panel
+    const std::vector<float> leftNearChestPalmDown_    = {-1.70, -1.04, 1.39, -1.85, 1.50, 0, 0};
+    //used for picking up the panel
+    const std::vector<float> leftNearChestPalmUp_    = {-1.5, -1.04, 1.6, -1.85, -1.50, 0, 0};
     const std::vector<float> leftSeedNonGraspingHand_ = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};
     //while walking
-    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.38, -1.29, 0.99, -1.35, -0.26, 0.0, 0.0};
+    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.38, -1.49, 1.3, -0.7, -0.26, 0.0, 0.2};
 
 
     //before walking
-    const std::vector<float> rightNearChestPalmDown_     = {-1.70, 1.04, 1.39, 1.85, 1.50, 0, 0};
-    const std::vector<float> rightNearChestPalmUp_     = {-1.70, 1.04, 1.39, 1.85, -1.50, 0, 0};
+    //used for rotating panel
+    const std::vector<float> rightNearChestPalmDown_     = {-1.70, 1.04, 1.39, 1.85, -1.50, 0, 0};
+    //used for picking up the panel
+    const std::vector<float> rightNearChestPalmUp_     = {-1.5, 1.04, 1.6, 1.85, 1.50, 0, 0};
+
     const std::vector<float> rightSeedNonGraspingHand_ = {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0};
     //while walking
-    const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.38, 1.29, 0.99, 1.35, -0.26, 0.0, 0.0};
+    const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.38, 1.49, 1.3, 0.7, -0.26, 0.0, 0.2};
 
     // panel placement poses
     const std::vector<float> leftPanelPlacementUpPose1_  = {-1.5, -1.4, 1.39, -0.9, -1.10, 0.5, 0};

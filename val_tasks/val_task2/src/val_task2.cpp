@@ -716,7 +716,6 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
     else if (taskCommonUtils::isPoseChanged(pose_prev, solar_array_walk_goal_)) {
         ROS_INFO_STREAM("valTask2::walkSolarArrayTask : pose chaned to "<<solar_array_walk_goal_);
         walker_->walkToGoal(solar_array_walk_goal_, false);
-        task2_utils_->resumePointCloud();
         // sleep so that the walk starts
         ROS_INFO("valTask2::walkSolarArrayTask : Footsteps should be generated now");
         ros::Duration(4).sleep();
@@ -728,6 +727,7 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
     else if (walk_track_->isWalking())
     {
         // no state change
+        task2_utils_->resumePointCloud();
         ROS_INFO_THROTTLE(2, "valTask2::walkSolarArrayTask : walking");
         eventQueue.riseEvent("/WALK_TO_ARRAY_EXECUTING");
     }
@@ -737,6 +737,9 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
     {
         // reset the fail count
         fail_count = 0;
+        geometry_msgs::Pose2D temp;
+        pose_prev = temp;
+        task2_utils_->resumePointCloud();
         ROS_INFO("valTask2::walkSolarArrayTask : walk failed");
         eventQueue.riseEvent("/WALK_TO_ARRAY_FAILED");
     }
@@ -745,6 +748,8 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
     {
         // increment the fail count
         fail_count++;
+        geometry_msgs::Pose2D temp;
+        pose_prev = temp;
         ROS_INFO("valTask2::walkSolarArrayTask : walk retry");
         eventQueue.riseEvent("/WALK_TO_ARRAY_RETRY");
     }
