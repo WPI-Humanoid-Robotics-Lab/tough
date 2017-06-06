@@ -692,8 +692,6 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
     }
 
     return TaskResult::SUCCESS();
-
-
 }
 
 decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
@@ -762,10 +760,12 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
 decision_making::TaskResult valTask2::rotatePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("valTask2::rotatePanelTask : executing " << name);
-    if (!is_rotation_required_){
+    if (!is_rotation_required_)
+    {
         ROS_INFO("valTask2::rotatePanelTask : Rotation is not required. skipping this state");
     }
-    else {
+    else
+    {
         ROS_INFO("valTask2::rotatePanelTask : Rotating the panel");
         task2_utils_->rotatePanel(panel_grasping_hand_);
     }
@@ -773,7 +773,7 @@ decision_making::TaskResult valTask2::rotatePanelTask(string name, const FSMCall
 
     // generate the event
     while(!preemptiveWait(1000, eventQueue)){
-        ROS_INFO("waiting for transition");
+        ROS_INFO("valTask2::rotatePanelTask waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -936,8 +936,6 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
     return TaskResult::SUCCESS();
 
 }
-
-
 
 decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
@@ -1653,6 +1651,187 @@ decision_making::TaskResult valTask2::errorTask(string name, const FSMCallContex
     return TaskResult::SUCCESS();
 }
 
+decision_making::TaskResult valTask2::skipCheckPointTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+    ROS_INFO_STREAM("executing " << name);
+
+    // skip check point, basically take the user input and switches the state
+
+    return TaskResult::SUCCESS();
+}
+
+decision_making::TaskResult valTask2::skipToCP1Task(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+    ROS_INFO_STREAM("executing " << name);
+
+    static int retry_count = 0;
+
+    // skip to checkpoint 1
+    // start the task
+    ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
+    srcsim::StartTask   srv;
+    srv.request.checkpoint_id  = 2;
+    srv.request.task_id        = 1;
+
+    // if the check point is skipped
+    if(client.call(srv))
+    {
+        eventQueue.riseEvent("/SKIPPED_TO_CP_1");
+
+        ///@TODO: do anything which is required for further states
+    }
+    else if(retry_count < 5)
+    {
+        //reset the count
+        retry_count = 0;
+        eventQueue.riseEvent("/SKIP_CP_1_FAILED");
+    }
+    else
+    {
+        ROS_ERROR("service not called");
+        eventQueue.riseEvent("/SKIP_CP_1_RETRY");
+        retry_count++;
+    }
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("skipCheckPoint2Task: waiting for transition");
+    }
+
+    return TaskResult::SUCCESS();
+}
+
+decision_making::TaskResult valTask2::skipToCP3Task(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+    ROS_INFO_STREAM("executing " << name);
+
+    static int retry_count = 0;
+
+    // skip to checkpoint 3
+    // start the task
+    ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
+    srcsim::StartTask   srv;
+    srv.request.checkpoint_id  = 3;
+    srv.request.task_id        = 2;
+
+    // if the check point is skipped
+    if(client.call(srv))
+    {
+        eventQueue.riseEvent("/SKIPPED_TO_CP_3");
+
+        ///@TODO: do anything which is required for further states
+    }
+    else if(retry_count < 5)
+    {
+        //reset the count
+        retry_count = 0;
+        eventQueue.riseEvent("/SKIP_CP_3_FAILED");
+    }
+    else
+    {
+        ROS_ERROR("service not called");
+        eventQueue.riseEvent("/SKIP_CP_3_RETRY");
+        retry_count++;
+    }
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("skipCheckPoint3Task: waiting for transition");
+    }
+
+    return TaskResult::SUCCESS();
+}
+
+decision_making::TaskResult valTask2::skipToCP4Task(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+    ROS_INFO_STREAM("executing " << name);
+
+    static int retry_count = 0;
+
+    // skip to checkpoint 4
+    // start the task
+    ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
+    srcsim::StartTask   srv;
+    srv.request.checkpoint_id  = 5;
+    srv.request.task_id        = 2;
+
+    // if the check point is skipped
+    if(client.call(srv))
+    {
+        eventQueue.riseEvent("/SKIPPED_TO_CP_4");
+
+        ///@TODO: do anything which is required for further states
+    }
+    else if(retry_count < 5)
+    {
+        //reset the count
+        retry_count = 0;
+        eventQueue.riseEvent("/SKIP_CP_4_FAILED");
+    }
+    else
+    {
+        ROS_ERROR("service not called");
+        eventQueue.riseEvent("/SKIP_CP_4_RETRY");
+        retry_count++;
+    }
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("skipCheckPoint5Task: waiting for transition");
+    }
+
+    return TaskResult::SUCCESS();
+}
+
+decision_making::TaskResult valTask2::skipToCP6Task(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+    ROS_INFO_STREAM("executing " << name);
+
+    static int retry_count = 0;
+
+    // skip to checkpoint 6
+    // start the task
+    ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
+    srcsim::StartTask   srv;
+    srv.request.checkpoint_id  = 6;
+    srv.request.task_id        = 2;
+
+    // if the check point is skipped
+    if(client.call(srv))
+    {
+        eventQueue.riseEvent("/SKIPPED_TO_CP_6");
+
+        ///@TODO: do anything which is required for further states
+    }
+    else if(retry_count < 5)
+    {
+        //reset the count
+        retry_count = 0;
+        eventQueue.riseEvent("/SKIP_CP_6_FAILED");
+    }
+    else
+    {
+        ROS_ERROR("service not called");
+        eventQueue.riseEvent("/SKIP_CP_6_RETRY");
+        retry_count++;
+    }
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("skipCheckPoint6Task: waiting for transition");
+    }
+
+    return TaskResult::SUCCESS();
+}
+
+decision_making::TaskResult valTask2::manualExecutionTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+    ROS_INFO_STREAM("executing " << name);
+
+    // skip check point, basically take the user input
+
+    return TaskResult::SUCCESS();
+}
 
 // setter and getter methods
 geometry_msgs::Pose2D valTask2::getPanelWalkGoal()
