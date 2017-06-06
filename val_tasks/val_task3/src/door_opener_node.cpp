@@ -3,7 +3,7 @@
 int main(int argc, char** argv){
 
 
-    /** This code should acceot the centre of valve from perception
+    /** This code should accept the centre of valve from perception
      *  It's hard coded presently
      */
 

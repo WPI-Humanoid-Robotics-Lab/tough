@@ -19,50 +19,83 @@ int main(int argc, char **argv)
         pt.x = std::atof(argv[1]);
         pt.y = std::atof(argv[2]);
         pt.z = std::atof(argv[3]);
-        char input;
-        while(1)
-        {
-            std::cout<<"************ ************ ************ \n";
-            std::cout<<"enter choice \n";
-            std::cout<<" y - Execute quater circle motion \n";
-            std::cout<<" q - exit code \n";
-            std::cout<<" s - stop trajectories \n";
-            std::cin>>input;
-            if(input =='y')
-            {
 
-                gc.openGripper(LEFT);
-                rotate.grab_valve(pt);
-                std::vector<geometry_msgs::Pose> points;
-                geometry_msgs::Point cen;
+        //Gripping and executing circular motion
 
-                cen.x=std::atof(argv[4]);
-                cen.y=std::atof(argv[5]);
-                cen.z=std::atof(argv[6]);
-                rotate.compute_traj(cen,0.18,points);
-                rotate.move_valve(points);
-            }
-            else if(input =='q')
-            {
-                std::cout<<"Exiting Code \n";
-                exit(0);
-            }
-            else if(input =='s')
-            {
-                stopTraj.publish(stopMsg);
-                std::cout<<"Stopped All Trajectories \n";
-            }
-            else
-            {
-                std::cout<<"Choose wisely \n";
-            }
+        ROS_INFO("Gripping the valve");
+
+        gc.openGripper(LEFT);
+
+        std::vector<geometry_msgs::Pose> points;
+
+
+
+        geometry_msgs::Point cen;
+
+        cen.x = std::atof(argv[4]);
+        cen.y = std::atof(argv[5]);
+        cen.z = std::atof(argv[6]);
+
+        rotate.reOrientbeforgrab(cen);
+
+
+        ros::Duration(3.0).sleep();
+
+        //Rotating the valve six times
+        for(size_t i = 0; i< 8; ++i){
+            rotate.grab_valve(pt);
+            rotate.compute_traj(cen,0.18,points);
+            rotate.move_valve(points);
         }
-
-
-    } else{
-        ROS_INFO("Arguments incorrect");
-        return -1;
     }
+
+    else {
+
+        ROS_INFO("Please enter correct arguments");
+    }
+
+    //        char input;
+    //        while(1)
+    //        {
+    //            std::cout<<"************ ************ ************ \n";
+    //            std::cout<<"enter choice \n";
+    //            std::cout<<" y - Execute quater circle motion \n";
+    //            std::cout<<" q - exit code \n";
+    //            std::cout<<" s - stop trajectories \n";
+    //            std::cin>>input;
+    //            if(input =='y')
+    //            {
+
+    //                gc.openGripper(LEFT);
+    //                rotate.grab_valve(pt);
+    //                std::vector<geometry_msgs::Pose> points;
+    //                geometry_msgs::Point cen;
+
+    //                cen.x=std::atof(argv[4]);
+    //                cen.y=std::atof(argv[5]);
+    //                cen.z=std::atof(argv[6]);
+    //                rotate.compute_traj(cen,0.18,points);
+    //                rotate.move_valve(points);
+    //            }
+    //            else if(input =='q')
+    //            {
+    //                std::cout<<"Exiting Code \n";
+    //                exit(0);
+    //            }
+    //            else if(input =='s')
+    //            {
+    //                stopTraj.publish(stopMsg);
+    //                std::cout<<"Stopped All Trajectories \n";
+    //            }
+    //            else
+    //            {
+    //                std::cout<<"Choose wisely \n";
+    //            }
+    //        }
+    //    } else{
+    //        ROS_INFO("Arguments incorrect");
+    //        return -1;
+    //    }
 
     ros::spin();
     return 0;

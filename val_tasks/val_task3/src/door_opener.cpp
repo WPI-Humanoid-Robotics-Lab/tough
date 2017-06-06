@@ -24,11 +24,14 @@ void doorOpener::openDoor(geometry_msgs::Pose valveCenter){
 
     valveCenter.position.x  -= 0.3;
 
+    //Converting back to world
     robot_state_->transformPose(valveCenter, valveCenter, VAL_COMMON_NAMES::PELVIS_TF);
 
     preDoorOpenGoal.x        = valveCenter.position.x;
     preDoorOpenGoal.y        = valveCenter.position.y;
     preDoorOpenGoal.theta    = tf::getYaw(pelvisPose.orientation);
+
+
     walker_.walkToGoal(preDoorOpenGoal);
 
     gripper_.closeGripper(LEFT);
@@ -39,6 +42,7 @@ void doorOpener::openDoor(geometry_msgs::Pose valveCenter){
 //   walker_.walkLocalPreComputedSteps(x_offset,y_offset,LEFT);
 
 //    ros::Duration(2.0).sleep();
+
     task3_.beforDoorOpenPose();
     ros::Duration(0.5).sleep();
 
@@ -47,6 +51,7 @@ void doorOpener::openDoor(geometry_msgs::Pose valveCenter){
     y_offset = {0.0,0.0,0,0};
     walker_.walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
     ros::Duration(1.0).sleep();
+
     x_offset = {0.3,0.3};
     y_offset = {0.0, 0.0};
     walker_.walkLocalPreComputedSteps(x_offset,y_offset,LEFT);
