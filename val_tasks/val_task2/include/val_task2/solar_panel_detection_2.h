@@ -59,6 +59,7 @@ private:
                                  pcl::PointIndices &pts_inside_trailer) const;
 
     void publishClusters(const PointCloud::ConstPtr &cloud, const std::vector<pcl::PointIndices> &clusters) const;
+    void publishNormals(const PointCloud &points, const NormalCloud &normals) const;
     Eigen::Vector3f modelToVector(const pcl::ModelCoefficients &model) const;
 
 };

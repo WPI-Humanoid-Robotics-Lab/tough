@@ -21,6 +21,56 @@
 #define TRAILER_BOUNDS_MAX {2.5f,  0.75f, 1.1f, 1}
 #define TRAILER_BOUNDS_MIN {0.0f, -0.75f, 0.0f, 1}
 
+
+// COPIED FROM PCL 1.8
+template <typename Scalar> bool
+threePlanesIntersection(const Eigen::Matrix<Scalar, 4, 1> &plane_a,
+                        const Eigen::Matrix<Scalar, 4, 1> &plane_b,
+                        const Eigen::Matrix<Scalar, 4, 1> &plane_c,
+                        Eigen::Matrix<Scalar, 3, 1> &intersection_point,
+                        double determinant_tolerance = 1e-6) {
+    typedef Eigen::Matrix<Scalar, 3, 1> Vector3;
+    typedef Eigen::Matrix<Scalar, 3, 3> Matrix3;
+
+    // TODO: Using Eigen::HyperPlanes is better to solve this problem
+    // Check if some planes are parallel
+    Matrix3 normals_in_lines;
+
+    for (int i = 0; i < 3; i++)
+    {
+        normals_in_lines (i, 0) = plane_a[i];
+        normals_in_lines (i, 1) = plane_b[i];
+        normals_in_lines (i, 2) = plane_c[i];
+    }
+
+    Scalar determinant = normals_in_lines.determinant ();
+    if (fabs (determinant) < determinant_tolerance)
+    {
+        // det ~= 0
+        PCL_DEBUG ("At least two planes are parralel.\n");
+        return (false);
+    }
+
+    // Left part of the 3 equations
+    Matrix3 left_member;
+
+    for (int i = 0; i < 3; i++)
+    {
+        left_member (0, i) = plane_a[i];
+        left_member (1, i) = plane_b[i];
+        left_member (2, i) = plane_c[i];
+    }
+
+    // Right side of the 3 equations
+    Vector3 right_member;
+    right_member << -plane_a[3], -plane_b[3], -plane_c[3];
+
+    // Solve the system
+    intersection_point = left_member.fullPivLu ().solve (right_member);
+    return (true);
+}
+
+
 solar_panel_detector_2::solar_panel_detector_2(ros::NodeHandle nh, const geometry_msgs::PoseStamped &rover_pose) :
         nh_(nh),
         rover_pose_(rover_pose),
@@ -28,7 +78,7 @@ solar_panel_detector_2::solar_panel_detector_2(ros::NodeHandle nh, const geometr
         point_cloud_listener_(nh, "/leftFoot", "/left_camera_frame")
 {
     pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("solar_panel_detection_debug_pose", 1);
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_stair", 1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("solar_panel_detection_markers", 1);
     blacklist_pub_ = nh_.advertise<PointCloud>("/block_map", 1);
     // Seems like the specific point type doesn't matter. I can publish PointXYZRGB to this topic and it works.
     points_pub_ = nh_.advertise<PointCloud>("solar_panel_detection_debug_points", 1);
@@ -58,26 +108,30 @@ void solar_panel_detector_2::cloudCB(const PointCloud::ConstPtr &cloud_raw) {
                                                      << "%)");
     NormalCloud::Ptr filtered_normals = estimateNormals(filtered_cloud);
 
+//    points_pub_.publish(filtered_cloud);
+    publishNormals(*filtered_cloud, *filtered_normals);
+
     pcl::PointIndices points_in_trailer;
     if (!findPointsInsideTrailer(filtered_cloud, filtered_normals, points_in_trailer)) {
         ROS_DEBUG("Abandoning solar panel detection attempt because the trailer could not be located");
         return;
     }
 
-    points_pub_.publish(filtered_normals);
+    points_pub_.publish(PointCloud(*filtered_cloud, points_in_trailer.indices));
 }
 
 solar_panel_detector_2::PointCloud::Ptr solar_panel_detector_2::prefilterCloud(const PointCloud::ConstPtr &cloud_raw) const {
     // Get trailer pose as an Eigen
     geometry_msgs::PoseStamped rover_pose_cloud_frame;
     try {
+//        tf_listener_.waitForTransform(cloud_raw->header.frame_id, rover_pose_.header.frame_id, ros::Time(0), ros::Duration(5));
         tf_listener_.transformPose(cloud_raw->header.frame_id, rover_pose_, rover_pose_cloud_frame);
     } catch (const tf::TransformException &e) {
         ROS_WARN_STREAM("Skipping detection attempt: could not transform rover pose into the cloud frame \n" << e.what());
         return boost::make_shared<PointCloud>();
     }
 
-    pose_pub_.publish(rover_pose_cloud_frame);
+//    pose_pub_.publish(rover_pose_cloud_frame);
     Eigen::Affine3d rover_pose;
     tf::poseMsgToEigen(rover_pose_cloud_frame.pose, rover_pose);
 
@@ -100,7 +154,8 @@ solar_panel_detector_2::PointCloud::Ptr solar_panel_detector_2::prefilterCloud(c
     // with large point clouds
     auto filtered_cloud = boost::make_shared<PointCloud>();
     filtered_cloud->header = cloud_raw->header;
-    pcl::octree::OctreePointCloudVoxelCentroid<Point> oct(0.02);
+    // anything less dense than 1cm causes voxelization artifacts to mess with normal estimation
+    pcl::octree::OctreePointCloudVoxelCentroid<Point> oct(0.01);
     oct.setInputCloud(points_in_trailer_aligned);
     oct.addPointsFromInputCloud();
 
@@ -118,7 +173,7 @@ solar_panel_detector_2::PointCloud::Ptr solar_panel_detector_2::prefilterCloud(c
 solar_panel_detector_2::NormalCloud::Ptr solar_panel_detector_2::estimateNormals(const PointCloud::ConstPtr &filtered_cloud) const {
     pcl::NormalEstimation<Point, Normal> ne;
     ne.setInputCloud(filtered_cloud);
-    ne.setRadiusSearch(0.03);
+    ne.setRadiusSearch(0.1);
 
     auto filtered_normals = boost::make_shared<NormalCloud>();
     filtered_normals->header = filtered_cloud->header;
@@ -133,8 +188,9 @@ bool solar_panel_detector_2::findPointsInsideTrailer(const PointCloud::ConstPtr 
     // RGS to identify big segments. Probably better than RANSAC here. Probably better than RANSAC
     // in most other places I used RANSAC, too. Oh well.
     pcl::RegionGrowing<Point, Normal> rgs;
-    rgs.setMinClusterSize(100); // probably can be much bigger than 100
-    rgs.setNumberOfNeighbours(10);
+    rgs.setMinClusterSize(200); // probably can be much bigger than 100
+    rgs.setNumberOfNeighbours(30);
+    rgs.setCurvatureThreshold(0.05);
     rgs.setInputCloud(points);
     rgs.setInputNormals(normals);
 
@@ -143,21 +199,25 @@ bool solar_panel_detector_2::findPointsInsideTrailer(const PointCloud::ConstPtr 
 
     // Sort clusters so the largest cluster that fits each wall/floor description is encountered first
     std::sort(clusters->begin(), clusters->end(), [](const pcl::PointIndices &a, const pcl::PointIndices &b) {
-        return a.indices.size() < b.indices.size();
+        return a.indices.size() > b.indices.size();
     });
 
 //    publishClusters(points, *clusters);
 
     // Find the 3 walls and the floor
-    pcl::ModelCoefficients front_model, left_model, right_model, floor_model;
-    bool front_found, left_found, right_found, floor_found;
+    pcl::ModelCoefficients back_model, floor_model, right_model, left_model;
+    bool back_found = false, floor_found = false, right_found = false, left_found = false;
 
     pcl::SACSegmentationFromNormals<Point, Normal> sac;
     sac.setModelType(pcl::SACMODEL_NORMAL_PLANE);
     sac.setMethodType(pcl::SAC_RANSAC);
+    sac.setDistanceThreshold(0.04);
     sac.setInputCloud(points);
     sac.setInputNormals(normals);
     // indices set inside the loop
+
+    Eigen::Vector4f overall_centroid;
+    pcl::compute3DCentroid(*points, overall_centroid);
 
     for (const pcl::PointIndices &cluster : *clusters) {
         pcl::PointIndices::ConstPtr cluster_ptr(clusters, &cluster); // aliasing pointer
@@ -167,8 +227,115 @@ bool solar_panel_detector_2::findPointsInsideTrailer(const PointCloud::ConstPtr 
         pcl::PointIndices inliers;
         sac.segment(inliers, model);
 
-        // TODO Identify 3 walls and floor
+        Eigen::Vector4f cluster_centroid;
+        pcl::compute3DCentroid(*points, cluster, cluster_centroid);
+
+        if (cluster_centroid.z() < overall_centroid.z() && std::abs(model.values[2]) > 0.85) {
+            // low centroid and close-to-unit-z normal: floor
+            if (!floor_found) {
+                floor_found = true;
+                floor_model = model;
+            }
+        } else if (cluster_centroid.x() > overall_centroid.x() && std::abs(model.values[0]) > 0.75 && std::abs(model.values[2]) < 0.1) {
+            // far-forward centroid and close-to-unit-x normal: back wall
+            if (!back_found) {
+                back_found = true;
+                back_model = model;
+            }
+        } else if (cluster_centroid.y() < overall_centroid.y() && std::abs(model.values[1]) > 0.75 && std::abs(model.values[2]) < 0.1) {
+            // far-right centroid and close-to-unit-y normal: right wall
+            if (!right_found) {
+                right_found = true;
+                right_model = model;
+            }
+        } else if (cluster_centroid.y() > overall_centroid.y() && std::abs(model.values[1]) > 0.75 && std::abs(model.values[2]) < 0.1) {
+            // far-left centroid and close-to-unit-y normal: left wall
+            if (!left_found) {
+                left_found = true;
+                left_model = model;
+            }
+        }
+
+        if (floor_found && back_found && right_found && left_found) break;
     }
+
+    if (!(floor_found && back_found && right_found && left_found)) {
+        ROS_DEBUG_STREAM("Skipping detection attempt: could not detect floor and walls ("
+                          << floor_found << ", "  << back_found << ", " << right_found << ", " << left_found << ")");
+//        publishClusters(points, *clusters);
+        return false;
+    }
+
+
+    Eigen::Map<Eigen::Vector4f> floor_plane(floor_model.values.data());
+    Eigen::Map<Eigen::Vector4f> back_plane(back_model.values.data());
+    Eigen::Map<Eigen::Vector4f> right_plane(right_model.values.data());
+    Eigen::Map<Eigen::Vector4f> left_plane(left_model.values.data());
+
+    Eigen::Vector3f back_left_corner, back_right_corner;
+    if (!(
+            threePlanesIntersection<float>(floor_plane, back_plane, right_plane, back_right_corner) &&
+            threePlanesIntersection<float>(floor_plane, back_plane, left_plane, back_left_corner)
+    )) {
+        ROS_DEBUG_STREAM("Skipping detection attempt: detected floor and walls were not perpendicular");
+        return false;
+    }
+
+    // Move y and z of the back right corner a little bit towards the centroid, and set its x to turn it into min_pt
+    Eigen::Vector4f min_pt(
+            0,
+            back_right_corner.y() + 0.05f * (back_right_corner.y() < overall_centroid.y() ? 1 : -1),
+            back_right_corner.z() + 0.05f * (back_right_corner.z() < overall_centroid.z() ? 1 : -1),
+            1
+    );
+
+    // Move x and y of the back left corner a little bit towards the centroid, and set its z to turn it into max_pt
+    Eigen::Vector4f max_pt(
+        back_left_corner.x() + 0.05f * (back_left_corner.x() < overall_centroid.x() ? 1 : -1),
+        back_left_corner.y() + 0.05f * (back_left_corner.y() < overall_centroid.y() ? 1 : -1),
+        3,
+        1
+    );
+
+    // Take the average of the 3 walls, rotated to align and normalized to point in the same direction, as the axis
+    Eigen::Vector3f trailer_axis = (
+        Eigen::Affine3f(Eigen::AngleAxisf(M_PI * (back_plane.x() > 0 ? 0 : 1), Eigen::Vector3f::UnitZ())) * back_plane.head<3>() +
+        Eigen::Affine3f(Eigen::AngleAxisf(M_PI_2 * (right_plane.y() > 0 ? -1 : 1), Eigen::Vector3f::UnitZ())) * right_plane.head<3>() +
+        Eigen::Affine3f(Eigen::AngleAxisf(M_PI_2 * (left_plane.y() > 0 ? -1 : 1), Eigen::Vector3f::UnitZ())) * left_plane.head<3>()
+    );
+    trailer_axis.normalize();
+
+    if (std::abs(trailer_axis.z()) > 0.05) {
+        ROS_DEBUG_STREAM("Skipping detection attempt: detected trailer axis was not in xy plane " << trailer_axis.transpose());
+        return false;
+    }
+
+    Eigen::Affine3f trailer_axis_tf(
+            Eigen::Quaternionf::FromTwoVectors(trailer_axis, Eigen::Vector3f::UnitX())
+    );
+
+    geometry_msgs::PoseStamped trailer_axis_pose;
+    pcl_conversions::fromPCL(points->header, trailer_axis_pose.header);
+    tf::poseEigenToMsg(trailer_axis_tf.cast<double>(), trailer_axis_pose.pose);
+    pose_pub_.publish(trailer_axis_pose);
+
+    // Finally, crop
+    pcl::CropBox<Point> cropFilter;
+    cropFilter.setInputCloud(points);
+    cropFilter.setMin(trailer_axis_tf * min_pt);
+    cropFilter.setMax(trailer_axis_tf * max_pt);
+    cropFilter.setTransform(trailer_axis_tf);
+
+    cropFilter.filter(pts_inside_trailer.indices);
+
+//    PointCloud tmp;
+//    tmp.header = points->header;
+//    tmp.resize(2);
+//    tmp.front().getVector4fMap() = trailer_axis_tf * min_pt;
+//    tmp.back().getVector4fMap() = trailer_axis_tf * max_pt;
+//    points_pub_.publish(tmp);
+
+    return true;
 }
 
 
@@ -193,6 +360,44 @@ void solar_panel_detector_2::publishClusters(const PointCloud::ConstPtr &cloud, 
         }
     }
     points_pub_.publish(pub_cld);
+}
+
+void solar_panel_detector_2::publishNormals(const PointCloud &points, const NormalCloud &normals) const {
+    visualization_msgs::MarkerArray markers;
+    visualization_msgs::Marker marker;
+    pcl_conversions::fromPCL(normals.header, marker.header);
+    marker.ns = "model_normals";
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::LINE_LIST;
+    marker.pose.orientation.w = 1;
+    marker.scale.x = 0.005;
+    marker.color.r = 0.5;
+    marker.color.g = 0.5;
+    marker.color.b = 1;
+    marker.color.a = 1;
+
+    PointCloud::VectorType::const_iterator pt_it;
+    NormalCloud::VectorType::const_iterator n_it;
+    for (pt_it = points.begin(), n_it = normals.begin();
+         pt_it != points.end() && n_it != normals.end();
+         ++pt_it, ++n_it) {
+        if (!pt_it->getVector3fMap().allFinite() || !n_it->getNormalVector3fMap().allFinite()) continue;
+
+        const Eigen::Vector3f endpt = pt_it->getVector3fMap() + n_it->getNormalVector3fMap() * 0.05;
+
+        geometry_msgs::Point ros_start, ros_end;
+        ros_start.x = pt_it->x;
+        ros_start.y = pt_it->y;
+        ros_start.z =pt_it->z;
+        ros_end.x = endpt.x();
+        ros_end.y = endpt.y();
+        ros_end.z = endpt.z();
+
+        marker.points.push_back(ros_start);
+        marker.points.push_back(ros_end);
+    }
+    markers.markers.push_back(marker);
+    marker_pub_.publish(markers);
 }
 
 Eigen::Vector3f solar_panel_detector_2::modelToVector(const pcl::ModelCoefficients &model) const {
