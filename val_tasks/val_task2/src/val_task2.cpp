@@ -853,7 +853,7 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         // set the poses back
         q3 = panel_grasping_hand_ == armSide::LEFT ? -1.85 : 1.85;
         q1 = panel_grasping_hand_ == armSide::LEFT ? -1.04 : 1.04;
-        q0 = -1.85;
+        float q0 = -1.85;
         arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
         ros::Duration(0.2).sleep();
         arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
