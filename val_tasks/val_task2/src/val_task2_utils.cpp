@@ -365,7 +365,8 @@ bool task2Utils::isCableInHand(armSide side)
 
 bool task2Utils::isCableTouchingSocket()
 {
-    return taskMsg.checkpoint_durations.size() > 2;
+//    return taskMsg.checkpoint_durations.size() > 2;
+    ROS_ERROR("task2Utils::isCableTouchingSocket is not implemented");
     return 1;
 }
 
