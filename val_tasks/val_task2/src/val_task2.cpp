@@ -115,7 +115,7 @@ valTask2::~valTask2(){
 
 void valTask2::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
     // Count the number of times map is updated
-    ROS_INFO("valTask2::occupancy_grid_cb: map count updated to %d",map_update_count_);
+//    ROS_INFO("valTask2::occupancy_grid_cb: map count updated to %d",map_update_count_);
     ++map_update_count_;
 }
 
@@ -599,15 +599,15 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
         ros::Duration(0.2).sleep();
     }
 
-    ///@todo check if the threshold is right for this function. since the hand is supporting the button, condition might fail
-    if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
-        ROS_INFO("Panel is still in hand");
-    }
-    else
-    {
-        ROS_INFO("Dropped the bag on the way. Consider skipping checkpoint");
-        eventQueue.riseEvent("/DETECT_ARRAY_FAILED");
-    }
+//    ///@todo check if the threshold is right for this function. since the hand is supporting the button, condition might fail
+//    if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
+//        ROS_INFO("Panel is still in hand");
+//    }
+//    else
+//    {
+//        ROS_INFO("Dropped the bag on the way. Consider skipping checkpoint");
+//        eventQueue.riseEvent("/DETECT_ARRAY_FAILED");
+//    }
 
     static int fail_count = 0;
     static int retry_count = 0;
@@ -697,7 +697,7 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
 
 decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("valTask2::walkSolarArrayTask : executing " << name);
+    ROS_INFO_STREAM_ONCE("valTask2::walkSolarArrayTask : executing " << name);
     static int fail_count = 0;
 
     // walk to the goal location
@@ -945,7 +945,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
 
 decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("valTask2::alignSolarArrayTask : executing " << name);
+    ROS_INFO_STREAM_ONCE("valTask2::alignSolarArrayTask : executing " << name);
     static int fail_count = 0;
 
     // walk to the goal location

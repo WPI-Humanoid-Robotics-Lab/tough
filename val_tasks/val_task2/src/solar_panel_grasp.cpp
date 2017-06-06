@@ -72,7 +72,7 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : Moving at an intermidate point before goal");
     ROS_INFO("Intermidiate goal x:%f y:%f z:%f quat x:%f y:%f z:%f w:%f",intermGoal.position.x, intermGoal.position.y, intermGoal.position.z,
              intermGoal.orientation.x, intermGoal.orientation.y, intermGoal.orientation.z, intermGoal.orientation.w);
-    armTraj_.moveArmInTaskSpace(side, intermGoal, executionTime*2);
+    armTraj_.moveArmInTaskSpace(side, intermGoal, executionTime);
     ros::Duration(executionTime*2).sleep();
     control_util.stopAllTrajectories();
 
@@ -140,6 +140,9 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
             return false;
         }
     }
+
+    wholebody_controller_->compileMsg(side, traj2.joint_trajectory);
+    ros::Duration(executionTime*2).sleep();
 
     geometry_msgs::Pose finalFramePose;
 
