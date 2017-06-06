@@ -1,5 +1,5 @@
-#ifndef STAIR_DETECTOR_2_H
-#define STAIR_DETECTOR_2_H
+#ifndef SOLAR_PANEL_DETECTOR_2_H
+#define SOLAR_PANEL_DETECTOR_2_H
 
 #include <geometry_msgs/Point.h>
 
@@ -16,9 +16,10 @@
 #include <iostream>
 #include <vector>
 
-class stair_detector_2
+class solar_panel_detector_2
 {
     ros::NodeHandle nh_;
+    ros::Publisher pose_pub_;
     ros::Publisher marker_pub_;
     ros::Publisher points_pub_;
     ros::Publisher blacklist_pub_;
@@ -28,7 +29,8 @@ class stair_detector_2
 
     src_perception::MultisensePointCloud point_cloud_listener_;
 
-    std::vector<std::vector<geometry_msgs::Pose>> detections_;
+    geometry_msgs::PoseStamped rover_pose_;
+    std::vector<geometry_msgs::PoseStamped> vantage_poses_;
 
 public:
 
@@ -39,27 +41,25 @@ public:
     typedef pcl::PointXYZL                  LabeledPoint;
     typedef pcl::PointCloud<LabeledPoint>   LabeledCloud;
 
-    stair_detector_2(ros::NodeHandle nh);
+    solar_panel_detector_2(ros::NodeHandle nh, const geometry_msgs::PoseStamped &rover_pose);
 
-    void cloudCB(const stair_detector_2::PointCloud::ConstPtr &cloud);
-    std::vector<std::vector<geometry_msgs::Pose>> getDetections() const;
+    void setRoverPose(const geometry_msgs::PoseStamped &pos);
+    geometry_msgs::PoseStamped getRoverPose() const;
 
-    ~stair_detector_2();
+    void cloudCB(const solar_panel_detector_2::PointCloud::ConstPtr &cloud);
+
+    ~solar_panel_detector_2();
 
 private:
     PointCloud::Ptr prefilterCloud(const PointCloud::ConstPtr &cloud_raw) const;
     NormalCloud::Ptr estimateNormals(const PointCloud::ConstPtr &filtered_cloud) const;
-    bool estimateStairs(const PointCloud::ConstPtr &filtered_cloud,
-                            const NormalCloud::ConstPtr &filtered_normals);
 
-    size_t estimateStairPose(const PointCloud::ConstPtr &filtered_cloud,
-                             const std::vector<pcl::PointIndices> &step_clusters,
-                             const Eigen::Vector3f &stairs_dir, Eigen::Affine3f &stairs_pose) const;
+    bool findPointsInsideTrailer(const PointCloud::ConstPtr &points,
+                                 const NormalCloud::Ptr &normals, // not ConstPtr because PCL demands a Ptr
+                                 pcl::PointIndices &pts_inside_trailer) const;
 
-    std::vector<pcl::PointIndices> findStairClusters(const Eigen::Vector3f &avg_normal,
-                                                     const PointCloud::ConstPtr &filtered_cloud) const;
-
+    void publishClusters(const PointCloud::ConstPtr &cloud, const std::vector<pcl::PointIndices> &clusters) const;
     Eigen::Vector3f modelToVector(const pcl::ModelCoefficients &model) const;
 
 };
-#endif // STAIR_DETECTOR_2_H
+#endif // SOLAR_PANEL_DETECTOR_2_H

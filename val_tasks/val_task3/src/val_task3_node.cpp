@@ -18,7 +18,9 @@ void task3Node::registerStateMethods()
   // register the api's for states
   LocalTasks::registrate("STATE_INIT",                         std::bind(&valTask3::initTask,             task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   LocalTasks::registrate("STATE_DETECT_STAIRS",                std::bind(&valTask3::detectStairsTask,     task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-  LocalTasks::registrate("STATE_CLIMB_STAIRS",                 std::bind(&valTask3::climbStairsTask,      task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  LocalTasks::registrate("STATE_WALK_TO_STAIRS",               std::bind(&valTask3::walkToStairsTask,     task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  LocalTasks::registrate("STATE_DETECT_STEPS",                 std::bind(&valTask3::detectStepsTask,      task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  LocalTasks::registrate("STATE_CLIMB_STAIRS",                 std::bind(&valTask3::climbStepsTask,       task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   LocalTasks::registrate("STATE_DETECT_DOOR_HANDLE",           std::bind(&valTask3::detectDoorHandleTask, task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   LocalTasks::registrate("STATE_OPEN_DOOR",                    std::bind(&valTask3::openDoorTask,         task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   LocalTasks::registrate("STATE_WALK_THROUGH_DOOR",            std::bind(&valTask3::walkthroughDoorTask,  task3_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));

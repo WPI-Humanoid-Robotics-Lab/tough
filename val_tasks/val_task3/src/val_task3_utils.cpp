@@ -74,5 +74,4 @@ void task3Utils::blindNavigation(geometry_msgs::Pose2D & goal){
             goal.theta = angle;
         }
     }
-
 }
