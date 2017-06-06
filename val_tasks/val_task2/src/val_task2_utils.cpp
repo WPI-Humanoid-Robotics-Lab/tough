@@ -242,7 +242,7 @@ void task2Utils::rotatePanel(const armSide graspingHand)
     arm_controller_->moveArmJoint(nonGraspingHand, 3, tempOffset);
     ros::Duration(1).sleep();
 
-    arm_controller_->moveArmJoints(reOrientPanelTraj);
+    arm_controller_->moveArmJoints(*reOrientPanelTraj);
     ros::Duration(3).sleep();
 
     std::vector< std::vector<float> > armData;
