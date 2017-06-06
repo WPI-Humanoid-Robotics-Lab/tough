@@ -145,7 +145,7 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
     current_state_->transformQuaternion(temp, temp);
     intermGoal.orientation = temp.quaternion;
 
-    armTraj_.moveArmInTaskSpace(side, intermGoal, executionTime*2);
+    armTraj_.moveArmInTaskSpace(side, intermGoal, executionTime);
     ros::Duration(executionTime*2).sleep();
 
     //move arm to final position with known orientation
