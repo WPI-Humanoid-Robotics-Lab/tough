@@ -41,7 +41,6 @@ class valTask3{
     ros::NodeHandle nh_;
     valTask3(ros::NodeHandle nh);
 
-    task3Utils*         task3_utils_;
     ValkyrieWalker*     walker_;
     walkTracking*       walk_track_;
     chestTrajectory*    chest_controller_;
@@ -52,6 +51,7 @@ class valTask3{
     armTrajectory*      arm_controller_;
     wholebodyManipulation* wholebody_controller_;
     RobotStateInformer* robot_state_;
+    task3Utils*         task3_utils_;
 
     //map and occupancy grid
     ros::Subscriber occupancy_grid_sub_;
@@ -82,7 +82,9 @@ class valTask3{
 
     decision_making::TaskResult initTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    decision_making::TaskResult climbStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult walkToStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult detectStepsTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult climbStepsTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectDoorHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult openDoorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult walkthroughDoorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
