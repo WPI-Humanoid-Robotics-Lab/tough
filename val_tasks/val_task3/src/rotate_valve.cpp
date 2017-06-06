@@ -1,40 +1,41 @@
 #include "val_task3/rotate_valve.h"
 
-rotateValve::rotateValve(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
+rotateValve::rotateValve(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_), walk_(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 
     /* Top Grip Flat Hand modified*/
-    leftHandOrientationTop_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    leftHandOrientationTop_.quaternion.x = 0.604;
-    leftHandOrientationTop_.quaternion.y = 0.434;
-    leftHandOrientationTop_.quaternion.z = -0.583;
-    leftHandOrientationTop_.quaternion.w = 0.326;
+    leftHandOrientationTop_.header.frame_id         = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationTop_.quaternion.x            = 0.604;
+    leftHandOrientationTop_.quaternion.y            = 0.434;
+    leftHandOrientationTop_.quaternion.z            = -0.583;
+    leftHandOrientationTop_.quaternion.w            = 0.326;
 
-    leftHandOrientationSide_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    leftHandOrientationSide_.quaternion.x = 0.155;
-    leftHandOrientationSide_.quaternion.y = -0.061;
-    leftHandOrientationSide_.quaternion.z = -0.696;
-    leftHandOrientationSide_.quaternion.w = 0.699;
+    leftHandOrientationSide_.header.frame_id        = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationSide_.quaternion.x           = 0.155;
+    leftHandOrientationSide_.quaternion.y           = -0.061;
+    leftHandOrientationSide_.quaternion.z           = -0.696;
+    leftHandOrientationSide_.quaternion.w           = 0.699;
 
-    leftHandOrientationSideUp_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    leftHandOrientationSideUp_.quaternion.x = 0.211;
-    leftHandOrientationSideUp_.quaternion.y = 0.248;
-    leftHandOrientationSideUp_.quaternion.z = -0.644;
-    leftHandOrientationSideUp_.quaternion.w = 0.692;
+    leftHandOrientationSideUp_.header.frame_id      = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationSideUp_.quaternion.x         = 0.211;
+    leftHandOrientationSideUp_.quaternion.y         = 0.248;
+    leftHandOrientationSideUp_.quaternion.z         = -0.644;
+    leftHandOrientationSideUp_.quaternion.w         = 0.692;
 
-    leftHandOrientationSideDown_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
-    leftHandOrientationSideDown_.quaternion.x = -0.341;
-    leftHandOrientationSideDown_.quaternion.y = -0.312;
-    leftHandOrientationSideDown_.quaternion.z = -0.655;
-    leftHandOrientationSideDown_.quaternion.w =  0.598;
+    leftHandOrientationSideDown_.header.frame_id    = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationSideDown_.quaternion.x       = -0.341;
+    leftHandOrientationSideDown_.quaternion.y       = -0.312;
+    leftHandOrientationSideDown_.quaternion.z       = -0.655;
+    leftHandOrientationSideDown_.quaternion.w       =  0.598;
+
 
     // cartesian planners for the arm
-    left_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
-    wholebody_controller_ = new wholebodyManipulation(nh_);
-    chest_controller_ = new chestTrajectory(nh_);
+    left_arm_planner_       = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    wholebody_controller_   = new wholebodyManipulation(nh_);
+    chest_controller_       = new chestTrajectory(nh_);
 
-    marker_pub = nh_.advertise<visualization_msgs::MarkerArray>( "valve_path", 10, true);
+    marker_pub               = nh_.advertise<visualization_msgs::MarkerArray>( "valve_path", 10, true);
 }
 
 bool rotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTime)
@@ -44,31 +45,42 @@ bool rotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTi
     // move to goal point and grasp the valve
 
     ROS_INFO("rotateValve: Setting gripper position");
+
     std::vector<double> gripper1,gripper2,gripper3;
-    gripper1={1.2, -1.35, -0.1, -0.1 ,-0.1 };
-    gripper2={1.35, 0.0, -0.40, -0.40 ,-0.40 };
+
+    gripper1 = {1.2, -1.35, -0.1, -0.1 ,-0.1 };
+    gripper2 = {1.35, 0.0, -0.40, -0.40 ,-0.40 };
+
     gripper_.controlGripper(LEFT,gripper1);
     ros::Duration(executionTime/2).sleep();
+
     gripper_.controlGripper(LEFT,gripper2);
     ros::Duration(executionTime/2).sleep();
 
     ROS_INFO("rotateValve: Setting left arm seed position");
+
     std::vector< std::vector<float> > armData;
     armData.clear();
-    armData.push_back(leftShoulderSeedInitial_);
+    armData.push_back(LEFT_SHOULDER_SEED_INITIAL);
+
     armTraj_.moveArmJoints(LEFT, armData, executionTime);
+
     ros::Duration(executionTime).sleep();
 
     geometry_msgs::QuaternionStamped temp  =leftHandOrientationTop_;
     current_state_->transformQuaternion(temp,temp);
 
     geometry_msgs::Point intermGoal;
+
     current_state_->transformPoint(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-    intermGoal.x+=0.03;
+
+    intermGoal.x += 0.03;
+
     current_state_->transformPoint(intermGoal,intermGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
 
     geometry_msgs::Pose final;
     std::vector<geometry_msgs::Pose> waypoints;
+
     final.position=intermGoal;
     final.position.z+=0.08;
     final.orientation=temp.quaternion;
@@ -84,7 +96,7 @@ bool rotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTi
     // Sending waypoints to the planner
     left_arm_planner_->getTrajFromCartPoints(waypoints,traj,false);
 
-    //        // Planning whole body motion
+    // Planning whole body motion
     wholebody_controller_->compileMsg(LEFT,traj.joint_trajectory);
     ros::Duration(executionTime*1.5).sleep();
 
@@ -199,4 +211,35 @@ bool rotateValve::move_valve(std::vector<geometry_msgs::Pose> poses, float execu
     ROS_INFO("rotateValve: Adjusting chest to zero position");
     chest_controller_->controlChest(0,0,0);
     ros::Duration(executionTime).sleep();
+}
+
+void rotateValve::reOrientbeforgrab(geometry_msgs::Point valveCenter)
+{
+    //Alligning relative to the centre of the valve
+    geometry_msgs::Pose   pelvisPose;
+    geometry_msgs::Pose2D preDoorOpenGoal;
+
+    current_state_->transformPoint(valveCenter,valveCenter,
+                                   VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+
+    valveCenter.x  -= 0.5;
+    valveCenter.y  -= 0.45;
+    //Converting back to world
+    current_state_->transformPoint(valveCenter, valveCenter, VAL_COMMON_NAMES::PELVIS_TF);
+
+    preDoorOpenGoal.x        = valveCenter.x;
+    preDoorOpenGoal.y        = valveCenter.y;
+    preDoorOpenGoal.theta    = tf::getYaw(pelvisPose.orientation);
+
+
+    walk_.walkToGoal(preDoorOpenGoal);
+}
+
+rotateValve::~rotateValve(){
+
+    if (left_arm_planner_!= nullptr)        delete left_arm_planner_;
+    if (wholebody_controller_!= nullptr)    delete wholebody_controller_;
+    if (chest_controller_!= nullptr)        delete chest_controller_;
+
 }
