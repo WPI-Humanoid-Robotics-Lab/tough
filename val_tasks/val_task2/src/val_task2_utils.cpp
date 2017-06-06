@@ -24,6 +24,7 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     clearbox_pointcloud_pub = nh_.advertise<std_msgs::Int8>("/field/clearbox_pointcloud",1);
 
     task_status_sub_        = nh_.subscribe("/srcsim/finals/task", 10, &task2Utils::taskStatusCB, this);
+    mapUpdaterSub_          = nh_.subscribe("/map", 10, &task2Utils::mapUpdateCB, this);
 
     // rotate panel trajectory for left hand
     reOrientPanelTrajLeft_.resize(2);
@@ -79,6 +80,11 @@ bool task2Utils::afterPanelGraspPose(const armSide side)
     std::vector< std::vector<float> > armData;
 
     armData.clear();
+    armData.push_back(*seed2);
+    arm_controller_->moveArmJoints((armSide)(!side), armData, 2.0f);
+    ros::Duration(0.5).sleep();
+
+    armData.clear();
     armData.push_back(*seed1);
     arm_controller_->moveArmJoints(side, armData, 2.0f);
     ros::Duration(2).sleep();
@@ -86,14 +92,15 @@ bool task2Utils::afterPanelGraspPose(const armSide side)
     if (!isPanelPicked(side))
         return false;
 
-    armData.clear();
-    armData.push_back(*seed2);
-    arm_controller_->moveArmJoints((armSide)(!side), armData, 2.0f);
-    ros::Duration(0.5).sleep();
-
     return true;
 
 
+}
+
+bool task2Utils::isPointOnWalkway(float x, float y)
+{
+    size_t index = MapGenerator::getIndex(x, y);
+    return map_.data.at(index) == CELL_STATUS::FREE;
 }
 
 void task2Utils::movePanelToWalkSafePose(const armSide side)
@@ -295,7 +302,7 @@ void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offs
         ROS_INFO("reOrientTowardsPanel: Walking %d steps",int(nSteps));
 
         walk_->walkLocalPreComputedSteps(x_offset,y_offset,startStep);
-        ros::Duration(2.0).sleep();
+        ros::Duration(4.0).sleep();
 
     }
 
@@ -470,6 +477,13 @@ void task2Utils::taskStatusCB(const srcsim::Task &msg)
         outfile.close();
     }
 
+}
+
+void task2Utils::mapUpdateCB(const nav_msgs::OccupancyGrid &msg)
+{
+    mtx.lock();
+    map_ = msg;
+    mtx.unlock();
 }
 
 void task2Utils::clearPointCloud() {

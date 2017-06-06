@@ -40,11 +40,11 @@ private:
     cv::Mat map_image_;
     std::set<Point2D> finish_box_centers_;
 
-    float MAP_RESOLUTION;
-    float MAP_HEIGHT;
-    float MAP_WIDTH;
-    float MAP_X_OFFSET;
-    float MAP_Y_OFFSET;
+    float map_resolution;
+    float map_height;
+    float map_width;
+    float map_x_offset;
+    float map_y_offset;
 
 };
 

@@ -20,6 +20,8 @@
 #include "val_task2/val_solar_panel_detector.h"
 #include <std_msgs/Int8.h>
 #include <math.h>
+#include <mutex>
+#include <navigation_common/map_generator.h>
 
 enum class CLEAR_BOX_CLOUD{
     WAIST_UP=0,
@@ -103,11 +105,16 @@ private:
     void taskStatusCB(const srcsim::Task &msg);
 
     std::string logFile;
+    std::mutex mtx;
+    nav_msgs::OccupancyGrid map_;
+    void mapUpdateCB(const nav_msgs::OccupancyGrid &msg);
+    ros::Subscriber mapUpdaterSub_;
 
 public:
     task2Utils(ros::NodeHandle nh);
     ~task2Utils();
     bool afterPanelGraspPose(const armSide side);
+    bool isPointOnWalkway(float x, float y);
     void movePanelToWalkSafePose(const armSide side);
     bool isPanelPicked(const armSide side);
     void moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel);
