@@ -42,6 +42,12 @@ void task2Node::registerStateMethods(void)
     LocalTasks::registrate("STATE_WALK_TO_FINISH",             std::bind(&valTask2::walkToFinishTask,           task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_END",                        std::bind(&valTask2::endTask,                    task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_ERROR",                      std::bind(&valTask2::errorTask,                  task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_SKIP_CHECKPOINT",            std::bind(&valTask2::skipCheckPointTask,         task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_SKIP_TO_CP_1",               std::bind(&valTask2::skipToCP1Task,              task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_SKIP_TO_CP_3",               std::bind(&valTask2::skipToCP3Task,              task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_SKIP_TO_CP_4",               std::bind(&valTask2::skipToCP4Task,              task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_SKIP_TO_CP_6",               std::bind(&valTask2::skipToCP6Task,              task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_MANUAL_EXECUTION",           std::bind(&valTask2::manualExecutionTask,        task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 void task2Node::paramUpdateCallback(val_task2::task2_parametersConfig &config, uint32_t level)

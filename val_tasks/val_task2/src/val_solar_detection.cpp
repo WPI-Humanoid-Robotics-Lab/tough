@@ -1,4 +1,6 @@
 #include "val_task2/val_solar_detection.h"
+#include <pcl_ros/point_cloud.h>
+
 #define solar_pass_x_min -2.0
 #define solar_pass_x_max  10.0
 #define solar_pass_y_min -10.0
@@ -18,6 +20,7 @@ SolarArrayDetector::SolarArrayDetector(ros::NodeHandle nh, geometry_msgs::Pose2D
   pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_plane/cloud2", 1);
   vis_pub_array = nh.advertise<visualization_msgs::MarkerArray>( "/val_solar/visualization_markers", 1 );
   rover_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/block_map",1);
+    dbg_points_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/solar_detection_debug_pts", 1);
 
   rover_loc_ = rover_loc;
   robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
@@ -60,8 +63,12 @@ void SolarArrayDetector::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
     sensor_msgs::PointCloud2 output;
 
     pcl::fromROSMsg(*input, *cloud);
+    dbg_points_pub_.publish(cloud);
+    pcl::PCLHeader cld_header = cloud->header;
 //    ROS_INFO("removing rover");
     roverremove(cloud);
+    cloud->header = cld_header;
+
     PassThroughFilter(cloud);
 //    ROS_INFO("pub %d",(int)cloud->points.size());
 
@@ -71,7 +78,7 @@ void SolarArrayDetector::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 
     pcl::toROSMsg(*cloud,output);
     output.header.frame_id="world";
-    pcl_filtered_pub.publish(output);
+//    pcl_filtered_pub.publish(output);
 
     ros::Time endTime = ros::Time::now();
 //    std::cout << "Number of detections               = " << detections_.size() << std::endl;

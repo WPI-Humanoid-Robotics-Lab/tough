@@ -24,13 +24,26 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     clearbox_pointcloud_pub = nh_.advertise<std_msgs::Int8>("/field/clearbox_pointcloud",1);
 
     task_status_sub_        = nh_.subscribe("/srcsim/finals/task", 10, &task2Utils::taskStatusCB, this);
+    mapUpdaterSub_          = nh_.subscribe("/map", 10, &task2Utils::mapUpdateCB, this);
 
-    reOrientPanelTraj_.resize(2);
-    reOrientPanelTraj_[0].arm_pose = {-1.2, -1.04, 2.11, -0.85, -1.1, 0, 0.29};
-    reOrientPanelTraj_[0].time = 1;
+    // rotate panel trajectory for left hand
+    reOrientPanelTrajLeft_.resize(2);
+    reOrientPanelTrajLeft_[0].arm_pose = {-1.2, -1.04, 2.11, -0.85, -1.15, 0, 0.29};
+    reOrientPanelTrajLeft_[0].time = 1;
+    reOrientPanelTrajLeft_[0].side = armSide::LEFT;
+    reOrientPanelTrajLeft_[1].arm_pose = {-1.2, -1.04, 2.11, -0.85, 1.21, 0, -0.29};
+    reOrientPanelTrajLeft_[1].time = 2;
+    reOrientPanelTrajLeft_[1].side = armSide::LEFT;
 
-    reOrientPanelTraj_[1].arm_pose = {-1.2, -1.04, 2.11, -0.85, 1.21, 0, 0.29};
-    reOrientPanelTraj_[1].time = 2;
+    // rotate panel trajectory for right hand
+    reOrientPanelTrajRight_.resize(2);
+    reOrientPanelTrajRight_[0].arm_pose = {-1.2, 1.04, 2.11, 0.85, -1.21, 0, -0.29};
+    reOrientPanelTrajRight_[0].time = 1;
+    reOrientPanelTrajRight_[0].side = armSide::RIGHT;
+    reOrientPanelTrajRight_[1].arm_pose = {-1.2, 1.04, 2.11, 0.85, 1.15, 0, 0.29};
+    reOrientPanelTrajRight_[1].time = 2;
+    reOrientPanelTrajRight_[1].side = armSide::RIGHT;
+
 
     timeNow = boost::posix_time::second_clock::local_time();
 
@@ -47,12 +60,11 @@ task2Utils::~task2Utils()
     delete walk_                ;
 }
 
-void task2Utils::afterPanelGraspPose(const armSide side)
+bool task2Utils::afterPanelGraspPose(const armSide side)
 {
-    // reorient the chest
+    // reorienting the chest would bring the panel above the rover
     chest_controller_->controlChest(0,0,0);
     ros::Duration(2).sleep();
-
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
@@ -76,6 +88,19 @@ void task2Utils::afterPanelGraspPose(const armSide side)
     armData.push_back(*seed1);
     arm_controller_->moveArmJoints(side, armData, 2.0f);
     ros::Duration(2).sleep();
+
+    if (!isPanelPicked(side))
+        return false;
+
+    return true;
+
+
+}
+
+bool task2Utils::isPointOnWalkway(float x, float y)
+{
+    size_t index = MapGenerator::getIndex(x, y);
+    return map_.data.at(index) == CELL_STATUS::FREE;
 }
 
 void task2Utils::movePanelToWalkSafePose(const armSide side)
@@ -202,29 +227,29 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
 void task2Utils::rotatePanel(const armSide graspingHand)
 {
     armSide nonGraspingHand = (armSide) !graspingHand;
+
+    /// @todo change the grip when rotation is perfect
     gripper_controller_->closeGripper(graspingHand);
 
     const std::vector<float> *graspingHandPoseUp;
+    std::vector<armTrajectory::armJointData>* reOrientPanelTraj;
     float tempOffset;
     if(graspingHand == armSide::LEFT){
         graspingHandPoseUp = &leftNearChestPalmUp_;
-        tempOffset = 0.5;
+        reOrientPanelTraj = &reOrientPanelTrajLeft_;
+        tempOffset = -0.5;
     }
     else
     {
         graspingHandPoseUp = &rightNearChestPalmUp_;
-        tempOffset = -0.5;
+        reOrientPanelTraj = &reOrientPanelTrajRight_;
+        tempOffset = 0.5;
     }
     // take non-GraspingHand out
     arm_controller_->moveArmJoint(nonGraspingHand, 3, tempOffset);
     ros::Duration(1).sleep();
 
-    // set armside for precalculated trajectory
-    for (int i = 0; i < reOrientPanelTraj_.size(); ++i){
-        reOrientPanelTraj_[i].side = graspingHand;
-    }
-
-    arm_controller_->moveArmJoints(reOrientPanelTraj_);
+    arm_controller_->moveArmJoints(*reOrientPanelTraj);
     ros::Duration(3).sleep();
 
     std::vector< std::vector<float> > armData;
@@ -277,12 +302,13 @@ void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offs
         ROS_INFO("reOrientTowardsPanel: Walking %d steps",int(nSteps));
 
         walk_->walkLocalPreComputedSteps(x_offset,y_offset,startStep);
-        ros::Duration(2.0).sleep();
+        ros::Duration(4.0).sleep();
 
     }
 
 }
 
+// this function is not being used anywhere. maybe it's not needed. ///@todo delete
 void task2Utils::reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose){
 
     geometry_msgs::Pose poseInPelvisFrame;
@@ -358,7 +384,8 @@ bool task2Utils::isCableInHand(armSide side)
 
 bool task2Utils::isCableTouchingSocket()
 {
-    return taskMsg.checkpoint_durations.size() > 2;
+//    return taskMsg.checkpoint_durations.size() > 2;
+    ROS_ERROR("task2Utils::isCableTouchingSocket is not implemented");
     return 1;
 }
 
@@ -450,6 +477,13 @@ void task2Utils::taskStatusCB(const srcsim::Task &msg)
         outfile.close();
     }
 
+}
+
+void task2Utils::mapUpdateCB(const nav_msgs::OccupancyGrid &msg)
+{
+    mtx.lock();
+    map_ = msg;
+    mtx.unlock();
 }
 
 void task2Utils::clearPointCloud() {

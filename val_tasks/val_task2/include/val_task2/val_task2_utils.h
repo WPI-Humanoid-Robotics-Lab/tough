@@ -20,6 +20,8 @@
 #include "val_task2/val_solar_panel_detector.h"
 #include <std_msgs/Int8.h>
 #include <math.h>
+#include <mutex>
+#include <navigation_common/map_generator.h>
 
 enum class CLEAR_BOX_CLOUD{
     WAIST_UP=0,
@@ -56,16 +58,16 @@ private:
     float table_height_;
 
     //before walking
-    const std::vector<float> leftNearChestPalmDown_    = {-1.70, -1.04, 1.39, -1.85, -1.10, 0, 0};
-    const std::vector<float> leftNearChestPalmUp_    = {-1.70, -1.04, 1.39, -1.85, 1.10, 0, 0};
+    const std::vector<float> leftNearChestPalmDown_    = {-1.70, -1.04, 1.39, -1.85, -1.50, 0, 0};
+    const std::vector<float> leftNearChestPalmUp_    = {-1.70, -1.04, 1.39, -1.85, 1.50, 0, 0};
     const std::vector<float> leftSeedNonGraspingHand_ = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};
     //while walking
     const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.38, -1.29, 0.99, -1.35, -0.26, 0.0, 0.0};
 
 
     //before walking
-    const std::vector<float> rightNearChestPalmDown_     = {-1.70, 1.04, 1.39, 1.85, -1.10, 0, 0};
-    const std::vector<float> rightNearChestPalmUp_     = {-1.70, 1.04, 1.39, 1.85, 1.10, 0, 0};
+    const std::vector<float> rightNearChestPalmDown_     = {-1.70, 1.04, 1.39, 1.85, 1.50, 0, 0};
+    const std::vector<float> rightNearChestPalmUp_     = {-1.70, 1.04, 1.39, 1.85, -1.50, 0, 0};
     const std::vector<float> rightSeedNonGraspingHand_ = {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0};
     //while walking
     const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.38, 1.29, 0.99, 1.35, -0.26, 0.0, 0.0};
@@ -97,16 +99,22 @@ private:
     const std::vector<double> rightHandGrasp_         = {1.2,  0.6,  0.77,  0.9,  0.9};
 
     //Swapping sides of bag
-    std::vector<armTrajectory::armJointData> reOrientPanelTraj_;
+    std::vector<armTrajectory::armJointData> reOrientPanelTrajLeft_;
+    std::vector<armTrajectory::armJointData> reOrientPanelTrajRight_;
 
     void taskStatusCB(const srcsim::Task &msg);
 
     std::string logFile;
+    std::mutex mtx;
+    nav_msgs::OccupancyGrid map_;
+    void mapUpdateCB(const nav_msgs::OccupancyGrid &msg);
+    ros::Subscriber mapUpdaterSub_;
 
 public:
     task2Utils(ros::NodeHandle nh);
     ~task2Utils();
-    void afterPanelGraspPose(const armSide side);
+    bool afterPanelGraspPose(const armSide side);
+    bool isPointOnWalkway(float x, float y);
     void movePanelToWalkSafePose(const armSide side);
     bool isPanelPicked(const armSide side);
     void moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel);

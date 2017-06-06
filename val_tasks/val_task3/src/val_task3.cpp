@@ -32,8 +32,10 @@ valTask3::valTask3(ros::NodeHandle nh):nh_(nh){
 
   // walker
   walker_              = new ValkyrieWalker(nh_,0.7,0.7,0,0.18);
+  ROS_INFO("1");
   // walk tracker
   walk_track_          = new walkTracking(nh_);
+  ROS_INFO("2");
 
   // controllers
   chest_controller_    = new chestTrajectory(nh_);
@@ -42,12 +44,15 @@ valTask3::valTask3(ros::NodeHandle nh):nh_(nh){
   gripper_controller_  = new gripperControl(nh_);
   arm_controller_      = new armTrajectory(nh_);
   wholebody_controller_= new wholebodyManipulation(nh_);
+  task3_utils_         = new task3Utils(nh_);
+  ROS_INFO("4");
+
+  // detectors
+
 
   robot_state_         = RobotStateInformer::getRobotStateInformer(nh_);
   map_update_count_    = 0;
   occupancy_grid_sub_  = nh_.subscribe("/map",10,&valTask3::occupancy_grid_cb,this);
-
-  task3_utils_         = new task3Utils(nh_);
 }
 
 valTask3::~valTask3(){
@@ -91,8 +96,6 @@ decision_making::TaskResult valTask3::initTask(string name, const FSMCallContext
        map_update_count_ = 0;
     }
 
-    ROS_INFO("here");
-    map_update_count_++;
     // the state transition can happen from an event externally or can be geenerated here
     ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
     if (map_update_count_ > 1) {
@@ -139,7 +142,33 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult valTask3::climbStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
+decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
+
+  ROS_INFO_STREAM("executing " << name);
+
+  while(!preemptiveWait(1000, eventQueue)){
+
+    ROS_INFO("waiting for transition");
+  }
+
+  return TaskResult::SUCCESS();
+}
+
+
+decision_making::TaskResult valTask3::detectStepsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
+
+  ROS_INFO_STREAM("executing " << name);
+
+  while(!preemptiveWait(1000, eventQueue)){
+
+    ROS_INFO("waiting for transition");
+  }
+
+  return TaskResult::SUCCESS();
+}
+
+
+decision_making::TaskResult valTask3::climbStepsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
   ROS_INFO_STREAM("executing " << name);
 

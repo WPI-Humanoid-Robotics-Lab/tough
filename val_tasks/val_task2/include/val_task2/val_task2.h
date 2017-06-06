@@ -82,7 +82,7 @@ class valTask2 {
     // Pick Cable Task
     CableTask* cable_task_;
     // socket detector
-    plug_detector* socket_detector_;
+    SocketDetector* socket_detector_;
     // finish box detector
     FinishBoxDetector* finish_box_detector_;
 
@@ -146,7 +146,6 @@ class valTask2 {
 
     public:
 
-
     // default destructor
     ~valTask2();
     static valTask2* getValTask2(ros::NodeHandle nh);
@@ -174,6 +173,12 @@ class valTask2 {
     decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult rotatePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult skipCheckPointTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult skipToCP1Task(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult skipToCP3Task(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult skipToCP4Task(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult skipToCP6Task(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult manualExecutionTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     geometry_msgs::Pose2D getPanelWalkGoal();
 
     void setRoverWalkGoal(const std::vector<geometry_msgs::Pose2D> &rover_walk_goal);

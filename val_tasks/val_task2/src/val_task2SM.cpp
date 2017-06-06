@@ -28,7 +28,13 @@ FSM(val_task2)
         STATE_DETECT_FINISH,
         STATE_WALK_TO_FINISH,
         STATE_END,
-        STATE_ERROR
+        STATE_ERROR,
+        STATE_SKIP_CHECKPOINT,
+        STATE_SKIP_TO_CP_1,
+        STATE_SKIP_TO_CP_3,
+        STATE_SKIP_TO_CP_4,
+        STATE_SKIP_TO_CP_6,
+        STATE_MANUAL_EXECUTION
     }
 
     // give the start state
@@ -49,6 +55,7 @@ FSM(val_task2)
             FSM_ON_EVENT("/INIT_RETRY", FSM_NEXT(STATE_INIT))
             FSM_ON_EVENT("/INIT_SUCESSFUL", FSM_NEXT(STATE_DETECT_ROVER))
             FSM_ON_EVENT("/INIT_FAILED", FSM_NEXT(STATE_ERROR))
+            FSM_ON_EVENT("/SKIP_CHECK_POINT", FSM_NEXT(STATE_SKIP_CHECKPOINT))
 
             // or on condition or next state directly
           }
@@ -297,6 +304,79 @@ FSM(val_task2)
           FSM_TRANSITIONS
           {
             FSM_ON_EVENT("/RESTART", FSM_NEXT(STATE_INIT))
+            FSM_ON_EVENT("/SKIP_CHECK_POINT", FSM_NEXT(STATE_SKIP_CHECKPOINT))
+          }
+        }
+        FSM_STATE(STATE_SKIP_CHECKPOINT)
+        {
+
+          FSM_CALL_TASK(STATE_SKIP_CHECKPOINT)
+
+          FSM_TRANSITIONS
+          {
+            FSM_ON_EVENT("/SKIP_TO_CP_1", FSM_NEXT(STATE_SKIP_TO_CP_1));
+            FSM_ON_EVENT("/SKIP_TO_CP_3", FSM_NEXT(STATE_SKIP_TO_CP_3));
+            FSM_ON_EVENT("/SKIP_TO_CP_4", FSM_NEXT(STATE_SKIP_TO_CP_4));
+            FSM_ON_EVENT("/SKIP_TO_CP_6", FSM_NEXT(STATE_SKIP_TO_CP_6));
+          }
+        }
+        FSM_STATE(STATE_SKIP_TO_CP_1)
+        {
+
+          FSM_CALL_TASK(STATE_SKIP_TO_CP_1)
+
+          FSM_TRANSITIONS
+          {
+            FSM_ON_EVENT("/SKIPPED_TO_CP_2", FSM_NEXT(STATE_DETECT_ROVER));
+            FSM_ON_EVENT("/SKIP_TO_CP_2_RETRY", FSM_NEXT(STATE_SKIP_CHECKPOINT));
+            FSM_ON_EVENT("/SKIP_TO_CP_2_FAILED", FSM_NEXT(STATE_ERROR));
+          }
+        }
+        FSM_STATE(STATE_SKIP_TO_CP_3)
+        {
+
+          FSM_CALL_TASK(STATE_SKIP_TO_CP_3)
+
+          FSM_TRANSITIONS
+          {
+            FSM_ON_EVENT("/SKIPPED_TO_CP_3", FSM_NEXT(STATE_DETECT_DEPLOY_PANEL_BUTTON));
+            FSM_ON_EVENT("/SKIP_TO_CP_3_RETRY", FSM_NEXT(STATE_SKIP_CHECKPOINT));
+            FSM_ON_EVENT("/SKIP_TO_CP_3_FAILED", FSM_NEXT(STATE_ERROR));
+          }
+        }
+        FSM_STATE(STATE_SKIP_TO_CP_4)
+        {
+
+          FSM_CALL_TASK(STATE_SKIP_TO_CP_4)
+
+          FSM_TRANSITIONS
+          {
+            FSM_ON_EVENT("/SKIPPED_TO_CP_4", FSM_NEXT(STATE_DETECT_POWER_CABLE));
+            FSM_ON_EVENT("/SKIP_TO_CP_4_RETRY", FSM_NEXT(STATE_SKIP_CHECKPOINT));
+            FSM_ON_EVENT("/SKIP_TO_CP_4_FAILED", FSM_NEXT(STATE_ERROR));
+          }
+        }
+        FSM_STATE(STATE_SKIP_TO_CP_6)
+        {
+
+          FSM_CALL_TASK(STATE_SKIP_TO_CP_6)
+
+          FSM_TRANSITIONS
+          {
+            FSM_ON_EVENT("/SKIPPED_TO_CP_6", FSM_NEXT(STATE_DETECT_FINISH));
+            FSM_ON_EVENT("/SKIP_CP_6_RETRY", FSM_NEXT(STATE_SKIP_CHECKPOINT));
+            FSM_ON_EVENT("/SKIP_CP_6_FAILED", FSM_NEXT(STATE_ERROR));
+          }
+        }
+
+        FSM_STATE(STATE_MANUAL_EXECUTION)
+        {
+
+          FSM_CALL_TASK(STATE_MANUAL_EXECUTION)
+
+          FSM_TRANSITIONS
+          {
+            // basically should be possible to go to any state
           }
         }
     }

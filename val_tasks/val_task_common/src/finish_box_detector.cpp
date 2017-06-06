@@ -30,8 +30,8 @@ bool FinishBoxDetector::getFinishBoxCenters(std::vector<geometry_msgs::Point> &c
     std::set<Point2D> temp_centers = finish_box_centers_;
     for(auto it = temp_centers.begin(); it != temp_centers.end(); ++it) {
         geometry_msgs::Point pt;
-        pt.x = it->x*MAP_RESOLUTION+MAP_X_OFFSET;
-        pt.y = it->y*MAP_RESOLUTION+MAP_Y_OFFSET;
+        pt.x = it->x*map_resolution+map_x_offset;
+        pt.y = it->y*map_resolution+map_y_offset;
         centers.push_back(pt);
     }
 
@@ -44,11 +44,11 @@ void FinishBoxDetector::detectFinishBox(const nav_msgs::OccupancyGrid::Ptr msg) 
     if(!isProcessing){
         isProcessing = true;
         ros::WallTime t = ros::WallTime::now();
-        MAP_X_OFFSET = msg->info.origin.position.x;
-        MAP_Y_OFFSET = msg->info.origin.position.y;
-        MAP_RESOLUTION = msg->info.resolution;
-        MAP_WIDTH   = msg->info.width;
-        MAP_HEIGHT  = msg->info.height;
+        map_x_offset = msg->info.origin.position.x;
+        map_y_offset = msg->info.origin.position.y;
+        map_resolution = msg->info.resolution;
+        map_width   = msg->info.width;
+        map_height  = msg->info.height;
         vector<vector<Point> > contours;
         RNG rng(12345);
 
@@ -57,7 +57,7 @@ void FinishBoxDetector::detectFinishBox(const nav_msgs::OccupancyGrid::Ptr msg) 
             pv[i] = (uchar) msg->data.at(i);
         }
 
-        map_image_ = cv::Mat(cv::Size(MAP_WIDTH, MAP_HEIGHT), CV_8UC1);
+        map_image_ = cv::Mat(cv::Size(map_width, map_height), CV_8UC1);
         memcpy(map_image_.data, &pv, msg->data.size());
 
         cv::threshold(map_image_, map_image_,50, 255, CV_THRESH_BINARY);
@@ -94,7 +94,7 @@ void FinishBoxDetector::detectFinishBox(const nav_msgs::OccupancyGrid::Ptr msg) 
         }
         //    showImage(map_image_);
 
-        float radius=1.3/MAP_RESOLUTION; // side of square is 3 meters
+        float radius=1.3/map_resolution; // side of square is 3 meters
 
         cv::Mat circleMask,reducedImage,newMap;
         for(int k = 0; k < xMin.size(); ++k){
@@ -110,7 +110,7 @@ void FinishBoxDetector::detectFinishBox(const nav_msgs::OccupancyGrid::Ptr msg) 
                     {
                         //                std::cout<<"BOX found"<<std::endl;
                         //                std::cout<<"Image CenterX:    "<<i<<"    Image CenterY:    "<<j<<std::endl;
-                        std::cout<<"World CenterX:    "<<i*MAP_RESOLUTION+MAP_X_OFFSET<<"    World CenterY:    "<<j*MAP_RESOLUTION+MAP_Y_OFFSET<<std::endl;
+                        std::cout<<"World CenterX:    "<<i*map_resolution+map_x_offset<<"    World CenterY:    "<<j*map_resolution+map_y_offset<<std::endl;
                         Point2D pt;
                         pt.x = i;
                         pt.y = j;

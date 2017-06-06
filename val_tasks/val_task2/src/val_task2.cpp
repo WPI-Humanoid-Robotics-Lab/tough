@@ -55,13 +55,13 @@ valTask2::valTask2(ros::NodeHandle nh):
     panel_grabber_              = nullptr;
     button_press_               = nullptr;
     cable_task_                 = nullptr;
-    socket_detector_            = nullptr;
     finish_box_detector_        = nullptr;
 
     // use a single multisense object for all stereo detectors. It doesn't work otherwise :(
     ms_sensor_ = new src_perception::MultisenseImage(nh_);
     button_detector_            = new ButtonDetector(nh_, ms_sensor_);
     cable_detector_             = new CableDetector(nh_, ms_sensor_);
+    socket_detector_            = new SocketDetector(nh_, ms_sensor_);
 
     //utils
     task2_utils_    = new task2Utils(nh_);
@@ -79,6 +79,7 @@ valTask2::valTask2(ros::NodeHandle nh):
 
     cv::Mat img;
     ms_sensor_->giveImage(img);
+    ms_sensor_->giveDisparityImage(img);
 }
 
 // destructor
@@ -362,6 +363,7 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
     {
         // increment the fail count
         fail_count++;
+        executeOnce = true;
         ROS_INFO("walk retry");
         eventQueue.riseEvent("/WALK_RETRY");
     }
@@ -532,20 +534,8 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
 {
     ROS_INFO_STREAM("valTask2::pickPanelTask : executing " << name);
 
-    task2_utils_->afterPanelGraspPose(panel_grasping_hand_);
+    if(task2_utils_->afterPanelGraspPose(panel_grasping_hand_)){
 
-    if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
-        ROS_INFO("valTask2::pickPanelTask performing shake test");
-        task2_utils_->shakeTest(panel_grasping_hand_);
-
-    }
-    else
-    {
-        ROS_INFO("valTask2::pickPanelTask failed shake test. bag not in hand");
-        eventQueue.riseEvent("/RE_REDETECT_PANEL");
-    }
-
-    if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
         ROS_INFO("valTask2::pickPanelTask : Walking 1 step back");
         // increasing pelvis height back to normal
         pelvis_controller_->controlPelvisHeight(0.9);
@@ -555,19 +545,15 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         std::vector<float> y_offset={0.0,0.1};
         walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
         ros::Duration(4).sleep();
-        task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
-    }
-    else
-    {
-        ROS_INFO("valTask2::pickPanelTask failed walking one step back. bag not in hand");
-        eventQueue.riseEvent("/RE_REDETECT_PANEL");
-    }
 
-    if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
+        // this is absolutely necessary
+        task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
+
         // walk slowly for this turn
         walker_->setWalkParms(1.0, 1.0, 0);
         /// @todo The following code should be a new state
         // reorient the robot.
+
         ROS_INFO("valTask2::pickPanelTask : Reorienting");
         geometry_msgs::Pose pose;
         pose.position.x = 0.0;
@@ -585,22 +571,13 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_);
         head_controller_->moveHead(0,0,0);
         ros::Duration(2).sleep();
-    }
-    else
-    {
-        ROS_INFO("valTask2::pickPanelTask failed taking a turn back. bag not in hand");
-        eventQueue.riseEvent("/RE_REDETECT_PANEL");
-    }
-
-    if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
-        ROS_INFO("valTask2::pickPanelTask Picked pannel successfully !!!!!");
         eventQueue.riseEvent("/PICKED_PANEL");
     }
     else
     {
-        ROS_INFO("valTask2::pickPanelTask failed dissapointingly fell somehow. bag not in hand");
         eventQueue.riseEvent("/RE_REDETECT_PANEL");
     }
+
 
     // generate the event
     while(!preemptiveWait(1000, eventQueue)){
@@ -615,10 +592,13 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
     ROS_INFO_STREAM("valTask2::detectSolarArrayTask : executing " << name);
 
     if(solar_array_detector_ == nullptr) {
+        // this is absolutely necessary
+        task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
         solar_array_detector_ = new SolarArrayDetector(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
         ros::Duration(0.2).sleep();
     }
 
+    ///@todo check if the threshold is right for this function. since the hand is supporting the button, condition might fail
     if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
         ROS_INFO("Panel is still in hand");
     }
@@ -811,7 +791,7 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
     {
         // moving hands to get in position to detect the cable
         ROS_INFO("valTask2::findCableIntermediateTask : Moving panel to see cable");
-        q3 = panel_grasping_hand_ == armSide::LEFT ? 0.5 : -0.5;
+        q3 = panel_grasping_hand_ == armSide::LEFT ? -0.5 : 0.5;
         arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
         ros::Duration(0.5).sleep();
         q1 = panel_grasping_hand_ == armSide::LEFT ? -0.36 : 0.36;
@@ -876,14 +856,15 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         // set the poses back
         q3 = panel_grasping_hand_ == armSide::LEFT ? -1.85 : 1.85;
         q1 = panel_grasping_hand_ == armSide::LEFT ? -1.04 : 1.04;
+        float q0 = -1.85;
         arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
         ros::Duration(0.2).sleep();
         arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
         ros::Duration(0.2).sleep();
+        arm_controller_->moveArmJoint(panel_grasping_hand_,0,q0);
+        ros::Duration(0.2).sleep();
         eventQueue.riseEvent("/FOUND_CABLE");
         executingOnce= true;
-        //        if(cable_detector_ != nullptr) delete cable_detector_;
-        //        cable_detector_ = nullptr;
     }
 
 
@@ -928,7 +909,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
         if(solar_array_fine_detector_ != nullptr) delete solar_array_fine_detector_;
         solar_array_fine_detector_ = nullptr;
 
-        pelvis_controller_->controlPelvisHeight(1.1);
+        pelvis_controller_->controlPelvisHeight(1.0);
         ros::Duration(2).sleep();
     }
 
@@ -973,6 +954,8 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
     if ( taskCommonUtils::isGoalReached(current_pelvis_pose, solar_array_fine_walk_goal_) ) {
         ROS_INFO("valTask2::alignSolarArrayTask : reached solar array");
         ros::Duration(1).sleep();
+        geometry_msgs::Pose2D temp;
+        pose_prev = temp;
         // TODO: check if robot rechead the panel
         eventQueue.riseEvent("/ALIGNED_TO_ARRAY");
     }
@@ -1000,6 +983,8 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
     {
         // reset the fail count
         fail_count = 0;
+        geometry_msgs::Pose2D temp;
+        pose_prev = temp;
         ROS_INFO("valTask2::alignSolarArrayTask : walk failed");
         eventQueue.riseEvent("/ALIGN_TO_ARRAY_FAILED");
     }
@@ -1008,6 +993,8 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
     {
         // increment the fail count
         fail_count++;
+        geometry_msgs::Pose2D temp;
+        pose_prev = temp;
         ROS_INFO("valTask2::alignSolarArrayTask : walk retry");
         eventQueue.riseEvent("/ALIGN_TO_ARRAY_RETRY");
     }
@@ -1142,6 +1129,7 @@ decision_making::TaskResult valTask2::detectButtonTask(string name, const FSMCal
 
         ///@todo use goal position rather than hard coded steps. determine after experimenation
         /// the robot is expected to stand atleast 0.15 meters to the right of the button to press it.
+
         task2_utils_->reOrientTowardsGoal(button_coordinates_,-0.15);
         ros::Duration(1).sleep();
     }
@@ -1321,6 +1309,7 @@ decision_making::TaskResult valTask2::detectCableTask(string name, const FSMCall
         std::cout<<"cable x: "<<cable_pose_.position.x<<" cable y: "<<cable_pose_.position.y<<" cable z: "<<cable_pose_.position.z<<"\n";
         eventQueue.riseEvent("/DETECTED_CABLE");
         executingOnce= true;
+        task2_utils_->reOrientTowardsGoal(cable_pose_.position,0.35);
         head_controller_->moveHead(0,0,0,2.0f);
     }
 
@@ -1399,25 +1388,22 @@ TaskResult valTask2::detectSocketTask(string name, const FSMCallContext &context
     static bool executingOnce = true;
     if(executingOnce)
     {
-        head_controller_->moveHead(0,30,0,1.5);
+        head_controller_->moveHead(0,40,30,1.5);
         ros::Duration(2).sleep();
 
         // possible head yaw rotations to better detect the cable
         //clear the queue before starting
         std::queue<float> temp;
         head_yaw_ranges= temp;
-        head_yaw_ranges.push(-55.0);
-        head_yaw_ranges.push(-45.0);
-        head_yaw_ranges.push(-35.0);
-        head_yaw_ranges.push(-20.0);
-        head_yaw_ranges.push(-10.0);
+        head_yaw_ranges.push( 20.0);
+        head_yaw_ranges.push( 10.0);
+        head_yaw_ranges.push( 0.0);
         head_yaw_ranges.push( 10.0);
         head_yaw_ranges.push( 20.0);
-        head_yaw_ranges.push( 35.0);
-        head_yaw_ranges.push( 45.0);
-        head_yaw_ranges.push( 55.0);
         executingOnce = false;
         control_common_->stopAllTrajectories();
+        walker_->walkLocalPreComputedSteps({-0.1,-0.1},{0.0,0.0},RIGHT);
+        ros::Duration(2).sleep();
     }
 
 
@@ -1453,6 +1439,9 @@ TaskResult valTask2::detectSocketTask(string name, const FSMCallContext &context
         eventQueue.riseEvent("/DETECTED_SOCKET");
         executingOnce= true;
         head_controller_->moveHead(0,0,0,2.0f);
+        walker_->walkLocalPreComputedSteps({0.1,0.1},{0.0,0.0},RIGHT);
+        ros::Duration(2.5).sleep();
+        task2_utils_->reOrientTowardsGoal(socket_coordinates_);
     }
 
     while(!preemptiveWait(1000, eventQueue)){
