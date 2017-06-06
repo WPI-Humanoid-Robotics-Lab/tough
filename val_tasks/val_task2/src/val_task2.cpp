@@ -115,6 +115,7 @@ valTask2::~valTask2(){
 
 void valTask2::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
     // Count the number of times map is updated
+    ROS_INFO("valTask2::occupancy_grid_cb: map count updated to %d",map_update_count_);
     ++map_update_count_;
 }
 
@@ -716,7 +717,6 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
     else if (taskCommonUtils::isPoseChanged(pose_prev, solar_array_walk_goal_)) {
         ROS_INFO_STREAM("valTask2::walkSolarArrayTask : pose chaned to "<<solar_array_walk_goal_);
         walker_->walkToGoal(solar_array_walk_goal_, false);
-        task2_utils_->resumePointCloud();
         // sleep so that the walk starts
         ROS_INFO("valTask2::walkSolarArrayTask : Footsteps should be generated now");
         ros::Duration(4).sleep();
@@ -728,6 +728,7 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
     else if (walk_track_->isWalking())
     {
         // no state change
+        task2_utils_->resumePointCloud();
         ROS_INFO_THROTTLE(2, "valTask2::walkSolarArrayTask : walking");
         eventQueue.riseEvent("/WALK_TO_ARRAY_EXECUTING");
     }
@@ -737,6 +738,9 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
     {
         // reset the fail count
         fail_count = 0;
+        geometry_msgs::Pose2D temp;
+        pose_prev = temp;
+        task2_utils_->resumePointCloud();
         ROS_INFO("valTask2::walkSolarArrayTask : walk failed");
         eventQueue.riseEvent("/WALK_TO_ARRAY_FAILED");
     }
@@ -745,6 +749,8 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
     {
         // increment the fail count
         fail_count++;
+        geometry_msgs::Pose2D temp;
+        pose_prev = temp;
         ROS_INFO("valTask2::walkSolarArrayTask : walk retry");
         eventQueue.riseEvent("/WALK_TO_ARRAY_RETRY");
     }
@@ -1338,6 +1344,7 @@ decision_making::TaskResult valTask2::pickCableTask(string name, const FSMCallCo
     if (task2_utils_->isCableOnTable(cable_pose_)){
 
         ROS_INFO("valTask2::pickCableTask : Picking up the cable");
+        ///@todo add yaw condition here. if yaw greater then certain angle, it should rotate first, then grasp
         cable_task_->grasp_choke(armSide::RIGHT,cable_pose_);
         ros::Duration(1).sleep();
     }
@@ -1353,7 +1360,7 @@ decision_making::TaskResult valTask2::pickCableTask(string name, const FSMCallCo
         eventQueue.riseEvent("/CABLE_PICKED");
 
     }
-    else if(retry <5)
+    else if(retry <15)
     {
         ROS_INFO("valTask2::pickCableTask : Failed picking up the cable. Retrying detection");
         retry++;

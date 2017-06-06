@@ -68,12 +68,12 @@ bool task2Utils::afterPanelGraspPose(const armSide side)
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
-        seed1 = &leftNearChestPalmDown_;
+        seed1 = &leftNearChestPalmUp_;
         seed2 = &rightSeedNonGraspingHand_;
     }
     else
     {
-        seed1 = &rightNearChestPalmDown_;
+        seed1 = &rightNearChestPalmUp_;
         seed2 = &leftSeedNonGraspingHand_;
     }
 
@@ -235,13 +235,13 @@ void task2Utils::rotatePanel(const armSide graspingHand)
     std::vector<armTrajectory::armJointData>* reOrientPanelTraj;
     float tempOffset;
     if(graspingHand == armSide::LEFT){
-        graspingHandPoseUp = &leftNearChestPalmUp_;
+        graspingHandPoseUp = &leftNearChestPalmDown_;
         reOrientPanelTraj = &reOrientPanelTrajLeft_;
         tempOffset = -0.5;
     }
     else
     {
-        graspingHandPoseUp = &rightNearChestPalmUp_;
+        graspingHandPoseUp = &rightNearChestPalmDown_;
         reOrientPanelTraj = &reOrientPanelTrajRight_;
         tempOffset = 0.5;
     }
