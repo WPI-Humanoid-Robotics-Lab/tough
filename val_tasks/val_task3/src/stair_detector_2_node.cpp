@@ -12,10 +12,12 @@ int main(int argc, char** argv)
     bool found = false;
 
     stair_detector_2 detector(nh);
+    std::vector<std::vector<geometry_msgs::Pose>> detections;
     //while (!found && numIterations < 20)
     while(ros::ok())
     {
-        found = detector.findStair();
+        detections = detector.getDetections();
+        found = !detections.empty();
 
         numIterations++;
         ros::spinOnce();

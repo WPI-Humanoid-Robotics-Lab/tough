@@ -200,7 +200,7 @@ stair_detector_2::NormalCloud::Ptr stair_detector_2::estimateNormals(const Point
 }
 
 bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud,
-                                      const NormalCloud::ConstPtr &filtered_normals) const {
+                                      const NormalCloud::ConstPtr &filtered_normals) {
     // Use RANSAC to find _vertical_ planes -- the horizontal ones are what we want, but are much less likely to be
     // seen by the multisense
     pcl::SACSegmentationFromNormals<Point, Normal> nsac;
