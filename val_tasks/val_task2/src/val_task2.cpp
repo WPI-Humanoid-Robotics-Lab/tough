@@ -786,7 +786,7 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
     {
         // moving hands to get in position to detect the cable
         ROS_INFO("valTask2::findCableIntermediateTask : Moving panel to see cable");
-        q3 = panel_grasping_hand_ == armSide::LEFT ? 0.5 : -0.5;
+        q3 = panel_grasping_hand_ == armSide::LEFT ? -0.5 : 0.5;
         arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
         ros::Duration(0.5).sleep();
         q1 = panel_grasping_hand_ == armSide::LEFT ? -0.36 : 0.36;
