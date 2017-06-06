@@ -570,6 +570,7 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_);
         head_controller_->moveHead(0,0,0);
         ros::Duration(2).sleep();
+        eventQueue.riseEvent("/PICKED_PANEL");
     }
     else
     {
@@ -594,6 +595,7 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
         ros::Duration(0.2).sleep();
     }
 
+    ///@todo check if the threshold is right for this function. since the hand is supporting the button, condition might fail
     if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
         ROS_INFO("Panel is still in hand");
     }
