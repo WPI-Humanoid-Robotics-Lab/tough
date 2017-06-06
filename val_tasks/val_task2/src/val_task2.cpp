@@ -570,6 +570,7 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_);
         head_controller_->moveHead(0,0,0);
         ros::Duration(2).sleep();
+        eventQueue.riseEvent("/PICKED_PANEL");
     }
     else
     {
@@ -594,6 +595,7 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
         ros::Duration(0.2).sleep();
     }
 
+    ///@todo check if the threshold is right for this function. since the hand is supporting the button, condition might fail
     if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
         ROS_INFO("Panel is still in hand");
     }
@@ -786,7 +788,7 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
     {
         // moving hands to get in position to detect the cable
         ROS_INFO("valTask2::findCableIntermediateTask : Moving panel to see cable");
-        q3 = panel_grasping_hand_ == armSide::LEFT ? 0.5 : -0.5;
+        q3 = panel_grasping_hand_ == armSide::LEFT ? -0.5 : 0.5;
         arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
         ros::Duration(0.5).sleep();
         q1 = panel_grasping_hand_ == armSide::LEFT ? -0.36 : 0.36;
@@ -851,9 +853,12 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         // set the poses back
         q3 = panel_grasping_hand_ == armSide::LEFT ? -1.85 : 1.85;
         q1 = panel_grasping_hand_ == armSide::LEFT ? -1.04 : 1.04;
+        float q0 = -1.85;
         arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
         ros::Duration(0.2).sleep();
         arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
+        ros::Duration(0.2).sleep();
+        arm_controller_->moveArmJoint(panel_grasping_hand_,0,q0);
         ros::Duration(0.2).sleep();
         eventQueue.riseEvent("/FOUND_CABLE");
         executingOnce= true;
@@ -901,7 +906,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
         if(solar_array_fine_detector_ != nullptr) delete solar_array_fine_detector_;
         solar_array_fine_detector_ = nullptr;
 
-        pelvis_controller_->controlPelvisHeight(1.1);
+        pelvis_controller_->controlPelvisHeight(1.0);
         ros::Duration(2).sleep();
     }
 

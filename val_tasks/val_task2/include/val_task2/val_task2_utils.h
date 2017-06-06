@@ -56,16 +56,16 @@ private:
     float table_height_;
 
     //before walking
-    const std::vector<float> leftNearChestPalmDown_    = {-1.70, -1.04, 1.39, -1.85, -1.10, 0, 0};
-    const std::vector<float> leftNearChestPalmUp_    = {-1.70, -1.04, 1.39, -1.85, 1.10, 0, 0};
+    const std::vector<float> leftNearChestPalmDown_    = {-1.70, -1.04, 1.39, -1.85, -1.50, 0, 0};
+    const std::vector<float> leftNearChestPalmUp_    = {-1.70, -1.04, 1.39, -1.85, 1.50, 0, 0};
     const std::vector<float> leftSeedNonGraspingHand_ = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};
     //while walking
     const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.38, -1.29, 0.99, -1.35, -0.26, 0.0, 0.0};
 
 
     //before walking
-    const std::vector<float> rightNearChestPalmDown_     = {-1.70, 1.04, 1.39, 1.85, -1.10, 0, 0};
-    const std::vector<float> rightNearChestPalmUp_     = {-1.70, 1.04, 1.39, 1.85, 1.10, 0, 0};
+    const std::vector<float> rightNearChestPalmDown_     = {-1.70, 1.04, 1.39, 1.85, 1.50, 0, 0};
+    const std::vector<float> rightNearChestPalmUp_     = {-1.70, 1.04, 1.39, 1.85, -1.50, 0, 0};
     const std::vector<float> rightSeedNonGraspingHand_ = {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0};
     //while walking
     const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.38, 1.29, 0.99, 1.35, -0.26, 0.0, 0.0};
@@ -97,7 +97,8 @@ private:
     const std::vector<double> rightHandGrasp_         = {1.2,  0.6,  0.77,  0.9,  0.9};
 
     //Swapping sides of bag
-    std::vector<armTrajectory::armJointData> reOrientPanelTraj_;
+    std::vector<armTrajectory::armJointData> reOrientPanelTrajLeft_;
+    std::vector<armTrajectory::armJointData> reOrientPanelTrajRight_;
 
     void taskStatusCB(const srcsim::Task &msg);
 
