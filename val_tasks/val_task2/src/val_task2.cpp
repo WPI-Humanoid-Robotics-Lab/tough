@@ -115,6 +115,7 @@ valTask2::~valTask2(){
 
 void valTask2::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
     // Count the number of times map is updated
+    ROS_INFO("valTask2::occupancy_grid_cb: map count updated to %d",map_update_count_);
     ++map_update_count_;
 }
 
@@ -1343,6 +1344,7 @@ decision_making::TaskResult valTask2::pickCableTask(string name, const FSMCallCo
     if (task2_utils_->isCableOnTable(cable_pose_)){
 
         ROS_INFO("valTask2::pickCableTask : Picking up the cable");
+        ///@todo add yaw condition here. if yaw greater then certain angle, it should rotate first, then grasp
         cable_task_->grasp_choke(armSide::RIGHT,cable_pose_);
         ros::Duration(1).sleep();
     }
@@ -1358,7 +1360,7 @@ decision_making::TaskResult valTask2::pickCableTask(string name, const FSMCallCo
         eventQueue.riseEvent("/CABLE_PICKED");
 
     }
-    else if(retry <5)
+    else if(retry <15)
     {
         ROS_INFO("valTask2::pickCableTask : Failed picking up the cable. Retrying detection");
         retry++;
