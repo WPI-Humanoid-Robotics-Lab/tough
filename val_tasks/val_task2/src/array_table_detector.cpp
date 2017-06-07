@@ -37,7 +37,7 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
     ROS_INFO("ArrayTableDetector::planeSegmentation : Downsampled the cloud");
 
     //apply passthrough filter on z
-    float min_z = 0.02;
+    float min_z = 0.1;
     float max_z = cable_loc_.z - 0.05;
 
     pcl::PassThrough<pcl::PointXYZ> pass;

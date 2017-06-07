@@ -9,7 +9,8 @@ task3Node::task3Node(ros::NodeHandle nh): nh_(nh)
 
 task3Node::~task3Node()
 {
-  if(task3_ != nullptr) delete task3_;
+    ROS_INFO("task3Node::Destrutor called");
+    if (task3_ != nullptr) delete task3_;
 }
 
 void task3Node::registerStateMethods()
@@ -115,9 +116,8 @@ int main(int argc, char** argv){
 
   dynamic_reconfigure::Server<val_task3::task3_parametersConfig> service;
   dynamic_reconfigure::Server<val_task3::task3_parametersConfig>::CallbackType callback_type;
-  callback_type = boost::bind(&task3Node::paramUpdateCallback, task3Node, _1, _2);
+  callback_type = std::bind(&task3Node::paramUpdateCallback, &task3Node, std::placeholders::_1, std::placeholders::_2);
   service.setCallback(callback_type);
-
   ros::AsyncSpinner spinner(1);
   spinner.start();
 
