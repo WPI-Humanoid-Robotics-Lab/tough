@@ -243,6 +243,34 @@ bool RobotStateInformer::transformPose(const geometry_msgs::Pose &pose_in, geome
     return true;
 }
 
+bool RobotStateInformer::transformPose(const geometry_msgs::Pose2D &pose_in, geometry_msgs::Pose2D &pose_out,const std::string &from_frame, const std::string &to_frame)
+{
+    geometry_msgs::PoseStamped in, out;
+    in.header.frame_id = from_frame;
+    in.header.stamp = ros::Time(0);
+    in.pose.position.x = pose_in.x;
+    in.pose.position.y = pose_in.y;
+    in.pose.position.z = 0;
+    tf::quaternionTFToMsg(tf::createQuaternionFromYaw(pose_in.theta), in.pose.orientation);
+
+    try{
+
+        listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        listener_.transformPose(to_frame, in, out);
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+
+    pose_out.x     = out.pose.position.x;
+    pose_out.y     = out.pose.position.y;
+    pose_out.theta = tf::getYaw(out.pose.orientation);
+
+    return true;
+}
+
 bool RobotStateInformer::transformPoint(const geometry_msgs::Point &pt_in, geometry_msgs::Point &pt_out,const std::string &from_frame, const std::string &to_frame)
 {
     geometry_msgs::PointStamped stmp_pt_in, stmp_pt_out;
