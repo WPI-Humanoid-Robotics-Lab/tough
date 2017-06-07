@@ -128,7 +128,7 @@ void MapGenerator::convertToOccupancyGrid(const sensor_msgs::PointCloud2Ptr msg)
         if(visitedOccGrid_.data.at(getIndex(x,y)) ==  OCCUPIED){
             visitedOccGrid_.data.at(getIndex(x, y)) =  FREE;
         }
-    }
+    }    
 
     mapPub_.publish(occGrid_);
 
