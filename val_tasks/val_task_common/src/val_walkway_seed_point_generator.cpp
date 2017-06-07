@@ -28,71 +28,15 @@ void WalkwaySeedPointGenerator::generateSeedPoints(const pcl::PointCloud<pcl::Po
         return;
     ROS_INFO("Recieved a pointcloud");
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud1 (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud2 (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
 
-    ROS_INFO("Computing Normals to each point");
-    // Normals estimation
-    pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
-    ne.setInputCloud (cloud);
-
-    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
-    ne.setSearchMethod (tree);
-    ne.setRadiusSearch (0.03);
-    ne.compute (*cloud_normals);
+    zAxisLimitFilter(cloud, cloud_filtered);
 
     ROS_INFO("Removing NaN Normals");
     std::vector<int> index;
-    pcl::removeNaNNormalsFromPointCloud(*cloud_normals, *cloud_normals, index);
-
-    for(size_t i = 0; i < index.size(); i++)
-    {
-        temp_cloud1->points.push_back(cloud->points[index[i]]);
-    }
-
-    if(temp_cloud1->empty())
-    {
-        ROS_ERROR("There are no normals in the point cloud!");
-        return;
-    }
-
-    for(size_t i = 0; i < cloud_normals->points.size(); i++)
-    {
-        if(fabs(cloud_normals->points[i].normal_z) > SURFACE_NORMAL_THRESHOLD)
-            temp_cloud2->points.push_back(temp_cloud1->points[i]);
-    }
-
-    if(temp_cloud2->empty())
-    {
-        ROS_ERROR("There are no points above the threshold...");
-        return;
-    }
-
-    zAxisLimitFilter(temp_cloud2, cloud_filtered);
-
     pcl::removeNaNFromPointCloud(*cloud_filtered, *cloud_filtered, index);
 
     if(getLargestCluster(cloud_filtered)) {
         cloud_filtered->header = cloud->header;
-
-
-//        float leafsize = 0.25;
-//        pcl::VoxelGrid<pcl::PointXYZ> grid;
-//        grid.setLeafSize (leafsize, leafsize, leafsize);
-//        grid.setInputCloud (cloud_filtered);
-//        grid.filter (*cloud_filtered);
-
-//        ROS_INFO("Cloud size after voxel grid filter : %d", (int)cloud_filtered->size());
-//        pcl::RadiusOutlierRemoval<pcl::PointXYZ> outrem;
-//        // build the filter
-//        outrem.setInputCloud(cloud_filtered);
-//        outrem.setRadiusSearch(1.5);
-//        outrem.setMinNeighborsInRadius (205);
-//        // apply filter
-//        outrem.filter (*cloud_filtered);
-
-//        ROS_INFO("Cloud size after outlier filter : %d", (int)cloud_filtered->size());
         pointcloudPub_.publish(cloud_filtered);
 
     }
