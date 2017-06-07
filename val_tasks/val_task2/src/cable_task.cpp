@@ -66,14 +66,19 @@ bool CableTask::grasp_choke(armSide side, const geometry_msgs::Pose &goal, float
     ROS_INFO("CableTask::grasp_choke : Setting initial positions");
 
     std::vector< std::vector<float> > armData;
-    armData.push_back(leftShoulderSeedInitial_);
-    armTraj_.moveArmJoints(LEFT, armData, executionTime);
-    ros::Duration(0.2).sleep();
-
-    armData.clear();
-    armData.push_back(rightShoulderSeedInitial_);
-    armTraj_.moveArmJoints(RIGHT, armData, executionTime);
-    ros::Duration(executionTime).sleep();
+    if(side ==LEFT){
+        armData.clear();
+        armData.push_back(leftShoulderSeedInitial_);
+        armTraj_.moveArmJoints(LEFT, armData, executionTime);
+        ros::Duration(executionTime).sleep();
+    }
+    else
+    {
+        armData.clear();
+        armData.push_back(rightShoulderSeedInitial_);
+        armTraj_.moveArmJoints(RIGHT, armData, executionTime);
+        ros::Duration(executionTime).sleep();
+    }
 
 
     //move arm to given point with known orientation and higher z
@@ -161,7 +166,7 @@ bool CableTask::grasp_choke(armSide side, const geometry_msgs::Pose &goal, float
     ros::Duration(0.3).sleep();
 
     chest_controller_->controlChest(0,0,0);
-    ros::Duration(0.3).sleep();
+    ros::Duration(1).sleep();
     return true;
 }
 
@@ -522,7 +527,7 @@ bool CableTask::rotate_cable(const geometry_msgs::Pose &goal, float executionTim
 
 
     // setting a sead position without movement of chest
-    intermGoal.position.z+=0.06;
+    intermGoal.position.z+=0.07;
     armTraj_.moveArmInTaskSpace(RIGHT, intermGoal, executionTime);
     ros::Duration(executionTime*2).sleep();
     control_util.stopAllTrajectories();
@@ -541,7 +546,7 @@ bool CableTask::rotate_cable(const geometry_msgs::Pose &goal, float executionTim
     std::vector<geometry_msgs::Pose> waypoints;
 
     waypoints.push_back(intermGoal);
-    waypoints.push_back(finalGoal);
+
 
     moveit_msgs::RobotTrajectory traj;
 
@@ -556,17 +561,39 @@ bool CableTask::rotate_cable(const geometry_msgs::Pose &goal, float executionTim
     wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
     ros::Duration(executionTime*2).sleep();
 
-    std::vector<double> closeGrip={1.3999, 0.55, 1.1, 0.9, 1.0};
-    taskCommonUtils::slowGrip(nh_,RIGHT,gripper1,closeGrip);
-    ros::Duration(0.3).sleep();
-    gripper_.closeGripper(RIGHT);
-    ros::Duration(0.3).sleep();
+        std::vector<double> closeGrip={1.2, 0.4, 0.4, 0.4 ,0.4 };
+        taskCommonUtils::slowGrip(nh_,RIGHT,gripper1,closeGrip);
+        ros::Duration(0.3).sleep();
+        gripper_.closeGripper(RIGHT);
+        ros::Duration(2).sleep();
 
-    // Setting arm position to dock
-    ROS_INFO("grasp_cable: Setting arm position to dock cable");
+    //     Setting arm position to go leave cable and go up
+
+     waypoints.clear();
+     waypoints.push_back(finalGoal);
+
+
+
+     if (right_arm_planner_choke->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
+         ROS_INFO("CableTask::grasp_choke: Trajectory is not planned 100% - retrying");
+         return false;
+     }
+
+
+     ROS_INFO("CableTask::grasp_choke: Calculated Traj");
+     wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
+     ros::Duration(executionTime*2).sleep();
+
+
+//     Setting arm position to go leave cable and go up
+
+    ROS_INFO("grasp_cable: Setting arm position to go up");
     armData.clear();
-    armData.push_back(rightAfterGraspShoulderSeed2_);
+    armData.push_back(rightAfterRotateSeed_);
     armTraj_.moveArmJoints(RIGHT,armData,executionTime);
+    ros::Duration(2).sleep();
+
+    gripper_.openGripper(RIGHT);
     ros::Duration(0.3).sleep();
 
     chest_controller_->controlChest(0,0,0);
@@ -575,6 +602,19 @@ bool CableTask::rotate_cable(const geometry_msgs::Pose &goal, float executionTim
     return true;
 
 
+}
+
+bool CableTask::drop_cable(armSide side)
+{
+    std::vector< std::vector<float> > armData;
+    armData.clear();
+    armData.push_back(rightCablePlaceSeed_);
+    armTraj_.moveArmJoints(side,armData,2.0f);
+    ros::Duration(2).sleep();
+
+    gripper_.openGripper(side);
+    ros::Duration(0.3).sleep();
+    return true;
 }
 
 

@@ -69,9 +69,9 @@ private:
 
     //before walking
     //used for rotating panel
-    const std::vector<float> rightNearChestPalmDown_     = {-1.70, 1.04, 1.39, 1.85, -1.50, 0, 0};
+    const std::vector<float> rightNearChestPalmUp_       = {-1.70, 1.04, 1.39, 1.85, -1.50, 0, 0};
     //used for picking up the panel
-    const std::vector<float> rightNearChestPalmUp_     = {-1.5, 1.04, 1.6, 1.85, 1.50, 0, 0};
+    const std::vector<float> rightNearChestPalmDown_     = {-1.5, 1.04, 1.6, 1.85, 1.50, 0, 0};
 
     const std::vector<float> rightSeedNonGraspingHand_ = {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0};
     //while walking
