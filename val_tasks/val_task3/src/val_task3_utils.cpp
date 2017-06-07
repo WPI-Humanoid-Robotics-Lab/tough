@@ -29,12 +29,12 @@ void task3Utils::beforDoorOpenPose(){
     std::vector< std::vector<float> > armData;
     armData.push_back(RIGHT_ARM_DOOR_OPEN);
 
-     arm_controller_.moveArmJoints(RIGHT,armData,2.0f);
+     arm_controller_.moveArmJoints(RIGHT,armData,0.5f);
      ros::Duration(2.0).sleep();
 
      armData.clear();
      armData.push_back(LEFT_ARM_DOOR_OPEN);
-     arm_controller_.moveArmJoints(LEFT,armData,2.0f);
+     arm_controller_.moveArmJoints(LEFT,armData,0.5f);
      ros::Duration(2.0).sleep();
 }
 
