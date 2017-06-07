@@ -1,21 +1,21 @@
 #include "val_task2/solar_array_detector.h"
 
-ArrayDetector::ArrayDetector(ros::NodeHandle& nh) : nh_(nh), cloud_(new pcl::PointCloud<pcl::PointXYZ>)
+CoarseArrayDetector::CoarseArrayDetector(ros::NodeHandle& nh) : nh_(nh), cloud_(new pcl::PointCloud<pcl::PointXYZ>)
 {
-    pcl_sub_ = nh_.subscribe("/field/assembled_cloud2", 10, &ArrayDetector::cloudCB, this);
+    pcl_sub_ = nh_.subscribe("/field/assembled_cloud2", 10, &CoarseArrayDetector::cloudCB, this);
     pcl_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/val_solar_plane/cloud2", 1, true);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_normal",1);
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 }
 
-ArrayDetector::~ArrayDetector()
+CoarseArrayDetector::~CoarseArrayDetector()
 {
     pcl_sub_.shutdown();
     pcl_pub_.shutdown();
     marker_pub_.shutdown();
 }
 
-void ArrayDetector::cloudCB(const sensor_msgs::PointCloud2::Ptr input)
+void CoarseArrayDetector::cloudCB(const sensor_msgs::PointCloud2::Ptr input)
 {
     if (input->data.empty())
         return;
@@ -25,11 +25,10 @@ void ArrayDetector::cloudCB(const sensor_msgs::PointCloud2::Ptr input)
     mtx_.unlock();
 }
 
-bool ArrayDetector::getArrayPosition(const geometry_msgs::Pose2D& rover_pose)
+bool CoarseArrayDetector::getArrayPosition(const geometry_msgs::Pose2D& rover_pose)
 {
     markers_.markers.clear();
     bool array_detected = false;
-
     rover_pose_ = rover_pose;
 
     if (cloud_->empty())
@@ -38,72 +37,127 @@ bool ArrayDetector::getArrayPosition(const geometry_msgs::Pose2D& rover_pose)
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud1 (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud2 (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud3 (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
     //copy cloud into local variable
     mtx_.lock();
     input_cloud = cloud_;
     mtx_.unlock();
-    ROS_INFO_STREAM("cloud header" << cloud_->header << std::endl);
 
-
-    //Segment the plane and pass through filter to narrow the filter region to the stairs
     if (input_cloud->empty())
         return false;
 
-    ROS_INFO("Removing Rover from Point Cloud");
-
+    ROS_INFO("CoarseArrayDetector::Removing Rover from Point Cloud");
     roverRemove(input_cloud, out_cloud1);
 
     if (out_cloud1->empty())
         return false;
-    ROS_INFO("Computing Normals");
-    boxFilter(out_cloud1 , out_cloud2);
+
+    ROS_INFO("CoarseArrayDetector::Computing Normals");
+    normalSegmentation(out_cloud1, out_cloud2);
 
     if (out_cloud2->empty())
         return false;
-    ROS_INFO("Plane Detection");
-    planeDetection(out_cloud2, out_cloud3);
 
-    if (!out_cloud3->empty())
+    ROS_INFO("CoarseArrayDetector::Finding Array Cluster");
+    findArrayCluster(out_cloud2, output_cloud);
+
+    if (!output_cloud->empty())
         array_detected = true;
-//    ROS_INFO("Finding Largest Cluster");
-//    findLargestCluster(out_cloud3, output_cloud);
 
-//    if (!output_cloud->empty())
-//        array_detected = true;
+    if(output_cloud->empty())
+        ROS_ERROR("CoarseArrayDetector::Dandanakka not done!!!!");
 
     //publish the output cloud for visualization
     sensor_msgs::PointCloud2 output;
-    pcl::toROSMsg(*out_cloud3, output);
+    pcl::toROSMsg(*output_cloud, output);
     output.header.frame_id = "world";
     pcl_pub_.publish(output);
 
     return array_detected;
 }
 
-void ArrayDetector::boxFilter(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output)
+void CoarseArrayDetector::roverRemove(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output)
 {
+    //box filter
+    Eigen::Vector4f minPoint;
+    Eigen::Vector4f maxPoint;
+    minPoint[0] = 0.0;
+    minPoint[1] = -2.0;
+    minPoint[2] = 0.0;
+
+    maxPoint[0] = 9.0;
+    maxPoint[1] = 2.0;
+    maxPoint[2] = 3.0;
+
+    Eigen::Vector3f boxTranslatation;
+    boxTranslatation[0] = rover_pose_.x;
+    boxTranslatation[1] = rover_pose_.y;
+    boxTranslatation[2] = 0.1;  // to remove the points belonging to the walkway
+
+    Eigen::Vector3f boxRotation;
+    boxRotation[0] = 0.0;  // rotation around x-axis
+    boxRotation[1] = 0.0;  // rotation around y-axis
+    boxRotation[2] = rover_pose_.theta;  //in radians rotation around z-axis. this rotates your cube 45deg around z-axis.
+
+    pcl::CropBox<pcl::PointXYZ> box_filter;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr rover_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    box_filter.setInputCloud(input);
+    box_filter.setMin(minPoint);
+    box_filter.setMax(maxPoint);
+    box_filter.setTranslation(boxTranslatation);
+    box_filter.setRotation(boxRotation);
+    box_filter.setNegative(false);
+    box_filter.filter(*rover_cloud);
+
+    if (rover_cloud->empty())
+        return;
+
+    //projecting rover cloud onto xy plane
+    auto coefficients = boost::make_shared<pcl::ModelCoefficients>();
+    coefficients->header.frame_id = "world";
+    coefficients->values.resize (4);
+    coefficients->values[0] = coefficients->values[1] = 0;
+    coefficients->values[2] = 1.0;
+    coefficients->values[3] = 0;
+
+    pcl::ProjectInliers<pcl::PointXYZ> proj;
+    proj.setModelType(pcl::SACMODEL_PLANE);
+    proj.setInputCloud(rover_cloud);
+    proj.setModelCoefficients(coefficients);
+    proj.filter(*rover_cloud);
+
+    // Widen cloud in +/- y to make sure val doesn't walk into the side of it
+    Eigen::Affine3f rover_shift_l, rover_shift_r;
+    const auto rover_align = Eigen::AngleAxisf(rover_pose_.theta, Eigen::Vector3f::UnitZ());
+    rover_shift_l.linear() = Eigen::Matrix3f::Identity();
+    rover_shift_l.translation() = rover_align * Eigen::Vector3f(-0.2, -0.4, 0);
+    rover_shift_r.linear() = Eigen::Matrix3f::Identity();
+    rover_shift_r.translation() = rover_align * Eigen::Vector3f(-0.2, 0.4, 0);
+
+    pcl::PointCloud<pcl::PointXYZ> rover_shifted_l, rover_shifted_r;
+    pcl::transformPointCloud(*rover_cloud, rover_shifted_l, rover_shift_l);
+    pcl::transformPointCloud(*rover_cloud, rover_shifted_r, rover_shift_r);
+    rover_shifted_l += rover_shifted_r;
+
+    box_filter.setNegative(true);
+    box_filter.filter(*output);
+}
+
+void CoarseArrayDetector::normalSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output)
+{
+    //box filter
     geometry_msgs::Pose pelvisPose;
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;
     minPoint[0] = -2.0;
-    minPoint[1] = -8.0;
-    minPoint[2] = 0.5;
-    //minPoint.normalize();
+    minPoint[1] = -4.0;
+    minPoint[2] = -pelvisPose.position.z + 0.1;
 
-//    ROS_INFO_STREAM("pelvis pose" << pelvisPose.position << std::endl);
-//    ROS_INFO_STREAM("pelvis orientation yaw" << tf::getYaw(pelvisPose.orientation) << std::endl);
-//    ROS_INFO_STREAM("pelvis orientation quaternion" << pelvisPose.orientation << std::endl);
-
-
-
-    maxPoint[0] = 8.0;//(pelvisPose.position.x - rover_pose_.x) * 5;
-    maxPoint[1] = 8.0;//(pelvisPose.position.y - rover_pose_.y) * 5;
+    maxPoint[0] = 8.0;
+    maxPoint[1] = 4.0;
     maxPoint[2] = 2.0;
-    //maxPoint.normalize();
 
     Eigen::Vector3f boxTranslatation;
     boxTranslatation[0] = pelvisPose.position.x;
@@ -115,7 +169,6 @@ void ArrayDetector::boxFilter(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, p
     boxRotation[1] = 0;  // rotation around y-axis
     boxRotation[2] = tf::getYaw(pelvisPose.orientation);
 
-
     pcl::CropBox<pcl::PointXYZ> box_filter;
     box_filter.setInputCloud(input);
     box_filter.setMin(minPoint);
@@ -123,88 +176,15 @@ void ArrayDetector::boxFilter(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, p
     box_filter.setTranslation(boxTranslatation);
     box_filter.setRotation(boxRotation);
     box_filter.setNegative(false);
-    box_filter.filter(*output);
-}
-
-
-void ArrayDetector::planeDetection(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output)
-{
-
-  pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-  pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-  pcl::SACSegmentation<pcl::PointXYZ> seg;
-  Eigen::Vector4f cloudCentroid;
-
-
-  seg.setOptimizeCoefficients (true);
-  seg.setModelType (pcl::SACMODEL_PLANE);
-  seg.setMethodType (pcl::SAC_RANSAC);
-  seg.setMaxIterations (100);
-  seg.setDistanceThreshold (0.25);
-  seg.setInputCloud (input);
-  seg.segment (*inliers, *coefficients);
-  ROS_INFO_STREAM(" coefficients" << coefficients->values[0] <<"\t" << coefficients->values[1] <<"\t" << coefficients->values[2] <<"\t" << coefficients->values[3] <<"\t" << std::endl);
-
-  if (coefficients->values[2] < 0)
-  {
-      coefficients->values[0] = -coefficients->values[0];
-      coefficients->values[1] = -coefficients->values[1];
-      coefficients->values[2] = -coefficients->values[2];
-
-  }
-
-  pcl::ExtractIndices<pcl::PointXYZ> extract;
-
-  extract.setInputCloud (input);
-  extract.setIndices (inliers);
-  extract.setNegative (false);
-  extract.filter (*output);
-
-  float leafsize  = 0.05;
-  pcl::VoxelGrid<pcl::PointXYZ> grid;
-  grid.setLeafSize (leafsize, leafsize, leafsize);
-  grid.setInputCloud (output);
-  grid.filter (*output);
-
-
-  pcl::compute3DCentroid(*output, cloudCentroid);
-
-  double t = -(cloudCentroid(2)) / double(coefficients->values[2]);
-
-
-  float cos_theta = coefficients->values[0]/std::sqrt(std::pow(coefficients->values[0],2) + std::pow(coefficients->values[1],2) );
-  float sin_theta = coefficients->values[1]/std::sqrt(std::pow(coefficients->values[0],2) + std::pow(coefficients->values[1],2) );
-  float theta = std::atan2(sin_theta, cos_theta);
-  geometry_msgs::Pose pose;
-
-  pose.position.x = cloudCentroid(0) + t * coefficients->values[0];
-  pose.position.y = cloudCentroid(1) + t * coefficients->values[1];
-  pose.position.z = 0;
-
-
-  geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
-  pose.orientation = quaternion;
-  ROS_INFO_STREAM("t " << t << std::endl << "theta" << theta <<std::endl << "pose" << pose <<std::endl);
-
-  visualizePose(pose);
-
-  marker_pub_.publish(markers_);
-
-}
-
-
-void ArrayDetector::normalSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output)
-{
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud1 (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
+    box_filter.filter(*temp_cloud);
 
     // Downsample the cloud for faster processing
-    float leafsize  = 0.00002;
+    float leafsize  = 0.02;
     pcl::VoxelGrid<pcl::PointXYZ> grid;
     grid.setLeafSize (leafsize, leafsize, leafsize);
-    grid.setInputCloud (input);
+    grid.setInputCloud (temp_cloud);
     grid.filter (*temp_cloud);
 
     // Normals estimation
@@ -214,6 +194,8 @@ void ArrayDetector::normalSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
     ne.setSearchMethod (tree);
     ne.setRadiusSearch (0.03);
+
+    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
     ne.compute (*cloud_normals);
 
     std::vector<int> index;
@@ -222,6 +204,7 @@ void ArrayDetector::normalSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr
     auto inliers = boost::make_shared<pcl::PointIndices>();
     inliers->indices = index;
     inliers->header = cloud_->header;
+
     pcl::ExtractIndices<pcl::PointXYZ> extract;
     extract.setInputCloud (temp_cloud);
     extract.setIndices (inliers);
@@ -244,110 +227,155 @@ void ArrayDetector::normalSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr
     }
 }
 
-
-void ArrayDetector::roverRemove(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output)
+void CoarseArrayDetector::findArrayCluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output)
 {
+    geometry_msgs::Pose pelvisPose;
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
 
-    double theta;
-    theta = rover_pose_.theta;
-
-    Eigen::Vector4f minPoint;
-    Eigen::Vector4f maxPoint;
-    minPoint[0]=0;
-    minPoint[1]=-2;
-    minPoint[2]=0;
-
-    maxPoint[0]=9;
-    maxPoint[1]=+2;
-    maxPoint[2]=3;
-    Eigen::Vector3f boxTranslatation;
-         boxTranslatation[0]=rover_pose_.x;
-         boxTranslatation[1]=rover_pose_.y;
-         boxTranslatation[2]=0.1;  // to remove the points belonging to the walkway
-    Eigen::Vector3f boxRotation;
-         boxRotation[0]=0;  // rotation around x-axis
-         boxRotation[1]=0;  // rotation around y-axis
-         boxRotation[2]=theta;  //in radians rotation around z-axis. this rotates your cube 45deg around z-axis.
-
-    pcl::CropBox<pcl::PointXYZ> box_filter;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr rover_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-    box_filter.setInputCloud(input);
-    box_filter.setMin(minPoint);
-    box_filter.setMax(maxPoint);
-    box_filter.setTranslation(boxTranslatation);
-    box_filter.setRotation(boxRotation);
-    box_filter.setNegative(false);
-    box_filter.filter(*rover_cloud);
-    if (rover_cloud->empty())
-        return;
-
-    auto coefficients = boost::make_shared<pcl::ModelCoefficients>();
-    coefficients->header.frame_id = "world";
-    coefficients->values.resize (4);
-    coefficients->values[0] = coefficients->values[1] = 0;
-    coefficients->values[2] = 1.0;
-    coefficients->values[3] = 0;
-
-    pcl::ProjectInliers<pcl::PointXYZ> proj;
-    proj.setModelType(pcl::SACMODEL_PLANE);
-    proj.setInputCloud(rover_cloud);
-    proj.setModelCoefficients(coefficients);
-    proj.filter(*rover_cloud);
-
-    // Widen cloud in +/- y to make sure val doesn't walk into the side of it
-    Eigen::Affine3f rover_shift_l, rover_shift_r;
-    const auto rover_align = Eigen::AngleAxisf(theta, Eigen::Vector3f::UnitZ());
-
-    rover_shift_l.linear() = Eigen::Matrix3f::Identity();
-    rover_shift_l.translation() = rover_align * Eigen::Vector3f(-0.2, -0.4, 0);
-    rover_shift_r.linear() = Eigen::Matrix3f::Identity();
-    rover_shift_r.translation() = rover_align * Eigen::Vector3f(-0.2, 0.4, 0);
-
-    pcl::PointCloud<pcl::PointXYZ> rover_shifted_l, rover_shifted_r;
-    pcl::transformPointCloud(*rover_cloud, rover_shifted_l, rover_shift_l);
-    pcl::transformPointCloud(*rover_cloud, rover_shifted_r, rover_shift_r);
-
-    rover_shifted_l += rover_shifted_r;
-
-    box_filter.setNegative(true);
-    box_filter.filter(*output);
-}
-
-void ArrayDetector::findLargestCluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output)
-{
+    //find the clusters
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
     tree->setInputCloud (input);
-    int cloudSize = (int)input->points.size();
-    //  ROS_INFO("Minimum Size = %d", (int)(0.2*cloudSize));
-    //  ROS_INFO("Maximum Size = %d", cloudSize);
     std::vector<pcl::PointIndices> cluster_indices;
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
     ec.setClusterTolerance (0.1);
-    ec.setMinClusterSize ((int)(0.40*cloudSize));
-    ec.setMaxClusterSize (cloudSize);
+    ec.setMinClusterSize ((int)(0.10 * (input->points.size())));  //10% to make sure minimize the number of clusters
+    ec.setMaxClusterSize ((int)(input->points.size()));
     ec.setSearchMethod (tree);
     ec.setInputCloud (input);
     ec.extract (cluster_indices);
 
-    ROS_INFO_STREAM("cluster indices size " << cluster_indices[0].indices.size() << std::endl);
-    if (cluster_indices.size() == 1)
+    //Iterate to find the array cluster
+    ROS_INFO_STREAM("Cluster size " << cluster_indices.size());
+    for(auto it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
     {
         auto inliers = boost::make_shared<pcl::PointIndices>();
-        inliers->indices = cluster_indices[0].indices;
+        inliers->indices = it->indices;
         inliers->header = cloud_->header;
+
         pcl::ExtractIndices<pcl::PointXYZ> extract;
         extract.setInputCloud (input);
         extract.setIndices (inliers);
         extract.setNegative (false);
-        extract.filter (*output);
 
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
+        extract.filter (*cloud_cluster);
+
+        Eigen::Vector4f cloudCentroid;
+        pcl::compute3DCentroid(*cloud_cluster, cloudCentroid);
+
+        //box filter
+        Eigen::Vector4f minPoint;
+        Eigen::Vector4f maxPoint;
+        minPoint[0] = cloudCentroid(0) - 1.7;
+        minPoint[1] = cloudCentroid(1) -2;
+        minPoint[2] = pelvisPose.position.z + 0.5;
+
+        maxPoint[0] = cloudCentroid(0) + 3.0;
+        maxPoint[1] = cloudCentroid(1) + 2.0;
+        maxPoint[2] = 2.0;
+
+        pcl::CropBox<pcl::PointXYZ> box_filter;
+        box_filter.setInputCloud(cloud_);
+        box_filter.setMin(minPoint);
+        box_filter.setMax(maxPoint);
+        box_filter.setNegative(false);
+
+        pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+        box_filter.filter(*temp_cloud);
+
+        //Downsample cloud
+        float leafsize  = 0.05;
+        pcl::VoxelGrid<pcl::PointXYZ> grid;
+        grid.setLeafSize (leafsize, leafsize, leafsize);
+        grid.setInputCloud (temp_cloud);
+        grid.filter (*temp_cloud);
+
+        if (temp_cloud->empty())
+            continue;
+
+//        sensor_msgs::PointCloud2 output1;
+//        pcl::toROSMsg(*temp_cloud, output1);
+//        output1.header.frame_id = "world";
+//        pcl_pub_.publish(output1);
+
+        pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud1 (new pcl::PointCloud<pcl::PointXYZ>);
+        if (planeDetection(temp_cloud, temp_cloud1))
+            *output = *temp_cloud1;
+        //ROS_INFO_STREAM("output size " << output->points.size()<< std::endl);
     }
-    //ROS_INFO("ArrayDetector::findLargestCluster : Number of points in the cluster = %d", (int)cloud_cluster->points.size());
+}
+
+bool CoarseArrayDetector::planeDetection(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output)
+{
+    if (input->points.size() < 20)
+        return false;
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
+    seg.setOptimizeCoefficients (true);
+    seg.setModelType (pcl::SACMODEL_PLANE);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setMaxIterations (100);
+    seg.setDistanceThreshold (0.25);
+    seg.setInputCloud (input);
+
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    seg.segment (*inliers, *coefficients);
+
+    if (coefficients->values.empty() || inliers->indices.empty())
+        return false;
+
+    if (coefficients->values[2] < 0)
+    {
+      coefficients->values[0] = -coefficients->values[0];
+      coefficients->values[1] = -coefficients->values[1];
+      coefficients->values[2] = -coefficients->values[2];
+    }
+
+    float cos_theta1 = coefficients->values[2]/std::sqrt(std::pow(coefficients->values[0],2) + std::pow(coefficients->values[1],2) + std::pow(coefficients->values[2],2));
+    float sin_theta1 = std::sqrt(std::pow(coefficients->values[0],2) + std::pow(coefficients->values[1],2))/std::sqrt(std::pow(coefficients->values[0],2) + std::pow(coefficients->values[1],2) + std::pow(coefficients->values[2],2));
+    float theta1 = std::atan2(sin_theta1, cos_theta1);
+
+    ROS_INFO_STREAM("theta1 "<< theta1 << "\t" <<coefficients->values[2] << std::endl);
+
+    if (theta1 < 0.72 || theta1 > 1.00)
+        return false;
+
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    extract.setInputCloud (input);
+    extract.setIndices (inliers);
+    extract.setNegative (false);
+    extract.filter (*output);
+
+    float leafsize  = 0.05;
+    pcl::VoxelGrid<pcl::PointXYZ> grid;
+    grid.setLeafSize (leafsize, leafsize, leafsize);
+    grid.setInputCloud (output);
+    grid.filter (*output);
+
+    Eigen::Vector4f cloudCentroid;
+    pcl::compute3DCentroid(*output, cloudCentroid);
+
+    double t = -(cloudCentroid(2)) / double(coefficients->values[2]);
+    float cos_theta = coefficients->values[0]/std::sqrt(std::pow(coefficients->values[0],2) + std::pow(coefficients->values[1],2) );
+    float sin_theta = coefficients->values[1]/std::sqrt(std::pow(coefficients->values[0],2) + std::pow(coefficients->values[1],2) );
+    float theta = std::atan2(sin_theta, cos_theta);
+
+    geometry_msgs::Pose pose;
+    pose.position.x = cloudCentroid(0) + ARRAY_OFFSET * t * coefficients->values[0];
+    pose.position.y = cloudCentroid(1) + ARRAY_OFFSET * t * coefficients->values[1];
+    pose.position.z = 0;
+
+    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
+    pose.orientation = quaternion;
+
+    visualizePose(pose);
+    marker_pub_.publish(markers_);
+    return true;
 
 }
 
-void ArrayDetector::visualizePose(const geometry_msgs::Pose &pose){
-
+void CoarseArrayDetector::visualizePose(const geometry_msgs::Pose &pose)
+{
     static int id = 0;
     visualization_msgs::Marker marker;
     // Set the frame ID and timestamp.  See the TF tutorials for information on these.
@@ -372,8 +400,8 @@ void ArrayDetector::visualizePose(const geometry_msgs::Pose &pose){
     marker.scale.y = 0.01;
     marker.scale.z = 0.01;
     marker.color.a = 1.0; // Don't forget to set the alpha!
-    marker.color.r = 1.0;
-    marker.color.g = 0.0;
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
     marker.color.b = 0.0;
 
     markers_.markers.push_back(marker);

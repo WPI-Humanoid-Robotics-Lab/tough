@@ -38,7 +38,9 @@
 #include "val_controllers/robot_state.h"
 #include <visualization_msgs/MarkerArray.h>
 
-class ArrayDetector{
+#define ARRAY_OFFSET 0.96
+
+class CoarseArrayDetector{
 private:
 
   ros::NodeHandle nh_;
@@ -56,21 +58,20 @@ private:
   std::mutex mtx_;
 
   void cloudCB(const sensor_msgs::PointCloud2::Ptr input);
-
+  void visualizePose(const geometry_msgs::Pose& pose);
+  void normalSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output);
+  void roverRemove(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output);
+  void findArrayCluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output);
+  bool planeDetection(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output);
 
 public:
   // Constructor
 
-  ArrayDetector(ros::NodeHandle& nh);
-  ~ArrayDetector();
-  void normalSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output);
+  CoarseArrayDetector(ros::NodeHandle& nh);
+  ~CoarseArrayDetector();
 
-  void roverRemove(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output);
   bool getArrayPosition(const geometry_msgs::Pose2D &rover_pose);
-  void boxFilter(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output);
-  void findLargestCluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output);
-  void planeDetection(const pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointCloud<pcl::PointXYZ>::Ptr output);
-  void visualizePose(const geometry_msgs::Pose& pose);
+
 };
 
 #endif // SOLAR_ARRAY_DETECTOR_H
