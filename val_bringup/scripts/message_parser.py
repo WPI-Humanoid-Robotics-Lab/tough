@@ -48,14 +48,13 @@ sock.connect(FIELD_IP,PORT)
 
 def state_callback(data):
     #send only data that is required. it should be a string only
-    for msg in data.status:
-        rospy.loginfo(rospy.get_caller_id() + "Message %s", msg.message)
-        sock.mysend(msg.message +" \n")
+    rospy.loginfo(rospy.get_caller_id() + "Message %s", data.data)
+    sock.mysend(data.data +" \n")
 
 def listener():
     # Listen to the decision making topic
     rospy.init_node('state_listener', anonymous=True)
-    rospy.Subscriber("/decision_making/monitoring", DiagnosticArray, state_callback)
+    rospy.Subscriber("/field/log", String, state_callback)
 
 
 
