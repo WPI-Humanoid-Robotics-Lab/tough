@@ -64,7 +64,7 @@ private:
     const std::vector<float> leftNearChestPalmUp_    = {-1.5, -1.04, 1.6, -1.85, -1.50, 0, 0};
     const std::vector<float> leftSeedNonGraspingHand_ = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};
     //while walking
-    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.38, -1.49, 1.3, -0.7, -0.26, 0.0, 0.2};
+    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.62,-1.05,1.29,-1.23,-0.67,0.0,-0.30};
 
 
     //before walking
