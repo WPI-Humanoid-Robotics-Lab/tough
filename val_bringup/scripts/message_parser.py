@@ -65,12 +65,16 @@ if __name__ == '__main__':
     while True:
 
         msg = sock.myreceive()
-        if (msg[len(FIELD_IP)+4] == "+"):
+        start_index = msg.find("]")
+        if start_index == -1:
+            continue
+        start_index += 2
+        if (msg[start_index] == "+"):
             # any message that begins with a + is
-            command = msg[len(FIELD_IP)+5:-1]
-            print msg[:len(FIELD_IP)+4] + "**Command Recieved** " + msg[len(FIELD_IP)+4:-1]
+            command = msg[start_index+1:-1]
+            print msg[:start_index] + "**Command Recieved** " + msg[start_index:-1]
             print "executing '"+command + "'"
             subprocess.Popen(command.split())
 
         else:
-            print msg[:len(FIELD_IP)+4] + "**Message Recieved** " + msg[len(FIELD_IP)+4:-1]
+            print msg[:start_index] + "**Message Recieved** " + msg[start_index:-1]
