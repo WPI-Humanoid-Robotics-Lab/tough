@@ -255,7 +255,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
         }
     }
     else if(retry_count < 5) {
-        ROS_INFO("sleep for 3 seconds for panel detection");
+        ROS_INFO("sleep for 3 seconds for panel detection, retry count : %d fail count : %d",retry_count,fail_count);
         ++retry_count;
         ros::Duration(2).sleep();
         eventQueue.riseEvent("/DETECT_ROVER_RETRY");
@@ -297,6 +297,8 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
     static std::queue<geometry_msgs::Pose2D> goal_waypoints;
     // Run this block once during every visit of the state from either a failed state or previous state
     if(executeOnce){
+        std::queue<geometry_msgs::Pose2D>  temp1;
+        goal_waypoints = temp1;
         for (auto pose : rover_walk_goal_waypoints_){
             ROS_INFO("X: %.2f  Y:%.2f  Theta:%.2f", pose.x, pose.y, pose.theta);
             goal_waypoints.push(pose);
@@ -396,7 +398,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
         isFirstRun = false;
 
         solar_panel_detector_ = new SolarPanelDetect(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
-        chest_controller_->controlChest(0, 0, 0);
+        chest_controller_->controlChest(2, 2, 2);
 
         //move arms to default position
         arm_controller_->moveToDefaultPose(armSide::RIGHT);
@@ -412,14 +414,12 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
 
     // detect solar panel
     std::vector<geometry_msgs::Pose> poses;
+    ROS_INFO("valTask2::detectPanelTask : get detections");
     solar_panel_detector_->getDetections(poses);
-    ROS_INFO("Size of detections : %d", poses.size());
+    ROS_INFO("valTask2::detectPanelTask : Size of detections : %d", poses.size());
     // if we get atleast two detections
     if (poses.size() > 1)
     {
-        //        if (button_detector_ == nullptr){
-        //            button_detector_ = new ButtonDetector(nh_);
-        //        }
         size_t idx = poses.size()-1;
         setSolarPanelHandlePose(poses[idx]);
         task2_utils_->reOrientTowardsGoal(solar_panel_handle_pose_.position);
@@ -435,13 +435,10 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
         eventQueue.riseEvent("/DETECTED_PANEL");
         if(solar_panel_detector_ != nullptr) delete solar_panel_detector_;
         solar_panel_detector_ = nullptr;
-
-        //        if(button_detector_ != nullptr) delete button_detector_;
-        //        button_detector_ = nullptr;
     }
 
     else if(retry_count < 10) {
-        ROS_INFO("sleep for 3 seconds for panel detection");
+        ROS_INFO("valTask2::detectPanelTask :sleep for 3 seconds for panel detection");
         ++retry_count;
         eventQueue.riseEvent("/DETECT_PANEL_RETRY");
         ros::Duration(3).sleep();
@@ -1567,7 +1564,7 @@ decision_making::TaskResult valTask2::walkToFinishTask(string name, const FSMCal
         ros::Duration(1).sleep();
         pelvis_controller_->controlPelvisHeight(0.9);
         ros::Duration(0.2).sleep();
-        chest_controller_->controlChest(0.0, 0.0, 0.0);
+        chest_controller_->controlChest(2, 2, 2);
         ros::Duration(0.2).sleep();
         arm_controller_->moveToDefaultPose(armSide::LEFT);
         ros::Duration(0.2).sleep();

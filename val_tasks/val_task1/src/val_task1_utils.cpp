@@ -15,8 +15,11 @@ task1Utils::task1Utils(ros::NodeHandle nh):
     task1_log_pub_           = nh_.advertise<std_msgs::String>("/field/log",10);
 
     task_status_sub_ = nh.subscribe("/srcsim/finals/task1", 10, &task1Utils::taskStatusSubCB, this);
+    visitedMapUpdaterSub_    = nh_.subscribe("/visited_map", 10, &task1Utils::visitedMapUpdateCB, this);
 
     logFile = ros::package::getPath("val_task1") + "/log/task1.csv";
+
+    robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 
     current_checkpoint_ = 0;
 
@@ -34,10 +37,50 @@ int task1Utils::getCurrentCheckpoint() const{
     return current_checkpoint_;
 }
 
+bool task1Utils::isPointVisited(float x, float y)
+{
+    size_t index = MapGenerator::getIndex(x, y);
+    return visited_map_.data.at(index) == CELL_STATUS::VISITED;
+}
+
+bool task1Utils::getNextPoseToWalk(geometry_msgs::Pose2D &pose2D, bool allowVisitied)
+{
+    if (visited_map_.data.empty())
+        return false;
+    const float radius = 2.0f;
+
+    for (float theta = 0; theta < M_PI; theta += M_PI/6){
+        for (int i = -1; i < 2; i+=2){
+            pose2D.x = radius*cos(i*theta);
+            pose2D.y = radius*sin(i*theta);
+            pose2D.theta = i*theta;
+            robot_state_->transformPose(pose2D, pose2D, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+            size_t index = MapGenerator::getIndex(pose2D.x, pose2D.y);
+            if (visited_map_.data.at(index) == CELL_STATUS::FREE || (allowVisitied && visited_map_.data.at(index) == CELL_STATUS::VISITED)){
+                ROS_INFO("task1Utils::getNextPoseToWalk : x:%f y:%f theta:%f",i, pose2D.x, pose2D.y, pose2D.theta);
+                return true;
+            }
+        }
+    }
+
+    pose2D.x = 0;
+    pose2D.y = 0;
+    pose2D.theta = 0;
+
+    return false;
+}
+
 void task1Utils::satelliteMsgCB(const srcsim::Satellite& msg)
 {
     // update the message
     msg_ = msg;
+}
+
+void task1Utils::visitedMapUpdateCB(const nav_msgs::OccupancyGrid &msg)
+{
+    mtx.lock();
+    visited_map_ = msg;
+    mtx.unlock();
 }
 
 // satellite dish helper tasks
