@@ -131,7 +131,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
     // the state transition can happen from an event externally or can be geenerated here
     ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
     task1_utils_->taskLogPub("Occupancy grid has been updated : " + std::to_string(map_update_count_) + " times and tried : " + std::to_string(retry_count));
-    if (map_update_count_ > 1) {
+    if (map_update_count_ > 3) {
         // move to a configuration that is robust while walking
         retry_count = 0;
 
@@ -345,6 +345,7 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
     //tilt head downwards to see the panel
     head_controller_->moveHead(0.0f, 30.0f, 0.0f, 2.0f);
     static int retry_count = 0;
+    static int fail_count = 0;
     //wait for head to be in position
     ros::Duration(3).sleep();
 
@@ -366,9 +367,20 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
         task1_utils_->taskLogPub("Did not detect handle, retrying");
         eventQueue.riseEvent("/DETECT_HANDLE_RETRY");
     }
-    else{
+    else if (fail_count > 2){
+        fail_count = 0;
+        retry_count = 0;
         ROS_INFO("Did not detect handle, failed");
-        task1_utils_->taskLogPub("Did not detect handle, failed");
+        task1_utils_->taskLogPub("Did not detect handle. Failed");
+        eventQueue.riseEvent("/DETECT_HANDLE_ERROR");
+
+    }
+    else{
+        ++fail_count;
+        head_controller_->moveHead(0.0f, 0.0f, 0.0f, 2.0f);
+        ros::Duration(2).sleep();
+        ROS_INFO("Did not detect handle. Detecting panel one more time");
+        task1_utils_->taskLogPub("Did not detect handle. Detecting panel one more time");
         eventQueue.riseEvent("/DETECT_HANDLE_FAILED");
         retry_count = 0;
     }
