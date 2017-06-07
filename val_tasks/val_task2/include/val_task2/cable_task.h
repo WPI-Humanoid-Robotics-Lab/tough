@@ -26,6 +26,7 @@ public:
    bool grasp_cable(const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool insert_cable(const geometry_msgs::Point &goal, float executionTime=2.0f);
    bool rotate_cable(const geometry_msgs::Pose &goal, float executionTime=2.0f);
+   bool drop_cable(armSide side);
 private:
    ros::NodeHandle nh_;
    tf::TransformListener listener_;
@@ -56,6 +57,8 @@ private:
    const std::vector<float> rightAfterGraspShoulderSeed2_ = {-0.57, 1.09, 0.65, 1.1, 0.30, -0.19, 0.31}; // more wrist yaw angle
    const std::vector<float> rightShoulderSeed_ = {-0.81,0.60,1.12,1.16,1.91,0.0,0.0};
    const std::vector<float> rightShoulderInHandSeed_ = {-0.81,1.11,0.65,1.14,-0.26,-0.19,0.30};
+   const std::vector<float> rightAfterRotateSeed_ = {-1.35,0.76,1.70,1.07,1.44,0.62,0.06};
+   const std::vector<float> rightCablePlaceSeed_ = {-1.56, 0.97, 2.18, 0.63, 0.86, 0.62, 0.15};
 };
 
 #endif // CABLETASK_H
