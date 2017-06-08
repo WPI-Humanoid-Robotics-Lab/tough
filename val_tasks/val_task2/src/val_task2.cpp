@@ -887,6 +887,7 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
             arm_controller_->moveArmJoint(panel_grasping_hand_,0,q0);
             ros::Duration(0.2).sleep();
         }
+        head_controller_->moveHead(0,0,0,2.0f);
         executingOnce= true;
         isPoseChangeReq = true;
     }
@@ -1032,6 +1033,13 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
 decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("valTask2::placePanelTask : executing " << name);
+    if(skip_4)
+    {
+        // go to next state of detecting cable
+        ROS_INFO("valTask2::placePanelTask: [SKIP] skipping place Panel Task state");
+        eventQueue.riseEvent("/PLACED_ON_GROUND");
+        return TaskResult::SUCCESS();
+    }
     static bool handsPulledOff = false;
 
     /************************************
@@ -1088,6 +1096,14 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
 decision_making::TaskResult valTask2::detectButtonTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("valTask2::detectButtonTask: executing " << name);
+
+    if(skip_4)
+    {
+        // go to next state of detecting cable
+        ROS_INFO("valTask2::detectButtonTask: [SKIP] skipping detecting button state");
+        eventQueue.riseEvent("/BUTTON_DETECTED");
+        return TaskResult::SUCCESS();
+    }
 
     static std::queue<float> head_yaw_ranges;
 
@@ -1168,6 +1184,15 @@ decision_making::TaskResult valTask2::detectButtonTask(string name, const FSMCal
 decision_making::TaskResult valTask2::deployPanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("executing " << name);
+
+    if(skip_4)
+    {
+        // go to next state of detecting cable
+        ROS_INFO("valTask2::deployPanelTask: [SKIP] skipping deploying panel state");
+        eventQueue.riseEvent("/DEPLOYED");
+        skip_4=false;
+        return TaskResult::SUCCESS();
+    }
 
     if(button_press_ == nullptr) {
         button_press_ = new ButtonPress(nh_);
@@ -1682,8 +1707,8 @@ decision_making::TaskResult valTask2::skipCheckPointTask(string name, const FSMC
 
     // skip check point, basically take the user input and switches the state
 
-//    wait infinetly until an external even occurs
-            while(!preemptiveWait(1000, eventQueue)){
+    //    wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("valTask2::skipCheckPointTask: waiting for transition");
     }
 
@@ -1751,6 +1776,7 @@ decision_making::TaskResult valTask2::skipToCP4Task(string name, const FSMCallCo
     {
         ///@TODO: do anything which is required for further states
         task2_utils_->checkpoint_init();
+        skip_3=true;
         skip_4=true;
         eventQueue.riseEvent("/SKIPPED_TO_CP_4");
     }
