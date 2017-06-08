@@ -186,6 +186,10 @@ add_dependencies(panel_detection_node
  ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(panel_detection_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} ${PROJECT_NAME})
+
+ add_executable(TrimWalkway src/trim_walkway_pointcloud.cpp)
+ add_dependencies(TrimWalkway ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ target_link_libraries(TrimWalkway ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${PROJECT_NAME})
 #############
 ## Install ##
 #############

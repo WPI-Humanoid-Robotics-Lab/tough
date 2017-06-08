@@ -14,6 +14,7 @@
 #include "val_controllers/robot_state.h"
 #include <mutex>
 
+
 enum CELL_STATUS{
     FREE = 0,
     VISITED = 50,
