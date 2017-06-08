@@ -33,7 +33,7 @@
 
 #include <pcl/sample_consensus/sac_model_sphere.h>
 #include <pcl/sample_consensus/ransac.h>
-
+#include "val_controllers/robot_state.h"
 #include <visualization_msgs/MarkerArray.h>
 enum class ROVER_SIDE{
     LEFT = 0,
@@ -55,6 +55,8 @@ private:
   std::vector<std::vector<geometry_msgs::Pose>> detections_;
 
   int detection_tries_;
+
+  RobotStateInformer* current_state_;
 
   ROVER_SIDE roverSide_;
 
