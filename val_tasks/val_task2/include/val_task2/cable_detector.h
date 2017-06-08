@@ -22,6 +22,7 @@
 #include <mutex>
 
 #define CONTOUR_AREA_THRESHOLD 6000.0
+#define OFF_SET 4.0 // set value from 0-10 ( 0:- center of cable 10:- cable extreme)
 
 class CableDetector
 {

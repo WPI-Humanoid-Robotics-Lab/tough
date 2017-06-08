@@ -80,6 +80,11 @@ valTask2::valTask2(ros::NodeHandle nh):
     cv::Mat img;
     ms_sensor_->giveImage(img);
     ms_sensor_->giveDisparityImage(img);
+
+    // setting skip variables
+    skip_3=false;
+    skip_4=false;
+    skip_6=false;
 }
 
 // destructor
@@ -115,7 +120,7 @@ valTask2::~valTask2(){
 
 void valTask2::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
     // Count the number of times map is updated
-//    ROS_INFO("valTask2::occupancy_grid_cb: map count updated to %d",map_update_count_);
+    //    ROS_INFO("valTask2::occupancy_grid_cb: map count updated to %d",map_update_count_);
     ++map_update_count_;
 }
 
@@ -596,15 +601,15 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
         ros::Duration(0.2).sleep();
     }
 
-//    ///@todo check if the threshold is right for this function. since the hand is supporting the button, condition might fail
-//    if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
-//        ROS_INFO("Panel is still in hand");
-//    }
-//    else
-//    {
-//        ROS_INFO("Dropped the bag on the way. Consider skipping checkpoint");
-//        eventQueue.riseEvent("/DETECT_ARRAY_FAILED");
-//    }
+    //    ///@todo check if the threshold is right for this function. since the hand is supporting the button, condition might fail
+    //    if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
+    //        ROS_INFO("Panel is still in hand");
+    //    }
+    //    else
+    //    {
+    //        ROS_INFO("Dropped the bag on the way. Consider skipping checkpoint");
+    //        eventQueue.riseEvent("/DETECT_ARRAY_FAILED");
+    //    }
 
     static int fail_count = 0;
     static int retry_count = 0;
@@ -790,16 +795,28 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
 
     static bool executingOnce = true;
     static float q1, q3;
+    static bool isPoseChangeReq = true;
+
+    if(skip_3)
+    {
+        ROS_INFO("valTask2::findCableIntermediateTask : [SKIP] Disabled pose change required flag");
+        isPoseChangeReq = false;
+        skip_3 = false;
+    }
+
     if(executingOnce)
     {
-        // moving hands to get in position to detect the cable
-        ROS_INFO("valTask2::findCableIntermediateTask : Moving panel to see cable");
-        q3 = panel_grasping_hand_ == armSide::LEFT ? -0.5 : 0.5;
-        arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
-        ros::Duration(0.5).sleep();
-        q1 = panel_grasping_hand_ == armSide::LEFT ? -0.36 : 0.36;
-        arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
-        ros::Duration(0.5).sleep();
+        if(isPoseChangeReq)
+        {
+            // moving hands to get in position to detect the cable
+            ROS_INFO("valTask2::findCableIntermediateTask : Moving panel to see cable");
+            q3 = panel_grasping_hand_ == armSide::LEFT ? -0.5 : 0.5;
+            arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
+            ros::Duration(0.5).sleep();
+            q1 = panel_grasping_hand_ == armSide::LEFT ? -0.36 : 0.36;
+            arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
+            ros::Duration(0.5).sleep();
+        }
 
         ROS_INFO("valTask2::findCableIntermediateTask : If controllers die, increase the delay here");
         head_controller_->moveHead(0,30,0,1.5);
@@ -845,10 +862,8 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         ROS_INFO("valTask2::findCableIntermediateTask : Cable not found. Failed after 20 trials");
         eventQueue.riseEvent("/FIND_CABLE_FAILED");
         head_controller_->moveHead(0,0,0,2.0f);
-
+        isPoseChangeReq = true;
         executingOnce= true;
-        //        if(cable_detector_ != nullptr) delete cable_detector_;
-        //        cable_detector_ = nullptr;
     }
     else
     {
@@ -856,18 +871,24 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         setTempCablePoint(cable_point);
         std::cout<<"Cable position x: "<<cable_point.x<<"\t"<<"Cable position y: "<<cable_point.y<<"\t"<<"Cable position z: "<<cable_point.z<<"\n";
         ROS_INFO("valTask2::findCableIntermediateTask : Cable found! Setting motion back. exiting");
-        // set the poses back
-        q3 = panel_grasping_hand_ == armSide::LEFT ? -1.85 : 1.85;
-        q1 = panel_grasping_hand_ == armSide::LEFT ? -1.04 : 1.04;
-        float q0 = -1.85;
-        arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
-        ros::Duration(0.2).sleep();
-        arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
-        ros::Duration(0.2).sleep();
-        arm_controller_->moveArmJoint(panel_grasping_hand_,0,q0);
-        ros::Duration(0.2).sleep();
+
         eventQueue.riseEvent("/FOUND_CABLE");
+
+        if(isPoseChangeReq)
+        {
+            // set the poses back
+            q3 = panel_grasping_hand_ == armSide::LEFT ? -1.85 : 1.85;
+            q1 = panel_grasping_hand_ == armSide::LEFT ? -1.04 : 1.04;
+            float q0 = -1.85;
+            arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
+            ros::Duration(0.2).sleep();
+            arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
+            ros::Duration(0.2).sleep();
+            arm_controller_->moveArmJoint(panel_grasping_hand_,0,q0);
+            ros::Duration(0.2).sleep();
+        }
         executingOnce= true;
+        isPoseChangeReq = true;
     }
 
 
@@ -1661,45 +1682,9 @@ decision_making::TaskResult valTask2::skipCheckPointTask(string name, const FSMC
 
     // skip check point, basically take the user input and switches the state
 
-    return TaskResult::SUCCESS();
-}
-
-decision_making::TaskResult valTask2::skipToCP1Task(string name, const FSMCallContext& context, EventQueue& eventQueue)
-{
-    ROS_INFO_STREAM("executing " << name);
-
-    static int retry_count = 0;
-
-    // skip to checkpoint 1
-    // start the task
-    ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
-    srcsim::StartTask   srv;
-    srv.request.checkpoint_id  = 2;
-    srv.request.task_id        = 1;
-
-    // if the check point is skipped
-    if(client.call(srv))
-    {
-        eventQueue.riseEvent("/SKIPPED_TO_CP_1");
-
-        ///@TODO: do anything which is required for further states
-    }
-    else if(retry_count < 5)
-    {
-        //reset the count
-        retry_count = 0;
-        eventQueue.riseEvent("/SKIP_CP_1_FAILED");
-    }
-    else
-    {
-        ROS_ERROR("service not called");
-        eventQueue.riseEvent("/SKIP_CP_1_RETRY");
-        retry_count++;
-    }
-
-    // wait infinetly until an external even occurs
-    while(!preemptiveWait(1000, eventQueue)){
-        ROS_INFO("skipCheckPoint2Task: waiting for transition");
+//    wait infinetly until an external even occurs
+            while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("valTask2::skipCheckPointTask: waiting for transition");
     }
 
     return TaskResult::SUCCESS();
@@ -1718,23 +1703,25 @@ decision_making::TaskResult valTask2::skipToCP3Task(string name, const FSMCallCo
     srv.request.checkpoint_id  = 3;
     srv.request.task_id        = 2;
 
+
     // if the check point is skipped
     if(client.call(srv))
     {
-        eventQueue.riseEvent("/SKIPPED_TO_CP_3");
-
         ///@TODO: do anything which is required for further states
+        task2_utils_->checkpoint_init();
+        skip_3=true;
+        eventQueue.riseEvent("/SKIPPED_TO_CP_3");
     }
     else if(retry_count < 5)
     {
         //reset the count
         retry_count = 0;
-        eventQueue.riseEvent("/SKIP_CP_3_FAILED");
+        eventQueue.riseEvent("/SKIP_CP_3_RETRY");
     }
     else
     {
         ROS_ERROR("service not called");
-        eventQueue.riseEvent("/SKIP_CP_3_RETRY");
+        eventQueue.riseEvent("/SKIP_CP_3_FAILED");
         retry_count++;
     }
 
@@ -1756,26 +1743,27 @@ decision_making::TaskResult valTask2::skipToCP4Task(string name, const FSMCallCo
     // start the task
     ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
     srcsim::StartTask   srv;
-    srv.request.checkpoint_id  = 5;
+    srv.request.checkpoint_id  = 4;
     srv.request.task_id        = 2;
 
     // if the check point is skipped
     if(client.call(srv))
     {
-        eventQueue.riseEvent("/SKIPPED_TO_CP_4");
-
         ///@TODO: do anything which is required for further states
+        task2_utils_->checkpoint_init();
+        skip_4=true;
+        eventQueue.riseEvent("/SKIPPED_TO_CP_4");
     }
     else if(retry_count < 5)
     {
         //reset the count
         retry_count = 0;
-        eventQueue.riseEvent("/SKIP_CP_4_FAILED");
+        eventQueue.riseEvent("/SKIP_CP_4_RETRY");
     }
     else
     {
         ROS_ERROR("service not called");
-        eventQueue.riseEvent("/SKIP_CP_4_RETRY");
+        eventQueue.riseEvent("/SKIP_CP_4_FAILED");
         retry_count++;
     }
 
@@ -1803,20 +1791,21 @@ decision_making::TaskResult valTask2::skipToCP6Task(string name, const FSMCallCo
     // if the check point is skipped
     if(client.call(srv))
     {
-        eventQueue.riseEvent("/SKIPPED_TO_CP_6");
-
         ///@TODO: do anything which is required for further states
+        task2_utils_->checkpoint_init();
+        skip_6=true;
+        eventQueue.riseEvent("/SKIPPED_TO_CP_6");
     }
     else if(retry_count < 5)
     {
         //reset the count
         retry_count = 0;
-        eventQueue.riseEvent("/SKIP_CP_6_FAILED");
+        eventQueue.riseEvent("/SKIP_CP_6_RETRY");
     }
     else
     {
         ROS_ERROR("service not called");
-        eventQueue.riseEvent("/SKIP_CP_6_RETRY");
+        eventQueue.riseEvent("/SKIP_CP_6_FAILED");
         retry_count++;
     }
 
