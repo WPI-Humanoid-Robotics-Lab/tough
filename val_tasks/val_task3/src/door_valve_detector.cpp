@@ -81,6 +81,16 @@ void DoorValvedetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
     std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
 
+    Eigen::Vector4f valveCentroid;
+    //  Calculating the Centroid of the handle Point cloud
+    pcl::compute3DCentroid(*cloud, valveCentroid);
+    geometry_msgs::Point geom_point;
+    geom_point.x = valveCentroid(0);
+    geom_point.y = valveCentroid(1);
+    geom_point.z = valveCentroid(2);
+
+    detections_.push_back(geom_point);
+
     pcl::toROSMsg(*cloud, output);
 
     output.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
@@ -136,6 +146,12 @@ void DoorValvedetector::clustering(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     }
     cloud = door_valve_cloud;
 
+}
+
+bool DoorValvedetector::getDetections(std::vector<geometry_msgs::Point> &out)
+{
+   out = detections_;
+   return !detections_.empty();
 }
 
 void DoorValvedetector::filter_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
