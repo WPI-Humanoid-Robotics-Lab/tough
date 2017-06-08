@@ -119,6 +119,19 @@ bool CableTask::grasp_choke(armSide side, const geometry_msgs::Pose &goal, float
     {
         if (right_arm_planner_choke->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
             ROS_INFO("CableTask::grasp_choke: Trajectory is not planned 100% - retrying");
+            if(side ==LEFT){
+                armData.clear();
+                armData.push_back(leftShoulderSeedInitial_);
+                armTraj_.moveArmJoints(LEFT, armData, executionTime);
+                ros::Duration(executionTime).sleep();
+            }
+            else
+            {
+                armData.clear();
+                armData.push_back(rightShoulderSeedInitial_);
+                armTraj_.moveArmJoints(RIGHT, armData, executionTime);
+                ros::Duration(executionTime).sleep();
+            }
             return false;
         }
     }
@@ -126,6 +139,19 @@ bool CableTask::grasp_choke(armSide side, const geometry_msgs::Pose &goal, float
     {
         if (left_arm_planner_choke->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
             ROS_INFO("CableTask::grasp_choke: Trajectory is not planned 100% - retrying");
+            if(side ==LEFT){
+                armData.clear();
+                armData.push_back(leftShoulderSeedInitial_);
+                armTraj_.moveArmJoints(LEFT, armData, executionTime);
+                ros::Duration(executionTime).sleep();
+            }
+            else
+            {
+                armData.clear();
+                armData.push_back(rightShoulderSeedInitial_);
+                armTraj_.moveArmJoints(RIGHT, armData, executionTime);
+                ros::Duration(executionTime).sleep();
+            }
             return false;
         }
     }
