@@ -26,6 +26,7 @@ RoverDetector::RoverDetector(ros::NodeHandle nh, bool getFine)
     detection_tries_ = 0;
     roverSide_ = ROVER_SIDE::UNKOWN;
     finePose_ = getFine;
+    current_state_ = RobotStateInformer::getRobotStateInformer(nh);
 }
 
 RoverDetector::~RoverDetector()
@@ -286,17 +287,19 @@ bool RoverDetector::getRoverSide(ROVER_SIDE &side) const
 }
 
 void RoverDetector::lowerBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+    geometry_msgs::Pose pelvisPose;
+    current_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
 
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
     pass_x.setFilterFieldName("x");
-    pass_x.setFilterLimits(lowerBox_pass_x_min,lowerBox_pass_x_max);
+    pass_x.setFilterLimits(pelvisPose.position.x + lowerBox_pass_x_min,pelvisPose.position.x + lowerBox_pass_x_max);
     pass_x.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> pass_y;
     pass_y.setInputCloud(cloud);
     pass_y.setFilterFieldName("y");
-    pass_y.setFilterLimits(lowerBox_pass_y_min,lowerBox_pass_y_max);
+    pass_y.setFilterLimits(pelvisPose.position.y + lowerBox_pass_y_min,pelvisPose.position.y + lowerBox_pass_y_max);
     pass_y.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> pass_z;
@@ -309,17 +312,19 @@ void RoverDetector::lowerBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Pt
 }
 
 void RoverDetector::upperBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+    geometry_msgs::Pose pelvisPose;
+    current_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
 
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
     pass_x.setFilterFieldName("x");
-    pass_x.setFilterLimits(upperBox_pass_x_min,upperBox_pass_x_max);
+    pass_x.setFilterLimits(pelvisPose.position.x + upperBox_pass_x_min, pelvisPose.position.x + upperBox_pass_x_max);
     pass_x.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> pass_y;
     pass_y.setInputCloud(cloud);
     pass_y.setFilterFieldName("y");
-    pass_y.setFilterLimits(upperBox_pass_y_min,upperBox_pass_y_max);
+    pass_y.setFilterLimits(pelvisPose.position.y + upperBox_pass_y_min, pelvisPose.position.y + upperBox_pass_y_max);
     pass_y.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> pass_z;

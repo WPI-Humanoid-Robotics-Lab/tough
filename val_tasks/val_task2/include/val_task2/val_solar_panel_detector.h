@@ -34,6 +34,7 @@
 #include <pcl/filters/crop_box.h>
 #include <pcl/surface/convex_hull.h>
 #include <pcl/filters/project_inliers.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 
 #include <pcl/sample_consensus/sac_model_sphere.h>
 #include <pcl/sample_consensus/ransac.h>
@@ -51,6 +52,8 @@ private:
 
   RobotStateInformer* robot_state_;
 
+  float optimal_dist;
+  geometry_msgs::Point button_loc_;
   geometry_msgs::Pose2D rover_loc_;
   bool isroverRight_;
   float rover_theta;
@@ -80,6 +83,7 @@ private:
 
 public:
   SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight);
+  SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight, geometry_msgs::Point button_loc);
   ~SolarPanelDetect();
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
   int getDetectionTries() const;

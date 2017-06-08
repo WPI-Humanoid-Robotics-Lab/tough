@@ -35,7 +35,15 @@ int main(int argc, char** argv){
       }
   }
 
-  SolarPanelDetect obj(nh,rover_loc,isroverRight);
+
+  geometry_msgs::Point button_loc;
+
+  button_loc.x = 3.66;
+  button_loc.y = -1.75;
+  button_loc.z = 0.846;
+
+
+  SolarPanelDetect obj(nh,rover_loc,isroverRight,button_loc);
 
   ros::Rate loop(1);
   while(ros::ok()){
