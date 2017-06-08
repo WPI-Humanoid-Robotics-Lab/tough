@@ -119,7 +119,7 @@ public:
     std::string logFile;
     ros::Timer timer_;
 
-
+    valueDirection getGoalDirection(double current_value, controlSelection control);
     void taskLogPub(std::string data);
 
 };
