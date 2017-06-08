@@ -592,6 +592,8 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
     if(solar_array_detector_ == nullptr) {
         // this is absolutely necessary
         task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
+
+        //this blocks rover on map
         solar_array_detector_ = new SolarArrayDetector(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
         ros::Duration(0.2).sleep();
     }
@@ -675,9 +677,9 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
     {
         ROS_INFO("valTask2::detectSolarArrayTask : Failed attempt. trying again");
         // increment the fail count
-        head_controller_->moveHead(0,0,head_yaw_ranges.front());
         if(!head_yaw_ranges.empty())
         {
+            head_controller_->moveHead(0,0,head_yaw_ranges.front());
             head_yaw_ranges.pop();
         }
         retry_count=0;

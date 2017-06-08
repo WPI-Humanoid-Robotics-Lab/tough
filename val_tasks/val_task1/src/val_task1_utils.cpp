@@ -19,8 +19,8 @@ task1Utils::task1Utils(ros::NodeHandle nh):
 
     logFile = ros::package::getPath("val_task1") + "/log/task1.csv";
 
-    robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-
+    current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    walk_          = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
     current_checkpoint_ = 0;
 
     timeNow = boost::posix_time::second_clock::local_time();
@@ -54,7 +54,7 @@ bool task1Utils::getNextPoseToWalk(geometry_msgs::Pose2D &pose2D, bool allowVisi
             pose2D.x = radius*cos(i*theta);
             pose2D.y = radius*sin(i*theta);
             pose2D.theta = i*theta;
-            robot_state_->transformPose(pose2D, pose2D, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+            current_state_->transformPose(pose2D, pose2D, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
             size_t index = MapGenerator::getIndex(pose2D.x, pose2D.y);
             if (visited_map_.data.at(index) == CELL_STATUS::FREE || (allowVisitied && visited_map_.data.at(index) == CELL_STATUS::VISITED)){
                 ROS_INFO("task1Utils::getNextPoseToWalk : x:%f y:%f theta:%f",i, pose2D.x, pose2D.y, pose2D.theta);
@@ -69,6 +69,53 @@ bool task1Utils::getNextPoseToWalk(geometry_msgs::Pose2D &pose2D, bool allowVisi
 
     return false;
 }
+
+void task1Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset){
+
+    size_t nSteps;
+    armSide startStep;
+    std::vector<float> y_offset;
+    std::vector<float> x_offset;
+
+    current_state_->transformPoint(goal_point,goal_point,VAL_COMMON_NAMES::WORLD_TF,
+                                   VAL_COMMON_NAMES::PELVIS_TF);
+
+    double error = goal_point.y+offset;
+    double abserror = std::fabs(error);
+    ROS_INFO_STREAM("Error is:" << error << "Absolute value for error is:" << abserror);
+    if (abserror < 0.1 || abserror > 0.49 ){
+        ROS_INFO("reOrientTowardsPanel: Not reorienting, the offset is too less or beyond control");
+    }
+    else
+    {
+        nSteps = int(((abserror/0.1)+0.5));
+        ROS_INFO_STREAM("No of steps to walk is:" << nSteps);
+
+        if (error > 0){
+            startStep = LEFT;
+            for(size_t i = 0; i < nSteps; ++i){
+                y_offset.push_back(0.1);
+                y_offset.push_back(0.1);
+            }
+        }
+        else {
+            startStep = RIGHT;
+            for(size_t i = 0; i < nSteps; ++i){
+                y_offset.push_back(-0.1);
+                y_offset.push_back(-0.1);
+            }
+        }
+
+        x_offset.resize(y_offset.size());
+        ROS_INFO("reOrientTowardsPanel: Walking %d steps",int(nSteps));
+
+        walk_->walkLocalPreComputedSteps(x_offset,y_offset,startStep);
+        ros::Duration(4.0).sleep();
+
+    }
+
+}
+
 
 void task1Utils::satelliteMsgCB(const srcsim::Satellite& msg)
 {
