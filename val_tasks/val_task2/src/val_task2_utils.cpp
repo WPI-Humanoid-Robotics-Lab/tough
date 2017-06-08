@@ -445,9 +445,12 @@ bool task2Utils::isRotationReq(armSide side, geometry_msgs::Point handle_coordin
 
 bool task2Utils::checkpoint_init()
 {
+    ROS_INFO("[SKIP] Resetting point cloud and map for skipped checkpoint");
     clearPointCloud();
     ros::Duration(0.3).sleep();
     clearMap();
+    ros::Duration(3);
+    head_controller_->moveHead(0,40,0);
     ros::Duration(3);
     head_controller_->moveHead(0,0,40);
     ros::Duration(3);
