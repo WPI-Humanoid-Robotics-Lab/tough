@@ -6,7 +6,11 @@
 #include <pcl/filters/radius_outlier_removal.h>
 #include <pcl/search/kdtree.h>
 #include <pcl/segmentation/extract_clusters.h>
-#include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/filter_indices.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/octree/octree_pointcloud_voxelcentroid.h>
+#include <pcl/octree/octree_impl.h>
+#include <pcl/common/time.h>
 
 static const float GROUND_THRESHOLD      = 0.07f;
 static const float FOOT_GROUND_THRESHOLD = 0.05f;
@@ -27,15 +31,41 @@ void WalkwaySeedPointGenerator::generateSeedPoints(const pcl::PointCloud<pcl::Po
     if(cloud->empty())
         return;
     ROS_INFO("Recieved a pointcloud");
+
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud1 (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud2 (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
+
+    float foot_height = getCurrentFootHeight();
+
+    pcl::PassThrough<pcl::PointXYZ> pass;
+    pass.setInputCloud (cloud);
+    pass.setFilterFieldName ("z");
+    pass.setFilterLimits ((foot_height - FOOT_GROUND_THRESHOLD - GROUND_THRESHOLD), foot_height - FOOT_GROUND_THRESHOLD + 0.1);
+    //pass.setFilterLimitsNegative (true);
+    pass.filter (*out_cloud);
+
+    // Downsample the cloud1
+    pcl::octree::OctreePointCloudVoxelCentroid<pcl::PointXYZ> oct(0.02);
+    oct.setInputCloud(out_cloud);
+    oct.addPointsFromInputCloud();
+
+    pcl::PointCloud<pcl::PointXYZ>::VectorType pts;
+    oct.getVoxelCentroids(pts);
+
+    out_cloud->clear();
+    for (const auto &pt : pts) {
+        out_cloud->push_back(pcl::PointXYZ());
+        out_cloud->back().x = pt.x;
+        out_cloud->back().y = pt.y;
+        out_cloud->back().z = pt.z;
+    }
 
     ROS_INFO("Computing Normals to each point");
     // Normals estimation
     pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
-    ne.setInputCloud (cloud);
+    ne.setInputCloud (out_cloud);
 
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
     ne.setSearchMethod (tree);
@@ -46,12 +76,17 @@ void WalkwaySeedPointGenerator::generateSeedPoints(const pcl::PointCloud<pcl::Po
     std::vector<int> index;
     pcl::removeNaNNormalsFromPointCloud(*cloud_normals, *cloud_normals, index);
 
-    for(size_t i = 0; i < index.size(); i++)
-    {
-        temp_cloud1->points.push_back(cloud->points[index[i]]);
-    }
+    auto inliers = boost::make_shared<pcl::PointIndices>();
+    inliers->indices = index;
+    inliers->header = cloud->header;
 
-    if(temp_cloud1->empty())
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    extract.setInputCloud (out_cloud);
+    extract.setIndices (inliers);
+    extract.setNegative (false);
+    extract.filter (*out_cloud);
+
+    if(out_cloud->empty())
     {
         ROS_ERROR("There are no normals in the point cloud!");
         return;
@@ -60,7 +95,7 @@ void WalkwaySeedPointGenerator::generateSeedPoints(const pcl::PointCloud<pcl::Po
     for(size_t i = 0; i < cloud_normals->points.size(); i++)
     {
         if(fabs(cloud_normals->points[i].normal_z) > SURFACE_NORMAL_THRESHOLD)
-            temp_cloud2->points.push_back(temp_cloud1->points[i]);
+            temp_cloud2->points.push_back(out_cloud->points[i]);
     }
 
     if(temp_cloud2->empty())
@@ -71,29 +106,10 @@ void WalkwaySeedPointGenerator::generateSeedPoints(const pcl::PointCloud<pcl::Po
 
     zAxisLimitFilter(temp_cloud2, cloud_filtered);
 
-    pcl::removeNaNFromPointCloud(*cloud_filtered, *cloud_filtered, index);
-
     if(getLargestCluster(cloud_filtered)) {
         cloud_filtered->header = cloud->header;
 
-
-//        float leafsize = 0.25;
-//        pcl::VoxelGrid<pcl::PointXYZ> grid;
-//        grid.setLeafSize (leafsize, leafsize, leafsize);
-//        grid.setInputCloud (cloud_filtered);
-//        grid.filter (*cloud_filtered);
-
-//        ROS_INFO("Cloud size after voxel grid filter : %d", (int)cloud_filtered->size());
-//        pcl::RadiusOutlierRemoval<pcl::PointXYZ> outrem;
-//        // build the filter
-//        outrem.setInputCloud(cloud_filtered);
-//        outrem.setRadiusSearch(1.5);
-//        outrem.setMinNeighborsInRadius (205);
-//        // apply filter
-//        outrem.filter (*cloud_filtered);
-
-//        ROS_INFO("Cloud size after outlier filter : %d", (int)cloud_filtered->size());
-        pointcloudPub_.publish(cloud_filtered);
+    pointcloudPub_.publish(cloud_filtered);
 
     }
 
@@ -103,24 +119,13 @@ void WalkwaySeedPointGenerator::zAxisLimitFilter(const pcl::PointCloud<pcl::Poin
 
     float foot_height = getCurrentFootHeight();
 
-    /* Filter out the pointcloud on z axis*/
-    pcl::ConditionAnd<pcl::PointXYZ>::Ptr range_cond (new pcl::ConditionAnd<pcl::PointXYZ> ());
-
-    range_cond->addComparison(
-                pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-                    new pcl::FieldComparison<pcl::PointXYZ>(
-                        "z", pcl::ComparisonOps::GT, foot_height - FOOT_GROUND_THRESHOLD - (GROUND_THRESHOLD))));
-
-    range_cond->addComparison(
-                pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-                    new pcl::FieldComparison<pcl::PointXYZ>(
-                        "z", pcl::ComparisonOps::LT, foot_height - FOOT_GROUND_THRESHOLD)));
-    // build the filter
-    pcl::ConditionalRemoval<pcl::PointXYZ> condrem;
-    condrem.setCondition (range_cond);
-    condrem.setInputCloud (in_cloud);
-    condrem.setKeepOrganized(true);
-    condrem.filter (*out_cloud);
+    /* Filter out the pointcloud on z axis*/  
+    pcl::PassThrough<pcl::PointXYZ> pass;
+    pass.setInputCloud (in_cloud);
+    pass.setFilterFieldName ("z");
+    pass.setFilterLimits ((foot_height - FOOT_GROUND_THRESHOLD - GROUND_THRESHOLD), foot_height - FOOT_GROUND_THRESHOLD);
+    //pass.setFilterLimitsNegative (true);
+    pass.filter (*out_cloud);
 }
 
 bool WalkwaySeedPointGenerator::getLargestCluster(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
@@ -133,7 +138,7 @@ bool WalkwaySeedPointGenerator::getLargestCluster(pcl::PointCloud<pcl::PointXYZ>
     std::vector<pcl::PointIndices> cluster_indices;
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
     ec.setClusterTolerance (CLUSTER_TOLERANCE);
-    ec.setMinClusterSize ((int)(0.51*cloudSize));    //get the cluster with atleast 10% of the total points. this can be 50%
+    ec.setMinClusterSize ((int)(0.51 * cloudSize));    //get the cluster with atleast 10% of the total points. this can be 50%
     ec.setMaxClusterSize (cloudSize);
     ec.setSearchMethod (tree);
     ec.setInputCloud (cloud);
@@ -143,15 +148,16 @@ bool WalkwaySeedPointGenerator::getLargestCluster(pcl::PointCloud<pcl::PointXYZ>
     if(cluster_indices.empty())
         return false;
 
-    std::vector<pcl::PointIndices>::const_iterator it;
-    std::vector<int>::const_iterator pit;
-
-    for(it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
-        for(pit = it->indices.begin(); pit != it->indices.end(); pit++) {
-            cloud_cluster->points.push_back(cloud->points[*pit]);
-        }
-        *cloud = *cloud_cluster;
+    auto inliers = boost::make_shared<pcl::PointIndices>();
+    inliers->header.frame_id = "world";
+    for(auto it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
+    {
+        inliers->indices = it->indices;
+        pcl::ExtractIndices<pcl::PointXYZ> extract;
+        extract.setInputCloud (cloud);
+        extract.setIndices (inliers);
+        extract.setNegative (false);
+        extract.filter (*cloud);
     }
     return true;
 }

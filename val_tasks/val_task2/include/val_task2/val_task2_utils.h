@@ -46,9 +46,7 @@ private:
     ValkyrieWalker *walk_;
     // robot state
     RobotStateInformer *current_state_;
-    ros::Publisher reset_pointcloud_pub ;
-    ros::Publisher pause_pointcloud_pub ;
-    ros::Publisher clearbox_pointcloud_pub ;
+    ros::Publisher reset_pointcloud_pub, reset_map_pub, pause_pointcloud_pub , clearbox_pointcloud_pub , task2_log_pub_;
 
     ros::Subscriber task_status_sub_;
 
@@ -64,14 +62,14 @@ private:
     const std::vector<float> leftNearChestPalmUp_    = {-1.5, -1.04, 1.6, -1.85, -1.50, 0, 0};
     const std::vector<float> leftSeedNonGraspingHand_ = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};
     //while walking
-    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.38, -1.49, 1.3, -0.7, -0.26, 0.0, 0.2};
+    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.62,-1.05,1.29,-1.23,-0.67,0.0,-0.30};
 
 
     //before walking
     //used for rotating panel
-    const std::vector<float> rightNearChestPalmDown_     = {-1.70, 1.04, 1.39, 1.85, -1.50, 0, 0};
+    const std::vector<float> rightNearChestPalmUp_       = {-1.70, 1.04, 1.39, 1.85, -1.50, 0, 0};
     //used for picking up the panel
-    const std::vector<float> rightNearChestPalmUp_     = {-1.5, 1.04, 1.6, 1.85, 1.50, 0, 0};
+    const std::vector<float> rightNearChestPalmDown_     = {-1.5, 1.04, 1.6, 1.85, 1.50, 0, 0};
 
     const std::vector<float> rightSeedNonGraspingHand_ = {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0};
     //while walking
@@ -125,6 +123,7 @@ public:
     void moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel);
     void rotatePanel(const armSide graspingHand);
     void clearPointCloud();
+    void clearMap();
     void pausePointCloud();
     void resumePointCloud();
     void clearBoxPointCloud(CLEAR_BOX_CLOUD state);
@@ -138,6 +137,8 @@ public:
     bool isCableTouchingSocket();
     geometry_msgs::Pose grasping_hand(armSide &side, geometry_msgs::Pose handle_pose);
     bool isRotationReq(armSide side, geometry_msgs::Point handle_coordinates,geometry_msgs::Point button_coordinates);
+    bool checkpoint_init();
+    void taskLogPub(std::string data);
 };
 
 

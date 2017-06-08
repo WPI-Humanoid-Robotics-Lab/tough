@@ -12,6 +12,8 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include "val_controllers/robot_state.h"
+#include <mutex>
+
 
 enum CELL_STATUS{
     FREE = 0,
@@ -30,7 +32,10 @@ public:
     static size_t getIndex(float x, float y);
 
 private:
+    std::mutex mtx;
+
     void resetMap(const std_msgs::Empty &msg);
+    void clearCurrentPoseCB(const std_msgs::Empty &msg);
     void convertToOccupancyGrid(const sensor_msgs::PointCloud2Ptr msg);
     void updatePointsToBlock(const sensor_msgs::PointCloud2Ptr msg);
     void timerCallback(const ros::TimerEvent& e);
@@ -38,6 +43,7 @@ private:
     ros::NodeHandle nh_;
     ros::Subscriber pointcloudSub_;
     ros::Subscriber resetMapSub_;
+    ros::Subscriber clearCurrentPoseSub_;
     ros::Subscriber blockMapSub_;
     ros::Publisher  mapPub_;
     ros::Publisher  visitedMapPub_;

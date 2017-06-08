@@ -268,6 +268,17 @@ target_link_libraries(val_circle
    val_marker
  )
 
+add_executable(test_next_goal src/test_nextgoal.cpp)
+
+add_dependencies(test_next_goal
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(test_next_goal
+   ${catkin_LIBRARIES}
+   ${PROJECT_NAME}
+ )
+
 add_executable(handle_grabber_node src/handle_grabber_node.cpp)
 add_dependencies(handle_grabber_node
  ${${PROJECT_NAME}_EXPORTED_TARGETS}

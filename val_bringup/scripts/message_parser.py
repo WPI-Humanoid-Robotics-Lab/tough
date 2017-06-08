@@ -48,14 +48,13 @@ sock.connect(FIELD_IP,PORT)
 
 def state_callback(data):
     #send only data that is required. it should be a string only
-    for msg in data.status:
-        rospy.loginfo(rospy.get_caller_id() + "Message %s", msg.message)
-        sock.mysend(msg.message +" \n")
+    rospy.loginfo(rospy.get_caller_id() + "Message %s", data.data)
+    sock.mysend(data.data +" \n")
 
 def listener():
     # Listen to the decision making topic
     rospy.init_node('state_listener', anonymous=True)
-    rospy.Subscriber("/decision_making/monitoring", DiagnosticArray, state_callback)
+    rospy.Subscriber("/field/log", String, state_callback)
 
 
 
@@ -65,12 +64,16 @@ if __name__ == '__main__':
     while True:
 
         msg = sock.myreceive()
-        if (msg[len(FIELD_IP)+4] == "+"):
+        start_index = msg.find("]")
+        if start_index == -1:
+            continue
+        start_index += 2
+        if (msg[start_index] == "+"):
             # any message that begins with a + is
-            command = msg[len(FIELD_IP)+5:-1]
-            print msg[:len(FIELD_IP)+4] + "**Command Recieved** " + msg[len(FIELD_IP)+4:-1]
+            command = msg[start_index+1:-1]
+            print msg[:start_index] + "**Command Recieved** " + msg[start_index:-1]
             print "executing '"+command + "'"
             subprocess.Popen(command.split())
 
         else:
-            print msg[:len(FIELD_IP)+4] + "**Message Recieved** " + msg[len(FIELD_IP)+4:-1]
+            print msg[:start_index] + "**Message Recieved** " + msg[start_index:-1]

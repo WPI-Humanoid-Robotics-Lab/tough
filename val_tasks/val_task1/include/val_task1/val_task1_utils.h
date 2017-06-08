@@ -15,9 +15,10 @@
 #include <fstream>
 #include <cstdlib>
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include "navigation_common/map_generator.h"
 #include <std_msgs/String.h>
-
-
+#include <geometry_msgs/Pose2D.h>
+#include <val_footstep/ValkyrieWalker.h>
 
 // minimum moment to determine the rotation direction
 #define HANDLE_MINIMUM_MOVMENT_IN_RAD      0.0698132 // 4 deg
@@ -76,12 +77,18 @@ private:
     ros::Subscriber satellite_sub_;
     srcsim::Satellite msg_;
     ros::Subscriber task_status_sub_;
+    RobotStateInformer* current_state_;
 
     ros::Publisher marker_pub_, clearbox_pointcloud_pub_, reset_pointcloud_pub_, task1_log_pub_;
     void satelliteMsgCB (const srcsim::Satellite &msg);
     int current_checkpoint_;
     srcsim::Task taskMsg;
 
+    std::mutex mtx;
+    nav_msgs::OccupancyGrid visited_map_;
+    void visitedMapUpdateCB(const nav_msgs::OccupancyGrid &msg);
+    ros::Subscriber visitedMapUpdaterSub_;
+    ValkyrieWalker* walk_;
 
 public:
     task1Utils(ros::NodeHandle nh);
@@ -104,6 +111,10 @@ public:
     void terminator(const ros::TimerEvent& t);
     void fixHandleArray(std::vector<geometry_msgs::Point> &handle_loc, std::vector<geometry_msgs::Point> &pclHandlePoses);
     int getCurrentCheckpoint() const;    
+    void reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset=0.0f);
+    bool isPointVisited(float x, float y);
+    bool getNextPoseToWalk(geometry_msgs::Pose2D &pose2D, bool allowVisitied = false);
+
     boost::posix_time::ptime timeNow;
     std::string logFile;
     ros::Timer timer_;

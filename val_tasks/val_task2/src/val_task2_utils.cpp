@@ -23,6 +23,9 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     pause_pointcloud_pub    = nh_.advertise<std_msgs::Bool>("/field/pause_pointcloud",1);
     clearbox_pointcloud_pub = nh_.advertise<std_msgs::Int8>("/field/clearbox_pointcloud",1);
 
+    reset_map_pub    = nh_.advertise<std_msgs::Empty>("/field/reset_map",1);
+    task2_log_pub_   = nh_.advertise<std_msgs::String>("/field/log",10);
+
     task_status_sub_        = nh_.subscribe("/srcsim/finals/task", 10, &task2Utils::taskStatusCB, this);
     mapUpdaterSub_          = nh_.subscribe("/map", 10, &task2Utils::mapUpdateCB, this);
 
@@ -440,6 +443,23 @@ bool task2Utils::isRotationReq(armSide side, geometry_msgs::Point handle_coordin
     return is_rotation_required_;
 }
 
+bool task2Utils::checkpoint_init()
+{
+    ROS_INFO("[SKIP] Resetting point cloud and map for skipped checkpoint");
+    clearPointCloud();
+    ros::Duration(0.3).sleep();
+    clearMap();
+    ros::Duration(3);
+    head_controller_->moveHead(0,40,0);
+    ros::Duration(3);
+    head_controller_->moveHead(0,0,40);
+    ros::Duration(3);
+    head_controller_->moveHead(0,0,-40);
+    ros::Duration(3);
+    head_controller_->moveHead(0,0,0);
+
+}
+
 bool task2Utils::shakeTest(const armSide graspingHand)
 {
     ROS_INFO("task2Utils::shakeTest : Closing, opening and reclosing grippers to see if the panel falls off");
@@ -492,6 +512,12 @@ void task2Utils::clearPointCloud() {
     ros::Duration(0.3).sleep();
 }
 
+void task2Utils::clearMap() {
+    std_msgs::Empty msg;
+    reset_map_pub.publish(msg);
+    ros::Duration(0.3).sleep();
+}
+
 void task2Utils::clearBoxPointCloud(CLEAR_BOX_CLOUD state) {
     std_msgs::Int8 msg;
     if(state == CLEAR_BOX_CLOUD::WAIST_UP)
@@ -521,3 +547,9 @@ void task2Utils::resumePointCloud() {
     pause_pointcloud_pub.publish(msg);
 }
 
+void task2Utils::taskLogPub(std::string data){
+
+    std_msgs::String ms;
+    ms.data = data;
+    task2_log_pub_.publish(ms);
+}

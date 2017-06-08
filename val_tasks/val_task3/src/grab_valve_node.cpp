@@ -42,7 +42,8 @@ int main(int argc, char **argv)
         ros::Duration(3.0).sleep();
 
         //Rotating the valve six times
-        for(size_t i = 0; i< 8; ++i){
+        for(size_t i = 1; i< 7; ++i){
+            ROS_INFO("Try Number : %d", i );
             rotate.grab_valve(pt);
             rotate.compute_traj(cen,0.18,points);
             rotate.move_valve(points);

@@ -131,7 +131,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
     // the state transition can happen from an event externally or can be geenerated here
     ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
     task1_utils_->taskLogPub("Occupancy grid has been updated : " + std::to_string(map_update_count_) + " times and tried : " + std::to_string(retry_count));
-    if (map_update_count_ > 1) {
+    if (map_update_count_ > 3) {
         // move to a configuration that is robust while walking
         retry_count = 0;
 
@@ -147,10 +147,15 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
             //what do we do if this call fails or succeeds?
         }
         // generate the event
+        head_controller_->moveHead(0,0,0);
         eventQueue.riseEvent("/INIT_SUCESSFUL");
 
     }
-    else if (map_update_count_ < 2 && retry_count++ < 40) {
+    else if (retry_count++ < 40) {
+
+        if(retry_count == 1) head_controller_->moveHead(0,0,20);
+        if(retry_count == 3) head_controller_->moveHead(0,0,-20);
+
         ROS_INFO("valTask1::initTask : Retry Count : %d. Wait for occupancy grid to be updated with atleast 2 messages", retry_count);
         task1_utils_->taskLogPub("valTask1::initTask : Retry Count : " + std::to_string(retry_count) + " Wait for occupancy grid to be updated with atleast 2 messages");
         ros::Duration(2.0).sleep();
@@ -345,6 +350,7 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
     //tilt head downwards to see the panel
     head_controller_->moveHead(0.0f, 30.0f, 0.0f, 2.0f);
     static int retry_count = 0;
+    static int fail_count = 0;
     //wait for head to be in position
     ros::Duration(3).sleep();
 
@@ -366,9 +372,20 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
         task1_utils_->taskLogPub("Did not detect handle, retrying");
         eventQueue.riseEvent("/DETECT_HANDLE_RETRY");
     }
-    else{
+    else if (fail_count > 2){
+        fail_count = 0;
+        retry_count = 0;
         ROS_INFO("Did not detect handle, failed");
-        task1_utils_->taskLogPub("Did not detect handle, failed");
+        task1_utils_->taskLogPub("Did not detect handle. Failed");
+        eventQueue.riseEvent("/DETECT_HANDLE_ERROR");
+
+    }
+    else{
+        ++fail_count;
+        head_controller_->moveHead(0.0f, 0.0f, 0.0f, 2.0f);
+        ros::Duration(2).sleep();
+        ROS_INFO("Did not detect handle. Detecting panel one more time");
+        task1_utils_->taskLogPub("Did not detect handle. Detecting panel one more time");
         eventQueue.riseEvent("/DETECT_HANDLE_FAILED");
         retry_count = 0;
     }
@@ -570,9 +587,6 @@ decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContex
         pcl_handle_detector_ = new pcl_handle_detector(nh_, pose);
     }
 
-
-
-
     std::vector<geometry_msgs::Point> pclHandlePoses;
     pcl_handle_detector_->getDetections(pclHandlePoses);
 
@@ -586,6 +600,7 @@ decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContex
         if(pcl_handle_detector_!= nullptr){
             delete pcl_handle_detector_;
         }
+
         // generate the event
         eventQueue.riseEvent("/FIXED_HANDLE");
 
@@ -635,6 +650,11 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
     //pelvis_controller_->controlPelvisHeight(0.85);
 
     if(!executing){
+//        ROS_INFO("Aligning to fix Pitch");
+//        task1_utils_->taskLogPub("Aligning to fix Pitch");
+//        //align to center of yaw while fixing pitch
+//        task1_utils_->reOrientTowardsGoal(handle_loc_[YAW_KNOB_CENTER]);
+
         ROS_INFO("Executing the grasp handle command");
         task1_utils_->taskLogPub("Executing the grasp handle command");
         executing = true;
@@ -699,6 +719,16 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         // reset the execute flag
         execute_once = false;
 
+        // determine direction of the rotation (clock wise rotation increases angles)
+        if (task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_INCRSING)
+        {
+            rot_dir = handleDirection::CLOCK_WISE;
+        }
+        else if (task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_DECRASING)
+        {
+            rot_dir = handleDirection::ANTICLOCK_WISE;
+        }
+
         // generate the way points for the knob (current pose(6DOF) of arm is used to generate the way points)
         //current pose of the hand
         geometry_msgs::Pose current_hand_pose;
@@ -731,7 +761,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     gripper_controller_->closeGripper(armSide::RIGHT);
 
     // if the handle is moving in wrong direction, flip the points (assuming grasp is not lost)
-    if(task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_AWAY_TO_GOAL)
+    if(0) //task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_AWAY_TO_GOAL)
     {
         ROS_INFO("handle moving in wrong direction, path will be flipped ");
         task1_utils_->taskLogPub("handle moving in wrong direction, path will be flipped ");
@@ -750,6 +780,10 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     // if the pitch is corrected
     else if (task1_utils_->isPitchCorrectNow())
     {
+        // pitch is correct now, wait for 0.2 sec and then stop the trajectories
+        // this is to fix the disturbance in arm moment
+        ros::Duration(0.2).sleep();
+
         // stop all the trajectories
         control_helper_->stopAllTrajectories();
 
@@ -757,7 +791,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         task1_utils_->taskLogPub("pitch correct now");
 
         // wait until the pich correction becomes complete
-        ros::Duration(3).sleep();
+        ros::Duration(5).sleep();
 
         //check if its complete
         if (task1_utils_->isPitchCompleted())
@@ -886,6 +920,11 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
     static int retry_count = 0;
 
     if(!executing){
+//        ROS_INFO("Aligning to fix yaw");
+//        task1_utils_->taskLogPub("Aligning to fix yaw");
+//        //align to center of pitch while fixing yaw
+//        task1_utils_->reOrientTowardsGoal(handle_loc_[PITCH_KNOB_CENTER]);
+
         ROS_INFO("Executing the grasp handle command");
         task1_utils_->taskLogPub("Executing the grasp handle command");
         executing = true;
@@ -948,6 +987,16 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         // reset the execute flag
         execute_once = false;
 
+        // determine direction of the rotation (clock wise rotation increases angles)
+        if (task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_INCRSING)
+        {
+            rot_dir = handleDirection::CLOCK_WISE;
+        }
+        else if (task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_DECRASING)
+        {
+            rot_dir = handleDirection::ANTICLOCK_WISE;
+        }
+
         // generate the way points for the knob (current pose(6DOF) of arm is used to generate the way points)
         //current pose of the hand
         geometry_msgs::Pose current_hand_pose;
@@ -984,7 +1033,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     gripper_controller_->closeGripper(armSide::LEFT);
 
     // if the handle is moving in wrong direction, flip the points (assuming grasp is not lost)
-    if(task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_AWAY_TO_GOAL)
+    if(0) //task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_AWAY_TO_GOAL)
     {
         ROS_INFO("handle moving in wrong direction, path will be flipped ");
         task1_utils_->taskLogPub("handle moving in wrong direction, path will be flipped ");
@@ -1004,13 +1053,17 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     // if the yaw is corrected
     else if (task1_utils_->isYawCorrectNow())
     {
+        // yaw is correct now, wait for 0.2 sec and then stop the trajectories
+        // this is to fix the disturbance in arm moment
+        ros::Duration(0.2).sleep();
+
         // stop all the trajectories
         control_helper_->stopAllTrajectories();
 
         ROS_INFO("yaw correct now");
         task1_utils_->taskLogPub("yaw correct now");
 
-        // wait until the pich correction becomes complete
+        // wait until the yaw correction becomes complete
         ros::Duration(5).sleep();
 
         //check if its complete

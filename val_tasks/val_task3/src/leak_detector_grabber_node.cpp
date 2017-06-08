@@ -24,6 +24,9 @@ int main(int argc, char **argv){
 
     geometry_msgs::Pose goal;
 
+    armSide side;
+    side = RIGHT;
+
     if(argc == 8){
 
         goal.position.x = std::atof(argv[1]);
@@ -40,7 +43,8 @@ int main(int argc, char **argv){
         ROS_INFO("Please enter the goal Pose");
     }
 
-    ldg.graspDetector(RIGHT,goal);
+    // To be done - add another seed point for better planning and manipulation
+    ldg.graspDetector(side,goal);
 
     ros::spin();
     return 0;

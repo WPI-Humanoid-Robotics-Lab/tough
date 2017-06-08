@@ -32,10 +32,8 @@ valTask3::valTask3(ros::NodeHandle nh):nh_(nh){
 
   // walker
   walker_              = new ValkyrieWalker(nh_,0.7,0.7,0,0.18);
-  ROS_INFO("1");
   // walk tracker
   walk_track_          = new walkTracking(nh_);
-  ROS_INFO("2");
 
   // controllers
   chest_controller_    = new chestTrajectory(nh_);
@@ -45,7 +43,6 @@ valTask3::valTask3(ros::NodeHandle nh):nh_(nh){
   arm_controller_      = new armTrajectory(nh_);
   wholebody_controller_= new wholebodyManipulation(nh_);
   task3_utils_         = new task3Utils(nh_);
-  ROS_INFO("4");
 
   // detectors
 
