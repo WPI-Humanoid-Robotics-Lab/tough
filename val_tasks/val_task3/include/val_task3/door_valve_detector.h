@@ -34,6 +34,7 @@
 #include <pcl/sample_consensus/sac_model_sphere.h>
 #include <pcl/sample_consensus/sac_model_circle.h>
 #include <pcl/sample_consensus/ransac.h>
+#include <pcl/common/centroid.h>
 
 #include <pcl/filters/statistical_outlier_removal.h>
 
@@ -50,33 +51,37 @@ struct model_param
 class DoorValvedetector{
 private:
 
-  ros::Subscriber pcl_sub_;
+    ros::Subscriber pcl_sub_;
 
-  ros::Publisher pcl_filtered_pub_;
+    ros::Publisher pcl_filtered_pub_;
 
-  ros::Publisher vis_pub_;
-  RobotStateInformer* robot_state_;
+    ros::Publisher vis_pub_;
+    RobotStateInformer* robot_state_;
 
-  float min_x,max_x,min_y,max_y,min_z,max_z;
+    float min_x,max_x,min_y,max_y,min_z,max_z;
 
-  model_param circle_param;
+    model_param circle_param;
 
+    /// @todo change it to pose later
+    std::vector<geometry_msgs::Point> detections_;
 
-  void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
-  void PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-  void setOffset(float minX = 0.2, float maxX = 2.0,float minY = -0.7 , float maxY = 0.7 ,float minZ= 0.7, float maxZ=1.5);
-  void transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool isinverse);
-  void filter_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-  void fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-  void visualize();
-  void clustering(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+    // Temporary function feel free to modify
+    void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
+
+    void PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+    void setOffset(float minX = 0.2, float maxX = 2.0,float minY = -0.7 , float maxY = 0.7 ,float minZ= 0.7, float maxZ=1.5);
+    void transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool isinverse);
+    void filter_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+    void fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+    void visualize();
+    void clustering(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
 
 public:
 
-  // Constructor
-
-  DoorValvedetector(ros::NodeHandle nh);
-  ~DoorValvedetector();
+    // Constructor
+    bool getDetections(std::vector<geometry_msgs::Point> &out);
+    DoorValvedetector(ros::NodeHandle nh);
+    ~DoorValvedetector();
 
 };

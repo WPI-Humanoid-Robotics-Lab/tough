@@ -32,10 +32,10 @@ void task3Utils::beforDoorOpenPose(){
      arm_controller_.moveArmJoints(RIGHT,armData,0.5f);
      ros::Duration(2.0).sleep();
 
-     armData.clear();
-     armData.push_back(LEFT_ARM_DOOR_OPEN);
-     arm_controller_.moveArmJoints(LEFT,armData,0.5f);
-     ros::Duration(2.0).sleep();
+     //armData.clear();
+     //armData.push_back(LEFT_ARM_DOOR_OPEN);
+     //arm_controller_.moveArmJoints(LEFT,armData,0.5f);
+     //ros::Duration(2.0).sleep();
 }
 
 void task3Utils::visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg)
