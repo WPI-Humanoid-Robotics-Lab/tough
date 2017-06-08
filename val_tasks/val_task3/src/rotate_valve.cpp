@@ -44,7 +44,14 @@ bool rotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTi
     // move to seed point somewhere above the valve
     // move to goal point and grasp the valve
 
+    geometry_msgs::Point grabGoal;
     ROS_INFO("rotateValve: Setting gripper position");
+
+    //Converting the centre to the grasp point based on the dimensions calculated manually
+    current_state_->transformPoint(goal,grabGoal,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    grabGoal.y -= 0.05241;
+    grabGoal.z += 0.1601;
+    current_state_->transformPoint(grabGoal,grabGoal,VAL_COMMON_NAMES::PELVIS_TF);
 
     std::vector<double> gripper1,gripper2,gripper3;
 
@@ -72,7 +79,7 @@ bool rotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTi
 
     geometry_msgs::Point intermGoal;
 
-    current_state_->transformPoint(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPoint(grabGoal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
 
     intermGoal.x += 0.03;
 

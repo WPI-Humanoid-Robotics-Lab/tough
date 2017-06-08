@@ -14,11 +14,12 @@ int main(int argc, char **argv)
     ihmc_msgs::StopAllTrajectoryRosMessage stopMsg;
     stopMsg.unique_id=45;
 
-    if(argc == 7){
+
+    if(argc == 4){
         geometry_msgs::Point pt;
-        pt.x = std::atof(argv[1]);
-        pt.y = std::atof(argv[2]);
-        pt.z = std::atof(argv[3]);
+//        pt.x = std::atof(argv[1]);
+//        pt.y = std::atof(argv[2]);
+//        pt.z = std::atof(argv[3]);
 
         //Gripping and executing circular motion
 
@@ -32,9 +33,9 @@ int main(int argc, char **argv)
 
         geometry_msgs::Point cen;
 
-        cen.x = std::atof(argv[4]);
-        cen.y = std::atof(argv[5]);
-        cen.z = std::atof(argv[6]);
+        cen.x = std::atof(argv[1]);
+        cen.y = std::atof(argv[2]);
+        cen.z = std::atof(argv[3]);
 
         rotate.reOrientbeforgrab(cen);
 
@@ -44,7 +45,8 @@ int main(int argc, char **argv)
         //Rotating the valve six times
         for(size_t i = 1; i< 7; ++i){
             ROS_INFO("Try Number : %d", i );
-            rotate.grab_valve(pt);
+            // rotate.grab_valve(pt);
+            rotate.grab_valve(cen);
             rotate.compute_traj(cen,0.18,points);
             rotate.move_valve(points);
         }
