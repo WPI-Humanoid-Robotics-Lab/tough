@@ -147,10 +147,15 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
             //what do we do if this call fails or succeeds?
         }
         // generate the event
+        head_controller_->moveHead(0,0,0);
         eventQueue.riseEvent("/INIT_SUCESSFUL");
 
     }
-    else if (map_update_count_ < 2 && retry_count++ < 40) {
+    else if (retry_count++ < 40) {
+
+        if(retry_count == 1) head_controller_->moveHead(0,0,20);
+        if(retry_count == 3) head_controller_->moveHead(0,0,-20);
+
         ROS_INFO("valTask1::initTask : Retry Count : %d. Wait for occupancy grid to be updated with atleast 2 messages", retry_count);
         task1_utils_->taskLogPub("valTask1::initTask : Retry Count : " + std::to_string(retry_count) + " Wait for occupancy grid to be updated with atleast 2 messages");
         ros::Duration(2.0).sleep();
@@ -598,6 +603,7 @@ decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContex
         if(pcl_handle_detector_!= nullptr){
             delete pcl_handle_detector_;
         }
+
         // generate the event
         eventQueue.riseEvent("/FIXED_HANDLE");
 
@@ -647,6 +653,11 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
     //pelvis_controller_->controlPelvisHeight(0.85);
 
     if(!executing){
+//        ROS_INFO("Aligning to fix Pitch");
+//        task1_utils_->taskLogPub("Aligning to fix Pitch");
+//        //align to center of yaw while fixing pitch
+//        task1_utils_->reOrientTowardsGoal(handle_loc_[YAW_KNOB_CENTER]);
+
         ROS_INFO("Executing the grasp handle command");
         task1_utils_->taskLogPub("Executing the grasp handle command");
         executing = true;
@@ -898,6 +909,11 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
     static int retry_count = 0;
 
     if(!executing){
+//        ROS_INFO("Aligning to fix yaw");
+//        task1_utils_->taskLogPub("Aligning to fix yaw");
+//        //align to center of pitch while fixing yaw
+//        task1_utils_->reOrientTowardsGoal(handle_loc_[PITCH_KNOB_CENTER]);
+
         ROS_INFO("Executing the grasp handle command");
         task1_utils_->taskLogPub("Executing the grasp handle command");
         executing = true;
