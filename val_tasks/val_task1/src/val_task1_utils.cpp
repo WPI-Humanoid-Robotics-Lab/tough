@@ -492,6 +492,7 @@ void task1Utils::taskStatusSubCB(const srcsim::Task &msg){
 
         outfile << data.str();
         outfile.close();
+        task1_log_pub_.publish("Current Checkpoint : "+ std::to_string(current_checkpoint_));
     }
 }
 
@@ -499,7 +500,7 @@ void task1Utils::taskStatusSubCB(const srcsim::Task &msg){
 void task1Utils::terminator(const ros::TimerEvent& e){
 
     ROS_INFO("Killing! Kill! Kill! Fire in the Hole! Headshot!");
-    int status = system("killall roscore rosmaster rosout gzserver gzclient roslaunch");
+//    int status = system("killall roscore rosmaster rosout gzserver gzclient roslaunch");
 }
 
 void task1Utils::taskLogPub(std::string data){

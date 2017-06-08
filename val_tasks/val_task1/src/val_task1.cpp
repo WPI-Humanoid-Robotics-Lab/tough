@@ -702,7 +702,7 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
 decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM_ONCE("executing " << name);
-    task1_utils_->taskLogPub("valTask1::controlPitchTask : executing " + name);
+
 
     static bool execute_once = true;
     static int retry_count = 0;
@@ -718,6 +718,8 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     {
         // reset the execute flag
         execute_once = false;
+
+        task1_utils_->taskLogPub("valTask1::controlPitchTask : executing " + name);
 
         // determine direction of the rotation (clock wise rotation increases angles)
         if (task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_INCRSING)
@@ -972,7 +974,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 {
 
     ROS_INFO_STREAM_ONCE("executing " << name);
-    task1_utils_->taskLogPub("valTask1::controlYaw : executing " + name);
+
 
     static bool execute_once = true;
     static int retry_count = 0;
@@ -984,6 +986,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     // execute this part once
     if (execute_once)
     {
+        task1_utils_->taskLogPub("valTask1::controlYaw : executing " + name);
         // reset the execute flag
         execute_once = false;
 
