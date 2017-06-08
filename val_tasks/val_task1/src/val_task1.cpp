@@ -587,9 +587,6 @@ decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContex
         pcl_handle_detector_ = new pcl_handle_detector(nh_, pose);
     }
 
-
-
-
     std::vector<geometry_msgs::Point> pclHandlePoses;
     pcl_handle_detector_->getDetections(pclHandlePoses);
 
@@ -773,6 +770,10 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     // if the pitch is corrected
     else if (task1_utils_->isPitchCorrectNow())
     {
+        // pitch is correct now, wait for 0.2 sec and then stop the trajectories
+        // this is to fix the disturbance in arm moment
+        ros::Duration(0.2).sleep();
+
         // stop all the trajectories
         control_helper_->stopAllTrajectories();
 
@@ -1032,6 +1033,10 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     // if the yaw is corrected
     else if (task1_utils_->isYawCorrectNow())
     {
+        // yaw is correct now, wait for 0.2 sec and then stop the trajectories
+        // this is to fix the disturbance in arm moment
+        ros::Duration(0.2).sleep();
+
         // stop all the trajectories
         control_helper_->stopAllTrajectories();
 
