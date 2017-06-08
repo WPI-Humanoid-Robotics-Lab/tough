@@ -97,6 +97,9 @@ geometry_msgs::PoseStamped solar_panel_detector_2::getRoverPose() const {
 void solar_panel_detector_2::cloudCB(const PointCloud::ConstPtr &cloud_raw) {
     ROS_DEBUG_STREAM("Got point cloud of size " << cloud_raw->size());
 
+    // DEBUG ONLY only do 1 callback
+//    pcl_sub_.shutdown();
+
     PointCloud::Ptr filtered_cloud = prefilterCloud(cloud_raw);
     if (filtered_cloud->empty()) {
         ROS_DEBUG("Abandoning solar panel detection attempt because the filtered cloud was empty");
@@ -108,16 +111,38 @@ void solar_panel_detector_2::cloudCB(const PointCloud::ConstPtr &cloud_raw) {
                                                      << "%)");
     NormalCloud::Ptr filtered_normals = estimateNormals(filtered_cloud);
 
-//    points_pub_.publish(filtered_cloud);
-    publishNormals(*filtered_cloud, *filtered_normals);
+    ROS_DEBUG_STREAM("Got normals");
 
-    pcl::PointIndices points_in_trailer;
-    if (!findPointsInsideTrailer(filtered_cloud, filtered_normals, points_in_trailer)) {
+    auto points_in_trailer = boost::make_shared<pcl::PointIndices>();
+    if (!findPointsInsideTrailer(filtered_cloud, filtered_normals, *points_in_trailer)) {
         ROS_DEBUG("Abandoning solar panel detection attempt because the trailer could not be located");
         return;
     }
 
-    points_pub_.publish(PointCloud(*filtered_cloud, points_in_trailer.indices));
+    ROS_DEBUG_STREAM("Got " << points_in_trailer->indices.size() << " points in trailer");
+
+    geometry_msgs::PoseStamped solar_panel_pose;
+    if (!findSolarPanelPose(filtered_cloud, filtered_normals, points_in_trailer, solar_panel_pose)) {
+        ROS_DEBUG("Abandoning solar panel detection attempt because the panel could not be located");
+        return;
+    }
+
+    ROS_INFO("Got solar panel pose");
+
+    // solar_panel_pose is relative to rover_pose
+    // round-trip through Eigen to transform it (thanks, ROS)
+    Eigen::Affine3d rover_pose_eigen, solar_panel_pose_eigen;
+    tf::poseMsgToEigen(rover_pose_.pose, rover_pose_eigen);
+    tf::poseMsgToEigen(solar_panel_pose.pose, solar_panel_pose_eigen);
+
+    Eigen::Affine3d absolute_pose_eigen = rover_pose_eigen * solar_panel_pose_eigen;
+    geometry_msgs::PoseStamped absolute_pose;
+    absolute_pose.header = rover_pose_.header;
+    tf::poseEigenToMsg(absolute_pose_eigen, absolute_pose.pose);
+    pose_pub_.publish(absolute_pose);
+
+
+//    ros::shutdown(); // FOR DEBUGGING ONLY
 }
 
 solar_panel_detector_2::PointCloud::Ptr solar_panel_detector_2::prefilterCloud(const PointCloud::ConstPtr &cloud_raw) const {
@@ -291,11 +316,13 @@ bool solar_panel_detector_2::findPointsInsideTrailer(const PointCloud::ConstPtr 
 
     // Move x and y of the back left corner a little bit towards the centroid, and set its z to turn it into max_pt
     Eigen::Vector4f max_pt(
-        back_left_corner.x() + 0.05f * (back_left_corner.x() < overall_centroid.x() ? 1 : -1),
+        back_left_corner.x() + 0.10f * (back_left_corner.x() < overall_centroid.x() ? 1 : -1),
         back_left_corner.y() + 0.05f * (back_left_corner.y() < overall_centroid.y() ? 1 : -1),
         3,
         1
     );
+
+    ROS_DEBUG_STREAM("Adjusted max_pt.x by " << 0.05f * (back_left_corner.x() < overall_centroid.x() ? 1 : -1));
 
     // Take the average of the 3 walls, rotated to align and normalized to point in the same direction, as the axis
     Eigen::Vector3f trailer_axis = (
@@ -317,7 +344,7 @@ bool solar_panel_detector_2::findPointsInsideTrailer(const PointCloud::ConstPtr 
     geometry_msgs::PoseStamped trailer_axis_pose;
     pcl_conversions::fromPCL(points->header, trailer_axis_pose.header);
     tf::poseEigenToMsg(trailer_axis_tf.cast<double>(), trailer_axis_pose.pose);
-    pose_pub_.publish(trailer_axis_pose);
+//    pose_pub_.publish(trailer_axis_pose);
 
     // Finally, crop
     pcl::CropBox<Point> cropFilter;
@@ -336,6 +363,160 @@ bool solar_panel_detector_2::findPointsInsideTrailer(const PointCloud::ConstPtr 
 //    points_pub_.publish(tmp);
 
     return true;
+}
+
+bool solar_panel_detector_2::findSolarPanelPose(const PointCloud::ConstPtr &points,
+                                                const NormalCloud::Ptr &normals, // not ConstPtr because of PCL
+                                                const pcl::PointIndices::ConstPtr &pts_inside_trailer,
+                                                geometry_msgs::PoseStamped &solar_panel_pose) const {
+    pcl::RegionGrowing<Point, Normal> rgs;
+    rgs.setMinClusterSize(200); // probably can be much bigger than 100
+    rgs.setNumberOfNeighbours(30);
+    rgs.setCurvatureThreshold(0.05);
+    rgs.setInputCloud(points);
+    rgs.setInputNormals(normals);
+    rgs.setIndices(pts_inside_trailer);
+
+    auto clusters = boost::make_shared<std::vector<pcl::PointIndices>>();
+    rgs.extract(*clusters);
+
+    // Sort clusters so the largest cluster that fits the expected shape is encountered first
+    std::sort(clusters->begin(), clusters->end(), [](const pcl::PointIndices &a, const pcl::PointIndices &b) {
+        return a.indices.size() > b.indices.size();
+    });
+
+
+    pcl::SACSegmentationFromNormals<Point, Normal> sac;
+    sac.setModelType(pcl::SACMODEL_NORMAL_PLANE);
+    sac.setMethodType(pcl::SAC_RANSAC);
+    sac.setDistanceThreshold(0.04);
+    sac.setInputCloud(points);
+    sac.setInputNormals(normals);
+
+    for (const auto &cluster : *clusters) {
+        pcl::PointIndices::ConstPtr cluster_ptr(clusters, &cluster); // aliasing pointer
+        sac.setIndices(cluster_ptr);
+
+        pcl::PointIndices inliers;
+        pcl::ModelCoefficients model;
+        sac.segment(inliers, model);
+
+        if (std::abs(model.values[2]) > 0.1) {
+            ROS_DEBUG_STREAM("Abandoning cluster of size " << cluster.indices.size()
+                             << " because its normal was not close to the xy plane");
+            continue;
+        }
+
+        Eigen::Vector4f centroid;
+        pcl::compute3DCentroid(*points, inliers, centroid);
+
+        Eigen::Affine3f panel_side_tf = (
+            Eigen::Translation3f(centroid.head<3>()) *
+            Eigen::Quaternionf::FromTwoVectors(Eigen::Vector3f::UnitX(), Eigen::Map<Eigen::Vector3f>(model.values.data()))
+        );
+
+        auto panel_cloud = boost::make_shared<PointCloud>();
+        pcl::transformPointCloud(*points, pts_inside_trailer->indices, *panel_cloud, panel_side_tf.inverse());
+        panel_cloud->header = points->header;
+
+        ROS_ERROR_STREAM_COND(panel_cloud->empty(), "Panel cloud was empty!");
+        
+        const float gap_center_z = findGapAlongAxis(panel_cloud, 2);
+        if (std::isnan(gap_center_z)) {
+            ROS_DEBUG_STREAM("Abandoning cluster of size " << cluster.indices.size()
+                                                           << " because its handle gap couldn't be found (z axis)");
+            continue;
+        }
+
+        const float gap_center_y = findGapAlongAxis(panel_cloud, 1);
+        if (std::isnan(gap_center_y)) {
+            ROS_DEBUG_STREAM("Abandoning cluster of size " << cluster.indices.size()
+                                                           << " because its handle gap couldn't be found (y axis)");
+            continue;
+        }
+
+        // Handle is connected to box in all cross sections along x. For findGapAlongAxis to work, it needs to be
+        // limited to the center, in between the places where the handle connects to the box -- gap_center_y +/- ~2cm
+        std::vector<int> panel_cloud_x_indices;
+        Eigen::Vector4f handle_center_crop_min(-10, gap_center_y - 0.02f, -10, 1);
+        Eigen::Vector4f handle_crop_max(10, gap_center_y + 0.02f, 10, 1);
+        pcl::getPointsInBox(*panel_cloud, handle_center_crop_min, handle_crop_max, panel_cloud_x_indices);
+        // Few enough points that duplicating the cloud is insignificant; also, some algorithms inside findGapAlongAxis
+        // can't handle indices.
+        auto panel_cloud_x = boost::make_shared<PointCloud>(*panel_cloud, panel_cloud_x_indices);
+
+        const float gap_center_x = findGapAlongAxis(panel_cloud_x, 0);
+        if (std::isnan(gap_center_x)) {
+            ROS_DEBUG_STREAM("Abandoning cluster of size " << cluster.indices.size()
+                                                           << " because its handle gap couldn't be found (x axis)");
+            continue;
+        }
+
+        Eigen::Translation3f handle_center(gap_center_x, gap_center_y, gap_center_z);
+
+        Eigen::Affine3f final_pose = handle_center * panel_side_tf;
+        tf::poseEigenToMsg(final_pose.cast<double>(), solar_panel_pose.pose);
+        pcl_conversions::fromPCL(points->header, solar_panel_pose.header);
+
+        // If loop hasn't continued yet, pose detection was successful
+        return true;
+    }
+
+    // If we didn't return yet, the panel wasn't found
+    return false;
+}
+
+float solar_panel_detector_2::findGapAlongAxis(const PointCloud::ConstPtr &points, const int axis) const {
+    // This function finds gaps (such as the gap between the handle and the main piece of the solar panel) along the
+    // given axis, and returns the center of the longest gap. It finds the gaps by iterating over axial cross sections
+    // of the input cloud and finding the connected components, if a cross-section has multiple connected components
+    // then a gap exists in that cross section.
+
+    Point min_pt, max_pt;
+    pcl::getMinMax3D(*points, min_pt, max_pt);
+    const float range_diff = 0.01;
+    const float range_min = min_pt.data[axis];
+    const float range_max = max_pt.data[axis];
+
+    float longest_gap_start = NAN;
+    float longest_gap_end = NAN;
+    float current_gap_start = NAN;
+    for (float cross_section_center = range_min; cross_section_center < range_max; cross_section_center += range_diff) {
+        auto cross_section = boost::make_shared<pcl::PointIndices>();
+        Eigen::Vector4f cross_section_min(-10, -10, -10, 1), cross_section_max(10, 10, 10, 1);
+        cross_section_min[axis] = cross_section_center - range_diff/2;
+        cross_section_max[axis] = cross_section_center + range_diff/2;
+        pcl::getPointsInBox(*points, cross_section_min, cross_section_max, cross_section->indices);
+
+        pcl::EuclideanClusterExtraction<Point> ece;
+        ece.setMinClusterSize(10);
+        ece.setClusterTolerance(0.02);
+        ece.setInputCloud(points);
+        ece.setIndices(cross_section);
+
+        std::vector<pcl::PointIndices> clusters;
+        ece.extract(clusters);
+
+        if (clusters.size() >= 2 && std::isnan(current_gap_start)) {
+            // Case 1: Beginning of a new gap
+            current_gap_start = cross_section_center;
+        } else if (clusters.size() < 2 && !std::isnan(current_gap_start)) {
+            // Case 2: End of a gap
+            if (cross_section_center - current_gap_start > 1.5 * range_diff && (std::isnan(longest_gap_start) ||
+                    (cross_section_center - current_gap_start) > (longest_gap_end - longest_gap_start))) {
+                // If this is the new longest gap, and it's more than 1 long (possible spurious result), record it
+                longest_gap_start = current_gap_start;
+                longest_gap_end = cross_section_center;
+            }
+            // Always reset the current gap
+            current_gap_start = NAN;
+        }
+
+        // All other cases: just continue iteration
+    }
+
+    // This naturally returns NAN if there was no gap
+    return (longest_gap_start + longest_gap_end) / 2;
 }
 
 
