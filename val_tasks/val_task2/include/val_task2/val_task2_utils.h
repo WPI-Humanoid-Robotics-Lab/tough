@@ -112,7 +112,7 @@ private:
     void isDetachedCB(const srcsim::Harness &harnessMsg);
 
     std::string logFile;
-    std::mutex mtx;
+    std::mutex mtx_;
     nav_msgs::OccupancyGrid map_;
     void mapUpdateCB(const nav_msgs::OccupancyGrid &msg);
     ros::Subscriber mapUpdaterSub_;

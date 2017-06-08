@@ -66,11 +66,12 @@ task2Utils::~task2Utils()
 }
 void task2Utils::isDetachedCB(const srcsim::Harness &harnessMsg)
 {
-    if(harnessMsg.status == 4)
+     mtx_.lock();
+    if(harnessMsg.status == 5)
     {
         isHarnessDetached = true;
-        ros::Duration(0.3).sleep();
     }
+    mtx_.unlock();
 }
 
 bool task2Utils::afterPanelGraspPose(const armSide side)
@@ -460,7 +461,10 @@ bool task2Utils::checkpoint_init()
     ros::Duration(0.3).sleep();
     clearMap();
     isHarnessDetached = false;
-    while(!isHarnessDetached);
+    while(!isHarnessDetached)
+    {
+        ros::Duration(0.1).sleep();
+    }
     ROS_INFO("[SKIP] Harness Detached!");
     walk_->walkLocalPreComputedSteps({-0.2,-0.2,-0.2,-0.2},{0.0,0.0,0.0,0.0},RIGHT);
     ros::Duration(3);
@@ -517,9 +521,9 @@ void task2Utils::taskStatusCB(const srcsim::Task &msg)
 
 void task2Utils::mapUpdateCB(const nav_msgs::OccupancyGrid &msg)
 {
-    mtx.lock();
+    mtx_.lock();
     map_ = msg;
-    mtx.unlock();
+    mtx_.unlock();
 }
 
 void task2Utils::clearPointCloud() {
