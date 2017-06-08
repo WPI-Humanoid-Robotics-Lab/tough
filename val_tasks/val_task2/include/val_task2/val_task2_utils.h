@@ -46,10 +46,7 @@ private:
     ValkyrieWalker *walk_;
     // robot state
     RobotStateInformer *current_state_;
-    ros::Publisher reset_pointcloud_pub;
-    ros::Publisher reset_map_pub;
-    ros::Publisher pause_pointcloud_pub ;
-    ros::Publisher clearbox_pointcloud_pub ;
+    ros::Publisher reset_pointcloud_pub, reset_map_pub, pause_pointcloud_pub , clearbox_pointcloud_pub , task2_log_pub_;
 
     ros::Subscriber task_status_sub_;
 
@@ -141,6 +138,7 @@ public:
     geometry_msgs::Pose grasping_hand(armSide &side, geometry_msgs::Pose handle_pose);
     bool isRotationReq(armSide side, geometry_msgs::Point handle_coordinates,geometry_msgs::Point button_coordinates);
     bool checkpoint_init();
+    void taskLogPub(std::string data);
 };
 
 
