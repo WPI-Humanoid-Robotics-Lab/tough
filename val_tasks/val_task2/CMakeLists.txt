@@ -72,6 +72,7 @@ include_directories(include
             src/val_task2_utils.cpp
             src/cable_task.cpp
             src/array_table_detector.cpp
+	    src/solar_array_detector.cpp
  )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -116,6 +117,9 @@ target_link_libraries(solar_panel_grasp_node  ${catkin_LIBRARIES} ${PROJECT_NAME
 
 add_executable(cable_grabber_node src/cable_grabber_node.cpp)
 target_link_libraries(cable_grabber_node  ${catkin_LIBRARIES} ${PROJECT_NAME} )
+
+add_executable(solar_array_detector_node src/solar_array_detector_node.cpp)
+target_link_libraries(solar_array_detector_node  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARY_DIRS} ${PROJECT_NAME} )
 
 add_dependencies(cable_grabber_node
  ${${PROJECT_NAME}_EXPORTED_TARGETS}

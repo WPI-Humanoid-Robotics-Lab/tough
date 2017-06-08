@@ -14,6 +14,7 @@
 #include "val_task_common/val_task_common_utils.h"
 #include "val_task2/val_task2_utils.h"
 #include <queue>
+#include <string>
 
 using namespace std;
 
@@ -36,6 +37,7 @@ valTask2* valTask2::getValTask2(ros::NodeHandle nh){
 valTask2::valTask2(ros::NodeHandle nh):
     nh_(nh)
 {
+
     // object for the valkyrie walker
     walker_             = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
     pelvis_controller_  = new pelvisTrajectory(nh_);
@@ -65,6 +67,7 @@ valTask2::valTask2(ros::NodeHandle nh):
 
     //utils
     task2_utils_    = new task2Utils(nh_);
+    task2_utils_->taskLogPub("Starting task 2");
     robot_state_    = RobotStateInformer::getRobotStateInformer(nh_);
 
     control_common_ = new valControlCommon(nh_);
@@ -77,6 +80,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask2::occupancy_grid_cb, this);
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask2::visited_map_cb, this);
 
+    task2_utils_->taskLogPub("Setting Multisense Subscribers");
     cv::Mat img;
     ms_sensor_->giveImage(img);
     ms_sensor_->giveDisparityImage(img);
@@ -141,6 +145,7 @@ decision_making::TaskResult valTask2::initTask(string name, const FSMCallContext
 {
 
     ROS_INFO_STREAM("valTask2::initTask : executing " << name);
+    task2_utils_->taskLogPub("valTask2::initTask : executing " + name);
     static int retry_count = 0;
 
     // reset mapcount when retrying the state for the first time
@@ -151,6 +156,7 @@ decision_making::TaskResult valTask2::initTask(string name, const FSMCallContext
 
     // the state transition can happen from an event externally or can be geenerated here
     ROS_INFO("valTask2::initTask : Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
+    task2_utils_->taskLogPub("valTask2::initTask : Occupancy Grid has been updated " + std::to_string(map_update_count_)+ "times, tried " + std::to_string(retry_count) + " times");
     if (map_update_count_ > 1) {
         // move to a configuration that is robust while walking
         retry_count = 0;
@@ -167,7 +173,7 @@ decision_making::TaskResult valTask2::initTask(string name, const FSMCallContext
         }
         else
         {
-            ROS_ERROR("service not called");
+            ROS_ERROR("valTask2::initTask : service not called");
             eventQueue.riseEvent("/INIT_FAILED");
         }
         // generate the event
@@ -597,6 +603,8 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
     if(solar_array_detector_ == nullptr) {
         // this is absolutely necessary
         task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
+
+        //this blocks rover on map
         solar_array_detector_ = new SolarArrayDetector(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
         ros::Duration(0.2).sleep();
     }
@@ -680,9 +688,9 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
     {
         ROS_INFO("valTask2::detectSolarArrayTask : Failed attempt. trying again");
         // increment the fail count
-        head_controller_->moveHead(0,0,head_yaw_ranges.front());
         if(!head_yaw_ranges.empty())
         {
+            head_controller_->moveHead(0,0,head_yaw_ranges.front());
             head_yaw_ranges.pop();
         }
         retry_count=0;
