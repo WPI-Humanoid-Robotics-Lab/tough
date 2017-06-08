@@ -5,15 +5,17 @@ int main(int argc, char** argv)
     ros::init (argc,argv,"array_table_detector");
     ros::NodeHandle nh;
     geometry_msgs::Pose2D rover_pose;
+    geometry_msgs::Pose coarse_array_pose;
     geometry_msgs::Quaternion quaternion;
-    quaternion.w = 0.927;
+    quaternion.w = 0.708325254252;
     quaternion.x = 0.0;
     quaternion.y = 0.0;
-    quaternion.z = -0.40452093478;
-    rover_pose.x = 8.442;
-    rover_pose.y = 1.104;
+    quaternion.z = 0.705886204843;
+    rover_pose.x = 0.183420181274;
+    rover_pose.y = 0.339629471302;
     rover_pose.theta = tf::getYaw(quaternion);
-    bool foundArrayLoc;
+    bool foundArrayLoc = false;
+    int numIterations = 0;
 //x: 3.65252542496
 //y: 1.20730876923
 //z: 0.0
@@ -24,10 +26,12 @@ int main(int argc, char** argv)
 //w: 0.374888882761
 // 8.442, 1.104, 0.000 0.000, 0.000, -0.376, 0.927
     CoarseArrayDetector ad(nh);
-    while(ros::ok())
+    while(!foundArrayLoc)
     {
-        foundArrayLoc = ad.getArrayPosition(rover_pose);
+        foundArrayLoc = ad.getArrayPosition(rover_pose, coarse_array_pose);
+        //ROS_INFO(foundArrayLoc ? "***** Coarse Array Pose found" : "xxxxx Coarse Array Pose not found");
         ros::spinOnce();
+        numIterations++;
     }
 
 }
