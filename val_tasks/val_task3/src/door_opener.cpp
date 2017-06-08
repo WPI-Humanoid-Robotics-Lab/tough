@@ -22,8 +22,8 @@ void doorOpener::openDoor(geometry_msgs::Pose valveCenter){
                                 VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
 
-    valveCenter.position.x  -= 0.4;
-    valveCenter.position.y  -= 0.25;
+    valveCenter.position.x  -= 0.35;
+    valveCenter.position.y  -= 0.28;
 
     //Converting back to world
     robot_state_->transformPose(valveCenter, valveCenter, VAL_COMMON_NAMES::PELVIS_TF);
@@ -52,7 +52,7 @@ void doorOpener::openDoor(geometry_msgs::Pose valveCenter){
      //Walk straight few small steps
     ROS_INFO("Walking again");
     x_offset = {0.3,0.3,0.6,0.6};
-    y_offset = {0.0,0.0,0,0};
+    y_offset = {0.0,0.0,-0.1,-0.1};
     walker_.walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
     ros::Duration(1.0).sleep();
 
@@ -60,6 +60,8 @@ void doorOpener::openDoor(geometry_msgs::Pose valveCenter){
     x_offset = {0.3,0.3};
     y_offset = {0.0, 0.0};
     walker_.walkLocalPreComputedSteps(x_offset,y_offset,LEFT);
+
+    // @todo spread left arm
     ros::Duration(1.0).sleep();
 
 }
