@@ -123,6 +123,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
 
     static int retry_count = 0;
 
+    ROS_INFO("goal %d", map_update_count_);
     // reset map count for the first entry
     if(retry_count == 0){
         map_update_count_ = 0;
@@ -702,11 +703,11 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
 decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM_ONCE("executing " << name);
-    task1_utils_->taskLogPub("valTask1::controlPitchTask : executing " + name);
+
 
     static bool execute_once = true;
     static int retry_count = 0;
-    static handleDirection rot_dir = handleDirection::CLOCK_WISE;
+    static handleDirection rot_dir = handleDirection::ANTICLOCK_WISE;
 
     //timer
     static std::chrono::system_clock::time_point timer_start = std::chrono::system_clock::now();
@@ -719,15 +720,10 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         // reset the execute flag
         execute_once = false;
 
+        task1_utils_->taskLogPub("valTask1::controlPitchTask : executing " + name);
+
         // determine direction of the rotation (clock wise rotation increases angles)
-        if (task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_INCRSING)
-        {
-            rot_dir = handleDirection::CLOCK_WISE;
-        }
-        else if (task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_DECRASING)
-        {
-            rot_dir = handleDirection::ANTICLOCK_WISE;
-        }
+        rot_dir = (task1_utils_->getGoalDirection(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_INCRSING) ? handleDirection::CLOCK_WISE : handleDirection::ANTICLOCK_WISE;
 
         // generate the way points for the knob (current pose(6DOF) of arm is used to generate the way points)
         //current pose of the hand
@@ -761,24 +757,24 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     gripper_controller_->closeGripper(armSide::RIGHT);
 
     // if the handle is moving in wrong direction, flip the points (assuming grasp is not lost)
-    if(0) //task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_AWAY_TO_GOAL)
-    {
-        ROS_INFO("handle moving in wrong direction, path will be flipped ");
-        task1_utils_->taskLogPub("handle moving in wrong direction, path will be flipped ");
-        // stop all the trajectories
-        control_helper_->stopAllTrajectories();
+//    if(task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_AWAY_TO_GOAL)
+//    {
+//        ROS_INFO("handle moving in wrong direction, path will be flipped ");
+//        task1_utils_->taskLogPub("handle moving in wrong direction, path will be flipped ");
+//        // stop all the trajectories
+//        control_helper_->stopAllTrajectories();
 
-        // set the execute flag
-        execute_once = true;
+//        // set the execute flag
+//        execute_once = true;
 
-        // flip the direction
-        rot_dir = (rot_dir == handleDirection::ANTICLOCK_WISE) ? handleDirection::CLOCK_WISE : handleDirection::ANTICLOCK_WISE;
+//        // flip the direction
+//        rot_dir = (rot_dir == handleDirection::ANTICLOCK_WISE) ? handleDirection::CLOCK_WISE : handleDirection::ANTICLOCK_WISE;
 
-        // still stay in the same state
-        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
-    }
+//        // still stay in the same state
+//        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
+//    }
     // if the pitch is corrected
-    else if (task1_utils_->isPitchCorrectNow())
+    if (task1_utils_->isPitchCorrectNow())
     {
         // pitch is correct now, wait for 0.2 sec and then stop the trajectories
         // this is to fix the disturbance in arm moment
@@ -972,7 +968,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 {
 
     ROS_INFO_STREAM_ONCE("executing " << name);
-    task1_utils_->taskLogPub("valTask1::controlYaw : executing " + name);
+
 
     static bool execute_once = true;
     static int retry_count = 0;
@@ -984,18 +980,12 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     // execute this part once
     if (execute_once)
     {
+        task1_utils_->taskLogPub("valTask1::controlYaw : executing " + name);
         // reset the execute flag
         execute_once = false;
 
         // determine direction of the rotation (clock wise rotation increases angles)
-        if (task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_INCRSING)
-        {
-            rot_dir = handleDirection::CLOCK_WISE;
-        }
-        else if (task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_DECRASING)
-        {
-            rot_dir = handleDirection::ANTICLOCK_WISE;
-        }
+        rot_dir = (task1_utils_->getGoalDirection(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_INCRSING) ? handleDirection::CLOCK_WISE : handleDirection::ANTICLOCK_WISE;
 
         // generate the way points for the knob (current pose(6DOF) of arm is used to generate the way points)
         //current pose of the hand
@@ -1033,25 +1023,25 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     gripper_controller_->closeGripper(armSide::LEFT);
 
     // if the handle is moving in wrong direction, flip the points (assuming grasp is not lost)
-    if(0) //task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_AWAY_TO_GOAL)
-    {
-        ROS_INFO("handle moving in wrong direction, path will be flipped ");
-        task1_utils_->taskLogPub("handle moving in wrong direction, path will be flipped ");
+//    if(task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_AWAY_TO_GOAL)
+//    {
+//        ROS_INFO("handle moving in wrong direction, path will be flipped ");
+//        task1_utils_->taskLogPub("handle moving in wrong direction, path will be flipped ");
 
-        // stop all the trajectories
-        control_helper_->stopAllTrajectories();
+//        // stop all the trajectories
+//        control_helper_->stopAllTrajectories();
 
-        // set the execute flag
-        execute_once = true;
+//        // set the execute flag
+//        execute_once = true;
 
-        // flip the direction
-        rot_dir = (rot_dir == handleDirection::ANTICLOCK_WISE) ? handleDirection::CLOCK_WISE : handleDirection::ANTICLOCK_WISE;
+//        // flip the direction
+//        rot_dir = (rot_dir == handleDirection::ANTICLOCK_WISE) ? handleDirection::CLOCK_WISE : handleDirection::ANTICLOCK_WISE;
 
-        // still stay in the same state
-        eventQueue.riseEvent("/YAW_CORRECTION_EXECUTING");
-    }
+//        // still stay in the same state
+//        eventQueue.riseEvent("/YAW_CORRECTION_EXECUTING");
+//    }
     // if the yaw is corrected
-    else if (task1_utils_->isYawCorrectNow())
+    if (task1_utils_->isYawCorrectNow())
     {
         // yaw is correct now, wait for 0.2 sec and then stop the trajectories
         // this is to fix the disturbance in arm moment

@@ -171,12 +171,31 @@ double task1Utils::getYaw (void)
     return msg_.current_yaw;
 }
 
+valueDirection task1Utils::getGoalDirection(double current_value, controlSelection control)
+{
+    valueDirection ret;
+
+    //decide the direction to move
+    double goal = (control == controlSelection::CONTROL_PITCH) ? msg_.target_pitch : msg_.target_yaw;
+    if (goal > current_value)
+    {
+        // we should increase the value
+        ret = valueDirection::VALUE_INCRSING;
+    }
+    else
+    {
+        // decrease the alue
+        ret = valueDirection::VALUE_DECRASING;
+    }
+
+    return ret;
+}
+
 valueDirection task1Utils::getValueStatus(double current_value, controlSelection control)
 {
     valueDirection ret = valueDirection::VALUE_NOT_INITIALISED;
     // required direction
     static valueDirection required_direction = valueDirection::VALUE_NOT_INITIALISED;
-    static double goal = 0;
     static controlSelection prev_control = controlSelection::CONTROL_NOT_INITIALISED;
     static bool execute_once = true;
     static double prev_trigger_value = 0;
@@ -194,21 +213,8 @@ valueDirection task1Utils::getValueStatus(double current_value, controlSelection
         // initialise previous value and return
         prev_trigger_value = current_value;
 
-        // update the goal
-        goal = (control == controlSelection::CONTROL_PITCH) ? msg_.target_pitch : msg_.target_yaw;
-
         //decide the direction to move
-        double current_value = (control == controlSelection::CONTROL_PITCH) ? msg_.current_pitch : msg_.current_yaw;
-        if (goal > current_value)
-        {
-            // we should increase the value
-            required_direction = valueDirection::VALUE_INCRSING;
-        }
-        else
-        {
-            // decrease the alue
-            required_direction = valueDirection::VALUE_DECRASING;
-        }
+        required_direction = getGoalDirection(current_value, control);
 
         //reset the flah
         execute_once = false;
@@ -265,7 +271,7 @@ valueDirection task1Utils::getValueStatus(double current_value, controlSelection
     }
     else
     {
-        ROS_INFO("toggling");
+        //ROS_INFO("toggling");
         ret = valueDirection::VALUE_TOGGLING;
     }
 
@@ -492,6 +498,7 @@ void task1Utils::taskStatusSubCB(const srcsim::Task &msg){
 
         outfile << data.str();
         outfile.close();
+        task1_log_pub_.publish("Current Checkpoint : "+ std::to_string(current_checkpoint_));
     }
 }
 
@@ -499,7 +506,7 @@ void task1Utils::taskStatusSubCB(const srcsim::Task &msg){
 void task1Utils::terminator(const ros::TimerEvent& e){
 
     ROS_INFO("Killing! Kill! Kill! Fire in the Hole! Headshot!");
-    int status = system("killall roscore rosmaster rosout gzserver gzclient roslaunch");
+//    int status = system("killall roscore rosmaster rosout gzserver gzclient roslaunch");
 }
 
 void task1Utils::taskLogPub(std::string data){
