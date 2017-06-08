@@ -20,13 +20,16 @@ ArrayTableDetector::~ArrayTableDetector()
 bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 {
     ROS_INFO("ArrayTableDetector::planeSegmentation : Detecting table");
-
+    if (input->empty())
+        return false;
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
     //fetch the cloud which would have table. assuming robot is standing less than 2m away from th etable
     extractCloudOfInterest(input, *output_cloud);
     ROS_INFO("ArrayTableDetector::planeSegmentation : Trimmed Cloud");
 
+    if (output_cloud->empty())
+        return false;
     // Downsample the cloud for faster processing
     float leafsize  = 0.05;
     pcl::VoxelGrid<pcl::PointXYZ> grid;
@@ -46,6 +49,8 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
     pass.setFilterLimits ( min_z, max_z);
     pass.filter (*output_cloud);
 
+    if (output_cloud->empty())
+        return false;
     ROS_INFO("ArrayTableDetector::planeSegmentation : Passthrough filter on z applied");
 
     pcl::SACSegmentation<pcl::PointXYZ> seg;
@@ -67,6 +72,9 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
     ROS_INFO("ArrayTableDetector::planeSegmentation : Segmented the plane");
 
     getLargestCluster(output_cloud, output_cloud);
+
+    if (output_cloud->empty())
+        return false;
 
     ROS_INFO("ArrayTableDetector::planeSegmentation : Got the largest cluster");
 

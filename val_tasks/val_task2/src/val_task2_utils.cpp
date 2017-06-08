@@ -28,6 +28,7 @@ task2Utils::task2Utils(ros::NodeHandle nh):
 
     task_status_sub_        = nh_.subscribe("/srcsim/finals/task", 10, &task2Utils::taskStatusCB, this);
     mapUpdaterSub_          = nh_.subscribe("/map", 10, &task2Utils::mapUpdateCB, this);
+    detach_harness          = nh_.subscribe("/srcsim/finals/harness",10, &task2Utils::isDetachedCB, this);
 
     // rotate panel trajectory for left hand
     reOrientPanelTrajLeft_.resize(2);
@@ -47,6 +48,7 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     reOrientPanelTrajRight_[1].time = 2;
     reOrientPanelTrajRight_[1].side = armSide::RIGHT;
 
+    isHarnessDetached= false;
 
     timeNow = boost::posix_time::second_clock::local_time();
 
@@ -61,6 +63,14 @@ task2Utils::~task2Utils()
     delete gripper_controller_  ;
     delete arm_controller_      ;
     delete walk_                ;
+}
+void task2Utils::isDetachedCB(const srcsim::Harness &harnessMsg)
+{
+    if(harnessMsg.status == 4)
+    {
+        isHarnessDetached = true;
+        ros::Duration(0.3).sleep();
+    }
 }
 
 bool task2Utils::afterPanelGraspPose(const armSide side)
@@ -449,15 +459,17 @@ bool task2Utils::checkpoint_init()
     clearPointCloud();
     ros::Duration(0.3).sleep();
     clearMap();
-    ros::Duration(1);
-    walk_->walkLocalPreComputedSteps({-0.2,-0.2},{0.0,0.0},RIGHT);
+    isHarnessDetached = false;
+    while(!isHarnessDetached);
+    ROS_INFO("[SKIP] Harness Detached!");
+    walk_->walkLocalPreComputedSteps({-0.2,-0.2,-0.2,-0.2},{0.0,0.0,0.0,0.0},RIGHT);
     ros::Duration(3);
     head_controller_->moveHead(0,40,0);
-    ros::Duration(5);
+    ros::Duration(10);
     head_controller_->moveHead(0,0,40);
-    ros::Duration(3);
+    ros::Duration(5);
     head_controller_->moveHead(0,0,-40);
-    ros::Duration(3);
+    ros::Duration(5);
     head_controller_->moveHead(0,0,0);
     pelvis_controller_->controlPelvisHeight(0.9);
     ros::Duration(1);
