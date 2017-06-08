@@ -2,6 +2,7 @@
 
 #include <ros/ros.h>
 #include <srcsim/Task.h>
+#include <srcsim/Harness.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Pose.h>
 #include <visualization_msgs/Marker.h>
@@ -48,10 +49,12 @@ private:
     RobotStateInformer *current_state_;
     ros::Publisher reset_pointcloud_pub, reset_map_pub, pause_pointcloud_pub , clearbox_pointcloud_pub , task2_log_pub_;
 
-    ros::Subscriber task_status_sub_;
+    ros::Subscriber task_status_sub_,detach_harness;
 
     CableDetector* cable_detector_;
     srcsim::Task taskMsg;
+    srcsim::Harness harnessMsg;
+
     int current_checkpoint_;
     float table_height_;
 
@@ -106,12 +109,14 @@ private:
     std::vector<armTrajectory::armJointData> reOrientPanelTrajRight_;
 
     void taskStatusCB(const srcsim::Task &msg);
+    void isDetachedCB(const srcsim::Harness &harnessMsg);
 
     std::string logFile;
     std::mutex mtx;
     nav_msgs::OccupancyGrid map_;
     void mapUpdateCB(const nav_msgs::OccupancyGrid &msg);
     ros::Subscriber mapUpdaterSub_;
+    bool isHarnessDetached;
 
 public:
     task2Utils(ros::NodeHandle nh);
@@ -131,6 +136,7 @@ public:
     void reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
     bool shakeTest(const armSide graspingHand);
+
     boost::posix_time::ptime timeNow;
     bool isCableOnTable(geometry_msgs::Pose &cable_pose);
     bool isCableInHand(armSide side);

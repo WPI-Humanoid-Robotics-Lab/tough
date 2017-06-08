@@ -1385,6 +1385,13 @@ decision_making::TaskResult valTask2::pickCableTask(string name, const FSMCallCo
      * else - fail
      */
     static int retry = 0;
+    static bool executeOnce= true;
+    if(executeOnce)
+    {
+        pelvis_controller_->controlPelvisHeight(0.85);
+        ros::Duration(0.3).sleep();
+        executeOnce=false;
+    }
 
     if(cable_task_ == nullptr)
     {
@@ -1409,6 +1416,9 @@ decision_making::TaskResult valTask2::pickCableTask(string name, const FSMCallCo
         ROS_INFO("valTask2::pickCableTask : Picked up cable");
         // go to next state
         eventQueue.riseEvent("/CABLE_PICKED");
+        pelvis_controller_->controlPelvisHeight(0.90);
+        ros::Duration(0.3).sleep();
+        executeOnce=true;
 
     }
     else if(retry <15)
@@ -1423,6 +1433,9 @@ decision_making::TaskResult valTask2::pickCableTask(string name, const FSMCallCo
         ROS_INFO("valTask2::pickCableTask : Failed picking the cable.");
         if (cable_detector_ != nullptr) delete cable_detector_;
         cable_detector_ = nullptr;
+        pelvis_controller_->controlPelvisHeight(0.90);
+        ros::Duration(0.3).sleep();
+        executeOnce=true;
         eventQueue.riseEvent("/PICKUP_CABLE_FAILED");
     }
 
@@ -1458,7 +1471,7 @@ TaskResult valTask2::detectSocketTask(string name, const FSMCallContext &context
         head_yaw_ranges.push( 20.0);
         executingOnce = false;
         control_common_->stopAllTrajectories();
-        walker_->walkLocalPreComputedSteps({-0.1,-0.1},{0.0,0.0},RIGHT);
+//        walker_->walkLocalPreComputedSteps({-0.1,-0.1},{0.0,0.0},RIGHT);
         ros::Duration(2).sleep();
     }
 
@@ -1495,7 +1508,7 @@ TaskResult valTask2::detectSocketTask(string name, const FSMCallContext &context
         eventQueue.riseEvent("/DETECTED_SOCKET");
         executingOnce= true;
         head_controller_->moveHead(0,0,0,2.0f);
-        walker_->walkLocalPreComputedSteps({0.1,0.1},{0.0,0.0},RIGHT);
+//        walker_->walkLocalPreComputedSteps({0.1,0.1},{0.0,0.0},RIGHT);
         ros::Duration(2.5).sleep();
         task2_utils_->reOrientTowardsGoal(socket_coordinates_);
     }

@@ -119,19 +119,10 @@ bool CableTask::grasp_choke(armSide side, const geometry_msgs::Pose &goal, float
     {
         if (right_arm_planner_choke->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
             ROS_INFO("CableTask::grasp_choke: Trajectory is not planned 100% - retrying");
-            if(side ==LEFT){
-                armData.clear();
-                armData.push_back(leftShoulderSeedInitial_);
-                armTraj_.moveArmJoints(LEFT, armData, executionTime);
-                ros::Duration(executionTime).sleep();
-            }
-            else
-            {
-                armData.clear();
-                armData.push_back(rightShoulderSeedInitial_);
-                armTraj_.moveArmJoints(RIGHT, armData, executionTime);
-                ros::Duration(executionTime).sleep();
-            }
+            armData.clear();
+            armData.push_back(rightShoulderSeedInitial_);
+            armTraj_.moveArmJoints(RIGHT, armData, executionTime);
+            ros::Duration(executionTime).sleep();
             return false;
         }
     }
@@ -139,19 +130,11 @@ bool CableTask::grasp_choke(armSide side, const geometry_msgs::Pose &goal, float
     {
         if (left_arm_planner_choke->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
             ROS_INFO("CableTask::grasp_choke: Trajectory is not planned 100% - retrying");
-            if(side ==LEFT){
-                armData.clear();
-                armData.push_back(leftShoulderSeedInitial_);
-                armTraj_.moveArmJoints(LEFT, armData, executionTime);
-                ros::Duration(executionTime).sleep();
-            }
-            else
-            {
-                armData.clear();
-                armData.push_back(rightShoulderSeedInitial_);
-                armTraj_.moveArmJoints(RIGHT, armData, executionTime);
-                ros::Duration(executionTime).sleep();
-            }
+            armData.clear();
+            armData.push_back(leftShoulderSeedInitial_);
+            armTraj_.moveArmJoints(LEFT, armData, executionTime);
+            ros::Duration(executionTime).sleep();
+
             return false;
         }
     }
@@ -322,7 +305,17 @@ bool CableTask::insert_cable(const geometry_msgs::Point &goal, float executionTi
     moveit_msgs::RobotTrajectory traj;
 
     // Sending waypoints to the planner
-    right_arm_planner_cable->getTrajFromCartPoints(waypoints,traj,false);
+    std::vector< std::vector<float> > armData;
+    if (right_arm_planner_choke->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
+        ROS_INFO("CableTask::grasp_choke: Trajectory is not planned 100% - retrying");
+        ROS_INFO("grasp_cable: Setting arm position to dock cable");
+        armData.clear();
+        armData.push_back(rightAfterGraspShoulderSeed_);
+        armTraj_.moveArmJoints(RIGHT,armData,executionTime);
+        ros::Duration(0.3).sleep();
+        return false;
+    }
+
     wholebody_controller_->compileMsg(RIGHT,traj.joint_trajectory);
 
     ros::Time startTime= ros::Time::now();
@@ -587,31 +580,31 @@ bool CableTask::rotate_cable(const geometry_msgs::Pose &goal, float executionTim
     wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
     ros::Duration(executionTime*2).sleep();
 
-        std::vector<double> closeGrip={1.2, 0.4, 0.4, 0.4 ,0.4 };
-        taskCommonUtils::slowGrip(nh_,RIGHT,gripper1,closeGrip);
-        ros::Duration(0.3).sleep();
-        gripper_.closeGripper(RIGHT);
-        ros::Duration(2).sleep();
+    std::vector<double> closeGrip={1.2, 0.4, 0.4, 0.4 ,0.4 };
+    taskCommonUtils::slowGrip(nh_,RIGHT,gripper1,closeGrip);
+    ros::Duration(0.3).sleep();
+    gripper_.closeGripper(RIGHT);
+    ros::Duration(2).sleep();
 
     //     Setting arm position to go leave cable and go up
 
-     waypoints.clear();
-     waypoints.push_back(finalGoal);
+    waypoints.clear();
+    waypoints.push_back(finalGoal);
 
 
 
-     if (right_arm_planner_choke->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
-         ROS_INFO("CableTask::grasp_choke: Trajectory is not planned 100% - retrying");
-         return false;
-     }
+    if (right_arm_planner_choke->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
+        ROS_INFO("CableTask::grasp_choke: Trajectory is not planned 100% - retrying");
+        return false;
+    }
 
 
-     ROS_INFO("CableTask::grasp_choke: Calculated Traj");
-     wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
-     ros::Duration(executionTime*2).sleep();
+    ROS_INFO("CableTask::grasp_choke: Calculated Traj");
+    wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
+    ros::Duration(executionTime*2).sleep();
 
 
-//     Setting arm position to go leave cable and go up
+    //     Setting arm position to go leave cable and go up
 
     ROS_INFO("grasp_cable: Setting arm position to go up");
     armData.clear();
