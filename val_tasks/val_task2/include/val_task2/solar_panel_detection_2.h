@@ -30,7 +30,9 @@ class solar_panel_detector_2
     src_perception::MultisensePointCloud point_cloud_listener_;
 
     geometry_msgs::PoseStamped rover_pose_;
-    std::vector<geometry_msgs::PoseStamped> vantage_poses_;
+
+    bool detection_success_;
+    geometry_msgs::PoseStamped latest_detection_;
 
 public:
 
@@ -48,6 +50,8 @@ public:
 
     void cloudCB(const solar_panel_detector_2::PointCloud::ConstPtr &cloud);
 
+    bool getPanelPose(geometry_msgs::PoseStamped &pose) const;
+
     ~solar_panel_detector_2();
 
 private:
@@ -57,6 +61,13 @@ private:
     bool findPointsInsideTrailer(const PointCloud::ConstPtr &points,
                                  const NormalCloud::Ptr &normals, // not ConstPtr because PCL demands a Ptr
                                  pcl::PointIndices &pts_inside_trailer) const;
+
+    bool findSolarPanelPose(const PointCloud::ConstPtr &points,
+                            const NormalCloud::Ptr &normals, // not ConstPtr because of PCL
+                            const pcl::PointIndices::ConstPtr &pts_inside_trailer,
+                            geometry_msgs::PoseStamped &solar_panel_pose) const;
+
+    float findGapAlongAxis(const PointCloud::ConstPtr &points, const int axis) const;
 
     void publishClusters(const PointCloud::ConstPtr &cloud, const std::vector<pcl::PointIndices> &clusters) const;
     void publishNormals(const PointCloud &points, const NormalCloud &normals) const;

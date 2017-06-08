@@ -75,7 +75,8 @@ solar_panel_detector_2::solar_panel_detector_2(ros::NodeHandle nh, const geometr
         nh_(nh),
         rover_pose_(rover_pose),
         tf_listener_(nh),
-        point_cloud_listener_(nh, "/leftFoot", "/left_camera_frame")
+        point_cloud_listener_(nh, "/leftFoot", "/left_camera_frame"),
+        detection_success_(false)
 {
     pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("solar_panel_detection_debug_pose", 1);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("solar_panel_detection_markers", 1);
@@ -111,6 +112,9 @@ void solar_panel_detector_2::cloudCB(const PointCloud::ConstPtr &cloud_raw) {
                                                      << "%)");
     NormalCloud::Ptr filtered_normals = estimateNormals(filtered_cloud);
 
+//    points_pub_.publish(filtered_cloud);
+//    publishNormals(*filtered_cloud, *filtered_normals);
+
     ROS_DEBUG_STREAM("Got normals");
 
     auto points_in_trailer = boost::make_shared<pcl::PointIndices>();
@@ -141,8 +145,18 @@ void solar_panel_detector_2::cloudCB(const PointCloud::ConstPtr &cloud_raw) {
     tf::poseEigenToMsg(absolute_pose_eigen, absolute_pose.pose);
     pose_pub_.publish(absolute_pose);
 
+    detection_success_ = true;
+    latest_detection_ = absolute_pose;
 
 //    ros::shutdown(); // FOR DEBUGGING ONLY
+}
+
+bool solar_panel_detector_2::getPanelPose(geometry_msgs::PoseStamped &pose) const {
+    if (detection_success_) {
+        pose = latest_detection_;
+    }
+
+    return detection_success_;
 }
 
 solar_panel_detector_2::PointCloud::Ptr solar_panel_detector_2::prefilterCloud(const PointCloud::ConstPtr &cloud_raw) const {
@@ -174,6 +188,7 @@ solar_panel_detector_2::PointCloud::Ptr solar_panel_detector_2::prefilterCloud(c
     // approximately axis-aligned
     auto points_in_trailer_aligned = boost::make_shared<PointCloud>();
     pcl::transformPointCloud(*cloud_raw, *points_in_trailer, *points_in_trailer_aligned, rover_pose.inverse());
+//    points_pub_.publish(points_in_trailer_aligned);
 
     // Downsample the cloud -- using OctreePointCloudVoxelCentroid rather than VoxelGrid because VoxelGrid behaves badly
     // with large point clouds
@@ -215,7 +230,9 @@ bool solar_panel_detector_2::findPointsInsideTrailer(const PointCloud::ConstPtr 
     pcl::RegionGrowing<Point, Normal> rgs;
     rgs.setMinClusterSize(200); // probably can be much bigger than 100
     rgs.setNumberOfNeighbours(30);
-    rgs.setCurvatureThreshold(0.05);
+    rgs.setCurvatureThreshold(0.07);
+//    rgs.setSmoothnessThreshold(45.0 * M_PI / 180.0);
+    rgs.setSmoothModeFlag(false);
     rgs.setInputCloud(points);
     rgs.setInputNormals(normals);
 
@@ -341,9 +358,9 @@ bool solar_panel_detector_2::findPointsInsideTrailer(const PointCloud::ConstPtr 
             Eigen::Quaternionf::FromTwoVectors(trailer_axis, Eigen::Vector3f::UnitX())
     );
 
-    geometry_msgs::PoseStamped trailer_axis_pose;
-    pcl_conversions::fromPCL(points->header, trailer_axis_pose.header);
-    tf::poseEigenToMsg(trailer_axis_tf.cast<double>(), trailer_axis_pose.pose);
+//    geometry_msgs::PoseStamped trailer_axis_pose;
+//    pcl_conversions::fromPCL(points->header, trailer_axis_pose.header);
+//    tf::poseEigenToMsg(trailer_axis_tf.cast<double>(), trailer_axis_pose.pose);
 //    pose_pub_.publish(trailer_axis_pose);
 
     // Finally, crop
@@ -353,14 +370,26 @@ bool solar_panel_detector_2::findPointsInsideTrailer(const PointCloud::ConstPtr 
     cropFilter.setMax(trailer_axis_tf * max_pt);
     cropFilter.setTransform(trailer_axis_tf);
 
-    cropFilter.filter(pts_inside_trailer.indices);
+    auto pts_inside_trailer_candidate = boost::make_shared<pcl::PointIndices>();
+    cropFilter.filter(pts_inside_trailer_candidate->indices);
 
-//    PointCloud tmp;
-//    tmp.header = points->header;
-//    tmp.resize(2);
-//    tmp.front().getVector4fMap() = trailer_axis_tf * min_pt;
-//    tmp.back().getVector4fMap() = trailer_axis_tf * max_pt;
-//    points_pub_.publish(tmp);
+    // Smoke test: Make sure there is only 1 significant connected component. This prevents badly-conditioned data from
+    // causing incorrect detection
+    pcl::EuclideanClusterExtraction<Point> ece;
+    ece.setMinClusterSize(10);
+    ece.setClusterTolerance(0.02);
+    ece.setInputCloud(points);
+    ece.setIndices(pts_inside_trailer_candidate);
+
+    std::vector<pcl::PointIndices> ece_clusters;
+    ece.extract(ece_clusters);
+
+    if (ece_clusters.size() != 1) {
+        ROS_DEBUG_STREAM("Skipping detection attempt: expected there to be 1 object in the trailer, but found " << ece_clusters.size());
+        return false;
+    }
+
+    pts_inside_trailer = *pts_inside_trailer_candidate;
 
     return true;
 }
@@ -415,9 +444,28 @@ bool solar_panel_detector_2::findSolarPanelPose(const PointCloud::ConstPtr &poin
             Eigen::Quaternionf::FromTwoVectors(Eigen::Vector3f::UnitX(), Eigen::Map<Eigen::Vector3f>(model.values.data()))
         );
 
+        geometry_msgs::PoseStamped panel_side_pose;
+        tf::poseEigenToMsg(panel_side_tf.cast<double>(), panel_side_pose.pose);
+        pcl_conversions::fromPCL(points->header, panel_side_pose.header);
+//        pose_pub_.publish(panel_side_pose);
+
         auto panel_cloud = boost::make_shared<PointCloud>();
         pcl::transformPointCloud(*points, pts_inside_trailer->indices, *panel_cloud, panel_side_tf.inverse());
         panel_cloud->header = points->header;
+//        points_pub_.publish(panel_cloud);
+
+        // Make sure the majority of the point cloud is in the expected area
+        std::vector<int> panel_pts_in_box;
+        Eigen::Vector4f expected_box_max(0.16f, 0.25f, 0.30f, 1);
+        Eigen::Vector4f expected_box_min = -expected_box_max;
+        expected_box_min[3] = 1;
+        pcl::getPointsInBox(*panel_cloud, expected_box_min, expected_box_max, panel_pts_in_box);
+
+        if (panel_pts_in_box.size() < panel_cloud->size() * 0.9) {
+            ROS_DEBUG_STREAM("Abandoning cluster of size " << cluster.indices.size()
+                                                           << " because it was too far outside the expected box");
+            continue;
+        }
 
         ROS_ERROR_STREAM_COND(panel_cloud->empty(), "Panel cloud was empty!");
         
@@ -454,9 +502,12 @@ bool solar_panel_detector_2::findSolarPanelPose(const PointCloud::ConstPtr &poin
 
         Eigen::Translation3f handle_center(gap_center_x, gap_center_y, gap_center_z);
 
-        Eigen::Affine3f final_pose = handle_center * panel_side_tf;
+        Eigen::Affine3f final_pose = panel_side_tf * handle_center;
         tf::poseEigenToMsg(final_pose.cast<double>(), solar_panel_pose.pose);
         pcl_conversions::fromPCL(points->header, solar_panel_pose.header);
+
+//        pose_pub_.publish(solar_panel_pose);
+//        points_pub_.publish(points);
 
         // If loop hasn't continued yet, pose detection was successful
         return true;
@@ -551,7 +602,7 @@ void solar_panel_detector_2::publishNormals(const PointCloud &points, const Norm
     marker.id = 0;
     marker.type = visualization_msgs::Marker::LINE_LIST;
     marker.pose.orientation.w = 1;
-    marker.scale.x = 0.005;
+    marker.scale.x = 0.002;
     marker.color.r = 0.5;
     marker.color.g = 0.5;
     marker.color.b = 1;
@@ -564,7 +615,7 @@ void solar_panel_detector_2::publishNormals(const PointCloud &points, const Norm
          ++pt_it, ++n_it) {
         if (!pt_it->getVector3fMap().allFinite() || !n_it->getNormalVector3fMap().allFinite()) continue;
 
-        const Eigen::Vector3f endpt = pt_it->getVector3fMap() + n_it->getNormalVector3fMap() * 0.05;
+        const Eigen::Vector3f endpt = pt_it->getVector3fMap() + n_it->getNormalVector3fMap() * 0.02;
 
         geometry_msgs::Point ros_start, ros_end;
         ros_start.x = pt_it->x;
