@@ -46,7 +46,8 @@ private:
     ValkyrieWalker *walk_;
     // robot state
     RobotStateInformer *current_state_;
-    ros::Publisher reset_pointcloud_pub ;
+    ros::Publisher reset_pointcloud_pub;
+    ros::Publisher reset_map_pub;
     ros::Publisher pause_pointcloud_pub ;
     ros::Publisher clearbox_pointcloud_pub ;
 
@@ -125,6 +126,7 @@ public:
     void moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel);
     void rotatePanel(const armSide graspingHand);
     void clearPointCloud();
+    void clearMap();
     void pausePointCloud();
     void resumePointCloud();
     void clearBoxPointCloud(CLEAR_BOX_CLOUD state);
@@ -138,6 +140,7 @@ public:
     bool isCableTouchingSocket();
     geometry_msgs::Pose grasping_hand(armSide &side, geometry_msgs::Pose handle_pose);
     bool isRotationReq(armSide side, geometry_msgs::Point handle_coordinates,geometry_msgs::Point button_coordinates);
+    bool checkpoint_init();
 };
 
 

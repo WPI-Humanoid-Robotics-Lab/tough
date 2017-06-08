@@ -144,6 +144,9 @@ class valTask2 {
 
     src_perception::MultisenseImage* ms_sensor_;
 
+    // skip checkpoint global variables
+    bool skip_3, skip_4, skip_6 ;
+
     public:
 
     // default destructor
@@ -174,7 +177,6 @@ class valTask2 {
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult rotatePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult skipCheckPointTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    decision_making::TaskResult skipToCP1Task(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult skipToCP3Task(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult skipToCP4Task(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult skipToCP6Task(string name, const FSMCallContext& context, EventQueue& eventQueue);
