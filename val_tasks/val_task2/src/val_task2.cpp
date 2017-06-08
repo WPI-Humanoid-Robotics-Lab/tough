@@ -1510,11 +1510,17 @@ decision_making::TaskResult valTask2::plugCableTask(string name, const FSMCallCo
 {
     ROS_INFO_STREAM("executing " << name);
 
-    if (cable_task_ != nullptr) delete cable_task_;
-    cable_task_ = nullptr;
+//    if (cable_task_ != nullptr) delete cable_task_;
+//    cable_task_ = nullptr;
 
     static int retry=0;
     static int fail =0;
+
+    if(cable_task_ == nullptr)
+    {
+        cable_task_ = new CableTask(nh_);
+        ROS_INFO("valTask2::pickCableTask : Initializing object");
+    }
 
     //    Checkpoint 5: Plug the power cable into the solar panel
     if(cable_task_->insert_cable(socket_coordinates_) && task2_utils_->getCurrentCheckpoint() > 5)

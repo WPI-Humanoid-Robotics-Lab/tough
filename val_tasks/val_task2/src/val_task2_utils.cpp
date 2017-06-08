@@ -449,14 +449,18 @@ bool task2Utils::checkpoint_init()
     clearPointCloud();
     ros::Duration(0.3).sleep();
     clearMap();
+    ros::Duration(1);
+    walk_->walkLocalPreComputedSteps({-0.2,-0.2},{0.0,0.0},RIGHT);
     ros::Duration(3);
     head_controller_->moveHead(0,40,0);
-    ros::Duration(3);
+    ros::Duration(5);
     head_controller_->moveHead(0,0,40);
     ros::Duration(3);
     head_controller_->moveHead(0,0,-40);
     ros::Duration(3);
     head_controller_->moveHead(0,0,0);
+    pelvis_controller_->controlPelvisHeight(0.9);
+    ros::Duration(1);
 
 }
 
