@@ -83,6 +83,18 @@ add_executable(walk_test src/walk_test.cpp )
 add_dependencies(walk_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(walk_test  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
+add_executable(walk_steps src/walk_steps.cpp )
+add_dependencies(walk_steps ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(walk_steps  ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(walk_goal src/walk_goal.cpp )
+add_dependencies(walk_goal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(walk_goal  ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(walk_rotate src/walk_rotate.cpp )
+add_dependencies(walk_rotate ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(walk_rotate  ${catkin_LIBRARIES} ${PROJECT_NAME})
+
 # Add cmake target dependencies of the executable
 ## same as for the library above
 

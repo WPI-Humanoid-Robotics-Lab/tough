@@ -68,6 +68,10 @@ add_executable(test_gripper src/test_gripper_control.cpp)
 add_dependencies(test_gripper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_gripper  ${catkin_LIBRARIES} val_controllers)
 
+add_executable(reset_robot src/reset_robot.cpp)
+add_dependencies(reset_robot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(reset_robot  ${catkin_LIBRARIES} val_controllers)
+
 add_dependencies(val_controllers ${catkin_EXPORTED_TARGETS})
 install(TARGETS val_controllers ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})

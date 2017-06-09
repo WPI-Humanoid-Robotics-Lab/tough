@@ -762,11 +762,16 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
     geometry_msgs::Pose current_pelvis_pose;
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
 
+    /// is this required?
+    //task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
+
     if ( taskCommonUtils::isGoalReached(current_pelvis_pose, solar_array_walk_goal_) ) {
         ROS_INFO("valTask2::walkSolarArrayTask : reached solar array");
         task2_utils_->taskLogPub("valTask2::walkSolarArrayTask : reached solar array");
         ros::Duration(1).sleep();
         /// @todo: check if robot rechead the panel (is this done ???)
+        geometry_msgs::Pose2D temp; // added to test
+        pose_prev = temp; // added to test
         eventQueue.riseEvent("/REACHED_ARRAY");
     }
     // check if the pose is changed
@@ -865,7 +870,6 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         ROS_INFO("valTask2::findCableIntermediateTask : [SKIP] Disabled pose change required flag");
         task2_utils_->taskLogPub("valTask2::findCableIntermediateTask : [SKIP] Disabled pose change required flag");
         isPoseChangeReq = false;
-        skip_3 = false;
     }
 
     if(executingOnce)
@@ -883,8 +887,6 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
             ros::Duration(0.5).sleep();
         }
 
-        ROS_INFO("valTask2::findCableIntermediateTask : If controllers die, increase the delay here");
-        task2_utils_->taskLogPub("valTask2::findCableIntermediateTask : If controllers die, increase the delay here");
         head_controller_->moveHead(0,30,0,1.5);
         ros::Duration(2).sleep();
 
@@ -984,6 +986,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
     solar_array_fine_detector_->getDetections(poses);
 
     // if we get atleast two detections
+    ROS_INFO("valTask2::detectSolarArrayFineTask : size of detections %d ",poses.size());
     if (poses.size() > 1) {
         // get the last detected pose
         int idx = poses.size() -1 ;
@@ -1044,6 +1047,15 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
     task2_utils_->taskLogPub("valTask2::alignSolarArrayTask : executing " + name);
     static int fail_count = 0;
 
+    if(skip_3 || skip_4)
+    {
+        ROS_INFO("valTask2::alignSolarArrayTask: Resetting robot");
+        control_common_->resetRobot();
+        ros::Duration(0.2).sleep();
+        task2_utils_->clearCurrentPoseMap();
+        skip_3 = false;
+    }
+
     // walk to the goal location
     // the goal can be updated on the run time
     static geometry_msgs::Pose2D pose_prev;
@@ -1051,8 +1063,9 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
     geometry_msgs::Pose current_pelvis_pose;
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
     task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
+    ros::Duration(1).sleep();
     if ( taskCommonUtils::isGoalReached(current_pelvis_pose, solar_array_fine_walk_goal_) ) {
-        ROS_INFO_STREAM("valTask2::alignSolarArrayTask : pose chaned to x: " << solar_array_fine_walk_goal_);
+        ROS_INFO_STREAM("valTask2::alignSolarArrayTask : pose changed to x: " << solar_array_fine_walk_goal_);
         task2_utils_->taskLogPub("valTask2::alignSolarArrayTask : pose chaned to x: " + std::to_string(solar_array_fine_walk_goal_.x) + "y: " + std::to_string(solar_array_fine_walk_goal_.y) + " theta:" + std::to_string(solar_array_fine_walk_goal_.theta));
         ros::Duration(1).sleep();
         geometry_msgs::Pose2D temp;
@@ -1208,16 +1221,17 @@ decision_making::TaskResult valTask2::detectButtonTask(string name, const FSMCal
         //clear the queue before starting
         std::queue<float> temp;
         head_yaw_ranges= temp;
-        head_yaw_ranges.push(-55.0);
-        head_yaw_ranges.push(-45.0);
-        head_yaw_ranges.push(-35.0);
-        head_yaw_ranges.push(-20.0);
-        head_yaw_ranges.push(-10.0);
-        head_yaw_ranges.push( 10.0);
-        head_yaw_ranges.push( 20.0);
-        head_yaw_ranges.push( 35.0);
-        head_yaw_ranges.push( 45.0);
         head_yaw_ranges.push( 55.0);
+        head_yaw_ranges.push( 45.0);
+        head_yaw_ranges.push( 35.0);
+        head_yaw_ranges.push( 20.0);
+        head_yaw_ranges.push( 10.0);
+        head_yaw_ranges.push(-10.0);
+        head_yaw_ranges.push(-20.0);
+        head_yaw_ranges.push(-35.0);
+        head_yaw_ranges.push(-45.0);
+        head_yaw_ranges.push(-55.0);
+
         executingOnce = false;
         control_common_->stopAllTrajectories();
     }
@@ -1261,7 +1275,7 @@ decision_making::TaskResult valTask2::detectButtonTask(string name, const FSMCal
         ///@todo use goal position rather than hard coded steps. determine after experimenation
         /// the robot is expected to stand atleast 0.15 meters to the right of the button to press it.
 
-        task2_utils_->reOrientTowardsGoal(button_coordinates_,-0.15);
+        task2_utils_->reOrientTowardsGoal(button_coordinates_,-0.25);
         ros::Duration(1).sleep();
     }
 
@@ -1314,12 +1328,12 @@ decision_making::TaskResult valTask2::deployPanelTask(string name, const FSMCall
         retryPoints.resize(4);
         // First Retry Point
         retryPoints[0]=buttonPelvis;
-        retryPoints[0].x+=offset;
+        retryPoints[0].x-=offset;
         robot_state_->transformPoint(retryPoints[0],retryPoints[0],VAL_COMMON_NAMES::PELVIS_TF);
 
         // Second Retry Point
         retryPoints[1]=buttonPelvis;
-        retryPoints[1].x-=offset;
+        retryPoints[1].x+=offset;
         robot_state_->transformPoint(retryPoints[1],retryPoints[1],VAL_COMMON_NAMES::PELVIS_TF);
 
         // Third Retry Point
@@ -1349,6 +1363,8 @@ decision_making::TaskResult valTask2::deployPanelTask(string name, const FSMCall
         ROS_INFO("valTask2::deployPanelTask : Panel deployed successfully");
         task2_utils_->taskLogPub("valTask2::deployPanelTask : Panel deployed successfully");
         eventQueue.riseEvent("/DEPLOYED");
+        task2_utils_->clearPointCloud();
+        ros::Duration(1).sleep();
 
         if (button_press_ != nullptr) delete button_press_;
         button_press_ = nullptr;
@@ -1460,7 +1476,7 @@ decision_making::TaskResult valTask2::detectCableTask(string name, const FSMCall
         std::cout<<"cable x: "<<cable_pose_.position.x<<" cable y: "<<cable_pose_.position.y<<" cable z: "<<cable_pose_.position.z<<"\n";
         eventQueue.riseEvent("/DETECTED_CABLE");
         executingOnce= true;
-        task2_utils_->reOrientTowardsGoal(cable_pose_.position,0.35);
+        task2_utils_->reOrientTowardsGoal(cable_pose_.position,0.4);
         head_controller_->moveHead(0,0,0,2.0f);
     }
 
@@ -1576,7 +1592,7 @@ TaskResult valTask2::detectSocketTask(string name, const FSMCallContext &context
         head_yaw_ranges.push( 20.0);
         executingOnce = false;
         control_common_->stopAllTrajectories();
-//        walker_->walkLocalPreComputedSteps({-0.1,-0.1},{0.0,0.0},RIGHT);
+        //        walker_->walkLocalPreComputedSteps({-0.1,-0.1},{0.0,0.0},RIGHT);
         ros::Duration(2).sleep();
     }
 
@@ -1615,7 +1631,7 @@ TaskResult valTask2::detectSocketTask(string name, const FSMCallContext &context
         eventQueue.riseEvent("/DETECTED_SOCKET");
         executingOnce= true;
         head_controller_->moveHead(0,0,0,2.0f);
-//        walker_->walkLocalPreComputedSteps({0.1,0.1},{0.0,0.0},RIGHT);
+        //        walker_->walkLocalPreComputedSteps({0.1,0.1},{0.0,0.0},RIGHT);
         ros::Duration(2.5).sleep();
         task2_utils_->reOrientTowardsGoal(socket_coordinates_);
     }
@@ -1632,8 +1648,8 @@ decision_making::TaskResult valTask2::plugCableTask(string name, const FSMCallCo
     ROS_INFO_STREAM("executing " << name);
     task2_utils_->taskLogPub("executing " + name);
 
-//    if (cable_task_ != nullptr) delete cable_task_;
-//    cable_task_ = nullptr;
+    //    if (cable_task_ != nullptr) delete cable_task_;
+    //    cable_task_ = nullptr;
 
     static int retry=0;
     static int fail =0;
@@ -1853,6 +1869,10 @@ decision_making::TaskResult valTask2::errorTask(string name, const FSMCallContex
     // generate the event
     //eventQueue.riseEvent("/INIT_SUCESSUFL");
 
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("valTask2::skipCheckPointTask: waiting for transition");
+        task2_utils_->taskLogPub("valTask2:: error state: waiting for transition");
+    }
     return TaskResult::SUCCESS();
 }
 
