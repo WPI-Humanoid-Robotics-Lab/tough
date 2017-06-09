@@ -50,7 +50,7 @@ private:
     PointCloud::Ptr prefilterCloud(const PointCloud::ConstPtr &cloud_raw) const;
     NormalCloud::Ptr estimateNormals(const PointCloud::ConstPtr &filtered_cloud) const;
     bool estimateStairs(const PointCloud::ConstPtr &filtered_cloud,
-                            const NormalCloud::ConstPtr &filtered_normals);
+                            const NormalCloud::Ptr &filtered_normals);
 
     size_t estimateStairPose(const PointCloud::ConstPtr &filtered_cloud,
                              const std::vector<pcl::PointIndices> &step_clusters,
@@ -58,6 +58,8 @@ private:
 
     std::vector<pcl::PointIndices> findStairClusters(const Eigen::Vector3f &avg_normal,
                                                      const PointCloud::ConstPtr &filtered_cloud) const;
+
+    void publishClusters(const PointCloud::ConstPtr &cloud, const std::vector<pcl::PointIndices> &clusters) const;
 
     Eigen::Vector3f modelToVector(const pcl::ModelCoefficients &model) const;
 
