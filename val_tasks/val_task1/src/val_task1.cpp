@@ -842,6 +842,24 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     // if the handle is not moving (assuming grasp is not lost)
     else if (task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_CONSTANT)
     {
+        // reset the robot pose
+        // open the gripper
+        gripper_controller_->openGripper(armSide::RIGHT);
+        ros::Duration(0.2).sleep();
+        // increase the pelvis height
+        pelvis_controller_->controlPelvisHeight(1.0);
+        ros::Duration(0.2).sleep();
+        // reset the chest
+        chest_controller_->controlChest(0,0,0);
+        ros::Duration(0.2).sleep();
+        // get to normal height
+        pelvis_controller_->controlPelvisHeight(0.9);
+        ros::Duration(0.2).sleep();
+
+        // regrasp the handle
+        ///@todo vinayak, fix the regrasp
+        // handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[PITCH_KNOB_HANDLE]);
+
         // replan and execute from the current point,
         // set the execute once state
         execute_once = true;
@@ -1113,6 +1131,25 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     // if the arm is not moving any more
     else if (task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_CONSTANT)
     {
+
+        // reset the robot pose
+        // open the gripper
+        gripper_controller_->openGripper(armSide::LEFT);
+        ros::Duration(0.2).sleep();
+        // increase the pelvis height
+        pelvis_controller_->controlPelvisHeight(1.0);
+        ros::Duration(0.2).sleep();
+        // reset the chest
+        chest_controller_->controlChest(0,0,0);
+        ros::Duration(0.2).sleep();
+        // get to normal height
+        pelvis_controller_->controlPelvisHeight(0.9);
+        ros::Duration(0.2).sleep();
+
+        // regrasp the handle
+        ///@todo vinayak, fix the regrasp
+        // handle_grabber_->grasp_handles(armSide::LEFT , handle_loc_[YAW_KNOB_HANDLE]);
+
         // replan and execute from the current point,
         // set the execute once state
         execute_once = true;
