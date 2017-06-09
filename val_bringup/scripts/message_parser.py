@@ -8,6 +8,7 @@ from std_msgs.msg import String
 from diagnostic_msgs.msg import DiagnosticArray
 
 FIELD_IP = "192.168.2.10"
+#FIELD_IP = "localhost"
 PORT = 8080 
 
 class mysocket:
@@ -60,9 +61,16 @@ def listener():
 
 if __name__ == '__main__':
     listener()
-
+    prev_time = time.time()
+    prev_ros_time = rospy.get_rostime().secs
     while True:
-
+        current_time = time.time()
+        if current_time - prev_time > 5:
+            ros_time = rospy.get_rostime().secs
+            rtf = (ros_time - prev_ros_time)/ (current_time - prev_time)
+            prev_time = time.time()
+            prev_ros_time = rospy.get_rostime().secs
+            sock.mysend("Real Time Factor : "+ str(rtf))
         msg = sock.myreceive()
         start_index = msg.find("]")
         if start_index == -1:

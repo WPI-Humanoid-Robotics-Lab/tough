@@ -651,10 +651,18 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
     //pelvis_controller_->controlPelvisHeight(0.85);
 
     if(!executing){
-//        ROS_INFO("Aligning to fix Pitch");
-//        task1_utils_->taskLogPub("Aligning to fix Pitch");
-//        //align to center of yaw while fixing pitch
-//        task1_utils_->reOrientTowardsGoal(handle_loc_[YAW_KNOB_CENTER]);
+        ROS_INFO("Aligning to fix Pitch");
+        task1_utils_->taskLogPub("Aligning to fix Pitch");
+        //align to center of yaw while fixing pitch
+        geometry_msgs::Point pointToAlign;
+        pointToAlign.x = (handle_loc_[YAW_KNOB_CENTER].x + handle_loc_[PITCH_KNOB_CENTER].x )/2;
+        pointToAlign.x = (handle_loc_[YAW_KNOB_CENTER].x + pointToAlign.x )/2;
+        pointToAlign.y = (handle_loc_[YAW_KNOB_CENTER].y + handle_loc_[PITCH_KNOB_CENTER].y )/2;
+        pointToAlign.y = (handle_loc_[YAW_KNOB_CENTER].y + pointToAlign.y )/2;
+        pointToAlign.z = (handle_loc_[YAW_KNOB_CENTER].z + handle_loc_[PITCH_KNOB_CENTER].z )/2;
+        pointToAlign.z = (handle_loc_[YAW_KNOB_CENTER].z + pointToAlign.z )/2;
+
+        task1_utils_->reOrientTowardsGoal(pointToAlign);
 
         ROS_INFO("Executing the grasp handle command");
         task1_utils_->taskLogPub("Executing the grasp handle command");
@@ -916,10 +924,18 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
     static int retry_count = 0;
 
     if(!executing){
-//        ROS_INFO("Aligning to fix yaw");
-//        task1_utils_->taskLogPub("Aligning to fix yaw");
-//        //align to center of pitch while fixing yaw
-//        task1_utils_->reOrientTowardsGoal(handle_loc_[PITCH_KNOB_CENTER]);
+        ROS_INFO("Aligning to fix yaw");
+        task1_utils_->taskLogPub("Aligning to fix yaw");
+        //align to center of pitch while fixing yaw
+        geometry_msgs::Point pointToAlign;
+        pointToAlign.x = (handle_loc_[YAW_KNOB_CENTER].x + handle_loc_[PITCH_KNOB_CENTER].x )/2;
+        pointToAlign.x = (handle_loc_[PITCH_KNOB_CENTER].x + pointToAlign.x )/2;
+        pointToAlign.y = (handle_loc_[YAW_KNOB_CENTER].y + handle_loc_[PITCH_KNOB_CENTER].y )/2;
+        pointToAlign.y = (handle_loc_[PITCH_KNOB_CENTER].y + pointToAlign.y )/2;
+        pointToAlign.z = (handle_loc_[YAW_KNOB_CENTER].z + handle_loc_[PITCH_KNOB_CENTER].z )/2;
+        pointToAlign.z = (handle_loc_[PITCH_KNOB_CENTER].z + pointToAlign.z )/2;
+
+        task1_utils_->reOrientTowardsGoal(pointToAlign);
 
         ROS_INFO("Executing the grasp handle command");
         task1_utils_->taskLogPub("Executing the grasp handle command");
