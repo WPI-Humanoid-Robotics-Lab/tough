@@ -47,7 +47,7 @@ private:
     ValkyrieWalker *walk_;
     // robot state
     RobotStateInformer *current_state_;
-    ros::Publisher reset_pointcloud_pub, reset_map_pub, pause_pointcloud_pub , clearbox_pointcloud_pub , task2_log_pub_;
+    ros::Publisher reset_pointcloud_pub, reset_map_pub, pause_pointcloud_pub , clearbox_pointcloud_pub , task2_log_pub_,clear_pose_map;
 
     ros::Subscriber task_status_sub_,detach_harness;
 
@@ -131,6 +131,7 @@ public:
     void clearMap();
     void pausePointCloud();
     void resumePointCloud();
+    void clearCurrentPoseMap();
     void clearBoxPointCloud(CLEAR_BOX_CLOUD state);
     void reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset=0.0);
     void reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose);

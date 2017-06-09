@@ -71,6 +71,9 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
 
     ROS_INFO("ArrayTableDetector::planeSegmentation : Segmented the plane");
 
+    if (output_cloud->empty())
+        return false;
+
     getLargestCluster(output_cloud, output_cloud);
 
     if (output_cloud->empty())
