@@ -1013,7 +1013,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 
 
     static bool execute_once = true;
-    static int retry_count = 0;
+    static int retry_count, recorrected_pitch_count = 0;
     static handleDirection rot_dir = handleDirection::ANTICLOCK_WISE;
 
     //timer
@@ -1101,7 +1101,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         //check if its complete
         if (task1_utils_->isYawCompleted())
         {
-            // check if pitch is still correct if not, go to redetct with prev state as pitchcontrol
+            // check if pitch is still correct
             if(task1_utils_->isPitchCompleted()){
                 // sucessuflly done
                 eventQueue.riseEvent("/YAW_CORRECTION_SUCESSFUL");
@@ -1118,11 +1118,31 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
                 ROS_INFO("yaw completed now");
                 task1_utils_->taskLogPub("yaw completed now");
             }
-            else {
+            // if pitch is re corrected for many times
+            else if (recorrected_pitch_count > 5)
+            {
+                //reset robot to default state
+                resetRobotToDefaults();
+
+                // reset the count
+                recorrected_pitch_count = 0;
+
+                //error state
+                eventQueue.riseEvent("/YAW_CORRECTION_FAILED");
+
+                task1_utils_->taskLogPub("yaw correction failed, max time recorrected pitch");
+
+            }
+            // if pitch is not moved, go to redetct with prev state as pitchcontrol
+            else
+            {
+                // increment the count
+                recorrected_pitch_count++;
                 task1_utils_->taskLogPub("Fixed yaw, but pitch is wrong");
                 // move to redetct that would take us back to fixing pitch
                 prev_grasp_state_ = prevGraspState::GRASP_PITCH_HANDLE;
 
+                // redetect the handles (retry)
                 eventQueue.riseEvent("/YAW_CORRECTION_RETRY");
 
                 //set the execute once flag back
@@ -1218,6 +1238,9 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 
         //error state
         eventQueue.riseEvent("/YAW_CORRECTION_FAILED");
+
+        task1_utils_->taskLogPub("yaw correction failed, max retry counts");
+
     }
     // fall through case
     else
@@ -1400,6 +1423,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
             ROS_INFO("finish box detected");
             task1_utils_->taskLogPub("finish box detected");
             eventQueue.riseEvent("/DETECT_FINISH_SUCESSFUL");
+            retry_count=0;
 
             if(finish_box_detector_ != nullptr) delete finish_box_detector_;
             finish_box_detector_ = nullptr;
@@ -1419,6 +1443,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
         eventQueue.riseEvent("/DETECT_FINISH_FAILED");
         if(finish_box_detector_ != nullptr) delete finish_box_detector_;
         finish_box_detector_ = nullptr;
+        retry_count=0;
         //sleep is required to avoid moving to next state before subscriber is shutdown
         ros::Duration(2).sleep();
     }

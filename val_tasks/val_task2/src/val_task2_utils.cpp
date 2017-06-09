@@ -463,10 +463,11 @@ bool task2Utils::isRotationReq(armSide side, geometry_msgs::Point handle_coordin
 
 bool task2Utils::checkpoint_init()
 {
-    ROS_INFO("[SKIP] Resetting point cloud and map for skipped checkpoint");
-    clearMap();
+    ROS_INFO("[SKIP] Resetting point cloud and map for skipped checkpoint");    
     ros::Duration(3).sleep(); // 3 seconds sleep to get the most recent-new point cloud
     clearPointCloud();
+    ros::Duration(1).sleep();
+    clearMap();
     ros::Duration(1).sleep();
     isHarnessDetached = false;
     while(!isHarnessDetached)
