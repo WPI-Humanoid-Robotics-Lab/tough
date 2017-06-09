@@ -299,6 +299,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
 
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
+        task2_utils_->taskLogPub("waiting for transition from "+ name);
     }
 
     return TaskResult::SUCCESS();
@@ -307,7 +308,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
 decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM_ONCE("executing " << name);
-    task2_utils_->taskLogPub("executing " + name);
+
     // walk to the goal location
     // the goal can be updated on the run time
     static bool executeOnce = true;
@@ -317,6 +318,7 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
     static std::queue<geometry_msgs::Pose2D> goal_waypoints;
     // Run this block once during every visit of the state from either a failed state or previous state
     if(executeOnce){
+        task2_utils_->taskLogPub("executing " + name);
         std::queue<geometry_msgs::Pose2D>  temp1;
         goal_waypoints = temp1;
         for (auto pose : rover_walk_goal_waypoints_){
@@ -341,10 +343,8 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
         // if coarse goal was already reached before, then the current state is fine goal reached, else it is coarse goal reached
         if(goal_waypoints.empty()){
             ROS_INFO("reached The rover");
-            task2_utils_->taskLogPub("reached The rover");
+            task2_utils_->taskLogPub("reached the rover");
             ros::Duration(3).sleep(); // This is required for steps to complete
-            ROS_INFO("Final few steps before we reach rover");
-            task2_utils_->taskLogPub("Final few steps before we reach rover");
             eventQueue.riseEvent("/REACHED_ROVER");
             executeOnce = true;
             ros::Duration(1).sleep();
@@ -752,7 +752,7 @@ decision_making::TaskResult valTask2::detectSolarArrayTask(string name, const FS
 decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM_ONCE("valTask2::walkSolarArrayTask : executing " << name);
-    task2_utils_->taskLogPub("valTask2::walkSolarArrayTask : executing " + name);
+
     static int fail_count = 0;
 
     // walk to the goal location
@@ -1044,7 +1044,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
 decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM_ONCE("valTask2::alignSolarArrayTask : executing " << name);
-    task2_utils_->taskLogPub("valTask2::alignSolarArrayTask : executing " + name);
+    
     static int fail_count = 0;
 
     if(skip_3 || skip_4)
@@ -1760,11 +1760,12 @@ decision_making::TaskResult valTask2::detectFinishBoxTask(string name, const FSM
 decision_making::TaskResult valTask2::walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue) {
 
     ROS_INFO_STREAM("valTask2::walkToFinishTask : executing " << name);
-    task2_utils_->taskLogPub("valTask2::walkToFinishTask : executing " + name);
+
 
     static bool execute_once = true;
 
     if (execute_once){
+        task2_utils_->taskLogPub("valTask2::walkToFinishTask : executing " + name);
         // set the robot to default state to walk
         gripper_controller_->openGripper(armSide::RIGHT);
         ros::Duration(0.2).sleep();
