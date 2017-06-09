@@ -1372,6 +1372,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
             ROS_INFO("finish box detected");
             task1_utils_->taskLogPub("finish box detected");
             eventQueue.riseEvent("/DETECT_FINISH_SUCESSFUL");
+            retry_count=0;
 
             if(finish_box_detector_ != nullptr) delete finish_box_detector_;
             finish_box_detector_ = nullptr;
@@ -1391,6 +1392,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
         eventQueue.riseEvent("/DETECT_FINISH_FAILED");
         if(finish_box_detector_ != nullptr) delete finish_box_detector_;
         finish_box_detector_ = nullptr;
+        retry_count=0;
         //sleep is required to avoid moving to next state before subscriber is shutdown
         ros::Duration(2).sleep();
     }

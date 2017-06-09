@@ -1726,6 +1726,7 @@ decision_making::TaskResult valTask2::detectFinishBoxTask(string name, const FSM
             ROS_INFO("detectFinishBoxTask: Successful");
             task2_utils_->taskLogPub("detectFinishBoxTask: Successful");
             eventQueue.riseEvent("/DETECT_FINISH_SUCESSFUL");
+            retry_count=0;
             if(finish_box_detector_ != nullptr) delete finish_box_detector_;
             finish_box_detector_ = nullptr;
             //sleep is required to avoid moving to next state before subscriber is shutdown
@@ -1734,8 +1735,9 @@ decision_making::TaskResult valTask2::detectFinishBoxTask(string name, const FSM
         }
         // this is to avoid detecting points that will always be in collision
         retry_count++;
+        eventQueue.riseEvent("/DETECT_FINISH_RETRY");
     }
-    else if(retry_count++ < 5){
+    else if(retry_count++ < 15){
         ros::Duration(3).sleep();   // map is updated every 4 sec
         eventQueue.riseEvent("/DETECT_FINISH_RETRY");
     }
@@ -1743,6 +1745,7 @@ decision_making::TaskResult valTask2::detectFinishBoxTask(string name, const FSM
         eventQueue.riseEvent("/DETECT_FINISH_FAILED");
         if(finish_box_detector_ != nullptr) delete finish_box_detector_;
         finish_box_detector_ = nullptr;
+        retry_count=0;
         //sleep is required to avoid moving to next state before subscriber is shutdown
         //        ros::Duration(2).sleep();
     }
@@ -2002,6 +2005,17 @@ decision_making::TaskResult valTask2::skipToCP6Task(string name, const FSMCallCo
         ///@TODO: do anything which is required for further states
         task2_utils_->checkpoint_init();
         skip_6=true;
+        ros::Duration(1).sleep();
+        task2_utils_->clearCurrentPoseMap();
+        ros::Duration(1).sleep();
+        walker_->walk_rotate(1.57);
+        ros::Duration(2).sleep();
+        walker_->walk_rotate(1.57);
+        ros::Duration(2).sleep();
+        walker_->walk_rotate(1.57);
+        ros::Duration(2).sleep();
+        walker_->walk_rotate(1.57);
+        ros::Duration(2).sleep();
         eventQueue.riseEvent("/SKIPPED_TO_CP_6");
     }
     else if(retry_count < 5)
