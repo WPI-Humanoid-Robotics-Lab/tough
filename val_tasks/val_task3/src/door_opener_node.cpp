@@ -18,7 +18,6 @@ int main(int argc, char** argv){
     ROS_INFO("Starting door open task");
 
     doorOpen.openDoor(valveCenter);
-
     ros::spin();
 
     return 0;

@@ -39,15 +39,6 @@ void doorOpener::openDoor(geometry_msgs::Pose valveCenter){
 
     walker_.walkToGoal(preDoorOpenGoal);
 
-
-//    std::vector<float> y_offset={0.2,0.2,0.30,0.30};
-//    std::vector<float> x_offset={0.0,0.0,0.0,0.0};
-//   walker_.walkLocalPreComputedSteps(x_offset,y_offset,LEFT);
-
-//    ros::Duration(2.0).sleep();
-
-
-
     ROS_INFO("Sleeping for 0.5 seconds");
     ros::Duration(0.5).sleep();
 
@@ -57,8 +48,6 @@ void doorOpener::openDoor(geometry_msgs::Pose valveCenter){
     y_offset = {0.0,0.0,-0.1,-0.1};
     walker_.walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
     ros::Duration(1.0).sleep();
-
-
 
     ROS_INFO("Walking last step");
     x_offset = {0.3,0.3,0.5,0.5};
