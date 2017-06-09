@@ -842,6 +842,14 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     // if the handle is not moving (assuming grasp is not lost)
     else if (task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_CONSTANT)
     {
+        // get the handle position
+        geometry_msgs::Pose handPose;
+        robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF, handPose, VAL_COMMON_NAMES::PELVIS_TF);
+        geometry_msgs::Point handlePosition = handPose.position;
+        handlePosition.x += 0.05;
+        robot_state_->transformPoint(handlePosition, handlePosition, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+        handle_loc_[PITCH_KNOB_HANDLE] = handlePosition;
+
         // reset the robot pose
         // open the gripper
         gripper_controller_->openGripper(armSide::RIGHT);
@@ -858,7 +866,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
         // regrasp the handle
         ///@todo vinayak, fix the regrasp
-        // handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[PITCH_KNOB_HANDLE]);
+       handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[PITCH_KNOB_HANDLE]);
 
         // replan and execute from the current point,
         // set the execute once state
@@ -1093,20 +1101,33 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         //check if its complete
         if (task1_utils_->isYawCompleted())
         {
-            // sucessuflly done
-            eventQueue.riseEvent("/YAW_CORRECTION_SUCESSFUL");
+            // check if pitch is still correct if not, go to redetct with prev state as pitchcontrol
+            if(task1_utils_->isPitchCompleted()){
+                // sucessuflly done
+                eventQueue.riseEvent("/YAW_CORRECTION_SUCESSFUL");
 
-            // set the execute flag
-            execute_once = true;
+                // set the execute flag
+                execute_once = true;
 
-            //reset robot to defaults
-            resetRobotToDefaults();
+                //reset robot to defaults
+                resetRobotToDefaults();
 
-            // reset the count
-            retry_count = 0;
+                // reset the count
+                retry_count = 0;
 
-            ROS_INFO("yaw completed now");
-            task1_utils_->taskLogPub("yaw completed now");
+                ROS_INFO("yaw completed now");
+                task1_utils_->taskLogPub("yaw completed now");
+            }
+            else {
+                task1_utils_->taskLogPub("Fixed yaw, but pitch is wrong");
+                // move to redetct that would take us back to fixing pitch
+                prev_grasp_state_ = prevGraspState::GRASP_PITCH_HANDLE;
+
+                eventQueue.riseEvent("/YAW_CORRECTION_RETRY");
+
+                //set the execute once flag back
+                execute_once = true;
+            }
         }
         else
         {
@@ -1132,6 +1153,13 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     else if (task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_CONSTANT)
     {
 
+        // get the handle position
+        geometry_msgs::Pose handPose;
+        robot_state_->getCurrentPose(VAL_COMMON_NAMES::L_PALM_TF, handPose, VAL_COMMON_NAMES::PELVIS_TF);
+        geometry_msgs::Point handlePosition = handPose.position;
+        handlePosition.x += 0.05;
+        robot_state_->transformPoint(handlePosition, handlePosition, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+        handle_loc_[YAW_KNOB_HANDLE] = handlePosition;
         // reset the robot pose
         // open the gripper
         gripper_controller_->openGripper(armSide::LEFT);
@@ -1148,7 +1176,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 
         // regrasp the handle
         ///@todo vinayak, fix the regrasp
-        // handle_grabber_->grasp_handles(armSide::LEFT , handle_loc_[YAW_KNOB_HANDLE]);
+        handle_grabber_->grasp_handles(armSide::LEFT , handle_loc_[YAW_KNOB_HANDLE]);
 
         // replan and execute from the current point,
         // set the execute once state
