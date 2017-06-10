@@ -15,7 +15,7 @@ HandleDetector::HandleDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), o
     ms_sensor_.giveImage(img);
     ms_sensor_.giveDisparityImage(img);
 
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_handles",1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array",1);
 }
 
 void HandleDetector::showImage(cv::Mat image, std::string caption)

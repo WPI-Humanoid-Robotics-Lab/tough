@@ -32,7 +32,7 @@ stair_detector_2::stair_detector_2(ros::NodeHandle nh) :
         tf_listener_(nh),
         point_cloud_listener_(nh, "/leftFoot", "/left_camera_frame")
 {
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_stair", 1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array", 1);
     blacklist_pub_ = nh_.advertise<stair_detector_2::PointCloud>("/block_map", 1);
     points_pub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZL>>("stair_detection_debug_points", 1);
     pcl_sub_ = nh.subscribe(PERCEPTION_COMMON_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC, 10, &stair_detector_2::cloudCB, this);
@@ -155,7 +155,7 @@ std::size_t stair_detector_2::estimateStairPose(const PointCloud::ConstPtr &filt
 
     // Rotation of PCA
     Eigen::Matrix3f rot_mat = pca.getEigenVectors();
-    
+
     // Reorder principal components into a valid rotation matrix
     stairs_pose.linear().col(0) = (rot_mat.col(0).cross(rot_mat.col(1))).normalized();
     stairs_pose.linear().col(2) = rot_mat.col(1);
@@ -369,8 +369,8 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
     // Now that we finally have a reliable stair pose (assumed to be the very center of the bottommost step), base the
     // pose of the individual steps off it
     std::vector<geometry_msgs::Pose> step_poses;
-    
-    // Add the first pose as the point on the ground right in front of the staircase. Note that because the robot is 
+
+    // Add the first pose as the point on the ground right in front of the staircase. Note that because the robot is
     // standing on the walkway, not the ground, this pose doesn't follow the pattern used in the for loop
     Eigen::Translation3f base_pose_ground(-0.5f * STEP_DEPTH, 0, 0);
     Eigen::Affine3f step_pose_ground = best_stair_pose * base_pose_ground;

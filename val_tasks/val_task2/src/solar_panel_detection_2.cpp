@@ -28,7 +28,7 @@ solar_panel_detector_2::solar_panel_detector_2(ros::NodeHandle nh, const geometr
         point_cloud_listener_(nh, "/leftFoot", "/left_camera_frame")
 {
     pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("solar_panel_detection_debug_pose", 1);
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_stair", 1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array", 1);
     blacklist_pub_ = nh_.advertise<PointCloud>("/block_map", 1);
     // Seems like the specific point type doesn't matter. I can publish PointXYZRGB to this topic and it works.
     points_pub_ = nh_.advertise<PointCloud>("solar_panel_detection_debug_points", 1);

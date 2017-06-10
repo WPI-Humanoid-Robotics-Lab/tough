@@ -19,7 +19,7 @@ SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rov
 {
     pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &SolarPanelDetect::cloudCB, this);;
     pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_panel/cloud2", 1);
-    vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_solar_panel/visualization_marker", 1 );
+    vis_pub = nh.advertise<visualization_msgs::Marker>( "/visualization_marker", 1 );
     rover_loc_  =rover_loc;
     isroverRight_ = isroverRight;
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
