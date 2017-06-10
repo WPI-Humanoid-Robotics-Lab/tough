@@ -11,8 +11,8 @@ int main(int argc, char **argv)
 
     ROS_INFO("Starting valve grabber");
 
-    //ros::Rate loop(0.3);
-    //size_t retry_count = 0;
+    ros::Rate loop(0.3);
+    size_t retry_count = 0;
 
     rotateValve rotate(nh);
     gripperControl gc(nh);
@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 
     geometry_msgs::Point valveCentre;
     std::vector<geometry_msgs::Pose> points;
-    //std::vector<geometry_msgs::Pose> valveCentres;
+    std::vector<geometry_msgs::Pose> valveCentres;
     //geometry_msgs::Point pt;
 
 
@@ -29,52 +29,37 @@ int main(int argc, char **argv)
     ihmc_msgs::StopAllTrajectoryRosMessage stopMsg;
     stopMsg.unique_id=45;
 
-    //DoorValvedetector detectionObj(nh);
-
-        //valve centre value
-        if(argc == 4){
-
-            gc.openGripper(LEFT);
-
-            valveCentre.x = std::atof(argv[1]);
-            valveCentre.y = std::atof(argv[2]);
-            valveCentre.z = std::atof(argv[3]);
-           }
-
-        else {
-
-            ROS_INFO("Please enter correct arguments");
-        }
+    DoorValvedetector detectionObj(nh);
 
 
     // Do door detection stuff
 
-//    bool success = false;
-//    while (retry_count++ < 5 ){
-//        success = detectionObj.getDetections(valveCentres);
-//        if (success){
-//            break;
-//        }
-//        ros::spinOnce();
-//        loop.sleep();
-//    }
+    bool success = false;
+    while (retry_count++ < 5 ){
+        success = detectionObj.getDetections(valveCentres);
+        if (success){
+            break;
+        }
+        ros::spinOnce();
+        loop.sleep();
+    }
 
 
-//    if(success){
+    if(success){
 
-//        ROS_INFO_STREAM("Valve centre detected at x: " << valveCentres[0].position.x
-//                << " y : " << valveCentres[0].position.y << " z : " << valveCentres[0].position.z);
-//    }
+        ROS_INFO_STREAM("Valve centre detected at x: " << valveCentres[0].position.x
+                << " y : " << valveCentres[0].position.y << " z : " << valveCentres[0].position.z);
+    }
 
-//    else {
+    else {
 
-//        ROS_INFO("Unable to detect the valve");
-//    }
+        ROS_INFO("Unable to detect the valve");
+    }
 
 
 
     //Positioning the robot to rotate the valve
-    //valveCentre = valveCentres[0].position;
+    valveCentre = valveCentres[0].position;
     rotate.reOrientbeforgrab(valveCentre);
 
 
@@ -91,13 +76,13 @@ int main(int argc, char **argv)
     ros::Duration(3.0).sleep();
 
     //Opening the door
-    geometry_msgs::Pose valveCentrePose;
-    valveCentrePose.position = valveCentre;
-    doorOpen.openDoor(valveCentrePose);
+    //valveCentrePose.position = valveCentre;
+    doorOpen.openDoor(valveCentres[0]);
 
     ros::spin();
     return 0;
 }
+
 
 
 
