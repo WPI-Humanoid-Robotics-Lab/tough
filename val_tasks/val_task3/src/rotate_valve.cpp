@@ -241,6 +241,7 @@ void rotateValve::reOrientbeforgrab(geometry_msgs::Point valveCenter)
 
 
     walk_.walkToGoal(preDoorOpenGoal);
+    ros::Duration(1.0).sleep();
 }
 
 rotateValve::~rotateValve(){
