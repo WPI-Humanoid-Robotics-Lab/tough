@@ -8,12 +8,12 @@ enum armSide
 };
 
 enum class direction{
-    LEFT = 0,  //Positive Y
-    RIGHT,     //Negative Y
-    UP,        //Positive Z
-    DOWN,      //Negative Z
-    FRONT,     //Positive X
-    BACK       //Negative X
+    LEFT = 0,  //Positive Y 0
+    RIGHT,     //Negative Y 1
+    UP,        //Positive Z 2
+    DOWN,      //Negative Z 3
+    FRONT,     //Positive X 4
+    BACK       //Negative X 5
 };
 
 enum class EE_LOADING{
