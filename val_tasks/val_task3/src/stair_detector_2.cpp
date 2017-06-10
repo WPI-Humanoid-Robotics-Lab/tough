@@ -82,6 +82,7 @@ float stair_detector_2::estimateStairPose(const PointCloud::ConstPtr &filtered_c
 
     std::vector<pcl::PointIndices> stair_clusters;
     auto step_shape = boost::make_shared<PointCloud>();
+
     step_shape->header = filtered_cloud->header;
 
     for (const auto &cluster : step_clusters) {
@@ -237,7 +238,7 @@ float stair_detector_2::estimateStairPose(const PointCloud::ConstPtr &filtered_c
 
 stair_detector_2::PointCloud::Ptr stair_detector_2::prefilterCloud(const PointCloud::ConstPtr &cloud_raw) const {
     // Crop the cloud to the height of the staircase
-    pcl::IndicesPtr points_in_room = boost::make_shared<vector<int>>();
+    pcl::IndicesPtr points_in_room = boost::make_shared<std::vector<int>>();
     pcl::CropBox<Point> cropFilter;
     cropFilter.setInputCloud(cloud_raw);
     cropFilter.setMin({0, -8.f, 0.02f, 1});
@@ -320,7 +321,6 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
         // Segment the largest planar component from the remaining cloud
         nsac.setIndices(region_ptr);
         nsac.segment(inliers, coefficients);
-
         Eigen::Vector3f coef = modelToVector(coefficients);
 
         if (std::abs(coef.z()) < 0.1 && inliers.indices.size() > 250) {
@@ -512,7 +512,7 @@ std::vector<pcl::PointIndices> stair_detector_2::findStairClusters(const Eigen::
             continue;
         }
 
-        vector<int> tmp_indices;
+        std::vector<int> tmp_indices;
         std::set_difference(remaining_indices->begin(), remaining_indices->end(),
                             inliers.indices.begin(), inliers.indices.end(),
                             back_inserter(tmp_indices));

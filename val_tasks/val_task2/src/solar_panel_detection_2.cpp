@@ -82,7 +82,7 @@ solar_panel_detector_2::PointCloud::Ptr solar_panel_detector_2::prefilterCloud(c
     tf::poseMsgToEigen(rover_pose_cloud_frame.pose, rover_pose);
 
     // Crop the cloud to the trailer
-    pcl::IndicesPtr points_in_trailer = boost::make_shared<vector<int>>();
+    pcl::IndicesPtr points_in_trailer = boost::make_shared<std::vector<int>>();
     pcl::CropBox<Point> cropFilter;
     cropFilter.setInputCloud(cloud_raw);
     cropFilter.setMin(TRAILER_BOUNDS_MIN);
