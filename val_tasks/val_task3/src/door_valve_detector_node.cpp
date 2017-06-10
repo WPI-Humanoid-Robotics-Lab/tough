@@ -6,7 +6,7 @@ int main(int argc, char** argv){
     ros::init(argc, argv, "door_valve_detector");
     ros::NodeHandle nh;
 
-    std::vector<geometry_msgs::Point> valveCentres;
+    std::vector<geometry_msgs::Pose> valveCentres;
     DoorValvedetector detectionObj(nh);
     size_t retry_count = 1;
 
@@ -23,8 +23,8 @@ int main(int argc, char** argv){
     if(detectionObj.getDetections(valveCentres)){
 
 
-        ROS_INFO_STREAM("Valve centre detected at x: " << valveCentres[0].x
-                        << " y : " << valveCentres[0].y << " z : " << valveCentres[0].z);
+        ROS_INFO_STREAM("Valve centre detected at x: " << valveCentres[0].position.x
+                        << " y : " << valveCentres[0].position.y << " z : " << valveCentres[0].position.z);
     }
 
     else {

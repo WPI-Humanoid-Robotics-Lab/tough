@@ -385,47 +385,47 @@ double y_h_z;
 
 
 
-//#line 14 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 14 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double x_pw;
-//#line 15 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 15 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double y_pw;
-//#line 16 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 16 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double theta_pw;
-//#line 20 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 20 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double x_pf;
-//#line 21 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 21 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double y_pf;
-//#line 22 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 22 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double theta_pf;
-//#line 26 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 26 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double x_fb;
-//#line 27 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 27 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double y_fb;
-//#line 28 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 28 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double theta_fb;
-//#line 32 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 32 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double p_c_x;
-//#line 33 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 33 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double p_c_y;
-//#line 34 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 34 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double p_c_z;
-//#line 36 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 36 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double p_h_x;
-//#line 37 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 37 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double p_h_y;
-//#line 38 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 38 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double p_h_z;
-//#line 40 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 40 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double y_c_x;
-//#line 41 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 41 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double y_c_y;
-//#line 42 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 42 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double y_c_z;
-//#line 44 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 44 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double y_h_x;
-//#line 45 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 45 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double y_h_y;
-//#line 46 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 46 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       double y_h_z;
 //#line 218 "/opt/ros/indigo/share/dynamic_reconfigure/templates/ConfigType.h.template"
 
@@ -566,35 +566,35 @@ double y_h_z;
     {
 task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT, task1_parametersConfig> Default("Default", "", 0, 0, true, &task1_parametersConfig::groups);
 task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELWALKPOSE, task1_parametersConfig::DEFAULT> panelWalkPose("panelWalkPose", "", 0, 1, true, &task1_parametersConfig::DEFAULT::panelwalkpose);
-//#line 14 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 14 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.x_pw = 0.0;
-//#line 14 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 14 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.x_pw = 10.0;
-//#line 14 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 14 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.x_pw = 2.828;
-//#line 14 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 14 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x_pw", "double", 0, "x of goal location", "", &task1_parametersConfig::x_pw)));
-//#line 14 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 14 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x_pw", "double", 0, "x of goal location", "", &task1_parametersConfig::x_pw)));
-//#line 15 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 15 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.y_pw = -1.0;
-//#line 15 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 15 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.y_pw = 1.0;
-//#line 15 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 15 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.y_pw = 0.292;
-//#line 15 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 15 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_pw", "double", 0, "y of goal location", "", &task1_parametersConfig::y_pw)));
-//#line 15 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 15 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_pw", "double", 0, "y of goal location", "", &task1_parametersConfig::y_pw)));
-//#line 16 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 16 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.theta_pw = -1.57;
-//#line 16 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 16 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.theta_pw = 1.57;
-//#line 16 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 16 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.theta_pw = 0.82;
-//#line 16 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 16 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       panelWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta_pw", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta_pw)));
-//#line 16 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 16 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta_pw", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta_pw)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       panelWalkPose.convertParams();
@@ -603,35 +603,35 @@ task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELW
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELWALKPOSE, task1_parametersConfig::DEFAULT>(panelWalkPose)));
 task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELFINALPOSE, task1_parametersConfig::DEFAULT> panelFinalPose("panelFinalPose", "", 0, 2, true, &task1_parametersConfig::DEFAULT::panelfinalpose);
-//#line 20 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 20 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.x_pf = 0.0;
-//#line 20 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 20 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.x_pf = 10.0;
-//#line 20 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 20 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.x_pf = 2.828;
-//#line 20 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 20 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       panelFinalPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x_pf", "double", 0, "x of goal location", "", &task1_parametersConfig::x_pf)));
-//#line 20 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 20 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x_pf", "double", 0, "x of goal location", "", &task1_parametersConfig::x_pf)));
-//#line 21 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 21 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.y_pf = -1.0;
-//#line 21 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 21 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.y_pf = 1.0;
-//#line 21 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 21 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.y_pf = 0.292;
-//#line 21 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 21 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       panelFinalPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_pf", "double", 0, "y of goal location", "", &task1_parametersConfig::y_pf)));
-//#line 21 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 21 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_pf", "double", 0, "y of goal location", "", &task1_parametersConfig::y_pf)));
-//#line 22 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 22 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.theta_pf = -1.57;
-//#line 22 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 22 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.theta_pf = 1.57;
-//#line 22 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 22 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.theta_pf = 0.82;
-//#line 22 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 22 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       panelFinalPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta_pf", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta_pf)));
-//#line 22 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 22 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta_pf", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta_pf)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       panelFinalPose.convertParams();
@@ -640,35 +640,35 @@ task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELF
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::PANELFINALPOSE, task1_parametersConfig::DEFAULT>(panelFinalPose)));
 task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::FINISHBOXWALKPOSE, task1_parametersConfig::DEFAULT> finishBoxWalkPose("finishBoxWalkPose", "", 0, 3, true, &task1_parametersConfig::DEFAULT::finishboxwalkpose);
-//#line 26 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 26 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.x_fb = 0.0;
-//#line 26 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 26 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.x_fb = 10.0;
-//#line 26 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 26 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.x_fb = 2.828;
-//#line 26 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 26 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       finishBoxWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x_fb", "double", 0, "x of goal location", "", &task1_parametersConfig::x_fb)));
-//#line 26 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 26 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("x_fb", "double", 0, "x of goal location", "", &task1_parametersConfig::x_fb)));
-//#line 27 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 27 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.y_fb = -1.0;
-//#line 27 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 27 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.y_fb = 1.0;
-//#line 27 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 27 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.y_fb = 0.292;
-//#line 27 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 27 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       finishBoxWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_fb", "double", 0, "y of goal location", "", &task1_parametersConfig::y_fb)));
-//#line 27 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 27 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_fb", "double", 0, "y of goal location", "", &task1_parametersConfig::y_fb)));
-//#line 28 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 28 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.theta_fb = -1.57;
-//#line 28 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 28 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.theta_fb = 1.57;
-//#line 28 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 28 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.theta_fb = 0.82;
-//#line 28 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 28 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       finishBoxWalkPose.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta_fb", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta_fb)));
-//#line 28 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 28 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("theta_fb", "double", 0, "theta of goal location", "", &task1_parametersConfig::theta_fb)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       finishBoxWalkPose.convertParams();
@@ -677,125 +677,125 @@ task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::FINISH
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(task1_parametersConfig::AbstractGroupDescriptionConstPtr(new task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::FINISHBOXWALKPOSE, task1_parametersConfig::DEFAULT>(finishBoxWalkPose)));
 task1_parametersConfig::GroupDescription<task1_parametersConfig::DEFAULT::HANDLELOC, task1_parametersConfig::DEFAULT> handleLoc("handleLoc", "", 0, 4, true, &task1_parametersConfig::DEFAULT::handleloc);
-//#line 32 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 32 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.p_c_x = 0.0;
-//#line 32 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 32 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.p_c_x = 1.1;
-//#line 32 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 32 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.p_c_x = 2.828;
-//#line 32 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 32 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_c_x", "double", 0, "x of pitch knob center", "", &task1_parametersConfig::p_c_x)));
-//#line 32 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 32 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_c_x", "double", 0, "x of pitch knob center", "", &task1_parametersConfig::p_c_x)));
-//#line 33 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 33 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.p_c_y = -1.0;
-//#line 33 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 33 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.p_c_y = 1.1;
-//#line 33 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 33 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.p_c_y = 0.292;
-//#line 33 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 33 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_c_y", "double", 0, "y of pitch knob center", "", &task1_parametersConfig::p_c_y)));
-//#line 33 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 33 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_c_y", "double", 0, "y of pitch knob center", "", &task1_parametersConfig::p_c_y)));
-//#line 34 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 34 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.p_c_z = 0.0;
-//#line 34 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 34 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.p_c_z = 1.1;
-//#line 34 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 34 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.p_c_z = 0.89;
-//#line 34 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 34 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_c_z", "double", 0, "z of pitch knob center", "", &task1_parametersConfig::p_c_z)));
-//#line 34 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 34 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_c_z", "double", 0, "z of pitch knob center", "", &task1_parametersConfig::p_c_z)));
-//#line 36 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 36 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.p_h_x = 0.0;
-//#line 36 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 36 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.p_h_x = 1.1;
-//#line 36 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 36 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.p_h_x = 2.828;
-//#line 36 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 36 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_h_x", "double", 0, "x of pitch knob handle", "", &task1_parametersConfig::p_h_x)));
-//#line 36 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 36 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_h_x", "double", 0, "x of pitch knob handle", "", &task1_parametersConfig::p_h_x)));
-//#line 37 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 37 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.p_h_y = -1.0;
-//#line 37 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 37 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.p_h_y = 1.1;
-//#line 37 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 37 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.p_h_y = 0.292;
-//#line 37 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 37 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_h_y", "double", 0, "y of pitch knob handle", "", &task1_parametersConfig::p_h_y)));
-//#line 37 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 37 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_h_y", "double", 0, "y of pitch knob handle", "", &task1_parametersConfig::p_h_y)));
-//#line 38 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 38 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.p_h_z = 0.0;
-//#line 38 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 38 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.p_h_z = 1.1;
-//#line 38 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 38 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.p_h_z = 0.89;
-//#line 38 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 38 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_h_z", "double", 0, "z of pitch knob handle", "", &task1_parametersConfig::p_h_z)));
-//#line 38 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 38 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("p_h_z", "double", 0, "z of pitch knob handle", "", &task1_parametersConfig::p_h_z)));
-//#line 40 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 40 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.y_c_x = 0.0;
-//#line 40 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 40 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.y_c_x = 1.1;
-//#line 40 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 40 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.y_c_x = 2.828;
-//#line 40 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 40 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_c_x", "double", 0, "x of yaw knob center", "", &task1_parametersConfig::y_c_x)));
-//#line 40 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 40 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_c_x", "double", 0, "x of yaw knob center", "", &task1_parametersConfig::y_c_x)));
-//#line 41 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 41 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.y_c_y = -1.0;
-//#line 41 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 41 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.y_c_y = 1.1;
-//#line 41 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 41 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.y_c_y = 0.292;
-//#line 41 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 41 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_c_y", "double", 0, "y of yaw knob center", "", &task1_parametersConfig::y_c_y)));
-//#line 41 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 41 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_c_y", "double", 0, "y of yaw knob center", "", &task1_parametersConfig::y_c_y)));
-//#line 42 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 42 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.y_c_z = 0.0;
-//#line 42 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 42 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.y_c_z = 1.1;
-//#line 42 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 42 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.y_c_z = 0.89;
-//#line 42 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 42 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_c_z", "double", 0, "z of yaw knob center", "", &task1_parametersConfig::y_c_z)));
-//#line 42 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 42 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_c_z", "double", 0, "z of yaw knob center", "", &task1_parametersConfig::y_c_z)));
-//#line 44 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 44 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.y_h_x = 0.0;
-//#line 44 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 44 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.y_h_x = 1.1;
-//#line 44 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 44 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.y_h_x = 2.828;
-//#line 44 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 44 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_h_x", "double", 0, "x of yaw knob handle", "", &task1_parametersConfig::y_h_x)));
-//#line 44 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 44 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_h_x", "double", 0, "x of yaw knob handle", "", &task1_parametersConfig::y_h_x)));
-//#line 45 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 45 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.y_h_y = -1.0;
-//#line 45 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 45 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.y_h_y = 1.1;
-//#line 45 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 45 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.y_h_y = 0.292;
-//#line 45 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 45 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_h_y", "double", 0, "y of yaw knob handle", "", &task1_parametersConfig::y_h_y)));
-//#line 45 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 45 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_h_y", "double", 0, "y of yaw knob handle", "", &task1_parametersConfig::y_h_y)));
-//#line 46 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 46 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __min__.y_h_z = 0.0;
-//#line 46 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 46 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __max__.y_h_z = 1.1;
-//#line 46 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 46 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __default__.y_h_z = 0.89;
-//#line 46 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 46 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       handleLoc.abstract_parameters.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_h_z", "double", 0, "z of yaw knob handle", "", &task1_parametersConfig::y_h_z)));
-//#line 46 "/home/dikshya/indigo_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
+//#line 46 "/media/jadhu/HDD/ros_ws/src/space_robotics_challenge/val_tasks/val_task1/cfg/task1_parameters.cfg"
       __param_descriptions__.push_back(task1_parametersConfig::AbstractParamDescriptionConstPtr(new task1_parametersConfig::ParamDescription<double>("y_h_z", "double", 0, "z of yaw knob handle", "", &task1_parametersConfig::y_h_z)));
 //#line 121 "/opt/ros/indigo/lib/python2.7/dist-packages/dynamic_reconfigure/parameter_generator.py"
       handleLoc.convertParams();

@@ -35,6 +35,8 @@
 #include <pcl/sample_consensus/sac_model_circle.h>
 #include <pcl/sample_consensus/ransac.h>
 #include <pcl/common/centroid.h>
+#include <pcl/filters/crop_box.h>
+#include <pcl/filters/voxel_grid.h>
 
 #include <pcl/filters/statistical_outlier_removal.h>
 
@@ -45,7 +47,8 @@ struct model_param
 {
     std::vector<float> center;
     float radius;
-    std::vector<float> norm;
+//    std::vector<float> norm;
+    float theta;
 };
 
 class DoorValvedetector{
@@ -56,14 +59,14 @@ private:
     ros::Publisher pcl_filtered_pub_;
 
     ros::Publisher vis_pub_;
+
     RobotStateInformer* robot_state_;
 
     float min_x,max_x,min_y,max_y,min_z,max_z;
 
     model_param circle_param;
 
-    /// @todo change it to pose later
-    std::vector<geometry_msgs::Point> detections_;
+    std::vector<geometry_msgs::Pose> detections_;
 
     // Temporary function feel free to modify
     void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
@@ -74,13 +77,16 @@ private:
     void filter_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
     void fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
     void visualize();
+    void visualizept(float x,float y,float z);
     void clustering(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+    void boxfilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
 
+void panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, float &theta);
 public:
 
     // Constructor
-    bool getDetections(std::vector<geometry_msgs::Point> &out);
+    bool getDetections(std::vector<geometry_msgs::Pose> &out);
     DoorValvedetector(ros::NodeHandle nh);
     ~DoorValvedetector();
 

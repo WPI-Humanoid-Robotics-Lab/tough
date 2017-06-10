@@ -60,10 +60,15 @@ std::size_t stair_detector_2::estimateStairPose(const PointCloud::ConstPtr &filt
                                                 Eigen::Affine3f &stairs_pose) const {
     float stairs_angle = atan2(stairs_dir.y(), stairs_dir.x());
 
+<<<<<<< HEAD
+    std::vector<pcl::PointIndices> stair_clusters;
+    auto step_shape = boost::make_shared<LabeledCloud>();
+=======
     ROS_DEBUG_STREAM("Testing angle " << stairs_angle);
 
     std::vector<pcl::PointIndices> stair_clusters;
     auto step_shape = boost::make_shared<PointCloud>();
+>>>>>>> f96d507f361cb8d147aa84c9964beba44b1d2da0
     step_shape->header = filtered_cloud->header;
 
     for (const auto &cluster : step_clusters) {
@@ -177,7 +182,7 @@ std::size_t stair_detector_2::estimateStairPose(const PointCloud::ConstPtr &filt
 
 stair_detector_2::PointCloud::Ptr stair_detector_2::prefilterCloud(const PointCloud::ConstPtr &cloud_raw) const {
     // Crop the cloud to the height of the staircase
-    pcl::IndicesPtr points_in_room = boost::make_shared<vector<int>>();
+    pcl::IndicesPtr points_in_room = boost::make_shared<std::vector<int>>();
     pcl::CropBox<Point> cropFilter;
     cropFilter.setInputCloud(cloud_raw);
     cropFilter.setMin({-8.f, -8.f, 0.02f, 1});
@@ -260,6 +265,20 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
         // Segment the largest planar component from the remaining cloud
         nsac.setIndices(region_ptr);
         nsac.segment(inliers, coefficients);
+<<<<<<< HEAD
+        if (inliers.indices.size() == 0) {
+            consecutive_failed_attempts += 1;
+            ROS_DEBUG_STREAM("Failed " << consecutive_failed_attempts << (consecutive_failed_attempts == 1 ? " time" : " times"));
+        }
+
+        std::vector<int> tmp_indices;
+        set_difference(remaining_indices->begin(), remaining_indices->end(),
+                       inliers.indices.begin(), inliers.indices.end(),
+                       back_inserter(tmp_indices));
+
+        remaining_indices->swap(tmp_indices);
+=======
+>>>>>>> f96d507f361cb8d147aa84c9964beba44b1d2da0
 
         Eigen::Vector3f coef = modelToVector(coefficients);
 
@@ -448,7 +467,7 @@ std::vector<pcl::PointIndices> stair_detector_2::findStairClusters(const Eigen::
             continue;
         }
 
-        vector<int> tmp_indices;
+        std::vector<int> tmp_indices;
         std::set_difference(remaining_indices->begin(), remaining_indices->end(),
                             inliers.indices.begin(), inliers.indices.end(),
                             back_inserter(tmp_indices));
