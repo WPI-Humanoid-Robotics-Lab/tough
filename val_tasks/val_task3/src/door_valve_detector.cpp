@@ -55,41 +55,77 @@ void DoorValvedetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
     pcl::fromROSMsg(*input, *cloud);
 
+    float theta=0.0;
+
 
 /*  // use this when walking over the steps this will helps us in reducing the pts before transforming
+ * No need: using box filter now
     pcl::PassThrough<pcl::PointXYZ> pass_z;
     pass_z.setInputCloud(cloud);
     pass_z.setFilterFieldName("z");
     pass_z.setFilterLimits(2,10);
     pass_z.filter(*cloud);
 */
+
+    boxfilter(cloud);
     transformCloud(cloud,0);
+    /*
     PassThroughFilter(cloud);
+    */
     if(cloud->empty())
+    {
+        ROS_INFO("empty after tansform cloud");
         return;
+    }
     filter_cloud(cloud);
-    if(cloud->empty())
+    /*if(cloud->empty())
+    {
+        ROS_INFO("filter_cloud gives empty cloud");
         return;
+    }*/
     transformCloud(cloud,1);
+    float t;
+//    panelSegmentation(cloud,t);
     fitting(cloud);
     if(cloud->empty())
         return;
-    clustering(cloud);
+    /*clustering(cloud);
+*/
+
+    geometry_msgs::Pose center_loc,center_loc_pelvis;
+
+    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(circle_param.theta);
+
+
+    center_loc.position.x = circle_param.center[0];
+    center_loc.position.y = circle_param.center[1];
+    center_loc.position.z = circle_param.center[2];
+    center_loc.orientation = quaternion;
+
+    robot_state_->transformPose(center_loc,center_loc_pelvis,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+
+    float pelvis_theta = tf::getYaw(center_loc_pelvis.orientation);
+
+
+    float ang = (20/180)*M_PI;
+    ROS_INFO(" pelvis theta %.4f  ang %.4f",pelvis_theta,ang);
+
+    if(! (abs(pelvis_theta) < ang) )
+    {
+        ROS_INFO(" pelvis theta %.4f",pelvis_theta);
+        circle_param.theta+=M_PI;
+    }
+
+    quaternion = tf::createQuaternionMsgFromYaw(circle_param.theta);
+    center_loc.orientation = quaternion;
+
     visualize();
 
     ros::Time endTime = ros::Time::now();
 
     std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
 
-    Eigen::Vector4f valveCentroid;
-    //  Calculating the Centroid of the handle Point cloud
-    pcl::compute3DCentroid(*cloud, valveCentroid);
-    geometry_msgs::Point geom_point;
-    geom_point.x = valveCentroid(0);
-    geom_point.y = valveCentroid(1);
-    geom_point.z = valveCentroid(2);
-
-    detections_.push_back(geom_point);
+    detections_.push_back(center_loc);
 
     pcl::toROSMsg(*cloud, output);
 
@@ -98,6 +134,89 @@ void DoorValvedetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
     pcl_filtered_pub_.publish(output);
 
 }
+
+void DoorValvedetector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, float &theta){
+
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
+
+    seg.setOptimizeCoefficients (true);
+    seg.setModelType (pcl::SACMODEL_PLANE);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setMaxIterations (100);
+    seg.setDistanceThreshold (0.008);
+    seg.setInputCloud (cloud);
+    seg.segment (*inliers, *coefficients);
+    ROS_INFO("a : %0.4f, b : %0.4f, c : %0.4f, d: %.4f",coefficients->values[0], coefficients->values[1], coefficients->values[2], coefficients->values[3]);
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr plane_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    extract.setInputCloud (cloud);
+    extract.setIndices (inliers);
+    extract.setNegative (false);
+    extract.filter (*plane_cloud);
+
+    pcl::ExtractIndices<pcl::PointXYZ> extract1;
+    extract1.setInputCloud (cloud);
+    extract1.setIndices (inliers);
+    extract1.setNegative (true);
+    extract1.filter (*cloud);
+
+    // find centroid and apply pca
+    Eigen::Vector4f centroid;
+    pcl::compute3DCentroid(*plane_cloud, centroid);
+    Eigen::Matrix3f covarianceMatrix;
+    pcl::computeCovarianceMatrix(*plane_cloud, centroid, covarianceMatrix);
+    Eigen::Matrix3f eigenVectors;
+    Eigen::Vector3f eigenValues;
+    pcl::eigen33(covarianceMatrix, eigenVectors, eigenValues);
+
+//    visualizept(centroid(0)+eigenVectors.col(0)[0],centroid(1)+eigenVectors.col(0)[1],centroid(2));
+
+    float cosTheta = eigenVectors.col(0)[0]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
+    float sinTheta = eigenVectors.col(0)[1]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
+    theta = atan2(sinTheta, cosTheta);
+
+}
+
+
+void DoorValvedetector::boxfilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+{
+       geometry_msgs::Pose pelvisPose;
+       robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+       Eigen::Vector4f minPoint;
+       Eigen::Vector4f maxPoint;
+       minPoint[0]= 0;
+       minPoint[1]=-0.6;
+       minPoint[2]= -0.2; //pelvis height is approx 0.1
+
+       maxPoint[0]=2;
+       maxPoint[1]=+0.6;
+       maxPoint[2]=0.8;
+
+       Eigen::Vector3f boxTranslatation;
+       boxTranslatation[0]=pelvisPose.position.x;
+       boxTranslatation[1]=pelvisPose.position.y;
+       boxTranslatation[2]=pelvisPose.position.z;
+       Eigen::Vector3f boxRotation;
+       boxRotation[0]=0;  // rotation around x-axis
+       boxRotation[1]=0;  // rotation around y-axis
+       boxRotation[2]= tf::getYaw(pelvisPose.orientation);  //in radians rotation around z-axis. this rotates your cube 45deg around z-axis.
+
+       pcl::CropBox<pcl::PointXYZ> box_filter;
+       std::vector<int> indices;
+       indices.clear();
+       box_filter.setInputCloud(cloud);
+       box_filter.setMin(minPoint);
+       box_filter.setMax(maxPoint);
+       box_filter.setTranslation(boxTranslatation);
+       box_filter.setRotation(boxRotation);
+       box_filter.setNegative(false);
+       box_filter.filter(*cloud);
+       ROS_INFO("box filter");
+}
+
 void DoorValvedetector::clustering(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
     ROS_INFO("clustering");
@@ -148,7 +267,7 @@ void DoorValvedetector::clustering(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 
 }
 
-bool DoorValvedetector::getDetections(std::vector<geometry_msgs::Point> &out)
+bool DoorValvedetector::getDetections(std::vector<geometry_msgs::Pose> &out)
 {
    out = detections_;
    return !detections_.empty();
@@ -157,8 +276,11 @@ bool DoorValvedetector::getDetections(std::vector<geometry_msgs::Point> &out)
 void DoorValvedetector::filter_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
 
+    ROS_INFO("filter cloud");
     Eigen::Vector4f min_pt,max_pt;
     pcl::getMinMax3D(*cloud,min_pt,max_pt);
+
+    ROS_INFO("min x %.2f max x%.2f",min_pt(0),max_pt(0));
 
     pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
       sor.setInputCloud (cloud);
@@ -166,16 +288,30 @@ void DoorValvedetector::filter_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
       sor.setStddevMulThresh (1.0);
       sor.filter (*cloud);
 
+
     // filtering around min x value
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
     pass_x.setFilterFieldName("x");
-    pass_x.setFilterLimits(min_pt(0),min_pt(0)+0.05);
+    pass_x.setFilterLimits(min_pt(0),max_pt(0)-0.15);
     pass_x.filter(*cloud);
 
 }
 void DoorValvedetector::fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
+    float theta;
+    panelSegmentation(cloud,theta);
+
+    // voxel filter to prevent improper fitting of circle
+    pcl::VoxelGrid<pcl::PointXYZ> sor;
+     sor.setInputCloud (cloud);
+     sor.setLeafSize (0.01f, 0.01f, 0.01f);
+     sor.filter (*cloud);
+
+     Eigen::Vector4f min_pt,max_pt;
+     pcl::getMinMax3D(*cloud,min_pt,max_pt);
+
+
     // fitting a circle
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
@@ -185,33 +321,58 @@ void DoorValvedetector::fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     seg.setModelType (pcl::SACMODEL_CIRCLE3D);
     seg.setMethodType (pcl::SAC_RANSAC);
     seg.setMaxIterations (100);
-    seg.setRadiusLimits(0.2,0.3);
+    seg.setRadiusLimits(0.18,0.3);
     //seg.setAxis(ax);
     seg.setDistanceThreshold (0.008);
     seg.setInputCloud (cloud);
     seg.segment (*inliers, *coefficients);
     ROS_INFO("x : %0.4f, y : %0.4f, z : %0.4f, r: %.4f ",coefficients->values[0], coefficients->values[1], coefficients->values[2], coefficients->values[3]);
 
-    /*
+/*
     pcl::ExtractIndices<pcl::PointXYZ> extract;
     extract.setInputCloud (cloud);
     extract.setIndices (inliers);
     extract.setNegative (false);
-    extract.filter (*cloud);
-    */
+    extract.filter (*cloud);*/
+/*
+
+    if(coefficients->values[0] < min_pt(0) || coefficients->values[0] > max_pt(0))
+    {
+        coefficients->values[0] = (min_pt(0)+max_pt(0))/2;
+    }
+
+
+    if(coefficients->values[1] < min_pt(1) || coefficients->values[1] > max_pt(1))
+    {
+        coefficients->values[1] = (min_pt(1)+max_pt(1))/2;
+    }
+
+
+    if(coefficients->values[2] < min_pt(2) || coefficients->values[2] > max_pt(2))
+    {
+        coefficients->values[2] = (min_pt(2)+max_pt(2))/2;
+    }
+*/
+
+/*
+    coefficients->values[0] = (min_pt(0)+max_pt(0))/2;
+    coefficients->values[1] = (min_pt(1)+max_pt(1))/2;
+    coefficients->values[2] = (min_pt(2)+max_pt(2))/2;
+    coefficients->values[3] = max_pt(2) - coefficients->values[2];
+*/
+
+    circle_param.center.clear();
+
     for(int i=0;i<3;++i)
         circle_param.center.push_back(coefficients->values[i]);
     circle_param.radius = coefficients->values[3];
-    for(int i=0;i<3;++i)
-        circle_param.norm.push_back(coefficients->values[i+4]);
+    circle_param.theta = theta;
+
 }
 
 void DoorValvedetector::visualize()
 {
-    float cosTheta2 = circle_param.norm[0]/sqrt(pow(circle_param.norm[0],2)+pow(circle_param.norm[1],2));
-    float sinTheta2 = circle_param.norm[1]/sqrt(pow(circle_param.norm[0],2)+pow(circle_param.norm[1],2));
-    float theta2 = atan2(sinTheta2, cosTheta2);
-    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta2);
+    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(circle_param.theta);
 
     visualization_msgs::MarkerArray mk_array;
     visualization_msgs::Marker marker;
@@ -268,41 +429,6 @@ void DoorValvedetector::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
     geometry_msgs::Point pt_in,pt_out;
     ROS_INFO("pts %.2f %.2f %.2f %.2f %.2f %.2f",min_x,max_x,min_y,max_y,min_z,max_z);
 
-/*
-
-
-    // transforming pts from pelvis to world frame
-    pt_in.x = min_x;
-    pt_in.y =  0;
-    pt_in.z =  0;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
-    minx = pt_out.x;
-    pt_in.x = max_x;
-    pt_in.y =  0;
-    pt_in.z =  0;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
-    maxx = pt_out.x;
-    pt_in.x =  0;
-    pt_in.y = min_y;
-    pt_in.z =  0;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
-    miny = pt_out.y;
-    pt_in.x =  0;
-    pt_in.y = max_y;
-    pt_in.z =  0;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
-    maxy = pt_out.y;
-    pt_in.x =  0;
-    pt_in.y =  0;
-    pt_in.z = min_z;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
-    minz = pt_out.z;
-    pt_in.x =  0;
-    pt_in.y =  0;
-    pt_in.z = max_z;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
-    maxz = pt_out.z;
-*/
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
     pass_x.setFilterFieldName("x");
@@ -346,3 +472,34 @@ void DoorValvedetector::transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& clou
     ROS_INFO("trasnforming cloud");
 }
 
+
+void DoorValvedetector::visualizept(float x,float y,float z)
+{
+    visualization_msgs::MarkerArray mk_array;
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = "world";
+    marker.header.stamp = ros::Time();
+    marker.ns = "Door valve detector";
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::SPHERE;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.position.x = x;
+    marker.pose.position.y = y;
+    marker.pose.position.z = z;
+    marker.pose.orientation.x = 0;
+    marker.pose.orientation.y = 0;
+    marker.pose.orientation.z = 0;
+    marker.pose.orientation.w = 1;
+    marker.scale.x = 0.05;
+    marker.scale.y = 0.05;
+    marker.scale.z = 0.05;
+    marker.color.a = 1.0;
+    marker.color.r = 1.0;
+    marker.color.g = 0.0;
+    marker.color.b = 0.0;
+    marker.lifetime = ros::Duration(10);
+    mk_array.markers.push_back(marker);
+
+    vis_pub_.publish(mk_array);
+
+}
