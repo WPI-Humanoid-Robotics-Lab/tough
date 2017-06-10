@@ -18,7 +18,7 @@ SolarArrayDetector::SolarArrayDetector(ros::NodeHandle nh, geometry_msgs::Pose2D
 {
   pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &SolarArrayDetector::cloudCB, this);
   pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_plane/cloud2", 1);
-  vis_pub_array = nh.advertise<visualization_msgs::MarkerArray>( "/val_solar/visualization_markers", 1 );
+  vis_pub_array = nh.advertise<visualization_msgs::MarkerArray>( "/visualization_marker_array", 1 );
   rover_cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/block_map",1);
     dbg_points_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/solar_detection_debug_pts", 1);
 
@@ -536,4 +536,3 @@ void SolarArrayDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
 
 
 }
-

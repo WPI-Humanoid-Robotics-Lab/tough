@@ -30,7 +30,7 @@
 
 table_detector::table_detector(ros::NodeHandle nh) : nh_(nh), point_cloud_listener_(nh, "/leftFoot", "/left_camera_frame")
 {
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_table", 1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array", 1);
     blacklist_pub_ = nh_.advertise<table_detector::PointCloud>("/block_map", 1);
     points_pub_ = nh_.advertise<table_detector::PointCloud>("table_detection_debug_points", 1);
     pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &table_detector::cloudCB, this);

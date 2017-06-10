@@ -21,7 +21,7 @@ RoverDetector::RoverDetector(ros::NodeHandle nh, bool getFine)
     pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &RoverDetector::cloudCB, this);
     pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_rover/cloud2", 1);
 
-    vis_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/val_rover/Position", 1 );
+    vis_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/visualization_marker_array", 1 );
     detections_.clear();
     detection_tries_ = 0;
     roverSide_ = ROVER_SIDE::UNKOWN;
