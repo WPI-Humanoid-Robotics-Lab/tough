@@ -61,12 +61,6 @@ float stair_detector_2::estimateStairPose(const PointCloud::ConstPtr &filtered_c
                                           Eigen::Affine3f &stairs_pose) const {
     float stairs_angle = std::atan2(stairs_dir.y(), stairs_dir.x());
 
-    // FOR DEBUGGING ONLY -- this hard-codes stairs angle!
-    if (std::abs(stairs_angle + 0.785398) > 0.1) {
-        ROS_DEBUG_STREAM("Trying to test angle -0.785398, but this is " << stairs_angle);
-        return std::numeric_limits<float>::infinity();
-    }
-
     Eigen::Affine3f vis_angle(Eigen::AngleAxisf(stairs_angle, Eigen::Vector3f::UnitZ()));
 
     visualization_msgs::MarkerArray ma;
@@ -392,7 +386,13 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
 
     // Make sure x points away from the robot
     tf::StampedTransform robot_pose_tf;
-    tf_listener_.lookupTransform(filtered_cloud->header.frame_id, "leftFoot", ros::Time(0), robot_pose_tf);
+    try {
+        tf_listener_.lookupTransform(filtered_cloud->header.frame_id, "leftFoot", ros::Time(0), robot_pose_tf);
+    } catch (const tf::TransformException &e) {
+        ROS_DEBUG_STREAM("Abandoning stair detection attempt because of a transform error when getting "
+                                 << "robot position: \n" << e.what());
+        return false;
+    }
     Eigen::Vector3d robot_pos_d;
     tf::vectorTFToEigen(robot_pose_tf.getOrigin(), robot_pos_d);
     Eigen::Vector3f robot_pos = robot_pos_d.cast<float>();
