@@ -464,6 +464,8 @@ bool task2Utils::isRotationReq(armSide side, geometry_msgs::Point handle_coordin
 bool task2Utils::checkpoint_init()
 {
     ROS_INFO("[SKIP] Resetting point cloud and map for skipped checkpoint");    
+    taskLogPub("[SKIP] Resetting point cloud and map for skipped checkpoint");
+
     ros::Duration(3).sleep(); // 3 seconds sleep to get the most recent-new point cloud
     clearPointCloud();
     ros::Duration(1).sleep();
@@ -475,6 +477,7 @@ bool task2Utils::checkpoint_init()
         ros::Duration(0.1).sleep();
     }
     ROS_INFO("[SKIP] Harness Detached!");
+    taskLogPub("[SKIP] Harness Detached!");
     ros::Duration(1).sleep();
     walk_->walkLocalPreComputedSteps({-0.2,-0.2,-0.4,-0.4},{0.0,0.0,0.0,0.0},RIGHT);
     ros::Duration(3).sleep();
@@ -486,6 +489,7 @@ bool task2Utils::checkpoint_init()
     ros::Duration(5).sleep();
     head_controller_->moveHead(0,0,0);
     ROS_INFO("[SKIP] Setting pelvis height");
+    taskLogPub("[SKIP] Setting pelvis height");
     pelvis_controller_->controlPelvisHeight(0.9);
     ros::Duration(1).sleep();;
 
