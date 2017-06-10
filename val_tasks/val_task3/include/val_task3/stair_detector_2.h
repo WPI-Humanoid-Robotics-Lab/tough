@@ -52,11 +52,10 @@ private:
     bool estimateStairs(const PointCloud::ConstPtr &filtered_cloud,
                             const NormalCloud::Ptr &filtered_normals);
 
-    size_t estimateStairPose(const PointCloud::ConstPtr &filtered_cloud,
-                             const std::vector<pcl::PointIndices> &step_clusters,
-                             const Eigen::Vector3f &stairs_dir,
-                             const Eigen::Vector3f &robot_pos,
-                             Eigen::Affine3f &stairs_pose) const;
+    float estimateStairPose(const PointCloud::ConstPtr &filtered_cloud,
+                            const std::vector<pcl::PointIndices> &step_clusters,
+                            const Eigen::Vector3f &stairs_dir, const Eigen::Vector3f &robot_pos,
+                            Eigen::Affine3f &stairs_pose) const;
 
     std::vector<pcl::PointIndices> findStairClusters(const Eigen::Vector3f &avg_normal,
                                                      const PointCloud::ConstPtr &filtered_cloud) const;
