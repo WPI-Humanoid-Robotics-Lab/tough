@@ -22,6 +22,7 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     reset_pointcloud_pub    = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
     pause_pointcloud_pub    = nh_.advertise<std_msgs::Bool>("/field/pause_pointcloud",1);
     clearbox_pointcloud_pub = nh_.advertise<std_msgs::Int8>("/field/clearbox_pointcloud",1);
+    clear_pose_map          = nh_.advertise<std_msgs::Empty>("/field/map/clear_current_pose",1);
 
     reset_map_pub    = nh_.advertise<std_msgs::Empty>("/field/reset_map",1);
     task2_log_pub_   = nh_.advertise<std_msgs::String>("/field/log",10);
@@ -29,6 +30,7 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     task_status_sub_        = nh_.subscribe("/srcsim/finals/task", 10, &task2Utils::taskStatusCB, this);
     mapUpdaterSub_          = nh_.subscribe("/map", 10, &task2Utils::mapUpdateCB, this);
     detach_harness          = nh_.subscribe("/srcsim/finals/harness",10, &task2Utils::isDetachedCB, this);
+
 
     // rotate panel trajectory for left hand
     reOrientPanelTrajLeft_.resize(2);
@@ -278,6 +280,9 @@ void task2Utils::rotatePanel(const armSide graspingHand)
 
 void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset){
 
+    pelvis_controller_->controlPelvisHeight(1.0);
+    ros::Duration(1.5).sleep();
+
     size_t nSteps;
     armSide startStep;
     std::vector<float> y_offset;
@@ -319,6 +324,8 @@ void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offs
         ros::Duration(4.0).sleep();
 
     }
+    pelvis_controller_->controlPelvisHeight(0.9);
+    ros::Duration(1.5).sleep();
 
 }
 
@@ -456,27 +463,31 @@ bool task2Utils::isRotationReq(armSide side, geometry_msgs::Point handle_coordin
 
 bool task2Utils::checkpoint_init()
 {
-    ROS_INFO("[SKIP] Resetting point cloud and map for skipped checkpoint");
+    ROS_INFO("[SKIP] Resetting point cloud and map for skipped checkpoint");    
+    ros::Duration(3).sleep(); // 3 seconds sleep to get the most recent-new point cloud
     clearPointCloud();
-    ros::Duration(0.3).sleep();
+    ros::Duration(1).sleep();
     clearMap();
+    ros::Duration(1).sleep();
     isHarnessDetached = false;
     while(!isHarnessDetached)
     {
         ros::Duration(0.1).sleep();
     }
     ROS_INFO("[SKIP] Harness Detached!");
-    walk_->walkLocalPreComputedSteps({-0.2,-0.2,-0.2,-0.2},{0.0,0.0,0.0,0.0},RIGHT);
-    ros::Duration(3);
+    ros::Duration(1).sleep();
+    walk_->walkLocalPreComputedSteps({-0.2,-0.2,-0.4,-0.4},{0.0,0.0,0.0,0.0},RIGHT);
+    ros::Duration(3).sleep();
     head_controller_->moveHead(0,40,0);
-    ros::Duration(10);
+    ros::Duration(10).sleep();
     head_controller_->moveHead(0,0,40);
-    ros::Duration(5);
+    ros::Duration(5).sleep();
     head_controller_->moveHead(0,0,-40);
-    ros::Duration(5);
+    ros::Duration(5).sleep();
     head_controller_->moveHead(0,0,0);
+    ROS_INFO("[SKIP] Setting pelvis height");
     pelvis_controller_->controlPelvisHeight(0.9);
-    ros::Duration(1);
+    ros::Duration(1).sleep();;
 
 }
 
@@ -529,6 +540,12 @@ void task2Utils::mapUpdateCB(const nav_msgs::OccupancyGrid &msg)
 void task2Utils::clearPointCloud() {
     std_msgs::Empty msg;
     reset_pointcloud_pub.publish(msg);
+    ros::Duration(0.3).sleep();
+}
+
+void task2Utils::clearCurrentPoseMap() {
+    std_msgs::Empty msg;
+    clear_pose_map.publish(msg);
     ros::Duration(0.3).sleep();
 }
 

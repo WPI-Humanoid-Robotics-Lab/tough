@@ -82,14 +82,17 @@ void MapGenerator::resetMap(const std_msgs::Empty &msg) {
     std::fill(occGrid_.data.begin(), occGrid_.data.end(),  OCCUPIED);
     visitedOccGrid_ = occGrid_;
 
-    geometry_msgs::Pose pelvisPose;
-    currentState_  = RobotStateInformer::getRobotStateInformer(nh_);
-    currentState_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pelvisPose);
+
     mtx.lock();
     for (float x = -0.5f; x < 0.5f; x += MAP_RESOLUTION/10){
         for (float y = -0.5f; y < 0.5f; y += MAP_RESOLUTION/10){
-            occGrid_.data.at(getIndex(pelvisPose.position.x + x, pelvisPose.position.y +y)) =  FREE;
-            visitedOccGrid_.data.at(getIndex(pelvisPose.position.x + x, pelvisPose.position.y +y)) =  FREE;
+            geometry_msgs::Pose pelvisPose;
+            pelvisPose.position.x = x;
+            pelvisPose.position.y = y;
+            pelvisPose.orientation.w = 1.0f;
+            currentState_->transformPose(pelvisPose, pelvisPose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+            occGrid_.data.at(getIndex(pelvisPose.position.x, pelvisPose.position.y)) =  FREE;
+            visitedOccGrid_.data.at(getIndex(pelvisPose.position.x, pelvisPose.position.y)) =  FREE;
         }
     }
     mtx.unlock();
@@ -100,11 +103,14 @@ void MapGenerator::resetMap(const std_msgs::Empty &msg) {
 
 void MapGenerator::clearCurrentPoseCB(const std_msgs::Empty &msg)
 {
-    geometry_msgs::Pose pelvisPose;
-    currentState_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pelvisPose);
     mtx.lock();
     for (float x = -0.2f; x < 0.2f; x += MAP_RESOLUTION/10){
         for (float y = -0.2f; y < 0.2f; y += MAP_RESOLUTION/10){
+            geometry_msgs::Pose pelvisPose;
+            pelvisPose.position.x = x;
+            pelvisPose.position.y = y;
+            pelvisPose.orientation.w = 1.0f;
+            currentState_->transformPose(pelvisPose, pelvisPose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
             occGrid_.data.at(getIndex(pelvisPose.position.x + x, pelvisPose.position.y +y)) =  FREE;
         }
     }

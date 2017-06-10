@@ -47,7 +47,7 @@ private:
     ValkyrieWalker *walk_;
     // robot state
     RobotStateInformer *current_state_;
-    ros::Publisher reset_pointcloud_pub, reset_map_pub, pause_pointcloud_pub , clearbox_pointcloud_pub , task2_log_pub_;
+    ros::Publisher reset_pointcloud_pub, reset_map_pub, pause_pointcloud_pub , clearbox_pointcloud_pub , task2_log_pub_,clear_pose_map;
 
     ros::Subscriber task_status_sub_,detach_harness;
 
@@ -79,11 +79,11 @@ private:
     const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.38, 1.49, 1.3, 0.7, -0.26, 0.0, 0.2};
 
     // panel placement poses
-    const std::vector<float> leftPanelPlacementUpPose1_  = {-1.5, -1.4, 1.39, -0.9, -1.10, 0.5, 0};
-    const std::vector<float> leftPanelPlacementDownPose1_= {-1.2, -1.4, 1.39, -0.9, -1.10, 0.5, 0.4};
+    const std::vector<float> leftPanelPlacementUpPose1_  = {-1.5, -1.4, 1.39, -0.9, 1.10, 0.5, 0};
+    const std::vector<float> leftPanelPlacementDownPose1_= {-1.2, -1.4, 1.39, -0.9, 1.10, 0.5, 0.4};
 
-    const std::vector<float> leftPanelPlacementUpPose2_  = {-1.5, -1.4, 1.39, -0.9, 1.10, -0.5, 0};
-    const std::vector<float> leftPanelPlacementDownPose2_= {-1.2, -1.4, 1.39, -0.9, 1.10, -0.5, 0};
+    const std::vector<float> leftPanelPlacementUpPose2_  = {-1.5, -1.4, 1.39, -0.9, -1.10, -0.5, 0};
+    const std::vector<float> leftPanelPlacementDownPose2_= {-1.2, -1.4, 1.39, -0.9, -1.10, -0.5, 0};
 
     const std::vector<float> leftPanelPlacementSupport1_  = {-0.66, -1.4, 1.2, -1.49, 1.29, 0, 0.26};
     const std::vector<float> leftPanelPlacementSupport2_  = {-0.66, -1.4, 0.75, -1.49, 1.29, 0, 0.26};
@@ -131,6 +131,7 @@ public:
     void clearMap();
     void pausePointCloud();
     void resumePointCloud();
+    void clearCurrentPoseMap();
     void clearBoxPointCloud(CLEAR_BOX_CLOUD state);
     void reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset=0.0);
     void reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose);

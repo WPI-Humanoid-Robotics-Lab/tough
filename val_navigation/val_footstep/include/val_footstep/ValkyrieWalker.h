@@ -116,6 +116,7 @@ public:
     void getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage& foot);
     bool raiseLeg(armSide side, float height,float stepLength);
     void load_eff(armSide side, EE_LOADING load);
+    bool walk_rotate(float angle);
 
 private:
     static int id ;
