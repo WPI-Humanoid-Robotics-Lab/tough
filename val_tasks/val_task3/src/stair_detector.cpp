@@ -10,7 +10,7 @@
 StairDetector::StairDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor), coefficients_(4), endPoints_(2)
 {
     ms_sensor_.giveQMatrix(qMatrix_);
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/detected_stair",1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array",1);
 }
 
 void StairDetector::showImage(cv::Mat image, std::string caption)
