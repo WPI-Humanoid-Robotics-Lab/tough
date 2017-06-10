@@ -6,25 +6,26 @@ int main(int argc, char** argv){
     ros::init(argc, argv, "door_valve_detector");
     ros::NodeHandle nh;
 
-    std::vector<geometry_msgs::Point> valveCentres;
+    std::vector<geometry_msgs::Pose> valveCentres;
     DoorValvedetector detectionObj(nh);
-    size_t retry_count = 1;
-
+    size_t retry_count = 0;
+    ros::Rate loop(0.3);
     // Do door detection stuff
-
-    while (!detectionObj.getDetections(valveCentres) && retry_count < 4){
-
-        ROS_INFO("Try Number : %d", retry_count);
-        retry_count++;
-
-        ros::Duration(3.0).sleep();
+    bool success = false;
+    while (retry_count++ < 5 ){
+        success = detectionObj.getDetections(valveCentres);
+        if (success){
+            break;
+        }
+        ros::spinOnce();
+        loop.sleep();
     }
 
-    if(detectionObj.getDetections(valveCentres)){
 
+    if(success){
 
-        ROS_INFO_STREAM("Valve centre detected at x: " << valveCentres[0].x
-                        << " y : " << valveCentres[0].y << " z : " << valveCentres[0].z);
+        ROS_INFO_STREAM("Valve centre detected at x: " << valveCentres[0].position.x
+                << " y : " << valveCentres[0].position.y << " z : " << valveCentres[0].position.z);
     }
 
     else {
@@ -33,6 +34,8 @@ int main(int argc, char** argv){
     }
 
 
-    ros::spin();
+
+
+
     return 0;
 }

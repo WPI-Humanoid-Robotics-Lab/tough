@@ -108,12 +108,12 @@ bool rotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTi
     ros::Duration(executionTime*1.5).sleep();
 
     // Grasping the cable
-    ROS_INFO("rotateValve: Closing the gripper ");
-    gripper3={1.35, -0.60, -0.50, -0.50 ,-0.50 };
-    gripper_.controlGripper(LEFT,gripper3);
-    ros::Duration(executionTime/2).sleep();
-    gripper_.closeGripper(LEFT);
-    ros::Duration(executionTime/2).sleep();
+    ROS_INFO("rotateValve:Not Closing the gripper ");
+    //gripper3={1.35, -0.60, -0.50, -0.50 ,-0.50 };
+    //gripper_.controlGripper(LEFT,gripper3);
+   // ros::Duration(executionTime/2).sleep();
+    //gripper_.closeGripper(LEFT);
+    //ros::Duration(executionTime/2).sleep();
 
     return true;
 
@@ -241,6 +241,7 @@ void rotateValve::reOrientbeforgrab(geometry_msgs::Point valveCenter)
 
 
     walk_.walkToGoal(preDoorOpenGoal);
+    ros::Duration(1.0).sleep();
 }
 
 rotateValve::~rotateValve(){

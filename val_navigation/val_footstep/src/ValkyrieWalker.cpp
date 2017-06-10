@@ -42,6 +42,7 @@ bool ValkyrieWalker::walkToGoal( geometry_msgs::Pose2D &goal, bool waitForSteps)
 
         if (waitForSteps)
         {
+            cbTime_=ros::Time::now();
             this->waitForSteps(list.footstep_data_list.size());
         }
         return true;
