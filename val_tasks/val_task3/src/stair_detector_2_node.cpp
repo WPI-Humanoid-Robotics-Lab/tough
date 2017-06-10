@@ -6,7 +6,7 @@
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "stairs_detector_2");
+    ros::init(argc, argv, "stairs_detector_2", ros::init_options::NoSigintHandler);
     ros::NodeHandle nh;
     int numIterations = 0;
     bool found = false;

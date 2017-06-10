@@ -651,10 +651,18 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
     //pelvis_controller_->controlPelvisHeight(0.85);
 
     if(!executing){
-//        ROS_INFO("Aligning to fix Pitch");
-//        task1_utils_->taskLogPub("Aligning to fix Pitch");
-//        //align to center of yaw while fixing pitch
-//        task1_utils_->reOrientTowardsGoal(handle_loc_[YAW_KNOB_CENTER]);
+        ROS_INFO("Aligning to fix Pitch");
+        task1_utils_->taskLogPub("Aligning to fix Pitch");
+        //align to center of yaw while fixing pitch
+        geometry_msgs::Point pointToAlign;
+        pointToAlign.x = (handle_loc_[YAW_KNOB_CENTER].x + handle_loc_[PITCH_KNOB_CENTER].x )/2;
+        pointToAlign.x = (handle_loc_[YAW_KNOB_CENTER].x + pointToAlign.x )/2;
+        pointToAlign.y = (handle_loc_[YAW_KNOB_CENTER].y + handle_loc_[PITCH_KNOB_CENTER].y )/2;
+        pointToAlign.y = (handle_loc_[YAW_KNOB_CENTER].y + pointToAlign.y )/2;
+        pointToAlign.z = (handle_loc_[YAW_KNOB_CENTER].z + handle_loc_[PITCH_KNOB_CENTER].z )/2;
+        pointToAlign.z = (handle_loc_[YAW_KNOB_CENTER].z + pointToAlign.z )/2;
+
+        task1_utils_->reOrientTowardsGoal(pointToAlign);
 
         ROS_INFO("Executing the grasp handle command");
         task1_utils_->taskLogPub("Executing the grasp handle command");
@@ -834,6 +842,32 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     // if the handle is not moving (assuming grasp is not lost)
     else if (task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_CONSTANT)
     {
+        // get the handle position
+        geometry_msgs::Pose handPose;
+        robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF, handPose, VAL_COMMON_NAMES::PELVIS_TF);
+        geometry_msgs::Point handlePosition = handPose.position;
+        handlePosition.x += 0.05;
+        robot_state_->transformPoint(handlePosition, handlePosition, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+        handle_loc_[PITCH_KNOB_HANDLE] = handlePosition;
+
+        // reset the robot pose
+        // open the gripper
+        gripper_controller_->openGripper(armSide::RIGHT);
+        ros::Duration(0.2).sleep();
+        // increase the pelvis height
+        pelvis_controller_->controlPelvisHeight(1.0);
+        ros::Duration(0.2).sleep();
+        // reset the chest
+        chest_controller_->controlChest(0,0,0);
+        ros::Duration(0.2).sleep();
+        // get to normal height
+        pelvis_controller_->controlPelvisHeight(0.9);
+        ros::Duration(0.2).sleep();
+
+        // regrasp the handle
+        ///@todo vinayak, fix the regrasp
+       handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[PITCH_KNOB_HANDLE]);
+
         // replan and execute from the current point,
         // set the execute once state
         execute_once = true;
@@ -916,10 +950,18 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
     static int retry_count = 0;
 
     if(!executing){
-//        ROS_INFO("Aligning to fix yaw");
-//        task1_utils_->taskLogPub("Aligning to fix yaw");
-//        //align to center of pitch while fixing yaw
-//        task1_utils_->reOrientTowardsGoal(handle_loc_[PITCH_KNOB_CENTER]);
+        ROS_INFO("Aligning to fix yaw");
+        task1_utils_->taskLogPub("Aligning to fix yaw");
+        //align to center of pitch while fixing yaw
+        geometry_msgs::Point pointToAlign;
+        pointToAlign.x = (handle_loc_[YAW_KNOB_CENTER].x + handle_loc_[PITCH_KNOB_CENTER].x )/2;
+        pointToAlign.x = (handle_loc_[PITCH_KNOB_CENTER].x + pointToAlign.x )/2;
+        pointToAlign.y = (handle_loc_[YAW_KNOB_CENTER].y + handle_loc_[PITCH_KNOB_CENTER].y )/2;
+        pointToAlign.y = (handle_loc_[PITCH_KNOB_CENTER].y + pointToAlign.y )/2;
+        pointToAlign.z = (handle_loc_[YAW_KNOB_CENTER].z + handle_loc_[PITCH_KNOB_CENTER].z )/2;
+        pointToAlign.z = (handle_loc_[PITCH_KNOB_CENTER].z + pointToAlign.z )/2;
+
+        task1_utils_->reOrientTowardsGoal(pointToAlign);
 
         ROS_INFO("Executing the grasp handle command");
         task1_utils_->taskLogPub("Executing the grasp handle command");
@@ -971,7 +1013,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 
 
     static bool execute_once = true;
-    static int retry_count = 0;
+    static int retry_count, recorrected_pitch_count = 0;
     static handleDirection rot_dir = handleDirection::ANTICLOCK_WISE;
 
     //timer
@@ -1059,20 +1101,53 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         //check if its complete
         if (task1_utils_->isYawCompleted())
         {
-            // sucessuflly done
-            eventQueue.riseEvent("/YAW_CORRECTION_SUCESSFUL");
+            // check if pitch is still correct
+            if(task1_utils_->isPitchCompleted()){
+                // sucessuflly done
+                eventQueue.riseEvent("/YAW_CORRECTION_SUCESSFUL");
 
-            // set the execute flag
-            execute_once = true;
+                // set the execute flag
+                execute_once = true;
 
-            //reset robot to defaults
-            resetRobotToDefaults();
+                //reset robot to defaults
+                resetRobotToDefaults();
 
-            // reset the count
-            retry_count = 0;
+                // reset the count
+                retry_count = 0;
 
-            ROS_INFO("yaw completed now");
-            task1_utils_->taskLogPub("yaw completed now");
+                ROS_INFO("yaw completed now");
+                task1_utils_->taskLogPub("yaw completed now");
+            }
+            // if pitch is re corrected for many times
+            else if (recorrected_pitch_count > 5)
+            {
+                //reset robot to default state
+                resetRobotToDefaults();
+
+                // reset the count
+                recorrected_pitch_count = 0;
+
+                //error state
+                eventQueue.riseEvent("/YAW_CORRECTION_FAILED");
+
+                task1_utils_->taskLogPub("yaw correction failed, max time recorrected pitch");
+
+            }
+            // if pitch is not moved, go to redetct with prev state as pitchcontrol
+            else
+            {
+                // increment the count
+                recorrected_pitch_count++;
+                task1_utils_->taskLogPub("Fixed yaw, but pitch is wrong");
+                // move to redetct that would take us back to fixing pitch
+                prev_grasp_state_ = prevGraspState::GRASP_PITCH_HANDLE;
+
+                // redetect the handles (retry)
+                eventQueue.riseEvent("/YAW_CORRECTION_RETRY");
+
+                //set the execute once flag back
+                execute_once = true;
+            }
         }
         else
         {
@@ -1097,6 +1172,32 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     // if the arm is not moving any more
     else if (task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_CONSTANT)
     {
+
+        // get the handle position
+        geometry_msgs::Pose handPose;
+        robot_state_->getCurrentPose(VAL_COMMON_NAMES::L_PALM_TF, handPose, VAL_COMMON_NAMES::PELVIS_TF);
+        geometry_msgs::Point handlePosition = handPose.position;
+        handlePosition.x += 0.05;
+        robot_state_->transformPoint(handlePosition, handlePosition, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+        handle_loc_[YAW_KNOB_HANDLE] = handlePosition;
+        // reset the robot pose
+        // open the gripper
+        gripper_controller_->openGripper(armSide::LEFT);
+        ros::Duration(0.2).sleep();
+        // increase the pelvis height
+        pelvis_controller_->controlPelvisHeight(1.0);
+        ros::Duration(0.2).sleep();
+        // reset the chest
+        chest_controller_->controlChest(0,0,0);
+        ros::Duration(0.2).sleep();
+        // get to normal height
+        pelvis_controller_->controlPelvisHeight(0.9);
+        ros::Duration(0.2).sleep();
+
+        // regrasp the handle
+        ///@todo vinayak, fix the regrasp
+        handle_grabber_->grasp_handles(armSide::LEFT , handle_loc_[YAW_KNOB_HANDLE]);
+
         // replan and execute from the current point,
         // set the execute once state
         execute_once = true;
@@ -1137,6 +1238,9 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 
         //error state
         eventQueue.riseEvent("/YAW_CORRECTION_FAILED");
+
+        task1_utils_->taskLogPub("yaw correction failed, max retry counts");
+
     }
     // fall through case
     else
@@ -1319,6 +1423,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
             ROS_INFO("finish box detected");
             task1_utils_->taskLogPub("finish box detected");
             eventQueue.riseEvent("/DETECT_FINISH_SUCESSFUL");
+            retry_count=0;
 
             if(finish_box_detector_ != nullptr) delete finish_box_detector_;
             finish_box_detector_ = nullptr;
@@ -1338,6 +1443,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
         eventQueue.riseEvent("/DETECT_FINISH_FAILED");
         if(finish_box_detector_ != nullptr) delete finish_box_detector_;
         finish_box_detector_ = nullptr;
+        retry_count=0;
         //sleep is required to avoid moving to next state before subscriber is shutdown
         ros::Duration(2).sleep();
     }

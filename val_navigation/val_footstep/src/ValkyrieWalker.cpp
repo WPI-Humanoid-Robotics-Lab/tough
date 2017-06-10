@@ -785,6 +785,22 @@ void ValkyrieWalker::load_eff(armSide side, EE_LOADING load)
 
 }
 
+bool ValkyrieWalker::walk_rotate(float angle)
+{
+
+    // get current position
+    ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
+    getCurrentStep(RIGHT, *current);
+
+    geometry_msgs::Pose2D goal;
+    goal.x = current->location.x;
+    goal.y = current->location.y;
+    goal.theta = tf::getYaw(current->orientation)+angle;
+    walkToGoal(goal);
+    return true;
+
+}
+
 // wait till all the steps are taken
 void ValkyrieWalker::waitForSteps(int n)
 {

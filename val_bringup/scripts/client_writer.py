@@ -5,6 +5,7 @@ import socket
 import select
 
 FIELD_IP = "192.168.2.10"
+#FIELD_IP = "localhost"
 PORT = 8080
 
 

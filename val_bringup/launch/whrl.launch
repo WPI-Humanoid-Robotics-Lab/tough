@@ -1,6 +1,6 @@
 <launch>
   
-   <include file="$(find val_bringup)/launch/joint_state.launch" />
+<!--   <include file="$(find val_bringup)/launch/joint_state.launch" />-->
    <include file="$(find val_perception_bringup)/launch/field_laser_assembler.launch" />
    <!-- <include file="$(find val_perception_bringup)/launch/field_octomap.launch"/> -->
    <include file="$(find val_footstep)/launch/val_footstep.launch"/>

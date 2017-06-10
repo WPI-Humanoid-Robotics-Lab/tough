@@ -29,6 +29,7 @@ bool taskCommonUtils::isGoalReached(geometry_msgs::Pose2D pose_old, geometry_msg
     bool ret = true;
     if (sqrt(pow((pose_new.y - pose_old.y),2) + pow((pose_new.x - pose_old.x),2)) > GOAL_DISTANCE_TOLERANCE)
     {
+//        ROS_WARN("taskCommonUtils::isGoalReached : Position Tolerance exceeded");
         ret = false;
     }
 

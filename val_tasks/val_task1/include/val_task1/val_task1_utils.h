@@ -23,7 +23,7 @@
 // minimum moment to determine the rotation direction
 #define HANDLE_MINIMUM_MOVMENT_IN_RAD      0.0698132 // 4 deg
 #define HANDLE_CONSTANT_THRESHOLD_IN_RAD   0.005     // ~0.3 deg  (// tricky to choose the value, it depends on body acceleration)
-#define HANDLE_CONSTANT_DEBOUNCE_TIME_SEC  2
+#define HANDLE_CONSTANT_DEBOUNCE_TIME_SEC  5
 
 // control time ouit (real time)
 #define HANDLE_CONTROL_TIMEOUT_SEC 60 //sec
