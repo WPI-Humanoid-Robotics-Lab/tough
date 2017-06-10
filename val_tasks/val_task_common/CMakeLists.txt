@@ -20,6 +20,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   val_controllers
   image_transport
+  val_moveit_planners
+  val_control_common
 )
 
 ## System dependencies are found with CMake's conventions
@@ -190,6 +192,15 @@ target_link_libraries(panel_detection_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIE
  add_executable(TrimWalkway src/trim_walkway_pointcloud.cpp)
  add_dependencies(TrimWalkway ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
  target_link_libraries(TrimWalkway ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${PROJECT_NAME})
+
+
+add_executable(push_object src/push_object.cpp)
+add_dependencies(push_object ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(push_object  ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(val_seeds src/val_seeds.cpp)
+add_dependencies(val_seeds ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(val_seeds  ${catkin_LIBRARIES} ${PROJECT_NAME})
 #############
 ## Install ##
 #############

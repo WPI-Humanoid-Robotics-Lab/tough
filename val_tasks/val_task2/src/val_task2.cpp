@@ -753,6 +753,12 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
 {
     ROS_INFO_STREAM_ONCE("valTask2::walkSolarArrayTask : executing " << name);
 
+    static bool executeOnce = true;
+    if(executeOnce )
+    {
+        task2_utils_->clearCurrentPoseMap();
+        executeOnce = false;
+    }
     static int fail_count = 0;
 
     // walk to the goal location
@@ -773,6 +779,7 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
         geometry_msgs::Pose2D temp; // added to test
         pose_prev = temp; // added to test
         eventQueue.riseEvent("/REACHED_ARRAY");
+        executeOnce = true;
     }
     // check if the pose is changed
     else if (taskCommonUtils::isPoseChanged(pose_prev, solar_array_walk_goal_)) {
@@ -807,6 +814,7 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
         ROS_INFO("valTask2::walkSolarArrayTask : walk failed");
         task2_utils_->taskLogPub("valTask2::walkSolarArrayTask : walk failed");
         eventQueue.riseEvent("/WALK_TO_ARRAY_FAILED");
+        executeOnce = true;
     }
     // if failed retry detecting the array and then walk
     else
@@ -1046,7 +1054,7 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
     ROS_INFO_STREAM_ONCE("valTask2::alignSolarArrayTask : executing " << name);
     
     static int fail_count = 0;
-
+    static bool executeOnce = true;
     if(skip_3 || skip_4)
     {
         ROS_INFO("valTask2::alignSolarArrayTask: Resetting robot");
@@ -1054,6 +1062,13 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
         ros::Duration(0.2).sleep();
         task2_utils_->clearCurrentPoseMap();
         skip_3 = false;
+        executeOnce = false;
+    }
+
+    if(executeOnce)
+    {
+        task2_utils_->clearCurrentPoseMap();
+        executeOnce = false;
     }
 
     // walk to the goal location
@@ -1071,6 +1086,7 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
         geometry_msgs::Pose2D temp;
         pose_prev = temp;
         // TODO: check if robot rechead the panel
+        executeOnce = true;
         eventQueue.riseEvent("/ALIGNED_TO_ARRAY");
     }
     // check if the pose is changed
@@ -1103,6 +1119,7 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
         pose_prev = temp;
         ROS_INFO("valTask2::alignSolarArrayTask : walk failed");
         task2_utils_->taskLogPub("valTask2::alignSolarArrayTask : walk failed");
+        executeOnce = true;
         eventQueue.riseEvent("/ALIGN_TO_ARRAY_FAILED");
     }
     // if failed retry detecting the array and then walk
@@ -1768,6 +1785,7 @@ decision_making::TaskResult valTask2::walkToFinishTask(string name, const FSMCal
     static bool execute_once = true;
 
     if (execute_once){
+        task2_utils_->clearCurrentPoseMap();
         task2_utils_->taskLogPub("valTask2::walkToFinishTask : executing " + name);
         // set the robot to default state to walk
         gripper_controller_->openGripper(armSide::RIGHT);
