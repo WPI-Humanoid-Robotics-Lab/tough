@@ -22,6 +22,7 @@
 #include <val_task3/stair_detector_2.h>
 #include <pcl/segmentation/region_growing.h>
 
+#define RANDOM_STEP_ARROW_COLOR false
 
 #define N_STAIR_ANGLE_BUCKETS 16
 #define STEP_DEPTH 0.24f
@@ -47,7 +48,7 @@ void stair_detector_2::cloudCB(const PointCloud::ConstPtr &cloud_raw) {
                                                      << (filtered_cloud->size() * 100.0 / cloud_raw->size()) << "%)");
     NormalCloud::Ptr filtered_normals = estimateNormals(filtered_cloud);
     ROS_DEBUG_STREAM("Normal estimation complete");
-    publishNormals(*filtered_cloud, *filtered_normals);
+//    publishNormals(*filtered_cloud, *filtered_normals);
 
     std::vector<pcl::PointIndices> clusters;
     Eigen::Vector3f stairs_dir;
@@ -59,6 +60,12 @@ float stair_detector_2::estimateStairPose(const PointCloud::ConstPtr &filtered_c
                                           const Eigen::Vector3f &stairs_dir, const Eigen::Vector3f &robot_pos,
                                           Eigen::Affine3f &stairs_pose) const {
     float stairs_angle = std::atan2(stairs_dir.y(), stairs_dir.x());
+
+    // FOR DEBUGGING ONLY -- this hard-codes stairs angle!
+    if (std::abs(stairs_angle + 0.785398) > 0.1) {
+        ROS_DEBUG_STREAM("Trying to test angle -0.785398, but this is " << stairs_angle);
+        return std::numeric_limits<float>::infinity();
+    }
 
     Eigen::Affine3f vis_angle(Eigen::AngleAxisf(stairs_angle, Eigen::Vector3f::UnitZ()));
 
@@ -95,6 +102,14 @@ float stair_detector_2::estimateStairPose(const PointCloud::ConstPtr &filtered_c
         size_t step = static_cast<size_t>(step_height);
         if (step_height - step < 0.1 || step_height - step > 0.9) {
             // Discard clusters whose centroids are too close to the boundary between steps to confidently categorize
+            continue;
+        }
+
+
+        Eigen::Vector4f min, max;
+        pcl::getMinMax3D(*filtered_cloud, cluster.indices, min, max);
+        if (max.z() - min.z() > STEP_HEIGHT + 0.05) {
+            // Discard clusters which are too tall to represent a single step
             continue;
         }
 
@@ -135,14 +150,14 @@ float stair_detector_2::estimateStairPose(const PointCloud::ConstPtr &filtered_c
     // find the largest euclidean segment -- it should be very dense and by far the largest
     pcl::EuclideanClusterExtraction<Point> cluster;
     cluster.setClusterTolerance(0.02);
-    cluster.setMinClusterSize(100);
+    cluster.setMinClusterSize(1000);
     cluster.setInputCloud(step_shape);
     cluster.setIndices(step_clipped_indices);
 
     std::vector<pcl::PointIndices> shape_clusters;
     cluster.extract(shape_clusters);
 
-    publishClusters(step_shape, shape_clusters);
+//    publishClusters(step_shape, shape_clusters);
 
     if (shape_clusters.empty()) {
         ROS_DEBUG_STREAM("Candidate step pose abandoned because the steps were not at the expected positions for this angle");
@@ -173,7 +188,8 @@ float stair_detector_2::estimateStairPose(const PointCloud::ConstPtr &filtered_c
     pca.setInputCloud(step_shape);
     pca.setIndices(stair_cluster);
 
-    stairs_pose.translation() = pca.getMean().head<3>();
+    // Translation identified by bounding box center, not mean
+    stairs_pose.translation() = Eigen::Vector3f::Zero();
 
     // Rotation of PCA
     Eigen::Matrix3f rot_mat = pca.getEigenVectors();
@@ -182,6 +198,16 @@ float stair_detector_2::estimateStairPose(const PointCloud::ConstPtr &filtered_c
     stairs_pose.linear().col(0) = (rot_mat.col(0).cross(rot_mat.col(1))).normalized();
     stairs_pose.linear().col(2) = rot_mat.col(1);
     stairs_pose.linear().col(1) = rot_mat.col(0);
+
+    // Transform the whole cloud one last time in order to get the stair center and variance
+    auto aligned_step_shape = boost::make_shared<PointCloud>();
+    pcl::transformPointCloud(*step_shape, stair_cluster->indices, *aligned_step_shape, stairs_pose.inverse());
+    points_pub_.publish(aligned_step_shape);
+    Eigen::Vector4f obb_min, obb_max;
+    pcl::getMinMax3D(*aligned_step_shape, obb_min, obb_max);
+    stairs_pose.translation() = stairs_pose * ((obb_max.head<3>() + obb_min.head<3>()) / 2);
+    // Score is sum of sizes in each dimension, the smaller the better
+    float score = (obb_max.head<3>() - obb_min.head<3>()).sum();
 
     // Apply the inverse to the rotation from before
     stairs_pose = Eigen::AngleAxisf(stairs_angle, Eigen::Vector3f::UnitZ()) * stairs_pose;
@@ -221,19 +247,11 @@ float stair_detector_2::estimateStairPose(const PointCloud::ConstPtr &filtered_c
     candidate_pose_m.color.b = 0;
     candidate_pose_m.color.a = 1;
     ma.markers.push_back(candidate_pose_m);
-    marker_pub_.publish(ma);
 
-
-    // The score of the candidate pose is the sum square distances to the mean, a measure of the misalignment
-    float sum_sqr_dist = 0;
-    for (const int idx : stair_cluster->indices) {
-        sum_sqr_dist += (stairs_pose.translation() - (*step_shape)[idx].getVector3fMap()).squaredNorm();
-    }
-
-    ROS_DEBUG_STREAM("Got a potential pose with score " << sum_sqr_dist);
+    ROS_DEBUG_STREAM("Got a potential pose with score " << score);
     //  ros::Duration(2).sleep();
     marker_pub_.publish(ma);
-    return sum_sqr_dist;
+    return score;
 }
 
 stair_detector_2::PointCloud::Ptr stair_detector_2::prefilterCloud(const PointCloud::ConstPtr &cloud_raw) const {
@@ -298,7 +316,7 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
     rgs.extract(*regions);
 
     ROS_DEBUG_STREAM("Region growing segmentation found " << regions->size() << " regions");
-    publishClusters(filtered_cloud, *regions);
+//    publishClusters(filtered_cloud, *regions);
 
     // Use RANSAC to get direction of each regions and filter out the non-vertical ones
     pcl::SACSegmentationFromNormals<Point, Normal> nsac;
@@ -412,7 +430,9 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
         // Try this angle and its opposite (the wrong one will return failure fairly quickly)
         Eigen::Affine3f stair_pose_pos, stair_pose_neg;
         float score_pos = estimateStairPose(filtered_cloud, clusters, refined_dir, robot_pos, stair_pose_pos);
+//        ros::Duration(2).sleep();
         float score_neg = estimateStairPose(filtered_cloud, clusters, -refined_dir, robot_pos, stair_pose_neg);
+//        ros::Duration(2).sleep();
 
         // Figure out which of these worked and update the current best if necessary
         float score = std::min(score_pos, score_neg);
@@ -454,6 +474,9 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
 
     visualization_msgs::MarkerArray ma;
     int marker_id_ctr = 0;
+    float pose_m_r = RANDOM_STEP_ARROW_COLOR ? static_cast<float>(std::rand()) / RAND_MAX : 0;
+    float pose_m_g = RANDOM_STEP_ARROW_COLOR ? static_cast<float>(std::rand()) / RAND_MAX : 1;
+    float pose_m_b = RANDOM_STEP_ARROW_COLOR ? static_cast<float>(std::rand()) / RAND_MAX : 1;
     for (const geometry_msgs::Pose &pose : step_poses) {
         visualization_msgs::Marker stair_pose_m;
         pcl_conversions::fromPCL(filtered_cloud->header, stair_pose_m.header);
@@ -464,9 +487,9 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
         stair_pose_m.scale.x = 1;
         stair_pose_m.scale.y = 0.05;
         stair_pose_m.scale.z = 0.05;
-        stair_pose_m.color.r = 0;
-        stair_pose_m.color.g = 1;
-        stair_pose_m.color.b = 1;
+        stair_pose_m.color.r = pose_m_r;
+        stair_pose_m.color.g = pose_m_g;
+        stair_pose_m.color.b = pose_m_b;
         stair_pose_m.color.a = 1;
         ma.markers.push_back(stair_pose_m);
     }
