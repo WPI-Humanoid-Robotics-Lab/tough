@@ -11,19 +11,21 @@ doorOpener::~doorOpener(){
 
 }
 
-void doorOpener::openDoor(geometry_msgs::Pose valveCenter){
+void doorOpener::openDoor(geometry_msgs::Pose valveCenterWorld){
 
     //Alligning relative to the centre of the valve
     geometry_msgs::Pose   pelvisPose;
     geometry_msgs::Pose2D preDoorOpenGoal;
     std::vector<float> x_offset, y_offset;
+    geometry_msgs::Pose valveCenter;
 
-    robot_state_->transformPose(valveCenter,valveCenter,
+    //Walking back a little
+    robot_state_->transformPose(valveCenterWorld,valveCenter,
                                 VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
 
-    valveCenter.position.x  -= 0.35;
-    valveCenter.position.y  -= 0.32;
+    valveCenter.position.x  -= 0.85;
+    valveCenter.position.y  -= 0.12;
 
     //Converting back to world
     robot_state_->transformPose(valveCenter, valveCenter, VAL_COMMON_NAMES::PELVIS_TF);
@@ -32,11 +34,31 @@ void doorOpener::openDoor(geometry_msgs::Pose valveCenter){
     preDoorOpenGoal.y        = valveCenter.position.y;
     preDoorOpenGoal.theta    = tf::getYaw(pelvisPose.orientation);
 
+    ROS_INFO("openDoor: Walking back");
+    walker_.walkToGoal(preDoorOpenGoal);
+
+    //Opening hands
+    ROS_INFO("openDoor: Openign arms");
     task3_.beforDoorOpenPose();
 
     gripper_.closeGripper(LEFT);
     gripper_.closeGripper(RIGHT);
 
+    //Walking close to the door
+    robot_state_->transformPose(valveCenterWorld,valveCenter,
+                                VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+
+    valveCenter.position.x  -= 0.35;
+
+    //Converting back to world
+    robot_state_->transformPose(valveCenter, valveCenter, VAL_COMMON_NAMES::PELVIS_TF);
+
+    preDoorOpenGoal.x        = valveCenter.position.x;
+    preDoorOpenGoal.y        = valveCenter.position.y;
+    preDoorOpenGoal.theta    = tf::getYaw(pelvisPose.orientation);
+
+    ROS_INFO("openDoor: Walking close to the door");
     walker_.walkToGoal(preDoorOpenGoal);
 
     ROS_INFO("Sleeping for 0.5 seconds");

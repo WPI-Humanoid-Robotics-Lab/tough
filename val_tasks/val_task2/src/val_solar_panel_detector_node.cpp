@@ -9,6 +9,7 @@ int main(int argc, char** argv){
   ros::init(argc, argv, "solar_plane_detection");
   ros::NodeHandle nh;
 
+
   src_perception::MultisenseImage* ms_sensor = new src_perception::MultisenseImage(nh);
     cv::Mat tmp;
     ms_sensor->giveImage(tmp);
