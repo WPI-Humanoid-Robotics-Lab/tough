@@ -45,7 +45,7 @@ valTask3::valTask3(ros::NodeHandle nh):nh_(nh){
   task3_utils_         = new task3Utils(nh_);
 
   // detectors
-
+  stair_detector_      = new stair_detector_2(nh_);
 
   robot_state_         = RobotStateInformer::getRobotStateInformer(nh_);
   map_update_count_    = 0;
@@ -66,6 +66,7 @@ valTask3::~valTask3(){
   if(arm_controller_ != nullptr)        delete arm_controller_;
   if(wholebody_controller_ != nullptr)  delete wholebody_controller_;
   if(task3_utils_ != nullptr)           delete task3_utils_;
+  if(stair_detector_ != nullptr)        delete stair_detector_;
 }
 
 void valTask3::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
@@ -129,7 +130,58 @@ decision_making::TaskResult valTask3::initTask(string name, const FSMCallContext
 
 decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
-  ROS_INFO_STREAM("executing " << name);
+  ROS_INFO_STREAM("valTask3::detectStairsTask : executing " << name);
+
+  static int retry_count = 0;
+
+  // detect stairs
+  std::vector<geometry_msgs::Pose> poses;
+  stair_detector_->getDetections(poses);
+
+  // if we get at least 2 poses
+  if (poses.size() > 1)
+  {
+      // update the pose
+      geometry_msgs::Pose2D pose2D;
+      // get the last detected pose
+      int idx = poses.size() -1 ;
+      pose2D.x = poses[idx].position.x;
+      pose2D.y = poses[idx].position.y;
+
+      ROS_INFO_STREAM("valTask3::detectStairsTask : x " << pose2D.x << " y " << pose2D.y);
+
+      // get the theta
+      pose2D.theta = tf::getYaw(poses[idx].orientation);
+      setStairDetectWalkPose(pose2D);
+
+      ROS_INFO_STREAM("valTask3::detectStairsTask : quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w );
+      ROS_INFO_STREAM("valTask3::detectStairsTask : yaw: " << pose2D.theta );
+
+      //reset count
+      retry_count = 0;
+
+      eventQueue.riseEvent("/DETECTED_STAIRS");
+  }
+  // if failed for more than 5 times, go to error state
+  else if (retry_count > 5)
+  {
+      // reset the fail count
+      retry_count = 0;
+      eventQueue.riseEvent("/DETECT_STAIRS_FAILED");
+      if(stair_detector_ != nullptr) delete stair_detector_;
+      stair_detector_ = nullptr;
+
+      ROS_INFO("valTask3::detectStairsTask : reset fail count");
+  }
+  // if failed retry detecting the panel
+  else
+  {
+      // increment the fail count
+      retry_count++;
+      eventQueue.riseEvent("/DETECT_STAIRS_RETRY");
+
+      ROS_INFO("valTask3::detectStairsTask: increment fail count");
+  }
 
   while(!preemptiveWait(1000, eventQueue)){
 
@@ -141,7 +193,8 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
 
 decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
-  ROS_INFO_STREAM("executing " << name);
+  ROS_INFO_STREAM("valTask3::walkToStairsTask : executing " << name);
+
 
   while(!preemptiveWait(1000, eventQueue)){
 

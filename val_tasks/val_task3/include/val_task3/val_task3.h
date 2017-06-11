@@ -28,6 +28,7 @@
 #include "val_controllers/robot_state.h"
 #include <val_controllers/val_wholebody_manipulation.h>
 #include <mutex>
+#include <val_task3/stair_detector_2.h>
 
 using namespace decision_making;
 
@@ -52,6 +53,9 @@ class valTask3{
     wholebodyManipulation* wholebody_controller_;
     RobotStateInformer* robot_state_;
     task3Utils*         task3_utils_;
+
+    //detectors
+    stair_detector_2*   stair_detector_;
 
     //map and occupancy grid
     ros::Subscriber occupancy_grid_sub_;
