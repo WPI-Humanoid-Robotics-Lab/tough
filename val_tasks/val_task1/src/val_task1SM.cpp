@@ -21,7 +21,8 @@ FSM(val_task1)
     STATE_DETECT_FINISH, // fails --> indicate error and stay transition to error
     STATE_WALK_TO_FINISH, // go back
     STATE_END,
-    STATE_ERROR
+    STATE_ERROR,
+    STATE_SKIP_TO_CP3
   }
 
   // give the start state
@@ -42,6 +43,7 @@ FSM(val_task1)
         FSM_ON_EVENT("/INIT_RETRY", FSM_NEXT(STATE_INIT))
         FSM_ON_EVENT("/INIT_SUCESSFUL", FSM_NEXT(STATE_DETECT_PANEL_COARSE))
         FSM_ON_EVENT("/INIT_FAILED", FSM_NEXT(STATE_ERROR))
+        FSM_ON_EVENT("/SKIP_CHECKPOINT", FSM_NEXT(STATE_SKIP_TO_CP3))
 
         // or on condition or next state directly
       }
@@ -223,6 +225,18 @@ FSM(val_task1)
       FSM_TRANSITIONS
       {
         FSM_ON_EVENT("/RESTART", FSM_NEXT(STATE_INIT))
+      }
+    }
+    FSM_STATE(STATE_SKIP_TO_CP3)
+    {
+
+      FSM_CALL_TASK(STATE_SKIP_TO_CP3)
+
+      FSM_TRANSITIONS
+      {
+        FSM_ON_EVENT("/SKIPPED_TO_CP3", FSM_NEXT(STATE_DETECT_HANDLE_CENTER))
+        FSM_ON_EVENT("/SKIP_CP3_RETRY", FSM_NEXT(STATE_SKIP_TO_CP3))
+        FSM_ON_EVENT("/SKIP_CP3_FAILED", FSM_NEXT(STATE_ERROR))
       }
     }
   }
