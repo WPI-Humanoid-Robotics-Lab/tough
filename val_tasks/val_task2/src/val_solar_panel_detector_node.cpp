@@ -8,38 +8,6 @@
 int main(int argc, char** argv){
   ros::init(argc, argv, "solar_plane_detection");
   ros::NodeHandle nh;
-  geometry_msgs::Pose2D rover_loc;
-  std::vector<std::vector<geometry_msgs::Pose> > rover_poses;
-  bool isroverRight;
-
-  ros::Rate loop1(1);
-
-  /*
-  if(true) //to destruct the rover_obj
-  {
-      RoverDetector rover_obj(nh);
-      while(ros::ok())
-      {
-
-          rover_obj.getDetections(rover_poses);
-          if(!rover_poses.empty() )
-          {
-              geometry_msgs::Pose rover_loc_3d;
-              rover_loc_3d = rover_poses[rover_poses.size()-1][2];
-              rover_loc.x = rover_loc_3d.position.x;
-              rover_loc.y = rover_loc_3d.position.y;
-              rover_loc.theta = tf::getYaw(rover_poses.back()[2].orientation);
-              ROVER_SIDE roverSide;
-              if(rover_obj.getRoverSide(roverSide)){
-                  isroverRight = roverSide == ROVER_SIDE::RIGHT;
-                  break;
-              }
-          }
-          ros::spinOnce();
-          loop1.sleep();
-      }
-  }*/
-
 
 
   src_perception::MultisenseImage* ms_sensor = new src_perception::MultisenseImage(nh);
@@ -54,7 +22,7 @@ int main(int argc, char** argv){
 
 
 
-  SolarPanelDetect obj(nh,rover_loc,isroverRight,button_loc);
+  SolarPanelDetect obj(nh,button_loc);
 
   ros::Rate loop(1);
   while(ros::ok()){

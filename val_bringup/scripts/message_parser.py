@@ -5,11 +5,12 @@ import time
 import subprocess
 import rospy
 from std_msgs.msg import String
-from diagnostic_msgs.msg import DiagnosticArray
+from geometry_msgs.msg import Point
+
 
 FIELD_IP = "192.168.2.10"
-#FIELD_IP = "localhost"
-PORT = 8080 
+# FIELD_IP = "localhost"
+PORT = 8080
 
 class mysocket:
     def __init__(self, sock=None):
@@ -50,38 +51,64 @@ sock.connect(FIELD_IP,PORT)
 def state_callback(data):
     #send only data that is required. it should be a string only
     rospy.loginfo(rospy.get_caller_id() + "Message %s", data.data)
-    sock.mysend(data.data +" \n")
+    sock.mysend(str(time.time()) + " : " + data.data +" \n")
+
+def point_callback(data):
+    #send only data that is required. it should be a string only
+    sock.mysend(str(time.time()) + " : " + "Clicked point : x:"+str(data.x) +" y:"+ str(data.y) + " z:"+str(data.z) +" \n")
 
 def listener():
     # Listen to the decision making topic
     rospy.init_node('state_listener', anonymous=True)
     rospy.Subscriber("/field/log", String, state_callback)
+    rospy.Subscriber("/clicked_point", Point, point_callback)
 
 
 
 if __name__ == '__main__':
     listener()
+    pub1 = rospy.Publisher('/decision_making/task1/events', String, queue_size=10)
+    pub2 = rospy.Publisher('/decision_making/task2/events', String, queue_size=10)
     prev_time = time.time()
     prev_ros_time = rospy.get_rostime().secs
     while True:
         current_time = time.time()
+
         if current_time - prev_time > 5:
             ros_time = rospy.get_rostime().secs
             rtf = (ros_time - prev_ros_time)/ (current_time - prev_time)
             prev_time = time.time()
             prev_ros_time = rospy.get_rostime().secs
-            sock.mysend("Real Time Factor : "+ str(rtf))
+            sock.mysend(str(time.time()) + " : " + "Real Time Factor : "+ str(rtf)+"\n")
         msg = sock.myreceive()
         start_index = msg.find("]")
+
         if start_index == -1:
             continue
         start_index += 2
+
+        # + is a linux command to be executed
         if (msg[start_index] == "+"):
-            # any message that begins with a + is
             command = msg[start_index+1:-1]
             print msg[:start_index] + "**Command Recieved** " + msg[start_index:-1]
             print "executing '"+command + "'"
             subprocess.Popen(command.split())
 
+        # ! is rostopic echo for 1 message.
+        elif (msg[start_index] == "!"):
+            topic_name = msg[start_index + 1:-1]
+            print msg[:start_index] + "Listening to " + msg[start_index:-1]
+            proc = subprocess.Popen(["rostopic", "echo", "-n", "1", topic_name], stdout=subprocess.PIPE)
+            output = proc.stdout.read()
+            sock.mysend(str(time.time()) + " : " +  output + "\n")
+
+        # / is message to be sent to the state machine
+        elif (msg[start_index] == "/"):
+            print msg[:start_index] + "**Message Recieved** " + msg[start_index:-1]
+            pub1.publish(msg[start_index:-1])
+            pub2.publish(msg[start_index:-1])
+
+        # rest of the messages
         else:
             print msg[:start_index] + "**Message Recieved** " + msg[start_index:-1]
+

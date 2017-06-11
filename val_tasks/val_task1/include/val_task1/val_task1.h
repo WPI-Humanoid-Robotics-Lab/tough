@@ -100,6 +100,7 @@ class valTask1 {
 
     //required for initialization. Move out init state only if map is updated twice.
     ros::Subscriber occupancy_grid_sub_;
+
     unsigned int map_update_count_;
     void occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg);
 
@@ -150,6 +151,7 @@ class valTask1 {
     decision_making::TaskResult walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult endTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult errorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
+    decision_making::TaskResult skipToCP3(string name, const FSMCallContext& context, EventQueue& eventQueue);
 
     geometry_msgs::Pose2D getPanelWalkGoal();
     void setPanelWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal_coarse_);

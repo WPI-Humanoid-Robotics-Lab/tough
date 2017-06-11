@@ -765,22 +765,22 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     gripper_controller_->closeGripper(armSide::RIGHT);
 
     // if the handle is moving in wrong direction, flip the points (assuming grasp is not lost)
-//    if(task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_AWAY_TO_GOAL)
-//    {
-//        ROS_INFO("handle moving in wrong direction, path will be flipped ");
-//        task1_utils_->taskLogPub("handle moving in wrong direction, path will be flipped ");
-//        // stop all the trajectories
-//        control_helper_->stopAllTrajectories();
+    //    if(task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_AWAY_TO_GOAL)
+    //    {
+    //        ROS_INFO("handle moving in wrong direction, path will be flipped ");
+    //        task1_utils_->taskLogPub("handle moving in wrong direction, path will be flipped ");
+    //        // stop all the trajectories
+    //        control_helper_->stopAllTrajectories();
 
-//        // set the execute flag
-//        execute_once = true;
+    //        // set the execute flag
+    //        execute_once = true;
 
-//        // flip the direction
-//        rot_dir = (rot_dir == handleDirection::ANTICLOCK_WISE) ? handleDirection::CLOCK_WISE : handleDirection::ANTICLOCK_WISE;
+    //        // flip the direction
+    //        rot_dir = (rot_dir == handleDirection::ANTICLOCK_WISE) ? handleDirection::CLOCK_WISE : handleDirection::ANTICLOCK_WISE;
 
-//        // still stay in the same state
-//        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
-//    }
+    //        // still stay in the same state
+    //        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
+    //    }
     // if the pitch is corrected
     if (task1_utils_->isPitchCorrectNow())
     {
@@ -866,7 +866,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
         // regrasp the handle
         ///@todo vinayak, fix the regrasp
-       handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[PITCH_KNOB_HANDLE]);
+        handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[PITCH_KNOB_HANDLE]);
 
         // replan and execute from the current point,
         // set the execute once state
@@ -1065,23 +1065,23 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     gripper_controller_->closeGripper(armSide::LEFT);
 
     // if the handle is moving in wrong direction, flip the points (assuming grasp is not lost)
-//    if(task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_AWAY_TO_GOAL)
-//    {
-//        ROS_INFO("handle moving in wrong direction, path will be flipped ");
-//        task1_utils_->taskLogPub("handle moving in wrong direction, path will be flipped ");
+    //    if(task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_AWAY_TO_GOAL)
+    //    {
+    //        ROS_INFO("handle moving in wrong direction, path will be flipped ");
+    //        task1_utils_->taskLogPub("handle moving in wrong direction, path will be flipped ");
 
-//        // stop all the trajectories
-//        control_helper_->stopAllTrajectories();
+    //        // stop all the trajectories
+    //        control_helper_->stopAllTrajectories();
 
-//        // set the execute flag
-//        execute_once = true;
+    //        // set the execute flag
+    //        execute_once = true;
 
-//        // flip the direction
-//        rot_dir = (rot_dir == handleDirection::ANTICLOCK_WISE) ? handleDirection::CLOCK_WISE : handleDirection::ANTICLOCK_WISE;
+    //        // flip the direction
+    //        rot_dir = (rot_dir == handleDirection::ANTICLOCK_WISE) ? handleDirection::CLOCK_WISE : handleDirection::ANTICLOCK_WISE;
 
-//        // still stay in the same state
-//        eventQueue.riseEvent("/YAW_CORRECTION_EXECUTING");
-//    }
+    //        // still stay in the same state
+    //        eventQueue.riseEvent("/YAW_CORRECTION_EXECUTING");
+    //    }
     // if the yaw is corrected
     if (task1_utils_->isYawCorrectNow())
     {
@@ -1553,6 +1553,78 @@ decision_making::TaskResult valTask1::errorTask(string name, const FSMCallContex
 {
     ROS_INFO_STREAM("executing " << name);
     task1_utils_->taskLogPub(" valTask1::errorTask : executing " + name);
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
+    }
+
+    return TaskResult::SUCCESS();
+}
+
+decision_making::TaskResult valTask1::skipToCP3(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+    ROS_INFO_STREAM("executing " << name);
+    task1_utils_->taskLogPub(" valTask1::skipToCP3 : executing " + name);
+
+    static int retry_count, harness_release_retry_count = 0;
+
+    // skip to checkpoint 3
+    // start the task
+    ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
+    srcsim::StartTask   srv;
+    srv.request.checkpoint_id  = 3;
+    srv.request.task_id        = 1;
+    \
+    // if the check point is skipped
+    if(client.call(srv))
+    {
+        task1_utils_->setHarnessDetached(false);
+        ros::Duration(10).sleep();
+        // if the robot harness is released
+        if (task1_utils_->isHarnessDetached())
+        {
+            ROS_INFO("clear point cloud and map");
+            task1_utils_->resetPointCloud();
+            ros::Duration(1).sleep();
+            task1_utils_->clearMap();
+            ROS_INFO("skipped to cp3, walking 1 step back");
+            task1_utils_->taskLogPub("skipped to cp3, walking 1 step back");
+            ros::Duration(0.5).sleep();
+            std::vector<float> x_offset={-0.25,-0.25};
+            std::vector<float> y_offset={0.0, 0.0};
+            walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
+            ros::Duration(5).sleep();
+
+            // continue with the task
+            eventQueue.riseEvent("/SKIPPED_TO_CP3");
+        }
+        else if (harness_release_retry_count < 5)
+        {
+            ROS_ERROR("waiting for harness");
+            eventQueue.riseEvent("/SKIP_CP3_FAILED");
+            harness_release_retry_count++;
+        }
+        else
+        {
+            ROS_ERROR("harness not released");
+            eventQueue.riseEvent("/SKIP_CP3_FAILED");
+            harness_release_retry_count++;
+        }
+    }
+    else if(retry_count < 5)
+    {
+        //reset the count
+        retry_count = 0;
+        eventQueue.riseEvent("/SKIP_CP3_RETRY");
+    }
+    else
+    {
+        ROS_ERROR("service not called");
+        eventQueue.riseEvent("/SKIP_CP3_FAILED");
+        retry_count++;
+    }
 
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){

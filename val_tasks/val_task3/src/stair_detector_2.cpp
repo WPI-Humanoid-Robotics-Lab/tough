@@ -25,15 +25,16 @@
 #define RANDOM_STEP_ARROW_COLOR false
 
 #define N_STAIR_ANGLE_BUCKETS 16
-#define STEP_DEPTH 0.24f
-#define STEP_HEIGHT 0.2f
+// These values were derived by inspecting objects in Gazebo
+#define STEP_DEPTH 0.2389f
+#define STEP_HEIGHT 0.2031f
 
 stair_detector_2::stair_detector_2(ros::NodeHandle nh) :
         nh_(nh),
         tf_listener_(nh),
         point_cloud_listener_(nh, "/leftFoot", "/left_camera_frame")
 {
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array", 1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("stairs", 1);
     blacklist_pub_ = nh_.advertise<stair_detector_2::PointCloud>("/block_map", 1);
     points_pub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZL>>("stair_detection_debug_points", 1);
     pcl_sub_ = nh.subscribe(PERCEPTION_COMMON_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC, 10, &stair_detector_2::cloudCB, this);
@@ -456,7 +457,7 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
 
     // Add the first pose as the point on the ground right in front of the staircase. Note that because the robot is
     // standing on the walkway, not the ground, this pose doesn't follow the pattern used in the for loop
-    Eigen::Translation3f base_pose_ground(-0.5f * STEP_DEPTH, 0, 0);
+    Eigen::Translation3f base_pose_ground(-STEP_DEPTH, 0, 0); // changed this line to change offset \\\\\\\\\\~~~~~~~
     Eigen::Affine3f step_pose_ground = best_stair_pose * base_pose_ground;
     geometry_msgs::Pose step_pose_ground_ros;
     tf::poseEigenToMsg(step_pose_ground.cast<double>(), step_pose_ground_ros);

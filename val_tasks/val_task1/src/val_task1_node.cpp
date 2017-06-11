@@ -34,6 +34,7 @@ void task1Node::registerStateMethods(void)
     LocalTasks::registrate("STATE_WALK_TO_FINISH",      std::bind(&valTask1::walkToFinishTask,      task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("END_STATE",                 std::bind(&valTask1::endTask,               task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_ERROR",               std::bind(&valTask1::errorTask,             task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    LocalTasks::registrate("STATE_SKIP_TO_CP3",         std::bind(&valTask1::skipToCP3,             task1_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 void task1Node::paramUpdateCallback(val_task1::task1_parametersConfig &config, uint32_t level)
