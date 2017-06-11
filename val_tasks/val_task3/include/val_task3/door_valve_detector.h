@@ -75,7 +75,7 @@ private:
     void setOffset(float minX = 0.2, float maxX = 2.0,float minY = -0.7 , float maxY = 0.7 ,float minZ= 0.7, float maxZ=1.5);
     void transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, bool isinverse);
     void filter_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-    void fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+    void fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, float &theta);
     void visualize();
     void visualizept(float x,float y,float z);
     void clustering(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);

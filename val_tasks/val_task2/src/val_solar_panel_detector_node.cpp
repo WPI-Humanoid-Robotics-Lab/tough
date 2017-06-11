@@ -1,6 +1,10 @@
 #include "val_task2/val_solar_panel_detector.h"
 #include "val_task2/val_rover_detection.h"
 
+
+#include "val_task2/button_detector.h"
+#include "perception_common/MultisenseImage.h"
+
 int main(int argc, char** argv){
   ros::init(argc, argv, "solar_plane_detection");
   ros::NodeHandle nh;
@@ -36,11 +40,17 @@ int main(int argc, char** argv){
   }
 
 
-  geometry_msgs::Point button_loc;
 
-  button_loc.x = 3.66;
-  button_loc.y = -1.75;
-  button_loc.z = 0.846;
+  src_perception::MultisenseImage* ms_sensor = new src_perception::MultisenseImage(nh);
+    cv::Mat tmp;
+    ms_sensor->giveImage(tmp);
+    ms_sensor->giveDisparityImage(tmp);
+    ButtonDetector button_detector(nh, ms_sensor);
+    geometry_msgs::Point button_loc;
+    int retry = 0;
+    while (!button_detector.findButtons(button_loc) && retry++ < 10);
+
+
 
 
   SolarPanelDetect obj(nh,rover_loc,isroverRight,button_loc);
