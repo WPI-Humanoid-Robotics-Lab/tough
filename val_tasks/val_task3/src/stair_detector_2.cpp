@@ -25,8 +25,9 @@
 #define RANDOM_STEP_ARROW_COLOR false
 
 #define N_STAIR_ANGLE_BUCKETS 16
-#define STEP_DEPTH 0.24f
-#define STEP_HEIGHT 0.2f
+// These values were derived by inspecting objects in Gazebo
+#define STEP_DEPTH 0.2389f
+#define STEP_HEIGHT 0.2031f
 
 stair_detector_2::stair_detector_2(ros::NodeHandle nh) :
         nh_(nh),
