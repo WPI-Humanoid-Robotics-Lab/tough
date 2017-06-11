@@ -132,9 +132,13 @@ void valTask2::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
 void valTask2::panelHandleOffsetCB(const std_msgs::Float32 msg)
 {
     geometry_msgs::Pose tempPose = solar_panel_handle_pose_;
+    float theta = tf::getYaw(tempPose.orientation);
+    // converting theta to be along the handle (inward direction)
+    theta+=M_PI/2;
 
+    tempPose.position.x = tempPose.positon.x + msg*cos(theta);
+    tempPose.position.y = tempPose.positon.y + msg*sin(theta);
     setSolarPanelHandlePose(tempPose);
-
 }
 
 bool valTask2::preemptiveWait(double ms, decision_making::EventQueue& queue) {
