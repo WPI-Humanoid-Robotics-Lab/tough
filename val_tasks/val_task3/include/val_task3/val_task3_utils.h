@@ -26,7 +26,7 @@ private:
     const std::vector<float> RIGHT_ARM_SEED_TABLE_MANIP = {-0.23, 0, 0.70, 1.51, -0.05, 0, 0};
     const std::vector<float> LEFT_ARM_SEED_TABLE_MANIP  = {-0.23, 0, 0.70, -1.51, 0.05, 0, 0};
     const std::vector<float> RIGHT_ARM_DOOR_OPEN = {-1.35, 1.20, 0.75, 0.50, 1.28, 0.0, 0.0};
-    const std::vector<float> LEFT_ARM_DOOR_OPEN  = {-0.40, -1.25, 0.70,-0.68, 1.27, 0, 0};
+    const std::vector<float> LEFT_ARM_DOOR_OPEN  = {-0.2f, -1.2f, 0.7222f, -1.5101f, 0.0f, 0.0f, 0.0f};
 
     // Visited map
     ros::Subscriber visited_map_sub_;

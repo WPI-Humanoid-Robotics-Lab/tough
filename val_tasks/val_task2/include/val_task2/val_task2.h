@@ -37,6 +37,7 @@
 #include "val_task_common/finish_box_detector.h"
 #include "navigation_common/map_generator.h"
 #include "perception_common/MultisensePointCloud.h"
+#include <std_msgs/Float32.h>
 
 using namespace decision_making;
 
@@ -119,6 +120,9 @@ class valTask2 {
     geometry_msgs::Pose2D solar_array_fine_walk_goal_;
     bool is_array_on_right_;
 
+    ros::Subscriber panel_handle_offset_sub_;
+    ros::Publisher  panel_handle_offset_pub_;
+    void panelHandleOffsetCB(const std_msgs::Float32 msg);
     geometry_msgs::Point button_coordinates_;
     geometry_msgs::Point button_coordinates_temp_; // this is used for deciding if rotation of panel is required
 

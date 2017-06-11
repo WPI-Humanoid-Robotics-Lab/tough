@@ -79,7 +79,10 @@ valTask2::valTask2(ros::NodeHandle nh):
     // Subscribers
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask2::occupancy_grid_cb, this);
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask2::visited_map_cb, this);
+    panel_handle_offset_sub_ = nh_.subscribe("/panel_offset",10, &valTask2::panelHandleOffsetCB, this);
 
+    //publishers
+    panel_handle_offset_pub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 10);
     task2_utils_->taskLogPub("Setting Multisense Subscribers");
     cv::Mat img;
     ms_sensor_->giveImage(img);
@@ -126,6 +129,37 @@ void valTask2::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
     // Count the number of times map is updated
     //    ROS_INFO("valTask2::occupancy_grid_cb: map count updated to %d",map_update_count_);
     ++map_update_count_;
+}
+
+void valTask2::panelHandleOffsetCB(const std_msgs::Float32 msg)
+{
+    geometry_msgs::Pose tempPose = solar_panel_handle_pose_;
+    float theta = tf::getYaw(tempPose.orientation);
+    // converting theta to be along the handle
+
+    theta+=M_PI/2;
+
+    tempPose.position.x = tempPose.position.x + msg.data*cos(theta);
+    tempPose.position.y = tempPose.position.y + msg.data*sin(theta);
+
+    setSolarPanelHandlePose(tempPose);
+
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+    marker.header.stamp = ros::Time::now();
+    marker.ns = "panel_handle";
+    marker.id = 1;
+    marker.type = visualization_msgs::Marker::ARROW;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose = tempPose;
+    marker.scale.x = 0.5;
+    marker.scale.y = 0.05;
+    marker.scale.z = 0.05;
+    marker.color.a = 1.0;
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
+    panel_handle_offset_pub_.publish(marker);
 }
 
 bool valTask2::preemptiveWait(double ms, decision_making::EventQueue& queue) {
@@ -428,8 +462,13 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
 
         task2_utils_->resumePointCloud();
         isFirstRun = false;
+        geometry_msgs::Point temp;
+        button_coordinates_temp_ = temp;
+        int retry = 0;
+        while (!button_detector_->findButtons(button_coordinates_temp_) && retry++ < 10);
+        ROS_INFO("valTask2::detectPanelTask : Button detected at x:%f y:%f z:%f", button_coordinates_temp_.x,button_coordinates_temp_.y,button_coordinates_temp_.z);
 
-        solar_panel_detector_ = new SolarPanelDetect(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
+        solar_panel_detector_ = new SolarPanelDetect(nh_, button_coordinates_temp_);
         chest_controller_->controlChest(2, 2, 2);
 
         //move arms to default position
@@ -459,9 +498,6 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
         task2_utils_->reOrientTowardsGoal(solar_panel_handle_pose_.position);
         ros::Duration(2.0).sleep();
 
-        int retry = 0;
-        while (!button_detector_->findButtons(button_coordinates_temp_) && retry++ < 10);
-        ROS_INFO("valTask2::detectPanelTask : Button detected at x:%f y:%f z:%f", button_coordinates_temp_.x,button_coordinates_temp_.y,button_coordinates_temp_.z);
         task2_utils_->taskLogPub("valTask2::detectPanelTask : Button detected at x: " + std::to_string(button_coordinates_temp_.x) + " y: " + std::to_string(button_coordinates_temp_.y) + " z:" + std::to_string(button_coordinates_temp_.z));
         ROS_INFO_STREAM("valTask2::detectPanelTask : Position " << poses[idx].position.x<< " " <<poses[idx].position.y <<" "<<poses[idx].position.z);
         task2_utils_->taskLogPub("valTask2::detectPanelTask : Position " + std::to_string(poses[idx].position.x) + " "  + std::to_string(poses[idx].position.y) + " " + std::to_string(poses[idx].position.z ));
@@ -470,6 +506,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
         retry_count = 0;
 
         eventQueue.riseEvent("/DETECTED_PANEL");
+//        eventQueue.riseEvent("/MANUAL_EXECUTION");
         if(solar_panel_detector_ != nullptr) delete solar_panel_detector_;
         solar_panel_detector_ = nullptr;
     }

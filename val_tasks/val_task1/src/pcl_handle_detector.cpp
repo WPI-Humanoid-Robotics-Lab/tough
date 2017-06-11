@@ -4,7 +4,7 @@ pcl_handle_detector::pcl_handle_detector(ros::NodeHandle &nh, geometry_msgs::Pos
 {
     pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &pcl_handle_detector::cloudCB, this);
     pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_task1/handle_detector/filteredPointCloud", 1);
-    vis_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/visualization_marker", 1 );
+    vis_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/visualization_marker_array", 1 );
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
     offset = 0.7;   //fine panel detection offset.
     panel_coarse_loc_ = panel_loc_;

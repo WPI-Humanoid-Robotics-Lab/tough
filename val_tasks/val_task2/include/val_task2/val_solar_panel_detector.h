@@ -85,8 +85,8 @@ private:
   void PlaneSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, pcl::PointIndices::Ptr &inliers, pcl::ModelCoefficients::Ptr &coefficients );
 
 public:
-  SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight);
-  SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight, geometry_msgs::Point button_loc);
+  SolarPanelDetect(ros::NodeHandle nh);
+  SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Point button_loc);
   ~SolarPanelDetect();
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
   int getDetectionTries() const;

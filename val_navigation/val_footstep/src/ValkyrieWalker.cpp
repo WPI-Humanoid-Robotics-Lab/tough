@@ -161,6 +161,7 @@ bool ValkyrieWalker::walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list 
     this->footsteps_pub_.publish(list);
     ValkyrieWalker::id--;
     if (waitForSteps){
+        cbTime_=ros::Time::now();
         this->waitForSteps(list.footstep_data_list.size());
     }
     return true;

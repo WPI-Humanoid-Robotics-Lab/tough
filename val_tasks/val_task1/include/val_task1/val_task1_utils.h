@@ -19,6 +19,7 @@
 #include <std_msgs/String.h>
 #include <geometry_msgs/Pose2D.h>
 #include <val_footstep/ValkyrieWalker.h>
+#include <srcsim/Harness.h>
 
 // minimum moment to determine the rotation direction
 #define HANDLE_MINIMUM_MOVMENT_IN_RAD      0.0698132 // 4 deg
@@ -79,16 +80,18 @@ private:
     ros::Subscriber task_status_sub_;
     RobotStateInformer* current_state_;
 
-    ros::Publisher marker_pub_, clearbox_pointcloud_pub_, reset_pointcloud_pub_, task1_log_pub_;
+    ros::Publisher marker_pub_, clearbox_pointcloud_pub_, reset_pointcloud_pub_, task1_log_pub_, reset_map_pub_;
     void satelliteMsgCB (const srcsim::Satellite &msg);
     int current_checkpoint_;
     srcsim::Task taskMsg;
 
-    std::mutex mtx;
+    std::mutex mtx, harness_mtx_;
     nav_msgs::OccupancyGrid visited_map_;
     void visitedMapUpdateCB(const nav_msgs::OccupancyGrid &msg);
-    ros::Subscriber visitedMapUpdaterSub_;
+    ros::Subscriber visitedMapUpdaterSub_, harness_sub_;
     ValkyrieWalker* walk_;
+    void harnessCB(const srcsim::Harness &harnessMsg);
+    bool is_harness_detached_;
 
 public:
     task1Utils(ros::NodeHandle nh);
@@ -107,6 +110,7 @@ public:
     void visulatise6DPoints(std::vector<geometry_msgs::Pose> &points);
     void clearBoxPointCloud();
     void resetPointCloud();
+    void clearMap();
     void taskStatusSubCB(const srcsim::Task &msg);
     void terminator(const ros::TimerEvent& t);
     void fixHandleArray(std::vector<geometry_msgs::Point> &handle_loc, std::vector<geometry_msgs::Point> &pclHandlePoses);
@@ -122,4 +126,6 @@ public:
     valueDirection getGoalDirection(double current_value, controlSelection control);
     void taskLogPub(std::string data);
 
+    bool isHarnessDetached() const;
+    void setHarnessDetached(bool isHarnessDetached);
 };
