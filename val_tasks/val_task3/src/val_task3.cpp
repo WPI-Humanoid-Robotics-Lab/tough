@@ -195,10 +195,68 @@ decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCal
 
   ROS_INFO_STREAM("valTask3::walkToStairsTask : executing " << name);
 
+  static int fail_count = 0;
 
+  // walk to the goal location
+  // the goal can be updated on the run time
+  static geometry_msgs::Pose2D pose_prev;
+
+  geometry_msgs::Pose current_pelvis_pose;
+  robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+
+  // Check if goal is reached before walking
+  if (taskCommonUtils::isGoalReached(current_pelvis_pose, stair_detect_walk_pose_))
+  {
+      ROS_INFO("reached stairs");
+
+      // TODO: check if robot rechead the panel
+      eventQueue.riseEvent("/REACHED_STAIRS");
+      // required for robot to stablize as goal tolerance is high
+      ros::Duration(1).sleep();
+  }
+  // check if the pose is changed
+  else if (taskCommonUtils::isPoseChanged(pose_prev, stair_detect_walk_pose_))
+  {
+      ROS_INFO_STREAM("pose changed to "<<stair_detect_walk_pose_);
+      walker_->walkToGoal(stair_detect_walk_pose_, false);
+      // sleep so that the walk starts
+      ROS_INFO("Footsteps should be generated now");
+      ros::Duration(4).sleep();
+
+      // update the previous pose
+      pose_prev = stair_detect_walk_pose_;
+      eventQueue.riseEvent("/WALK_TO_STAIRS_EXECUTING");
+  }
+
+  // if walking stay in the same state
+  else if (walk_track_->isWalking())
+  {
+      // no state change
+      ROS_INFO_THROTTLE(2, "walking");
+      eventQueue.riseEvent("/WALK_TO_STAIRS_EXECUTING");
+  }
+  // if walk finished
+  // if failed for more than 5 times, go to error state
+  else if (fail_count > 5)
+  {
+      // reset the fail count
+      fail_count = 0;
+      ROS_INFO("walk failed");
+      eventQueue.riseEvent("/WALK_TO_STAIRS_FAILED");
+  }
+  // if failed retry detecting the panel and then walk
+  // also handles MOVE_FAILED
+  else
+  {
+      // increment the fail count
+      fail_count++;
+      ROS_INFO("walk retry");
+      eventQueue.riseEvent("/WALK_TO_STAIRS_RETRY");
+  }
+
+  // wait infinetly until an external even occurs
   while(!preemptiveWait(1000, eventQueue)){
-
-    ROS_INFO("waiting for transition");
+      ROS_INFO("waiting for transition");
   }
 
   return TaskResult::SUCCESS();
