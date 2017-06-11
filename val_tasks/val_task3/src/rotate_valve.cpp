@@ -218,6 +218,18 @@ bool rotateValve::move_valve(std::vector<geometry_msgs::Pose> poses, float execu
     ros::Duration(executionTime/2).sleep();
 
     std::vector< std::vector<float> > armData;
+    //Moving down and towards the robot
+    armData.clear();
+    armData.push_back({-0.23,-1.21,0.65,-0.84,1.28,0,0});
+    armTraj_.moveArmJoints(LEFT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
+
+    armData.clear();
+    armData.push_back({-0.23,-0.74,0.65,-0.84,1.28,0,0});
+    armTraj_.moveArmJoints(LEFT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
+
+    //Moving arm outside
     armData.clear();
     armData.push_back({0.1,0.1,0.1,0.1,0.1,0.1,0.1});
     armTraj_.moveArmJoints(LEFT, armData, executionTime);

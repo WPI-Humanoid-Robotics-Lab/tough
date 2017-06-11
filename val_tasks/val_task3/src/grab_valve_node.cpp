@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     rotateValve rotate(nh);
     gripperControl gc(nh);
     doorOpener doorOpen(nh);
-    valControlCommon cont(nh);
+
 
 
     geometry_msgs::Point valveCentre;
@@ -89,10 +89,7 @@ int main(int argc, char **argv)
         rotate.grab_valve(valveCentre);
         rotate.compute_traj(valveCentre,0.18,points);
         rotate.move_valve(points);
-        if(i == 3){
-            cont.resetRobot();
-            ros::Duration(3.0).sleep();
-        }
+
     }
 
     ros::Duration(3.0).sleep();
