@@ -257,7 +257,6 @@ decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCal
   // wait infinetly until an external even occurs
   while(!preemptiveWait(1000, eventQueue)){
       ROS_INFO("waiting for transition");
-      task1_utils_->taskLogPub("waiting for transition");
   }
 
   return TaskResult::SUCCESS();
