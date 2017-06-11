@@ -74,6 +74,8 @@ add_library(${PROJECT_NAME}
          src/val_task3_utils.cpp
          src/rotate_valve.cpp
          src/door_opener.cpp
+         src/climb_stairs.cpp
+         src/leak_detector.cpp
 )
 
 add_executable(stair_climb_node src/val_stairclimb.cpp)
@@ -115,6 +117,9 @@ target_link_libraries(door_task_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(blind_goal_finder src/blind_goal_finder.cpp)
 target_link_libraries(blind_goal_finder ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(climb_stairs_node src/climb_stairs_node.cpp)
+target_link_libraries(climb_stairs_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(val_task3_node            src/val_task3_node.cpp)
 
