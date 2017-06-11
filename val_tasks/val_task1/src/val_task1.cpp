@@ -272,7 +272,7 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
 
 decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM_ONCE("executing " << name);
+    ROS_INFO_STREAM_ONCE("valTask1::walkToSeePanelTask : executing " << name);
 
 
     static int fail_count = 0;
