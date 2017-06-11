@@ -803,6 +803,80 @@ bool ValkyrieWalker::walk_rotate(float angle)
 
 }
 
+bool ValkyrieWalker::climbStair(const std::vector<float> x_offset, const std::vector<float> z_offset, armSide startLeg)
+{
+    ihmc_msgs::FootstepDataListRosMessage list;
+    list.default_transfer_time= transfer_time;
+    list.default_swing_time = swing_time;
+    list.execution_mode = execution_mode;
+    list.unique_id = ValkyrieWalker::id;
+
+    geometry_msgs::Vector3 waypoint;
+    float offset =0.1;
+
+    if (x_offset.size() != z_offset.size())
+        ROS_ERROR("X Offset and Z Offset have different size");
+
+    ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
+    ihmc_msgs::FootstepDataRosMessage::Ptr newFootStep(new ihmc_msgs::FootstepDataRosMessage());
+
+    geometry_msgs::Point currentWorldLocation,currentPelvisLocation;
+
+    size_t numberOfSteps = x_offset.size();
+
+    for (int m = 1; m <= numberOfSteps; ++m) {
+        if(m%2 == 1)
+        {
+            getCurrentStep(startLeg, *current);
+        }
+        else
+        {
+            getCurrentStep((startLeg+1)%2, *current);
+        }
+
+        currentWorldLocation.x=current->location.x;
+        currentWorldLocation.y=current->location.y;
+        currentWorldLocation.z=current->location.z;
+
+        current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+        currentPelvisLocation.x+=x_offset[m-1];
+        currentPelvisLocation.z+=z_offset[m-1];
+        current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF);
+        newFootStep->location.x=currentWorldLocation.x;
+        newFootStep->location.y=currentWorldLocation.y;
+        newFootStep->location.z=currentWorldLocation.z;
+        newFootStep->orientation=current->orientation;
+        newFootStep->robot_side=current->robot_side;
+        newFootStep->trajectory_type=1; // 0 - DEFAULT, 1 - OBSTACLE CLEARANCE, 2- CUSTOM
+
+        currentWorldLocation.x=current->location.x;
+        currentWorldLocation.y=current->location.y;
+        currentWorldLocation.z=current->location.z;
+
+        if(m>2)
+        {
+            current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+            currentPelvisLocation.x+=(x_offset[m-2]-0.1);
+            currentPelvisLocation.z+=z_offset[m-1]+offset;
+            current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF);
+
+            waypoint.x=currentWorldLocation.x;
+            waypoint.y=currentWorldLocation.y;
+            waypoint.z=currentWorldLocation.z;
+
+            newFootStep->trajectory_waypoints.push_back(waypoint);
+            newFootStep->trajectory_type=2; // 0 - DEFAULT, 1 - OBSTACLE CLEARANCE, 2- CUSTOM
+        }
+
+
+        newFootStep->trajectory_waypoints.push_back(waypoint);
+        list.footstep_data_list.push_back(*newFootStep);
+    }
+
+    this->walkGivenSteps(list);
+    return true;
+}
+
 // wait till all the steps are taken
 void ValkyrieWalker::waitForSteps(int n)
 {

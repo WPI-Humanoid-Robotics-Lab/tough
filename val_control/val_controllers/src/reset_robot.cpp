@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "reset robot");
+    ros::init(argc, argv, "reset_robot");
     ros::NodeHandle nh;
 
     // initializing objects
