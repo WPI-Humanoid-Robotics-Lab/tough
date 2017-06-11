@@ -500,6 +500,7 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
         retry_count = 0;
 
         eventQueue.riseEvent("/DETECTED_PANEL");
+//        eventQueue.riseEvent("/MANUAL_EXECUTION");
         if(solar_panel_detector_ != nullptr) delete solar_panel_detector_;
         solar_panel_detector_ = nullptr;
     }

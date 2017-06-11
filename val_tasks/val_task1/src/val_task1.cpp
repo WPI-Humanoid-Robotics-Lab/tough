@@ -149,7 +149,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
         }
         // generate the event
         head_controller_->moveHead(0,0,0);
-        eventQueue.riseEvent("/INIT_SUCESSFUL");
+//        eventQueue.riseEvent("/REGULAR");
 
     }
     else if (retry_count++ < 40) {
@@ -167,6 +167,11 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
         ROS_INFO("valTask1::initTask : Failed to initialize");
         task1_utils_->taskLogPub("valTask1::initTask : Failed to initialize");
         eventQueue.riseEvent("/INIT_FAILED");
+    }
+
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("waiting for transition");
     }
     return TaskResult::SUCCESS();
 }
@@ -1419,7 +1424,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
             finish_box_pose.theta =  atan2(finish_box_pose.y, finish_box_pose.x);
             // update the finish box pose
             setFinishboxGoal(finish_box_pose);
-
+            resetRobotToDefaults();
             ROS_INFO("finish box detected");
             task1_utils_->taskLogPub("finish box detected");
             eventQueue.riseEvent("/DETECT_FINISH_SUCESSFUL");
@@ -1488,9 +1493,6 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
         ROS_INFO("pose changed");
         task1_utils_->taskLogPub("pose changed");
         //reset chest before moving close to panel
-        chest_controller_->controlChest(0, 0, 0);
-        ROS_INFO("Adjusted Chest");
-        task1_utils_->taskLogPub("Adjusted Chest");
         walker_->walkToGoal(next_finishbox_center_, false);
         ROS_INFO("Footsteps should be published now");
         task1_utils_->taskLogPub("Footsteps should be published now");
