@@ -185,10 +185,12 @@ void climbStairs::climb_stairs()
 {
     // set the chest orientation
     chest_->controlChest(0,20,0);
-    ros::Duration(0.1).sleep();
+    ros::Duration(1).sleep();
 
     // set the arms orientation
-
+    arm_->moveArmJoint(RIGHT, 1, 0.7);
+    ros::Duration(1).sleep();
+    arm_->moveArmJoint(LEFT, 1, -0.7);
 
     // first step
     walker_->walkNSteps(1, 0.3, 0.0, true, RIGHT);
