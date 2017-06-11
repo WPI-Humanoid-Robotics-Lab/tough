@@ -117,6 +117,7 @@ public:
     bool raiseLeg(armSide side, float height,float stepLength);
     void load_eff(armSide side, EE_LOADING load);
     bool walk_rotate(float angle);
+    bool climbStair(const std::vector<float> x_offset, const std::vector<float> z_offset, armSide startLeg);
 
 private:
     static int id ;

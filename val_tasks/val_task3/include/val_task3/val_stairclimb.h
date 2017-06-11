@@ -14,8 +14,6 @@ class StairClimb
 public:
     StairClimb(ros::NodeHandle n);
     bool walkToSetPosition(geometry_msgs::Pose2D goal);
-    bool takeStep(armSide side, geometry_msgs::Pose nextStair);
-    bool takeFistStep(armSide side, geometry_msgs::Pose fistStair);
     ValkyrieWalker* walker_;
     RobotStateInformer* robot_state_;
     chestTrajectory* chest_controller_;
