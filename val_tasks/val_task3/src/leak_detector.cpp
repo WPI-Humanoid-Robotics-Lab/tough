@@ -24,6 +24,14 @@ void leakDetector::generateSearchWayPoints(void)
   // generate way points with the dimension of the leak tool
 }
 
+void leakDetector::findLeak (geometry_msgs::Point& leak_point)
+{
+    // get the way points
+
+    // plan the path
+
+}
+
 // helper functions
 double leakDetector::getLeakValue() const
 {
