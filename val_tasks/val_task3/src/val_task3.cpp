@@ -143,15 +143,14 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
 
   // detect stairs
   std::vector<geometry_msgs::Pose> poses;
-  stair_detector_->getDetections(poses);
 
-  // if we get at least 2 poses
-  if (poses.size() > 1)
+  // if detection is sucessful
+  if (stair_detector_->getDetections(poses))
   {
       // update the pose
       geometry_msgs::Pose2D pose2D;
-      // get the last detected pose
-      int idx = poses.size() -1 ;
+      // get the first pose, which takes use to the stairs
+      int idx = 0; //poses.size() -1 ;
       pose2D.x = poses[idx].position.x;
       pose2D.y = poses[idx].position.y;
 
@@ -183,6 +182,9 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
   // if failed retry detecting the panel
   else
   {
+      // sleep for some time so detection happens
+      ros::Duration(5).sleep();
+
       // increment the fail count
       retry_count++;
       eventQueue.riseEvent("/DETECT_STAIRS_RETRY");
@@ -200,7 +202,7 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
 
 decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
-  ROS_INFO_STREAM("valTask3::walkToStairsTask : executing " << name);
+  ROS_INFO_STREAM_ONCE("valTask3::walkToStairsTask : executing " << name);
 
   static int fail_count = 0;
 
@@ -269,7 +271,7 @@ decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCal
   return TaskResult::SUCCESS();
 }
 
-
+///@todo fill based on climbing code
 decision_making::TaskResult valTask3::detectStepsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
   ROS_INFO_STREAM("executing " << name);
