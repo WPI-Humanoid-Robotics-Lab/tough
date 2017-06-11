@@ -45,7 +45,7 @@ valTask3::valTask3(ros::NodeHandle nh):nh_(nh){
   task3_utils_         = new task3Utils(nh_);
 
   // detectors
-  stair_detector_      = new stair_detector_2(nh_);
+  stair_detector_      = nullptr;
 
   robot_state_         = RobotStateInformer::getRobotStateInformer(nh_);
   map_update_count_    = 0;
@@ -143,6 +143,13 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
 
   // detect stairs
   std::vector<geometry_msgs::Pose> poses;
+
+  // if the object null create a new one
+  if(stair_detector_ == nullptr)
+  {
+      stair_detector_ = new stair_detector_2(nh_);
+      ros::Duration(0.2).sleep();
+  }
 
   // if detection is sucessful
   if (stair_detector_->getDetections(poses))
