@@ -47,6 +47,8 @@ valTask3::valTask3(ros::NodeHandle nh):nh_(nh){
   // detectors
   stair_detector_      = nullptr;
 
+  climb_stairs_        = new climbStairs(nh_);
+
   robot_state_         = RobotStateInformer::getRobotStateInformer(nh_);
   map_update_count_    = 0;
   occupancy_grid_sub_  = nh_.subscribe("/map",10,&valTask3::occupancy_grid_cb,this);
@@ -283,6 +285,9 @@ decision_making::TaskResult valTask3::detectStepsTask(string name, const FSMCall
 
   ROS_INFO_STREAM("executing " << name);
 
+  // detection is not required
+  eventQueue.riseEvent("/DETECTED_STEPS");
+
   while(!preemptiveWait(1000, eventQueue)){
 
     ROS_INFO("waiting for transition");
@@ -295,6 +300,11 @@ decision_making::TaskResult valTask3::detectStepsTask(string name, const FSMCall
 decision_making::TaskResult valTask3::climbStepsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
   ROS_INFO_STREAM("executing " << name);
+
+  // climb the stairs (this is a blocking call)
+  climb_stairs_->climb_stairs();
+
+  ///@todo: complete
 
   while(!preemptiveWait(1000, eventQueue)){
 
