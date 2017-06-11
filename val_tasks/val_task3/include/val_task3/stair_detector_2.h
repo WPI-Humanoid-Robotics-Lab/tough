@@ -42,7 +42,7 @@ public:
     stair_detector_2(ros::NodeHandle nh);
 
     void cloudCB(const stair_detector_2::PointCloud::ConstPtr &cloud);
-    std::vector<std::vector<geometry_msgs::Pose>> getDetections() const;
+    bool getDetections(std::vector<geometry_msgs::Pose> &detections) const;
 
     ~stair_detector_2();
 

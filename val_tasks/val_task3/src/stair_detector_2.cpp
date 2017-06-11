@@ -482,9 +482,9 @@ bool stair_detector_2::estimateStairs(const PointCloud::ConstPtr &filtered_cloud
         pcl_conversions::fromPCL(filtered_cloud->header, stair_pose_m.header);
         stair_pose_m.ns = "stairs_pose" ;
         stair_pose_m.id = marker_id_ctr++;
-        stair_pose_m.type = visualization_msgs::Marker::ARROW;
+        stair_pose_m.type = visualization_msgs::Marker::CUBE;
         stair_pose_m.pose = pose;
-        stair_pose_m.scale.x = 1;
+        stair_pose_m.scale.x = 0.05;
         stair_pose_m.scale.y = 0.05;
         stair_pose_m.scale.z = 0.05;
         stair_pose_m.color.r = pose_m_r;
@@ -626,8 +626,12 @@ Eigen::Vector3f stair_detector_2::modelToVector(const pcl::ModelCoefficients &mo
     return coef;
 }
 
-std::vector<std::vector<geometry_msgs::Pose>> stair_detector_2::getDetections() const {
-    return detections_;
+bool stair_detector_2::getDetections(std::vector<geometry_msgs::Pose> &detections) const {
+    if (detections_.size() > 3) {
+        detections = detections_.back();
+        return true;
+    }
+    return false;
 }
 
 stair_detector_2::~stair_detector_2()
