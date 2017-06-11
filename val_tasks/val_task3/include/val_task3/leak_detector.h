@@ -20,4 +20,5 @@ public:
     void leakMsgCB(const srcsim::Leak &leakmsg);
     double getLeakValue() const;
     void setLeakValue(double getLeakValue);
+    void findLeak (geometry_msgs::Point& leak_point);
 };
