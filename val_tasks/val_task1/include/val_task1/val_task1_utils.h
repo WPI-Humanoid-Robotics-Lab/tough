@@ -80,7 +80,7 @@ private:
     ros::Subscriber task_status_sub_;
     RobotStateInformer* current_state_;
 
-    ros::Publisher marker_pub_, clearbox_pointcloud_pub_, reset_pointcloud_pub_, task1_log_pub_;
+    ros::Publisher marker_pub_, clearbox_pointcloud_pub_, reset_pointcloud_pub_, task1_log_pub_, reset_map_pub_;
     void satelliteMsgCB (const srcsim::Satellite &msg);
     int current_checkpoint_;
     srcsim::Task taskMsg;
@@ -110,6 +110,7 @@ public:
     void visulatise6DPoints(std::vector<geometry_msgs::Pose> &points);
     void clearBoxPointCloud();
     void resetPointCloud();
+    void clearMap();
     void taskStatusSubCB(const srcsim::Task &msg);
     void terminator(const ros::TimerEvent& t);
     void fixHandleArray(std::vector<geometry_msgs::Point> &handle_loc, std::vector<geometry_msgs::Point> &pclHandlePoses);
