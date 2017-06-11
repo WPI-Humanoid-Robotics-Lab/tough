@@ -15,7 +15,7 @@ void SolarPanelDetect::invertYaw(geometry_msgs::Pose &pose)
     pose.orientation = quaternion;
 }
 
-SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight, geometry_msgs::Point button_loc)
+SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Point button_loc)
 {
     pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &SolarPanelDetect::cloudCB, this);;
     pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_panel/cloud2", 1);
@@ -34,7 +34,7 @@ SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rov
 //    ROS_INFO("in const");
 }
 
-SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rover_loc, bool isroverRight)
+SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh)
 {
     pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &SolarPanelDetect::cloudCB, this);;
     pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_panel/cloud2", 1);
@@ -363,7 +363,8 @@ void SolarPanelDetect::getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud
     pose.orientation = quaternion;
 
     geometry_msgs::Pose pose_pelvis;
-    robot_state_->transformPose(pose,pose_pelvis,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+//    robot_state_->transformPose(pose,pose_pelvis,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    pose_pelvis = pose;
 
 
     // so that arrow is always inwards
