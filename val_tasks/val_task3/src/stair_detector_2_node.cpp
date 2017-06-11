@@ -8,18 +8,12 @@ int main(int argc, char** argv)
 {
     ros::init(argc, argv, "stairs_detector_2", ros::init_options::NoSigintHandler);
     ros::NodeHandle nh;
-    int numIterations = 0;
-    bool found = false;
 
     stair_detector_2 detector(nh);
-    std::vector<std::vector<geometry_msgs::Pose>> detections;
-    //while (!found && numIterations < 20)
-    while(ros::ok())
-    {
-        detections = detector.getDetections();
-        found = !detections.empty();
+    std::vector<geometry_msgs::Pose> detections;
 
-        numIterations++;
+    while(!detector.getDetections(detections)) {
+        ROS_INFO_STREAM_THROTTLE(5, "Stairs detections: " << detections.size());
         ros::spinOnce();
     }
 
