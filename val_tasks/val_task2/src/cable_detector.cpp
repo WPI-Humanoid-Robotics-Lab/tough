@@ -12,7 +12,7 @@ CableDetector::CableDetector(ros::NodeHandle nh, src_perception::MultisenseImage
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     ms_sensor_ = ms_sensor;
     ms_sensor_->giveQMatrix(qMatrix_);
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_cable",1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array",1);
     eigenVecs_.reserve(2);
 }
 
@@ -631,6 +631,3 @@ CableDetector::~CableDetector()
 //x: 0.863122105598
 //y: -0.865445196629   point left
 //z: 0.776612520218
-
-
-

@@ -1,5 +1,6 @@
 #include "val_task3/val_stairclimb.h"
 #include "val_common/val_common_defines.h"
+#include "val_footstep/ValkyrieWalker.h"
 
 
 StairClimb::StairClimb(ros::NodeHandle n)
@@ -28,66 +29,106 @@ bool StairClimb::takeStep(armSide side,float stepLength, float stepHeight)
      * Stage 6: Orient the chest back to zero position
     */
 
-    // Stage 1
     float raise_factor=1.5;
     float lower_factor=-0.5;
+    float pitch_angle=20;
+    float curl_radius=0.2;
 
-    // fist leg movement
-    walker_->raiseLeg(side,raise_factor*stepHeight,0.0);
-    walker_->placeLeg(side,stepLength);
-    walker_->placeLeg(side,lower_factor*stepHeight);
-    walker_->load_eff(side,EE_LOADING::LOAD);
 
     // second leg movement
-    float pitch_angle=20;
+    walker_->curlLeg(side,curl_radius);
+    ros::Duration(1).sleep();
+    walker_->placeLeg(side,raise_factor*stepHeight);
+    ros::Duration(1).sleep();
+    walker_->nudgeFoot(side,stepLength);
+    ros::Duration(1).sleep();
+    walker_->raiseLeg(side,lower_factor*stepHeight,0.0);
+    ros::Duration(1).sleep();
+    walker_->load_eff(side,EE_LOADING::LOAD);
+    ros::Duration(1).sleep();
     chest_controller_->controlChest(0,pitch_angle,0);
-
-
+    ros::Duration(1).sleep();
 }
 
 bool StairClimb::climbStairs(std::vector<float> horizontals, std::vector<float> verticals)
 {
     // find current position and first stair position
 
-    ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
-    walker_->getCurrentStep(RIGHT, *current);
+    //    ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
+    //    walker_->getCurrentStep(RIGHT, *current);
 
+    armSide side = RIGHT;
     for (size_t i= 0; i < horizontals.size(); ++i) {
-        takeStep(RIGHT,horizontals[i],verticals[i]);
+        takeStep(side,horizontals[i],verticals[i]);
+
     }
 
 }
 
+bool StairClimb::takeFistStep(armSide side, float stepLength, float stepHeight)
+{
+    float raise_factor=1.5;
+    float lower_factor=-0.5;
+    float pitch_angle=20;
+    float curl_radius=0.2;
+
+    // fist leg movement
+    walker_->raiseLeg(side,raise_factor*stepHeight,0.0);
+    ros::Duration(1).sleep();
+    walker_->nudgeFoot(side,stepLength);
+    ros::Duration(1).sleep();
+    walker_->raiseLeg(side,lower_factor*stepHeight,0.0);
+    ros::Duration(1).sleep();
+    walker_->load_eff(side,EE_LOADING::LOAD);
+    ros::Duration(1).sleep();
+    chest_controller_->controlChest(0,pitch_angle,0);
+    ros::Duration(1).sleep();
+}
+
 int main(int argc, char** argv){
 
-    ros::init(argc, argv, "stair_climb");
+    ros::init(argc, argv, "stair_climb",ros::init_options::NoSigintHandler);
     ros::NodeHandle nh;
 
-//    StepDetector step(nh);
-//    bool foundSteps = false;
-//    std::vector<double> coefficients;
-//    geometry_msgs::Point dirVector;
-//    geometry_msgs::Point stairLoc;
+    ValkyrieWalker walk(nh, 1.0,1.0,0);
+    StairClimb stair(nh);
 
-//    coefficients = { 0.0588899, -2.50763,	0, 2.91158};
-//    dirVector.x = 1;
-//    dirVector.y = 0.0234843;
-//    dirVector.z = 0;
-//    stairLoc.x = 3.56882;
-//    stairLoc.y = -1.07728;
-//    stairLoc.z = 0.758028;
-//    std::vector<pcl::PointXYZ> steps_location;
+    ROS_INFO("hERE 1");
+    stair_detector_2 detector(nh);
+    std::vector<geometry_msgs::Pose> detections;
 
-//    // step_location will have the stair locations in world coordinate frame
-//    foundSteps = step.getStepsPosition(coefficients, dirVector, stairLoc, steps_location);
+    while(!detector.getDetections(detections))
+    {
+        ros::spinOnce();
+    }
+    ROS_INFO("hERE 2");
 
-//    geometry_msgs::Pose2D walkPoint;
-//    walkPoint.x= 3.56882;
-//    walkPoint.y=-1.07728;
-//    walkPoint.theta=0.0;
+    std::vector<float> step_length,step_height;
 
-//    StairClimb stair(nh);
-//    stair.walkToSetPosition(walkPoint);
+    geometry_msgs::Pose2D goal;
+    goal.x=detections[0].position.x;
+    goal.y=detections[0].position.y;
+    goal.theta=tf::getYaw(detections[0].orientation);
+    walk.walkToGoal(goal);
 
+    ROS_INFO("hERE 3");
+
+    ros::Duration(1).sleep();
+
+    for (int i = 0; i < detections.size(); ++i) {
+        std::cout<<"x: "<<detections[i].position.x<<" y: "<<detections[i].position.y<<" z: "<<detections[i].position.z<<"\n";
+    }
+    ROS_INFO("hERE 4");
+
+    for (int i = 1; i < 10; ++i) {
+        step_height.push_back(detections[i].position.z-detections[i-1].position.z);
+        std::cout<<"step height at "<<i<<"is"<<(detections[i].position.z-detections[i-1].position.z)<<"\n";
+    }
+
+    ROS_INFO("hERE 5");
+
+    step_length.assign(10,0.24);
+    //    stair.climbStairs(step_length,step_height);
+    ros::Duration(2).sleep();
     return 0;
 }

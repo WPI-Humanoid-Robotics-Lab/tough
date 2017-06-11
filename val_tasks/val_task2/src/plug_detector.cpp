@@ -11,7 +11,7 @@ SocketDetector::SocketDetector(ros::NodeHandle nh, src_perception::MultisenseIma
 {
     ms_sensor_ = ms_sensor;
     ms_sensor_->giveQMatrix(qMatrix_);
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("detected_plug",1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array",1);
 }
 
 void SocketDetector::showImage(cv::Mat image, std::string caption)
@@ -210,4 +210,3 @@ SocketDetector::~SocketDetector()
 {
 
 }
-

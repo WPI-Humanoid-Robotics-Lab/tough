@@ -2065,6 +2065,11 @@ decision_making::TaskResult valTask2::manualExecutionTask(string name, const FSM
     task2_utils_->taskLogPub("executing " + name);
 
     // skip check point, basically take the user input
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("valTask2::manualExecutionTask: waiting for transition");
+        task2_utils_->taskLogPub("valTask2::manualExecutionTask: waiting for transition");
+    }
 
     return TaskResult::SUCCESS();
 }

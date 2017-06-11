@@ -5,7 +5,7 @@ DoorValvedetector::DoorValvedetector(ros::NodeHandle nh)
 {
     pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &DoorValvedetector::cloudCB, this);
     pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_door/cloud2", 1);
-    vis_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/val_door/markers", 1 );
+    vis_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/visualization_marker_array", 1 );
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
     setOffset();
 
