@@ -136,10 +136,18 @@ void valTask2::panelHandleOffsetCB(const std_msgs::Float32 msg)
     geometry_msgs::Pose tempPose = solar_panel_handle_pose_;
     float theta = tf::getYaw(tempPose.orientation);
     // converting theta to be along the handle (inward direction)
-    theta+=M_PI/2;
+    if(is_rover_on_right_)
+    {
+        theta-=M_PI/2;
+    }
+    else
+    {
+        theta+=M_PI/2;
+    }
 
-    tempPose.position.x = tempPose.positon.x + msg*cos(theta);
-    tempPose.position.y = tempPose.positon.y + msg*sin(theta);
+    tempPose.position.x = tempPose.position.x + msg.data*cos(theta);
+    tempPose.position.y = tempPose.position.y + msg.data*sin(theta);
+
     setSolarPanelHandlePose(tempPose);
 
     visualization_msgs::Marker marker;
