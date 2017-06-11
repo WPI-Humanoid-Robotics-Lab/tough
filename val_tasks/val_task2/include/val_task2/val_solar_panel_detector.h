@@ -90,7 +90,7 @@ public:
   ~SolarPanelDetect();
   bool getDetections(std::vector<geometry_msgs::Pose> &ret_val);
   int getDetectionTries() const;
-  void setoffset(float minX=0, float maxX=1.0, float minY=-1.5, float maxY=1.5, float minZ=0.8, float maxZ=1.2, float optimalDist=0.16,float pitchDeg=0);
+  void setoffset(float minX=0, float maxX=1.0, float minY=-1.5, float maxY=1.5, float minZ=0.8, float maxZ=1.2, float optimalDist=0.14,float pitchDeg=0);
   void getoffset(float &minX, float &maxX, float &minY, float &maxY, float &minZ, float &maxZ, float &optimalDist, float &pitchDeg);
   static void invertYaw(geometry_msgs::Pose &pose);
 

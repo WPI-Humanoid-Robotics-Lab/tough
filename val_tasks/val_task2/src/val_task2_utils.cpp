@@ -151,7 +151,7 @@ void task2Utils::movePanelToWalkSafePose(const armSide side)
 
 }
 
-#define EFFORT_THRESHOLD 55 //threshold is selected by experimentation
+#define EFFORT_THRESHOLD 50 //threshold is selected by experimentation
 bool task2Utils::isPanelPicked(const armSide side)
 {
     std::string jointNames = side == armSide::LEFT ? "left_arm" : "right_arm";
@@ -170,7 +170,7 @@ bool task2Utils::isPanelPicked(const armSide side)
     return false;
 }
 
-void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel)
+void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRotated)
 {
     armSide nonGraspingHand = (armSide) !graspingHand;
 
@@ -178,7 +178,7 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     const std::vector<float>  *nonGraspingHandPose2, *nonGraspingHandPose1;
 
     if(graspingHand == armSide::LEFT){
-        if (rotatePanel){
+        if (isPanelRotated){
             graspingHandPoseUp     = &leftPanelPlacementUpPose1_;
             graspingHandPoseDown   = &leftPanelPlacementDownPose1_;
         }
@@ -194,7 +194,7 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     }
     else
     {
-        if (rotatePanel){
+        if (isPanelRotated){
             graspingHandPoseUp     = &rightPanelPlacementUpPose1_;
             graspingHandPoseDown   = &rightPanelPlacementDownPose1_;
         }
@@ -226,7 +226,7 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     }
 
     std::vector<armTrajectory::armJointData> pushPanel;
-    pushPanel.resize(2);
+    pushPanel.resize(3);
     pushPanel[0].side = nonGraspingHand;
     pushPanel[0].arm_pose = *nonGraspingHandPose1;
     pushPanel[0].time = 1;
@@ -235,8 +235,13 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     pushPanel[1].arm_pose = *nonGraspingHandPose2;
     pushPanel[1].time = 2;
 
+    pushPanel[2].side = nonGraspingHand;
+    pushPanel[2].arm_pose = *nonGraspingHandPose1;
+    pushPanel[2].time = 5;
+
     arm_controller_->moveArmJoints(pushPanel);
-    ros::Duration(3).sleep();
+    // Duration is less than trajectory time as the next step should execute before moving non-grasping hand
+    ros::Duration(2.5).sleep();
 
 }
 
@@ -280,8 +285,7 @@ void task2Utils::rotatePanel(const armSide graspingHand)
 
 void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset){
 
-    pelvis_controller_->controlPelvisHeight(1.0);
-    ros::Duration(1.5).sleep();
+
 
     size_t nSteps;
     armSide startStep;
@@ -299,6 +303,9 @@ void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offs
     }
     else
     {
+        pelvis_controller_->controlPelvisHeight(1.0);
+        ros::Duration(1.5).sleep();
+
         nSteps = int(((abserror/0.1)+0.5));
         ROS_INFO_STREAM("No of steps to walk is:" << nSteps);
 
@@ -323,9 +330,10 @@ void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offs
         walk_->walkLocalPreComputedSteps(x_offset,y_offset,startStep);
         ros::Duration(4.0).sleep();
 
+        pelvis_controller_->controlPelvisHeight(0.9);
+        ros::Duration(1.5).sleep();
     }
-    pelvis_controller_->controlPelvisHeight(0.9);
-    ros::Duration(1.5).sleep();
+
 
 }
 

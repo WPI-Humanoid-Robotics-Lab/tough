@@ -653,7 +653,9 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_);
         head_controller_->moveHead(0,0,0);
         ros::Duration(2).sleep();
-        eventQueue.riseEvent("/PICKED_PANEL");
+//        eventQueue.riseEvent("/PICKED_PANEL");
+        // lets detect the array manually
+        eventQueue.riseEvent("/MANUAL_EXECUTION");
     }
     else
     {
@@ -1001,7 +1003,7 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
             arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
             ros::Duration(0.2).sleep();
             arm_controller_->moveArmJoint(panel_grasping_hand_,0,q0);
-            ros::Duration(0.2).sleep();
+            ros::Duration(2).sleep();
         }
         head_controller_->moveHead(0,0,0,2.0f);
         executingOnce= true;
@@ -1023,6 +1025,8 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
 
     static int retry_count = 0;
     if(solar_array_fine_detector_ == nullptr) {
+        task2_utils_->clearPointCloud();
+        task2_utils_->resumePointCloud();
         solar_array_fine_detector_ = new ArrayTableDetector(nh_, cable_point_temp_);
     }
 
@@ -1221,10 +1225,11 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
         arm_controller_->moveArmInTaskSpace(panel_grasping_hand_, currentPalmPose, 1.0f);
         ros::Duration(1).sleep();
 
-        arm_controller_->moveToZeroPose(panel_grasping_hand_);
-        ros::Duration(0.5).sleep();
         arm_controller_->moveToZeroPose((armSide)!panel_grasping_hand_);
         ros::Duration(0.5).sleep();
+        arm_controller_->moveToZeroPose(panel_grasping_hand_);
+        ros::Duration(0.5).sleep();
+
         handsPulledOff = true;
         eventQueue.riseEvent("/PLACE_ON_GROUND_RETRY");
     }
