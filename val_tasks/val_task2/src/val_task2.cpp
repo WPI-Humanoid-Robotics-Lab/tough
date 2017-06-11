@@ -428,8 +428,13 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
 
         task2_utils_->resumePointCloud();
         isFirstRun = false;
+        geometry_msgs::Point temp;
+        button_coordinates_temp_ = temp;
+        int retry = 0;
+        while (!button_detector_->findButtons(button_coordinates_temp_) && retry++ < 10);
+        ROS_INFO("valTask2::detectPanelTask : Button detected at x:%f y:%f z:%f", button_coordinates_temp_.x,button_coordinates_temp_.y,button_coordinates_temp_.z);
 
-        solar_panel_detector_ = new SolarPanelDetect(nh_, rover_walk_goal_waypoints_.back(), is_rover_on_right_);
+        solar_panel_detector_ = new SolarPanelDetect(nh_, button_coordinates_temp_);
         chest_controller_->controlChest(2, 2, 2);
 
         //move arms to default position
@@ -459,9 +464,6 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
         task2_utils_->reOrientTowardsGoal(solar_panel_handle_pose_.position);
         ros::Duration(2.0).sleep();
 
-        int retry = 0;
-        while (!button_detector_->findButtons(button_coordinates_temp_) && retry++ < 10);
-        ROS_INFO("valTask2::detectPanelTask : Button detected at x:%f y:%f z:%f", button_coordinates_temp_.x,button_coordinates_temp_.y,button_coordinates_temp_.z);
         task2_utils_->taskLogPub("valTask2::detectPanelTask : Button detected at x: " + std::to_string(button_coordinates_temp_.x) + " y: " + std::to_string(button_coordinates_temp_.y) + " z:" + std::to_string(button_coordinates_temp_.z));
         ROS_INFO_STREAM("valTask2::detectPanelTask : Position " << poses[idx].position.x<< " " <<poses[idx].position.y <<" "<<poses[idx].position.z);
         task2_utils_->taskLogPub("valTask2::detectPanelTask : Position " + std::to_string(poses[idx].position.x) + " "  + std::to_string(poses[idx].position.y) + " " + std::to_string(poses[idx].position.z ));
