@@ -38,6 +38,7 @@ armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
     joint_limits_right_[5]={-0.615,0.61};
     joint_limits_right_[6]={-0.47,0.35};
 
+
 }
 
 armTrajectory::~armTrajectory(){
@@ -322,34 +323,25 @@ bool armTrajectory::nudgeArm(const armSide side, const direction drct, float nud
 
 bool armTrajectory::nudgeArmLocal(const armSide side, const direction drct, float nudgeStep){
 
-    geometry_msgs::PoseStamped      world_values;
-    world_values.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
-
-    std::string target_frame = side == LEFT ? "/leftMiddleFingerPitch1Link" : "/rightMiddleFingerPitch1Link";
+    std::string target_frame = side == LEFT ? "/leftPalm" : "/rightPalm";
     int signInverter = side == LEFT ? 1 : -1;
 
-    geometry_msgs::PoseStamped palm_values;
-    palm_values.header.frame_id = target_frame;
-    palm_values.pose.orientation.w = 1.0f;
+    geometry_msgs::Pose value;
+    stateInformer_->getCurrentPose(target_frame,value);
+    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+    stateInformer_->transformPose(value, value,VAL_COMMON_NAMES::WORLD_TF,target_frame);
+    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
 
-    if     (drct == direction::FRONT)     palm_values.pose.position.y += nudgeStep * signInverter;
-    else if(drct == direction::BACK)      palm_values.pose.position.y -= nudgeStep * signInverter;
-    else if(drct == direction::LEFT)      palm_values.pose.position.z += nudgeStep;
-    else if(drct == direction::RIGHT)     palm_values.pose.position.z -= nudgeStep;
-    else if(drct == direction::UP)        palm_values.pose.position.x += nudgeStep;
-    else if(drct == direction::DOWN)      palm_values.pose.position.x -= nudgeStep;
-
-    try{
-        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-        tf_listener_.transformPose(VAL_COMMON_NAMES::WORLD_TF,palm_values,world_values);
-    }
-    catch (tf::TransformException ex) {
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
-
-    moveArmInTaskSpace(side,world_values.pose, 0.0f);
+    if     (drct == direction::FRONT)     value.position.y += nudgeStep*signInverter;
+    else if(drct == direction::BACK)      value.position.y -= nudgeStep*signInverter;
+    else if(drct == direction::UP)        value.position.z += nudgeStep;
+    else if(drct == direction::DOWN)      value.position.z -= nudgeStep;
+    else if(drct == direction::LEFT)      value.position.x += nudgeStep*signInverter;
+    else if(drct == direction::RIGHT)     value.position.x -= nudgeStep*signInverter;
+std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+    stateInformer_->transformPose(value, value,target_frame,VAL_COMMON_NAMES::WORLD_TF);
+std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+    moveArmInTaskSpace(side,value, 0.0f);
     return true;
 }
 

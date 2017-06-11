@@ -102,7 +102,7 @@ int main(int argc, char **argv)
     {
         armData.clear();
         side = std::stoi(argv[1]) == 1? armSide::RIGHT :armSide::LEFT;
-        if(std::stoi(argv[1]) == 1)
+        if(std::stoi(argv[1]) == 0)
         {
             if(std::stoi(argv[2]) == 1) armData.push_back(leftShoulderSeed1_);
             if(std::stoi(argv[2]) == 2) armData.push_back(leftShoulderSeed2_);

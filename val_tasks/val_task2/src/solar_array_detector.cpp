@@ -4,7 +4,7 @@ CoarseArrayDetector::CoarseArrayDetector(ros::NodeHandle& nh) : nh_(nh), cloud_(
 {
     pcl_sub_ = nh_.subscribe("/field/assembled_cloud2", 10, &CoarseArrayDetector::cloudCB, this);
     pcl_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/val_array_cloud/cloud2", 1, true);
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/coarse_array_pose", 1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array", 1);
     rover_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/block_map", 1, true);
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 }
@@ -322,7 +322,7 @@ void CoarseArrayDetector::findArrayCluster(const pcl::PointCloud<pcl::PointXYZ>:
             *output += *temp_cloud1;
         }
         //ROS_INFO_STREAM("output size " << output->points.size()<< std::endl);
-    }   
+    }
 
     //Downsample cloud
     pcl::octree::OctreePointCloudVoxelCentroid<pcl::PointXYZ> oct(0.05);

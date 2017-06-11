@@ -1,49 +1,27 @@
 #include "val_task2/val_solar_panel_detector.h"
 #include "val_task2/val_rover_detection.h"
 
+
+#include "val_task2/button_detector.h"
+#include "perception_common/MultisenseImage.h"
+
 int main(int argc, char** argv){
   ros::init(argc, argv, "solar_plane_detection");
   ros::NodeHandle nh;
-  geometry_msgs::Pose2D rover_loc;
-  std::vector<std::vector<geometry_msgs::Pose> > rover_poses;
-  bool isroverRight;
 
-  ros::Rate loop1(1);
-
-  if(true) //to destruct the rover_obj
-  {
-      RoverDetector rover_obj(nh);
-      while(ros::ok())
-      {
-
-          rover_obj.getDetections(rover_poses);
-          if(!rover_poses.empty() )
-          {
-              geometry_msgs::Pose rover_loc_3d;
-              rover_loc_3d = rover_poses[rover_poses.size()-1][2];
-              rover_loc.x = rover_loc_3d.position.x;
-              rover_loc.y = rover_loc_3d.position.y;
-              rover_loc.theta = tf::getYaw(rover_poses.back()[2].orientation);
-              ROVER_SIDE roverSide;
-              if(rover_obj.getRoverSide(roverSide)){
-                  isroverRight = roverSide == ROVER_SIDE::RIGHT;
-                  break;
-              }
-          }
-          ros::spinOnce();
-          loop1.sleep();
-      }
-  }
+  src_perception::MultisenseImage* ms_sensor = new src_perception::MultisenseImage(nh);
+    cv::Mat tmp;
+    ms_sensor->giveImage(tmp);
+    ms_sensor->giveDisparityImage(tmp);
+    ButtonDetector button_detector(nh, ms_sensor);
+    geometry_msgs::Point button_loc;
+    int retry = 0;
+    while (!button_detector.findButtons(button_loc) && retry++ < 10);
 
 
-  geometry_msgs::Point button_loc;
-
-  button_loc.x = 3.66;
-  button_loc.y = -1.75;
-  button_loc.z = 0.846;
 
 
-  SolarPanelDetect obj(nh,rover_loc,isroverRight,button_loc);
+  SolarPanelDetect obj(nh,button_loc);
 
   ros::Rate loop(1);
   while(ros::ok()){
