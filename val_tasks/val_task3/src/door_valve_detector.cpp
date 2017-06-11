@@ -15,21 +15,6 @@ DoorValvedetector::~DoorValvedetector()
 {
     pcl_sub_.shutdown();
 }
-/*
-void DoorValvedetector::setTransform()
-{
-    tf::TransformListener listener;
-    tf::StampedTransform transform;
-    try{
-        ros::Time now = ros::Time::now();
-        listener.waitForTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,now,ros::Duration(10.0));
-        listener.lookupTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,ros::Time(0),transform);
-        ROS_INFO("Got a transform! x = %f, y = %f",transform.getOrigin().x(),transform.getOrigin().y());
-    }
-    catch{
-
-    }
-}*/
 
 void DoorValvedetector::setOffset(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
 {
@@ -57,16 +42,6 @@ void DoorValvedetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
     float theta=0.0;
 
-
-/*  // use this when walking over the steps this will helps us in reducing the pts before transforming
- * No need: using box filter now
-    pcl::PassThrough<pcl::PointXYZ> pass_z;
-    pass_z.setInputCloud(cloud);
-    pass_z.setFilterFieldName("z");
-    pass_z.setFilterLimits(2,10);
-    pass_z.filter(*cloud);
-*/
-
     boxfilter(cloud);
     transformCloud(cloud,0);
     /*
@@ -77,16 +52,22 @@ void DoorValvedetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
         ROS_INFO("empty after tansform cloud");
         return;
     }
-    filter_cloud(cloud);
-    /*if(cloud->empty())
+//    filter_cloud(cloud);
+    if(cloud->empty())
     {
         ROS_INFO("filter_cloud gives empty cloud");
         return;
-    }*/
+    }
     transformCloud(cloud,1);
-    float t;
-//    panelSegmentation(cloud,t);
-    fitting(cloud);
+    panelSegmentation(cloud,theta);
+    if(cloud->empty())
+    {
+        ROS_INFO("plane seg gives empty cloud");
+        return;
+    }
+    return
+
+    fitting(cloud,theta);
     if(cloud->empty())
         return;
     /*clustering(cloud);
@@ -107,10 +88,10 @@ void DoorValvedetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
     float pelvis_theta = tf::getYaw(center_loc_pelvis.orientation);
 
 
-    float ang = (20/180)*M_PI;
+    float ang = (20*M_PI)/180;
     ROS_INFO(" pelvis theta %.4f  ang %.4f",pelvis_theta,ang);
 
-    if(! (abs(pelvis_theta) < ang) )
+    if(! (fabs(pelvis_theta) < ang) )
     {
         ROS_INFO(" pelvis theta %.4f",pelvis_theta);
         circle_param.theta+=M_PI;
@@ -126,13 +107,13 @@ void DoorValvedetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
     std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
 
     detections_.push_back(center_loc);
-
+/*
     pcl::toROSMsg(*cloud, output);
 
     output.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
 
     pcl_filtered_pub_.publish(output);
-
+*/
 }
 
 void DoorValvedetector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, float &theta){
@@ -177,6 +158,15 @@ void DoorValvedetector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
     float cosTheta = eigenVectors.col(0)[0]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
     float sinTheta = eigenVectors.col(0)[1]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
     theta = atan2(sinTheta, cosTheta);
+
+
+
+    sensor_msgs::PointCloud2 output;
+    pcl::toROSMsg(*cloud, output);
+
+    output.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+    ROS_INFO("plne");
+    pcl_filtered_pub_.publish(output);
 
 }
 
@@ -297,10 +287,8 @@ void DoorValvedetector::filter_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     pass_x.filter(*cloud);
 
 }
-void DoorValvedetector::fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+void DoorValvedetector::fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, float &theta)
 {
-    float theta;
-    panelSegmentation(cloud,theta);
 
     // voxel filter to prevent improper fitting of circle
     pcl::VoxelGrid<pcl::PointXYZ> sor;
