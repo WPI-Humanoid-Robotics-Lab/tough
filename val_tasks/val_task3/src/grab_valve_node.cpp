@@ -3,6 +3,7 @@
 #include <ihmc_msgs/StopAllTrajectoryRosMessage.h>
 #include "val_task3/door_opener.h"
 #include "val_task3/door_valve_detector.h"
+#include <val_control_common/val_control_common.h>
 
 int main(int argc, char **argv)
 {
@@ -17,6 +18,7 @@ int main(int argc, char **argv)
     rotateValve rotate(nh);
     gripperControl gc(nh);
     doorOpener doorOpen(nh);
+    valControlCommon cont(nh);
 
 
     geometry_msgs::Point valveCentre;
@@ -75,17 +77,22 @@ int main(int argc, char **argv)
 
     //Positioning the robot to rotate the valve
     //valveCentre = valveCentres[0].position;
+
     rotate.reOrientbeforgrab(valveCentre);
 
 
 
     //Rotating the valve six times
-    for(size_t i = 1; i< 7; ++i){
+    for(size_t i = 1; i< 4; ++i){
         ROS_INFO("Try Number : %d", i );
         // rotate.grab_valve(pt);
         rotate.grab_valve(valveCentre);
         rotate.compute_traj(valveCentre,0.18,points);
         rotate.move_valve(points);
+        if(i == 3){
+            cont.resetRobot();
+            ros::Duration(3.0).sleep();
+        }
     }
 
     ros::Duration(3.0).sleep();
