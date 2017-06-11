@@ -96,7 +96,7 @@ decision_making::TaskResult valTask3::initTask(string name, const FSMCallContext
 
     // the state transition can happen from an event externally or can be geenerated here
     ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
-    if (map_update_count_ > 1) {
+    if (map_update_count_ > 3) {
         // move to a configuration that is robust while walking
         retry_count = 0;
 
@@ -113,9 +113,12 @@ decision_making::TaskResult valTask3::initTask(string name, const FSMCallContext
         }
         // generate the event
         eventQueue.riseEvent("/INIT_SUCESSFUL");
-
     }
-    else if (map_update_count_ < 2 && retry_count++ < 40) {
+    else if (retry_count++ < 40) {
+
+        if(retry_count == 1) head_controller_->moveHead(0,0,20);
+        if(retry_count == 3) head_controller_->moveHead(0,0,-20);
+
         ROS_INFO("valTask3::initTask : Retry Count : %d. Wait for occupancy grid to be updated with atleast 2 messages", retry_count);
         ros::Duration(2.0).sleep();
         eventQueue.riseEvent("/INIT_RETRY");
@@ -124,6 +127,10 @@ decision_making::TaskResult valTask3::initTask(string name, const FSMCallContext
         retry_count = 0;
         ROS_INFO("valTask3::initTask : Failed to initialize");
         eventQueue.riseEvent("/INIT_FAILED");
+    }
+
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
     }
     return TaskResult::SUCCESS();
 }
