@@ -12,6 +12,7 @@ task1Utils::task1Utils(ros::NodeHandle nh):
 
     clearbox_pointcloud_pub_ = nh_.advertise<std_msgs::Int8>("/field/clearbox_pointcloud",1);
     reset_pointcloud_pub_    = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
+    reset_map_pub_           = nh_.advertise<std_msgs::Empty>("/field/reset_map",1);
     task1_log_pub_           = nh_.advertise<std_msgs::String>("/field/log",10);
 
     task_status_sub_ = nh_.subscribe("/srcsim/finals/task1", 10, &task1Utils::taskStatusSubCB, this);
@@ -504,6 +505,12 @@ void task1Utils::resetPointCloud()
 {
     std_msgs::Empty msg;
     reset_pointcloud_pub_.publish(msg);
+}
+
+void task1Utils::clearMap() {
+    std_msgs::Empty msg;
+    reset_map_pub_.publish(msg);
+    ros::Duration(0.3).sleep();
 }
 
 void task1Utils::taskStatusSubCB(const srcsim::Task &msg){

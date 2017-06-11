@@ -1585,13 +1585,17 @@ decision_making::TaskResult valTask1::skipToCP3(string name, const FSMCallContex
         // if the robot harness is released
         if (task1_utils_->isHarnessDetached())
         {
+            ROS_INFO("clear point cloud and map");
+            task1_utils_->resetPointCloud();
+            ros::Duration(1).sleep();
+            task1_utils_->clearMap();
             ROS_INFO("skipped to cp3, walking 1 step back");
             task1_utils_->taskLogPub("skipped to cp3, walking 1 step back");
             ros::Duration(0.5).sleep();
-            std::vector<float> x_offset={-0.25,-0.25, -0.5, -0.5};
-            std::vector<float> y_offset={0.0, 0.0, 0.0, 0.1};
+            std::vector<float> x_offset={-0.25,-0.25};
+            std::vector<float> y_offset={0.0, 0.0};
             walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
-            ros::Duration(4).sleep();
+            ros::Duration(5).sleep();
 
             // continue with the task
             eventQueue.riseEvent("/SKIPPED_TO_CP3");
