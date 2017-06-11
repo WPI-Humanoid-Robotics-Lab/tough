@@ -81,6 +81,8 @@ valTask2::valTask2(ros::NodeHandle nh):
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask2::visited_map_cb, this);
     panel_handle_offset_sub_ = nh_.subscribe("/panel_offset",10, &valTask2::panelHandleOffsetCB, this);
 
+    //publishers
+    panel_handle_offset_pub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 10);
     task2_utils_->taskLogPub("Setting Multisense Subscribers");
     cv::Mat img;
     ms_sensor_->giveImage(img);
@@ -139,6 +141,23 @@ void valTask2::panelHandleOffsetCB(const std_msgs::Float32 msg)
     tempPose.position.x = tempPose.positon.x + msg*cos(theta);
     tempPose.position.y = tempPose.positon.y + msg*sin(theta);
     setSolarPanelHandlePose(tempPose);
+
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+    marker.header.stamp = ros::Time::now();
+    marker.ns = "panel_handle";
+    marker.id = 1;
+    marker.type = visualization_msgs::Marker::ARROW;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose = tempPose;
+    marker.scale.x = 0.5;
+    marker.scale.y = 0.05;
+    marker.scale.z = 0.05;
+    marker.color.a = 1.0;
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
+    panel_handle_offset_pub_.publish(marker);
 }
 
 bool valTask2::preemptiveWait(double ms, decision_making::EventQueue& queue) {
