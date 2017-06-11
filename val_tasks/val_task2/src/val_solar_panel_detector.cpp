@@ -19,18 +19,17 @@ SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rov
 {
     pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &SolarPanelDetect::cloudCB, this);;
     pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_panel/cloud2", 1);
-    vis_pub = nh.advertise<visualization_msgs::Marker>( "/visualization_marker", 1 );
-    rover_loc_  =rover_loc;
-    isroverRight_ = isroverRight;
+    vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_solar_panel/visualization_marker", 1 );
+
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
     ROS_INFO("pose : x %.2f y %.2f z %.2f yaw %.2f ",current_pelvis_pose.position.x,current_pelvis_pose.position.y,current_pelvis_pose.position.z,tf::getYaw(current_pelvis_pose.orientation));
 
-    optimal_dist = 0.16;
+//    optimal_dist = 0.16;
     button_loc_ = button_loc;
 
 //    ROS_INFO("rover loc const %f %f right: %d",rover_loc_.position.x,rover_loc_.position.y,(int)isroverRight_);
-    setRoverTheta();
+//    setRoverTheta();
     setoffset();
 //    ROS_INFO("in const");
 }
@@ -40,20 +39,18 @@ SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Pose2D rov
     pcl_sub =  nh.subscribe("/field/assembled_cloud2", 10, &SolarPanelDetect::cloudCB, this);;
     pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_panel/cloud2", 1);
     vis_pub = nh.advertise<visualization_msgs::Marker>( "/val_solar_panel/visualization_marker", 1 );
-    rover_loc_  =rover_loc;
-    isroverRight_ = isroverRight;
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
     ROS_INFO("pose : x %.2f y %.2f z %.2f yaw %.2f ",current_pelvis_pose.position.x,current_pelvis_pose.position.y,current_pelvis_pose.position.z,tf::getYaw(current_pelvis_pose.orientation));
 
-    optimal_dist = 0.16;
-    button_loc_.x = 0;
+//    optimal_dist = 0.16;
 
+    button_loc_.x = 0;
     button_loc_.y = 0;
     button_loc_.z = 0;
 
 //    ROS_INFO("rover loc const %f %f right: %d",rover_loc_.position.x,rover_loc_.position.y,(int)isroverRight_);
-    setRoverTheta();
+//    setRoverTheta();
     setoffset();
 //    ROS_INFO("in const");
 }
@@ -77,7 +74,7 @@ int SolarPanelDetect::getDetectionTries() const
 
 }
 
-void SolarPanelDetect::getoffset(float &minX, float &maxX,float &minY, float &maxY,float &minZ, float &maxZ, float &pitchDeg)
+void SolarPanelDetect::getoffset(float &minX, float &maxX,float &minY, float &maxY,float &minZ, float &maxZ, float &optimalDist, float &pitchDeg)
 {
     minX = min_x;
     maxX = max_x;
@@ -85,13 +82,14 @@ void SolarPanelDetect::getoffset(float &minX, float &maxX,float &minY, float &ma
     maxY = max_y;
     minZ = min_z;
     maxZ = max_z;
+    optimalDist = optimal_dist;
     pitchDeg = (pitch*180)/M_PI;
 }
 
-void SolarPanelDetect::setoffset(float minX, float maxX, float minY, float maxY, float minZ, float maxZ, float pitchDeg)
+void SolarPanelDetect::setoffset(float minX, float maxX, float minY, float maxY, float minZ, float maxZ, float optimalDist,float pitchDeg)
 {
 //    float slope =tan(rover_theta);
-    ROS_INFO("setting offset");
+    ROS_INFO("setting offset and other parameters");
 
     min_x = minX;
     max_x = maxX;
@@ -99,9 +97,11 @@ void SolarPanelDetect::setoffset(float minX, float maxX, float minY, float maxY,
     max_y = maxY;
     min_z = minZ;
     max_z = maxZ;
+    optimal_dist = optimalDist;
     pitch = (pitchDeg*M_PI)/180;
 }
 
+/*
 void SolarPanelDetect::setRoverTheta()
 {
     // this func is for finding yaw and used for tranformation of the cloud
@@ -116,9 +116,9 @@ void SolarPanelDetect::setRoverTheta()
     else
     {
         rover_theta+=1.5708;
-    }*/
+    }
 
-}
+}*/
 
 void SolarPanelDetect::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 {
@@ -129,12 +129,12 @@ void SolarPanelDetect::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
 
     geometry_msgs::Pose pose;
 
-
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     sensor_msgs::PointCloud2 output;
     pcl::fromROSMsg(*input, *cloud);
 
     boxfilter(cloud);
+
     if(cloud->empty())
     {
         ROS_INFO("box fiter empty");
@@ -149,10 +149,8 @@ void SolarPanelDetect::cloudCB(const sensor_msgs::PointCloud2::Ptr &input)
         return;
     }
 
-
     getOrientation(cloud,pose);
     detections_.push_back(pose);
-
 
     /*transformCloud(cloud,true);
     PassThroughFilter(cloud);
@@ -247,6 +245,7 @@ void SolarPanelDetect::PlaneSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cl
 
 
 }
+
 /*
 
 float SolarPanelDetect::getArea(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointIndices::Ptr &inliers, pcl::ModelCoefficients::Ptr &coefficients )
@@ -288,12 +287,15 @@ float SolarPanelDetect::getArea(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::
 }
     */
 
+
 void SolarPanelDetect::getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, geometry_msgs::Pose &pose)
 {
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+
     Eigen::Vector4f min_pt,max_pt;
     pcl::getMinMax3D(*cloud,min_pt,max_pt);
-    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+
 
     ROS_INFO("max z : %.2f",max_pt(2));
 
@@ -306,15 +308,11 @@ void SolarPanelDetect::getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud
     pass_z.filter(*cloud);
 
     ROS_INFO("cld size %d",(int)cloud->points.size());
-    //ROS_INFO("hey in orientation");
-    // fitting the largest plane
-
 
     if (cloud->points.empty()){
         ROS_WARN("z Pass thru gives empty cloud in get orientation ");
         return;
     }
-
 
     PlaneSegmentation(cloud,inliers,coefficients);
 
@@ -322,6 +320,7 @@ void SolarPanelDetect::getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud
         ROS_WARN("No plane found");
         return;
     }
+
 
     // PCA
 //    transformCloud(cloud,tf::getYaw(current_pelvis_pose.orientation)+(M_PI/2),true);
@@ -346,46 +345,36 @@ void SolarPanelDetect::getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud
     float sinTheta = eigenVectors.col(0)[1]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
     float theta = atan2(sinTheta, cosTheta);
 
-
-
-
     transformCloud(cloud,theta,true);
     pcl::getMinMax3D(*cloud,min_pt,max_pt);
     ROS_INFO("range %.4f",fabs(max_pt(1)-min_pt(1)));
     transformCloud(cloud,theta,false);
 
-
 //    if the length is  less than 0.3 then detected plane is the smaller side of the panel
     if (fabs(max_pt(1)-min_pt(1)) < 0.3)
     {
+        ROS_INFO("Smaller plane detected");
         cosTheta = eigenVectors.col(1)[0]/sqrt(pow(eigenVectors.col(1)[0],2)+pow(eigenVectors.col(1)[1],2));
         sinTheta = eigenVectors.col(1)[1]/sqrt(pow(eigenVectors.col(1)[0],2)+pow(eigenVectors.col(1)[1],2));
         theta = atan2(sinTheta, cosTheta);
     }
 
+    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch,theta);
+    pose.orientation = quaternion;
 
-    ROS_INFO("Theta %.4f",theta);
+    geometry_msgs::Pose pose_pelvis;
+    robot_state_->transformPose(pose,pose_pelvis,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+
 
     // so that arrow is always inwards
-    if(isroverRight_)
+    if (!(fabs(tf::getYaw(pose_pelvis.orientation)) <= (M_PI/2)))
     {
-        ROS_INFO("rover is right");
-        if (theta >0)
-        {
-            theta-=M_PI;
-        }
-
+        ROS_INFO("orientation was outward");
+        theta+=M_PI;
     }
-    else
-    {
-        ROS_INFO("rover is left");
-        if (theta < 0)
-        {
-            theta+=M_PI;
-        }
-    }
+    ROS_INFO("Theta %.4f",theta);
 
-    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch,theta);
+    quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch,theta);
     pose.orientation = quaternion;
     visualizept(pose);
 
@@ -396,9 +385,11 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,geo
     // find centroid and apply pca
     Eigen::Vector4f centroid;
     pcl::compute3DCentroid(*cloud, centroid);
-    pose.position.x = centroid(0);
-    pose.position.y = centroid(1);
-    pose.position.z = centroid(2);
+//    pose.position.x = centroid(0);
+//    pose.position.y = centroid(1);
+//    pose.position.z = centroid(2);
+
+
 
     Eigen::Matrix3f covarianceMatrix;
     pcl::computeCovarianceMatrix(*cloud, centroid, covarianceMatrix);
@@ -415,37 +406,12 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,geo
     float sinTheta = eigenVectors.col(1)[1]/sqrt(pow(eigenVectors.col(1)[0],2)+pow(eigenVectors.col(1)[1],2));
     float theta = atan2(sinTheta, cosTheta);
 
-//    ROS_INFO("theta %.2f",theta);
-    // so that arrow is always inwards that is quadrant I and II
-    if(isroverRight_)
-    {
-        if (theta >0)
-        {
-            theta-=M_PI;
-        }
-
-    }
-    else
-    {
-        if (theta <0)
-        {
-            theta+=M_PI;
-        }
-    }
-
-//    float slope = (cloud->points[0].x-cloud->points[1].x)/(cloud->points[0].y-cloud->points[1].y);
-
-//    float theta1 = atan(slope);
-
-//    theta = 0;
-//    ROS_INFO("theta %.2f  theta1 %.2f",theta,theta1);
-
-
     // for viz
     geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(0,pitch,theta);
     pose.orientation = quaternion;
 //    visualizept(pose);
 
+    /*
     tfScalar r, p, y;
     tf::Quaternion q;
     tf::quaternionMsgToTF(quaternion, q);
@@ -453,7 +419,7 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,geo
     rot.getRPY(r, p, y);
     ROS_INFO("Roll %.2f, Pitch %.2f, Yaw %.2f", (float)r, (float)p, (float)y);
 //    geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
-
+    */
 
 
     //NOTE: if there is problem with the position try uncommenting
@@ -473,8 +439,7 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,geo
     ROS_INFO("x %.4f y %.4f",max_pt(0)-min_pt(0),max_pt(1)-min_pt(1));
 
 //    float length = std::max(max_pt(0)-min_pt(0),max_pt(1)-min_pt(1));
-
-    pcl::PointCloud<pcl::PointXYZ> pos_cloud;
+    /*pcl::PointCloud<pcl::PointXYZ> pos_cloud;
     pcl::PointCloud<pcl::PointXYZ>::Ptr pos_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
 
 
@@ -495,29 +460,39 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,geo
     pose.position.x = pos_cloud_ptr->points[0].x;
     pose.position.y = pos_cloud_ptr->points[0].y;
     pose.position.z = pos_cloud_ptr->points[0].z;
+*/
+
+    pose.position.x = (max_pt(0)+min_pt(0))/2;
+    pose.position.y = (max_pt(1)+min_pt(1))/2;
+    pose.position.z = (max_pt(2)+min_pt(2))/2;
+
+
+
+    ROS_WARN("Is button loc avail??");
 
     if(button_loc_.z != 0)
     {
-        ROS_INFO("button loc is avail");
+        ROS_INFO("Yes,button loc is avail");
         float dist = sqrt(pow(pose.position.x-button_loc_.x,2)+pow(pose.position.y-button_loc_.y,2));
+        ROS_INFO("Distance is %.2f",dist);
         if (dist >= 0.18 || dist <= 0.14)
         {
-            ROS_INFO("Distance is %.2f, moving position towards/away from button",dist);
+            ROS_INFO("Moving position towards/away from button");
             float lambda = optimal_dist/dist;
             pose.position.x = button_loc_.x + lambda*(button_loc_.x-pose.position.x);
             pose.position.x = button_loc_.y + lambda*(button_loc_.y-pose.position.y);
         }
     }
 
-    /*
-
+/*
     sensor_msgs::PointCloud2 output;
     pcl::toROSMsg(*cloud,output);
     output.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
     pcl_filtered_pub.publish(output);
-*/
 
+    visualizept(pose);*/
 }
+
 
 // NOTE: cloud is not by reference
 void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, geometry_msgs::Pose &pose)
@@ -614,7 +589,6 @@ void SolarPanelDetect::filter_solar_panel(pcl::PointCloud<pcl::PointXYZ>::Ptr cl
 //    cloud = solar_panel_cloud;
 
 */
-
 
 }
 
