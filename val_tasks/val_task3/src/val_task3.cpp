@@ -190,7 +190,7 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
   else
   {
       // sleep for some time so detection happens
-      ros::Duration(5).sleep();
+      ros::Duration(10).sleep();
 
       // increment the fail count
       retry_count++;
