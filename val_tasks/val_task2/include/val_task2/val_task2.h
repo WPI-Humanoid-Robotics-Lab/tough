@@ -121,6 +121,7 @@ class valTask2 {
     bool is_array_on_right_;
 
     ros::Subscriber panel_handle_offset_sub_;
+    ros::Publisher  panel_handle_offset_pub_;
     void panelHandleOffsetCB(const std_msgs::Float32 msg);
     geometry_msgs::Point button_coordinates_;
     geometry_msgs::Point button_coordinates_temp_; // this is used for deciding if rotation of panel is required
