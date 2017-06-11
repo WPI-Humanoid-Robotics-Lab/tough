@@ -14,6 +14,7 @@ int main(int argc, char** argv){
 
   ros::Rate loop1(1);
 
+  /*
   if(true) //to destruct the rover_obj
   {
       RoverDetector rover_obj(nh);
@@ -37,7 +38,7 @@ int main(int argc, char** argv){
           ros::spinOnce();
           loop1.sleep();
       }
-  }
+  }*/
 
 
 
