@@ -16,7 +16,7 @@ void LeftImageInverter::subscribeImage(){
 void LeftImageInverter::getLeftImageCB(const sensor_msgs::ImageConstPtr& msg){
   try
   {
-    cv::imshow("view", cv_bridge::toCvShare(msg, "bgr8")->image);
+  //  cv::imshow("view", cv_bridge::toCvShare(msg, "bgr8")->image);
     cv::waitKey(30);
     cv::Mat invertedLeftImage;
     cv::Mat leftImage = cv_bridge::toCvShare(msg, "bgr8")->image;

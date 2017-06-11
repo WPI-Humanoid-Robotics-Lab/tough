@@ -16,5 +16,6 @@ int main(int argc, char** argv)
         ROS_INFO_STREAM_THROTTLE(5, "Stairs detections: " << detections.size());
         ros::spinOnce();
     }
+    return 0;
 
 }
