@@ -79,6 +79,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     // Subscribers
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask2::occupancy_grid_cb, this);
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask2::visited_map_cb, this);
+    panel_handle_offset_sub_ = nh_.subscribe("/panel_offset",10, &valTask2::panelHandleOffsetCB, this);
 
     task2_utils_->taskLogPub("Setting Multisense Subscribers");
     cv::Mat img;
@@ -126,6 +127,14 @@ void valTask2::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
     // Count the number of times map is updated
     //    ROS_INFO("valTask2::occupancy_grid_cb: map count updated to %d",map_update_count_);
     ++map_update_count_;
+}
+
+void valTask2::panelHandleOffsetCB(const std_msgs::Float32 msg)
+{
+    geometry_msgs::Pose tempPose = solar_panel_handle_pose_;
+
+    setSolarPanelHandlePose(tempPose);
+
 }
 
 bool valTask2::preemptiveWait(double ms, decision_making::EventQueue& queue) {
