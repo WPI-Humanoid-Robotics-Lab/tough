@@ -164,19 +164,19 @@ decision_making::TaskResult valTask2::initTask(string name, const FSMCallContext
         ros::Duration(1.0f).sleep();
 
         // start the task
-        ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
-        srcsim::StartTask   srv;
-        srv.request.checkpoint_id = 1;
-        srv.request.task_id       = 2;
-        if(client.call(srv)) {
-            //what do we do if this call fails or succeeds?
-        }
-        else
-        {
-            ROS_ERROR("valTask2::initTask : service not called");
-            task2_utils_->taskLogPub("valTask2::initTask : service not called");
-            eventQueue.riseEvent("/INIT_FAILED");
-        }
+//        ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
+//        srcsim::StartTask   srv;
+//        srv.request.checkpoint_id = 1;
+//        srv.request.task_id       = 2;
+//        if(client.call(srv)) {
+//            //what do we do if this call fails or succeeds?
+//        }
+//        else
+//        {
+//            ROS_ERROR("valTask2::initTask : service not called");
+//            task2_utils_->taskLogPub("valTask2::initTask : service not called");
+//            eventQueue.riseEvent("/INIT_FAILED");
+//        }
         // generate the event
         head_controller_->moveHead(0,0,0);
         eventQueue.riseEvent("/INIT_SUCESSFUL");
