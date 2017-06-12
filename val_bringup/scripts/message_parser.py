@@ -5,6 +5,7 @@ import time
 import subprocess
 import rospy
 from std_msgs.msg import String
+from std_msgs.msg import Float32
 from geometry_msgs.msg import PointStamped
 
 from sensor_msgs.msg import JointState
@@ -58,46 +59,6 @@ def state_callback(data):
 def point_callback(data):
     #send only data that is required. it should be a string only
     sock.mysend(str(time.time()) + " : " + "Clicked point : x:"+str(data.point.x) +" y:"+ str(data.point.y) + " z:"+str(data.point.z) +" \n")
-
-# counter = 0 
-# countercheck = 0 
-# resetflag = False
-
-# def ihmc_callback(data):
-#     print "we get here"
-#     counter = counter + 1
-#     if counter > 5000000 :
-#         counter = 0
-#         resetflag = True
-
-# sch = sched.scheduler(time.time, time.sleep)
-
-# def check_status(sc): 
-#     global counter
-#     global countercheck
-#     global resetflag
-#     print countercheck
-#     print counter
-#     print resetflag
-
-#     if resetflag == True:
-#         resetflag = False
-#         countercheck = 0
-
-#     else:
-#         countercheck = counter
-
-#     if counter > countercheck:
-#         print " "
-#     else:
-#         sock.mysend("Probable the IHMC Controller Failed")
-
-    
-    
-#     sch.enter(5, 1, check_status, (sc,))
-
-# sch.enter(5, 1, check_status, (sch,))
-# sch.run()
 
 def listener():
     # Listen to the decision making topic
@@ -153,8 +114,8 @@ if __name__ == '__main__':
         
         # $ is message to be sent to the state machine
         elif (msg[start_index] == "$"):
-            print msg[:start_index] + "**Message Recieved** " + msg[start_index:-1]
-            pub3.publish(msg[start_index:-1])
+            print msg[:start_index] + "**offset received** " + msg[start_index:-1]
+            pub3.publish(float(msg[start_index + 1 :-1]))
         # rest of the messages
         else:
             print msg[:start_index] + "**Message Recieved** " + msg[start_index:-1]
