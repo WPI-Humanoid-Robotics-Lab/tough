@@ -21,7 +21,7 @@ public:
     bool move_valve(std::vector<geometry_msgs::Pose> points, float executionTime=2.0f);
     std::vector<geometry_msgs::Pose> poses;
     geometry_msgs::QuaternionStamped leftHandOrientationTop_,leftHandOrientationSide_,leftHandOrientationSideDown_,leftHandOrientationSideUp_;
-    void reOrientbeforgrab(geometry_msgs::Point valveCenter);
+    bool reOrientbeforgrab(geometry_msgs::Point valveCenter);
     ~rotateValve();
 
 private:

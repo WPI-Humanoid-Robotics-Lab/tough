@@ -129,7 +129,7 @@ bool rotateValve::compute_traj(geometry_msgs::Point center, float radius, std::v
     geometry_msgs::Point centerPelvis;
     current_state_->transformPoint(center,centerPelvis, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
     geometry_msgs::Pose point;
-    for (int i = -3; i < (NumSteps-5)/2-1; ++i) {
+    for (int i = 0; i < (NumSteps-5)/2-1; ++i) {
         point.position.x=centerPelvis.x;
         point.position.y=centerPelvis.y + radius*cos((i*2*M_PI/NumSteps)-(M_PI/2));
         point.position.z=centerPelvis.z + radius*sin((i*2*M_PI/NumSteps)-(M_PI/2));
@@ -240,7 +240,7 @@ bool rotateValve::move_valve(std::vector<geometry_msgs::Pose> poses, float execu
     ros::Duration(executionTime).sleep();
 }
 
-void rotateValve::reOrientbeforgrab(geometry_msgs::Point valveCenter)
+bool rotateValve::reOrientbeforgrab(geometry_msgs::Point valveCenter)
 {
     //Alligning relative to the centre of the valve
     geometry_msgs::Pose   pelvisPose;
@@ -260,8 +260,10 @@ void rotateValve::reOrientbeforgrab(geometry_msgs::Point valveCenter)
     preDoorOpenGoal.theta    = tf::getYaw(pelvisPose.orientation);
 
 
-    walk_.walkToGoal(preDoorOpenGoal);
+    bool result = walk_.walkToGoal(preDoorOpenGoal);
+    ROS_INFO("retOrientbeforegrab: the walking controller returned: %d",result);
     ros::Duration(1.0).sleep();
+    return result;
 }
 
 rotateValve::~rotateValve(){

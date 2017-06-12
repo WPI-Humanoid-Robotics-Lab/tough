@@ -15,6 +15,7 @@ int main(int argc, char** argv){
     valveCenter.position.x = std::atof(argv[1]);
     valveCenter.position.y = std::atof(argv[2]);
     valveCenter.position.z = std::atof(argv[3]);
+    valveCenter.orientation.w = 1;
     ROS_INFO("Starting door open task");
 
     doorOpen.openDoor(valveCenter);
