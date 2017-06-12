@@ -187,8 +187,8 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
 
     eventQueue.riseEvent("/DETECTED_STAIRS");
   }
-  // if failed for more than 5 times, go to error state
-  else if (retry_count > 5)
+  // if failed for more than 8 times, go to error state
+  else if (retry_count > 8)
   {
     // reset the fail count
     retry_count = 0;
@@ -239,6 +239,8 @@ decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCal
 
     // TODO: check if robot rechead the panel
     eventQueue.riseEvent("/REACHED_STAIRS");
+
+    ros::Duration(1).sleep();
   }
   // check if the pose is changed
   else if (taskCommonUtils::isPoseChanged(pose_prev, stair_detect_walk_pose_))
