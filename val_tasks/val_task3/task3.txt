@@ -13,4 +13,4 @@ Note: We need to add a case when we want to rotate the valve more/less than 3 ti
 
 3. Pushing the door
 
-rosrun val_task3 door_open_node [x_centre] [y_centre] [z_centre]
+rosrun val_task3 door_opener_node [x_centre] [y_centre] [z_centre]
