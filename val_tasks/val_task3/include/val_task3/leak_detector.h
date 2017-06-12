@@ -3,6 +3,8 @@
 #include <ros/ros.h>
 #include <val_task3/val_task3_utils.h>
 #include <srcsim/Leak.h>
+#include <val_moveit_planners/val_cartesian_planner.h>
+#include <val_controllers/val_wholebody_manipulation.h>
 
 #define VERTICAL_WIDTH    0.25
 #define HORIZONTAL_WIDTH  0.25
@@ -12,6 +14,8 @@ private:
     ros::NodeHandle nh_;
     ros::Subscriber leak_sb_;
     ros::Publisher  marker_pub_;
+    cartesianPlanner* left_arm_planner_;
+    wholebodyManipulation* wholebody_controller_;
 
     double leak_value_;
 
@@ -26,5 +30,5 @@ public:
     void leakMsgCB(const srcsim::Leak &leakmsg);
     double getLeakValue() const;
     void setLeakValue(double getLeakValue);
-    void findLeak (geometry_msgs::Point& leak_point);
+    void findLeak (std::vector<geometry_msgs::Point>& way_points, geometry_msgs::Point& leak_point);
 };
