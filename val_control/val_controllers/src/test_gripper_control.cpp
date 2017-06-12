@@ -59,6 +59,6 @@ int main(int argc, char **argv){
         gripcont.controlGripper(RIGHT,rightgripClose);
     }
     ros::spinOnce();
-
+    ros::Duration(2).sleep();
     return 0;
 }

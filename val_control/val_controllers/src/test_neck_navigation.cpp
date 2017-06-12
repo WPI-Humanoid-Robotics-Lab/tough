@@ -12,6 +12,6 @@ int main(int argc, char **argv)
   headTraj.moveNeckJoints({{ 0.0f, -1.0f, 0.0f }}, 2.0f);
 
   ros::spinOnce();
-
+  ros::Duration(2).sleep();
   return 0;
 }

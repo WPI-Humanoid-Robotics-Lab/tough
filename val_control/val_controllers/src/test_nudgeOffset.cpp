@@ -21,6 +21,7 @@ int main(int argc, char **argv)
         ROS_INFO(" 0 - local | 1 - pelvis, invalid input");
     }
     ros::spinOnce();
+    ros::Duration(2).sleep();
     return 0;
 }
 

@@ -35,5 +35,6 @@ int main(int argc, char **argv)
       ROS_INFO("Usage: %s <side> direction\n side is 0 or 1. read header file for direction indices", argv[0]);
   }
   ros::spinOnce();
+  ros::Duration(2).sleep();
   return 0;
 }
