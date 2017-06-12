@@ -93,12 +93,13 @@ private:
     void harnessCB(const srcsim::Harness &harnessMsg);
     bool is_harness_detached_;
 
+
+
+public:
     const std::string TEXT_RED="\033[0;31m";
     const std::string TEXT_GREEN = "\033[0;32m";
     const std::string TEXT_NC=  "\033[0m";
 
-
-public:
     task1Utils(ros::NodeHandle nh);
     ~task1Utils();
 

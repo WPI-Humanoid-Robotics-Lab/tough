@@ -38,6 +38,7 @@
 #include "navigation_common/map_generator.h"
 #include "perception_common/MultisensePointCloud.h"
 #include <std_msgs/Float32.h>
+#include <std_msgs/Bool.h>
 
 using namespace decision_making;
 
@@ -140,6 +141,8 @@ class valTask2 {
 
     static valTask2* currentObject;
 
+    ros::Subscriber set_panel_rotation_flag_sub_;
+    void setPanelRotationFlagCB(const std_msgs::Bool msg);
     bool is_rotation_required_;
     // Visited map
     ros::Subscriber visited_map_sub_;
