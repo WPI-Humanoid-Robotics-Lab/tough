@@ -30,6 +30,6 @@ int main(int argc, char **argv)
   }
 
   ros::spinOnce();
-ros::Duration(2).sleep();
+  ros::Duration(2).sleep();
   return 0;
 }

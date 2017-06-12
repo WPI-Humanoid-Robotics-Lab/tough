@@ -6,6 +6,7 @@ import subprocess
 import rospy
 from std_msgs.msg import String
 from std_msgs.msg import Float32
+from std_msgs.msg import Float64MultiArray
 from geometry_msgs.msg import PointStamped
 
 from sensor_msgs.msg import JointState
@@ -72,7 +73,8 @@ if __name__ == '__main__':
     listener()
     pub1 = rospy.Publisher('/decision_making/task1/events', String, queue_size=10)
     pub2 = rospy.Publisher('/decision_making/task2/events', String, queue_size=10)
-    pub3 = rospy.Publisher('/panel_offset', Float32, queue_size=10)
+    panel_offset_pub = rospy.Publisher('/panel_offset', Float32, queue_size=10)
+    nudge_pub  = rospy.Publisher('/nudge_pose', Float64MultiArray, queue_size=10)
     prev_time = time.time()
     prev_ros_time = rospy.get_rostime().secs
     while True:
@@ -115,7 +117,16 @@ if __name__ == '__main__':
         # $ is message to be sent to the state machine
         elif (msg[start_index] == "$"):
             print msg[:start_index] + "**offset received** " + msg[start_index:-1]
-            pub3.publish(float(msg[start_index + 1 :-1]))
+            panel_offset_pub.publish(float(msg[start_index + 1 :-1]))
+
+        # * is message to be sent to the nudge node
+        elif (msg[start_index] == "*"):
+            print msg[:start_index] + "**Nudge message received** " + msg[start_index:-1]
+            data_str = msg[start_index + 1:-1].split()
+            ros_msg = Float64MultiArray()
+            ros_msg.data = [float(x) for x in data_str]
+            nudge_pub.publish(ros_msg)
+
         # rest of the messages
         else:
             print msg[:start_index] + "**Message Recieved** " + msg[start_index:-1]
