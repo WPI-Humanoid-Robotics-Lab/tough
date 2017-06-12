@@ -79,9 +79,9 @@ void leakDetector::visulatise3DPoints(std::vector<geometry_msgs::Point> &points)
     marker.ns = "leak";
     marker.type = visualization_msgs::Marker::CUBE;
     marker.action = visualization_msgs::Marker::ADD;
-    marker.scale.x = 0.1;
-    marker.scale.y = 0.1;
-    marker.scale.z = 0.1;
+    marker.scale.x = 0.05;
+    marker.scale.y = 0.05;
+    marker.scale.z = 0.05;
     marker.color.a = 1.0;
     marker.color.r = 1.0;
     marker.color.g = 0.0;

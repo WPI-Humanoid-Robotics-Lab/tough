@@ -15,13 +15,14 @@ private:
 
     double leak_value_;
 
-    void generateSearchWayPoints(geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom, float ver_low_limit, float ver_high_limit, std::vector<geometry_msgs::Point>& way_points);
     void visulatise3DPoints(std::vector<geometry_msgs::Point> &points);
 
 public:
     leakDetector(ros::NodeHandle nh);
     ~leakDetector();
 
+
+    void generateSearchWayPoints(geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom, float ver_low_limit, float ver_high_limit, std::vector<geometry_msgs::Point>& way_points);
     void leakMsgCB(const srcsim::Leak &leakmsg);
     double getLeakValue() const;
     void setLeakValue(double getLeakValue);

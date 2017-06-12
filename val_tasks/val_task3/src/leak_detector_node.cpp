@@ -18,7 +18,13 @@ int main(int argc, char** argv)
     std::vector<geometry_msgs::Point> points;
     leak_detector.generateSearchWayPoints(h_s, h_e, v_s, v_e, points);
 
-    ros::spin();
+    ros::Rate loop_rate(10);
+
+    while(ros::ok())
+    {
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
 
     return 0;
 }
