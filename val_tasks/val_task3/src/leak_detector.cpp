@@ -24,20 +24,19 @@ void leakDetector::generateSearchWayPoints(geometry_msgs::Point horz_left_top, g
 {
     // generate way points with the dimension of the field of view of the tool
 
-    float points_in_vertical_line = (ver_high_limit - ver_low_limit)/VERTICAL_WIDTH;
-    float points_in_horizontal_line = (horz_right_bottom.x - horz_left_top.x)/HORIZONTAL_WIDTH;
+    int points_in_vertical_line = (ver_high_limit - ver_low_limit)/VERTICAL_WIDTH;
+    int points_in_horizontal_line = (horz_right_bottom.y - horz_left_top.y)/HORIZONTAL_WIDTH;
 
     geometry_msgs::Point point;
     point.x = horz_left_top.x;
     point.y = horz_left_top.y;
     point.z = ver_high_limit;
 
-    int z=0;
-    for (float i=0; i<points_in_horizontal_line; i+=VERTICAL_WIDTH, z++)
+    for (int i=0; i<points_in_horizontal_line; i++)
     {
-        for (float j=0; j<points_in_vertical_line; j+=HORIZONTAL_WIDTH)
+        for (int j=0; j<points_in_vertical_line; j++)
         {
-            point.z = (z%2 == 0) ? point.z-VERTICAL_WIDTH : point.z+VERTICAL_WIDTH;
+            point.z = (i%2 == 0) ? point.z-VERTICAL_WIDTH : point.z+VERTICAL_WIDTH;
             way_points.push_back(point);
         }
         point.y += HORIZONTAL_WIDTH;
@@ -46,7 +45,7 @@ void leakDetector::generateSearchWayPoints(geometry_msgs::Point horz_left_top, g
 
     ROS_INFO("%d search points generated", way_points.size());
     // visulaize points
-    visulatise3DPoints(way_points);
+    visulatiseSearchPoints(way_points, horz_left_top, horz_right_bottom);
 }
 
 void leakDetector::findLeak (geometry_msgs::Point& leak_point)
@@ -68,9 +67,8 @@ void leakDetector::setLeakValue(double leak_value)
     leak_value_ = leak_value;
 }
 
-void leakDetector::visulatise3DPoints(std::vector<geometry_msgs::Point> &points)
+void leakDetector::visulatiseSearchPoints(std::vector<geometry_msgs::Point> &points, geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom)
 {
-
     visualization_msgs::MarkerArray marker_array = visualization_msgs::MarkerArray();
 
     visualization_msgs::Marker marker;
@@ -83,17 +81,31 @@ void leakDetector::visulatise3DPoints(std::vector<geometry_msgs::Point> &points)
     marker.scale.y = 0.05;
     marker.scale.z = 0.05;
     marker.color.a = 1.0;
-    marker.color.r = 1.0;
+    marker.color.r = 0.0;
     marker.color.g = 0.0;
-    marker.color.b = 0.0;
+    marker.color.b = 1.0;
     marker.lifetime = ros::Duration(0);
 
-    for (int i=0; i<points.size();i++)
+    int i=0;
+    for (i=0; i<points.size();i++)
     {
         marker.id = i;
         marker.pose.position = points[i];
         marker_array.markers.push_back(marker);
     }
+
+    // add end points
+    marker.color.r = 1.0;
+    marker.color.g = 0.0;
+    marker.color.b = 0.0;
+
+    marker.id = i++;
+    marker.pose.position = horz_left_top;
+    marker_array.markers.push_back(marker);
+
+    marker.id = i++;
+    marker.pose.position = horz_right_bottom;
+    marker_array.markers.push_back(marker);
 
     marker_pub_.publish(marker_array);
     ros::Duration(0.2).sleep();

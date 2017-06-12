@@ -15,7 +15,7 @@ private:
 
     double leak_value_;
 
-    void visulatise3DPoints(std::vector<geometry_msgs::Point> &points);
+    void visulatiseSearchPoints(std::vector<geometry_msgs::Point> &points, geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom);
 
 public:
     leakDetector(ros::NodeHandle nh);
