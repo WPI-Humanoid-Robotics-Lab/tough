@@ -65,7 +65,7 @@ private:
     const std::vector<float> leftNearChestPalmUp_    = {-1.5, -1.04, 1.6, -1.85, -1.50, 0, 0};  // 0 -1.5  -1.04  1.6  -1.85  -1.50  0  0
     const std::vector<float> leftSeedNonGraspingHand_ = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};  // 0 0.21  -1.16  0.0  -1.07  1.52  0  0
     //while walking
-    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.62,-1.05,1.29,-1.23,-0.67,0.0,-0.30}; /// 0 -0.62 -1.2 1.29 -1.20 -0.67 0.0 -0.30
+    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.38,-1.5, 1.3,-1.23,-0.26, 0.0,-0.20}; // 0 -0.38  -1.5  1.3  -1.23  -0.26  0.0  -0.2
 
 
     //before walking
@@ -76,7 +76,7 @@ private:
 
     const std::vector<float> rightSeedNonGraspingHand_ = {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0}; // 1  0.21  1.16  0.0  1.07  1.52  0  0
     //while walking
-    const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.38, 1.49, 1.3, 0.7, -0.26, 0.0, 0.2}; // 1 -0.38  1.49  1.3  0.7  -0.26  0.0  0.2
+    const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.38, 1.5, 1.3, 0.7, -0.26, 0.0, 0.3}; // 1 -0.38  1.49  1.3  0.7  -0.26  0.0  0.2
 
     // panel placement poses
     const std::vector<float> leftPanelPlacementUpPose1_  = {-1.5, -1.4, 1.39, -0.9, 1.10, -0.5, 0}; // 0 -1.5  -1.4  1.39  -0.9  1.10  -0.5  0
@@ -121,9 +121,9 @@ private:
 public:
     task2Utils(ros::NodeHandle nh);
     ~task2Utils();
-    bool afterPanelGraspPose(const armSide side);
+    bool afterPanelGraspPose(const armSide side, bool isRotationRequired);
     bool isPointOnWalkway(float x, float y);
-    void movePanelToWalkSafePose(const armSide side);
+    void movePanelToWalkSafePose(const armSide side, bool isRotationRequired);
     bool isPanelPicked(const armSide side);
     void moveToPlacePanelPose(const armSide graspingHand, bool isPanelRotated);
     void rotatePanel(const armSide graspingHand);

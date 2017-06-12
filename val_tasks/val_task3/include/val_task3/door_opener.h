@@ -19,7 +19,7 @@ public:
     doorOpener(ros::NodeHandle nh);
     ~doorOpener();
 
-    void openDoor(geometry_msgs::Pose valveCenterWorld);
+    void openDoor(geometry_msgs::Pose &valveCenterWorld);
 
 private:
     ros::NodeHandle nh_;
