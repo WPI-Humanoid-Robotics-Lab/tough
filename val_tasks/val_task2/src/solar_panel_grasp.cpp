@@ -21,12 +21,13 @@ solar_panel_handle_grabber::~solar_panel_handle_grabber()
 }
 
 
-bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs::Pose &goal, float executionTime)
+bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs::Pose &goal, bool isRotationRequired, float executionTime)
 {
 
     const std::vector<float>* seed;
     std::string endEffectorFrame;
     float palmToFingerOffset;
+
     if(side == armSide::LEFT){
         seed = &leftShoulderSeed_;
         endEffectorFrame = VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME;
@@ -42,32 +43,47 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : opening grippers");
     if (side == RIGHT)
     {
-        gripper_.controlGripper(RIGHT, {1.39,0.3,0.1,0.1,0.1});
+        if(isRotationRequired){
+            gripper_.controlGripper(RIGHT, {1.39,0.3,0.1,0.1,0.1});
+        }
+        else{
+            gripper_.openGripper(RIGHT);
+        }
     }
-    else gripper_.controlGripper(LEFT, {1.39,-0.3,-0.1,-0.1,-0.1});
+    else {
+        if (isRotationRequired){
+            gripper_.controlGripper(LEFT, {1.39,-0.3,-0.1,-0.1,-0.1});
+        }
+        else {
+            gripper_.openGripper(LEFT);
+        }
+    }
     ros::Duration(0.2).sleep();
-
-
-    //move shoulder roll outwards
-    ROS_INFO("solar_panel_handle_grabber::grasp_handles : Setting shoulder roll");
-    std::vector< std::vector<float> > armData;
-    armData.push_back(*seed);
-
-    //    armTraj_.moveArmJoints(side, armData, executionTime);
-    //    ros::Duration(executionTime*2).sleep();
-    //    control_util.stopAllTrajectories();
 
     //move arm to given point with known orientation and higher z
     geometry_msgs::Pose finalGoal, intermGoal;
 
     current_state_->transformPose(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
     float yaw = tf::getYaw(intermGoal.orientation);
-    intermGoal.position.x -= 0.2*cos(yaw);
-    intermGoal.position.y -= 0.2*sin(yaw);
+    if (isRotationRequired){
+        intermGoal.position.x -= 0.2*cos(yaw);
+        intermGoal.position.y -= 0.2*sin(yaw);
+    }
+    else{
+        intermGoal.position.x += 0.05*cos(yaw);
+        intermGoal.position.y += 0.05*sin(yaw);
+        intermGoal.position.z += 0.1;
+    }
 
     //transform that point back to world frame
     current_state_->transformPose(intermGoal, intermGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-    taskCommonUtils::fixHandFramePalmUp(nh_, side, intermGoal);
+
+    if (isRotationRequired){
+        taskCommonUtils::fixHandFramePalmUp(nh_, side, intermGoal);
+    }
+    else{
+        taskCommonUtils::fixHandFramePalmDown(nh_,side, intermGoal);
+    }
 
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : Moving at an intermidate point before goal");
     ROS_INFO("Intermidiate goal x:%f y:%f z:%f quat x:%f y:%f z:%f w:%f",intermGoal.position.x, intermGoal.position.y, intermGoal.position.z,
@@ -79,15 +95,27 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     //move arm to final position with known orientation
 
     current_state_->transformPose(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-    finalGoal.position.x += 0.1*cos(yaw);
-    finalGoal.position.y += 0.1*sin(yaw);
+    if (isRotationRequired){
+        finalGoal.position.x += 0.1*cos(yaw);
+        finalGoal.position.y += 0.1*sin(yaw);
+    }
+    else{
+        finalGoal.position.x += 0.05*cos(yaw);
+        finalGoal.position.y += 0.05*sin(yaw);
+        finalGoal.position.z -= 0.05;
+    }
 
     //transform that point back to world frame
     current_state_->transformPose(finalGoal, finalGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
 
-    taskCommonUtils::fixHandFramePalmUp(nh_, side, finalGoal);
-    intermGoal.position.z -= 0.06;
-    finalGoal.position.z  -= 0.06;
+    if (isRotationRequired){
+        taskCommonUtils::fixHandFramePalmUp(nh_, side, finalGoal);
+        intermGoal.position.z -= 0.06;
+        finalGoal.position.z  -= 0.06;
+    }
+    else {
+        taskCommonUtils::fixHandFramePalmDown(nh_, side, finalGoal);
+    }
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : Moving towards goal");
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : Final goal  x:%f y:%f z:%f quat x:%f y:%f z:%f w:%f",finalGoal.position.x, finalGoal.position.y,
              finalGoal.position.z, finalGoal.orientation.x, finalGoal.orientation.y, finalGoal.orientation.z, finalGoal.orientation.w);
@@ -96,11 +124,13 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     waypoints.push_back(intermGoal);
     waypoints.push_back(finalGoal);
 
-    finalGoal.position.z  -= 0.01;
-    waypoints.push_back(finalGoal);
+    if (isRotationRequired){
+        finalGoal.position.z  -= 0.01;
+        waypoints.push_back(finalGoal);
 
-    finalGoal.position.z  += 0.03;
-    waypoints.push_back(finalGoal);
+        finalGoal.position.z  += 0.03;
+        waypoints.push_back(finalGoal);
+    }
 
     moveit_msgs::RobotTrajectory traj;
     if(side == armSide::LEFT)
@@ -122,7 +152,12 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     ros::Duration(executionTime*2).sleep();
 
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : Closing grippers");
-    gripper_.controlGripper(side,GRIPPER_STATE::CUP);
+    if (isRotationRequired){
+        gripper_.controlGripper(side,GRIPPER_STATE::CUP);
+    }
+    else {
+        gripper_.closeGripper(side);
+    }
     ros::Duration(0.3).sleep();
 
     finalGoal.position.z  += 0.2;
