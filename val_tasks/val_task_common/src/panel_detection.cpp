@@ -295,7 +295,7 @@ void PanelDetector::setPresetConfigs()
     handle_panel_coarse.x_max_limit = pelvisPose.position.x + 4.0f;
 
     handle_panel_coarse.y_min_limit = pelvisPose.position.y - 2.0f;
-    handle_panel_coarse.y_max_limit = pelvisPose.position.x + 2.0f;
+    handle_panel_coarse.y_max_limit = pelvisPose.position.y + 2.0f;
 
     handle_panel_coarse.z_min_limit = pelvisPose.position.z - 0.3f;
     handle_panel_coarse.z_max_limit = pelvisPose.position.z - 0.1f;
