@@ -13,9 +13,9 @@ int main(int argc, char **argv)
       ROS_ERROR("Invalid input!");
     }
     else{
-      int inputSide = argv[0];
-      int   jointNumber= argv[1];
-      float jointAngle = argv[2];
+      int inputSide = argv[1];
+      int   jointNumber= argv[2];
+      float jointAngle = argv[3];
 
       armSide side;
       if(inputSide == 0){
