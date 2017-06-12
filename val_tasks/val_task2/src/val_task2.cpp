@@ -158,7 +158,7 @@ void valTask2::panelHandleOffsetCB(const std_msgs::Float32 msg)
     marker.color.a = 1.0;
     marker.color.r = 0.0;
     marker.color.g = 1.0;
-    marker.color.b = 0.0;
+    marker.color.b = 1.0;
     panel_handle_offset_pub_.publish(marker);
 }
 
