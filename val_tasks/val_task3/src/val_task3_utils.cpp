@@ -3,10 +3,14 @@
 
 task3Utils::task3Utils(ros::NodeHandle nh): nh_(nh),arm_controller_(nh_) {
     visited_map_sub_  = nh_.subscribe("/visited_map",10, &task3Utils::visited_map_cb, this);
+    task_status_sub_  = nh_.subscribe("/srcsim/finals/task", 10, &task3Utils::taskStatusCB, this);
 }
 
 task3Utils::~task3Utils(){
 
+    // shut down subscribers
+    visited_map_sub_.shutdown();
+    task_status_sub_.shutdown();
 }
 
 void task3Utils::beforePanelManipPose(){
@@ -41,6 +45,11 @@ void task3Utils::beforDoorOpenPose(){
 void task3Utils::visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg)
 {
     visited_map_ = *msg;
+}
+
+void task3Utils::taskStatusCB(const srcsim::Task &msg)
+{
+    task_msg_ = msg;
 }
 
 void task3Utils::blindNavigation(geometry_msgs::Pose2D & goal){
