@@ -861,37 +861,37 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     else if (task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_CONSTANT)
     {
         // get the handle position
-        geometry_msgs::Pose handPose;
-        robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF, handPose, VAL_COMMON_NAMES::PELVIS_TF);
-        geometry_msgs::Point handlePosition = handPose.position;
-        handlePosition.x += 0.05;
-        robot_state_->transformPoint(handlePosition, handlePosition, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-        handle_loc_[PITCH_KNOB_HANDLE] = handlePosition;
+//        geometry_msgs::Pose handPose;
+//        robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF, handPose, VAL_COMMON_NAMES::PELVIS_TF);
+//        geometry_msgs::Point handlePosition = handPose.position;
+//        handlePosition.x += 0.05;
+//        robot_state_->transformPoint(handlePosition, handlePosition, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+//        handle_loc_[PITCH_KNOB_HANDLE] = handlePosition;
 
-        // reset the robot pose
-        // open the gripper
-        gripper_controller_->openGripper(armSide::RIGHT);
-        ros::Duration(0.2).sleep();
-        // increase the pelvis height
-        pelvis_controller_->controlPelvisHeight(1.0);
-        ros::Duration(0.2).sleep();
-        // reset the chest
-        chest_controller_->controlChest(0,0,0);
-        ros::Duration(0.2).sleep();
-        // get to normal height
-        pelvis_controller_->controlPelvisHeight(0.9);
-        ros::Duration(0.2).sleep();
+//        // reset the robot pose
+//        // open the gripper
+//        gripper_controller_->openGripper(armSide::RIGHT);
+//        ros::Duration(0.2).sleep();
+//        // increase the pelvis height
+//        pelvis_controller_->controlPelvisHeight(1.0);
+//        ros::Duration(0.2).sleep();
+//        // reset the chest
+//        chest_controller_->controlChest(0,0,0);
+//        ros::Duration(0.2).sleep();
+//        // get to normal height
+//        pelvis_controller_->controlPelvisHeight(0.9);
+//        ros::Duration(0.2).sleep();
 
         // regrasp the handle
         ///@todo vinayak, fix the regrasp
-        handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[PITCH_KNOB_HANDLE]);
+//        handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[PITCH_KNOB_HANDLE]);
 
         // replan and execute from the current point,
         // set the execute once state
         execute_once = true;
 
         // still stay in the same state (as grasp is not lost we will not redetect the handle)
-        eventQueue.riseEvent("/PITCH_CORRECTION_EXECUTING");
+        eventQueue.riseEvent("/PITCH_CORRECTION_RETRY");
 
         ROS_INFO("arm moment stopped, replanning rajectory with the current pose");
         task1_utils_->taskLogPub("arm moment stopped, replanning rajectory with the current pose");
@@ -1204,36 +1204,36 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     {
 
         // get the handle position
-        geometry_msgs::Pose handPose;
-        robot_state_->getCurrentPose(VAL_COMMON_NAMES::L_PALM_TF, handPose, VAL_COMMON_NAMES::PELVIS_TF);
-        geometry_msgs::Point handlePosition = handPose.position;
-        handlePosition.x += 0.05;
-        robot_state_->transformPoint(handlePosition, handlePosition, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-        handle_loc_[YAW_KNOB_HANDLE] = handlePosition;
-        // reset the robot pose
-        // open the gripper
-        gripper_controller_->openGripper(armSide::LEFT);
-        ros::Duration(0.2).sleep();
-        // increase the pelvis height
-        pelvis_controller_->controlPelvisHeight(1.0);
-        ros::Duration(0.2).sleep();
-        // reset the chest
-        chest_controller_->controlChest(0,0,0);
-        ros::Duration(0.2).sleep();
-        // get to normal height
-        pelvis_controller_->controlPelvisHeight(0.9);
-        ros::Duration(0.2).sleep();
+//        geometry_msgs::Pose handPose;
+//        robot_state_->getCurrentPose(VAL_COMMON_NAMES::L_PALM_TF, handPose, VAL_COMMON_NAMES::PELVIS_TF);
+//        geometry_msgs::Point handlePosition = handPose.position;
+//        handlePosition.x += 0.05;
+//        robot_state_->transformPoint(handlePosition, handlePosition, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+//        handle_loc_[YAW_KNOB_HANDLE] = handlePosition;
+//        // reset the robot pose
+//        // open the gripper
+//        gripper_controller_->openGripper(armSide::LEFT);
+//        ros::Duration(0.2).sleep();
+//        // increase the pelvis height
+//        pelvis_controller_->controlPelvisHeight(1.0);
+//        ros::Duration(0.2).sleep();
+//        // reset the chest
+//        chest_controller_->controlChest(0,0,0);
+//        ros::Duration(0.2).sleep();
+//        // get to normal height
+//        pelvis_controller_->controlPelvisHeight(0.9);
+//        ros::Duration(0.2).sleep();
 
         // regrasp the handle
         ///@todo vinayak, fix the regrasp
-        handle_grabber_->grasp_handles(armSide::LEFT , handle_loc_[YAW_KNOB_HANDLE]);
+//        handle_grabber_->grasp_handles(armSide::LEFT , handle_loc_[YAW_KNOB_HANDLE]);
 
         // replan and execute from the current point,
         // set the execute once state
         execute_once = true;
 
         // still stay in the same state (as grasp is not lost we will not redetect the handle)
-        eventQueue.riseEvent("/YAW_CORRECTION_EXECUTING");
+        eventQueue.riseEvent("/YAW_CORRECTION_RETRY");
 
         ROS_INFO("arm moment stopped, replanning rajectory with the current pose");
         task1_utils_->taskLogPub("arm moment stopped, replanning rajectory with the current pose");
@@ -1494,10 +1494,18 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
 {
     ROS_INFO_STREAM("valTask1::walkToFinishTask : executing " << name);
 
-    task1_utils_->taskLogPub("valTask1::walkToFinishTask : executing : " + name);
+    task1_utils_->taskLogPub("valTask1::walkToFinishTask : Walk Manually : " + name);
 
     // set the robot to default state to walk
     resetRobotToDefaults();
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("Give manual walk goal");
+    }
+
+    return TaskResult::SUCCESS();
 
     static int fail_count = 0;
 
