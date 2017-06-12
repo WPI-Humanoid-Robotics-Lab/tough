@@ -386,7 +386,7 @@ decision_making::TaskResult valTask3::detectDoorHandleTask(string name, const FS
 
 decision_making::TaskResult valTask3::openDoorTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
-  ROS_INFO_STREAM("executing " << name);
+  ROS_INFO_STREAM("valTask3::openDoorTask : executing " << name);
 
   while(!preemptiveWait(1000, eventQueue)){
 

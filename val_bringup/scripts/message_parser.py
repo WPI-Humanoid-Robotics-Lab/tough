@@ -5,8 +5,9 @@ import time
 import subprocess
 import rospy
 from std_msgs.msg import String
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import PointStamped
 
+from sensor_msgs.msg import JointState
 import sched
 
 FIELD_IP = "192.168.2.10"
@@ -56,7 +57,7 @@ def state_callback(data):
 
 def point_callback(data):
     #send only data that is required. it should be a string only
-    sock.mysend(str(time.time()) + " : " + "Clicked point : x:"+str(data.x) +" y:"+ str(data.y) + " z:"+str(data.z) +" \n")
+    sock.mysend(str(time.time()) + " : " + "Clicked point : x:"+str(data.point.x) +" y:"+ str(data.point.y) + " z:"+str(data.point.z) +" \n")
 
 # counter = 0 
 # countercheck = 0 
@@ -72,7 +73,6 @@ def point_callback(data):
 # sch = sched.scheduler(time.time, time.sleep)
 
 # def check_status(sc): 
-#     print "Doing stuff..."
 #     global counter
 #     global countercheck
 #     global resetflag
@@ -80,17 +80,19 @@ def point_callback(data):
 #     print counter
 #     print resetflag
 
-#     if counter > countercheck:
-#         print " "
-#     else:
-#         sock.mysend("Probable the IHMC Controller Failed")
-
 #     if resetflag == True:
 #         resetflag = False
 #         countercheck = 0
 
 #     else:
 #         countercheck = counter
+
+#     if counter > countercheck:
+#         print " "
+#     else:
+#         sock.mysend("Probable the IHMC Controller Failed")
+
+    
     
 #     sch.enter(5, 1, check_status, (sc,))
 
@@ -101,14 +103,15 @@ def listener():
     # Listen to the decision making topic
     rospy.init_node('state_listener', anonymous=True)
     rospy.Subscriber("/field/log", String, state_callback)
-    rospy.Subscriber("/clicked_point", Point, point_callback)
-    # rospy.Subscriber("/ihmc_ros/valkyrie/output/imu/pelvis_pelvisMiddleImu", String, ihmc_callback)
+    rospy.Subscriber("/clicked_point", PointStamped, point_callback)
+    # rospy.Subscriber("/ihmc_ros/valkyrie/output/joint_states", JointState, ihmc_callback)
     # rospy.Subscriber("/tf", String, ihmc_callback)
 
 if __name__ == '__main__':
     listener()
     pub1 = rospy.Publisher('/decision_making/task1/events', String, queue_size=10)
     pub2 = rospy.Publisher('/decision_making/task2/events', String, queue_size=10)
+    pub3 = rospy.Publisher('/panel_offset', Float32, queue_size=10)
     prev_time = time.time()
     prev_ros_time = rospy.get_rostime().secs
     while True:
@@ -147,7 +150,11 @@ if __name__ == '__main__':
             print msg[:start_index] + "**Message Recieved** " + msg[start_index:-1]
             pub1.publish(msg[start_index:-1])
             pub2.publish(msg[start_index:-1])
-
+        
+        # $ is message to be sent to the state machine
+        elif (msg[start_index] == "$"):
+            print msg[:start_index] + "**Message Recieved** " + msg[start_index:-1]
+            pub3.publish(msg[start_index:-1])
         # rest of the messages
         else:
             print msg[:start_index] + "**Message Recieved** " + msg[start_index:-1]
