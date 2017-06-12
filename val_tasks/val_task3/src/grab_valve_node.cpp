@@ -90,7 +90,7 @@ int main(int argc, char **argv)
         rotate.compute_traj(valveCentre,0.18,points);
         rotate.move_valve(points);
 
-//    }
+   }
 
     ros::Duration(3.0).sleep();
 
