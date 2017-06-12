@@ -24,24 +24,27 @@ void leakDetector::generateSearchWayPoints(geometry_msgs::Point horz_left_top, g
 {
     // generate way points with the dimension of the field of view of the tool
 
-    int points_in_vertical_line = (ver_high_limit - ver_low_limit)/VERTICAL_WIDTH;
-    int points_in_horizontal_line = (horz_left_top.x - horz_right_bottom.x)/HORIZONTAL_WIDTH;
+    float points_in_vertical_line = (ver_high_limit - ver_low_limit)/VERTICAL_WIDTH;
+    float points_in_horizontal_line = (horz_right_bottom.x - horz_left_top.x)/HORIZONTAL_WIDTH;
 
     geometry_msgs::Point point;
     point.x = horz_left_top.x;
     point.y = horz_left_top.y;
     point.z = ver_high_limit;
 
-    for (int i=0; i<points_in_horizontal_line; i++)
+    int z=0;
+    for (float i=0; i<points_in_horizontal_line; i+=VERTICAL_WIDTH, z++)
     {
-        for (int j=0; j<points_in_vertical_line; j++)
+        for (float j=0; j<points_in_vertical_line; j+=HORIZONTAL_WIDTH)
         {
-            point.z = (i%2 == 0) ? point.z-VERTICAL_WIDTH : point.z+VERTICAL_WIDTH;
+            point.z = (z%2 == 0) ? point.z-VERTICAL_WIDTH : point.z+VERTICAL_WIDTH;
             way_points.push_back(point);
         }
         point.y += HORIZONTAL_WIDTH;
+        way_points.push_back(point);
     }
 
+    ROS_INFO("%d search points generated", way_points.size());
     // visulaize points
     visulatise3DPoints(way_points);
 }
@@ -74,19 +77,23 @@ void leakDetector::visulatise3DPoints(std::vector<geometry_msgs::Point> &points)
     marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
     marker.header.stamp = ros::Time();
     marker.ns = "leak";
-    marker.id = 0;
     marker.type = visualization_msgs::Marker::CUBE;
     marker.action = visualization_msgs::Marker::ADD;
-    marker.points = points;
-    marker.scale.x = 0.01;
-    marker.scale.y = 0.01;
-    marker.scale.z = 0.01;
-    marker.color.a = 0.6;
+    marker.scale.x = 0.1;
+    marker.scale.y = 0.1;
+    marker.scale.z = 0.1;
+    marker.color.a = 1.0;
     marker.color.r = 1.0;
     marker.color.g = 0.0;
     marker.color.b = 0.0;
     marker.lifetime = ros::Duration(0);
-    marker_array.markers.push_back(marker);
+
+    for (int i=0; i<points.size();i++)
+    {
+        marker.id = i;
+        marker.pose.position = points[i];
+        marker_array.markers.push_back(marker);
+    }
 
     marker_pub_.publish(marker_array);
     ros::Duration(0.2).sleep();
