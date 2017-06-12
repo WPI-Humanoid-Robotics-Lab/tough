@@ -94,7 +94,10 @@ void armTrajectory::moveToZeroPose(armSide side)
     armTrajectory::arm_id--;
     arm_traj.unique_id = armTrajectory::arm_id;
 
-    appendTrajectoryPoint(arm_traj, 2, ZERO_POSE);
+    if(side == armSide::LEFT)
+        appendTrajectoryPoint(arm_traj, 2, {0.1,-0.1,0.1,-0.1,0.1,-0.1,-0.1});
+    else
+        appendTrajectoryPoint(arm_traj, 2, {0.1,0.1,0.1,0.1,0.1,0.1,0.1});
 
     armTrajectoryPublisher.publish(arm_traj);
 
@@ -444,6 +447,7 @@ bool armTrajectory::nudgeArmLocal(const armSide side, float x, float y, float z)
     // to save the orientation
     stateInformer_->getCurrentPose(target_EE_frame,value);
     quat = value.orientation;
+    std::cout<<"w :"<<quat.w<<" x :"<<quat.x<<" y :"<<quat.y<<" z :"<<quat.z<<"\n";
 
     stateInformer_->getCurrentPose(target_EE_frame,value,target_frame);
 
@@ -453,6 +457,7 @@ bool armTrajectory::nudgeArmLocal(const armSide side, float x, float y, float z)
 
     stateInformer_->transformPose(value, value,target_frame,VAL_COMMON_NAMES::WORLD_TF);
     value.orientation = quat;
+    std::cout<<"w :"<<value.orientation.w<<" x :"<<value.orientation.x<<" y :"<<value.orientation.y<<" z :"<<value.orientation.z<<"\n";
     moveArmInTaskSpace(side,value, 0.0f);
 
     return true;
