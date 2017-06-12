@@ -6,7 +6,7 @@ int main(int argc, char** argv){
     ros::NodeHandle nh;
     ros::Publisher goalPub = nh.advertise<geometry_msgs::PoseStamped>("/valkyrie/goal",1);
 
-    PanelDetector obj(nh, DETECTOR_TYPE::HANDLE_PANEL_COARSE);
+    PanelDetector obj(nh, DETECTOR_TYPE::HANDLE_PANEL_FINE);
     int NUM_SAMPLES = 1;
     std::vector<geometry_msgs::Pose> detections;
     int trials;
@@ -27,7 +27,7 @@ int main(int argc, char** argv){
     geometry_msgs::PoseStamped goal;
     goal.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
     goal.pose = poses[NUM_SAMPLES -1];
-    goalPub.publish(goal);
+//    goalPub.publish(goal);
 
     ros::Duration(1).sleep();
     ROS_INFO("Exiting panel detector node");
