@@ -44,28 +44,29 @@ void task3Node::paramUpdateCallback(val_task3::task3_parametersConfig &config, u
 {
   ROS_INFO("update the goal, x: %f, y: %f, theta: %f",  config.groups.stairwalkpose.x_sw ,  config.groups.stairwalkpose.y_sw,  config.groups.stairwalkpose.theta_sw);
 
-  geometry_msgs::Pose2D pose;
+  geometry_msgs::Pose2D pose2d;
   geometry_msgs::Point  location;
+  geometry_msgs::Pose pose;
 
   if (task3_ != nullptr)
   {
     //update the walk goal location to stair case
-    pose.x = config.groups.stairwalkpose.x_sw;
-    pose.y = config.groups.stairwalkpose.y_sw;
-    pose.theta = config.groups.stairwalkpose.theta_sw;
-    task3_->setStairDetectWalkPose(pose);
+    pose2d.x = config.groups.stairwalkpose.x_sw;
+    pose2d.y = config.groups.stairwalkpose.y_sw;
+    pose2d.theta = config.groups.stairwalkpose.theta_sw;
+    task3_->setStairDetectWalkPose(pose2d);
 
     // update the handle center
-    location.x = config.groups.handlecenter.x_hc;
-    location.y = config.groups.handlecenter.y_hc;
-    location.z = config.groups.handlecenter.z_hc;
-    task3_->setHandleCenter(location);
+    pose.position.x = config.groups.handlecenter.x_hc;
+    pose.position.y = config.groups.handlecenter.y_hc;
+    pose.position.z = config.groups.handlecenter.z_hc;
+    task3_->setHandleCenter(pose);
 
     // update table
-    pose.x = config.groups.tablewalkpose.x_tw;
-    pose.y = config.groups.tablewalkpose.y_tw;
-    pose.theta = config.groups.tablewalkpose.theta_tw;
-    task3_->setTableWalkPose(pose);
+    pose2d.x = config.groups.tablewalkpose.x_tw;
+    pose2d.y = config.groups.tablewalkpose.y_tw;
+    pose2d.theta = config.groups.tablewalkpose.theta_tw;
+    task3_->setTableWalkPose(pose2d);
 
     // set leak detector location
     location.x = config.groups.leakdetectorloc.x_ld;
@@ -74,10 +75,10 @@ void task3Node::paramUpdateCallback(val_task3::task3_parametersConfig &config, u
     task3_->setLeakDetectorLoc(location);
 
     // set leak wall walk pose
-    pose.x = config.groups.leakwallpose.x_lw;
-    pose.y = config.groups.leakwallpose.y_lw;
-    pose.theta = config.groups.leakwallpose.theta_lw;
-    task3_->setLeakWallPose(pose);
+    pose2d.x = config.groups.leakwallpose.x_lw;
+    pose2d.y = config.groups.leakwallpose.y_lw;
+    pose2d.theta = config.groups.leakwallpose.theta_lw;
+    task3_->setLeakWallPose(pose2d);
 
     // set leak location
     location.x = config.groups.leakloc.x_l;
@@ -92,10 +93,10 @@ void task3Node::paramUpdateCallback(val_task3::task3_parametersConfig &config, u
     task3_->setRepairToolLoc(location);
 
     // set finish box walk pose
-    pose.x = config.groups.finishboxwalkpose.x_fb;
-    pose.y = config.groups.finishboxwalkpose.y_fb;
-    pose.theta = config.groups.finishboxwalkpose.theta_fb;
-    task3_->setFinishBoxPose(pose);
+    pose2d.x = config.groups.finishboxwalkpose.x_fb;
+    pose2d.y = config.groups.finishboxwalkpose.y_fb;
+    pose2d.theta = config.groups.finishboxwalkpose.theta_fb;
+    task3_->setFinishBoxPose(pose2d);
   }
 }
 
