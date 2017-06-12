@@ -21,7 +21,7 @@ solar_panel_handle_grabber::~solar_panel_handle_grabber()
 }
 
 
-bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs::Pose &goal, float executionTime, bool isRotationRequired)
+bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs::Pose &goal, bool isRotationRequired, float executionTime)
 {
 
     const std::vector<float>* seed;
@@ -70,6 +70,8 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
         intermGoal.position.y -= 0.2*sin(yaw);
     }
     else{
+        intermGoal.position.x += 0.05*cos(yaw);
+        intermGoal.position.y += 0.05*sin(yaw);
         intermGoal.position.z += 0.1;
     }
 
@@ -98,6 +100,8 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
         finalGoal.position.y += 0.1*sin(yaw);
     }
     else{
+        finalGoal.position.x += 0.05*cos(yaw);
+        finalGoal.position.y += 0.05*sin(yaw);
         finalGoal.position.z -= 0.05;
     }
 
