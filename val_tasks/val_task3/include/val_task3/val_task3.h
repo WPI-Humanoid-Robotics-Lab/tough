@@ -90,7 +90,6 @@ class valTask3{
     decision_making::TaskResult initTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult walkToStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
-    decision_making::TaskResult detectStepsTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult climbStepsTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectDoorHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult openDoorTask(string name, const FSMCallContext& context, EventQueue& eventQueue);

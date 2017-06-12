@@ -280,23 +280,6 @@ decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCal
   return TaskResult::SUCCESS();
 }
 
-///@todo fill based on climbing code
-decision_making::TaskResult valTask3::detectStepsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
-
-  ROS_INFO_STREAM("executing " << name);
-
-  // detection is not required
-  eventQueue.riseEvent("/DETECTED_STEPS");
-
-  while(!preemptiveWait(1000, eventQueue)){
-
-    ROS_INFO("waiting for transition");
-  }
-
-  return TaskResult::SUCCESS();
-}
-
-
 decision_making::TaskResult valTask3::climbStepsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
   ROS_INFO_STREAM("executing " << name);
