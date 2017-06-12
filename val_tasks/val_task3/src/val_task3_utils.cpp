@@ -4,6 +4,8 @@
 task3Utils::task3Utils(ros::NodeHandle nh): nh_(nh),arm_controller_(nh_) {
     visited_map_sub_  = nh_.subscribe("/visited_map",10, &task3Utils::visited_map_cb, this);
     task_status_sub_  = nh_.subscribe("/srcsim/finals/task", 10, &task3Utils::taskStatusCB, this);
+
+    is_climbstairs_finished_ = false;
 }
 
 task3Utils::~task3Utils(){
@@ -42,6 +44,7 @@ void task3Utils::beforDoorOpenPose(){
      ros::Duration(2.0).sleep();
 }
 
+
 void task3Utils::visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg)
 {
     visited_map_ = *msg;
@@ -50,6 +53,16 @@ void task3Utils::visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg)
 void task3Utils::taskStatusCB(const srcsim::Task &msg)
 {
     task_msg_ = msg;
+
+    // if climb stairs task is fnished
+    if (task_msg_.task == 3 &&
+        task_msg_.current_checkpoint == 1 &&
+        task_msg_.finished == true)
+    {
+        // scoped mutex
+        std::lock_guard<std::mutex> lock(climstairs_flag_mtx_);
+        is_climbstairs_finished_ = true;
+    }
 }
 
 void task3Utils::blindNavigation(geometry_msgs::Pose2D & goal){
@@ -83,4 +96,17 @@ void task3Utils::blindNavigation(geometry_msgs::Pose2D & goal){
             goal.theta = angle;
         }
     }
+}
+
+
+bool task3Utils::isClimbstairsFinished() const
+{
+    return is_climbstairs_finished_;
+}
+
+void task3Utils::resetClimbstairsFlag(bool)
+{
+    // scoped mutex
+    std::lock_guard<std::mutex> lock(climstairs_flag_mtx_);
+    is_climbstairs_finished_ = false;
 }

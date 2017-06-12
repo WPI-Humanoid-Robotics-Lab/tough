@@ -17,12 +17,16 @@
 #include <val_controllers/robot_state.h>
 #include "navigation_common/map_generator.h"
 #include <srcsim/Task.h>
+#include <mutex>
 
 class task3Utils{
 private:
     ros::NodeHandle nh_;
     armTrajectory arm_controller_;
     srcsim::Task task_msg_;
+
+    bool is_climbstairs_finished_;
+    std::mutex climstairs_flag_mtx_;
 
     const std::vector<float> RIGHT_ARM_SEED_TABLE_MANIP = {-0.23, 0, 0.70, 1.51, -0.05, 0, 0};
     const std::vector<float> LEFT_ARM_SEED_TABLE_MANIP  = {-0.23, 0, 0.70, -1.51, 0.05, 0, 0};
@@ -42,6 +46,8 @@ public:
     void beforDoorOpenPose();
     void blindNavigation(geometry_msgs::Pose2D &goal);
 
+    bool isClimbstairsFinished() const;
+    void resetClimbstairsFlag(void);
 };
 
 
