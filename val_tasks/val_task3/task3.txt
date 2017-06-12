@@ -1,0 +1,16 @@
+
+
+
+2. Rotating the valve
+The robot should be oriented towards the door.
+The valve centre should be noted from rviz and passes on to the node.
+The 5 th argument is about closing the gripper (1 -> closes the gripper while rotating the valve)
+
+rosrun val_task3 grab_valve_node [x_centre] [y_centre] [z_centre] [gripperclosing option]
+
+Note: We need to add a case when we want to rotate the valve more/less than 3 times. Presently it works well.
+
+
+3. Pushing the door
+
+rosrun val_task3 door_open_node [x_centre] [y_centre] [z_centre]
