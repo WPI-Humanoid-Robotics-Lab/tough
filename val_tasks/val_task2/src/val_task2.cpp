@@ -152,7 +152,7 @@ void valTask2::panelHandleOffsetCB(const std_msgs::Float32 msg)
     marker.id = 1;
     marker.type = visualization_msgs::Marker::ARROW;
     marker.action = visualization_msgs::Marker::ADD;
-    marker.pose = tempPose;
+    marker.pose = solar_panel_handle_pose_;
     marker.scale.x = 0.5;
     marker.scale.y = 0.05;
     marker.scale.z = 0.05;
@@ -161,6 +161,11 @@ void valTask2::panelHandleOffsetCB(const std_msgs::Float32 msg)
     marker.color.g = 1.0;
     marker.color.b = 1.0;
     panel_handle_offset_pub_.publish(marker);
+}
+
+void valTask2::setPanelRotationFlagCB(const std_msgs::Bool msg)
+{
+    is_rotation_required_ = msg.data;
 }
 
 void valTask2::nudge_pose_cb(const std_msgs::Float64MultiArray msg)
@@ -607,6 +612,8 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
             ROS_INFO("valTask2::graspPanelTask : Plan is 100 % Maybe Grasp is successful. Going to Pick Pannel Task");
             task2_utils_->taskLogPub("valTask2::graspPanelTask : Plan is 100 % Maybe Grasp is successful. Going to Pick Pannel Task");
             eventQueue.riseEvent("/GRASPED_PANEL");
+            task2_utils_->taskLogPub("valTask2::graspPanelTask : Moving panel closer to chest to avoid collision with trailer");
+            task2_utils_->afterPanelGraspPose(panel_grasping_hand_, is_rotation_required_);
         }
         else
         {
