@@ -2,7 +2,7 @@
 
 climbStairs::climbStairs(ros::NodeHandle nh): nh_(nh)
 {
-    walker_ = new ValkyrieWalker(nh_, 0.8f, 0.8f, 0, 0.3);
+    walker_ = new ValkyrieWalker(nh_, 0.8f, 0.8f, 0, STEP_HEIGHT);
     chest_  = new chestTrajectory(nh_);
     pelvis_ = new pelvisTrajectory(nh_);
     arm_    = new armTrajectory(nh_);
@@ -29,12 +29,12 @@ void climbStairs::climb_stairs()
     ros::Duration(1).sleep();
 
     // first step
-    walker_->walkNSteps(1, 0.3, 0.0, true, RIGHT);
+    walker_->walkNSteps(1, FIRSTSTEP_OFFSET, 0.0, true, RIGHT);
     ros::Duration(0.4).sleep();
     pelvis_->controlPelvisHeight(1.0);
     ros::Duration(0.4).sleep();
     walker_->load_eff(armSide::RIGHT, EE_LOADING::LOAD);
-    walker_->walkNSteps(1, 0.3, 0.0, true, LEFT);
+    walker_->walkNSteps(1, FIRSTSTEP_OFFSET, 0.0, true, LEFT);
 
     // next 8 steps
     for (int i=0; i<8; i++)
@@ -43,15 +43,16 @@ void climbStairs::climb_stairs()
         pelvis_->controlPelvisHeight(1.0);
         ros::Duration(0.4).sleep();
         walker_->load_eff(armSide::LEFT, EE_LOADING::LOAD);
-        walker_->walkNSteps(1, 0.25, 0.0, true, RIGHT);
+        walker_->walkNSteps(1, STEP_DEPTH, 0.0, true, RIGHT);
         ros::Duration(0.4).sleep();
         pelvis_->controlPelvisHeight(1.0);
         ros::Duration(0.4).sleep();
         walker_->load_eff(armSide::RIGHT, EE_LOADING::LOAD);
-        walker_->walkNSteps(1, 0.25, 0.0, true, LEFT);
+        walker_->walkNSteps(1, STEP_DEPTH, 0.0, true, LEFT);
     }
 
     // last step required to finish the check point
-    walker_->setSwing_height(0.18);
+    walker_->setSwing_height(DEFAULT_SWINGHEIGHT);
     walker_->walkNSteps(2, 0.3, 0.0);
+    ros::Duration(0.1).sleep();
 }
