@@ -18,6 +18,7 @@
 #include "navigation_common/map_generator.h"
 #include <srcsim/Task.h>
 #include <mutex>
+#include <std_msgs/String.h>
 
 class task3Utils{
 private:
@@ -35,6 +36,7 @@ private:
 
     // Visited map
     ros::Subscriber visited_map_sub_, task_status_sub_;
+    ros::Publisher task3_log_pub_ ;
     void visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg);
     void taskStatusCB(const srcsim::Task &msg);
     nav_msgs::OccupancyGrid visited_map_;
@@ -49,6 +51,7 @@ public:
     bool isClimbstairsFinished() const;
     void resetClimbstairsFlag(bool);
     void resetClimbstairsFlag(void);
+    void task3LogPub(std::string data);
 };
 
 

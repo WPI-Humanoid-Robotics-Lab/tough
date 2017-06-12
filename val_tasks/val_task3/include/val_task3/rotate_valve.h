@@ -10,6 +10,7 @@
 #include "val_moveit_planners/val_cartesian_planner.h"
 #include "val_controllers/val_wholebody_manipulation.h"
 #include "val_footstep/ValkyrieWalker.h"
+#include "val_task3/val_task3_utils.h"
 
 class rotateValve
 {

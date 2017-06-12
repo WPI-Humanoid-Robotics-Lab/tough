@@ -4,7 +4,7 @@
 task3Utils::task3Utils(ros::NodeHandle nh): nh_(nh),arm_controller_(nh_) {
     visited_map_sub_  = nh_.subscribe("/visited_map",10, &task3Utils::visited_map_cb, this);
     task_status_sub_  = nh_.subscribe("/srcsim/finals/task", 10, &task3Utils::taskStatusCB, this);
-
+    task3_log_pub_    = nh_.advertise<std_msgs::String>("/field/log",10);
     is_climbstairs_finished_ = false;
 }
 
@@ -109,4 +109,11 @@ void task3Utils::resetClimbstairsFlag(void)
     // scoped mutex
     std::lock_guard<std::mutex> lock(climstairs_flag_mtx_);
     is_climbstairs_finished_ = false;
+}
+
+void task3Utils::task3LogPub(std::string data){
+
+    std_msgs::String ms;
+    ms.data = data;
+    task3_log_pub_.publish(ms);
 }
