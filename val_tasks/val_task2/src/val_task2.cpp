@@ -79,10 +79,11 @@ valTask2::valTask2(ros::NodeHandle nh):
     // Subscribers
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask2::occupancy_grid_cb, this);
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask2::visited_map_cb, this);
-    panel_handle_offset_sub_ = nh_.subscribe("/panel_offset",10, &valTask2::panelHandleOffsetCB, this);
+    panel_handle_offset_sub_ = nh_.subscribe("/panel_offset",1, &valTask2::panelHandleOffsetCB, this);
+    nudge_sub_ = nh_.subscribe("/nudge_pose",1, &valTask2::nudge_pose_cb, this);
 
     //publishers
-    panel_handle_offset_pub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 10);
+    panel_handle_offset_pub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1);
     task2_utils_->taskLogPub("Setting Multisense Subscribers");
     cv::Mat img;
     ms_sensor_->giveImage(img);
@@ -160,6 +161,27 @@ void valTask2::panelHandleOffsetCB(const std_msgs::Float32 msg)
     marker.color.g = 1.0;
     marker.color.b = 0.0;
     panel_handle_offset_pub_.publish(marker);
+}
+
+void valTask2::nudge_pose_cb(const std_msgs::Float64MultiArray msg)
+{
+
+    if(msg.data.size()!=5)
+    {
+        return;
+    }
+
+    std::vector<geometry_msgs::Pose> waypoint;
+    geometry_msgs::Pose pose;
+
+    armSide side = msg.data[0]== 0 ? armSide::LEFT : armSide::RIGHT;
+    if(msg.data[1] ==0) arm_controller_->nudgeArmLocal(side, msg.data[2],msg.data[3],msg.data[4],pose);
+    else arm_controller_->nudgeArmPelvis(side, msg.data[2],msg.data[3],msg.data[4],pose);
+
+    waypoint.clear();
+    waypoint.push_back(pose);
+
+    task2_utils_->planWholeBodyMotion(side, waypoint);
 }
 
 bool valTask2::preemptiveWait(double ms, decision_making::EventQueue& queue) {

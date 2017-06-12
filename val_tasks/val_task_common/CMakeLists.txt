@@ -201,6 +201,10 @@ target_link_libraries(push_object  ${catkin_LIBRARIES} ${PROJECT_NAME})
 add_executable(val_seeds src/val_seeds.cpp)
 add_dependencies(val_seeds ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(val_seeds  ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(test_nudgeOffset src/test_nudgeOffset.cpp)
+add_dependencies(test_nudgeOffset ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_nudgeOffset  ${catkin_LIBRARIES} val_controllers)
 #############
 ## Install ##
 #############
