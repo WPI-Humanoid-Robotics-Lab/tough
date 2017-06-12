@@ -47,6 +47,7 @@ public:
     void blindNavigation(geometry_msgs::Pose2D &goal);
 
     bool isClimbstairsFinished() const;
+    void resetClimbstairsFlag(bool);
     void resetClimbstairsFlag(void);
 };
 
