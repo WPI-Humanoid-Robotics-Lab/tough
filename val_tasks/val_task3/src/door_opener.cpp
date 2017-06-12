@@ -11,7 +11,7 @@ doorOpener::~doorOpener(){
 
 }
 
-void doorOpener::openDoor(geometry_msgs::Pose valveCenterWorld){
+void doorOpener::openDoor(geometry_msgs::Pose &valveCenterWorld){
 
     //Alligning relative to the centre of the valve
     geometry_msgs::Pose   pelvisPose;
@@ -19,10 +19,15 @@ void doorOpener::openDoor(geometry_msgs::Pose valveCenterWorld){
     std::vector<float> x_offset, y_offset;
     geometry_msgs::Pose valveCenter;
 
+    ROS_INFO("Valve centre world x: %f", valveCenterWorld.position.x);
     //Walking back a little
-    robot_state_->transformPose(valveCenterWorld,valveCenter,
+
+    bool result = robot_state_->transformPose(valveCenterWorld,valveCenter,
                                 VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    ros::Duration(1.0).sleep();
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+    ROS_INFO_STREAM(" The result is:" << result);
+    ROS_INFO("Valve centre prlvis x: %f", valveCenter.position.x);
 
     valveCenter.position.x  -= 0.85;
     valveCenter.position.y  -= 0.12;

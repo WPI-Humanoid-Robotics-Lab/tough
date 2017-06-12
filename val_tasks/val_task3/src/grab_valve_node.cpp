@@ -90,13 +90,16 @@ int main(int argc, char **argv)
         rotate.compute_traj(valveCentre,0.18,points);
         rotate.move_valve(points);
 
-    }
+//    }
 
     ros::Duration(3.0).sleep();
 
     //Opening the door
     geometry_msgs::Pose valveCentrePose;
-    valveCentrePose.position = valveCentre;
+    valveCentrePose.position.x = valveCentre.x;
+    valveCentrePose.position.y = valveCentre.y;
+    valveCentrePose.position.z = valveCentre.z;
+    valveCentrePose.orientation.w = 1;
     doorOpen.openDoor(valveCentrePose);
 
     ros::spin();
