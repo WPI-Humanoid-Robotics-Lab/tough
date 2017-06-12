@@ -201,6 +201,10 @@ target_link_libraries(push_object  ${catkin_LIBRARIES} ${PROJECT_NAME})
 add_executable(val_seeds src/val_seeds.cpp)
 add_dependencies(val_seeds ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(val_seeds  ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(val_gaze_controller src/val_gaze_controller.cpp)
+add_dependencies(val_gaze_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(val_gaze_controller  ${catkin_LIBRARIES} ${PROJECT_NAME})
 #############
 ## Install ##
 #############
