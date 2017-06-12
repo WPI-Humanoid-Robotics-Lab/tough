@@ -46,6 +46,7 @@ valTask3::valTask3(ros::NodeHandle nh):nh_(nh){
 
   // detectors
   stair_detector_      = nullptr;
+  door_valve_detcetor_ = nullptr;
 
   climb_stairs_        = new climbStairs(nh_);
 
@@ -69,6 +70,7 @@ valTask3::~valTask3(){
   if(wholebody_controller_ != nullptr)  delete wholebody_controller_;
   if(task3_utils_ != nullptr)           delete task3_utils_;
   if(stair_detector_ != nullptr)        delete stair_detector_;
+  if(door_valve_detcetor_ != nullptr)   delete door_valve_detcetor_;
 }
 
 void valTask3::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
@@ -137,7 +139,8 @@ decision_making::TaskResult valTask3::initTask(string name, const FSMCallContext
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
+decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
 
   ROS_INFO_STREAM("valTask3::detectStairsTask : executing " << name);
 
@@ -174,6 +177,9 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
 
     //reset count
     retry_count = 0;
+
+    if(stair_detector_ != nullptr) delete stair_detector_;
+    stair_detector_ = nullptr;
 
     eventQueue.riseEvent("/DETECTED_STAIRS");
   }
@@ -310,9 +316,65 @@ decision_making::TaskResult valTask3::climbStepsTask(string name, const FSMCallC
   return TaskResult::SUCCESS();
 }
 
-decision_making::TaskResult valTask3::detectDoorHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
+decision_making::TaskResult valTask3::detectDoorHandleTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
 
-  ROS_INFO_STREAM("executing " << name);
+  ROS_INFO_STREAM("valTask3::detectDoorHandleTask : executing " << name);
+
+  static int retry_count = 0;
+
+  // detect stairs
+  std::vector<geometry_msgs::Pose> poses;
+
+  // if the object null create a new one
+  if(door_valve_detcetor_ == nullptr)
+  {
+    door_valve_detcetor_ = new door_valve_detcetor_(nh_);
+    ros::Duration(0.2).sleep();
+  }
+
+  // get detections
+  door_valve_detcetor_->getDetections(poses);
+
+  // if we get atleast one detection
+  if (poses.size() > 1)
+  {
+    // update the pose
+    setHandleCenter(poses[poses.size()-1]);
+
+    ROS_INFO_STREAM("valTask3::detectDoorHandleTask : x " << poses[poses.size()-1]);
+
+    //reset count
+    retry_count = 0;
+
+    if(door_valve_detcetor_ != nullptr) delete door_valve_detcetor_;
+    door_valve_detcetor_ = nullptr;
+
+    eventQueue.riseEvent("/DOOR_HANDLE_DETECTED");
+  }
+  // if failed for more than 5 times, go to error state
+  else if (retry_count > 5)
+  {
+    // reset the fail count
+    retry_count = 0;
+    eventQueue.riseEvent("/DOOR_HANDLE_DETECT_FAILED");
+    if(door_valve_detcetor_ != nullptr) delete door_valve_detcetor_;
+    door_valve_detcetor_ = nullptr;
+
+    ROS_INFO("valTask3::detectStairsTask : reset fail count");
+  }
+  // if failed retry detecting the panel
+  else
+  {
+    // sleep for some time so detection happens
+    ros::Duration(5).sleep();
+
+    // increment the fail count
+    retry_count++;
+    eventQueue.riseEvent("/DOOR_HANDLE_DETECT_RETRY");
+
+    ROS_INFO("valTask3::detectStairsTask: increment fail count");
+  }
 
   while(!preemptiveWait(1000, eventQueue)){
 
@@ -540,7 +602,7 @@ void valTask3::setTableWalkPose(const geometry_msgs::Pose2D &table_walk_pose)
   table_walk_pose_ = table_walk_pose;
 }
 
-void valTask3::setHandleCenter(const geometry_msgs::Point &handle_center)
+void valTask3::setHandleCenter(const geometry_msgs::Pose &handle_center)
 {
   handle_center_ = handle_center;
 }

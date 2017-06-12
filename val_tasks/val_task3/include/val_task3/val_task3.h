@@ -30,6 +30,7 @@
 #include <mutex>
 #include <val_task3/stair_detector_2.h>
 #include <val_task3/climb_stairs.h>
+#include <val_task3/door_valve_detector.h>
 
 using namespace decision_making;
 
@@ -57,6 +58,7 @@ class valTask3{
 
     //detectors
     stair_detector_2*   stair_detector_;
+    DoorValvedetector*  door_valve_detcetor_;
 
     climbStairs*        climb_stairs_;
 
@@ -67,7 +69,7 @@ class valTask3{
 
     // private vairiables storing the pose and locations
     geometry_msgs::Pose2D stair_detect_walk_pose_;
-    geometry_msgs::Point  handle_center_;
+    geometry_msgs::Pose   handle_center_;
     geometry_msgs::Pose2D table_walk_pose_;
     geometry_msgs::Point  leak_detector_loc_;
     geometry_msgs::Pose2D leak_wall_pose_;
@@ -112,7 +114,7 @@ class valTask3{
 
     // setter getter api's
     void setStairDetectWalkPose(const geometry_msgs::Pose2D &stair_detect_walk_pose);
-    void setHandleCenter(const geometry_msgs::Point &handle_center);
+    void setHandleCenter(const geometry_msgs::Pose &handle_center);
     void setTableWalkPose(const geometry_msgs::Pose2D &table_walk_pose);
     void setLeakDetectorLoc(const geometry_msgs::Point &leak_detector_loc);
     void setLeakWallPose(const geometry_msgs::Pose2D &leak_wall_pose);
