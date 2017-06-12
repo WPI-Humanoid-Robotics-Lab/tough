@@ -149,7 +149,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
         }
         // generate the event
         head_controller_->moveHead(0,0,0);
-//        eventQueue.riseEvent("/REGULAR");
+        //        eventQueue.riseEvent("/REGULAR");
 
     }
     else if (retry_count++ < 40) {
@@ -752,16 +752,29 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
 
         // plan the trajectory
         moveit_msgs::RobotTrajectory traj;
-        right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
-        ROS_INFO("trajectory generated");
-        task1_utils_->taskLogPub("trajectory generated");
-        // execute the trajectory
-        wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
-        ROS_INFO("trajectory sent to controllers");
-        task1_utils_->taskLogPub("trajectory sent to controllers");
+        double fraction_planned = right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
 
-        // start the timer
-        timer_start = std::chrono::system_clock::now();
+        // if planning is not 100%
+        if (fraction_planned < 0.98)
+        {
+            // retry planning
+            // redetect the handles (retry)
+            eventQueue.riseEvent("/PITCH_CORRECTION_RETRY");
+
+            return TaskResult::SUCCESS();
+        }
+        else
+        {
+            ROS_INFO("sucessful trajectory generated");
+            task1_utils_->taskLogPub("trajectory generated");
+            // execute the trajectory
+            wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
+            ROS_INFO("trajectory sent to controllers");
+            task1_utils_->taskLogPub("trajectory sent to controllers");
+
+            // start the timer
+            timer_start = std::chrono::system_clock::now();
+        }
     }
 
     // checks to handle the behaviour, which will also trigger necessary transitions
@@ -1044,23 +1057,35 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         ROS_INFO("way points generatd");
         task1_utils_->taskLogPub("way points generatd");
 
-
         ///@todo: remove the visulaisation
         task1_utils_->visulatise6DPoints(waypoints);
 
         // plan the trajectory
         moveit_msgs::RobotTrajectory traj;
-        left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
-        ROS_INFO("trajectory generated");
-        task1_utils_->taskLogPub("trajectory generated");
+        double fraction_planned = left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
 
-        // execute the trajectory
-        wholebody_controller_->compileMsg(armSide::LEFT, traj.joint_trajectory);
-        ROS_INFO("trajectory sent to controllers");
-        task1_utils_->taskLogPub("trajectory sent to controllers");
+        // if planning is not 100%
+        if (fraction_planned < 0.98)
+        {
+            // retry planning
+            // redetect the handles (retry)
+            eventQueue.riseEvent("/YAW_CORRECTION_RETRY");
 
-        // start the timer
-        timer_start = std::chrono::system_clock::now();
+            return TaskResult::SUCCESS();
+        }
+        else
+        {
+            ROS_INFO("trajectory generated");
+            task1_utils_->taskLogPub("trajectory generated");
+
+            // execute the trajectory
+            wholebody_controller_->compileMsg(armSide::LEFT, traj.joint_trajectory);
+            ROS_INFO("trajectory sent to controllers");
+            task1_utils_->taskLogPub("trajectory sent to controllers");
+
+            // start the timer
+            timer_start = std::chrono::system_clock::now();
+        }
 
     }
 
@@ -1325,6 +1350,9 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
 
         // reset the state
         prev_grasp_state_ = prevGraspState::NOT_INITIALISED;
+
+        // reset the retry count
+        retry_count = 0;
 
         //delete the panel detector object
         if (pcl_handle_detector_ != nullptr) delete pcl_handle_detector_;

@@ -80,22 +80,42 @@ void PanelDetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
 void PanelDetector::passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
 
+    geometry_msgs::Point min, max;
+    min.x = preset_configs_[currentDetector].x_min_limit;
+    min.y = preset_configs_[currentDetector].y_min_limit;
+    min.z = preset_configs_[currentDetector].z_min_limit;
+
+    max.x = preset_configs_[currentDetector].x_max_limit;
+    max.y = preset_configs_[currentDetector].y_max_limit;
+    max.z = preset_configs_[currentDetector].z_max_limit;
+
+    current_state_->transformPoint(min, min, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPoint(max, max, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    float x_min = std::min(min.x, max.x);
+    float x_max = std::max(min.x, max.x);
+
+    float y_min = std::min(min.y, max.y);
+    float y_max = std::max(min.y, max.y);
+
+    float z_min = std::min(min.z, max.z);
+    float z_max = std::max(min.z, max.z);
+
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
     pass_x.setFilterFieldName("x");
-    pass_x.setFilterLimits(preset_configs_[currentDetector].x_min_limit,preset_configs_[currentDetector].x_max_limit);
+    pass_x.setFilterLimits(x_min, x_max);
     pass_x.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> pass_y;
     pass_y.setInputCloud(cloud);
     pass_y.setFilterFieldName("y");
-    pass_y.setFilterLimits(preset_configs_[currentDetector].y_min_limit, preset_configs_[currentDetector].y_max_limit);
+    pass_y.setFilterLimits(y_min, y_max);
     pass_y.filter(*cloud);
 
     pcl::PassThrough<pcl::PointXYZ> pass_z;
     pass_z.setInputCloud(cloud);
     pass_z.setFilterFieldName("z");
-    pass_z.setFilterLimits(preset_configs_[currentDetector].z_min_limit,preset_configs_[currentDetector].z_max_limit);
+    pass_z.setFilterLimits(z_min, z_max);
     pass_z.filter(*cloud);
 }
 
@@ -285,20 +305,19 @@ bool PanelDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geom
 
 void PanelDetector::setPresetConfigs()
 {
-    geometry_msgs::Pose pelvisPose;
-    current_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+
     //Handle panel coarse setting
     PanelSettings handle_panel_coarse;
     handle_panel_coarse.settingName = "HANDLE_PANEL_COARSE";
 
-    handle_panel_coarse.x_min_limit = pelvisPose.position.x;
-    handle_panel_coarse.x_max_limit = pelvisPose.position.x + 4.0f;
+    handle_panel_coarse.x_min_limit = 0.0f;
+    handle_panel_coarse.x_max_limit = 4.0f;
 
-    handle_panel_coarse.y_min_limit = pelvisPose.position.y - 2.0f;
-    handle_panel_coarse.y_max_limit = pelvisPose.position.x + 2.0f;
+    handle_panel_coarse.y_min_limit = -3.0f;
+    handle_panel_coarse.y_max_limit = 3.0f;
 
-    handle_panel_coarse.z_min_limit = pelvisPose.position.z - 0.3f;
-    handle_panel_coarse.z_max_limit = pelvisPose.position.z - 0.1f;
+    handle_panel_coarse.z_min_limit = -0.3f;
+    handle_panel_coarse.z_max_limit = -0.1f;
 
     handle_panel_coarse.OFFSET = 1.1f;
 
@@ -309,6 +328,9 @@ void PanelDetector::setPresetConfigs()
 
     handle_panel_fine.settingName = "HANDLE_PANEL_FINE";
     handle_panel_fine.OFFSET = 0.7f;
+
+    handle_panel_fine.x_min_limit = 0.0f;
+    handle_panel_fine.x_max_limit = 1.5f;
 
     preset_configs_[DETECTOR_TYPE::HANDLE_PANEL_FINE] = handle_panel_fine;
 
