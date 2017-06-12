@@ -301,6 +301,7 @@ decision_making::TaskResult valTask3::climbStepsTask(string name, const FSMCallC
 
   ROS_INFO_STREAM("executing " << name);
 
+  ROS_INFO("Climbing stairs");
   // climb the stairs (this is a blocking call)
   climb_stairs_->climb_stairs();
 
