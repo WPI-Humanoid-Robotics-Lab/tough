@@ -2,10 +2,11 @@
 
 climbStairs::climbStairs(ros::NodeHandle nh): nh_(nh)
 {
-    walker_ = new ValkyrieWalker(nh_, 0.8f, 0.8f, 0, STEP_HEIGHT);
-    chest_  = new chestTrajectory(nh_);
-    pelvis_ = new pelvisTrajectory(nh_);
-    arm_    = new armTrajectory(nh_);
+    walker_      = new ValkyrieWalker(nh_, 0.8f, 0.8f, 0, STEP_HEIGHT);
+    chest_       = new chestTrajectory(nh_);
+    pelvis_      = new pelvisTrajectory(nh_);
+    arm_         = new armTrajectory(nh_);
+    robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 }
 
 climbStairs::~climbStairs()
@@ -27,6 +28,7 @@ void climbStairs::climb_stairs()
     ros::Duration(1).sleep();
     arm_->moveArmJoint(LEFT, 1, -0.7);
     ros::Duration(1).sleep();
+
 
     // first step
     walker_->walkNSteps(1, FIRSTSTEP_OFFSET, 0.0, true, RIGHT);
