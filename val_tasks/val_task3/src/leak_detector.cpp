@@ -5,6 +5,7 @@ leakDetector::leakDetector(ros::NodeHandle nh):
     nh_(nh)
 {
     leak_sb_ = nh_.subscribe("/task3/checkpoint5/leak", 10, &leakDetector::leakMsgCB, this);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>( "leak_search_points", 10, true);
 }
 
 leakDetector::~leakDetector()
@@ -40,6 +41,9 @@ void leakDetector::generateSearchWayPoints(geometry_msgs::Point horz_left_top, g
         }
         point.y += HORIZONTAL_WIDTH;
     }
+
+    // visulaize points
+    visulatise3DPoints(way_points);
 }
 
 void leakDetector::findLeak (geometry_msgs::Point& leak_point)
@@ -59,5 +63,32 @@ double leakDetector::getLeakValue() const
 void leakDetector::setLeakValue(double leak_value)
 {
     leak_value_ = leak_value;
+}
+
+void leakDetector::visulatise3DPoints(std::vector<geometry_msgs::Point> &points)
+{
+
+    visualization_msgs::MarkerArray marker_array = visualization_msgs::MarkerArray();
+
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+    marker.header.stamp = ros::Time();
+    marker.ns = "leak";
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::CUBE;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.points = points;
+    marker.scale.x = 0.01;
+    marker.scale.y = 0.01;
+    marker.scale.z = 0.01;
+    marker.color.a = 0.6;
+    marker.color.r = 1.0;
+    marker.color.g = 0.0;
+    marker.color.b = 0.0;
+    marker.lifetime = ros::Duration(0);
+    marker_array.markers.push_back(marker);
+
+    marker_pub_.publish(marker_array);
+    ros::Duration(0.2).sleep();
 }
 
