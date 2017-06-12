@@ -28,14 +28,15 @@ int main(int argc, char **argv)
         waypoint.push_back(pose);
         if(side ==armSide::RIGHT)
         {
-            if (right_arm_planner->getTrajFromCartPoints(waypoint, traj, false)> 0.98){
-
+            if (right_arm_planner.getTrajFromCartPoints(waypoint, traj, false)> 0.98){
+                ROS_INFO("right arm whole body msg executed");
                 wholeBodyController.compileMsg(side, traj.joint_trajectory);
             }
         }
         else
         {
-            if (left_arm_planner->getTrajFromCartPoints(waypoint, traj, false)> 0.98){
+            if (left_arm_planner.getTrajFromCartPoints(waypoint, traj, false)> 0.98){
+                ROS_INFO("left arm whole body msg executed");
                 wholeBodyController.compileMsg(side, traj.joint_trajectory);
             }
 
@@ -48,7 +49,6 @@ int main(int argc, char **argv)
         ROS_INFO(" 0 - local | 1 - pelvis, invalid input");
     }
     ros::spinOnce();
-    ros::Duration(2).sleep();
     return 0;
 }
 

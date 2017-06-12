@@ -15,6 +15,8 @@
 #include <val_controllers/val_arm_navigation.h>
 #include <val_footstep/ValkyrieWalker.h>
 #include <val_task2/cable_detector.h>
+#include "val_controllers/val_wholebody_manipulation.h"
+#include "val_moveit_planners/val_cartesian_planner.h"
 #include "ros/package.h"
 #include <fstream>
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -50,6 +52,10 @@ private:
     ros::Publisher reset_pointcloud_pub, reset_map_pub, pause_pointcloud_pub , clearbox_pointcloud_pub , task2_log_pub_,clear_pose_map;
 
     ros::Subscriber task_status_sub_,detach_harness;
+
+    cartesianPlanner* left_arm_planner_;
+    cartesianPlanner* right_arm_planner_;
+    wholebodyManipulation* wholebody_controller_;
 
     CableDetector* cable_detector_;
     srcsim::Task taskMsg;
@@ -146,6 +152,7 @@ public:
     bool isRotationReq(armSide side, geometry_msgs::Point handle_coordinates,geometry_msgs::Point button_coordinates);
     bool checkpoint_init();
     void taskLogPub(std::string data);
+    bool planWholeBodyMotion(armSide side, std::vector<geometry_msgs::Pose> waypoints);
 };
 
 

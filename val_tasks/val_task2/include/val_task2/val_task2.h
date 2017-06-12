@@ -104,8 +104,10 @@ class valTask2 {
     valControlCommon* control_common_;
 
     ros::Subscriber occupancy_grid_sub_;
+    ros::Subscriber nudge_sub_;
     unsigned int map_update_count_;
     void occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg);
+    void nudge_pose_cb(const std_msgs::Float64MultiArray msg);
 
     // goal location for the panel
     geometry_msgs::Pose2D panel_walk_goal_;
