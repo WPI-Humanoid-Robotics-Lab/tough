@@ -2,7 +2,6 @@
 
 PanelDetector::PanelDetector(ros::NodeHandle &nh, DETECTOR_TYPE detector_type)
 {
-    current_state_ =  RobotStateInformer::getRobotStateInformer(nh);
     pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &PanelDetector::cloudCB, this);
     pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_filter/filteredPointCloud", 1);
 
@@ -10,7 +9,6 @@ PanelDetector::PanelDetector(ros::NodeHandle &nh, DETECTOR_TYPE detector_type)
     vis_plane_pub_ = nh.advertise<visualization_msgs::Marker>( "visualization_plane_vector", 1 );
     detection_tries_ = 0;
     //set the presets
-
     setPresetConfigs();
 
 //    currentSettings_ = &preset_configs_[detector_type];
@@ -151,31 +149,31 @@ bool PanelDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geom
 
     double OFFSET = preset_configs_[currentDetector].OFFSET;
 
-    // Not required anymore as the offsets are wrt Pelvis
-//    if (preset_configs_[currentDetector].settingName == "HANDLE_PANEL_COARSE" || preset_configs_[currentDetector].settingName == "HANDLE_PANEL_FINE"){
+    // what can be done to detect only the lower plane?
+    if (preset_configs_[currentDetector].settingName == "HANDLE_PANEL_COARSE" || preset_configs_[currentDetector].settingName == "HANDLE_PANEL_FINE"){
 //        if(pose.position.z > 0.80 && pose.position.z < 0.83)
-//        if(panel_plane_model_[2]>=0.95)
-//        {
-//            ROS_INFO("Upper plane detected");
-//            if(preset_configs_[currentDetector].settingName == "HANDLE_PANEL_COARSE")
-//            {
-//                OFFSET += 0.1;
-//            }
-//            else if (preset_configs_[currentDetector].settingName == "HANDLE_PANEL_FINE")
-//            {
-//                return false;
-//            }
-//        }
+        if(panel_plane_model_[2]>=0.95)
+        {
+            ROS_INFO("Upper plane detected");
+            if(preset_configs_[currentDetector].settingName == "HANDLE_PANEL_COARSE")
+            {
+                OFFSET += 0.1;
+            }
+            else if (preset_configs_[currentDetector].settingName == "HANDLE_PANEL_FINE")
+            {
+                return false;
+            }
+        }
 //        else if(pose.position.z > 0.75)
-//        else if(panel_plane_model_[2]>0.8){
-//            ROS_INFO("Lower Plane Detected");
-//            //        OFFSET = 0.6;
-//        }
-//        else{
-//            ROS_INFO("WTF");
-//            return false;
-//        }
-//    }
+        else if(panel_plane_model_[2]>0.8){
+            ROS_INFO("Lower Plane Detected");
+            //        OFFSET = 0.6;
+        }
+        else{
+            ROS_INFO("WTF");
+            return false;
+        }
+    }
     ROS_INFO("Centroid values are X:= %0.2f, Y := %0.2f, Z := %0.2f", pose.position.x, pose.position.y, pose.position.z);
 
     geometry_msgs::Point point1;
@@ -285,20 +283,18 @@ bool PanelDetector::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, geom
 
 void PanelDetector::setPresetConfigs()
 {
-    geometry_msgs::Pose pelvisPose;
-    current_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
     //Handle panel coarse setting
     PanelSettings handle_panel_coarse;
     handle_panel_coarse.settingName = "HANDLE_PANEL_COARSE";
 
-    handle_panel_coarse.x_min_limit = pelvisPose.position.x;
-    handle_panel_coarse.x_max_limit = pelvisPose.position.x + 4.0f;
+    handle_panel_coarse.x_min_limit = 1.0f;
+    handle_panel_coarse.x_max_limit = 4.0f;
 
-    handle_panel_coarse.y_min_limit = pelvisPose.position.y - 2.0f;
-    handle_panel_coarse.y_max_limit = pelvisPose.position.x + 2.0f;
+    handle_panel_coarse.y_min_limit = -2.0f;
+    handle_panel_coarse.y_max_limit = 2.0f;
 
-    handle_panel_coarse.z_min_limit = pelvisPose.position.z - 0.3f;
-    handle_panel_coarse.z_max_limit = pelvisPose.position.z - 0.1f;
+    handle_panel_coarse.z_min_limit = 0.7f;
+    handle_panel_coarse.z_max_limit = 0.87f;
 
     handle_panel_coarse.OFFSET = 1.1f;
 
