@@ -76,7 +76,7 @@ void task2Utils::isDetachedCB(const srcsim::Harness &harnessMsg)
     mtx_.unlock();
 }
 
-bool task2Utils::afterPanelGraspPose(const armSide side)
+bool task2Utils::afterPanelGraspPose(const armSide side, bool isRotationRequired)
 {
     // reorienting the chest would bring the panel above the rover
     chest_controller_->controlChest(0,0,0);
@@ -84,12 +84,12 @@ bool task2Utils::afterPanelGraspPose(const armSide side)
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
-        seed1 = &leftNearChestPalmUp_;
+        seed1 = isRotationRequired ? &leftNearChestPalmUp_ : &leftNearChestPalmDown_;
         seed2 = &rightSeedNonGraspingHand_;
     }
     else
     {
-        seed1 = &rightNearChestPalmUp_;
+        seed1 = isRotationRequired ? &rightNearChestPalmUp_ : &rightNearChestPalmDown_;
         seed2 = &leftSeedNonGraspingHand_;
     }
 
@@ -119,7 +119,7 @@ bool task2Utils::isPointOnWalkway(float x, float y)
     return map_.data.at(index) == CELL_STATUS::FREE;
 }
 
-void task2Utils::movePanelToWalkSafePose(const armSide side)
+void task2Utils::movePanelToWalkSafePose(const armSide side, bool isRotationRequired)
 {
     // reorient the chest
     chest_controller_->controlChest(0,0,0);
@@ -138,9 +138,10 @@ void task2Utils::movePanelToWalkSafePose(const armSide side)
         seed1 = &leftShoulderSeedPanelGraspWalk_;
         grasp = &rightHandGrasp_;
     }
-
-    gripper_controller_->controlGripper(side, *grasp);
-    ros::Duration(1).sleep();
+    if(isRotationRequired){
+        gripper_controller_->controlGripper(side, *grasp);
+        ros::Duration(1).sleep();
+    }
 
     std::vector< std::vector<float> > armData;
     armData.clear();
@@ -151,7 +152,7 @@ void task2Utils::movePanelToWalkSafePose(const armSide side)
 
 }
 
-#define EFFORT_THRESHOLD 55 //threshold is selected by experimentation
+#define EFFORT_THRESHOLD 50 //threshold is selected by experimentation
 bool task2Utils::isPanelPicked(const armSide side)
 {
     std::string jointNames = side == armSide::LEFT ? "left_arm" : "right_arm";
@@ -170,15 +171,17 @@ bool task2Utils::isPanelPicked(const armSide side)
     return false;
 }
 
-void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel)
+void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRotated)
 {
+    isPanelRotated = true; // this is to avoid rework. I'll fix it the right way when I have time
+
     armSide nonGraspingHand = (armSide) !graspingHand;
 
     const std::vector<float> *graspingHandPoseUp, *graspingHandPoseDown;
     const std::vector<float>  *nonGraspingHandPose2, *nonGraspingHandPose1;
 
     if(graspingHand == armSide::LEFT){
-        if (rotatePanel){
+        if (isPanelRotated){
             graspingHandPoseUp     = &leftPanelPlacementUpPose1_;
             graspingHandPoseDown   = &leftPanelPlacementDownPose1_;
         }
@@ -194,7 +197,7 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     }
     else
     {
-        if (rotatePanel){
+        if (isPanelRotated){
             graspingHandPoseUp     = &rightPanelPlacementUpPose1_;
             graspingHandPoseDown   = &rightPanelPlacementDownPose1_;
         }
@@ -226,7 +229,7 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     }
 
     std::vector<armTrajectory::armJointData> pushPanel;
-    pushPanel.resize(2);
+    pushPanel.resize(3);
     pushPanel[0].side = nonGraspingHand;
     pushPanel[0].arm_pose = *nonGraspingHandPose1;
     pushPanel[0].time = 1;
@@ -235,8 +238,13 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool rotatePan
     pushPanel[1].arm_pose = *nonGraspingHandPose2;
     pushPanel[1].time = 2;
 
+    pushPanel[2].side = nonGraspingHand;
+    pushPanel[2].arm_pose = *nonGraspingHandPose1;
+    pushPanel[2].time = 5;
+
     arm_controller_->moveArmJoints(pushPanel);
-    ros::Duration(3).sleep();
+    // Duration is less than trajectory time as the next step should execute before moving non-grasping hand
+    ros::Duration(2.5).sleep();
 
 }
 
@@ -280,8 +288,7 @@ void task2Utils::rotatePanel(const armSide graspingHand)
 
 void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset){
 
-    pelvis_controller_->controlPelvisHeight(1.0);
-    ros::Duration(1.5).sleep();
+
 
     size_t nSteps;
     armSide startStep;
@@ -299,6 +306,9 @@ void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offs
     }
     else
     {
+        pelvis_controller_->controlPelvisHeight(1.0);
+        ros::Duration(1.5).sleep();
+
         nSteps = int(((abserror/0.1)+0.5));
         ROS_INFO_STREAM("No of steps to walk is:" << nSteps);
 
@@ -323,9 +333,10 @@ void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offs
         walk_->walkLocalPreComputedSteps(x_offset,y_offset,startStep);
         ros::Duration(4.0).sleep();
 
+        pelvis_controller_->controlPelvisHeight(0.9);
+        ros::Duration(1.5).sleep();
     }
-    pelvis_controller_->controlPelvisHeight(0.9);
-    ros::Duration(1.5).sleep();
+
 
 }
 

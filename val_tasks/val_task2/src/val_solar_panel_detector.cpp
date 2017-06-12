@@ -31,6 +31,7 @@ SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Point butt
 //    ROS_INFO("rover loc const %f %f right: %d",rover_loc_.position.x,rover_loc_.position.y,(int)isroverRight_);
 //    setRoverTheta();
     setoffset();
+    ROS_INFO("optimaldistance %.2f",optimal_dist);
 //    ROS_INFO("in const");
 }
 
@@ -246,47 +247,6 @@ void SolarPanelDetect::PlaneSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cl
 
 }
 
-/*
-
-float SolarPanelDetect::getArea(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointIndices::Ptr &inliers, pcl::ModelCoefficients::Ptr &coefficients )
-{
-
-    //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_hull (new pcl::PointCloud<pcl::PointXYZ>);
-    //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_projected (new pcl::PointCloud<pcl::PointXYZ>);
-
-    //pcl::ProjectInliers<pcl::PointXYZ> proj;
-    //proj.setModelType (pcl::SACMODEL_PLANE);
-//    proj.setIndices (inliers);
-//    proj.setInputCloud (cloud);
-//    proj.setModelCoefficients (coefficients);
-//    proj.filter (*cloud_projected);
-
-//    pcl::ConvexHull<pcl::PointXYZ> chull;
-//    chull.setInputCloud (cloud_projected);
-
-//    chull.setComputeAreaVolume(1);
-//    chull.reconstruct (*cloud);
-
-//    return chull.getTotalArea();
-
-
-    float area= 0.0;
-    int num_points = cloud->points.size();
-    int j = 0;
-    Eigen::Vector3f va,vb,res;
-    res(0) = res(1) = res(2) = 0.0f;
-    for (int i = 0; i < num_points; ++i)
-    {
-        j = (i + 1) % num_points;
-        va = cloud->points[i].getVector3fMap();
-        vb = cloud->points[j].getVector3fMap();
-        res += va.cross(vb);
-    }
-    area=res.norm();
-    return area*0.5;
-}
-    */
-
 
 void SolarPanelDetect::getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, geometry_msgs::Pose &pose)
 {
@@ -390,8 +350,6 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,geo
 //    pose.position.y = centroid(1);
 //    pose.position.z = centroid(2);
 
-
-
     Eigen::Matrix3f covarianceMatrix;
     pcl::computeCovarianceMatrix(*cloud, centroid, covarianceMatrix);
     Eigen::Matrix3f eigenVectors;
@@ -443,7 +401,6 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,geo
     /*pcl::PointCloud<pcl::PointXYZ> pos_cloud;
     pcl::PointCloud<pcl::PointXYZ>::Ptr pos_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
 
-
 //    pcl::PointCloud<pcl::PointXYZ> pos;//((max_pt(0)+min_pt(0))/2,(max_pt(1)+min_pt(1))/2,(max_pt(2)+min_pt(2))/2);
     pos_cloud.width=1;
     pos_cloud.height=1;
@@ -468,7 +425,6 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,geo
     pose.position.z = (max_pt(2)+min_pt(2))/2;
 
 
-
     ROS_WARN("Is button loc avail??");
 
     if(button_loc_.z != 0)
@@ -476,12 +432,13 @@ void SolarPanelDetect::getPosition(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,geo
         ROS_INFO("Yes,button loc is avail");
         float dist = sqrt(pow(pose.position.x-button_loc_.x,2)+pow(pose.position.y-button_loc_.y,2));
         ROS_INFO("Distance is %.2f",dist);
-        if (dist >= 0.18 || dist <= 0.14)
+        if (dist > 0.19 || dist < 0.13)
         {
             ROS_INFO("Moving position towards/away from button");
             float lambda = optimal_dist/dist;
-            pose.position.x = button_loc_.x + lambda*(button_loc_.x-pose.position.x);
-            pose.position.x = button_loc_.y + lambda*(button_loc_.y-pose.position.y);
+            pose.position.x = button_loc_.x - lambda*(button_loc_.x-pose.position.x);
+            pose.position.y = button_loc_.y - lambda*(button_loc_.y-pose.position.y);
+
         }
     }
 

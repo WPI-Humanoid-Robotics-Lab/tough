@@ -60,45 +60,45 @@ private:
 
     //before walking
     //used for rotating panel
-    const std::vector<float> leftNearChestPalmDown_    = {-1.70, -1.04, 1.39, -1.85, 1.50, 0, 0};
+    const std::vector<float> leftNearChestPalmDown_    = {-1.70, -1.04, 1.39, -1.85, 1.50, 0, 0}; //0 -1.70  -1.04  1.39  -1.85  1.50  0  0
     //used for picking up the panel
-    const std::vector<float> leftNearChestPalmUp_    = {-1.5, -1.04, 1.6, -1.85, -1.50, 0, 0};
-    const std::vector<float> leftSeedNonGraspingHand_ = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};
+    const std::vector<float> leftNearChestPalmUp_    = {-1.5, -1.04, 1.6, -1.85, -1.50, 0, 0};  // 0 -1.5  -1.04  1.6  -1.85  -1.50  0  0
+    const std::vector<float> leftSeedNonGraspingHand_ = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};  // 0 0.21  -1.16  0.0  -1.07  1.52  0  0
     //while walking
-    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.62,-1.05,1.29,-1.23,-0.67,0.0,-0.30};
+    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.38,-1.5, 1.3,-1.23,-0.26, 0.0,-0.20}; // 0 -0.38  -1.5  1.3  -1.23  -0.26  0.0  -0.2
 
 
     //before walking
     //used for rotating panel
-    const std::vector<float> rightNearChestPalmUp_       = {-1.70, 1.04, 1.39, 1.85, -1.50, 0, 0};
+    const std::vector<float> rightNearChestPalmUp_       = {-1.70, 1.04, 1.39, 1.85, -1.50, 0, 0}; //1 -1.70  1.04  1.39  1.85  -1.50  0  0
     //used for picking up the panel
-    const std::vector<float> rightNearChestPalmDown_     = {-1.5, 1.04, 1.6, 1.85, 1.50, 0, 0};
+    const std::vector<float> rightNearChestPalmDown_     = {-1.5, 1.04, 1.6, 1.85, 1.50, 0, 0}; // 1 -1.5  1.04  1.6  1.85  1.50  0  0
 
-    const std::vector<float> rightSeedNonGraspingHand_ = {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0};
+    const std::vector<float> rightSeedNonGraspingHand_ = {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0}; // 1  0.21  1.16  0.0  1.07  1.52  0  0
     //while walking
-    const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.38, 1.49, 1.3, 0.7, -0.26, 0.0, 0.2};
+    const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.38, 1.5, 1.3, 0.7, -0.26, 0.0, 0.3}; // 1 -0.38  1.49  1.3  0.7  -0.26  0.0  0.2
 
     // panel placement poses
-    const std::vector<float> leftPanelPlacementUpPose1_  = {-1.5, -1.4, 1.39, -0.9, 1.10, 0.5, 0};
-    const std::vector<float> leftPanelPlacementDownPose1_= {-1.2, -1.4, 1.39, -0.9, 1.10, 0.5, 0.4};
+    const std::vector<float> leftPanelPlacementUpPose1_  = {-1.5, -1.4, 1.39, -0.9, 1.10, -0.5, 0}; // 0 -1.5  -1.4  1.39  -0.9  1.10  -0.5  0
+    const std::vector<float> leftPanelPlacementDownPose1_= {-1.2, -1.4, 1.39, -0.9, 1.10, -0.5, 0}; // 0 -1.2  -1.4  1.39  -0.9  1.10  -0.5  0
 
-    const std::vector<float> leftPanelPlacementUpPose2_  = {-1.5, -1.4, 1.39, -0.9, -1.10, -0.5, 0};
-    const std::vector<float> leftPanelPlacementDownPose2_= {-1.2, -1.4, 1.39, -0.9, -1.10, -0.5, 0};
+    const std::vector<float> leftPanelPlacementUpPose2_  = {-1.5, -1.4, 1.39, -0.9, -1.10, 0.5, 0}; // 0 -1.5  -1.4  1.39  -0.9  -1.10  0.5  0
+    const std::vector<float> leftPanelPlacementDownPose2_= {-1.2, -1.4, 1.39, -0.9, -1.10, 0.5, 0.4}; // 0 -1.2  -1.4  1.39  -0.9  -1.10  0.5  0.4
 
-    const std::vector<float> leftPanelPlacementSupport1_  = {-0.66, -1.4, 1.2, -1.49, 1.29, 0, 0.26};
-    const std::vector<float> leftPanelPlacementSupport2_  = {-0.66, -1.4, 0.75, -1.49, 1.29, 0, 0.26};
+    const std::vector<float> leftPanelPlacementSupport1_  = {-0.66, -1.4, 1.2, -1.49, 1.29, 0, 0.26}; // 0 -0.66  -1.4  1.2  -1.49  1.29  0  0.26
+    const std::vector<float> leftPanelPlacementSupport2_  = {-0.66, -1.4, 0.75, -1.49, 1.29, 0, 0.26}; // 0 -0.66  -1.4  0.75  -1.49  1.29  0  0.26
 
-    const std::vector<float> rightPanelPlacementUpPose1_  = {-1.5, 1.4, 1.39, 0.9, -1.10, -0.5, 0};
-    const std::vector<float> rightPanelPlacementDownPose1_= {-1.2, 1.4, 1.39, 0.9, -1.10, -0.5, 0.4};
+    const std::vector<float> rightPanelPlacementUpPose1_  = {-1.5, 1.4, 1.39, 0.9, 1.10, 0.5, 0}; // 1 -1.5  1.4  1.39  0.9  1.10  0.5  0
+    const std::vector<float> rightPanelPlacementDownPose1_= {-1.2, 1.4, 1.39, 0.9, 1.10, 0.5, 0}; // 1 -1.2  1.4  1.39  0.9  1.10  0.5  0
 
-    const std::vector<float> rightPanelPlacementUpPose2_  = {-1.5, 1.4, 1.39, 0.9, 1.10, 0.5, 0};
-    const std::vector<float> rightPanelPlacementDownPose2_= {-1.2, 1.4, 1.39, 0.9, 1.10, 0.5, 0};
+    const std::vector<float> rightPanelPlacementUpPose2_  = {-1.5, 1.4, 1.39, 0.9, -1.10, -0.5, 0}; // 1 -1.5  1.4  1.39  0.9  -1.10  -0.5  0
+    const std::vector<float> rightPanelPlacementDownPose2_= {-1.2, 1.4, 1.39, 0.9, -1.10, -0.5, -0.4};// 1 -1.2  1.4  1.39  0.9  -1.10  -0.5  -0.4
 
-    const std::vector<float> rightPanelPlacementSupport1_ = {-0.66, 1.4, 1.2, 1.49, 1.29, 0, 0.26};
-    const std::vector<float> rightPanelPlacementSupport2_ = {-0.66, 1.4, 0.75, 1.49, 1.29, 0, 0.26};
+    const std::vector<float> rightPanelPlacementSupport1_ = {-0.66, 1.4, 1.2, 1.49, 1.29, 0, 0.26}; // 1 -0.66  1.4  1.2  1.49  1.29  0  0.26
+    const std::vector<float> rightPanelPlacementSupport2_ = {-0.66, 1.4, 0.75, 1.49, 1.29, 0, 0.26};// 1 -0.66  1.4  0.75  1.49  1.29  0  0.26
 
     // cable in hand seed point
-    const std::vector<float> righCableInHandSeed_ = {-0.81,1.11,0.65,1.14,-0.26,-0.19,0.30};
+    const std::vector<float> righCableInHandSeed_ = {-0.81,1.11,0.65,1.14,-0.26,-0.19,0.30};// -0.81 1.11 0.65 1.14 -0.26 -0.19 0.30
 
     // Gripper commands
     const std::vector<double> leftHandGrasp_          = {1.2, -0.6, -0.77, -0.9, -0.9};
@@ -121,11 +121,11 @@ private:
 public:
     task2Utils(ros::NodeHandle nh);
     ~task2Utils();
-    bool afterPanelGraspPose(const armSide side);
+    bool afterPanelGraspPose(const armSide side, bool isRotationRequired);
     bool isPointOnWalkway(float x, float y);
-    void movePanelToWalkSafePose(const armSide side);
+    void movePanelToWalkSafePose(const armSide side, bool isRotationRequired);
     bool isPanelPicked(const armSide side);
-    void moveToPlacePanelPose(const armSide graspingHand, bool rotatePanel);
+    void moveToPlacePanelPose(const armSide graspingHand, bool isPanelRotated);
     void rotatePanel(const armSide graspingHand);
     void clearPointCloud();
     void clearMap();

@@ -6,9 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /Image1
       Splitter Ratio: 0.5
-    Tree Height: 744
+    Tree Height: 569
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -445,11 +444,11 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
-    - Alpha: 0.4
+    - Alpha: 0.6
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0.0295945
-        Min Value: -0.0352664
+        Max Value: 0.0522628
+        Min Value: -0.0177161
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -478,11 +477,11 @@ Visualization Manager:
     - Alpha: 0.2
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 12.6371
-        Min Value: -0.18061
+        Max Value: 12.5925
+        Min Value: -0.200331
         Value: true
       Axis: Z
-      Channel Name: x
+      Channel Name: intensity
       Class: rviz/PointCloud2
       Color: 255; 255; 255
       Color Transformer: AxisColor
@@ -490,9 +489,9 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: true
       Max Color: 255; 255; 255
-      Max Intensity: 30.108
+      Max Intensity: 0
       Min Color: 0; 0; 0
-      Min Intensity: -23.8628
+      Min Intensity: 0
       Name: PointCloud2
       Position Transformer: XYZ
       Queue Size: 10
@@ -507,7 +506,19 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /image
+      Image Topic: /multisense/camera/left/image_rect_color
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Image
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /multisense/camera/right/image_rect_color
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -518,290 +529,19 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Class: rviz/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
-        All Enabled: false
-        center_bottom_led_frame:
-          Value: false
-        center_top_led_frame:
-          Value: false
-        head:
-          Value: false
-        head_hokuyo_frame:
-          Value: false
-        head_imu_link:
-          Value: false
-        hokuyo_link:
-          Value: false
-        leftAnklePitchLink:
-          Value: false
-        leftCOP_Frame:
-          Value: false
-        leftElbowPitchLink:
-          Value: false
-        leftFoot:
-          Value: false
-        leftFootSixAxis_Frame:
-          Value: false
-        leftForearmLink:
-          Value: false
-        leftHazardCamera_Frame:
-          Value: false
-        leftHipPitchLink:
-          Value: false
-        leftHipRollLink:
-          Value: false
-        leftHipYawLink:
-          Value: false
-        leftIndexFingerPitch1Link:
-          Value: false
-        leftIndexFingerPitch2Link:
-          Value: false
-        leftIndexFingerPitch3Link:
-          Value: false
-        leftKneePitchLink:
-          Value: false
-        leftMiddleFingerPitch1Link:
-          Value: false
-        leftMiddleFingerPitch2Link:
-          Value: false
-        leftMiddleFingerPitch3Link:
-          Value: false
-        leftPalm:
-          Value: true
-        leftPinkyPitch1Link:
-          Value: false
-        leftPinkyPitch2Link:
-          Value: false
-        leftPinkyPitch3Link:
-          Value: false
-        leftShoulderPitchLink:
-          Value: false
-        leftShoulderRollLink:
-          Value: false
-        leftShoulderYawLink:
-          Value: false
-        leftThumbPitch1Link:
-          Value: false
-        leftThumbPitch2Link:
-          Value: false
-        leftThumbPitch3Link:
-          Value: false
-        leftThumbRollLink:
-          Value: false
-        leftTorsoImu_Frame:
-          Value: false
-        leftWristRollLink:
-          Value: false
-        left_camera_frame:
-          Value: false
-        left_camera_optical_frame:
-          Value: false
-        left_led_frame:
-          Value: false
-        lowerNeckPitchLink:
-          Value: false
-        multisense/head_root:
-          Value: false
-        neckYawLink:
-          Value: false
-        pelvis:
-          Value: false
-        pelvisMiddleImu_Frame:
-          Value: false
-        pelvisRearImu_Frame:
-          Value: false
-        rightAnklePitchLink:
-          Value: false
-        rightCOP_Frame:
-          Value: false
-        rightElbowPitchLink:
-          Value: false
-        rightFoot:
-          Value: false
-        rightFootSixAxis_Frame:
-          Value: false
-        rightForearmLink:
-          Value: false
-        rightHazardCamera_Frame:
-          Value: false
-        rightHipPitchLink:
-          Value: false
-        rightHipRollLink:
-          Value: false
-        rightHipYawLink:
-          Value: false
-        rightIndexFingerPitch1Link:
-          Value: false
-        rightIndexFingerPitch2Link:
-          Value: false
-        rightIndexFingerPitch3Link:
-          Value: false
-        rightKneePitchLink:
-          Value: false
-        rightMiddleFingerPitch1Link:
-          Value: false
-        rightMiddleFingerPitch2Link:
-          Value: false
-        rightMiddleFingerPitch3Link:
-          Value: false
-        rightPalm:
-          Value: true
-        rightPinkyPitch1Link:
-          Value: false
-        rightPinkyPitch2Link:
-          Value: false
-        rightPinkyPitch3Link:
-          Value: false
-        rightShoulderPitchLink:
-          Value: false
-        rightShoulderRollLink:
-          Value: false
-        rightShoulderYawLink:
-          Value: false
-        rightThumbPitch1Link:
-          Value: false
-        rightThumbPitch2Link:
-          Value: false
-        rightThumbPitch3Link:
-          Value: false
-        rightThumbRollLink:
-          Value: false
-        rightWristRollLink:
-          Value: false
-        right_camera_frame:
-          Value: false
-        right_camera_optical_frame:
-          Value: false
-        right_led_frame:
-          Value: false
-        torso:
-          Value: false
-        torsoPitchLink:
-          Value: false
-        torsoYawLink:
-          Value: false
-        upperNeckPitchLink:
-          Value: false
-        world:
-          Value: false
-      Marker Scale: 1
+        All Enabled: true
+      Marker Scale: 0.5
       Name: TF
-      Show Arrows: false
-      Show Axes: true
+      Show Arrows: true
+      Show Axes: false
       Show Names: false
       Tree:
-        world:
-          pelvis:
-            leftHipYawLink:
-              leftHipRollLink:
-                leftHipPitchLink:
-                  leftKneePitchLink:
-                    leftAnklePitchLink:
-                      leftFoot:
-                        leftCOP_Frame:
-                          {}
-                        leftFootSixAxis_Frame:
-                          {}
-            pelvisMiddleImu_Frame:
-              {}
-            pelvisRearImu_Frame:
-              {}
-            rightHipYawLink:
-              rightHipRollLink:
-                rightHipPitchLink:
-                  rightKneePitchLink:
-                    rightAnklePitchLink:
-                      rightFoot:
-                        rightCOP_Frame:
-                          {}
-                        rightFootSixAxis_Frame:
-                          {}
-            torsoYawLink:
-              torsoPitchLink:
-                torso:
-                  leftHazardCamera_Frame:
-                    {}
-                  leftShoulderPitchLink:
-                    leftShoulderRollLink:
-                      leftShoulderYawLink:
-                        leftElbowPitchLink:
-                          leftForearmLink:
-                            leftWristRollLink:
-                              leftPalm:
-                                leftIndexFingerPitch1Link:
-                                  leftIndexFingerPitch2Link:
-                                    leftIndexFingerPitch3Link:
-                                      {}
-                                leftMiddleFingerPitch1Link:
-                                  leftMiddleFingerPitch2Link:
-                                    leftMiddleFingerPitch3Link:
-                                      {}
-                                leftPinkyPitch1Link:
-                                  leftPinkyPitch2Link:
-                                    leftPinkyPitch3Link:
-                                      {}
-                                leftThumbRollLink:
-                                  leftThumbPitch1Link:
-                                    leftThumbPitch2Link:
-                                      leftThumbPitch3Link:
-                                        {}
-                  leftTorsoImu_Frame:
-                    {}
-                  lowerNeckPitchLink:
-                    neckYawLink:
-                      upperNeckPitchLink:
-                        head:
-                          center_bottom_led_frame:
-                            {}
-                          center_top_led_frame:
-                            {}
-                          head_imu_link:
-                            {}
-                          hokuyo_link:
-                            head_hokuyo_frame:
-                              {}
-                          left_camera_frame:
-                            left_camera_optical_frame:
-                              {}
-                          left_led_frame:
-                            {}
-                          right_camera_frame:
-                            right_camera_optical_frame:
-                              {}
-                          right_led_frame:
-                            {}
-                        multisense/head_root:
-                          {}
-                  rightHazardCamera_Frame:
-                    {}
-                  rightShoulderPitchLink:
-                    rightShoulderRollLink:
-                      rightShoulderYawLink:
-                        rightElbowPitchLink:
-                          rightForearmLink:
-                            rightWristRollLink:
-                              rightPalm:
-                                rightIndexFingerPitch1Link:
-                                  rightIndexFingerPitch2Link:
-                                    rightIndexFingerPitch3Link:
-                                      {}
-                                rightMiddleFingerPitch1Link:
-                                  rightMiddleFingerPitch2Link:
-                                    rightMiddleFingerPitch3Link:
-                                      {}
-                                rightPinkyPitch1Link:
-                                  rightPinkyPitch2Link:
-                                    rightPinkyPitch3Link:
-                                      {}
-                                rightThumbRollLink:
-                                  rightThumbPitch1Link:
-                                    rightThumbPitch2Link:
-                                      rightThumbPitch3Link:
-                                        {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
       Enabled: false
       Marker Topic: /field/occupied_cells_vis_array
@@ -815,7 +555,7 @@ Visualization Manager:
       Marker Topic: /visualization_marker
       Name: Marker
       Namespaces:
-        Rover Position: true
+        Center of the Panel: true
       Queue Size: 100
       Value: true
     - Alpha: 0.1
@@ -840,7 +580,10 @@ Visualization Manager:
       Marker Topic: /detected_handles
       Name: Handles
       Namespaces:
-        {}
+        1: true
+        2: true
+        3: true
+        4: true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -848,8 +591,409 @@ Visualization Manager:
       Marker Topic: /handle_path
       Name: HandTrajectory
       Namespaces:
-        {}
+        circle: true
       Queue Size: 100
+      Value: true
+    - Class: moveit_rviz_plugin/Trajectory
+      Color Enabled: false
+      Enabled: true
+      Interrupt Display: false
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        center_bottom_led_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        center_top_led_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        head:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        head_hokuyo_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        head_imu_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        hokuyo_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftAnklePitchLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftCOP_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        leftElbowPitchLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftFoot:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftFootSixAxis_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        leftForearmLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftHazardCamera_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        leftHipPitchLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftHipRollLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        leftHipYawLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftIndexFingerPitch1Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftIndexFingerPitch2Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftIndexFingerPitch3Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftKneePitchLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftMiddleFingerPitch1Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftMiddleFingerPitch2Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftMiddleFingerPitch3Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftPalm:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftPinkyPitch1Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftPinkyPitch2Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftPinkyPitch3Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftShoulderPitchLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftShoulderRollLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftShoulderYawLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftThumbPitch1Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftThumbPitch2Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftThumbPitch3Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftThumbRollLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        leftTorsoImu_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        leftWristRollLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_camera_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        left_camera_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        left_led_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        lowerNeckPitchLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        neckYawLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        pelvis:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        pelvisMiddleImu_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        pelvisRearImu_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rightAnklePitchLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightCOP_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rightElbowPitchLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightFoot:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightFootSixAxis_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rightForearmLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightHazardCamera_Frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rightHipPitchLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightHipRollLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rightHipYawLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightIndexFingerPitch1Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightIndexFingerPitch2Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightIndexFingerPitch3Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightKneePitchLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightMiddleFingerPitch1Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightMiddleFingerPitch2Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightMiddleFingerPitch3Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightPalm:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightPinkyPitch1Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightPinkyPitch2Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightPinkyPitch3Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightShoulderPitchLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightShoulderRollLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightShoulderYawLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightThumbPitch1Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightThumbPitch2Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightThumbPitch3Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightThumbRollLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rightWristRollLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_camera_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        right_camera_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        right_led_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        torso:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        torsoPitchLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        torsoYawLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        upperNeckPitchLink:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Loop Animation: false
+      Name: Trajectory
+      Robot Alpha: 0.5
+      Robot Color: 150; 50; 150
+      Robot Description: robot_description
+      Show Robot Collision: false
+      Show Robot Visual: true
+      Show Trail: false
+      State Display Time: 0.05 s
+      Trajectory Topic: /move_group/display_planned_path
       Value: true
     - Class: rviz/Marker
       Enabled: true
@@ -886,8 +1030,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0.740704
-        Min Value: 0.113935
+        Max Value: 3.19368
+        Min Value: -0.1625
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -918,23 +1062,8 @@ Visualization Manager:
       Marker Topic: /val_task1/handle_detector/visualization_marker
       Name: pclHandles
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: visualization_marker_array
-      Name: MarkerArray
-      Namespaces:
-        Rover Position: true
-      Queue Size: 100
-      Value: true
-    - Class: rviz/Axes
-      Enabled: true
-      Length: 1
-      Name: Axes
-      Radius: 0.1
-      Reference Frame: <Fixed Frame>
       Value: true
   Enabled: true
   Global Options:
@@ -959,72 +1088,24 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Class: rviz/Orbit
-      Distance: 8.19678
+      Class: rviz/ThirdPersonFollower
+      Distance: 3.91974
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 2.83452
-        Y: -0.538974
-        Z: 0.524147
+        X: 1.6783
+        Y: -0.424553
+        Z: -0.998979
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.309796
+      Pitch: 0.410398
       Target Frame: pelvis
-      Value: Orbit (rviz)
-      Yaw: 2.74858
-    Saved:
-      - Class: rviz/Orbit
-        Distance: 8.19678
-        Enable Stereo Rendering:
-          Stereo Eye Separation: 0.06
-          Stereo Focal Distance: 1
-          Swap Stereo Eyes: false
-          Value: false
-        Focal Point:
-          X: 2.83452
-          Y: -0.538974
-          Z: 0.524147
-        Name: Orbit
-        Near Clip Distance: 0.01
-        Pitch: 0.309796
-        Target Frame: pelvis
-        Value: Orbit (rviz)
-        Yaw: 2.74858
-      - Angle: 0
-        Class: rviz/TopDownOrtho
-        Enable Stereo Rendering:
-          Stereo Eye Separation: 0.06
-          Stereo Focal Distance: 1
-          Swap Stereo Eyes: false
-          Value: false
-        Name: TopDownOrtho
-        Near Clip Distance: 0.01
-        Scale: 166.12
-        Target Frame: pelvis
-        Value: TopDownOrtho (rviz)
-        X: 1.16346
-        Y: 0.750588
-      - Class: rviz/ThirdPersonFollower
-        Distance: 4.95865
-        Enable Stereo Rendering:
-          Stereo Eye Separation: 0.06
-          Stereo Focal Distance: 1
-          Swap Stereo Eyes: false
-          Value: false
-        Focal Point:
-          X: -0.157458
-          Y: -0.139909
-          Z: -4.76837e-07
-        Name: ThirdPersonFollower
-        Near Clip Distance: 0.01
-        Pitch: 0.165399
-        Target Frame: pelvis
-        Value: ThirdPersonFollower (rviz)
-        Yaw: 4.84541
+      Value: ThirdPersonFollower (rviz)
+      Yaw: 4.1004
+    Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
@@ -1033,7 +1114,7 @@ Window Geometry:
   Hide Right Dock: false
   Image:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000016a00000377fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006100fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d00000377000000d700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c0000026100000001000001cd00000377fc0200000004fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0049006d006100670065010000003d000001940000001600fffffffc000001d7000001dd000000ad00fffffffa000000010100000002fb0000000a0049006d0061006700650000000000ffffffff0000000000000000fb0000000a00560069006500770073010000066f0000010f0000010f00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000000000020000077e000000f0fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000077e0000003efc0100000002fb0000000800540069006d006501000000000000077e0000025300fffffffb0000000800540069006d006501000000000000045000000000000000000000043b0000037700000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000016a000002c8fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006100fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000ec000002c8000000d700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f000002c8fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007301000000ec000002c8000000ad00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000000000020000077e000000a9fc0100000003fb0000000a0049006d0061006700650100000000000003bc0000005b00fffffffb0000000a0049006d00610067006501000003c2000003bc0000005b00fffffffb0000000a00560069006500770073030000004e00000080000002e100000197000000030000077e0000003efc0100000002fb0000000800540069006d006501000000000000077e0000025300fffffffb0000000800540069006d00650100000000000004500000000000000000000004f9000002c800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:

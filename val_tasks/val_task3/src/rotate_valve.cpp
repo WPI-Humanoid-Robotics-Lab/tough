@@ -129,10 +129,18 @@ bool rotateValve::compute_traj(geometry_msgs::Point center, float radius, std::v
     geometry_msgs::Point centerPelvis;
     current_state_->transformPoint(center,centerPelvis, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
     geometry_msgs::Pose point;
-    for (int i = 0; i < NumSteps/3-1; ++i) {
+    for (int i = -3; i < (NumSteps-5)/2-1; ++i) {
         point.position.x=centerPelvis.x;
-        point.position.y=centerPelvis.y + radius*cos(i*2*M_PI/NumSteps);
-        point.position.z=centerPelvis.z + radius*sin(i*2*M_PI/NumSteps);
+        point.position.y=centerPelvis.y + radius*cos((i*2*M_PI/NumSteps)-(M_PI/2));
+        point.position.z=centerPelvis.z + radius*sin((i*2*M_PI/NumSteps)-(M_PI/2));
+
+
+//    int NumSteps = 18;
+//    for(int i = 0; i<(NumSteps/2-1);++i){
+//        point.positsion.x=centerPelvis.x;
+//        point.position.y=centerPelvis.y + radius*cos(i*2*M_PI/NumSteps);
+//        point.position.z=centerPelvis.z + radius*sin(i*2*M_PI/NumSteps);
+
 
         if(i<=1)
         {
@@ -201,7 +209,7 @@ bool rotateValve::move_valve(std::vector<geometry_msgs::Pose> poses, float execu
 
     // Planning whole body motion
     wholebody_controller_->compileMsg(LEFT,traj.joint_trajectory);
-    ros::Duration(executionTime*2.0).sleep();
+    ros::Duration(executionTime*4.0).sleep();
 
     ROS_INFO("rotateValve: Done executing motion !!!");
 
@@ -210,6 +218,18 @@ bool rotateValve::move_valve(std::vector<geometry_msgs::Pose> poses, float execu
     ros::Duration(executionTime/2).sleep();
 
     std::vector< std::vector<float> > armData;
+    //Moving down and towards the robot
+    armData.clear();
+    armData.push_back({-0.23,-1.21,0.65,-0.84,1.28,0,0});
+    armTraj_.moveArmJoints(LEFT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
+
+    armData.clear();
+    armData.push_back({-0.23,-0.74,0.65,-0.84,1.28,0,0});
+    armTraj_.moveArmJoints(LEFT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
+
+    //Moving arm outside
     armData.clear();
     armData.push_back({0.1,0.1,0.1,0.1,0.1,0.1,0.1});
     armTraj_.moveArmJoints(LEFT, armData, executionTime);

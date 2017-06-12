@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "reset robot");
+    ros::init(argc, argv, "reset_robot");
     ros::NodeHandle nh;
 
     // initializing objects
@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     armTraj.moveToZeroPose(armSide::LEFT);
     ros::Duration(0.3).sleep();
     armTraj.moveToZeroPose(armSide::RIGHT);
-    ros::Duration(1.5).sleep();
+    ros::Duration(1).sleep();
 
     pelvisTraj.controlPelvisHeight(0.9);
     ros::Duration(1.5).sleep();
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     armTraj.moveToDefaultPose(armSide::LEFT);
     ros::Duration(0.3).sleep();
     armTraj.moveToDefaultPose(armSide::RIGHT);
-    ros::Duration(1.5).sleep();
+    ros::Duration(1).sleep();
 
 }
 

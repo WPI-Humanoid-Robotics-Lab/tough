@@ -12,10 +12,12 @@ task1Utils::task1Utils(ros::NodeHandle nh):
 
     clearbox_pointcloud_pub_ = nh_.advertise<std_msgs::Int8>("/field/clearbox_pointcloud",1);
     reset_pointcloud_pub_    = nh_.advertise<std_msgs::Empty>("/field/reset_pointcloud",1);
+    reset_map_pub_           = nh_.advertise<std_msgs::Empty>("/field/reset_map",1);
     task1_log_pub_           = nh_.advertise<std_msgs::String>("/field/log",10);
 
-    task_status_sub_ = nh.subscribe("/srcsim/finals/task1", 10, &task1Utils::taskStatusSubCB, this);
+    task_status_sub_ = nh_.subscribe("/srcsim/finals/task1", 10, &task1Utils::taskStatusSubCB, this);
     visitedMapUpdaterSub_    = nh_.subscribe("/visited_map", 10, &task1Utils::visitedMapUpdateCB, this);
+    harness_sub_        = nh_.subscribe("/srcsim/finals/harness",10, &task1Utils::harnessCB, this);
 
     logFile = ros::package::getPath("val_task1") + "/log/task1.csv";
 
@@ -129,6 +131,28 @@ void task1Utils::visitedMapUpdateCB(const nav_msgs::OccupancyGrid &msg)
     visited_map_ = msg;
     mtx.unlock();
 }
+
+void task1Utils::harnessCB(const srcsim::Harness &harnessMsg)
+{
+    if (harnessMsg.status == srcsim::Harness::DETACH_TO_NONE)
+    {
+        // scoped mutex
+        std::lock_guard<std::mutex> lock(harness_mtx_);
+        is_harness_detached_ = true;
+    }
+}
+bool task1Utils::isHarnessDetached() const
+{
+    return is_harness_detached_;
+}
+
+void task1Utils::setHarnessDetached(bool is_harness_detached)
+{
+    // scoped mutex
+    std::lock_guard<std::mutex> lock(harness_mtx_);
+    is_harness_detached_ = is_harness_detached;
+}
+
 
 // satellite dish helper tasks
 bool task1Utils::isPitchCorrectNow(void)
@@ -483,6 +507,12 @@ void task1Utils::resetPointCloud()
     reset_pointcloud_pub_.publish(msg);
 }
 
+void task1Utils::clearMap() {
+    std_msgs::Empty msg;
+    reset_map_pub_.publish(msg);
+    ros::Duration(0.3).sleep();
+}
+
 void task1Utils::taskStatusSubCB(const srcsim::Task &msg){
 
     taskMsg = msg;
@@ -498,7 +528,7 @@ void task1Utils::taskStatusSubCB(const srcsim::Task &msg){
 
         outfile << data.str();
         outfile.close();
-        task1_log_pub_.publish("Current Checkpoint : "+ std::to_string(current_checkpoint_));
+        task1_log_pub_.publish(TEXT_GREEN + "Current Checkpoint : "+ std::to_string(current_checkpoint_) + TEXT_NC);
     }
 }
 
