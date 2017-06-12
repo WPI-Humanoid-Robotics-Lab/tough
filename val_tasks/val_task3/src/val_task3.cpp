@@ -72,7 +72,7 @@ valTask3::~valTask3(){
 }
 
 void valTask3::occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg){
-    ++map_update_count_;
+  ++map_update_count_;
 }
 
 
@@ -88,53 +88,53 @@ bool valTask3::preemptiveWait(double ms, decision_making::EventQueue &queue){
 
 decision_making::TaskResult valTask3::initTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("valTask3::initTask : executing " << name);
-    static int retry_count = 0;
+  ROS_INFO_STREAM("valTask3::initTask : executing " << name);
+  static int retry_count = 0;
 
-    // reset map count for the first entry
-    if(retry_count == 0){
-       map_update_count_ = 0;
+  // reset map count for the first entry
+  if(retry_count == 0){
+    map_update_count_ = 0;
+  }
+
+  // the state transition can happen from an event externally or can be geenerated here
+  ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
+  if (map_update_count_ > 3) {
+    // move to a configuration that is robust while walking
+    retry_count = 0;
+
+    // reset robot to defaults
+    resetRobotToDefaults();
+
+    // start the task
+    ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
+    srcsim::StartTask   srv;
+    srv.request.checkpoint_id = 1;
+    srv.request.task_id       = 3;
+    if(client.call(srv)) {
+      //what do we do if this call fails or succeeds?
     }
+    // generate the event
+    eventQueue.riseEvent("/INIT_SUCESSFUL");
+  }
+  else if (retry_count++ < 40) {
 
-    // the state transition can happen from an event externally or can be geenerated here
-    ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
-    if (map_update_count_ > 3) {
-        // move to a configuration that is robust while walking
-        retry_count = 0;
+    if(retry_count == 1) head_controller_->moveHead(0,0,20);
+    if(retry_count == 3) head_controller_->moveHead(0,0,-20);
 
-        // reset robot to defaults
-        resetRobotToDefaults();
+    ROS_INFO("valTask3::initTask : Retry Count : %d. Wait for occupancy grid to be updated with atleast 2 messages", retry_count);
+    ros::Duration(2.0).sleep();
+    eventQueue.riseEvent("/INIT_RETRY");
+  }
+  else {
+    retry_count = 0;
+    ROS_INFO("valTask3::initTask : Failed to initialize");
+    eventQueue.riseEvent("/INIT_FAILED");
+  }
 
-        // start the task
-        ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
-        srcsim::StartTask   srv;
-        srv.request.checkpoint_id = 1;
-        srv.request.task_id       = 3;
-        if(client.call(srv)) {
-            //what do we do if this call fails or succeeds?
-        }
-        // generate the event
-        eventQueue.riseEvent("/INIT_SUCESSFUL");
-    }
-    else if (retry_count++ < 40) {
-
-        if(retry_count == 1) head_controller_->moveHead(0,0,20);
-        if(retry_count == 3) head_controller_->moveHead(0,0,-20);
-
-        ROS_INFO("valTask3::initTask : Retry Count : %d. Wait for occupancy grid to be updated with atleast 2 messages", retry_count);
-        ros::Duration(2.0).sleep();
-        eventQueue.riseEvent("/INIT_RETRY");
-    }
-    else {
-        retry_count = 0;
-        ROS_INFO("valTask3::initTask : Failed to initialize");
-        eventQueue.riseEvent("/INIT_FAILED");
-    }
-
-    while(!preemptiveWait(1000, eventQueue)){
-        ROS_INFO("waiting for transition");
-    }
-    return TaskResult::SUCCESS();
+  while(!preemptiveWait(1000, eventQueue)){
+    ROS_INFO("waiting for transition");
+  }
+  return TaskResult::SUCCESS();
 }
 
 decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
@@ -149,56 +149,56 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
   // if the object null create a new one
   if(stair_detector_ == nullptr)
   {
-      stair_detector_ = new stair_detector_2(nh_);
-      ros::Duration(0.2).sleep();
+    stair_detector_ = new stair_detector_2(nh_);
+    ros::Duration(0.2).sleep();
   }
 
   // if detection is sucessful
   if (stair_detector_->getDetections(poses))
   {
-      // update the pose
-      geometry_msgs::Pose2D pose2D;
-      // get the first pose, which takes use to the stairs
-      int idx = 0; //poses.size() -1 ;
-      pose2D.x = poses[idx].position.x;
-      pose2D.y = poses[idx].position.y;
+    // update the pose
+    geometry_msgs::Pose2D pose2D;
+    // get the first pose, which takes use to the stairs
+    int idx = 0; //poses.size() -1 ;
+    pose2D.x = poses[idx].position.x;
+    pose2D.y = poses[idx].position.y;
 
-      ROS_INFO_STREAM("valTask3::detectStairsTask : x " << pose2D.x << " y " << pose2D.y);
+    ROS_INFO_STREAM("valTask3::detectStairsTask : x " << pose2D.x << " y " << pose2D.y);
 
-      // get the theta
-      pose2D.theta = tf::getYaw(poses[idx].orientation);
-      setStairDetectWalkPose(pose2D);
+    // get the theta
+    pose2D.theta = tf::getYaw(poses[idx].orientation);
+    setStairDetectWalkPose(pose2D);
 
-      ROS_INFO_STREAM("valTask3::detectStairsTask : quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w );
-      ROS_INFO_STREAM("valTask3::detectStairsTask : yaw: " << pose2D.theta );
+    ROS_INFO_STREAM("valTask3::detectStairsTask : quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w );
+    ROS_INFO_STREAM("valTask3::detectStairsTask : yaw: " << pose2D.theta );
 
-      //reset count
-      retry_count = 0;
+    //reset count
+    retry_count = 0;
 
-      eventQueue.riseEvent("/DETECTED_STAIRS");
+    eventQueue.riseEvent("/DETECTED_STAIRS");
   }
   // if failed for more than 5 times, go to error state
   else if (retry_count > 5)
   {
-      // reset the fail count
-      retry_count = 0;
-      eventQueue.riseEvent("/DETECT_STAIRS_FAILED");
-      if(stair_detector_ != nullptr) delete stair_detector_;
-      stair_detector_ = nullptr;
+    // reset the fail count
+    retry_count = 0;
+    eventQueue.riseEvent("/DETECT_STAIRS_FAILED");
+    if(stair_detector_ != nullptr) delete stair_detector_;
+    stair_detector_ = nullptr;
 
-      ROS_INFO("valTask3::detectStairsTask : reset fail count");
+    ROS_INFO("valTask3::detectStairsTask : reset fail count");
   }
   // if failed retry detecting the panel
   else
   {
-      // sleep for some time so detection happens
-      ros::Duration(10).sleep();
+    // sleep for some time so detection happens
+    ros::Duration(10).sleep();
 
-      // increment the fail count
-      retry_count++;
-      eventQueue.riseEvent("/DETECT_STAIRS_RETRY");
+    // increment the fail count
+    retry_count++;
+    eventQueue.riseEvent("/DETECT_STAIRS_RETRY");
 
-      ROS_INFO("valTask3::detectStairsTask: increment fail count");
+    ROS_INFO("valTask3::detectStairsTask: increment fail count");
   }
 
   while(!preemptiveWait(1000, eventQueue)){
@@ -225,56 +225,56 @@ decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCal
   // Check if goal is reached before walking
   if (taskCommonUtils::isGoalReached(current_pelvis_pose, stair_detect_walk_pose_))
   {
-      ROS_INFO("reached stairs");
+    ROS_INFO("reached stairs");
 
-      // TODO: check if robot rechead the panel
-      eventQueue.riseEvent("/REACHED_STAIRS");
-      // required for robot to stablize as goal tolerance is high
-      ros::Duration(1).sleep();
+    // TODO: check if robot rechead the panel
+    eventQueue.riseEvent("/REACHED_STAIRS");
+    // required for robot to stablize as goal tolerance is high
+    ros::Duration(1).sleep();
   }
   // check if the pose is changed
   else if (taskCommonUtils::isPoseChanged(pose_prev, stair_detect_walk_pose_))
   {
-      ROS_INFO_STREAM("pose changed to "<<stair_detect_walk_pose_);
-      walker_->walkToGoal(stair_detect_walk_pose_, false);
-      // sleep so that the walk starts
-      ROS_INFO("Footsteps should be generated now");
-      ros::Duration(4).sleep();
+    ROS_INFO_STREAM("pose changed to "<<stair_detect_walk_pose_);
+    walker_->walkToGoal(stair_detect_walk_pose_, false);
+    // sleep so that the walk starts
+    ROS_INFO("Footsteps should be generated now");
+    ros::Duration(4).sleep();
 
-      // update the previous pose
-      pose_prev = stair_detect_walk_pose_;
-      eventQueue.riseEvent("/WALK_TO_STAIRS_EXECUTING");
+    // update the previous pose
+    pose_prev = stair_detect_walk_pose_;
+    eventQueue.riseEvent("/WALK_TO_STAIRS_EXECUTING");
   }
 
   // if walking stay in the same state
   else if (walk_track_->isWalking())
   {
-      // no state change
-      ROS_INFO_THROTTLE(2, "walking");
-      eventQueue.riseEvent("/WALK_TO_STAIRS_EXECUTING");
+    // no state change
+    ROS_INFO_THROTTLE(2, "walking");
+    eventQueue.riseEvent("/WALK_TO_STAIRS_EXECUTING");
   }
   // if walk finished
   // if failed for more than 5 times, go to error state
   else if (fail_count > 5)
   {
-      // reset the fail count
-      fail_count = 0;
-      ROS_INFO("walk failed");
-      eventQueue.riseEvent("/WALK_TO_STAIRS_FAILED");
+    // reset the fail count
+    fail_count = 0;
+    ROS_INFO("walk failed");
+    eventQueue.riseEvent("/WALK_TO_STAIRS_FAILED");
   }
   // if failed retry detecting the panel and then walk
   // also handles MOVE_FAILED
   else
   {
-      // increment the fail count
-      fail_count++;
-      ROS_INFO("walk retry");
-      eventQueue.riseEvent("/WALK_TO_STAIRS_RETRY");
+    // increment the fail count
+    fail_count++;
+    ROS_INFO("walk retry");
+    eventQueue.riseEvent("/WALK_TO_STAIRS_RETRY");
   }
 
   // wait infinetly until an external even occurs
   while(!preemptiveWait(1000, eventQueue)){
-      ROS_INFO("waiting for transition");
+    ROS_INFO("waiting for transition");
   }
 
   return TaskResult::SUCCESS();
@@ -288,7 +288,19 @@ decision_making::TaskResult valTask3::climbStepsTask(string name, const FSMCallC
   // climb the stairs (this is a blocking call)
   climb_stairs_->climb_stairs();
 
-  ///@todo: complete
+  //if the task is finshed
+  if (task3Utils.isClimbstairsFinished())
+  {
+    ROS_INFO("sucessfully climbed the stairs");
+    // reset the flag
+    task3Utils.resetClimbstairsFlag();
+    eventQueue.riseEvent("/CLIMBED_STAIRS");
+  }
+  else
+  {
+    ROS_INFO("climb stairs failed");
+    eventQueue.riseEvent("/CLIMB_STAIRS_FAILED");
+  }
 
   while(!preemptiveWait(1000, eventQueue)){
 
@@ -545,36 +557,36 @@ void valTask3::setFinishBoxPose(const geometry_msgs::Pose2D &finish_box_pose)
 
 void valTask3::resetRobotToDefaults(int arm_pose)
 {
-    // open grippers
-    gripper_controller_->openGripper(armSide::RIGHT);
-    ros::Duration(0.2).sleep();
-    gripper_controller_->openGripper(armSide::LEFT);
-    ros::Duration(0.2).sleep();
+  // open grippers
+  gripper_controller_->openGripper(armSide::RIGHT);
+  ros::Duration(0.2).sleep();
+  gripper_controller_->openGripper(armSide::LEFT);
+  ros::Duration(0.2).sleep();
 
-    // increse pelvis
-    pelvis_controller_->controlPelvisHeight(0.9);
-    ros::Duration(1.0f).sleep();
+  // increse pelvis
+  pelvis_controller_->controlPelvisHeight(0.9);
+  ros::Duration(1.0f).sleep();
 
-    // reset chest
-    chest_controller_->controlChest(0.0, 0.0, 0.0);
+  // reset chest
+  chest_controller_->controlChest(0.0, 0.0, 0.0);
+  ros::Duration(1).sleep();
+
+  // arms to default
+  if (arm_pose == 0)
+  {
+    arm_controller_->moveToZeroPose(armSide::LEFT);
+    ros::Duration(0.2).sleep();
+    arm_controller_->moveToZeroPose(armSide::RIGHT);
     ros::Duration(1).sleep();
+  }
+  else if (arm_pose == 1)
+  {
+    arm_controller_->moveToDefaultPose(armSide::LEFT);
+    ros::Duration(0.2).sleep();
+    arm_controller_->moveToDefaultPose(armSide::RIGHT);
+    ros::Duration(1).sleep();
+  }
 
-    // arms to default
-    if (arm_pose == 0)
-    {
-        arm_controller_->moveToZeroPose(armSide::LEFT);
-        ros::Duration(0.2).sleep();
-        arm_controller_->moveToZeroPose(armSide::RIGHT);
-        ros::Duration(1).sleep();
-    }
-    else if (arm_pose == 1)
-    {
-        arm_controller_->moveToDefaultPose(armSide::LEFT);
-        ros::Duration(0.2).sleep();
-        arm_controller_->moveToDefaultPose(armSide::RIGHT);
-        ros::Duration(1).sleep();
-    }
-
-    // neck to defaults
-    head_controller_->moveHead(0.0f, 0.0f, 0.0f, 0.0f);
+  // neck to defaults
+  head_controller_->moveHead(0.0f, 0.0f, 0.0f, 0.0f);
 }
