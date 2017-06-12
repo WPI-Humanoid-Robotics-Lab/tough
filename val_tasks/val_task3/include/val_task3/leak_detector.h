@@ -19,16 +19,16 @@ private:
 
     double leak_value_;
 
-    void visulatiseSearchPoints(std::vector<geometry_msgs::Point> &points, geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom);
+    void visulatiseSearchPoints(std::vector<geometry_msgs::Pose> &poses, geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom);
 
 public:
     leakDetector(ros::NodeHandle nh);
     ~leakDetector();
 
 
-    void generateSearchWayPoints(geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom, float ver_low_limit, float ver_high_limit, std::vector<geometry_msgs::Point>& way_points);
+    void generateSearchWayPoints(geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom, float ver_low_limit, float ver_high_limit, std::vector<geometry_msgs::Pose> &way_points);
     void leakMsgCB(const srcsim::Leak &leakmsg);
     double getLeakValue() const;
     void setLeakValue(double getLeakValue);
-    void findLeak (std::vector<geometry_msgs::Point>& way_points, geometry_msgs::Point& leak_point);
+    void findLeak (std::vector<geometry_msgs::Pose> &way_points, geometry_msgs::Point& leak_point);
 };

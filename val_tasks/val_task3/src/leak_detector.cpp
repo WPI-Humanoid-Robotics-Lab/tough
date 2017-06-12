@@ -25,27 +25,30 @@ void leakDetector::leakMsgCB(const srcsim::Leak &leakmsg)
 }
 
 
-void leakDetector::generateSearchWayPoints(geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom, float ver_low_limit, float ver_high_limit, std::vector<geometry_msgs::Point>& way_points)
+void leakDetector::generateSearchWayPoints(geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom, float ver_low_limit, float ver_high_limit, std::vector<geometry_msgs::Pose>& way_points)
 {
     // generate way points with the dimension of the field of view of the tool
 
     int points_in_vertical_line = (ver_high_limit - ver_low_limit)/VERTICAL_WIDTH + 1;
     int points_in_horizontal_line = (horz_right_bottom.y - horz_left_top.y)/HORIZONTAL_WIDTH + 1;
 
-    geometry_msgs::Point point;
-    point.x = horz_left_top.x;
-    point.y = horz_left_top.y;
-    point.z = ver_high_limit;
+    geometry_msgs::Pose pose;
+    pose.position.x = horz_left_top.x;
+    pose.position.y = horz_left_top.y;
+    pose.position.z = ver_high_limit;
+
+    ///@todo: fill orientation
+
 
     for (int i=0; i<points_in_horizontal_line; i++)
     {
         for (int j=0; j<points_in_vertical_line; j++)
         {
-            point.z = (i%2 == 0) ? point.z-VERTICAL_WIDTH : point.z+VERTICAL_WIDTH;
-            way_points.push_back(point);
+            pose.position.z = (i%2 == 0) ? pose.position.z-VERTICAL_WIDTH : pose.position.z+VERTICAL_WIDTH;
+            way_points.push_back(pose);
         }
-        point.y += HORIZONTAL_WIDTH;
-        way_points.push_back(point);
+        pose.position.y += HORIZONTAL_WIDTH;
+        way_points.push_back(pose);
     }
 
     ROS_INFO("%d search points generated", way_points.size());
@@ -53,7 +56,7 @@ void leakDetector::generateSearchWayPoints(geometry_msgs::Point horz_left_top, g
     visulatiseSearchPoints(way_points, horz_left_top, horz_right_bottom);
 }
 
-void leakDetector::findLeak (std::vector<geometry_msgs::Point>& way_points, geometry_msgs::Point& leak_point)
+void leakDetector::findLeak (std::vector<geometry_msgs::Pose>& way_points, geometry_msgs::Point& leak_point)
 {
     // plan the trajectory
     moveit_msgs::RobotTrajectory traj;
@@ -76,7 +79,7 @@ void leakDetector::setLeakValue(double leak_value)
     leak_value_ = leak_value;
 }
 
-void leakDetector::visulatiseSearchPoints(std::vector<geometry_msgs::Point> &points, geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom)
+void leakDetector::visulatiseSearchPoints(std::vector<geometry_msgs::Pose> &poses, geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom)
 {
     visualization_msgs::MarkerArray marker_array = visualization_msgs::MarkerArray();
 
@@ -96,10 +99,10 @@ void leakDetector::visulatiseSearchPoints(std::vector<geometry_msgs::Point> &poi
     marker.lifetime = ros::Duration(0);
 
     int i=0;
-    for (i=0; i<points.size();i++)
+    for (i=0; i<poses.size();i++)
     {
         marker.id = i;
-        marker.pose.position = points[i];
+        marker.pose.position = poses[i].position;
         marker_array.markers.push_back(marker);
     }
 
