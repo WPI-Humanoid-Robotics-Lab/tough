@@ -6,7 +6,7 @@ climbStairs::climbStairs(ros::NodeHandle nh): nh_(nh)
     chest_       = new chestTrajectory(nh_);
     pelvis_      = new pelvisTrajectory(nh_);
     arm_         = new armTrajectory(nh_);
-    robot_state_ = new RobotStateInformer(nh_);
+    robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 }
 
 climbStairs::~climbStairs()
