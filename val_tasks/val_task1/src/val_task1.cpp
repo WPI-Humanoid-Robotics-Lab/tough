@@ -140,13 +140,13 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
         resetRobotToDefaults();
 
         // start the task
-        ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
-        srcsim::StartTask   srv;
-        srv.request.checkpoint_id = 1;
-        srv.request.task_id       = 1;
-        if(client.call(srv)) {
-            //what do we do if this call fails or succeeds?
-        }
+//        ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
+//        srcsim::StartTask   srv;
+//        srv.request.checkpoint_id = 1;
+//        srv.request.task_id       = 1;
+//        if(client.call(srv)) {
+//            //what do we do if this call fails or succeeds?
+//        }
         // generate the event
         head_controller_->moveHead(0,0,0);
 //        eventQueue.riseEvent("/REGULAR");
