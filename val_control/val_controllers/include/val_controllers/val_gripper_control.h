@@ -11,6 +11,7 @@ enum class GRIPPER_STATE{
     OPEN_THUMB_IN_APPROACH,
     CLOSE,
     HANDLE_HOLD,
+    TIGHT_HOLD,
     CUP
 };
 
@@ -36,6 +37,9 @@ private:
     //GRIPPER_STATE::HANDLE_HOLD
     const std::vector<double> HANDLE_HOLD_LEFT_GRIPPER  = {2.3, -0.55, -1.1, -0.9, -1.0};
     const std::vector<double> HANDLE_HOLD_RIGHT_GRIPPER = {2.3, 0.55, 1.1, 0.9, 1.0};
+    //GRIPPER_STATE::TIGHT_HOLD
+    const std::vector<double> TIGHT_HOLD_LEFT_GRIPPER  = {1.6, -1.8, -1.5, -1.6, -1.5};
+    const std::vector<double> TIGHT_HOLD_RIGHT_GRIPPER = {1.6, 1.8, 1.5, 1.6, 1.5};
 
 public:
     /**

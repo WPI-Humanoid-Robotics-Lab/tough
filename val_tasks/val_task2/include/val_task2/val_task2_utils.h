@@ -34,6 +34,11 @@ enum class CLEAR_BOX_CLOUD{
 
 class task2Utils {
 private:
+
+    const std::string TEXT_RED="\033[0;31m";
+    const std::string TEXT_GREEN = "\033[0;32m";
+    const std::string TEXT_NC=  "\033[0m";
+
     ros::NodeHandle nh_;
     // chest controller
     chestTrajectory* chest_controller_;
@@ -67,38 +72,33 @@ private:
     //before walking
     //used for rotating panel
     const std::vector<float> leftNearChestPalmDown_    = {-1.70, -1.04, 1.39, -1.85, 1.50, 0, 0}; //0 -1.70  -1.04  1.39  -1.85  1.50  0  0
+    const std::vector<float> rightNearChestPalmDown_   = {-1.70,  1.04, 1.39,  1.85, 1.50, 0, 0}; // 1 -1.7  1.04  1.39  1.85  1.50  0  0
     //used for picking up the panel
-    const std::vector<float> leftNearChestPalmUp_    = {-1.5, -1.04, 1.6, -1.85, -1.50, 0, 0};  // 0 -1.5  -1.04  1.6  -1.85  -1.50  0  0
-    const std::vector<float> leftSeedNonGraspingHand_ = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};  // 0 0.21  -1.16  0.0  -1.07  1.52  0  0
+    const std::vector<float> leftNearChestPalmUp_    = {-1.7, -1.04, 1.39, -1.85, -1.50, 0, 0};  // 0 -1.5  -1.04  1.6  -1.85  -1.50  0  0
+    const std::vector<float> rightNearChestPalmUp_   = {-1.70, 1.04, 1.39,  1.85, -1.50, 0, 0}; //1 -1.70  1.04  1.39  1.85  -1.50  0  0
+
+    const std::vector<float> leftSeedNonGraspingHand_  = {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};  // 0 0.21  -1.16  0.0  -1.07  1.52  0  0
+    const std::vector<float> rightSeedNonGraspingHand_ = {0.21,  1.16, 0.0,  1.07, 1.52, 0, 0}; // 1  0.21  1.16  0.0  1.07  1.52  0  0
     //while walking
-    const std::vector<float> leftShoulderSeedPanelGraspWalk_ = {-0.38,-1.5, 1.3,-1.23,-0.26, 0.0,-0.20}; // 0 -0.38  -1.5  1.3  -1.23  -0.26  0.0  -0.2
+    const std::vector<float> leftShoulderSeedPanelGraspWalk_  = {-0.38,-1.38, 1.3,-1.1,-0.26, 0.0, -0.3}; // 0 -0.38  -1.5  1.3  -1.23  -0.26  0.0  -0.2
+    const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.38, 1.38, 1.3, 1.1, -0.26, 0.0, 0.3}; // 1 -0.38  1.49  1.3  0.7  -0.26  0.0  0.2
 
-
-    //before walking
-    //used for rotating panel
-    const std::vector<float> rightNearChestPalmUp_       = {-1.70, 1.04, 1.39, 1.85, -1.50, 0, 0}; //1 -1.70  1.04  1.39  1.85  -1.50  0  0
-    //used for picking up the panel
-    const std::vector<float> rightNearChestPalmDown_     = {-1.5, 1.04, 1.6, 1.85, 1.50, 0, 0}; // 1 -1.5  1.04  1.6  1.85  1.50  0  0
-
-    const std::vector<float> rightSeedNonGraspingHand_ = {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0}; // 1  0.21  1.16  0.0  1.07  1.52  0  0
-    //while walking
-    const std::vector<float> rightShoulderSeedPanelGraspWalk_ = {-0.38, 1.5, 1.3, 0.7, -0.26, 0.0, 0.3}; // 1 -0.38  1.49  1.3  0.7  -0.26  0.0  0.2
 
     // panel placement poses
     const std::vector<float> leftPanelPlacementUpPose1_  = {-1.5, -1.4, 1.39, -0.9, 1.10, -0.5, 0}; // 0 -1.5  -1.4  1.39  -0.9  1.10  -0.5  0
     const std::vector<float> leftPanelPlacementDownPose1_= {-1.2, -1.4, 1.39, -0.9, 1.10, -0.5, 0}; // 0 -1.2  -1.4  1.39  -0.9  1.10  -0.5  0
 
-    const std::vector<float> leftPanelPlacementUpPose2_  = {-1.5, -1.4, 1.39, -0.9, -1.10, 0.5, 0}; // 0 -1.5  -1.4  1.39  -0.9  -1.10  0.5  0
-    const std::vector<float> leftPanelPlacementDownPose2_= {-1.2, -1.4, 1.39, -0.9, -1.10, 0.5, 0.4}; // 0 -1.2  -1.4  1.39  -0.9  -1.10  0.5  0.4
-
-    const std::vector<float> leftPanelPlacementSupport1_  = {-0.66, -1.4, 1.2, -1.49, 1.29, 0, 0.26}; // 0 -0.66  -1.4  1.2  -1.49  1.29  0  0.26
-    const std::vector<float> leftPanelPlacementSupport2_  = {-0.66, -1.4, 0.75, -1.49, 1.29, 0, 0.26}; // 0 -0.66  -1.4  0.75  -1.49  1.29  0  0.26
-
     const std::vector<float> rightPanelPlacementUpPose1_  = {-1.5, 1.4, 1.39, 0.9, 1.10, 0.5, 0}; // 1 -1.5  1.4  1.39  0.9  1.10  0.5  0
     const std::vector<float> rightPanelPlacementDownPose1_= {-1.2, 1.4, 1.39, 0.9, 1.10, 0.5, 0}; // 1 -1.2  1.4  1.39  0.9  1.10  0.5  0
 
+    const std::vector<float> leftPanelPlacementUpPose2_  = {-1.5, -1.4, 1.39, -0.9, -1.10, 0.5, 0}; // 0 -1.5  -1.4  1.39  -0.9  -1.10  0.5  0
+    const std::vector<float> leftPanelPlacementDownPose2_= {-1.2, -1.4, 1.39, -0.9, -1.10, 0.5, 0.4}; // 0 -1.2  -1.4  1.39  -0.9  -1.10  0.5  0.4
+
     const std::vector<float> rightPanelPlacementUpPose2_  = {-1.5, 1.4, 1.39, 0.9, -1.10, -0.5, 0}; // 1 -1.5  1.4  1.39  0.9  -1.10  -0.5  0
     const std::vector<float> rightPanelPlacementDownPose2_= {-1.2, 1.4, 1.39, 0.9, -1.10, -0.5, -0.4};// 1 -1.2  1.4  1.39  0.9  -1.10  -0.5  -0.4
+
+    const std::vector<float> leftPanelPlacementSupport1_  = {-0.66, -1.4, 1.2, -1.49, 1.29, 0, 0.26}; // 0 -0.66  -1.4  1.2  -1.49  1.29  0  0.26
+    const std::vector<float> leftPanelPlacementSupport2_  = {-0.66, -1.4, 0.75,-1.49, 1.29, 0, 0.26}; // 0 -0.66  -1.4  0.75  -1.49  1.29  0  0.26
 
     const std::vector<float> rightPanelPlacementSupport1_ = {-0.66, 1.4, 1.2, 1.49, 1.29, 0, 0.26}; // 1 -0.66  1.4  1.2  1.49  1.29  0  0.26
     const std::vector<float> rightPanelPlacementSupport2_ = {-0.66, 1.4, 0.75, 1.49, 1.29, 0, 0.26};// 1 -0.66  1.4  0.75  1.49  1.29  0  0.26
