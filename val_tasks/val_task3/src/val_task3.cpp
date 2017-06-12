@@ -49,6 +49,7 @@ valTask3::valTask3(ros::NodeHandle nh):nh_(nh){
   door_valve_detcetor_ = nullptr;
 
   climb_stairs_        = new climbStairs(nh_);
+  door_opener_         = new doorOpener(nh_);
 
   robot_state_         = RobotStateInformer::getRobotStateInformer(nh_);
   map_update_count_    = 0;
@@ -298,8 +299,14 @@ decision_making::TaskResult valTask3::climbStepsTask(string name, const FSMCallC
   if (task3_utils_->isClimbstairsFinished())
   {
     ROS_INFO("sucessfully climbed the stairs");
+
     // reset the flag
     task3_utils_->resetClimbstairsFlag();
+
+    // reset the robot to default state
+    resetRobotToDefaults();
+
+    // trigger to next state
     eventQueue.riseEvent("/CLIMBED_STAIRS");
   }
   else
@@ -387,6 +394,9 @@ decision_making::TaskResult valTask3::detectDoorHandleTask(string name, const FS
 decision_making::TaskResult valTask3::openDoorTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
   ROS_INFO_STREAM("valTask3::openDoorTask : executing " << name);
+
+  ROS_INFO("opening door");
+  door_opener_->openDoor(handle_center_);
 
   while(!preemptiveWait(1000, eventQueue)){
 

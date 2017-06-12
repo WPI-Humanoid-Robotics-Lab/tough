@@ -31,6 +31,7 @@
 #include <val_task3/stair_detector_2.h>
 #include <val_task3/climb_stairs.h>
 #include <val_task3/door_valve_detector.h>
+#include <val_task3/door_opener.h>
 
 using namespace decision_making;
 
@@ -61,6 +62,7 @@ class valTask3{
     DoorValvedetector*  door_valve_detcetor_;
 
     climbStairs*        climb_stairs_;
+    doorOpener*         door_opener_;
 
     //map and occupancy grid
     ros::Subscriber occupancy_grid_sub_;

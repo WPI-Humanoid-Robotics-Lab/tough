@@ -23,7 +23,7 @@ int main(int argc, char **argv)
   }
 
 
-  ros::spin();
+  ros::spinOnce();
 
   return 0;
 }
