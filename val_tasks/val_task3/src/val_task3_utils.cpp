@@ -104,7 +104,7 @@ bool task3Utils::isClimbstairsFinished() const
     return is_climbstairs_finished_;
 }
 
-void task3Utils::resetClimbstairsFlag(bool)
+void task3Utils::resetClimbstairsFlag(void)
 {
     // scoped mutex
     std::lock_guard<std::mutex> lock(climstairs_flag_mtx_);
