@@ -135,7 +135,7 @@ decision_making::TaskResult valTask3::initTask(string name, const FSMCallContext
   }
 
   while(!preemptiveWait(1000, eventQueue)){
-    ROS_INFO("waiting for transition");
+    ROS_INFO("valTask3::initTask waiting for transition");
   }
   return TaskResult::SUCCESS();
 }
@@ -157,8 +157,11 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
     ros::Duration(0.2).sleep();
   }
 
-  // if detection is sucessful
-  if (stair_detector_->getDetections(poses))
+  // get detections
+  stair_detector_->getDetections(poses);
+
+  // if atleast the initial steps are detected
+  if (poses.size() > 1)
   {
     // update the pose
     geometry_msgs::Pose2D pose2D;
@@ -210,7 +213,7 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
 
   while(!preemptiveWait(1000, eventQueue)){
 
-    ROS_INFO("waiting for transition");
+    ROS_INFO("valTask3::detectStairsTask waiting for transition");
   }
 
   return TaskResult::SUCCESS();
@@ -236,8 +239,6 @@ decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCal
 
     // TODO: check if robot rechead the panel
     eventQueue.riseEvent("/REACHED_STAIRS");
-    // required for robot to stablize as goal tolerance is high
-    ros::Duration(1).sleep();
   }
   // check if the pose is changed
   else if (taskCommonUtils::isPoseChanged(pose_prev, stair_detect_walk_pose_))
@@ -281,7 +282,7 @@ decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCal
 
   // wait infinetly until an external even occurs
   while(!preemptiveWait(1000, eventQueue)){
-    ROS_INFO("waiting for transition");
+    ROS_INFO("valTask3::walkToStairsTask waiting for transition");
   }
 
   return TaskResult::SUCCESS();
@@ -289,7 +290,7 @@ decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCal
 
 decision_making::TaskResult valTask3::climbStepsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
-  ROS_INFO_STREAM("executing " << name);
+  ROS_INFO_STREAM("valTask3::climbStepsTask executing " << name);
 
   ROS_INFO("Climbing stairs");
   // climb the stairs (this is a blocking call)
@@ -317,7 +318,7 @@ decision_making::TaskResult valTask3::climbStepsTask(string name, const FSMCallC
 
   while(!preemptiveWait(1000, eventQueue)){
 
-    ROS_INFO("waiting for transition");
+    ROS_INFO("valTask3::climbStepsTask waiting for transition");
   }
 
   return TaskResult::SUCCESS();
