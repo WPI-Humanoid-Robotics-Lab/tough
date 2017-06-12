@@ -76,7 +76,7 @@ void task2Utils::isDetachedCB(const srcsim::Harness &harnessMsg)
     mtx_.unlock();
 }
 
-bool task2Utils::afterPanelGraspPose(const armSide side)
+bool task2Utils::afterPanelGraspPose(const armSide side, bool isRotationRequired)
 {
     // reorienting the chest would bring the panel above the rover
     chest_controller_->controlChest(0,0,0);
@@ -84,12 +84,12 @@ bool task2Utils::afterPanelGraspPose(const armSide side)
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
-        seed1 = &leftNearChestPalmUp_;
+        seed1 = isRotationRequired ? &leftNearChestPalmUp_ : &leftNearChestPalmDown_;
         seed2 = &rightSeedNonGraspingHand_;
     }
     else
     {
-        seed1 = &rightNearChestPalmUp_;
+        seed1 = isRotationRequired ? &rightNearChestPalmUp_ : &rightNearChestPalmDown_;
         seed2 = &leftSeedNonGraspingHand_;
     }
 
@@ -119,7 +119,7 @@ bool task2Utils::isPointOnWalkway(float x, float y)
     return map_.data.at(index) == CELL_STATUS::FREE;
 }
 
-void task2Utils::movePanelToWalkSafePose(const armSide side)
+void task2Utils::movePanelToWalkSafePose(const armSide side, bool isRotationRequired)
 {
     // reorient the chest
     chest_controller_->controlChest(0,0,0);
@@ -138,9 +138,10 @@ void task2Utils::movePanelToWalkSafePose(const armSide side)
         seed1 = &leftShoulderSeedPanelGraspWalk_;
         grasp = &rightHandGrasp_;
     }
-
-    gripper_controller_->controlGripper(side, *grasp);
-    ros::Duration(1).sleep();
+    if(isRotationRequired){
+        gripper_controller_->controlGripper(side, *grasp);
+        ros::Duration(1).sleep();
+    }
 
     std::vector< std::vector<float> > armData;
     armData.clear();
@@ -172,6 +173,8 @@ bool task2Utils::isPanelPicked(const armSide side)
 
 void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRotated)
 {
+    isPanelRotated = true; // this is to avoid rework. I'll fix it the right way when I have time
+
     armSide nonGraspingHand = (armSide) !graspingHand;
 
     const std::vector<float> *graspingHandPoseUp, *graspingHandPoseDown;

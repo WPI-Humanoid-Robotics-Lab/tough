@@ -93,6 +93,11 @@ private:
     void harnessCB(const srcsim::Harness &harnessMsg);
     bool is_harness_detached_;
 
+    const std::string TEXT_RED="\033[0;31m";
+    const std::string TEXT_GREEN = "\033[0;32m";
+    const std::string TEXT_NC=  "\033[0m";
+
+
 public:
     task1Utils(ros::NodeHandle nh);
     ~task1Utils();
@@ -114,7 +119,7 @@ public:
     void taskStatusSubCB(const srcsim::Task &msg);
     void terminator(const ros::TimerEvent& t);
     void fixHandleArray(std::vector<geometry_msgs::Point> &handle_loc, std::vector<geometry_msgs::Point> &pclHandlePoses);
-    int getCurrentCheckpoint() const;    
+    int getCurrentCheckpoint() const;
     void reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset=0.0f);
     bool isPointVisited(float x, float y);
     bool getNextPoseToWalk(geometry_msgs::Pose2D &pose2D, bool allowVisitied = false);
