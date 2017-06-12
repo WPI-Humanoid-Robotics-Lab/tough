@@ -295,11 +295,11 @@ decision_making::TaskResult valTask3::climbStepsTask(string name, const FSMCallC
   climb_stairs_->climb_stairs();
 
   //if the task is finshed
-  if (task3Utils.isClimbstairsFinished())
+  if (task3_utils_->isClimbstairsFinished())
   {
     ROS_INFO("sucessfully climbed the stairs");
     // reset the flag
-    task3Utils.resetClimbstairsFlag();
+    task3_utils_->resetClimbstairsFlag();
     eventQueue.riseEvent("/CLIMBED_STAIRS");
   }
   else
@@ -329,7 +329,7 @@ decision_making::TaskResult valTask3::detectDoorHandleTask(string name, const FS
   // if the object null create a new one
   if(door_valve_detcetor_ == nullptr)
   {
-    door_valve_detcetor_ = new door_valve_detcetor_(nh_);
+    door_valve_detcetor_ = new DoorValvedetector(nh_);
     ros::Duration(0.2).sleep();
   }
 
