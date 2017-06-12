@@ -121,6 +121,9 @@ target_link_libraries(blind_goal_finder ${catkin_LIBRARIES} ${PROJECT_NAME})
 add_executable(climb_stairs_node src/climb_stairs_node.cpp)
 target_link_libraries(climb_stairs_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 
+add_executable(leak_detector_node src/leak_detector_node.cpp)
+target_link_libraries(leak_detector_node ${catkin_LIBRARIES} ${PROJECT_NAME})
+
 add_executable(val_task3_node            src/val_task3_node.cpp)
 
 add_dependencies(val_task3_node
