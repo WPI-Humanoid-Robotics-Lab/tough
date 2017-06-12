@@ -4,6 +4,9 @@
 #include <val_task3/val_task3_utils.h>
 #include <srcsim/Leak.h>
 
+#define VERTICAL_WIDTH    0.25
+#define HORIZONTAL_WIDTH  0.25
+
 class leakDetector{
 private:
     ros::NodeHandle nh_;
@@ -11,7 +14,7 @@ private:
 
     double leak_value_;
 
-    void generateSearchWayPoints (void);
+    void generateSearchWayPoints(geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom, float ver_low_limit, float ver_high_limit, std::vector<geometry_msgs::Point>& way_points);
 
 public:
     leakDetector(ros::NodeHandle nh);
