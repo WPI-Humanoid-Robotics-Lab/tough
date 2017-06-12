@@ -83,8 +83,8 @@ void task2Utils::isDetachedCB(const srcsim::Harness &harnessMsg)
 bool task2Utils::afterPanelGraspPose(const armSide side, bool isRotationRequired)
 {
     // reorienting the chest would bring the panel above the rover
-    chest_controller_->controlChest(0,0,0);
-    ros::Duration(2).sleep();
+//    chest_controller_->controlChest(0,0,0);
+//    ros::Duration(2).sleep();
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
@@ -547,6 +547,8 @@ void task2Utils::taskStatusCB(const srcsim::Task &msg)
 
         outfile << data.str();
         outfile.close();
+
+        taskLogPub(TEXT_GREEN + "Current Checkpoint : "+ std::to_string(current_checkpoint_) + TEXT_NC);
     }
 
 }
