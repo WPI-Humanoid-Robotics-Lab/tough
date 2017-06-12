@@ -1103,6 +1103,11 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
         task2_utils_->clearCurrentPoseMap();
         skip_3 = false;
         executeOnce = false;
+        if(skip_4)
+        {
+            arm_controller_->moveToZeroPose(armSide::LEFT); /// to account for panel being very close to body
+            ros::Duration(1).sleep();
+        }
     }
 
     if(executeOnce)
@@ -1358,6 +1363,9 @@ decision_making::TaskResult valTask2::deployPanelTask(string name, const FSMCall
         // go to next state of detecting cable
         ROS_INFO("valTask2::deployPanelTask: [SKIP] skipping deploying panel state");
         eventQueue.riseEvent("/DEPLOYED");
+        arm_controller_->moveToDefaultPose(armSide::LEFT);  /// to account for panel being very close to body
+        ros::Duration(1).sleep();
+
         skip_4=false;
         return TaskResult::SUCCESS();
     }
