@@ -111,8 +111,8 @@ void armTrajectory::moveArmJoints(const armSide side, const std::vector<std::vec
     armTrajectory::arm_id--;
     arm_traj.unique_id = armTrajectory::arm_id;
     for(auto i=arm_pose.begin(); i != arm_pose.end(); i++){
-           if(i->size() != NUM_ARM_JOINTS)
-           ROS_WARN("Check number of trajectory points");
+        if(i->size() != NUM_ARM_JOINTS)
+            ROS_WARN("Check number of trajectory points");
         appendTrajectoryPoint(arm_traj, time/arm_pose.size(), *i);
     }
 
@@ -195,66 +195,66 @@ void armTrajectory::moveArmInTaskSpaceMessage(const armSide side, const ihmc_msg
 
 void armTrajectory::moveArmInTaskSpace(const armSide side, const geometry_msgs::Pose &pose, const float time)
 {
-  ihmc_msgs::SE3TrajectoryPointRosMessage point;
-  poseToSE3TrajectoryPoint(pose, point);
-  point.time = time;
-  this->moveArmInTaskSpaceMessage(side, point);
+    ihmc_msgs::SE3TrajectoryPointRosMessage point;
+    poseToSE3TrajectoryPoint(pose, point);
+    point.time = time;
+    this->moveArmInTaskSpaceMessage(side, point);
 }
 
 void armTrajectory::moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data, int baseForControl)
 {
-  ihmc_msgs::HandTrajectoryRosMessage msg_l;
-  ihmc_msgs::HandTrajectoryRosMessage msg_r;
+    ihmc_msgs::HandTrajectoryRosMessage msg_l;
+    ihmc_msgs::HandTrajectoryRosMessage msg_r;
 
-  msg_l.taskspace_trajectory_points.clear();
-  msg_r.taskspace_trajectory_points.clear();
-  armTrajectory::arm_id--;
-  msg_l.unique_id = armTrajectory::arm_id;
-  msg_l.base_for_control = baseForControl;
-  msg_l.execution_mode = msg_l.OVERRIDE;
-  armTrajectory::arm_id--;
-  msg_r.unique_id = armTrajectory::arm_id;
-  msg_r.base_for_control = baseForControl;
-  msg_r.execution_mode = msg_r.OVERRIDE;
+    msg_l.taskspace_trajectory_points.clear();
+    msg_r.taskspace_trajectory_points.clear();
+    armTrajectory::arm_id--;
+    msg_l.unique_id = armTrajectory::arm_id;
+    msg_l.base_for_control = baseForControl;
+    msg_l.execution_mode = msg_l.OVERRIDE;
+    armTrajectory::arm_id--;
+    msg_r.unique_id = armTrajectory::arm_id;
+    msg_r.base_for_control = baseForControl;
+    msg_r.execution_mode = msg_r.OVERRIDE;
 
 
-  for(std::vector<armTaskSpaceData>::iterator i=arm_data.begin(); i != arm_data.end(); i++){
+    for(std::vector<armTaskSpaceData>::iterator i=arm_data.begin(); i != arm_data.end(); i++){
 
-      if(i->side == RIGHT){
-          msg_r.robot_side = i->side;
-          ihmc_msgs::SE3TrajectoryPointRosMessage point;
-          poseToSE3TrajectoryPoint(i->pose, point);
-          point.time = i->time;
-          msg_r.taskspace_trajectory_points.push_back(point);
-      }
+        if(i->side == RIGHT){
+            msg_r.robot_side = i->side;
+            ihmc_msgs::SE3TrajectoryPointRosMessage point;
+            poseToSE3TrajectoryPoint(i->pose, point);
+            point.time = i->time;
+            msg_r.taskspace_trajectory_points.push_back(point);
+        }
 
-      else {
-        msg_l.robot_side = i->side;
-        ihmc_msgs::SE3TrajectoryPointRosMessage point;
-        poseToSE3TrajectoryPoint(i->pose, point);
-        point.time = i->time;
-        msg_l.taskspace_trajectory_points.push_back(point);
-      }
+        else {
+            msg_l.robot_side = i->side;
+            ihmc_msgs::SE3TrajectoryPointRosMessage point;
+            poseToSE3TrajectoryPoint(i->pose, point);
+            point.time = i->time;
+            msg_l.taskspace_trajectory_points.push_back(point);
+        }
 
-  }
+    }
 
-  taskSpaceTrajectoryPublisher.publish(msg_r);
-  ros::Duration(0.02).sleep();
-  taskSpaceTrajectoryPublisher.publish(msg_l);
+    taskSpaceTrajectoryPublisher.publish(msg_r);
+    ros::Duration(0.02).sleep();
+    taskSpaceTrajectoryPublisher.publish(msg_l);
 }
 
 void armTrajectory::poseToSE3TrajectoryPoint(const geometry_msgs::Pose &pose, ihmc_msgs::SE3TrajectoryPointRosMessage &point)
 {
 
-  point.position.x = pose.position.x;
-  point.position.y = pose.position.y;
-  point.position.z = pose.position.z;
-  point.orientation.w = pose.orientation.w;
-  point.orientation.x = pose.orientation.x;
-  point.orientation.y = pose.orientation.y;
-  point.orientation.z = pose.orientation.z;
-  point.unique_id = 255;
-  return;
+    point.position.x = pose.position.x;
+    point.position.y = pose.position.y;
+    point.position.z = pose.position.z;
+    point.orientation.w = pose.orientation.w;
+    point.orientation.x = pose.orientation.x;
+    point.orientation.y = pose.orientation.y;
+    point.orientation.z = pose.orientation.z;
+    point.unique_id = 255;
+    return;
 }
 
 void armTrajectory::moveArmTrajectory(const armSide side, const trajectory_msgs::JointTrajectory &traj){
@@ -328,9 +328,9 @@ bool armTrajectory::nudgeArmLocal(const armSide side, const direction drct, floa
 
     geometry_msgs::Pose value;
     stateInformer_->getCurrentPose(target_frame,value);
-    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+    //    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
     stateInformer_->transformPose(value, value,VAL_COMMON_NAMES::WORLD_TF,target_frame);
-    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+    //    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
 
     if     (drct == direction::FRONT)     value.position.y += nudgeStep*signInverter;
     else if(drct == direction::BACK)      value.position.y -= nudgeStep*signInverter;
@@ -338,9 +338,9 @@ bool armTrajectory::nudgeArmLocal(const armSide side, const direction drct, floa
     else if(drct == direction::DOWN)      value.position.z -= nudgeStep;
     else if(drct == direction::LEFT)      value.position.x += nudgeStep*signInverter;
     else if(drct == direction::RIGHT)     value.position.x -= nudgeStep*signInverter;
-std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
     stateInformer_->transformPose(value, value,target_frame,VAL_COMMON_NAMES::WORLD_TF);
-std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
     moveArmInTaskSpace(side,value, 0.0f);
     return true;
 }
@@ -358,8 +358,8 @@ void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &ms
     for (int i=0;i<NUM_ARM_JOINTS;i++)
     {
         ihmc_msgs::TrajectoryPoint1DRosMessage p;
-//        point.positions[i] = point.positions[i] <= joint_limits_[i].first  ? joint_limits_[i].first : point.positions[i];
-//        point.positions[i] = point.positions[i] >= joint_limits_[i].second ? joint_limits_[i].second : point.positions[i];
+        //        point.positions[i] = point.positions[i] <= joint_limits_[i].first  ? joint_limits_[i].first : point.positions[i];
+        //        point.positions[i] = point.positions[i] >= joint_limits_[i].second ? joint_limits_[i].second : point.positions[i];
         if(point.positions[i] <= joint_limits_[i].first)
         {
             std::cout<<"wrapped lower point "<<point.positions[i]<<"\n";
@@ -390,18 +390,18 @@ void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &ms
 bool armTrajectory::generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const armSide input_side,const float desired_time, std::vector<armTrajectory::armTaskSpaceData> &arm_data_vector)
 {
 
-  float time_delta = desired_time == 0 ? 0 : desired_time/input_poses.size();
-  for(int i=0 ; i < input_poses.size(); i++)
-  {
-    geometry_msgs::PoseStamped input_pose=input_poses.at(i);
-    armTrajectory::armTaskSpaceData task_space_data;
-    task_space_data.side = input_side;
-    task_space_data.pose = input_pose.pose;
-    task_space_data.time = time_delta;
+    float time_delta = desired_time == 0 ? 0 : desired_time/input_poses.size();
+    for(int i=0 ; i < input_poses.size(); i++)
+    {
+        geometry_msgs::PoseStamped input_pose=input_poses.at(i);
+        armTrajectory::armTaskSpaceData task_space_data;
+        task_space_data.side = input_side;
+        task_space_data.pose = input_pose.pose;
+        task_space_data.time = time_delta;
 
-    arm_data_vector.push_back(task_space_data);
-  }
-  return true;
+        arm_data_vector.push_back(task_space_data);
+    }
+    return true;
 }
 
 bool armTrajectory::moveArmJoint(const armSide side, int jointNumber, const float targetAngle) {
@@ -430,4 +430,49 @@ bool armTrajectory::moveArmJoint(const armSide side, int jointNumber, const floa
         return true;
     }
     return false;
+}
+
+bool armTrajectory::nudgeArmLocal(const armSide side, float x, float y, float z)
+{
+
+    std::cout<<"Nudge arm local called \n";
+    std::string target_frame = side == LEFT ? "/leftPalm" : "/rightPalm";
+    std::string target_EE_frame = side == LEFT ? VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME : VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
+    geometry_msgs::Pose value;
+//    stateInformer_->transformPose(value, value,target_EE_frame, target_frame);
+    stateInformer_->getCurrentPose(target_EE_frame,value,target_frame);
+    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+
+    value.position.x+=x;
+    value.position.y+=y;
+    value.position.z+=z;
+
+    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+    stateInformer_->transformPose(value, value,target_frame,VAL_COMMON_NAMES::WORLD_TF);
+    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+    moveArmInTaskSpace(side,value, 0.0f);
+
+    return true;
+}
+
+bool armTrajectory::nudgeArmPelvis(const armSide side, float x, float y, float z)
+{
+    std::cout<<"Nudge arm pelvis called \n";
+    std::string target_frame = VAL_COMMON_NAMES::PELVIS_TF;
+    std::string target_EE_frame = side == LEFT ? VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME : VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
+    geometry_msgs::Pose value;
+
+    stateInformer_->getCurrentPose(target_EE_frame,value,target_frame);
+    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+
+    value.position.x+=x;
+    value.position.y+=y;
+    value.position.z+=z;
+
+    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+    stateInformer_->transformPose(value, value,target_frame,VAL_COMMON_NAMES::WORLD_TF);
+    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+    moveArmInTaskSpace(side,value, 0.0f);
+
+    return true;
 }
