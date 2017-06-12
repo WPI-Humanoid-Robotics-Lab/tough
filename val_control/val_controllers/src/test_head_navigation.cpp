@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     headTraj.moveHead(roll, pitch, yaw);
   }
 
-  ros::spin();
+  ros::spinOnce();
 
   return 0;
 }
