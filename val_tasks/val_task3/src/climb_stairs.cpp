@@ -6,7 +6,6 @@ climbStairs::climbStairs(ros::NodeHandle nh): nh_(nh)
     chest_       = new chestTrajectory(nh_);
     pelvis_      = new pelvisTrajectory(nh_);
     arm_         = new armTrajectory(nh_);
-    robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 }
 
 climbStairs::~climbStairs()
@@ -29,32 +28,31 @@ void climbStairs::climb_stairs()
     arm_->moveArmJoint(LEFT, 1, -0.7);
     ros::Duration(1).sleep();
 
-
     // first step
-    walker_->walkNSteps(1, FIRSTSTEP_OFFSET, 0.0, true, RIGHT);
-    ros::Duration(0.4).sleep();
+    walker_->walkNStepsWRTPelvis(1, FIRSTSTEP_OFFSET, 0.0, true, RIGHT);
+    ros::Duration(0.5).sleep();
     pelvis_->controlPelvisHeight(1.0);
-    ros::Duration(0.4).sleep();
+    ros::Duration(0.5).sleep();
     walker_->load_eff(armSide::RIGHT, EE_LOADING::LOAD);
-    walker_->walkNSteps(1, FIRSTSTEP_OFFSET, 0.0, true, LEFT);
+    walker_->walkNStepsWRTPelvis(1, FIRSTSTEP_OFFSET, 0.0, true, LEFT);
 
     // next 8 steps
     for (int i=0; i<8; i++)
     {
-        ros::Duration(0.4).sleep();
+        ros::Duration(1.0).sleep();
         pelvis_->controlPelvisHeight(1.0);
-        ros::Duration(0.4).sleep();
+        ros::Duration(1.0).sleep();
         walker_->load_eff(armSide::LEFT, EE_LOADING::LOAD);
-        walker_->walkNSteps(1, STEP_DEPTH, 0.0, true, RIGHT);
-        ros::Duration(0.4).sleep();
+        walker_->walkNStepsWRTPelvis(1, STEP_DEPTH, 0.0, true, RIGHT);
+        ros::Duration(1.0).sleep();
         pelvis_->controlPelvisHeight(1.0);
-        ros::Duration(0.4).sleep();
+        ros::Duration(1.0).sleep();
         walker_->load_eff(armSide::RIGHT, EE_LOADING::LOAD);
-        walker_->walkNSteps(1, STEP_DEPTH, 0.0, true, LEFT);
+        walker_->walkNStepsWRTPelvis(1, STEP_DEPTH, 0.0, true, LEFT);
     }
 
     // last step required to finish the check point
     walker_->setSwing_height(DEFAULT_SWINGHEIGHT);
-    walker_->walkNSteps(2, 0.3, 0.0);
+    walker_->walkNStepsWRTPelvis(2, 0.3, 0.0);
     ros::Duration(0.1).sleep();
 }

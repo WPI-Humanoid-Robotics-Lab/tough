@@ -21,7 +21,6 @@ private:
     chestTrajectory *chest_;
     pelvisTrajectory *pelvis_;
     armTrajectory *arm_;
-    RobotStateInformer *robot_state_;
 
 public:
     climbStairs(ros::NodeHandle nh);
