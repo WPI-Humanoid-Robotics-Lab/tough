@@ -280,13 +280,14 @@ void task2Utils::rotatePanel(const armSide graspingHand)
     arm_controller_->moveArmJoints(*reOrientPanelTraj);
     ros::Duration(3).sleep();
 
+//    gripper_controller_->controlGripper(graspingHand, GRIPPER_STATE::TIGHT_HOLD);
     std::vector< std::vector<float> > armData;
     armData.clear();
     armData.push_back(*graspingHandPoseUp);
     arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
     ros::Duration(2).sleep();
-    arm_controller_->moveArmJoint(nonGraspingHand, 3, -1*tempOffset);
-    ros::Duration(1).sleep();
+//    arm_controller_->moveArmJoint(nonGraspingHand, 3, -1*tempOffset);
+//    ros::Duration(1).sleep();
 
 }
 
@@ -488,14 +489,7 @@ bool task2Utils::checkpoint_init()
     ros::Duration(1).sleep();
     clearMap();
     ros::Duration(1).sleep();
-    isHarnessDetached = false;
-    while(!isHarnessDetached)
-    {
-        ros::Duration(0.1).sleep();
-    }
-    ROS_INFO("[SKIP] Harness Detached!");
-    taskLogPub("[SKIP] Harness Detached!");
-    ros::Duration(1).sleep();
+
     walk_->walkLocalPreComputedSteps({-0.2,-0.2,-0.4,-0.4},{0.0,0.0,0.0,0.0},RIGHT);
     ros::Duration(3).sleep();
     head_controller_->moveHead(0,40,0);

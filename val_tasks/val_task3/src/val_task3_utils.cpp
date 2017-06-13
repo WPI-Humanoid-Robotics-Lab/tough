@@ -9,6 +9,7 @@ task3Utils::task3Utils(ros::NodeHandle nh): nh_(nh),arm_controller_(nh_)
     task_status_sub_  = nh_.subscribe("/srcsim/finals/task", 10, &task3Utils::taskStatusCB, this);
     task3_log_pub_    = nh_.advertise<std_msgs::String>("/field/log",10);
     is_climbstairs_finished_ = false;
+    current_checkpoint_ = 0;
 }
 
 task3Utils::~task3Utils(){
@@ -65,6 +66,11 @@ void task3Utils::taskStatusCB(const srcsim::Task &msg)
         // scoped mutex
         std::lock_guard<std::mutex> lock(climstairs_flag_mtx_);
         is_climbstairs_finished_ = true;
+    }
+
+    if (current_checkpoint_ != msg.current_checkpoint){
+        current_checkpoint_ = msg.current_checkpoint;
+        task3LogPub(TEXT_GREEN + "Current Checkpoint : "+ std::to_string(current_checkpoint_) + TEXT_NC);
     }
 }
 

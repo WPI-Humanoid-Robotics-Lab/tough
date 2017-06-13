@@ -20,8 +20,10 @@
 
 +rostopic pub /field/reset_map std_msgs/Empty
 
- +roslaunch val_task2 task2.launch
++roslaunch val_task2 task2.launch
  
- +rosservice call /srcsim/finals/start_task 2 1
++rosservice call /srcsim/finals/start_task 2 1
  
- +rosnode kill task1
++rosnode kill task1
+
+!/srcsim/finals/score

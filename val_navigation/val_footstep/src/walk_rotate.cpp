@@ -28,6 +28,7 @@ int main(int argc, char **argv)
     }
     else cout<<"invalid input \n";
 
+    return 0;
 }
 
 

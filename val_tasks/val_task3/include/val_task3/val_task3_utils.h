@@ -22,6 +22,11 @@
 
 class task3Utils{
 private:
+
+    const std::string TEXT_RED="\033[0;31m";
+    const std::string TEXT_GREEN = "\033[0;32m";
+    const std::string TEXT_NC=  "\033[0m";
+
     ros::NodeHandle nh_;
     armTrajectory arm_controller_;
     srcsim::Task task_msg_;
@@ -43,7 +48,7 @@ private:
     void visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg);
     void taskStatusCB(const srcsim::Task &msg);
     nav_msgs::OccupancyGrid visited_map_;
-
+    int current_checkpoint_;
 public:
     task3Utils(ros::NodeHandle nh);
     ~task3Utils();
