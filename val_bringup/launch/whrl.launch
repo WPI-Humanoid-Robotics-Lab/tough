@@ -12,10 +12,13 @@
     <!-- start the robot fall detector -->
     <node pkg="navigation_common" type="fall_detector" name="fall_detector" />
 
+    <!-- start the gaze controller detector -->
+    <node pkg="val_task_common" type="val_gaze_controller" name="val_gaze_controller" />
+
    <!--IS_FIELD variable is set true on field docker container-->
    <group if="$(optenv IS_FIELD false)">
-       <node pkg="val_bringup" type="broadcast_server.py" name="broadcast_server" respawn="true" output="screen"/>
-       <node pkg="val_bringup" type="message_parser.py"   name="message_parser"   respawn="true" output="screen"/>
+       <node pkg="val_bringup" type="broadcast_server.py" name="broadcast_server" respawn="true" />
+       <node pkg="val_bringup" type="message_parser.py"   name="message_parser"   />
    </group>
    
    

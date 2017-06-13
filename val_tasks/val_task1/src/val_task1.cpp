@@ -1499,6 +1499,13 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
     // set the robot to default state to walk
     resetRobotToDefaults();
 
+
+    // kill the node and exit
+    ROS_INFO("task1 completed killing the node");
+    task1_utils_->taskLogPub("task1 completed killing the node");
+
+    int ret = std::system("rosnode kill task1");
+
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
@@ -1583,7 +1590,12 @@ decision_making::TaskResult valTask1::endTask(string name, const FSMCallContext&
     ROS_INFO_STREAM("executing " << name);
     task1_utils_->taskLogPub("valTask1::endTask : executing " + name);
 
-    eventQueue.riseEvent("/STOP_TIMEOUT");
+    // no transition here
+    ROS_INFO("task1 completed killing the node");
+    task1_utils_->taskLogPub("task1 completed killing the node");
+
+    int ret = std::system("rosnode kill task1");
+
     return TaskResult::SUCCESS();
 }
 
@@ -1707,13 +1719,14 @@ void valTask1::resetRobotToDefaults(int arm_pose)
     gripper_controller_->openGripper(armSide::LEFT);
     ros::Duration(0.2).sleep();
 
+    // reset chest
+    chest_controller_->controlChest(0.0, 0.0, 0.0);
+    ros::Duration(1).sleep();
+
     // increse pelvis
     pelvis_controller_->controlPelvisHeight(0.9);
     ros::Duration(1.0f).sleep();
 
-    // reset chest
-    chest_controller_->controlChest(0.0, 0.0, 0.0);
-    ros::Duration(1).sleep();
 
     // arms to default
     if (arm_pose == 0)

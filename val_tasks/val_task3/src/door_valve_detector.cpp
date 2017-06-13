@@ -36,6 +36,8 @@ void DoorValvedetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
+    pcl::PointCloud<pcl::PointXYZ>::Ptr plane_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+
     sensor_msgs::PointCloud2 output;
 
     pcl::fromROSMsg(*input, *cloud);
@@ -52,26 +54,34 @@ void DoorValvedetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
         ROS_INFO("empty after tansform cloud");
         return;
     }
-//    filter_cloud(cloud);
+    filter_cloud(cloud,plane_cloud);
     if(cloud->empty())
     {
         ROS_INFO("filter_cloud gives empty cloud");
         return;
     }
+
     transformCloud(cloud,1);
-    panelSegmentation(cloud,theta);
+    transformCloud(plane_cloud,1);
+
+    panelSegmentation(plane_cloud,theta);
     if(cloud->empty())
     {
         ROS_INFO("plane seg gives empty cloud");
         return;
     }
-    return
+
 
     fitting(cloud,theta);
     if(cloud->empty())
+    {
+        ROS_INFO("Fitting gives empty cloud");
         return;
+    }
+
     /*clustering(cloud);
 */
+
 
     geometry_msgs::Pose center_loc,center_loc_pelvis;
 
@@ -107,13 +117,13 @@ void DoorValvedetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
     std::cout << "Time Take for Calculating Position = " << endTime - startTime << std::endl;
 
     detections_.push_back(center_loc);
-/*
+
     pcl::toROSMsg(*cloud, output);
 
     output.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
 
     pcl_filtered_pub_.publish(output);
-*/
+
 }
 
 void DoorValvedetector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, float &theta){
@@ -153,20 +163,9 @@ void DoorValvedetector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
     Eigen::Vector3f eigenValues;
     pcl::eigen33(covarianceMatrix, eigenVectors, eigenValues);
 
-//    visualizept(centroid(0)+eigenVectors.col(0)[0],centroid(1)+eigenVectors.col(0)[1],centroid(2));
-
     float cosTheta = eigenVectors.col(0)[0]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
     float sinTheta = eigenVectors.col(0)[1]/sqrt(pow(eigenVectors.col(0)[0],2)+pow(eigenVectors.col(0)[1],2));
     theta = atan2(sinTheta, cosTheta);
-
-
-
-    sensor_msgs::PointCloud2 output;
-    pcl::toROSMsg(*cloud, output);
-
-    output.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
-    ROS_INFO("plne");
-    pcl_filtered_pub_.publish(output);
 
 }
 
@@ -263,7 +262,7 @@ bool DoorValvedetector::getDetections(std::vector<geometry_msgs::Pose> &out)
    return !detections_.empty();
 }
 
-void DoorValvedetector::filter_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+void DoorValvedetector::filter_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,pcl::PointCloud<pcl::PointXYZ>::Ptr& plane_cloud)
 {
 
     ROS_INFO("filter cloud");
@@ -278,13 +277,20 @@ void DoorValvedetector::filter_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
       sor.setStddevMulThresh (1.0);
       sor.filter (*cloud);
 
+      pcl::PassThrough<pcl::PointXYZ> pass_x_plane;
+      pass_x_plane.setInputCloud(cloud);
+      pass_x_plane.setFilterFieldName("x");
+      pass_x_plane.setFilterLimits(max_pt(0)-0.15,max_pt(0));
+      pass_x_plane.filter(*plane_cloud);
 
     // filtering around min x value
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
     pass_x.setFilterFieldName("x");
-    pass_x.setFilterLimits(min_pt(0),max_pt(0)-0.15);
+    pass_x.setFilterLimits(min_pt(0),max_pt(0)-0.13);
     pass_x.filter(*cloud);
+
+
 
 }
 void DoorValvedetector::fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, float &theta)
@@ -316,12 +322,12 @@ void DoorValvedetector::fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, floa
     seg.segment (*inliers, *coefficients);
     ROS_INFO("x : %0.4f, y : %0.4f, z : %0.4f, r: %.4f ",coefficients->values[0], coefficients->values[1], coefficients->values[2], coefficients->values[3]);
 
-/*
+
     pcl::ExtractIndices<pcl::PointXYZ> extract;
     extract.setInputCloud (cloud);
     extract.setIndices (inliers);
     extract.setNegative (false);
-    extract.filter (*cloud);*/
+    extract.filter (*cloud);
 /*
 
     if(coefficients->values[0] < min_pt(0) || coefficients->values[0] > max_pt(0))
@@ -342,12 +348,12 @@ void DoorValvedetector::fitting(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud, floa
     }
 */
 
-/*
+
     coefficients->values[0] = (min_pt(0)+max_pt(0))/2;
     coefficients->values[1] = (min_pt(1)+max_pt(1))/2;
     coefficients->values[2] = (min_pt(2)+max_pt(2))/2;
     coefficients->values[3] = max_pt(2) - coefficients->values[2];
-*/
+
 
     circle_param.center.clear();
 

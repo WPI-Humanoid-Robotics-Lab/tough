@@ -25,3 +25,5 @@
 +rosservice call /srcsim/finals/start_task 2 1
  
 +rosnode kill task1
+
+!/srcsim/finals/score
