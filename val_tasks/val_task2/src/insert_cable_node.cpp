@@ -5,21 +5,26 @@ int main(int argc, char **argv)
     ros::NodeHandle nh_;
     CableTask cable(nh_);
     ROS_INFO("Starting insert cable node");
+    geometry_msgs::Point pt;
+    float offset;
+    if(argc == 4){
+        pt.x = std::atof(argv[1]);
+        pt.y = std::atof(argv[2]);
+        pt.z = std::atof(argv[3]);
 
-    if(argc == 5){
-        geometry_msgs::Point pt;
-        pt.x = std::atof(argv[2]);
-        pt.y = std::atof(argv[3]);
-        pt.z = std::atof(argv[4]);
-
-        armSide side;
-        if(std::atoi(argv[1]) == 0){
-            side = LEFT;
-        } else {
-            side = RIGHT;
-        }
         cable.insert_cable(pt);
-    } else{
+    }
+    else if(argc == 5)
+    {
+        pt.x = std::atof(argv[1]);
+        pt.y = std::atof(argv[2]);
+        pt.z = std::atof(argv[3]);
+        offset = std::atof(argv[4]);
+
+        cable.allign_socket_axis(pt,offset);
+    }
+    else
+    {
         ROS_INFO("Usage : %s <side> <goal_x> <goal_y> <goal_z>\n side = 0 or 1");
         return -1;
     }
