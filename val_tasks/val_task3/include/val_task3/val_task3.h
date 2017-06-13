@@ -85,6 +85,10 @@ class valTask3{
 
     public:
 
+    const std::string TEXT_RED="\033[0;31m";
+    const std::string TEXT_GREEN = "\033[0;32m";
+    const std::string TEXT_NC=  "\033[0m";
+
     ~valTask3();
 
     static valTask3* getValTask3(ros::NodeHandle nh);
