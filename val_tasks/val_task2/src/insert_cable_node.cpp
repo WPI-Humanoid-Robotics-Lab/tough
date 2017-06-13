@@ -24,7 +24,8 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    ros::spin();
+    ros::spinOnce();
+    ros::Duration(2).sleep();
     return 0;
 }
 

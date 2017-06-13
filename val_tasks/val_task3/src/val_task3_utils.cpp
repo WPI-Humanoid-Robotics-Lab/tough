@@ -48,6 +48,20 @@ void task3Utils::beforDoorOpenPose(){
      ros::Duration(2.0).sleep();
 }
 
+void task3Utils::doorWalkwayPose()
+{
+    std::vector< std::vector<float> > armData;
+    armData.push_back(RIGHT_ARM_DOORWAY_WALK);
+
+     arm_controller_.moveArmJoints(RIGHT,armData,1.0f);
+     ros::Duration(2.0).sleep();
+
+     armData.clear();
+     armData.push_back(LEFT_ARM_DOORWAY_WALK);
+     arm_controller_.moveArmJoints(LEFT,armData,1.0f);
+     ros::Duration(2.0).sleep();
+}
+
 
 void task3Utils::visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg)
 {

@@ -77,6 +77,27 @@ geometry_msgs::Pose leakDetectorGrabber::getReachGoal(const armSide &side, const
     return reach_goal;
 }
 
+float leakDetectorGrabber::getStandingOffset(const armSide side, const geometry_msgs::Pose user_goal) const {
+    std::string shoulder_frame = (side == armSide::LEFT) ? "/leftShoulderRollLink" : "/rightShoulderRollLink";
+
+    geometry_msgs::Pose goal_wrt_pelvis, shoulder_wrt_pelvis;
+    current_state_->transformPose(user_goal, goal_wrt_pelvis, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->getCurrentPose(shoulder_frame, shoulder_wrt_pelvis, VAL_COMMON_NAMES::PELVIS_TF);
+
+    double yaw = tf::getYaw(goal_wrt_pelvis.orientation);
+
+    // 0.356 is the approximate length of the forearm
+    double delta_y = 0.356 * std::cos(yaw) * (side == armSide::LEFT ? 1 : -1);
+
+    geometry_msgs::Pose standing_pose;
+    standing_pose.position.y = goal_wrt_pelvis.position.y - shoulder_wrt_pelvis.position.y + delta_y;
+    standing_pose.orientation.w = 1;
+    current_state_->transformPose(standing_pose, standing_pose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+
+    pubPoseArrow(standing_pose, "detector_standing_pose", 1.f, 0.f, 0.f);
+
+    return standing_pose.position.y;
+}
 
 // note that `side` is ignored if GRAB_WITH_EITHER_HAND is true
 void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float executionTime) {
@@ -94,13 +115,17 @@ void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float exe
     user_goal = task3_utils_.grasping_hand(side, user_goal);
     ROS_DEBUG_STREAM("Grasping with " << (side == armSide::LEFT ? "left" : "right") << " hand");
 
-
     ROS_INFO("Moving hand to pre-grasp");
     if (side == armSide::LEFT) {
         gripper_.controlGripper(side, PREGRASP_LEFT);
     } else {
         gripper_.controlGripper(side, PREGRASP_RIGHT);
     }
+
+    float standing_offset = getStandingOffset(side, user_goal);
+
+    ROS_INFO_STREAM("Walking to standing pose (TODO) (offset " << standing_offset << ")");
+    ros::Duration(2).sleep();
 
     //move arm to given point with known orientation and higher z
     geometry_msgs::Pose grasp_goal = getGraspGoal(side, user_goal);
