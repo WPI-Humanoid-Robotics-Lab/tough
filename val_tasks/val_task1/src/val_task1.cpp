@@ -1719,13 +1719,14 @@ void valTask1::resetRobotToDefaults(int arm_pose)
     gripper_controller_->openGripper(armSide::LEFT);
     ros::Duration(0.2).sleep();
 
+    // reset chest
+    chest_controller_->controlChest(0.0, 0.0, 0.0);
+    ros::Duration(1).sleep();
+
     // increse pelvis
     pelvis_controller_->controlPelvisHeight(0.9);
     ros::Duration(1.0f).sleep();
 
-    // reset chest
-    chest_controller_->controlChest(0.0, 0.0, 0.0);
-    ros::Duration(1).sleep();
 
     // arms to default
     if (arm_pose == 0)
