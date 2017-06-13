@@ -5,31 +5,25 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "leak_detector_node");
     ros::NodeHandle nh_;
 
-    leakDetector leak_detector(nh_);
-
-    ROS_INFO("generating search points");
-    float v_s = 0.835;
-    float v_e = 1.713;
-
-    geometry_msgs::Point h_s, h_e;
-    h_s.x = 0.8; h_s.y = -0.25; h_s.z = v_e;
-    h_e.x = 0.8; h_e.y = 0.95; h_e.z = v_s;
-
-    // generate search points
-    std::vector<geometry_msgs::Pose> poses;
-    leak_detector.generateSearchWayPoints(h_s, h_e, v_s, v_e, poses);
-
-    // find the leak
-    geometry_msgs::Point leak;
-    leak_detector.findLeak(poses, leak);
-
-    ros::Rate loop_rate(10);
-
-    while(ros::ok())
-    {
-        ros::spinOnce();
-        loop_rate.sleep();
+    if (argc != 3) {
+        ROS_ERROR("Run leak_detector_node with 2 arguments: side ['left' or 'right'], and thumbwards [1 for thumbwards, 0 otherwise]");
+        return 1;
+    } else if (std::strcmp(argv[1], "left") != 0 && std::strcmp(argv[1], "right") != 0) {
+        ROS_ERROR("First argument to leak detector must be the string 'left' or 'right'");
+        return 1;
+    } else if (std::strcmp(argv[2], "1") != 0 && std::strcmp(argv[2], "0") != 0) {
+        ROS_ERROR("First argument to leak detector must be 1 or 0");
+        return 1;
     }
+
+    armSide side = (std::strcmp(argv[1], "left") == 0) ? armSide::LEFT : armSide::RIGHT;
+    bool thumbwards = (std::strcmp(argv[2], "1") == 0);
+
+    leakDetector leak_detector(nh_, side, thumbwards);
+
+    ROS_INFO("Starting leak detection");
+    leak_detector.findLeak();
+    ROS_INFO("Found leak OR node is shutting down");
 
     return 0;
 }
