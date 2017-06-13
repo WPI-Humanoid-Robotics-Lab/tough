@@ -15,7 +15,7 @@ task1Utils::task1Utils(ros::NodeHandle nh):
     reset_map_pub_           = nh_.advertise<std_msgs::Empty>("/field/reset_map",1);
     task1_log_pub_           = nh_.advertise<std_msgs::String>("/field/log",10);
 
-    task_status_sub_ = nh_.subscribe("/srcsim/finals/task1", 10, &task1Utils::taskStatusSubCB, this);
+    task_status_sub_ = nh_.subscribe("/srcsim/finals/task", 10, &task1Utils::taskStatusSubCB, this);
     visitedMapUpdaterSub_    = nh_.subscribe("/visited_map", 10, &task1Utils::visitedMapUpdateCB, this);
     harness_sub_        = nh_.subscribe("/srcsim/finals/harness",10, &task1Utils::harnessCB, this);
 

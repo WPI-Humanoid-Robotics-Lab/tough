@@ -639,4 +639,45 @@ bool CableTask::drop_cable(armSide side)
     return true;
 }
 
+bool CableTask::allign_socket_axis(const geometry_msgs::Point &goal, float offset, float executionTime)
+{
+    current_state_->transformQuaternion(quat, quat);
+
+    std::vector<geometry_msgs::Pose> waypoints;
+    geometry_msgs::Pose waypoint;
+
+    waypoint.position.x = goal.x;
+    waypoint.position.y = goal.y;
+    waypoint.position.z = goal.z+0.15; // 15 cm offset
+    waypoint.orientation = quat.quaternion;
+    waypoints.push_back(waypoint);
+
+    waypoint.position.x = goal.x;
+    waypoint.position.y = goal.y;
+    waypoint.position.z = goal.z+offset; // manual offset
+    waypoint.orientation = quat.quaternion;
+    waypoints.push_back(waypoint);
+
+
+
+    moveit_msgs::RobotTrajectory traj;
+
+    // Sending waypoints to the planner
+    std::vector< std::vector<float> > armData;
+    if (right_arm_planner_choke->getTrajFromCartPoints(waypoints, traj, false)< 0.98){
+        ROS_INFO("CableTask::allign socket: Trajectory is not planned 100% - retrying");
+        ROS_INFO("grasp_cable: Setting arm position to dock cable");
+        armData.clear();
+        armData.push_back(rightAfterGraspShoulderSeed_);
+        armTraj_.moveArmJoints(RIGHT,armData,executionTime);
+        ros::Duration(0.3).sleep();
+        return false;
+    }
+
+    wholebody_controller_->compileMsg(RIGHT,traj.joint_trajectory);
+
+    ros::Duration(1).sleep();
+}
+
+
 

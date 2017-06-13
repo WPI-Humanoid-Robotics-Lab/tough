@@ -7,7 +7,7 @@ int main(int argc, char **argv)
     CableTask cg(nh);
     ROS_INFO("Starting rotate cable node");
     gripperControl gc(nh);
-geometry_msgs::Pose pt;
+    geometry_msgs::Pose pt;
     if(argc == 10){
         pt.position.x = std::atof(argv[3]);
         pt.position.y = std::atof(argv[4]);
@@ -24,9 +24,9 @@ geometry_msgs::Pose pt;
             side = RIGHT;
         }
         gc.openGripper(side);
-        if(std::atof(argv[2]) == 1) cg.rotate_cable1(pt);
-        else if(std::atof(argv[2]) == 2) cg.rotate_cable2(pt);
-        else if(std::atof(argv[2]) == 3) cg.rotate_cable3(pt);
+        if(std::atoi(argv[2]) == 1) cg.rotate_cable1(pt);
+        else if(std::atoi(argv[2]) == 2) cg.rotate_cable2(pt);
+        else if(std::atoi(argv[2]) == 3) cg.rotate_cable3(pt);
 
     } else{
         ROS_INFO(" first argument specifies rotate type - 1, 2, 3. Then postion (3 args) and orientation(4 args)");

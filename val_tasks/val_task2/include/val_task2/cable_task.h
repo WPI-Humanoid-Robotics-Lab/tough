@@ -29,6 +29,7 @@ public:
    bool rotate_cable2(const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool rotate_cable3(const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool drop_cable(armSide side);
+   bool allign_socket_axis(const geometry_msgs::Point &goal, float offset=0.1, float executionTime=2.0f);
 private:
    ros::NodeHandle nh_;
    tf::TransformListener listener_;
