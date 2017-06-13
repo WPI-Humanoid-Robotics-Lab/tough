@@ -377,7 +377,7 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
     }
     else if( retry_count++ < 10){
         ROS_INFO("Did not detect handle, retrying");
-        task1_utils_->taskLogPub("Did not detect handle, retrying");
+        task1_utils_->taskLogPub("Did not detect handle, retrying. Retry count : "+ std::to_string(retry_count));
         eventQueue.riseEvent("/DETECT_HANDLE_RETRY");
     }
     else if (fail_count > 2){
@@ -616,7 +616,7 @@ decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContex
     }
     else if( retry_count++ < 10){
         ROS_INFO("valTask1::fixHandle : Did not find the handles using Point Cloud, retrying");
-        task1_utils_->taskLogPub("valTask1::fixHandle : Did not find the handles using Point Cloud, retrying");
+        task1_utils_->taskLogPub("valTask1::fixHandle : Did not find the handles using Point Cloud, retrying. Retry count : "+ std::to_string(retry_count));
         ros::Duration(3).sleep();
         eventQueue.riseEvent("/FIX_RETRY");
     }
@@ -695,7 +695,7 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
     }
     else if (retry_count < 20 ){
         ROS_INFO("Grasp Failed, retrying");
-        task1_utils_->taskLogPub("Grasp Failed, retrying");
+        task1_utils_->taskLogPub("Grasp Failed, retrying. Retry count : "+ std::to_string(retry_count));
         executing = false;
         ++retry_count;
         eventQueue.riseEvent("/GRASP_PITCH_HANDLE_RETRY");
@@ -1010,7 +1010,7 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
     }
     else if (retry_count < 20 ){
         ROS_INFO("Grasp Failed, retrying");
-        task1_utils_->taskLogPub("Grasp Failed, retrying");
+        task1_utils_->taskLogPub("Grasp Failed, retrying. Retry count : "+ std::to_string(retry_count));
         executing = false;
         ++retry_count;
         eventQueue.riseEvent("/GRASP_YAW_HANDLE_RETRY");
