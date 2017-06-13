@@ -1,4 +1,4 @@
-#include <val_task2/val_task2_utils.h>
+    #include <val_task2/val_task2_utils.h>
 #include <std_msgs/Bool.h>
 
 
@@ -167,11 +167,14 @@ bool task2Utils::isPanelPicked(const armSide side)
         total_effort += fabs(effort);
     }
     ROS_INFO("Total effort on arm is %f", total_effort);
+    taskLogPub("valTask2:: Total effort on arm is" + std::to_string(total_effort));
 
     if (total_effort > EFFORT_THRESHOLD){
+        taskLogPub(TEXT_GREEN + "Total effort on arm is "+ std::to_string(total_effort) + TEXT_NC);
         return true;
     }
 
+    taskLogPub(TEXT_RED + "Total effort on arm is "+ std::to_string(total_effort) + TEXT_NC);
     return false;
 }
 
@@ -508,6 +511,7 @@ bool task2Utils::checkpoint_init()
 
 bool task2Utils::shakeTest(const armSide graspingHand)
 {
+    return true;
     ROS_INFO("task2Utils::shakeTest : Closing, opening and reclosing grippers to see if the panel falls off");
     //close
     //open

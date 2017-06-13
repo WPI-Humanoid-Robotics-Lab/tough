@@ -33,6 +33,11 @@ valTask1* valTask1::getValTask1(ros::NodeHandle nh){
 valTask1::valTask1(ros::NodeHandle nh):
     nh_(nh)
 {
+    // task1 utils
+    task1_utils_ = new task1Utils(nh_);
+
+    task1_utils_->taskLogPub(task1_utils_->TEXT_GREEN + "Starting task 1" + task1_utils_->TEXT_NC);
+
     // object for the valkyrie walker
     walker_ = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
 
@@ -67,9 +72,6 @@ valTask1::valTask1(ros::NodeHandle nh):
 
     // val control common api;s
     control_helper_ = new valControlCommon(nh_);
-
-    // task1 utils
-    task1_utils_ = new task1Utils(nh_);
 
     // grasp state initialised
     prev_grasp_state_ = prevGraspState::NOT_INITIALISED;
@@ -171,7 +173,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
 
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
-        task1_utils_->taskLogPub("waiting for transition");
+        task1_utils_->taskLogPub(task1_utils_->TEXT_RED +"Call rosservice to start the task" + task1_utils_->TEXT_NC);
     }
     return TaskResult::SUCCESS();
 }
@@ -810,7 +812,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         control_helper_->stopAllTrajectories();
 
         ROS_INFO("pitch correct now");
-        task1_utils_->taskLogPub("pitch correct now");
+        task1_utils_->taskLogPub(task1_utils_->TEXT_GREEN + "pitch correct now" + task1_utils_->TEXT_NC);
 
         // wait until the pich correction becomes complete
         ros::Duration(5).sleep();
@@ -831,7 +833,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
             retry_count = 0;
 
             ROS_INFO("pitch completed now");
-            task1_utils_->taskLogPub("pitch completed now");
+            task1_utils_->taskLogPub(task1_utils_->TEXT_GREEN  + "pitch completed now" + task1_utils_->TEXT_NC);
         }
         else
         {
@@ -1001,7 +1003,7 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
         task1_utils_->taskLogPub("Grasp is successful");
         eventQueue.riseEvent("/GRASPED_YAW_HANDLE");
     }
-    else if (retry_count < 5 ){
+    else if (retry_count < 20 ){
         ROS_INFO("Grasp Failed, retrying");
         task1_utils_->taskLogPub("Grasp Failed, retrying");
         executing = false;
@@ -1123,7 +1125,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         control_helper_->stopAllTrajectories();
 
         ROS_INFO("yaw correct now");
-        task1_utils_->taskLogPub("yaw correct now");
+        task1_utils_->taskLogPub(task1_utils_->TEXT_GREEN + "yaw correct now" + task1_utils_->TEXT_NC);
 
         // wait until the yaw correction becomes complete
         ros::Duration(5).sleep();
@@ -1146,7 +1148,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
                 retry_count = 0;
 
                 ROS_INFO("yaw completed now");
-                task1_utils_->taskLogPub("yaw completed now");
+                task1_utils_->taskLogPub(task1_utils_->TEXT_GREEN + "yaw completed now" + task1_utils_->TEXT_NC);
             }
             // if pitch is re corrected for many times
             else if (recorrected_pitch_count > 5)
