@@ -118,6 +118,12 @@ target_link_libraries(solar_panel_grasp_node  ${catkin_LIBRARIES} ${PROJECT_NAME
 add_executable(cable_grabber_node src/cable_grabber_node.cpp)
 target_link_libraries(cable_grabber_node  ${catkin_LIBRARIES} ${PROJECT_NAME} )
 
+add_executable(choke_grabber_node src/choke_grabber_node.cpp)
+target_link_libraries(choke_grabber_node  ${catkin_LIBRARIES} ${PROJECT_NAME} )
+
+add_executable(rotate_cable_node src/rotate_cable_node.cpp)
+target_link_libraries(rotate_cable_node  ${catkin_LIBRARIES} ${PROJECT_NAME} )
+
 add_executable(solar_array_detector_node src/solar_array_detector_node.cpp)
 target_link_libraries(solar_array_detector_node  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARY_DIRS} ${PROJECT_NAME} )
 

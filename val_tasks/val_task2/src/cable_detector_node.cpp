@@ -56,7 +56,7 @@ int main(int argc, char** argv)
 
         if(input == 'r')
         {
-            cable.rotate_cable(CablePose);
+            cable.rotate_cable1(CablePose);
         }
         else if(input == 'g')
         {

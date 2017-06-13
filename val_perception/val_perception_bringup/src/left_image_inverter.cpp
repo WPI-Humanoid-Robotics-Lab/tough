@@ -2,7 +2,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
-
+using namespace cv;
 namespace perception_common{
 
 LeftImageInverter::LeftImageInverter(ros::NodeHandle& nh):it(nh){
@@ -16,16 +16,18 @@ void LeftImageInverter::subscribeImage(){
 void LeftImageInverter::getLeftImageCB(const sensor_msgs::ImageConstPtr& msg){
   try
   {
-  //  cv::imshow("view", cv_bridge::toCvShare(msg, "bgr8")->image);
 
-    cv::Mat invertedLeftImage;
-    cv::Mat leftImage = cv_bridge::toCvShare(msg, "bgr8")->image;
+
+    Mat invertedLeftImage;
+    Mat leftImage = cv_bridge::toCvShare(msg, "bgr8")->image;
     //invert left image
-
-    cv::flip(leftImage, invertedLeftImage, -1);
-    //cv::Mat finalImage;
-    //cv::flip(invertedLeftImage,finalImage,-1);
-
+    flip(leftImage, invertedLeftImage, -1);
+    int w = invertedLeftImage.size().width;
+    int h = invertedLeftImage.size().height;
+    // horizontal line
+    line(invertedLeftImage,Point(0,h/2),Point(w,h/2),Scalar(0,255,0),2,8);
+    // vertical line
+    line(invertedLeftImage,Point(w/2,0),Point(w/2,h),Scalar(0,255,0),2,8);
     sensor_msgs::ImageConstPtr image = cv_bridge::CvImage(std_msgs::Header(), "bgr8",invertedLeftImage).toImageMsg();
 
     pub.publish(image);

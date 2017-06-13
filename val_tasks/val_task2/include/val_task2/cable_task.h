@@ -25,7 +25,9 @@ public:
    bool grasp_choke(armSide side, const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool grasp_cable(const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool insert_cable(const geometry_msgs::Point &goal, float executionTime=2.0f);
-   bool rotate_cable(const geometry_msgs::Pose &goal, float executionTime=2.0f);
+   bool rotate_cable1(const geometry_msgs::Pose &goal, float executionTime=2.0f);
+   bool rotate_cable2(const geometry_msgs::Pose &goal, float executionTime=2.0f);
+   bool rotate_cable3(const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool drop_cable(armSide side);
 private:
    ros::NodeHandle nh_;
