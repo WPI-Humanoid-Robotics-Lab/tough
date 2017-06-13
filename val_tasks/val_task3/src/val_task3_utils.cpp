@@ -4,6 +4,8 @@
 task3Utils::task3Utils(ros::NodeHandle nh): nh_(nh),arm_controller_(nh_)
 {
     current_state_       = RobotStateInformer::getRobotStateInformer(nh_);
+    pelvis_controller_   = new pelvisTrajectory(nh_);
+    walk_                = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
 
     visited_map_sub_  = nh_.subscribe("/visited_map",10, &task3Utils::visited_map_cb, this);
     task_status_sub_  = nh_.subscribe("/srcsim/finals/task", 10, &task3Utils::taskStatusCB, this);
@@ -13,6 +15,8 @@ task3Utils::task3Utils(ros::NodeHandle nh): nh_(nh),arm_controller_(nh_)
 }
 
 task3Utils::~task3Utils(){
+    delete pelvis_controller_   ;
+    delete walk_                ;
 
     // shut down subscribers
     visited_map_sub_.shutdown();
@@ -149,4 +153,51 @@ void task3Utils::task3LogPub(std::string data){
     std_msgs::String ms;
     ms.data = data;
     task3_log_pub_.publish(ms);
+}
+
+// Copied and modified from task2utils
+void task3Utils::walkSideways(float error) {
+    std::size_t nSteps;
+    armSide startStep;
+    std::vector<float> y_offset;
+    std::vector<float> x_offset;
+
+    double abserror = std::fabs(error);
+    ROS_INFO_STREAM("Error is:" << error << "Absolute value for error is:" << abserror);
+    if (abserror < 0.05){
+        ROS_INFO("reOrientTowardsPanel: Not reorienting, the offset is less than 0.05");
+    }
+    else
+    {
+        pelvis_controller_->controlPelvisHeight(1.0);
+        ros::Duration(1.5).sleep();
+
+        nSteps = static_cast<std::size_t>(((abserror/0.1)+0.5));
+        ROS_INFO_STREAM("No of steps to walk is:" << nSteps);
+
+        if (error > 0){
+            startStep = LEFT;
+            for(size_t i = 0; i < nSteps; ++i){
+                y_offset.push_back(0.1);
+                y_offset.push_back(0.1);
+            }
+        }
+        else {
+            startStep = RIGHT;
+            for(size_t i = 0; i < nSteps; ++i){
+                y_offset.push_back(-0.1f);
+                y_offset.push_back(-0.1f);
+            }
+        }
+
+        x_offset.resize(y_offset.size(), 0);
+        ROS_INFO("reOrientTowardsPanel: Walking %d steps",int(nSteps));
+
+        walk_->walkLocalPreComputedSteps(x_offset, y_offset, startStep);
+        ros::Duration(4.0).sleep();
+
+        pelvis_controller_->controlPelvisHeight(0.9);
+        ros::Duration(1.5).sleep();
+    }
+
 }
