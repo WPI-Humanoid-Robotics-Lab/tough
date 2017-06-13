@@ -280,7 +280,7 @@ void task2Utils::rotatePanel(const armSide graspingHand)
     arm_controller_->moveArmJoints(*reOrientPanelTraj);
     ros::Duration(3).sleep();
 
-    gripper_controller_->controlGripper(graspingHand, GRIPPER_STATE::TIGHT_HOLD);
+//    gripper_controller_->controlGripper(graspingHand, GRIPPER_STATE::TIGHT_HOLD);
     std::vector< std::vector<float> > armData;
     armData.clear();
     armData.push_back(*graspingHandPoseUp);
