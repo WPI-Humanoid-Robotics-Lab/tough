@@ -605,7 +605,7 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
         is_rotation_required_=task2_utils_->isRotationReq(hand,solar_panel_handle_pose_.position,button_coordinates_temp_);
 
         ROS_INFO("valTask2::graspPanelTask : Rotation is %d ", is_rotation_required_);
-        task2_utils_->taskLogPub("valTask2::graspPanelTask : Rotation is  " + std::to_string(is_rotation_required_));
+        task2_utils_->taskLogPub(task2_utils_->TEXT_RED + "valTask2::graspPanelTask : Rotation is  " + std::to_string(is_rotation_required_)+ task2_utils_->TEXT_NC);
         //Pause the pointcloud to avoid obstacles on map due to panel
         task2_utils_->pausePointCloud();
         retry_count++;
