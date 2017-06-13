@@ -658,29 +658,30 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         // this is absolutely necessary
         task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
 
+        /// this should be done manually
         // walk slowly for this turn
-        walker_->setWalkParms(1.0, 1.0, 0);
-        /// @todo The following code should be a new state
-        // reorient the robot.
+//        walker_->setWalkParms(1.0, 1.0, 0);
+//        /// @todo The following code should be a new state
+//        // reorient the robot.
 
-        ROS_INFO("valTask2::pickPanelTask : Reorienting");
-        task2_utils_->taskLogPub("valTask2::pickPanelTask : Reorienting");
-        geometry_msgs::Pose pose;
-        pose.position.x = 0.0;
-        pose.position.y= is_rover_on_right_ == true ? 0.5 : -0.5;
-        pose.orientation.w = 1.0;
-        robot_state_->transformPose(pose, pose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-        geometry_msgs::Pose2D pose2D;
-        pose2D.x = pose.position.x;
-        pose2D.y = pose.position.y;
-        pose2D.theta = rover_walk_goal_waypoints_.front().theta;
-        ROS_INFO("valTask2::pickPanelTask: Walking to x:%f y:%f theta:%f", pose2D.x,pose2D.y,pose2D.theta);
-        task2_utils_->taskLogPub("valTask2::pickPanelTask: Walking to x: " + std::to_string(pose2D.x) + " y: " + std::to_string(pose2D.y) + " theta: " + std::to_string(pose2D.theta));
-        walker_->walkToGoal(pose2D);
-        ros::Duration(1).sleep();
-        walker_->setWalkParms(0.7, 0.7, 0);
+//        ROS_INFO("valTask2::pickPanelTask : Reorienting");
+//        task2_utils_->taskLogPub("valTask2::pickPanelTask : Reorienting");
+//        geometry_msgs::Pose pose;
+//        pose.position.x = 0.0;
+//        pose.position.y= is_rover_on_right_ == true ? 0.5 : -0.5;
+//        pose.orientation.w = 1.0;
+//        robot_state_->transformPose(pose, pose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+//        geometry_msgs::Pose2D pose2D;
+//        pose2D.x = pose.position.x;
+//        pose2D.y = pose.position.y;
+//        pose2D.theta = rover_walk_goal_waypoints_.front().theta;
+//        ROS_INFO("valTask2::pickPanelTask: Walking to x:%f y:%f theta:%f", pose2D.x,pose2D.y,pose2D.theta);
+//        task2_utils_->taskLogPub("valTask2::pickPanelTask: Walking to x: " + std::to_string(pose2D.x) + " y: " + std::to_string(pose2D.y) + " theta: " + std::to_string(pose2D.theta));
+//        walker_->walkToGoal(pose2D);
+//        ros::Duration(1).sleep();
+//        walker_->setWalkParms(0.7, 0.7, 0);
         head_controller_->moveHead(0,0,0);
-        ros::Duration(2).sleep();
+        ros::Duration(1).sleep();
 //        eventQueue.riseEvent("/PICKED_PANEL");
         // lets detect the array manually
         eventQueue.riseEvent("/MANUAL_EXECUTION");
