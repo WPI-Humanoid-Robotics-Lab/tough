@@ -1,6 +1,7 @@
 #include <val_task3/leak_detector_grabber.h>
 #include <val_controllers/robot_state.h>
 #include <val_task3/val_task3_utils.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 
 
 /*
@@ -36,10 +37,15 @@ int main(int argc, char **argv){
         goal.orientation.y = std::atof(argv[5]);
         goal.orientation.z = std::atof(argv[6]);
         goal.orientation.w = std::atof(argv[7]);
-    }
+    } else if (argc == 2) {
+        ROS_INFO("Leak detector grabber will listen for pose on /leak_detector_grasp");
 
-    else{
-
+        const geometry_msgs::PoseWithCovarianceStamped::ConstPtr topic_pose =
+                ros::topic::waitForMessage<geometry_msgs::PoseWithCovarianceStamped>("/leak_detector_grasp");
+        goal = topic_pose->pose.pose;
+        goal.position.z = std::atof(argv[1]);
+        ROS_INFO_STREAM("Leak detector grabber heard your pose (frame " << topic_pose->header.frame_id << ")");
+    } else {
         ROS_INFO("Please enter the goal Pose");
     }
 

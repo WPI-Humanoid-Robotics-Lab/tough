@@ -28,6 +28,9 @@ private:
     const std::vector<float> RIGHT_ARM_DOOR_OPEN = {-1.35, 1.20, 0.75, 0.50, 1.28, 0.0, 0.0};
     const std::vector<float> LEFT_ARM_DOOR_OPEN  = {-0.2f, -1.2f, 0.7222f, -1.5101f, 0.0f, 0.0f, 0.0f};
 
+
+    RobotStateInformer *current_state_;
+
     // Visited map
     ros::Subscriber visited_map_sub_;
     void visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg);
@@ -39,6 +42,7 @@ public:
     void beforePanelManipPose();
     void beforDoorOpenPose();
     void blindNavigation(geometry_msgs::Pose2D &goal);
+    geometry_msgs::Pose grasping_hand(armSide &side, geometry_msgs::Pose handle_pose);
 
 };
 

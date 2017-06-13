@@ -1,7 +1,10 @@
 #include <val_task3/val_task3_utils.h>
 #include <math.h>
 
-task3Utils::task3Utils(ros::NodeHandle nh): nh_(nh),arm_controller_(nh_) {
+task3Utils::task3Utils(ros::NodeHandle nh): nh_(nh),arm_controller_(nh_)
+{
+    current_state_       = RobotStateInformer::getRobotStateInformer(nh_);
+
     visited_map_sub_  = nh_.subscribe("/visited_map",10, &task3Utils::visited_map_cb, this);
 }
 
@@ -74,4 +77,28 @@ void task3Utils::blindNavigation(geometry_msgs::Pose2D & goal){
             goal.theta = angle;
         }
     }
+}
+
+
+geometry_msgs::Pose task3Utils::grasping_hand(armSide &side, geometry_msgs::Pose handle_pose)
+{
+    geometry_msgs::Pose poseInPelvisFrame;
+    current_state_->transformPose(handle_pose, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    float yaw = tf::getYaw(poseInPelvisFrame.orientation);
+
+    if (yaw > M_PI_2 || yaw < -M_PI_2){
+        tfScalar r, p, y;
+        tf::Quaternion q;
+        tf::quaternionMsgToTF(handle_pose.orientation, q);
+        tf::Matrix3x3 rot(q);
+        rot.getRPY(r, p, y);
+        y = y-M_PI;
+        geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(r,p,y);
+        handle_pose.orientation = quaternion;
+        current_state_->transformPose(handle_pose, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+        yaw = tf::getYaw(poseInPelvisFrame.orientation);
+    }
+
+    side = yaw < 0 ? armSide::LEFT : armSide::RIGHT;
+    return handle_pose;
 }
