@@ -10,10 +10,8 @@ int main(int argc, char **argv)
 
   perception_common::LeftImageInverter getImage(nh);
 
-  //cv::namedWindow("view");
-  //cv::startWindowThread();
   getImage.subscribeImage();
 
   ros::spin();
-  //cv::destroyWindow("view");
+  
 }
