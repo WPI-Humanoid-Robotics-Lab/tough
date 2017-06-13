@@ -13,10 +13,16 @@ int main(int argc, char **argv)
     chestTrajectory chestTraj(nh);
     pelvisTrajectory pelvisTraj(nh);
 
-    armTraj.moveToZeroPose(armSide::LEFT);
-    ros::Duration(0.3).sleep();
-    armTraj.moveToZeroPose(armSide::RIGHT);
-    ros::Duration(1).sleep();
+    if(argc ==2)
+    {
+
+        armTraj.moveToZeroPose(armSide::LEFT);
+        ros::Duration(0.3).sleep();
+        armTraj.moveToZeroPose(armSide::RIGHT);
+        ros::Duration(1).sleep();
+
+    }
+
 
     pelvisTraj.controlPelvisHeight(0.9);
     ros::Duration(1.5).sleep();
