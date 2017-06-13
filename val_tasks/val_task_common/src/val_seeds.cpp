@@ -98,6 +98,14 @@ int main(int argc, char **argv)
     const std::vector<float> rightShoulderSeed23_= {-0.66, 1.4, 0.75, 1.49, 1.29, 0, 0.26};
 
 
+    const std::vector<float> leftShoulderSeed24_= {0.f, 0, 0.f, -0.68f, 1.45, -0.5f, 0.f};
+    const std::vector<float> rightShoulderSeed24_= {0.f, 0, 0.f, 0.6f, 1.44f, 0.6f, 0.f};
+
+
+    const std::vector<float> leftShoulderSeed25_= {0.f, -1.45f, 0.f, -0.68f, 1.45, -0.5f, 0.f};
+    const std::vector<float> rightShoulderSeed25_= {0.f, 1.45f, 0.f, 0.6f, 1.44f, 0.6f, 0.f};
+
+
     if(argc == 3)
     {
         armData.clear();
@@ -127,6 +135,8 @@ int main(int argc, char **argv)
             if(std::stoi(argv[2]) == 21) armData.push_back(leftShoulderSeed21_);
             if(std::stoi(argv[2]) == 22) armData.push_back(leftShoulderSeed22_);
             if(std::stoi(argv[2]) == 23) armData.push_back(leftShoulderSeed23_);
+            if(std::stoi(argv[2]) == 24) armData.push_back(leftShoulderSeed24_);
+            if(std::stoi(argv[2]) == 25) armData.push_back(leftShoulderSeed25_);
         }
         else
         {
@@ -152,10 +162,11 @@ int main(int argc, char **argv)
             if(std::stoi(argv[2]) == 20) armData.push_back(rightShoulderSeed20_);
             if(std::stoi(argv[2]) == 21) armData.push_back(rightShoulderSeed21_);
             if(std::stoi(argv[2]) == 22) armData.push_back(rightShoulderSeed22_);
-            if(std::stoi(argv[2]) == 23) armData.push_back(rightShoulderSeed23_);
+            if(std::stoi(argv[2]) == 25) armData.push_back(rightShoulderSeed25_);
         }
-        armTraj.moveArmJoints(side, armData, 2.0f);
-        ros::Duration(2.0f).sleep();
-
+        if (!armData.empty()) {
+            armTraj.moveArmJoints(side, armData, 2.0f);
+            ros::Duration(2.0f).sleep();
+        }
     }
 }
