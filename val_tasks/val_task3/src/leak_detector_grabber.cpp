@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <eigen_conversions/eigen_msg.h>
+#include <std_msgs/Bool.h>
 
 // Detector height relative to floor (not world frame, which is untrustworthy)
 #define DETECTOR_GRASP_HEIGHT 0.92
@@ -88,15 +89,16 @@ float leakDetectorGrabber::getStandingOffset(const armSide side, const geometry_
 
     // 0.356 is the approximate length of the forearm
     double delta_y = 0.356 * std::cos(yaw) * (side == armSide::LEFT ? 1 : -1);
+    double offset = goal_wrt_pelvis.position.y - shoulder_wrt_pelvis.position.y + delta_y;
 
     geometry_msgs::Pose standing_pose;
-    standing_pose.position.y = goal_wrt_pelvis.position.y - shoulder_wrt_pelvis.position.y + delta_y;
+    standing_pose.position.y = offset;
     standing_pose.orientation.w = 1;
     current_state_->transformPose(standing_pose, standing_pose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
 
     pubPoseArrow(standing_pose, "detector_standing_pose", 1.f, 0.f, 0.f);
 
-    return standing_pose.position.y;
+    return static_cast<float>(offset);
 }
 
 // note that `side` is ignored if GRAB_WITH_EITHER_HAND is true
@@ -125,7 +127,7 @@ void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float exe
     float standing_offset = getStandingOffset(side, user_goal);
 
     ROS_INFO_STREAM("Walking to standing pose (TODO) (offset " << standing_offset << ")");
-    ros::Duration(2).sleep();
+    task3_utils_.walkSideways(standing_offset);
 
     //move arm to given point with known orientation and higher z
     geometry_msgs::Pose grasp_goal = getGraspGoal(side, user_goal);
@@ -169,6 +171,28 @@ void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float exe
         taskCommonUtils::slowGrip(nh_, side, PREGRASP_RIGHT, GRASP_RIGHT);
     }
     ros::Duration(0.3).sleep();
+
+
+    ROS_INFO("Moving back to reach goal");
+
+    armTraj_.moveArmInTaskSpace(side, reach_goal, executionTime * 2);
+    ros::Duration(executionTime * 2).sleep();
+
+
+//    ROS_INFO("Listening on topic /detector_antenna_side for the side the antenna is on; 'true' for pointing towards thumb");
+//    ROS_INFO("The robot will start moving to detect the leak once the message is recieved");
+//    std_msgs::Bool::ConstPtr antenna_thumbwards_msg =
+//            ros::topic::waitForMessage<std_msgs::Bool>("/detector_antenna_side");
+//
+//    bool antenna_thumbwards = antenna_thumbwards_msg->data != 0;
+//
+//    ROS_INFO("Antenna pointing %s", antenna_thumbwards ? "thumbwards" : "away from thumb");
+
+
+    // TODO:
+    // 1. Move arm into detection config
+    // 2. Start waving arm up and down
+    // 3. Subscribe to leak detector topic and record/output the hand position when the leak is detected
 }
 
 void leakDetectorGrabber::pubPoseArrow(const geometry_msgs::Pose &pose_msg, const std::string &ns, const int id,
