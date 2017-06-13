@@ -693,7 +693,7 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
         task1_utils_->taskLogPub("Grasp is successfu");
         eventQueue.riseEvent("/GRASPED_PITCH_HANDLE");
     }
-    else if (retry_count < 5 ){
+    else if (retry_count < 20 ){
         ROS_INFO("Grasp Failed, retrying");
         task1_utils_->taskLogPub("Grasp Failed, retrying");
         executing = false;
@@ -702,6 +702,8 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
     }
     else {
         ROS_INFO("Failed all conditions. state error");
+        retry_count = 0;
+        executing = false;
         task1_utils_->taskLogPub("Failed all conditions. state error");
         eventQueue.riseEvent("/GRASP_PITCH_HANDLE_FAILED");
     }
@@ -927,6 +929,9 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         // reset the count
         retry_count = 0;
 
+        //set the execute once flag back
+        execute_once = true;
+
         //error state
         eventQueue.riseEvent("/PITCH_CORRECTION_FAILED");
     }
@@ -1012,6 +1017,8 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
     }
     else {
         ROS_INFO("Failed all conditions. state error");
+        retry_count = 0;
+        executing = false;
         task1_utils_->taskLogPub("Failed all conditions. state error");
         eventQueue.riseEvent("/GRASP_YAW_HANDLE_FAILED");
     }
@@ -1158,6 +1165,12 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 
                 // reset the count
                 recorrected_pitch_count = 0;
+
+                // set the execute flag
+                execute_once = true;
+
+                // reset the count
+                retry_count = 0;
 
                 //error state
                 eventQueue.riseEvent("/YAW_CORRECTION_FAILED");

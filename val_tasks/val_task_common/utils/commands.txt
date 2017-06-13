@@ -1,3 +1,13 @@
+Task 1
+======
++rosservice call /srcsim/finals/start_task 1 1
+
++roslaunch val_task1 task1.launch
+
+/REGULAR
+
+
+
 +rostopic pub /decision_making/task2/events std_msgs/String "data: '/REGULAR'"
 
 +rostopic pub /panel_offset std_msgs/Float32 "data: 0.04"
