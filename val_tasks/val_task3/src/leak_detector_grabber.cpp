@@ -3,15 +3,16 @@
 #include <stdio.h>
 #include <eigen_conversions/eigen_msg.h>
 
-#define GRAB_WITH_EITHER_HAND true
+// Detector height relative to floor (not world frame, which is untrustworthy)
+#define DETECTOR_GRASP_HEIGHT 0.92
 
 #define INTERMEDIATE_GOAL_OFFSET 0.2
 
-#define PREGRASP_LEFT {1.3999, -0.3, 0.0, 0.0, 0.0}
-#define PREGRASP_RIGHT PREGRASP_LEFT
+#define PREGRASP_LEFT   {1.3999, -0.3, 0.0, 0.0, 0.0}
+#define PREGRASP_RIGHT  PREGRASP_LEFT
 
-#define GRASP_LEFT {1.3999, -0.55, -1.1, -0.9, -1.0}
-#define GRASP_RIGHT {1.3999, -0.55, 1.1, 0.9, 1.0}
+#define GRASP_LEFT      {1.3999, -0.55, -1.1, -0.9, -1.0}
+#define GRASP_RIGHT     {1.3999, -0.55, 1.1, 0.9, 1.0}
 
 leakDetectorGrabber::leakDetectorGrabber(ros::NodeHandle nh):nh_(nh),
     armTraj_(nh_), gripper_(nh_), wholebody_controller_(nh_), task3_utils_(nh_)
@@ -78,11 +79,19 @@ geometry_msgs::Pose leakDetectorGrabber::getReachGoal(const armSide &side, const
 
 
 // note that `side` is ignored if GRAB_WITH_EITHER_HAND is true
-void leakDetectorGrabber::graspDetector(armSide side, geometry_msgs::Pose user_goal, float executionTime) {
-    if (GRAB_WITH_EITHER_HAND) {
-        // this overwrites both side and user_goal
-        user_goal = task3_utils_.grasping_hand(side, user_goal);
+void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float executionTime) {
+    // If user_goal's z is exactly zero, it's almost certainly generated from Rviz and needs its z determined
+    if (user_goal.position.z == 0) {
+        geometry_msgs::Pose foot_bottom_world_frame;
+        current_state_->getCurrentPose("/leftCOP_Frame", foot_bottom_world_frame, VAL_COMMON_NAMES::WORLD_TF);
+        user_goal.position.z = foot_bottom_world_frame.position.z + DETECTOR_GRASP_HEIGHT;
+
+        ROS_DEBUG_STREAM("Goal pose z determined to be " << user_goal.position.z);
     }
+
+    armSide side;
+    // this overwrites both side and user_goal
+    user_goal = task3_utils_.grasping_hand(side, user_goal);
     ROS_DEBUG_STREAM("Grasping with " << (side == armSide::LEFT ? "left" : "right") << " hand");
 
 

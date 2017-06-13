@@ -24,12 +24,7 @@ int main(int argc, char **argv){
     ROS_INFO("starting leak detector grabber");
 
     geometry_msgs::Pose goal;
-
-    armSide side;
-    side = RIGHT;
-
-    if(argc == 8){
-
+    if (argc == 8){
         goal.position.x = std::atof(argv[1]);
         goal.position.y = std::atof(argv[2]);
         goal.position.z = std::atof(argv[3]);
@@ -37,20 +32,20 @@ int main(int argc, char **argv){
         goal.orientation.y = std::atof(argv[5]);
         goal.orientation.z = std::atof(argv[6]);
         goal.orientation.w = std::atof(argv[7]);
-    } else if (argc == 2) {
-        ROS_INFO("Leak detector grabber will listen for pose on /leak_detector_grasp");
+    } else if (argc == 1) {
+        ROS_INFO("Leak detector grabber will listen for pose from Rviz on /initialpose");
 
         const geometry_msgs::PoseWithCovarianceStamped::ConstPtr topic_pose =
-                ros::topic::waitForMessage<geometry_msgs::PoseWithCovarianceStamped>("/leak_detector_grasp");
+                ros::topic::waitForMessage<geometry_msgs::PoseWithCovarianceStamped>("/initialpose");
         goal = topic_pose->pose.pose;
-        goal.position.z = std::atof(argv[1]);
         ROS_INFO_STREAM("Leak detector grabber heard your pose (frame " << topic_pose->header.frame_id << ")");
     } else {
-        ROS_INFO("Please enter the goal Pose");
+        ROS_INFO("Please enter 7 arguments to specify the goal pose or 0 to listen for the published pose");
+        return 1;
     }
 
     // To be done - add another seed point for better planning and manipulation
-    ldg.graspDetector(side,goal);
+    ldg.graspDetector(goal);
 
     ros::spin();
     return 0;
