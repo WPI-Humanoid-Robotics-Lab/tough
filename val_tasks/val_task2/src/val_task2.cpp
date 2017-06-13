@@ -67,7 +67,7 @@ valTask2::valTask2(ros::NodeHandle nh):
 
     //utils
     task2_utils_    = new task2Utils(nh_);
-    task2_utils_->taskLogPub("Starting task 2");
+    task2_utils_->taskLogPub(task2_utils_->TEXT_GREEN + "Starting task 2"+ task2_utils_->TEXT_NC);
     robot_state_    = RobotStateInformer::getRobotStateInformer(nh_);
 
     control_common_ = new valControlCommon(nh_);
