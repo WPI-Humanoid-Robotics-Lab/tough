@@ -104,7 +104,7 @@ void doorOpener::openDoor(geometry_msgs::Pose &valveCenterWorld){
 
     ros::Duration(1.0).sleep();
 
-    task3_.task3LogPub(" door_opener_node : Resetting the robot");
-    control_common_.resetRobot();
+    task3_.task3LogPub(" door_opener_node : setting the robot for walking");
+    task3_.doorWalkwayPose();
 
 }
