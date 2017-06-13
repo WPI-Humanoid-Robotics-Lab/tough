@@ -71,6 +71,7 @@ valTask1::valTask1(ros::NodeHandle nh):
     // task1 utils
     task1_utils_ = new task1Utils(nh_);
 
+    task1_utils_->taskLogPub(task1_utils_->TEXT_GREEN + "Starting task 1" + task1_utils_->TEXT_NC);
     // grasp state initialised
     prev_grasp_state_ = prevGraspState::NOT_INITIALISED;
 }
@@ -171,7 +172,7 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
 
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
-        task1_utils_->taskLogPub("waiting for transition");
+        task1_utils_->taskLogPub(task1_utils_->TEXT_RED +"Call rosservice to start the task" + task1_utils_->TEXT_NC);
     }
     return TaskResult::SUCCESS();
 }
