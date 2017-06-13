@@ -8,8 +8,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ROS_INFO("Moving the arms");
     armTrajectory armTraj(nh);
-    while(ros::ok())
-    {
+
         std::cout<<"Arm motion\n"
                    "1. Move a joint using joint number\n"
                    "2. Move to a 3D point in task space\n"
@@ -77,7 +76,7 @@ int main(int argc, char **argv)
         }
 
         default:{
-
+             break;
             // Set the pose of the left arm to extend it to the front
             armTrajectory::armJointData l;
             l.side = LEFT;
@@ -155,8 +154,9 @@ int main(int argc, char **argv)
             break;
         }
 
-        }
+
     }
+        ros::Duration(2).sleep();
 
     return 0;
 }

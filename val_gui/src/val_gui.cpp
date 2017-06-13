@@ -295,7 +295,7 @@ void ValkyrieGUI::initTools(){
 
 void ValkyrieGUI::initDefaultValues() {
     // 3D view. select none by default
-    ui->radioBtnNone->setChecked(true);
+    ui->radioBtnPointcloud->setEnabled(true);
 
     //Arms select left arm by default
     ui->radioArmSideLeft->setChecked(true);
