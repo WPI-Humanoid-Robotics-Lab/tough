@@ -1976,6 +1976,8 @@ decision_making::TaskResult valTask2::endTask(string name, const FSMCallContext&
     ROS_INFO_STREAM("executing " << name);
     task2_utils_->taskLogPub("executing " + name);
 
+    int ret = std::system("rosnode kill task2");
+
     eventQueue.riseEvent("/STOP_TIMEOUT");
     return TaskResult::SUCCESS();
 }
