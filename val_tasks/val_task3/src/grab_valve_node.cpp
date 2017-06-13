@@ -10,6 +10,7 @@ int main(int argc, char **argv)
 
     ROS_INFO("Starting valve grabber");
 
+
     rotateValve rotate(nh);
     gripperControl gc(nh);
 
@@ -18,6 +19,7 @@ int main(int argc, char **argv)
     std::vector<geometry_msgs::Pose> points;
     bool walkingResult, trajectoryResult;
     task3Utils t3Utils(nh);
+    t3Utils.task3LogPub("grab_valve_node: Starting the grab valve node");
 
     ros::Publisher stopTraj= nh.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/stop_all_trajectories",1,true);
     ihmc_msgs::StopAllTrajectoryRosMessage stopMsg;
@@ -37,6 +39,7 @@ int main(int argc, char **argv)
     else {
 
         ROS_INFO("Please enter correct arguments");
+        t3Utils.task3LogPub("grab_valve_node: Please enter correct arguments");
     }
 
 
@@ -55,7 +58,9 @@ int main(int argc, char **argv)
             if (gripper == 1) gc.closeGripper(LEFT);
             rotate.compute_traj(valveCentre,0.18,points);
             trajectoryResult = rotate.move_valve(points);
-            if(!trajectoryResult) t3Utils.task3LogPub("trajectory was not planned");
+            ros::Duration(4.0).sleep();
+            t3Utils.task3LogPub("grab_valve_node : Sleeping for 4 seconds, try to look at the valve manually");
+            if(!trajectoryResult) t3Utils.task3LogPub("grab_valve_node : trajectory was not planned");
 
 
         }

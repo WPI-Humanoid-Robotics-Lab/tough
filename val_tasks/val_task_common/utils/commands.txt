@@ -27,3 +27,8 @@
 +rosnode kill task1
 
 !/srcsim/finals/score
+
++rosrun val_footstep walk_steps 
+
++rosrun val_footstep walk_rotate 
+

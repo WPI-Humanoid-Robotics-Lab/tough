@@ -1,6 +1,7 @@
 #include "val_task3/rotate_valve.h"
 
-rotateValve::rotateValve(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_), walk_(nh_)
+rotateValve::rotateValve(ros::NodeHandle n):nh_(n), armTraj_(nh_),
+    gripper_(nh_), walk_(nh_), t3Utils(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 
@@ -104,11 +105,12 @@ bool rotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTi
     left_arm_planner_->getTrajFromCartPoints(waypoints,traj,false);
 
     // Planning whole body motion
+    t3Utils.task3LogPub("grab_valve_node: Initial trajectory");
     wholebody_controller_->compileMsg(LEFT,traj.joint_trajectory);
     ros::Duration(executionTime*1.5).sleep();
 
     // Grasping the cable
-    ROS_INFO("rotateValve:Not Closing the gripper ");
+    //ROS_INFO("rotateValve:Not Closing the gripper ");
     //gripper3={1.35, -0.60, -0.50, -0.50 ,-0.50 };
     //gripper_.controlGripper(LEFT,gripper3);
     // ros::Duration(executionTime/2).sleep();
@@ -129,7 +131,7 @@ bool rotateValve::compute_traj(geometry_msgs::Point center, float radius, std::v
     geometry_msgs::Point centerPelvis;
     current_state_->transformPoint(center,centerPelvis, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
     geometry_msgs::Pose point;
-    for (int i = 0; i < (NumSteps-5)/2-1; ++i) {
+    for (int i = -2; i < (NumSteps-5)/2-1; ++i) {
         point.position.x=centerPelvis.x;
         point.position.y=centerPelvis.y + radius*cos((i*2*M_PI/NumSteps)-(M_PI/2));
         point.position.z=centerPelvis.z + radius*sin((i*2*M_PI/NumSteps)-(M_PI/2));
@@ -158,6 +160,7 @@ bool rotateValve::compute_traj(geometry_msgs::Point center, float radius, std::v
         points.push_back(point);
     }
     visualise_traj(points);
+    t3Utils.task3LogPub("grab_valve_node: Computed Rotation trajectory");
     return true;
 
 }
@@ -238,6 +241,7 @@ bool rotateValve::move_valve(std::vector<geometry_msgs::Pose> poses, float execu
         ros::Duration(executionTime).sleep();
 
         ROS_INFO("rotateValve: Adjusting chest to zero position");
+        t3Utils.task3LogPub("grab_valve_node: Adjusting chest to zero position");
         chest_controller_->controlChest(0,0,0);
         ros::Duration(executionTime).sleep();
 
