@@ -1882,6 +1882,21 @@ decision_making::TaskResult valTask2::walkToFinishTask(string name, const FSMCal
         execute_once = false;
     }
 
+
+    // kill the node and exit
+    ROS_INFO("task2 completed killing the node");
+    task2_utils_->taskLogPub("task2 completed killing the node");
+
+    int ret = std::system("rosnode kill task2");
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+        task1_utils_->taskLogPub("Give manual walk goal");
+    }
+
+    return TaskResult::SUCCESS();
+
     static int fail_count = 0;
 
     // walk to the goal location
