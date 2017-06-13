@@ -170,9 +170,11 @@ bool task2Utils::isPanelPicked(const armSide side)
     taskLogPub("valTask2:: Total effort on arm is" + std::to_string(total_effort));
 
     if (total_effort > EFFORT_THRESHOLD){
+        taskLogPub(TEXT_GREEN + "Total effort on arm is "+ std::to_string(total_effort) + TEXT_NC);
         return true;
     }
 
+    taskLogPub(TEXT_RED + "Total effort on arm is "+ std::to_string(total_effort) + TEXT_NC);
     return false;
 }
 
@@ -424,9 +426,12 @@ bool task2Utils::isCableInHand(armSide side)
 
 bool task2Utils::isCableTouchingSocket()
 {
-//    return taskMsg.checkpoint_durations.size() > 2;
-    ROS_ERROR("task2Utils::isCableTouchingSocket is not implemented");
-    return 1;
+    if(current_checkpoint_ == 5 && taskMsg.checkpoint_durations.size() > 3 ){
+        taskLogPub(TEXT_GREEN + "Cable is touching socket" + TEXT_NC);
+        return true;
+    }
+
+    return false;
 }
 
 geometry_msgs::Pose task2Utils::grasping_hand(armSide &side, geometry_msgs::Pose handle_pose)
@@ -509,6 +514,7 @@ bool task2Utils::checkpoint_init()
 
 bool task2Utils::shakeTest(const armSide graspingHand)
 {
+    return true;
     ROS_INFO("task2Utils::shakeTest : Closing, opening and reclosing grippers to see if the panel falls off");
     //close
     //open
@@ -530,6 +536,10 @@ bool task2Utils::shakeTest(const armSide graspingHand)
 void task2Utils::taskStatusCB(const srcsim::Task &msg)
 {
     taskMsg = msg;
+    if(current_checkpoint_ == 5 && taskMsg.checkpoint_durations.size() > 3 ){
+        taskLogPub(TEXT_GREEN + "Cable is touching socket" + TEXT_NC);
+    }
+
     if (msg.current_checkpoint != current_checkpoint_){
         current_checkpoint_ = msg.current_checkpoint;
 

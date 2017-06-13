@@ -35,10 +35,6 @@ enum class CLEAR_BOX_CLOUD{
 class task2Utils {
 private:
 
-    const std::string TEXT_RED="\033[0;31m";
-    const std::string TEXT_GREEN = "\033[0;32m";
-    const std::string TEXT_NC=  "\033[0m";
-
     ros::NodeHandle nh_;
     // chest controller
     chestTrajectory* chest_controller_;
@@ -125,6 +121,10 @@ private:
     bool isHarnessDetached;
 
 public:
+    const std::string TEXT_RED="\033[0;31m";
+    const std::string TEXT_GREEN = "\033[0;32m";
+    const std::string TEXT_NC=  "\033[0m";
+
     task2Utils(ros::NodeHandle nh);
     ~task2Utils();
     bool afterPanelGraspPose(const armSide side, bool isRotationRequired);

@@ -34,6 +34,7 @@ private:
     wholebodyManipulation* wholebody_controller_;
     chestTrajectory* chest_controller_;
     ValkyrieWalker walk_;
+    task3Utils t3Utils;
     const std::vector<float> LEFT_SHOULDER_SEED_INITIAL = {-0.81,0.0,0.65,-1.51,1.26,0.0,0.0};
     ros::Publisher marker_pub;
 };

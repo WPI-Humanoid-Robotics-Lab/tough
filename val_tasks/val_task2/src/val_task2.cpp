@@ -67,7 +67,7 @@ valTask2::valTask2(ros::NodeHandle nh):
 
     //utils
     task2_utils_    = new task2Utils(nh_);
-    task2_utils_->taskLogPub("Starting task 2");
+    task2_utils_->taskLogPub(task2_utils_->TEXT_GREEN + "Starting task 2"+ task2_utils_->TEXT_NC);
     robot_state_    = RobotStateInformer::getRobotStateInformer(nh_);
 
     control_common_ = new valControlCommon(nh_);
@@ -323,7 +323,8 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
             retry_count = 0;
             fail_count = 0;
             // update the plane coeffecients
-            eventQueue.riseEvent("/DETECTED_ROVER");
+//            eventQueue.riseEvent("/DETECTED_ROVER");
+            eventQueue.riseEvent("/MANUAL_EXECUTION");
             ROS_INFO("detected rover");
             task2_utils_->taskLogPub("detected rover");
             if(rover_detector_ != nullptr) delete rover_detector_;
@@ -406,7 +407,8 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
             ROS_INFO("reached The rover");
             task2_utils_->taskLogPub("reached the rover");
             ros::Duration(3).sleep(); // This is required for steps to complete
-            eventQueue.riseEvent("/REACHED_ROVER");
+//            eventQueue.riseEvent("/REACHED_ROVER");
+            eventQueue.riseEvent("/MANUAL_EXECUTION");
             executeOnce = true;
             ros::Duration(1).sleep();
         }
@@ -532,8 +534,8 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
         task2_utils_->taskLogPub("valTask2::detectPanelTask : quat " + std::to_string(poses[idx].orientation.x) + " "  + std::to_string(poses[idx].orientation.y) + " " + std::to_string(poses[idx].orientation.z ) + " " + std::to_string(poses[idx].orientation.w));
         retry_count = 0;
 
-        eventQueue.riseEvent("/DETECTED_PANEL");
-        //        eventQueue.riseEvent("/MANUAL_EXECUTION");
+//        eventQueue.riseEvent("/DETECTED_PANEL");
+        eventQueue.riseEvent("/MANUAL_EXECUTION");
         if(solar_panel_detector_ != nullptr) delete solar_panel_detector_;
         solar_panel_detector_ = nullptr;
     }
@@ -1973,6 +1975,8 @@ decision_making::TaskResult valTask2::endTask(string name, const FSMCallContext&
 {
     ROS_INFO_STREAM("executing " << name);
     task2_utils_->taskLogPub("executing " + name);
+
+    int ret = std::system("rosnode kill task2");
 
     eventQueue.riseEvent("/STOP_TIMEOUT");
     return TaskResult::SUCCESS();
