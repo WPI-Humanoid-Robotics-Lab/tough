@@ -1892,7 +1892,7 @@ decision_making::TaskResult valTask2::walkToFinishTask(string name, const FSMCal
     // wait infinetly until an external even occurs
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
-        task1_utils_->taskLogPub("Give manual walk goal");
+        task2_utils_->taskLogPub("Give manual walk goal");
     }
 
     return TaskResult::SUCCESS();
