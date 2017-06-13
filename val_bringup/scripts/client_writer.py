@@ -50,9 +50,13 @@ def broadcast_client():
             else:
                 # user entered a message
                 msg = sys.stdin.readline()
-                s.send(msg)
-                sys.stdout.write('[OCU] ');
+                if msg.strip() == "?":
+                    print " + : Linux command \n ! : rostopic echo -1\n / : state machine trigger\n $ : Panel offset\n * : Nudge function \n & : Head Control\n"
+                else:
+                    s.send(msg)
+                sys.stdout.write('[OCU] ')
                 sys.stdout.flush()
+
 
 
 if __name__ == "__main__":

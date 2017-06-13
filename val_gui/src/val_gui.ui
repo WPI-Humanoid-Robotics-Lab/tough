@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1920</width>
-    <height>1080</height>
+    <width>1289</width>
+    <height>507</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -59,119 +59,263 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QGroupBox" name="widgetvisualization">
-      <property name="title">
-       <string/>
+    <item row="5" column="1">
+     <widget class="QFrame" name="frameRobotState">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>300</height>
+       </size>
       </property>
-      <layout class="QGridLayout" name="gridLayout_10">
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item row="0" column="1">
-        <widget class="QRadioButton" name="radioBtnPointcloud">
-         <property name="text">
-          <string>PointCloud</string>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QGroupBox" name="groupBox_5">
+         <property name="title">
+          <string>Left Arm</string>
          </property>
-         <attribute name="buttonGroup">
-          <string notr="true">btnGroupDisplays</string>
-         </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout_12">
+          <item>
+           <widget class="QLabel" name="lblLeftShoulderPitch">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblLeftShoulderRoll">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblLeftShoulderYaw">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblLeftElbowPitch">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblLeftForearmYaw">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblLeftWristRoll">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblLeftWristPitch">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
-       <item row="0" column="2">
-        <widget class="QRadioButton" name="radioBtnNone">
-         <property name="text">
-          <string>None</string>
+       <item>
+        <widget class="QGroupBox" name="groupBox_7">
+         <property name="title">
+          <string>Right Arm</string>
          </property>
-         <attribute name="buttonGroup">
-          <string notr="true">btnGroupDisplays</string>
-         </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout_14">
+          <item>
+           <widget class="QLabel" name="lblRightShoulderPitch">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblRightShoulderRoll">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblRightShoulderYaw">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblRightElbowPitch">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblRightForearmYaw">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblRightWristRoll">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblRightWristPitch">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QRadioButton" name="radioBtnOctomap">
-         <property name="text">
-          <string>OctoMap</string>
-         </property>
-         <attribute name="buttonGroup">
-          <string notr="true">btnGroupDisplays</string>
-         </attribute>
+       <item>
+        <widget class="QWidget" name="widget_8" native="true">
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="1">
+           <widget class="QGroupBox" name="groupBox_4">
+            <property name="title">
+             <string>Robot Position</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_13">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>World X:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="lblRobotPositionX">
+               <property name="text">
+                <string>0.0</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>World Y:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLabel" name="lblRobotPositionY">
+               <property name="text">
+                <string>0.0</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;World &amp;#952;:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLabel" name="lblRobotPositionTheta">
+               <property name="text">
+                <string>0.0</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="btnResetRobot">
+            <property name="text">
+             <string>Reset Robot</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" rowspan="2">
+           <widget class="QWidget" name="widget_4" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <item>
+              <widget class="QGroupBox" name="groupBox_6">
+               <property name="title">
+                <string>Chest Orientation</string>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_13">
+                <item>
+                 <widget class="QLabel" name="lblChestRoll">
+                  <property name="text">
+                   <string>0.0</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="lblChestPitch">
+                  <property name="text">
+                   <string>0.0</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="lblChestYaw">
+                  <property name="text">
+                   <string>0.0</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_3">
+               <property name="title">
+                <string>Neck Orientation</string>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_10">
+                <item>
+                 <widget class="QLabel" name="lblLowerNeckPitch">
+                  <property name="text">
+                   <string>0.0</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="lblNeckYaw">
+                  <property name="text">
+                   <string>0.0</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="lblNeckUpperPitch">
+                  <property name="text">
+                   <string>0.0</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
      </widget>
-    </item>
-    <item row="0" column="0" colspan="3">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QPushButton" name="btnRvizInteract">
-        <property name="text">
-         <string>Interact</string>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">btnGroupRvizTools</string>
-        </attribute>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnRvizMeasure">
-        <property name="text">
-         <string>Measure</string>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">btnGroupRvizTools</string>
-        </attribute>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnRvizPoseEstimate">
-        <property name="text">
-         <string>2D Pose Estimate</string>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">btnGroupRvizTools</string>
-        </attribute>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnRvizNavGoal">
-        <property name="text">
-         <string>2D Nav Goal</string>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">btnGroupRvizTools</string>
-        </attribute>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnRvizPublishPoint">
-        <property name="text">
-         <string>Publish Point</string>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">btnGroupRvizTools</string>
-        </attribute>
-       </widget>
-      </item>
-     </layout>
     </item>
     <item row="5" column="2">
      <widget class="QWidget" name="gb_keyctrl" native="true">
@@ -190,6 +334,9 @@
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="0">
         <widget class="QTabWidget" name="controlTabs">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="maximumSize">
           <size>
            <width>500</width>
@@ -209,6 +356,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_4">
               <item>
                <widget class="QWidget" name="widget_8" native="true">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_15">
                  <item>
                   <widget class="QRadioButton" name="radioNudgeSideLeft">
@@ -229,6 +379,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="btnMoveToPoint">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Move to Point</string>
                 </property>
@@ -373,7 +526,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>437</width>
+                   <width>127</width>
                    <height>87</height>
                   </rect>
                  </property>
@@ -646,6 +799,9 @@
           </layout>
          </widget>
          <widget class="QWidget" name="tabNeck">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <attribute name="title">
            <string>Neck</string>
           </attribute>
@@ -719,6 +875,9 @@
           </layout>
          </widget>
          <widget class="QWidget" name="tabWalk">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <attribute name="title">
            <string>Walk</string>
           </attribute>
@@ -851,24 +1010,10 @@ p, li { white-space: pre-wrap; }
       </layout>
      </widget>
     </item>
-    <item row="4" column="4">
-     <widget class="QGroupBox" name="groupBox">
-      <property name="maximumSize">
-       <size>
-        <width>400</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="title">
-       <string>State Machine</string>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_9"/>
-     </widget>
-    </item>
     <item row="4" column="0" colspan="3">
      <widget class="QTabWidget" name="tab_display">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_3dscene">
        <attribute name="title">
@@ -892,268 +1037,119 @@ p, li { white-space: pre-wrap; }
       </widget>
      </widget>
     </item>
-    <item row="5" column="1">
-     <widget class="QFrame" name="frameRobotState">
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>300</height>
-       </size>
+    <item row="3" column="0">
+     <widget class="QGroupBox" name="widgetvisualization">
+      <property name="title">
+       <string/>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QGroupBox" name="groupBox_5">
-         <property name="title">
-          <string>Left Arm</string>
+      <layout class="QGridLayout" name="gridLayout_10">
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item row="0" column="1">
+        <widget class="QRadioButton" name="radioBtnPointcloud">
+         <property name="text">
+          <string>PointCloud</string>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_12">
-          <item>
-           <widget class="QLabel" name="lblLeftShoulderPitch">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblLeftShoulderRoll">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblLeftShoulderYaw">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblLeftElbowPitch">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblLeftForearmYaw">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblLeftWristRoll">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblLeftWristPitch">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <attribute name="buttonGroup">
+          <string notr="true">btnGroupDisplays</string>
+         </attribute>
         </widget>
        </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_7">
-         <property name="title">
-          <string>Right Arm</string>
+       <item row="0" column="2">
+        <widget class="QRadioButton" name="radioBtnNone">
+         <property name="text">
+          <string>None</string>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_14">
-          <item>
-           <widget class="QLabel" name="lblRightShoulderPitch">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblRightShoulderRoll">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblRightShoulderYaw">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblRightElbowPitch">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblRightForearmYaw">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblRightWristRoll">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblRightWristPitch">
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <attribute name="buttonGroup">
+          <string notr="true">btnGroupDisplays</string>
+         </attribute>
         </widget>
        </item>
-       <item>
-        <widget class="QWidget" name="widget_8" native="true">
-         <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="1">
-           <widget class="QGroupBox" name="groupBox_4">
-            <property name="title">
-             <string>Robot Position</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_13">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_7">
-               <property name="text">
-                <string>World X:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLabel" name="lblRobotPositionX">
-               <property name="text">
-                <string>0.0</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_6">
-               <property name="text">
-                <string>World Y:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLabel" name="lblRobotPositionY">
-               <property name="text">
-                <string>0.0</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_8">
-               <property name="text">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;World &amp;#952;:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLabel" name="lblRobotPositionTheta">
-               <property name="text">
-                <string>0.0</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="btnResetRobot">
-            <property name="text">
-             <string>Reset Robot</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" rowspan="2">
-           <widget class="QWidget" name="widget_4" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_3">
-             <item>
-              <widget class="QGroupBox" name="groupBox_6">
-               <property name="title">
-                <string>Chest Orientation</string>
-               </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_13">
-                <item>
-                 <widget class="QLabel" name="lblChestRoll">
-                  <property name="text">
-                   <string>0.0</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="lblChestPitch">
-                  <property name="text">
-                   <string>0.0</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="lblChestYaw">
-                  <property name="text">
-                   <string>0.0</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_3">
-               <property name="title">
-                <string>Neck Orientation</string>
-               </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_10">
-                <item>
-                 <widget class="QLabel" name="lblLowerNeckPitch">
-                  <property name="text">
-                   <string>0.0</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="lblNeckYaw">
-                  <property name="text">
-                   <string>0.0</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="lblNeckUpperPitch">
-                  <property name="text">
-                   <string>0.0</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
+       <item row="0" column="0">
+        <widget class="QRadioButton" name="radioBtnOctomap">
+         <property name="text">
+          <string>OctoMap</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">btnGroupDisplays</string>
+         </attribute>
         </widget>
        </item>
       </layout>
      </widget>
     </item>
-    <item row="5" column="4">
-     <widget class="QWidget" name="btnGrpArmSide_2" native="true">
-      <layout class="QHBoxLayout" name="horizontalLayout_11"/>
-     </widget>
+    <item row="0" column="0" colspan="3">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QPushButton" name="btnRvizInteract">
+        <property name="text">
+         <string>Interact</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">btnGroupRvizTools</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnRvizMeasure">
+        <property name="text">
+         <string>Measure</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">btnGroupRvizTools</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnRvizPoseEstimate">
+        <property name="text">
+         <string>2D Pose Estimate</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">btnGroupRvizTools</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnRvizNavGoal">
+        <property name="text">
+         <string>2D Nav Goal</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">btnGroupRvizTools</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnRvizPublishPoint">
+        <property name="text">
+         <string>Publish Point</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">btnGroupRvizTools</string>
+        </attribute>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -1162,7 +1158,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1920</width>
+     <width>1289</width>
      <height>21</height>
     </rect>
    </property>
@@ -1173,9 +1169,9 @@ p, li { white-space: pre-wrap; }
  <connections/>
  <buttongroups>
   <buttongroup name="btnGroupFeet"/>
-  <buttongroup name="btnGroupArm"/>
-  <buttongroup name="btnGroupDisplays"/>
   <buttongroup name="btnGroupRvizTools"/>
   <buttongroup name="btnGroupNudge"/>
+  <buttongroup name="btnGroupArm"/>
+  <buttongroup name="btnGroupDisplays"/>
  </buttongroups>
 </ui>
