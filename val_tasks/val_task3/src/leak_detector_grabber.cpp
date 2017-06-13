@@ -122,7 +122,7 @@ void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float exe
         gripper_.controlGripper(side, PREGRASP_RIGHT);
     }
 
-    float standing_offset = getStandingPose(side, user_goal);
+    float standing_offset = getStandingOffset(side, user_goal);
 
     ROS_INFO_STREAM("Walking to standing pose (TODO) (offset " << standing_offset << ")");
     ros::Duration(2).sleep();
