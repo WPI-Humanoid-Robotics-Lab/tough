@@ -1,10 +1,13 @@
 #include <val_task3/val_task3_utils.h>
 #include <math.h>
 
-task3Utils::task3Utils(ros::NodeHandle nh): nh_(nh),arm_controller_(nh_) {
+task3Utils::task3Utils(ros::NodeHandle nh): nh_(nh),arm_controller_(nh_)
+{
+    current_state_       = RobotStateInformer::getRobotStateInformer(nh_);
+
     visited_map_sub_  = nh_.subscribe("/visited_map",10, &task3Utils::visited_map_cb, this);
     task_status_sub_  = nh_.subscribe("/srcsim/finals/task", 10, &task3Utils::taskStatusCB, this);
-
+    task3_log_pub_    = nh_.advertise<std_msgs::String>("/field/log",10);
     is_climbstairs_finished_ = false;
 }
 
@@ -98,6 +101,30 @@ void task3Utils::blindNavigation(geometry_msgs::Pose2D & goal){
     }
 }
 
+// Copied from task2utils
+geometry_msgs::Pose task3Utils::grasping_hand(armSide &side, geometry_msgs::Pose handle_pose) {
+    geometry_msgs::Pose poseInPelvisFrame;
+    current_state_->transformPose(handle_pose, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF,
+                                  VAL_COMMON_NAMES::PELVIS_TF);
+    float yaw = tf::getYaw(poseInPelvisFrame.orientation);
+
+    if (yaw > M_PI_2 || yaw < -M_PI_2) {
+        tfScalar r, p, y;
+        tf::Quaternion q;
+        tf::quaternionMsgToTF(handle_pose.orientation, q);
+        tf::Matrix3x3 rot(q);
+        rot.getRPY(r, p, y);
+        y = y - M_PI;
+        geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(r, p, y);
+        handle_pose.orientation = quaternion;
+        current_state_->transformPose(handle_pose, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF,
+                                      VAL_COMMON_NAMES::PELVIS_TF);
+        yaw = tf::getYaw(poseInPelvisFrame.orientation);
+    }
+
+    side = yaw < 0 ? armSide::LEFT : armSide::RIGHT;
+    return handle_pose;
+}
 
 bool task3Utils::isClimbstairsFinished() const
 {
@@ -109,4 +136,11 @@ void task3Utils::resetClimbstairsFlag(void)
     // scoped mutex
     std::lock_guard<std::mutex> lock(climstairs_flag_mtx_);
     is_climbstairs_finished_ = false;
+}
+
+void task3Utils::task3LogPub(std::string data){
+
+    std_msgs::String ms;
+    ms.data = data;
+    task3_log_pub_.publish(ms);
 }

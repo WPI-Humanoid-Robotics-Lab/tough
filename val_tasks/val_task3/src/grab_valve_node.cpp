@@ -13,9 +13,11 @@ int main(int argc, char **argv)
     rotateValve rotate(nh);
     gripperControl gc(nh);
 
+
     geometry_msgs::Point valveCentre;
     std::vector<geometry_msgs::Pose> points;
-    bool walkingResult;
+    bool walkingResult, trajectoryResult;
+    task3Utils t3Utils(nh);
 
     ros::Publisher stopTraj= nh.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/stop_all_trajectories",1,true);
     ihmc_msgs::StopAllTrajectoryRosMessage stopMsg;
@@ -29,6 +31,7 @@ int main(int argc, char **argv)
         valveCentre.y = std::atof(argv[2]);
         valveCentre.z = std::atof(argv[3]);
         gripper        = std::atof(argv[4]);
+        t3Utils.task3LogPub("grab_valve_node: Received the centre coordinates for valve");
     }
 
     else {
@@ -43,18 +46,27 @@ int main(int argc, char **argv)
 
     if(walkingResult){
         //Rotating the valve six times
+        t3Utils.task3LogPub("grab_valve_node: trying to rotate the valve");
         for(size_t i = 1; i< 4; ++i){
             ROS_INFO("Try Number : %d", i );
+            t3Utils.task3LogPub("grab_valve_node : Try Number :" + std::to_string(i));
             // rotate.grab_valve(pt);
             rotate.grab_valve(valveCentre);
             if (gripper == 1) gc.closeGripper(LEFT);
             rotate.compute_traj(valveCentre,0.18,points);
-            rotate.move_valve(points);
+            trajectoryResult = rotate.move_valve(points);
+            if(!trajectoryResult) t3Utils.task3LogPub("trajectory was not planned");
+
 
         }
+         t3Utils.task3LogPub("grab_valve_node: Done Rotating the valve");
     }
 
-    else ROS_INFO("The path was not planned");
+    else{
+
+        ROS_INFO("The path was not planned, Not doing anything");
+        t3Utils.task3LogPub("grab_valve_node : The path was not planned, Not doing anything");
+    }
 
     ros::Duration(1.0).sleep();
 

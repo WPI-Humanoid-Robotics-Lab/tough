@@ -41,9 +41,10 @@ void doorOpener::openDoor(geometry_msgs::Pose &valveCenterWorld){
 //    ROS_INFO("openDoor: Walking back");
 //    walker_.walkToGoal(preDoorOpenGoal);
 
+    task3_.task3LogPub(" door_opener_node : Walking back");
     x_offset.clear();
     y_offset.clear();
-    x_offset = {-0.2,-0.2,-0.3,-0.3};
+    x_offset = {-0.2,-0.2,-0.4,-0.4};
     y_offset = {0.1,0.1,0.2,0.2};
     walker_.walkLocalPreComputedSteps(x_offset,y_offset,LEFT);
     ros::Duration(4.0).sleep();
@@ -51,6 +52,7 @@ void doorOpener::openDoor(geometry_msgs::Pose &valveCenterWorld){
 
     //Opening hands
     ROS_INFO("openDoor: Openign arms");
+    task3_.task3LogPub(" door_opener_node : Openign arms");
     task3_.beforDoorOpenPose();
 
     gripper_.closeGripper(LEFT);
@@ -58,6 +60,8 @@ void doorOpener::openDoor(geometry_msgs::Pose &valveCenterWorld){
 
     ros::Duration(3.0).sleep();
     //Walking close to the door
+
+    task3_.task3LogPub(" door_opener_node : Walking close to the door");
     robot_state_->transformPose(valveCenterWorld,valveCenter,
                                 VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
     robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
@@ -79,6 +83,8 @@ void doorOpener::openDoor(geometry_msgs::Pose &valveCenterWorld){
 
      //Walk straight few small steps
     ROS_INFO("Walking again");
+    task3_.task3LogPub(" door_opener_node : Walking again");
+
     x_offset.clear();
     y_offset.clear();
     x_offset = {0.3,0.3,0.5,0.5};
@@ -87,15 +93,18 @@ void doorOpener::openDoor(geometry_msgs::Pose &valveCenterWorld){
     ros::Duration(4.0).sleep();
 
     ROS_INFO("Walking last step");
+    task3_.task3LogPub(" door_opener_node : Walking last 2 steps");
+
     x_offset.clear();
     y_offset.clear();
     x_offset = {0.3,0.3,0.5,0.5};
     y_offset = {0.0, 0.0, 0.0, 0.0};
     walker_.walkLocalPreComputedSteps(x_offset,y_offset,LEFT);
 
-    // @todo spread left arm
+
     ros::Duration(1.0).sleep();
 
+    task3_.task3LogPub(" door_opener_node : Resetting the robot");
     control_common_.resetRobot();
 
 }
