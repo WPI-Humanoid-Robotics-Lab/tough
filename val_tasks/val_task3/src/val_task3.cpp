@@ -92,6 +92,7 @@ bool valTask3::preemptiveWait(double ms, decision_making::EventQueue &queue){
 decision_making::TaskResult valTask3::initTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
   ROS_INFO_STREAM("valTask3::initTask : executing " << name);
+  task3_utils_->task3LogPub("valTask3::initTask : executing " + name);
   static int retry_count = 0;
 
   // reset map count for the first entry
@@ -101,6 +102,7 @@ decision_making::TaskResult valTask3::initTask(string name, const FSMCallContext
 
   // the state transition can happen from an event externally or can be geenerated here
   ROS_INFO("Occupancy Grid has been updated %d times, tried %d times", map_update_count_, retry_count);
+  task3_utils_->task3LogPub("valTask3::initTask : Occupancy grid has been updated : " + std::to_string(map_update_count_) + " times and tried : " + std::to_string(retry_count));
   if (map_update_count_ > 3) {
     // move to a configuration that is robust while walking
     retry_count = 0;
@@ -125,17 +127,20 @@ decision_making::TaskResult valTask3::initTask(string name, const FSMCallContext
     if(retry_count == 3) head_controller_->moveHead(0,0,-20);
 
     ROS_INFO("valTask3::initTask : Retry Count : %d. Wait for occupancy grid to be updated with atleast 2 messages", retry_count);
+    task3_utils_->task3LogPub("valTask3::initTask : Retry Count : " + std::to_string(retry_count) + " Wait for occupancy grid to be updated with atleast 2 messages");
     ros::Duration(2.0).sleep();
     eventQueue.riseEvent("/INIT_RETRY");
   }
   else {
     retry_count = 0;
     ROS_INFO("valTask3::initTask : Failed to initialize");
+    task3_utils_->task3LogPub("valTask3::initTask : Failed to initialize");
     eventQueue.riseEvent("/INIT_FAILED");
   }
 
   while(!preemptiveWait(1000, eventQueue)){
     ROS_INFO("valTask3::initTask waiting for transition");
+    task3_utils_->task3LogPub("valTask3::initTask waiting for transition");
   }
   return TaskResult::SUCCESS();
 }
@@ -144,7 +149,7 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
 {
 
   ROS_INFO_STREAM("valTask3::detectStairsTask : executing " << name);
-
+  task3_utils_->task3LogPub("valTask3::initTask : executing " + name);
   static int retry_count = 0;
 
   // detect stairs
@@ -171,14 +176,15 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
     pose2D.y = poses[idx].position.y;
 
     ROS_INFO_STREAM("valTask3::detectStairsTask : x " << pose2D.x << " y " << pose2D.y);
-
+    task3_utils_->task3LogPub("valTask3::detectStairsTask: x : " + std::to_string(pose2D.x) + " y :  " + std::to_string(pose2D.y));
     // get the theta
     pose2D.theta = tf::getYaw(poses[idx].orientation);
     setStairDetectWalkPose(pose2D);
 
     ROS_INFO_STREAM("valTask3::detectStairsTask : quat " << poses[idx].orientation.x << " " <<poses[idx].orientation.y <<" "<<poses[idx].orientation.z <<" "<<poses[idx].orientation.w );
+    task3_utils_->task3LogPub("valTask3::detectStairsTask : quat " + std::to_string(poses[idx].orientation.x) + " " + std::to_string(poses[idx].orientation.y )+ " " + std::to_string(poses[idx].orientation.z )+ " " + std::to_string(poses[idx].orientation.w ));
     ROS_INFO_STREAM("valTask3::detectStairsTask : yaw: " << pose2D.theta );
-
+    task3_utils_->task3LogPub("valTask3::detectStairsTask : yaw: " + std::to_string(pose2D.theta));
     //reset count
     retry_count = 0;
 
@@ -197,6 +203,7 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
     stair_detector_ = nullptr;
 
     ROS_INFO("valTask3::detectStairsTask : reset fail count");
+    task3_utils_->task3LogPub("valTask3::detectStairsTask : reset fail count");
   }
   // if failed retry detecting the panel
   else
@@ -209,11 +216,13 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
     eventQueue.riseEvent("/DETECT_STAIRS_RETRY");
 
     ROS_INFO("valTask3::detectStairsTask: increment fail count");
+    task3_utils_->task3LogPub("valTask3::detectStairsTask: increment fail count");
   }
 
   while(!preemptiveWait(1000, eventQueue)){
 
     ROS_INFO("valTask3::detectStairsTask waiting for transition");
+    task3_utils_->task3LogPub("valTask3::detectStairsTask waiting for transition");
   }
 
   return TaskResult::SUCCESS();
@@ -222,6 +231,7 @@ decision_making::TaskResult valTask3::detectStairsTask(string name, const FSMCal
 decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCallContext& context, EventQueue& eventQueue){
 
   ROS_INFO_STREAM_ONCE("valTask3::walkToStairsTask : executing " << name);
+  task3_utils_->task3LogPub("valTask3::initTask : executing " + name);
 
   static int fail_count = 0;
 

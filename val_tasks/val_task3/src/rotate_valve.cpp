@@ -209,7 +209,7 @@ bool rotateValve::move_valve(std::vector<geometry_msgs::Pose> poses, float execu
 
     moveit_msgs::RobotTrajectory traj;
 
-    if (left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false) > 0.90){
+    if (left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false) > 0.50){
 
 
         // Planning whole body motion
