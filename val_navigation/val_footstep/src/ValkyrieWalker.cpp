@@ -82,6 +82,37 @@ bool ValkyrieWalker::walkNSteps(int n, float x_offset, float y_offset, bool cont
     return true;
 }
 
+bool ValkyrieWalker::walkNStepsWRTPelvis(int n, float x_offset, float y_offset, bool continous, armSide startLeg, bool waitForSteps)
+{
+    ihmc_msgs::FootstepDataListRosMessage list ;
+    list.default_transfer_time = transfer_time;
+    list.default_swing_time = swing_time;
+    list.execution_mode = execution_mode;
+
+    list.unique_id = ValkyrieWalker::id ;
+
+    for (int m =1; m <= n ; m++) {
+        if(m%2 == 1) {
+            list.footstep_data_list.push_back(*getOffsetStepWRTPelvis(startLeg , m*x_offset, m*y_offset));
+        }
+        else {
+            list.footstep_data_list.push_back(*getOffsetStepWRTPelvis((startLeg+1)%2 , m*x_offset, m*y_offset));
+        }
+
+    }
+    if(!continous){
+        if (n%2 ==1) {
+            list.footstep_data_list.push_back(*getOffsetStepWRTPelvis((startLeg+1)%2  , n*x_offset, n*y_offset));
+        }
+        if (n%2 ==0) {
+            list.footstep_data_list.push_back(*getOffsetStepWRTPelvis(startLeg , n*x_offset, n*y_offset));
+        }
+    }
+
+    this->walkGivenSteps(list, waitForSteps);
+    return true;
+}
+
 bool ValkyrieWalker::walkPreComputedSteps(const std::vector<float> x_offset, const std::vector<float> y_offset, armSide startLeg){
 
     ihmc_msgs::FootstepDataListRosMessage list;
@@ -600,6 +631,36 @@ ihmc_msgs::FootstepDataRosMessage::Ptr ValkyrieWalker::getOffsetStep(int side , 
     next->swing_height = swing_height;
     return next;
 
+}
+
+ihmc_msgs::FootstepDataRosMessage::Ptr ValkyrieWalker::getOffsetStepWRTPelvis(int side , float x, float y)
+{
+
+    ihmc_msgs::FootstepDataRosMessage::Ptr next(new ihmc_msgs::FootstepDataRosMessage());
+    geometry_msgs::Point currentWorldLocation,currentPelvisLocation;
+
+    // get the current step
+    getCurrentStep(side, *next);
+    currentWorldLocation.x=next->location.x;
+    currentWorldLocation.y=next->location.y;
+    currentWorldLocation.z=next->location.z;
+
+    // transform the step to pelvis
+    current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    // add the offsets wrt to pelvis
+    currentPelvisLocation.x+=x;
+    currentPelvisLocation.y+=y;
+    // tranform back the point to plevis
+    current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF);
+
+    // update the new location
+    next->location.x=currentWorldLocation.x;
+    next->location.y=currentWorldLocation.y;
+    next->location.z=currentWorldLocation.z;
+    next->swing_height = swing_height;
+
+    // return it
+    return next;
 }
 
 bool ValkyrieWalker::turn(armSide side)

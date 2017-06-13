@@ -12,6 +12,7 @@
 #include <tf/transform_datatypes.h>
 #include "val_footstep/ValkyrieWalker.h"
 #include "val_task3_utils.h"
+#include "val_control_common/val_control_common.h"
 
 class doorOpener{
 
@@ -19,7 +20,7 @@ public:
     doorOpener(ros::NodeHandle nh);
     ~doorOpener();
 
-    void openDoor(geometry_msgs::Pose valveCenterWorld);
+    void openDoor(geometry_msgs::Pose &valveCenterWorld);
 
 private:
     ros::NodeHandle nh_;
@@ -28,6 +29,7 @@ private:
     task3Utils task3_;
     ValkyrieWalker walker_;
     RobotStateInformer *robot_state_;
+    valControlCommon control_common_;
 };
 
 

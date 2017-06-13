@@ -16,21 +16,32 @@
 #include <val_controllers/val_arm_navigation.h>
 #include <val_controllers/robot_state.h>
 #include "navigation_common/map_generator.h"
-
+#include <srcsim/Task.h>
+#include <mutex>
+#include <std_msgs/String.h>
 
 class task3Utils{
 private:
     ros::NodeHandle nh_;
     armTrajectory arm_controller_;
+    srcsim::Task task_msg_;
+
+    bool is_climbstairs_finished_;
+    std::mutex climstairs_flag_mtx_;
 
     const std::vector<float> RIGHT_ARM_SEED_TABLE_MANIP = {-0.23, 0, 0.70, 1.51, -0.05, 0, 0};
     const std::vector<float> LEFT_ARM_SEED_TABLE_MANIP  = {-0.23, 0, 0.70, -1.51, 0.05, 0, 0};
     const std::vector<float> RIGHT_ARM_DOOR_OPEN = {-1.35, 1.20, 0.75, 0.50, 1.28, 0.0, 0.0};
     const std::vector<float> LEFT_ARM_DOOR_OPEN  = {-0.2f, -1.2f, 0.7222f, -1.5101f, 0.0f, 0.0f, 0.0f};
 
+
+    RobotStateInformer *current_state_;
+
     // Visited map
-    ros::Subscriber visited_map_sub_;
+    ros::Subscriber visited_map_sub_, task_status_sub_;
+    ros::Publisher task3_log_pub_ ;
     void visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg);
+    void taskStatusCB(const srcsim::Task &msg);
     nav_msgs::OccupancyGrid visited_map_;
 
 public:
@@ -39,7 +50,12 @@ public:
     void beforePanelManipPose();
     void beforDoorOpenPose();
     void blindNavigation(geometry_msgs::Pose2D &goal);
+    geometry_msgs::Pose grasping_hand(armSide &side, geometry_msgs::Pose handle_pose);
 
+    bool isClimbstairsFinished() const;
+    void resetClimbstairsFlag(bool);
+    void resetClimbstairsFlag(void);
+    void task3LogPub(std::string data);
 };
 
 

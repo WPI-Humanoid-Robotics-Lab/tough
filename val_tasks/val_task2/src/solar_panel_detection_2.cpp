@@ -75,11 +75,10 @@ solar_panel_detector_2::solar_panel_detector_2(ros::NodeHandle nh, const geometr
         nh_(nh),
         rover_pose_(rover_pose),
         tf_listener_(nh),
-        point_cloud_listener_(nh, "/leftFoot", "/left_camera_frame"),
-        detection_success_(false)
+        point_cloud_listener_(nh, "/leftFoot", "/left_camera_frame")
 {
     pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("solar_panel_detection_debug_pose", 1);
-    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("solar_panel_detection_markers", 1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_markers", 1);
 
     blacklist_pub_ = nh_.advertise<PointCloud>("/block_map", 1);
     // Seems like the specific point type doesn't matter. I can publish PointXYZRGB to this topic and it works.
@@ -146,18 +145,15 @@ void solar_panel_detector_2::cloudCB(const PointCloud::ConstPtr &cloud_raw) {
     tf::poseEigenToMsg(absolute_pose_eigen, absolute_pose.pose);
     pose_pub_.publish(absolute_pose);
 
-    detection_success_ = true;
-    latest_detection_ = absolute_pose;
-
-//    ros::shutdown(); // FOR DEBUGGING ONLY
+    detections_.push_back(absolute_pose.pose);
 }
 
-bool solar_panel_detector_2::getPanelPose(geometry_msgs::PoseStamped &pose) const {
-    if (detection_success_) {
-        pose = latest_detection_;
+bool solar_panel_detector_2::getDetections(std::vector<geometry_msgs::Pose> &detections) const {
+    if (!detections_.empty()) {
+        detections = detections_;
     }
 
-    return detection_success_;
+    return !detections.empty();
 }
 
 solar_panel_detector_2::PointCloud::Ptr solar_panel_detector_2::prefilterCloud(const PointCloud::ConstPtr &cloud_raw) const {

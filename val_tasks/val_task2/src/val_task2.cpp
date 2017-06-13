@@ -79,10 +79,11 @@ valTask2::valTask2(ros::NodeHandle nh):
     // Subscribers
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask2::occupancy_grid_cb, this);
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask2::visited_map_cb, this);
-    panel_handle_offset_sub_ = nh_.subscribe("/panel_offset",10, &valTask2::panelHandleOffsetCB, this);
+    panel_handle_offset_sub_ = nh_.subscribe("/panel_offset",1, &valTask2::panelHandleOffsetCB, this);
+    nudge_sub_ = nh_.subscribe("/nudge_pose",1, &valTask2::nudge_pose_cb, this);
 
     //publishers
-    panel_handle_offset_pub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 10);
+    panel_handle_offset_pub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1);
     task2_utils_->taskLogPub("Setting Multisense Subscribers");
     cv::Mat img;
     ms_sensor_->giveImage(img);
@@ -151,15 +152,41 @@ void valTask2::panelHandleOffsetCB(const std_msgs::Float32 msg)
     marker.id = 1;
     marker.type = visualization_msgs::Marker::ARROW;
     marker.action = visualization_msgs::Marker::ADD;
-    marker.pose = tempPose;
+    marker.pose = solar_panel_handle_pose_;
     marker.scale.x = 0.5;
     marker.scale.y = 0.05;
     marker.scale.z = 0.05;
     marker.color.a = 1.0;
     marker.color.r = 0.0;
     marker.color.g = 1.0;
-    marker.color.b = 0.0;
+    marker.color.b = 1.0;
     panel_handle_offset_pub_.publish(marker);
+}
+
+void valTask2::setPanelRotationFlagCB(const std_msgs::Bool msg)
+{
+    is_rotation_required_ = msg.data;
+}
+
+void valTask2::nudge_pose_cb(const std_msgs::Float64MultiArray msg)
+{
+
+    if(msg.data.size()!=5)
+    {
+        return;
+    }
+
+    std::vector<geometry_msgs::Pose> waypoint;
+    geometry_msgs::Pose pose;
+
+    armSide side = msg.data[0]== 0 ? armSide::LEFT : armSide::RIGHT;
+    if(msg.data[1] ==0) arm_controller_->nudgeArmLocal(side, msg.data[2],msg.data[3],msg.data[4],pose);
+    else arm_controller_->nudgeArmPelvis(side, msg.data[2],msg.data[3],msg.data[4],pose);
+
+    waypoint.clear();
+    waypoint.push_back(pose);
+
+    task2_utils_->planWholeBodyMotion(side, waypoint);
 }
 
 bool valTask2::preemptiveWait(double ms, decision_making::EventQueue& queue) {
@@ -581,10 +608,12 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
         task2_utils_->pausePointCloud();
         retry_count++;
 
-        if (panel_grabber_->grasp_handles(hand, solar_panel_handle_pose_)) {
+        if (panel_grabber_->grasp_handles(hand, solar_panel_handle_pose_, is_rotation_required_)) {
             ROS_INFO("valTask2::graspPanelTask : Plan is 100 % Maybe Grasp is successful. Going to Pick Pannel Task");
             task2_utils_->taskLogPub("valTask2::graspPanelTask : Plan is 100 % Maybe Grasp is successful. Going to Pick Pannel Task");
             eventQueue.riseEvent("/GRASPED_PANEL");
+            task2_utils_->taskLogPub("valTask2::graspPanelTask : Moving panel closer to chest to avoid collision with trailer");
+            task2_utils_->afterPanelGraspPose(panel_grasping_hand_, is_rotation_required_);
         }
         else
         {
@@ -613,13 +642,13 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
 {
     ROS_INFO_STREAM("valTask2::pickPanelTask : executing " << name);
     task2_utils_->taskLogPub("valTask2::pickPanelTask : executing " + name);
-    if(task2_utils_->afterPanelGraspPose(panel_grasping_hand_)){
+    if(task2_utils_->afterPanelGraspPose(panel_grasping_hand_, is_rotation_required_)){
 
         ROS_INFO("valTask2::pickPanelTask : Walking 1 step back");
         task2_utils_->taskLogPub("valTask2::pickPanelTask : Walking 1 step back");
         // increasing pelvis height back to normal
         pelvis_controller_->controlPelvisHeight(0.9);
-        task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_);
+        task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_, is_rotation_required_);
         ros::Duration(1).sleep();
         std::vector<float> x_offset={-0.3,-0.3};
         std::vector<float> y_offset={0.0,0.1};
@@ -650,7 +679,6 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
         walker_->walkToGoal(pose2D);
         ros::Duration(1).sleep();
         walker_->setWalkParms(0.7, 0.7, 0);
-        task2_utils_->movePanelToWalkSafePose(panel_grasping_hand_);
         head_controller_->moveHead(0,0,0);
         ros::Duration(2).sleep();
 //        eventQueue.riseEvent("/PICKED_PANEL");
@@ -1104,6 +1132,11 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
         task2_utils_->clearCurrentPoseMap();
         skip_3 = false;
         executeOnce = false;
+        if(skip_4)
+        {
+            arm_controller_->moveToZeroPose(armSide::LEFT); /// to account for panel being very close to body
+            ros::Duration(1).sleep();
+        }
     }
 
     if(executeOnce)
@@ -1128,7 +1161,8 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
         pose_prev = temp;
         // TODO: check if robot rechead the panel
         executeOnce = true;
-        eventQueue.riseEvent("/ALIGNED_TO_ARRAY");
+//        eventQueue.riseEvent("/ALIGNED_TO_ARRAY");
+        eventQueue.riseEvent("/MANUAL_EXECUTION");
     }
     // check if the pose is changed
     else if (taskCommonUtils::isPoseChanged(pose_prev, solar_array_fine_walk_goal_)) {
@@ -1358,6 +1392,9 @@ decision_making::TaskResult valTask2::deployPanelTask(string name, const FSMCall
         // go to next state of detecting cable
         ROS_INFO("valTask2::deployPanelTask: [SKIP] skipping deploying panel state");
         eventQueue.riseEvent("/DEPLOYED");
+        arm_controller_->moveToDefaultPose(armSide::LEFT);  /// to account for panel being very close to body
+        ros::Duration(1).sleep();
+
         skip_4=false;
         return TaskResult::SUCCESS();
     }
@@ -1379,7 +1416,7 @@ decision_making::TaskResult valTask2::deployPanelTask(string name, const FSMCall
         points.push(button_coordinates_);
 
         // define 4 retry points before going back to detection
-        float offset=0.02;
+        float offset=0.08;
         geometry_msgs::Point buttonPelvis;
         robot_state_->transformPoint(button_coordinates_,buttonPelvis,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
         std::vector<geometry_msgs::Point> retryPoints;
@@ -1844,6 +1881,21 @@ decision_making::TaskResult valTask2::walkToFinishTask(string name, const FSMCal
         ros::Duration(0.2).sleep();
         execute_once = false;
     }
+
+
+    // kill the node and exit
+    ROS_INFO("task2 completed killing the node");
+    task2_utils_->taskLogPub("task2 completed killing the node");
+
+    int ret = std::system("rosnode kill task2");
+
+    // wait infinetly until an external even occurs
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("waiting for transition");
+        task2_utils_->taskLogPub("Give manual walk goal");
+    }
+
+    return TaskResult::SUCCESS();
 
     static int fail_count = 0;
 

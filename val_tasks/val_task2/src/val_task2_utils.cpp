@@ -15,6 +15,10 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     current_state_       = RobotStateInformer::getRobotStateInformer(nh_);
     cable_detector_      = nullptr;
 
+    wholebody_controller_ = new wholebodyManipulation(nh_);
+    right_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    left_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+
 
     current_checkpoint_  = 0;
     table_height_        = 0.826; //trial value
@@ -76,20 +80,20 @@ void task2Utils::isDetachedCB(const srcsim::Harness &harnessMsg)
     mtx_.unlock();
 }
 
-bool task2Utils::afterPanelGraspPose(const armSide side)
+bool task2Utils::afterPanelGraspPose(const armSide side, bool isRotationRequired)
 {
     // reorienting the chest would bring the panel above the rover
-    chest_controller_->controlChest(0,0,0);
-    ros::Duration(2).sleep();
+//    chest_controller_->controlChest(0,0,0);
+//    ros::Duration(2).sleep();
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
-        seed1 = &leftNearChestPalmUp_;
+        seed1 = isRotationRequired ? &leftNearChestPalmUp_ : &leftNearChestPalmDown_;
         seed2 = &rightSeedNonGraspingHand_;
     }
     else
     {
-        seed1 = &rightNearChestPalmUp_;
+        seed1 = isRotationRequired ? &rightNearChestPalmUp_ : &rightNearChestPalmDown_;
         seed2 = &leftSeedNonGraspingHand_;
     }
 
@@ -119,7 +123,7 @@ bool task2Utils::isPointOnWalkway(float x, float y)
     return map_.data.at(index) == CELL_STATUS::FREE;
 }
 
-void task2Utils::movePanelToWalkSafePose(const armSide side)
+void task2Utils::movePanelToWalkSafePose(const armSide side, bool isRotationRequired)
 {
     // reorient the chest
     chest_controller_->controlChest(0,0,0);
@@ -138,9 +142,10 @@ void task2Utils::movePanelToWalkSafePose(const armSide side)
         seed1 = &leftShoulderSeedPanelGraspWalk_;
         grasp = &rightHandGrasp_;
     }
-
-    gripper_controller_->controlGripper(side, *grasp);
-    ros::Duration(1).sleep();
+    if(isRotationRequired){
+        gripper_controller_->controlGripper(side, *grasp);
+        ros::Duration(1).sleep();
+    }
 
     std::vector< std::vector<float> > armData;
     armData.clear();
@@ -172,6 +177,8 @@ bool task2Utils::isPanelPicked(const armSide side)
 
 void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRotated)
 {
+    isPanelRotated = true; // this is to avoid rework. I'll fix it the right way when I have time
+
     armSide nonGraspingHand = (armSide) !graspingHand;
 
     const std::vector<float> *graspingHandPoseUp, *graspingHandPoseDown;
@@ -388,6 +395,8 @@ bool task2Utils::isCableOnTable(geometry_msgs::Pose &cable_pose)
 
 }
 
+
+
 bool task2Utils::isCableInHand(armSide side)
 {
     // this function rotates the hand slighly to detect the cable and brings it back to same position
@@ -538,6 +547,8 @@ void task2Utils::taskStatusCB(const srcsim::Task &msg)
 
         outfile << data.str();
         outfile.close();
+
+        taskLogPub(TEXT_GREEN + "Current Checkpoint : "+ std::to_string(current_checkpoint_) + TEXT_NC);
     }
 
 }
@@ -601,4 +612,24 @@ void task2Utils::taskLogPub(std::string data){
     std_msgs::String ms;
     ms.data = data;
     task2_log_pub_.publish(ms);
+}
+
+bool task2Utils::planWholeBodyMotion(armSide side, std::vector<geometry_msgs::Pose> waypoints)
+{
+    moveit_msgs::RobotTrajectory traj;
+    if(side ==armSide::RIGHT)
+    {
+        if (right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false)> 0.98){
+            ROS_INFO("right arm whole body msg executed");
+            wholebody_controller_->compileMsg(side, traj.joint_trajectory);
+        }
+    }
+    else
+    {
+        if (left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false)> 0.98){
+            ROS_INFO("left arm whole body msg executed");
+            wholebody_controller_->compileMsg(side, traj.joint_trajectory);
+        }
+
+    }
 }

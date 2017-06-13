@@ -18,8 +18,7 @@ int main(int argc, char **argv)
     chestTraj.controlChest(roll, pitch, yaw);
   }
 
-  while(ros::ok())
-  {}
-
+  ros::spinOnce();
+  ros::Duration(2).sleep();
   return 0;
 }

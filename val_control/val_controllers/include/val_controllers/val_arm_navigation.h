@@ -142,8 +142,8 @@ public:
 
     bool moveArmJoint(const armSide side, int jointNumber, const float targetAngle);
 
-    bool nudgeArmLocal(const armSide side, float x, float y, float z);
-    bool nudgeArmPelvis(const armSide side, float x, float y, float z);
+    bool nudgeArmLocal(const armSide side, float x, float y, float z,geometry_msgs::Pose &pose);
+    bool nudgeArmPelvis(const armSide side, float x, float y, float z,geometry_msgs::Pose &pose);
 
 private:
 

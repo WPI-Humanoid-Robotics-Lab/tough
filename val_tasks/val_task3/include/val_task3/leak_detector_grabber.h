@@ -11,6 +11,7 @@
 #include "val_controllers/val_wholebody_manipulation.h"
 #include <val_task_common/val_task_common_utils.h>
 #include <tf/transform_datatypes.h>
+#include <val_task3/val_task3_utils.h>
 
 class leakDetectorGrabber{
 
@@ -18,8 +19,7 @@ public:
     leakDetectorGrabber(ros::NodeHandle nh);
     ~leakDetectorGrabber();
 
-    void graspDetector(armSide side, geometry_msgs::Pose &goal, float executionTime=2.0f);
-
+    void graspDetector(geometry_msgs::Pose goal, float executionTime=2.0f);
 
 private:
     ros::NodeHandle nh_;
@@ -33,7 +33,25 @@ private:
     geometry_msgs::QuaternionStamped leftHandOrientation_ ;
     geometry_msgs::QuaternionStamped rightHandOrientation_;
 
+    ros::Publisher marker_pub_;
+    task3Utils task3_utils_;
+    void pubPoseArrow(const geometry_msgs::Pose &pose,
+                      const std::string &ns,
+                      const int id,
+                      const float r,
+                      const float g,
+                      const float b) const;
+    void pubPoseArrow(const geometry_msgs::Pose &pose,
+                      const std::string &ns,
+                      const int id = 0) const { pubPoseArrow(pose, ns, id, 0.f, 0.5f, 0.5f); };
+    void pubPoseArrow(const geometry_msgs::Pose &pose,
+                      const std::string &ns,
+                      const float r,
+                      const float g,
+                      const float b) const { pubPoseArrow(pose, ns, 0, r, g, b); }
 
+    geometry_msgs::Pose getGraspGoal(const armSide &side, const geometry_msgs::Pose &user_goal) const;
+    geometry_msgs::Pose getReachGoal(const armSide &side, const geometry_msgs::Pose &grasp_goal) const;
 };
 
 #endif // LEAK_DETECTOR_GRASP_H

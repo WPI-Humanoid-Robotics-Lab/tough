@@ -528,7 +528,7 @@ void task1Utils::taskStatusSubCB(const srcsim::Task &msg){
 
         outfile << data.str();
         outfile.close();
-        task1_log_pub_.publish("Current Checkpoint : "+ std::to_string(current_checkpoint_));
+        taskLogPub(TEXT_GREEN + "Current Checkpoint : "+ std::to_string(current_checkpoint_) + TEXT_NC);
     }
 }
 

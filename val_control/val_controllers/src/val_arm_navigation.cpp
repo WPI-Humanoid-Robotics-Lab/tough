@@ -94,7 +94,10 @@ void armTrajectory::moveToZeroPose(armSide side)
     armTrajectory::arm_id--;
     arm_traj.unique_id = armTrajectory::arm_id;
 
-    appendTrajectoryPoint(arm_traj, 2, ZERO_POSE);
+    if(side == armSide::LEFT)
+        appendTrajectoryPoint(arm_traj, 2, {0.1,-0.1,0.1,-0.1,0.1,-0.1,-0.1});
+    else
+        appendTrajectoryPoint(arm_traj, 2, {0.1,0.1,0.1,0.1,0.1,0.1,0.1});
 
     armTrajectoryPublisher.publish(arm_traj);
 
@@ -432,47 +435,55 @@ bool armTrajectory::moveArmJoint(const armSide side, int jointNumber, const floa
     return false;
 }
 
-bool armTrajectory::nudgeArmLocal(const armSide side, float x, float y, float z)
+bool armTrajectory::nudgeArmLocal(const armSide side, float x, float y, float z, geometry_msgs::Pose &pose)
 {
 
     std::cout<<"Nudge arm local called \n";
     std::string target_frame = side == LEFT ? "/leftPalm" : "/rightPalm";
     std::string target_EE_frame = side == LEFT ? VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME : VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
     geometry_msgs::Pose value;
-//    stateInformer_->transformPose(value, value,target_EE_frame, target_frame);
+    geometry_msgs::Quaternion quat;
+
+    // to save the orientation
+    stateInformer_->getCurrentPose(target_EE_frame,value);
+    quat = value.orientation;
+//    std::cout<<"w :"<<quat.w<<" x :"<<quat.x<<" y :"<<quat.y<<" z :"<<quat.z<<"\n";
+
     stateInformer_->getCurrentPose(target_EE_frame,value,target_frame);
-    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
 
     value.position.x+=x;
     value.position.y+=y;
     value.position.z+=z;
 
-    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
     stateInformer_->transformPose(value, value,target_frame,VAL_COMMON_NAMES::WORLD_TF);
-    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
-    moveArmInTaskSpace(side,value, 0.0f);
-
+    value.orientation = quat;
+//    std::cout<<"w :"<<value.orientation.w<<" x :"<<value.orientation.x<<" y :"<<value.orientation.y<<" z :"<<value.orientation.z<<"\n";
+//    moveArmInTaskSpace(side,value, 0.0f);
+    pose = value;
     return true;
 }
 
-bool armTrajectory::nudgeArmPelvis(const armSide side, float x, float y, float z)
+bool armTrajectory::nudgeArmPelvis(const armSide side, float x, float y, float z, geometry_msgs::Pose &pose)
 {
     std::cout<<"Nudge arm pelvis called \n";
     std::string target_frame = VAL_COMMON_NAMES::PELVIS_TF;
     std::string target_EE_frame = side == LEFT ? VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME : VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
     geometry_msgs::Pose value;
+    geometry_msgs::Quaternion quat;
+
+    // to save the orientation
+    stateInformer_->getCurrentPose(target_EE_frame,value);
+    quat = value.orientation;
 
     stateInformer_->getCurrentPose(target_EE_frame,value,target_frame);
-    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
 
     value.position.x+=x;
     value.position.y+=y;
     value.position.z+=z;
 
-    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
     stateInformer_->transformPose(value, value,target_frame,VAL_COMMON_NAMES::WORLD_TF);
-    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
-    moveArmInTaskSpace(side,value, 0.0f);
-
+    value.orientation = quat;
+//    moveArmInTaskSpace(side,value, 0.0f);
+    pose = value;
     return true;
 }
