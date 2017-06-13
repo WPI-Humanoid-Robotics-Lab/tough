@@ -13,7 +13,7 @@
     <node pkg="navigation_common" type="fall_detector" name="fall_detector" />
 
     <!-- start the gaze controller detector -->
-    <node pkg="val_task_common" type="val_gaze_controller" name="val_gaze_controller" />
+    <node pkg="val_controllers" type="test_head" name="test_head" />
 
    <!--IS_FIELD variable is set true on field docker container-->
    <group if="$(optenv IS_FIELD false)">
