@@ -435,7 +435,7 @@ bool armTrajectory::moveArmJoint(const armSide side, int jointNumber, const floa
     return false;
 }
 
-bool armTrajectory::nudgeArmLocal(const armSide side, float x, float y, float z)
+bool armTrajectory::nudgeArmLocal(const armSide side, float x, float y, float z, geometry_msgs::Pose &pose)
 {
 
     std::cout<<"Nudge arm local called \n";
@@ -447,7 +447,7 @@ bool armTrajectory::nudgeArmLocal(const armSide side, float x, float y, float z)
     // to save the orientation
     stateInformer_->getCurrentPose(target_EE_frame,value);
     quat = value.orientation;
-    std::cout<<"w :"<<quat.w<<" x :"<<quat.x<<" y :"<<quat.y<<" z :"<<quat.z<<"\n";
+//    std::cout<<"w :"<<quat.w<<" x :"<<quat.x<<" y :"<<quat.y<<" z :"<<quat.z<<"\n";
 
     stateInformer_->getCurrentPose(target_EE_frame,value,target_frame);
 
@@ -457,13 +457,13 @@ bool armTrajectory::nudgeArmLocal(const armSide side, float x, float y, float z)
 
     stateInformer_->transformPose(value, value,target_frame,VAL_COMMON_NAMES::WORLD_TF);
     value.orientation = quat;
-    std::cout<<"w :"<<value.orientation.w<<" x :"<<value.orientation.x<<" y :"<<value.orientation.y<<" z :"<<value.orientation.z<<"\n";
-    moveArmInTaskSpace(side,value, 0.0f);
-
+//    std::cout<<"w :"<<value.orientation.w<<" x :"<<value.orientation.x<<" y :"<<value.orientation.y<<" z :"<<value.orientation.z<<"\n";
+//    moveArmInTaskSpace(side,value, 0.0f);
+    pose = value;
     return true;
 }
 
-bool armTrajectory::nudgeArmPelvis(const armSide side, float x, float y, float z)
+bool armTrajectory::nudgeArmPelvis(const armSide side, float x, float y, float z, geometry_msgs::Pose &pose)
 {
     std::cout<<"Nudge arm pelvis called \n";
     std::string target_frame = VAL_COMMON_NAMES::PELVIS_TF;
@@ -483,7 +483,7 @@ bool armTrajectory::nudgeArmPelvis(const armSide side, float x, float y, float z
 
     stateInformer_->transformPose(value, value,target_frame,VAL_COMMON_NAMES::WORLD_TF);
     value.orientation = quat;
-    moveArmInTaskSpace(side,value, 0.0f);
-
+//    moveArmInTaskSpace(side,value, 0.0f);
+    pose = value;
     return true;
 }

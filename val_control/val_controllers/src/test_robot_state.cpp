@@ -11,8 +11,7 @@ int main(int argc, char** argv)
   spinner.start();
 
   ros::Rate loop(60);
-  while (ros::ok())
-  {
+
     std::vector<float> positions;
 //    obj->getJointPositions(positions);
 
@@ -61,10 +60,10 @@ int main(int argc, char** argv)
       totalEffort += fabs(i);
     }
     std::cout << "Total Effort : "<<totalEffort<< std::endl;
-
+    ros::Duration(2).sleep();
     ros::spinOnce();
-    loop.sleep();
-  }
+    //loop.sleep();
+
 
   return 0;
 }

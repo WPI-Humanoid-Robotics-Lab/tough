@@ -62,6 +62,7 @@ public:
      * @return
      */
     bool walkNSteps(int n, float x_offset, float y_offset=0.0f, bool continous=false, armSide startLeg=RIGHT, bool waitForSteps=true);
+    bool walkNStepsWRTPelvis(int n, float x_offset, float y_offset=0.0f, bool continous=false, armSide startLeg=RIGHT, bool waitForSteps=true);
 
     /**
      * @brief walkPreComputedSteps If the steps to be sent to the robot are not identical, use this function to send steps that are precomputed.
@@ -138,6 +139,7 @@ private:
     void waitForSteps( int n);
     bool getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list);
     ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStep(int side, float x, float y);
+    ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStepWRTPelvis(int side , float x, float y);
 
 };
 

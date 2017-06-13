@@ -1,16 +1,27 @@
-rostopic pub /decision_making/task2/events std_msgs/String "data: '/REGULAR'"
++rostopic pub /decision_making/task2/events std_msgs/String "data: '/REGULAR'"
 
-rostopic pub /panel_offset std_msgs/Float32 "data: 0.04"
++rostopic pub /panel_offset std_msgs/Float32 "data: 0.04"
 
-rostopic pub /decision_making/task2/events std_msgs/String "data: '/GOTO_STATE_GRASP_SOLAR_PANEL'"
++rostopic pub /decision_making/task2/events std_msgs/String "data: '/GOTO_STATE_GRASP_SOLAR_PANEL'"
 
-rostopic pub /decision_making/task2/events std_msgs/String "data: '/GOTO_STATE_ROTATE_PANEL'"
++rostopic pub /decision_making/task2/events std_msgs/String "data: '/GOTO_STATE_ROTATE_PANEL'"
 
-rostopic pub /decision_making/task2/events std_msgs/String "data: '/MANUAL_EXECUTION'"
++rostopic pub /decision_making/task2/events std_msgs/String "data: '/MANUAL_EXECUTION'"
 
-rostopic pub /decision_making/task2/events std_msgs/String "data: '/GOTO_STATE_FIND_CABLE_INTERMEDIATE'"
++rostopic pub /decision_making/task2/events std_msgs/String "data: '/GOTO_STATE_FIND_CABLE_INTERMEDIATE'"
 
-rostopic pub /field/reset_pointcloud std_msgs/Empty
++rostopic pub /field/reset_pointcloud std_msgs/Empty
 
++rostopic pub /field/reset_map std_msgs/Empty
 
++rosservice call /srcsim/finals/start_task 2 1
 
++roslaunch val_task2 task2.launch
+
++rostopic pub /field/reset_map std_msgs/Empty
+
+ +roslaunch val_task2 task2.launch
+ 
+ +rosservice call /srcsim/finals/start_task 2 1
+ 
+ +rosnode kill task1

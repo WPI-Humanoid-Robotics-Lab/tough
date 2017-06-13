@@ -38,6 +38,7 @@
 #include "navigation_common/map_generator.h"
 #include "perception_common/MultisensePointCloud.h"
 #include <std_msgs/Float32.h>
+#include <std_msgs/Bool.h>
 
 using namespace decision_making;
 
@@ -104,8 +105,10 @@ class valTask2 {
     valControlCommon* control_common_;
 
     ros::Subscriber occupancy_grid_sub_;
+    ros::Subscriber nudge_sub_;
     unsigned int map_update_count_;
     void occupancy_grid_cb(const nav_msgs::OccupancyGrid::Ptr msg);
+    void nudge_pose_cb(const std_msgs::Float64MultiArray msg);
 
     // goal location for the panel
     geometry_msgs::Pose2D panel_walk_goal_;
@@ -138,6 +141,8 @@ class valTask2 {
 
     static valTask2* currentObject;
 
+    ros::Subscriber set_panel_rotation_flag_sub_;
+    void setPanelRotationFlagCB(const std_msgs::Bool msg);
     bool is_rotation_required_;
     // Visited map
     ros::Subscriber visited_map_sub_;

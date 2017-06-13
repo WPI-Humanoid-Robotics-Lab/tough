@@ -111,7 +111,7 @@ bool rotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTi
     ROS_INFO("rotateValve:Not Closing the gripper ");
     //gripper3={1.35, -0.60, -0.50, -0.50 ,-0.50 };
     //gripper_.controlGripper(LEFT,gripper3);
-   // ros::Duration(executionTime/2).sleep();
+    // ros::Duration(executionTime/2).sleep();
     //gripper_.closeGripper(LEFT);
     //ros::Duration(executionTime/2).sleep();
 
@@ -129,17 +129,17 @@ bool rotateValve::compute_traj(geometry_msgs::Point center, float radius, std::v
     geometry_msgs::Point centerPelvis;
     current_state_->transformPoint(center,centerPelvis, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
     geometry_msgs::Pose point;
-    for (int i = -3; i < (NumSteps-5)/2-1; ++i) {
+    for (int i = 0; i < (NumSteps-5)/2-1; ++i) {
         point.position.x=centerPelvis.x;
         point.position.y=centerPelvis.y + radius*cos((i*2*M_PI/NumSteps)-(M_PI/2));
         point.position.z=centerPelvis.z + radius*sin((i*2*M_PI/NumSteps)-(M_PI/2));
 
 
-//    int NumSteps = 18;
-//    for(int i = 0; i<(NumSteps/2-1);++i){
-//        point.positsion.x=centerPelvis.x;
-//        point.position.y=centerPelvis.y + radius*cos(i*2*M_PI/NumSteps);
-//        point.position.z=centerPelvis.z + radius*sin(i*2*M_PI/NumSteps);
+        //    int NumSteps = 18;
+        //    for(int i = 0; i<(NumSteps/2-1);++i){
+        //        point.positsion.x=centerPelvis.x;
+        //        point.position.y=centerPelvis.y + radius*cos(i*2*M_PI/NumSteps);
+        //        point.position.z=centerPelvis.z + radius*sin(i*2*M_PI/NumSteps);
 
 
         if(i<=1)
@@ -205,42 +205,48 @@ bool rotateValve::move_valve(std::vector<geometry_msgs::Pose> poses, float execu
     }
 
     moveit_msgs::RobotTrajectory traj;
-    left_arm_planner_->getTrajFromCartPoints(waypoints,traj,false);
 
-    // Planning whole body motion
-    wholebody_controller_->compileMsg(LEFT,traj.joint_trajectory);
-    ros::Duration(executionTime*4.0).sleep();
+    if (left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false) > 0.90){
 
-    ROS_INFO("rotateValve: Done executing motion !!!");
 
-    ROS_INFO("rotateValve: Opening Grippers");
-    gripper_.openGripper(LEFT);
-    ros::Duration(executionTime/2).sleep();
+        // Planning whole body motion
+        wholebody_controller_->compileMsg(LEFT,traj.joint_trajectory);
+        ros::Duration(executionTime*4.0).sleep();
 
-    std::vector< std::vector<float> > armData;
-    //Moving down and towards the robot
-    armData.clear();
-    armData.push_back({-0.23,-1.21,0.65,-0.84,1.28,0,0});
-    armTraj_.moveArmJoints(LEFT, armData, executionTime);
-    ros::Duration(executionTime).sleep();
+        ROS_INFO("rotateValve: Done executing motion !!!");
 
-    armData.clear();
-    armData.push_back({-0.23,-0.74,0.65,-0.84,1.28,0,0});
-    armTraj_.moveArmJoints(LEFT, armData, executionTime);
-    ros::Duration(executionTime).sleep();
+        ROS_INFO("rotateValve: Opening Grippers");
+        gripper_.openGripper(LEFT);
+        ros::Duration(executionTime/2).sleep();
 
-    //Moving arm outside
-    armData.clear();
-    armData.push_back({0.1,0.1,0.1,0.1,0.1,0.1,0.1});
-    armTraj_.moveArmJoints(LEFT, armData, executionTime);
-    ros::Duration(executionTime).sleep();
+        std::vector< std::vector<float> > armData;
+        //Moving down and towards the robot
+        armData.clear();
+        armData.push_back({-0.23,-1.21,0.65,-0.84,1.28,0,0});
+        armTraj_.moveArmJoints(LEFT, armData, executionTime);
+        ros::Duration(executionTime).sleep();
 
-    ROS_INFO("rotateValve: Adjusting chest to zero position");
-    chest_controller_->controlChest(0,0,0);
-    ros::Duration(executionTime).sleep();
+        armData.clear();
+        armData.push_back({-0.23,-0.74,0.65,-0.84,1.28,0,0});
+        armTraj_.moveArmJoints(LEFT, armData, executionTime);
+        ros::Duration(executionTime).sleep();
+
+        //Moving arm outside
+        armData.clear();
+        armData.push_back({0.1,0.1,0.1,0.1,0.1,0.1,0.1});
+        armTraj_.moveArmJoints(LEFT, armData, executionTime);
+        ros::Duration(executionTime).sleep();
+
+        ROS_INFO("rotateValve: Adjusting chest to zero position");
+        chest_controller_->controlChest(0,0,0);
+        ros::Duration(executionTime).sleep();
+
+        return true;
+    }
+    else return false;
 }
 
-void rotateValve::reOrientbeforgrab(geometry_msgs::Point valveCenter)
+bool rotateValve::reOrientbeforgrab(geometry_msgs::Point valveCenter)
 {
     //Alligning relative to the centre of the valve
     geometry_msgs::Pose   pelvisPose;
@@ -260,8 +266,10 @@ void rotateValve::reOrientbeforgrab(geometry_msgs::Point valveCenter)
     preDoorOpenGoal.theta    = tf::getYaw(pelvisPose.orientation);
 
 
-    walk_.walkToGoal(preDoorOpenGoal);
+    bool result = walk_.walkToGoal(preDoorOpenGoal);
+    ROS_INFO("retOrientbeforegrab: the walking controller returned: %d",result);
     ros::Duration(1.0).sleep();
+    return result;
 }
 
 rotateValve::~rotateValve(){

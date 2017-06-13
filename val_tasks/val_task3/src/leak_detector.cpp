@@ -6,12 +6,17 @@ leakDetector::leakDetector(ros::NodeHandle nh):
 {
     leak_sb_ = nh_.subscribe("/task3/checkpoint5/leak", 10, &leakDetector::leakMsgCB, this);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>( "leak_search_points", 10, true);
+    left_arm_planner_ = new cartesianPlanner("leftMiddleFingerGroup", "/world"); //leftPalm
+    wholebody_controller_= new wholebodyManipulation(nh_);
 }
 
 leakDetector::~leakDetector()
 {
     //shutdown subscribers
     leak_sb_.shutdown();
+
+    if(left_arm_planner_ != nullptr)      delete left_arm_planner_;
+    if(wholebody_controller_ != nullptr)  delete wholebody_controller_;
 }
 
 void leakDetector::leakMsgCB(const srcsim::Leak &leakmsg)
@@ -20,41 +25,47 @@ void leakDetector::leakMsgCB(const srcsim::Leak &leakmsg)
 }
 
 
-void leakDetector::generateSearchWayPoints(geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom, float ver_low_limit, float ver_high_limit, std::vector<geometry_msgs::Point>& way_points)
+void leakDetector::generateSearchWayPoints(geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom, float ver_low_limit, float ver_high_limit, std::vector<geometry_msgs::Pose>& way_points)
 {
     // generate way points with the dimension of the field of view of the tool
 
-    float points_in_vertical_line = (ver_high_limit - ver_low_limit)/VERTICAL_WIDTH;
-    float points_in_horizontal_line = (horz_right_bottom.x - horz_left_top.x)/HORIZONTAL_WIDTH;
+    int points_in_vertical_line = (ver_high_limit - ver_low_limit)/VERTICAL_WIDTH + 1;
+    int points_in_horizontal_line = (horz_right_bottom.y - horz_left_top.y)/HORIZONTAL_WIDTH + 1;
 
-    geometry_msgs::Point point;
-    point.x = horz_left_top.x;
-    point.y = horz_left_top.y;
-    point.z = ver_high_limit;
+    geometry_msgs::Pose pose;
+    pose.position.x = horz_left_top.x;
+    pose.position.y = horz_left_top.y;
+    pose.position.z = ver_high_limit;
 
-    int z=0;
-    for (float i=0; i<points_in_horizontal_line; i+=VERTICAL_WIDTH, z++)
+    ///@todo: fill orientation
+
+
+    for (int i=0; i<points_in_horizontal_line; i++)
     {
-        for (float j=0; j<points_in_vertical_line; j+=HORIZONTAL_WIDTH)
+        for (int j=0; j<points_in_vertical_line; j++)
         {
-            point.z = (z%2 == 0) ? point.z-VERTICAL_WIDTH : point.z+VERTICAL_WIDTH;
-            way_points.push_back(point);
+            pose.position.z = (i%2 == 0) ? pose.position.z-VERTICAL_WIDTH : pose.position.z+VERTICAL_WIDTH;
+            way_points.push_back(pose);
         }
-        point.y += HORIZONTAL_WIDTH;
-        way_points.push_back(point);
+        pose.position.y += HORIZONTAL_WIDTH;
+        way_points.push_back(pose);
     }
 
     ROS_INFO("%d search points generated", way_points.size());
     // visulaize points
-    visulatise3DPoints(way_points);
+    visulatiseSearchPoints(way_points, horz_left_top, horz_right_bottom);
 }
 
-void leakDetector::findLeak (geometry_msgs::Point& leak_point)
+void leakDetector::findLeak (std::vector<geometry_msgs::Pose>& way_points, geometry_msgs::Point& leak_point)
 {
-    // get the way points
+    // plan the trajectory
+    moveit_msgs::RobotTrajectory traj;
+    left_arm_planner_->getTrajFromCartPoints(way_points, traj, false);
+    ROS_INFO("trajectory generated");
 
-    // plan the path
-
+    // execute the trajectory
+    wholebody_controller_->compileMsg(armSide::LEFT, traj.joint_trajectory);
+    ROS_INFO("trajectory sent to controllers");
 }
 
 // helper functions
@@ -68,9 +79,8 @@ void leakDetector::setLeakValue(double leak_value)
     leak_value_ = leak_value;
 }
 
-void leakDetector::visulatise3DPoints(std::vector<geometry_msgs::Point> &points)
+void leakDetector::visulatiseSearchPoints(std::vector<geometry_msgs::Pose> &poses, geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom)
 {
-
     visualization_msgs::MarkerArray marker_array = visualization_msgs::MarkerArray();
 
     visualization_msgs::Marker marker;
@@ -83,17 +93,31 @@ void leakDetector::visulatise3DPoints(std::vector<geometry_msgs::Point> &points)
     marker.scale.y = 0.05;
     marker.scale.z = 0.05;
     marker.color.a = 1.0;
+    marker.color.r = 0.0;
+    marker.color.g = 0.0;
+    marker.color.b = 1.0;
+    marker.lifetime = ros::Duration(0);
+
+    int i=0;
+    for (i=0; i<poses.size();i++)
+    {
+        marker.id = i;
+        marker.pose.position = poses[i].position;
+        marker_array.markers.push_back(marker);
+    }
+
+    // add end points
     marker.color.r = 1.0;
     marker.color.g = 0.0;
     marker.color.b = 0.0;
-    marker.lifetime = ros::Duration(0);
 
-    for (int i=0; i<points.size();i++)
-    {
-        marker.id = i;
-        marker.pose.position = points[i];
-        marker_array.markers.push_back(marker);
-    }
+    marker.id = i++;
+    marker.pose.position = horz_left_top;
+    marker_array.markers.push_back(marker);
+
+    marker.id = i++;
+    marker.pose.position = horz_right_bottom;
+    marker_array.markers.push_back(marker);
 
     marker_pub_.publish(marker_array);
     ros::Duration(0.2).sleep();

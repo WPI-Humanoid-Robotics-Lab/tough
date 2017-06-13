@@ -40,17 +40,19 @@ add_executable(test_jointState src/test_robot_state.cpp)
 add_dependencies(test_jointState  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_jointState   ${catkin_LIBRARIES} val_controllers)
 
-add_executable(test_arm src/test_arm_navigation.cpp)
+
+add_executable(test_arm_navigation src/test_arm_navigation.cpp)
+add_dependencies(test_arm_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_arm_navigation  ${catkin_LIBRARIES} val_controllers)
+
+add_executable(test_arm src/test_arm.cpp)
 add_dependencies(test_arm ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_arm  ${catkin_LIBRARIES} val_controllers)
+
 
 add_executable(test_nudgeLocal src/test_nudgeLocal.cpp)
 add_dependencies(test_nudgeLocal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_nudgeLocal  ${catkin_LIBRARIES} val_controllers)
-
-add_executable(test_nudgeOffset src/test_nudgeOffset.cpp)
-add_dependencies(test_nudgeOffset ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_nudgeOffset  ${catkin_LIBRARIES} val_controllers)
 
 add_executable(test_chest src/test_chest_navigation.cpp)
 add_dependencies(test_chest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

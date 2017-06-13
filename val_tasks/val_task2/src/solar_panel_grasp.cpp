@@ -156,7 +156,7 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
         gripper_.controlGripper(side,GRIPPER_STATE::CUP);
     }
     else {
-        gripper_.closeGripper(side);
+        gripper_.controlGripper(side,GRIPPER_STATE::TIGHT_HOLD);
     }
     ros::Duration(0.3).sleep();
 

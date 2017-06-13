@@ -10,6 +10,7 @@
 #include "val_moveit_planners/val_cartesian_planner.h"
 #include "val_controllers/val_wholebody_manipulation.h"
 #include "val_footstep/ValkyrieWalker.h"
+#include "val_task3/val_task3_utils.h"
 
 class rotateValve
 {
@@ -21,7 +22,7 @@ public:
     bool move_valve(std::vector<geometry_msgs::Pose> points, float executionTime=2.0f);
     std::vector<geometry_msgs::Pose> poses;
     geometry_msgs::QuaternionStamped leftHandOrientationTop_,leftHandOrientationSide_,leftHandOrientationSideDown_,leftHandOrientationSideUp_;
-    void reOrientbeforgrab(geometry_msgs::Point valveCenter);
+    bool reOrientbeforgrab(geometry_msgs::Point valveCenter);
     ~rotateValve();
 
 private:
