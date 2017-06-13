@@ -7,7 +7,10 @@
 #include <eigen_conversions/eigen_msg.h>
 
 // minimum time it takes to execute a head trajectory, in seconds
-#define MIN_TRAJ_TIME 2.f
+#define TRAJ_STEP_TIME 0.5f
+// maximum difference in degrees between waypoints
+#define MAX_ANGLE 5
+
 
 std::unique_ptr<HeadTrajectory> headTraj;
 RobotStateInformer *current_state;
@@ -19,61 +22,73 @@ void clickedPointCB(const geometry_msgs::PointStamped &point_in) {
     geometry_msgs::Pose head_pelvisframe;
     current_state->getCurrentPose(VAL_COMMON_NAMES::ROBOT_HEAD_FRAME_TF, head_pelvisframe, VAL_COMMON_NAMES::PELVIS_TF);
 
-    Eigen::Vector3d given_pt, head_pt;
-    tf::pointMsgToEigen(point_pelvisframe, given_pt);
-    tf::pointMsgToEigen(head_pelvisframe.position, head_pt);
+    double x = point_pelvisframe.x - head_pelvisframe.position.x;
+    double y = point_pelvisframe.y - head_pelvisframe.position.y;
+    double z = point_pelvisframe.z - head_pelvisframe.position.z;
+    double d = std::sqrt(x*x + y*y);
 
-    Eigen::Quaterniond rotation_quat = Eigen::Quaterniond::FromTwoVectors(
-            Eigen::Vector3d::UnitX(),
-            given_pt - head_pt
-    );
-
-    Eigen::Vector3f rpy = rotation_quat.toRotationMatrix().eulerAngles(0, 1, 2).cast<float>();
+    double roll = 0;
+    double yaw = std::atan2(y, x);
+    double pitch = -std::atan2(z, d);
 
     // From this point down, all computations use degrees (including headTraj->moveHead)
-    rpy *= 180.f / M_PI;
+    yaw *= 180.f / M_PI;
+    pitch *= 180.f / M_PI;
 
-    ROS_INFO_STREAM("val_gaze_controller requested angle was " << std::fixed << rpy.transpose().format({1}));
+    ROS_INFO_STREAM(std::fixed << std::setprecision(1)
+                               << "angles before limit are 0, " << pitch << ", " << yaw);
 
-    if (std::abs(rpy[0]) > 20) {
-        ROS_WARN_STREAM("gaze_controller ignoring point with roll = " << std::fixed << std::setprecision(0) << rpy[0]);
-        return;
-    }
 
-    // test yaw first on purpose because pitch limits are complicated
-    if (std::abs(rpy[2]) > 50) {
-        ROS_WARN_STREAM("gaze_controller ignoring point with yaw = " << std::fixed << std::setprecision(0) << rpy[2]);
-        return;
-    }
+    // Apply limits: -90 <= yaw <= 90
+    yaw = std::max(-90., std::min(yaw, 90.));
 
     // If yaw is above 50 deg, the pitch is limited to 40 deg max; otherwise it's limited to 55 - 0.5*yaw
     // (formula deterimed experimentally) (note negative yaw means to look upwards)
-    float pitch_upper_limit = (std::abs(rpy[2]) > 50) ? 40 : (50 - 0.5f * std::abs(rpy[2]));
-    if (rpy[1] > pitch_upper_limit || rpy[1] < -45) {
-        ROS_WARN_STREAM("gaze_controller ignoring point with pitch = " << std::fixed << std::setprecision(0) << rpy[1]
-                                                                       << " (upper limit " << pitch_upper_limit << ")");
-        return;
+    double pitch_upper_limit = (std::abs(yaw) > 50) ? 40 : (50 - 0.5 * std::abs(yaw));
+
+    // Apply limits: -50 < pitch < pitch_upper_limit
+    pitch = std::max(-50., std::min(pitch, pitch_upper_limit));
+
+
+    // the incoming geometry_msgs::Quaternion is transformed to a tf::Quaterion
+    tf::Quaternion quat;
+    tf::quaternionMsgToTF(head_pelvisframe.orientation, quat);
+
+    // the tf::Quaternion has a method to acess roll pitch and yaw
+    double prev_roll, prev_pitch, prev_yaw;
+    tf::Matrix3x3(quat).getRPY(prev_roll, prev_pitch, prev_yaw);
+
+    prev_roll *= 180.f / M_PI;
+    prev_pitch *= 180.f / M_PI;
+    prev_yaw *= 180.f / M_PI;
+
+    prev_roll = 180 + prev_roll; // roll is defined upside-down in head frame
+    if (prev_roll > 180) prev_roll -= 360;
+
+    double roll_err = roll - prev_roll;
+    double pitch_err = pitch - prev_pitch;
+    double yaw_err = yaw - prev_yaw;
+    double largest_err = std::max(std::abs(roll_err), std::max(std::abs(pitch_err), std::abs(yaw_err)));
+    std::size_t n_steps = static_cast<std::size_t>(largest_err / MAX_ANGLE);
+
+    // One more waypoint than steps because waypoints starts with the current state
+    std::vector<std::vector<float>> waypoints(n_steps + 1);
+    for (std::size_t i = 0; i < n_steps + 1; i++) {
+        double roll_i = prev_roll + roll_err * i / n_steps;
+        double pitch_i = prev_pitch + pitch_err * i / n_steps;
+        double yaw_i = prev_yaw + yaw_err * i / n_steps;
+
+        ROS_INFO_STREAM(std::fixed << std::setprecision(1)
+                                   << "waypoint " << roll_i << ", " << pitch_i << ", " << yaw_i);
+
+        waypoints[i] = {static_cast<float>(roll_i), static_cast<float>(pitch_i), static_cast<float>(yaw_i)};
     }
 
-    std::vector<std::vector<float>> trajectory_points;
+    headTraj->moveHead(waypoints, TRAJ_STEP_TIME);
 
-    // Extreme angles are more likely to lead to collision. If any angle is above 20, 40, or 30 for r,p,y respectively,
-    // play it safe and first reset to 0, 0, 0 before moving to the desired angle.
-    if (std::abs(rpy[0]) > 20 || std::abs(rpy[1]) > 40 || std::abs(rpy[2]) > 30) {
-        trajectory_points.push_back({0, 0, 0});
-    }
-
-    trajectory_points.push_back({rpy[0], rpy[1], rpy[2]});
-
-    float traj_time = std::max(MIN_TRAJ_TIME, std::ceil(rpy.maxCoeff() / 20.f));
-
-    headTraj->moveHead(trajectory_points, traj_time);
-    if (trajectory_points.size() > 1) {
-        ROS_INFO_STREAM("val_gaze_controller turning head to 0, 0, 0 before desired goal to prevent collision");
-        ros::Duration(traj_time).sleep();
-    }
-
-    ROS_INFO_STREAM("val_gaze_controller turning head to " << std::fixed << rpy.transpose().format({1}));
+    ros::Duration(TRAJ_STEP_TIME * (n_steps + 1));
+    ROS_INFO_STREAM(std::fixed << std::setprecision(1)
+                               << "val_gaze_controller turned head to " << roll << ", " << pitch << ", " << yaw);
 }
 
 int main(int argc, char **argv) {
