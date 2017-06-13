@@ -2,10 +2,10 @@
 #define MAP_GENERATOR_H
 
 #define MAP_RESOLUTION 0.05
-#define MAP_HEIGHT     50/MAP_RESOLUTION
-#define MAP_WIDTH      50/MAP_RESOLUTION
-#define MAP_X_OFFSET   -5.0
-#define MAP_Y_OFFSET   -25.0
+#define MAP_HEIGHT     100/MAP_RESOLUTION
+#define MAP_WIDTH      100/MAP_RESOLUTION
+#define MAP_X_OFFSET   -50.0
+#define MAP_Y_OFFSET   -50.0
 
 #include <ros/ros.h>
 #include <nav_msgs/OccupancyGrid.h>

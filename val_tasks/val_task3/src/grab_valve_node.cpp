@@ -67,10 +67,9 @@ int main(int argc, char **argv)
         ROS_INFO("The path was not planned, Not doing anything");
         t3Utils.task3LogPub("grab_valve_node : The path was not planned, Not doing anything");
     }
-
+    ros::spinOnce(); // why should i Spin?
     ros::Duration(1.0).sleep();
 
-    ros::spin();
     return 0;
 }
 

@@ -22,6 +22,11 @@
 
 class task3Utils{
 private:
+
+    const std::string TEXT_RED="\033[0;31m";
+    const std::string TEXT_GREEN = "\033[0;32m";
+    const std::string TEXT_NC=  "\033[0m";
+
     ros::NodeHandle nh_;
     armTrajectory arm_controller_;
     srcsim::Task task_msg_;
@@ -34,19 +39,23 @@ private:
     const std::vector<float> RIGHT_ARM_DOOR_OPEN = {-1.35, 1.20, 0.75, 0.50, 1.28, 0.0, 0.0};
     const std::vector<float> LEFT_ARM_DOOR_OPEN  = {-0.2f, -1.2f, 0.7222f, -1.5101f, 0.0f, 0.0f, 0.0f};
 
+
+    RobotStateInformer *current_state_;
+
     // Visited map
     ros::Subscriber visited_map_sub_, task_status_sub_;
     ros::Publisher task3_log_pub_ ;
     void visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg);
     void taskStatusCB(const srcsim::Task &msg);
     nav_msgs::OccupancyGrid visited_map_;
-
+    int current_checkpoint_;
 public:
     task3Utils(ros::NodeHandle nh);
     ~task3Utils();
     void beforePanelManipPose();
     void beforDoorOpenPose();
     void blindNavigation(geometry_msgs::Pose2D &goal);
+    geometry_msgs::Pose grasping_hand(armSide &side, geometry_msgs::Pose handle_pose);
 
     bool isClimbstairsFinished() const;
     void resetClimbstairsFlag(bool);

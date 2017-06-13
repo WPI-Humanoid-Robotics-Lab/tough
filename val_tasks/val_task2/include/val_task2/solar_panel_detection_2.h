@@ -31,8 +31,7 @@ class solar_panel_detector_2
 
     geometry_msgs::PoseStamped rover_pose_;
 
-    bool detection_success_;
-    geometry_msgs::PoseStamped latest_detection_;
+    std::vector<geometry_msgs::Pose> detections_;
 
 public:
 
@@ -50,7 +49,7 @@ public:
 
     void cloudCB(const solar_panel_detector_2::PointCloud::ConstPtr &cloud);
 
-    bool getPanelPose(geometry_msgs::PoseStamped &pose) const;
+    bool getDetections(std::vector<geometry_msgs::Pose> &detections) const;
 
     ~solar_panel_detector_2();
 
