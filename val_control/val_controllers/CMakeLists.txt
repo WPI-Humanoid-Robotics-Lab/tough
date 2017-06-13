@@ -70,6 +70,10 @@ add_executable(test_neck src/test_neck_navigation.cpp)
 add_dependencies(test_neck ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_neck  ${catkin_LIBRARIES} val_controllers)
 
+add_executable(test_wrist src/test_wrist.cpp)
+add_dependencies(test_wrist ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_wrist ${catkin_LIBRARIES} val_controllers)
+
 add_executable(test_gripper src/test_gripper_control.cpp)
 add_dependencies(test_gripper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_gripper  ${catkin_LIBRARIES} val_controllers)

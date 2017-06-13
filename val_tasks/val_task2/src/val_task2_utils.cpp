@@ -488,14 +488,7 @@ bool task2Utils::checkpoint_init()
     ros::Duration(1).sleep();
     clearMap();
     ros::Duration(1).sleep();
-    isHarnessDetached = false;
-    while(!isHarnessDetached)
-    {
-        ros::Duration(0.1).sleep();
-    }
-    ROS_INFO("[SKIP] Harness Detached!");
-    taskLogPub("[SKIP] Harness Detached!");
-    ros::Duration(1).sleep();
+
     walk_->walkLocalPreComputedSteps({-0.2,-0.2,-0.4,-0.4},{0.0,0.0,0.0,0.0},RIGHT);
     ros::Duration(3).sleep();
     head_controller_->moveHead(0,40,0);
