@@ -52,6 +52,8 @@ private:
 
     geometry_msgs::Pose getGraspGoal(const armSide &side, const geometry_msgs::Pose &user_goal) const;
     geometry_msgs::Pose getReachGoal(const armSide &side, const geometry_msgs::Pose &grasp_goal) const;
+
+    float getStandingOffset(const armSide side, const geometry_msgs::Pose user_goal) const;
 };
 
 #endif // LEAK_DETECTOR_GRASP_H
