@@ -13,6 +13,7 @@
 
 #define DEFAULT_SWINGHEIGHT 0.18
 
+#define APPROACH 1
 
 class climbStairs {
 private:
@@ -21,6 +22,11 @@ private:
     chestTrajectory *chest_;
     pelvisTrajectory *pelvis_;
     armTrajectory *arm_;
+    RobotStateInformer *current_state_;
+
+    int approach_ ;
+    void approach_1 (void);
+    void approach_2 (void);
 
 public:
     climbStairs(ros::NodeHandle nh);
