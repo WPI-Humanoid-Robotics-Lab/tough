@@ -81,7 +81,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask2::visited_map_cb, this);
     panel_handle_offset_sub_ = nh_.subscribe("/panel_offset",1, &valTask2::panelHandleOffsetCB, this);
     nudge_sub_ = nh_.subscribe("/nudge_pose",1, &valTask2::nudge_pose_cb, this);
-
+    set_panel_rotation_flag_sub_ = nh_.subscribe("/set_panel_rotation",1, &valTask2::setPanelRotationFlagCB, this);
     //publishers
     panel_handle_offset_pub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1);
     task2_utils_->taskLogPub("Setting Multisense Subscribers");
@@ -602,7 +602,12 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
     if(retry_count< 20){
         setSolarPanelHandlePose(task2_utils_->grasping_hand(hand,solar_panel_handle_pose_));
         setPanelGraspingHand(hand);
-        is_rotation_required_=task2_utils_->isRotationReq(hand,solar_panel_handle_pose_.position,button_coordinates_temp_);
+        if(button_coordinates_temp_.x == 0.0 && button_coordinates_temp_.y == 0.0 && button_coordinates_temp_.z == 0.0){
+            task2_utils_->taskLogPub(task2_utils_->TEXT_RED + "valTask2::graspPanelTask : Using manually provided rotation."+ task2_utils_->TEXT_NC);
+        }
+        else {
+            is_rotation_required_=task2_utils_->isRotationReq(hand,solar_panel_handle_pose_.position,button_coordinates_temp_);
+        }
 
         ROS_INFO("valTask2::graspPanelTask : Rotation is %d ", is_rotation_required_);
         task2_utils_->taskLogPub(task2_utils_->TEXT_RED + "valTask2::graspPanelTask : Rotation is  " + std::to_string(is_rotation_required_)+ task2_utils_->TEXT_NC);
