@@ -641,10 +641,9 @@ bool CableTask::drop_cable(armSide side)
 
 bool CableTask::allign_socket_axis(const geometry_msgs::Point &goal, float offset, float executionTime)
 {
-    current_state_->transformQuaternion(quat, quat);
-
     std::vector<geometry_msgs::Pose> waypoints;
     geometry_msgs::Pose waypoint;
+    current_state_->transformQuaternion(quat, quat);
 
     waypoint.position.x = goal.x;
     waypoint.position.y = goal.y;
