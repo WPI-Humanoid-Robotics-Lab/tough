@@ -633,7 +633,7 @@ bool stair_detector_2::getDetections(std::vector<geometry_msgs::Pose> &detection
         detections = detections_.back();
         ROS_INFO("Walking goal %f %f %f",detections[0].position.x,detections[0].position.y,detections[0].position.z);
         utils_.task3LogPub("stair_detector_2::getDetections x : " + std::to_string(detections[0].position.x)
-                +  " y : " + std::to_string(detections[0].position.y) + " z : "  + std::to_string(detections[0].position.z));
+                +  " y : " + std::to_string(detections[0].position.y) + " z : "  + std::to_string(detections[0].position.z) + "orientation yaw: " + std::to_string(tf::getYaw(detections[0].orientation)));
         return true;
     }
     return false;
