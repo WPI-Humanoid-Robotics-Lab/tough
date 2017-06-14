@@ -2,7 +2,7 @@
 
 climbStairs::climbStairs(ros::NodeHandle nh): nh_(nh)
 {
-  walker_         = new ValkyrieWalker(nh_, 0.8f, 0.8f, 0, 0.22);
+  walker_         = new ValkyrieWalker(nh_, 0.9f, 0.9f, 0, DEFAULT_SWINGHEIGHT);
   chest_          = new chestTrajectory(nh_);
   pelvis_         = new pelvisTrajectory(nh_);
   arm_            = new armTrajectory(nh_);
@@ -35,7 +35,7 @@ void climbStairs::climb_stairs()
 void climbStairs::approach_1 (void)
 {
   // set the chest orientation
-  chest_->controlChest(0,25,0);
+  chest_->controlChest(0,26,0);
   ros::Duration(1).sleep();
 
   // set the arms orientation
@@ -69,6 +69,16 @@ void climbStairs::approach_1 (void)
     walker_->load_eff(armSide::RIGHT, EE_LOADING::LOAD);
     walker_->walkNStepsWRTPelvis(1, STEP_DEPTH, 0.0, true, LEFT);
   }
+
+  // reset the robot configuration
+  chest_->controlChest(0, 0, 0);
+  ros::Duration(0.4).sleep();
+  arm_->moveArmJoint(RIGHT, 1, 1.2);
+  ros::Duration(0.4).sleep();
+  arm_->moveArmJoint(LEFT, 1, -1.2);
+  ros::Duration(0.4).sleep();
+  pelvis_->controlPelvisHeight(1.0);
+  ros::Duration(0.4).sleep();
 
   // last step required to finish the check point
   walker_->setSwing_height(DEFAULT_SWINGHEIGHT);
