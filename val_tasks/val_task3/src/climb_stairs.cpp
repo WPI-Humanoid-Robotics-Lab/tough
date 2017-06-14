@@ -2,7 +2,7 @@
 
 climbStairs::climbStairs(ros::NodeHandle nh): nh_(nh)
 {
-  walker_         = new ValkyrieWalker(nh_, 0.8f, 0.8f, 0, STEP_HEIGHT);
+  walker_         = new ValkyrieWalker(nh_, 0.8f, 0.8f, 0, 0.22);
   chest_          = new chestTrajectory(nh_);
   pelvis_         = new pelvisTrajectory(nh_);
   arm_            = new armTrajectory(nh_);
@@ -35,7 +35,7 @@ void climbStairs::climb_stairs()
 void climbStairs::approach_1 (void)
 {
   // set the chest orientation
-  chest_->controlChest(0,20,0);
+  chest_->controlChest(0,25,0);
   ros::Duration(1).sleep();
 
   // set the arms orientation
@@ -52,17 +52,20 @@ void climbStairs::approach_1 (void)
   walker_->load_eff(armSide::RIGHT, EE_LOADING::LOAD);
   walker_->walkNStepsWRTPelvis(1, FIRSTSTEP_OFFSET, 0.0, true, LEFT);
 
+  // increase the swing height
+  walker_->setSwing_height(STEP_HEIGHT);
+
   // next 8 steps
   for (int i=0; i<8; i++)
   {
-    ros::Duration(1.0).sleep();
+    //ros::Duration(1.0).sleep();
     pelvis_->controlPelvisHeight(1.0);
-    ros::Duration(1.0).sleep();
+    //ros::Duration(1.0).sleep();
     walker_->load_eff(armSide::LEFT, EE_LOADING::LOAD);
     walker_->walkNStepsWRTPelvis(1, STEP_DEPTH, 0.0, true, RIGHT);
-    ros::Duration(1.0).sleep();
+    // ros::Duration(1.0).sleep();
     pelvis_->controlPelvisHeight(1.0);
-    ros::Duration(1.0).sleep();
+    //ros::Duration(1.0).sleep();
     walker_->load_eff(armSide::RIGHT, EE_LOADING::LOAD);
     walker_->walkNStepsWRTPelvis(1, STEP_DEPTH, 0.0, true, LEFT);
   }
@@ -71,7 +74,6 @@ void climbStairs::approach_1 (void)
   walker_->setSwing_height(DEFAULT_SWINGHEIGHT);
   walker_->walkNStepsWRTPelvis(2, 0.3, 0.0);
   ros::Duration(0.1).sleep();
-
 }
 
 void climbStairs::approach_2 (void)
