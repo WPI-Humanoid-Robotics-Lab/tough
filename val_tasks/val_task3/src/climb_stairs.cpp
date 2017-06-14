@@ -80,7 +80,7 @@ void climbStairs::approach_1 (void)
   ros::Duration(0.4).sleep();
   arm_->moveToDefaultPose(RIGHT);
   ros::Duration(0.4).sleep();
-  arm_->moveToZeroPose(LEFT);
+  arm_->moveToDefaultPose(LEFT);
   ros::Duration(0.4).sleep();
   pelvis_->controlPelvisHeight(0.9);
   ros::Duration(0.4).sleep();
