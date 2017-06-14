@@ -2,10 +2,11 @@
 
 climbStairs::climbStairs(ros::NodeHandle nh): nh_(nh)
 {
-  walker_      = new ValkyrieWalker(nh_, 0.8f, 0.8f, 0, STEP_HEIGHT);
-  chest_       = new chestTrajectory(nh_);
-  pelvis_      = new pelvisTrajectory(nh_);
-  arm_         = new armTrajectory(nh_);
+  walker_         = new ValkyrieWalker(nh_, 0.8f, 0.8f, 0, STEP_HEIGHT);
+  chest_          = new chestTrajectory(nh_);
+  pelvis_         = new pelvisTrajectory(nh_);
+  arm_            = new armTrajectory(nh_);
+  current_state_  = RobotStateInformer::getRobotStateInformer(nh_);
 
   approach_ = APPROACH;
 }
@@ -97,6 +98,7 @@ void climbStairs::approach_2 (void)
   // starting step to keep track of the x co-ordinate
   ihmc_msgs::FootstepDataRosMessage l_foot, r_foot;
 
+  ROS_INFO("1");
   // get the current foot steps
   walker_->getCurrentStep(LEFT, l_foot);
   walker_->getCurrentStep(RIGHT, r_foot);
