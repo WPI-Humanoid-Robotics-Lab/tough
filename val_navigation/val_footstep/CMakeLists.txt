@@ -91,6 +91,10 @@ add_executable(walk_goal src/walk_goal.cpp )
 add_dependencies(walk_goal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(walk_goal  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
+add_executable(walk_forward src/walk_forward.cpp )
+add_dependencies(walk_forward ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(walk_forward  ${catkin_LIBRARIES} ${PROJECT_NAME})
+
 add_executable(walk_rotate src/walk_rotate.cpp )
 add_dependencies(walk_rotate ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(walk_rotate  ${catkin_LIBRARIES} ${PROJECT_NAME})

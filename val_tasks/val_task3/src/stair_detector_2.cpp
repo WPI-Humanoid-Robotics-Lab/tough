@@ -31,6 +31,7 @@
 
 stair_detector_2::stair_detector_2(ros::NodeHandle nh) :
         nh_(nh),
+        utils_(nh),
         tf_listener_(nh),
         point_cloud_listener_(nh, "/leftFoot", "/left_camera_frame")
 {
@@ -627,9 +628,12 @@ Eigen::Vector3f stair_detector_2::modelToVector(const pcl::ModelCoefficients &mo
     return coef;
 }
 
-bool stair_detector_2::getDetections(std::vector<geometry_msgs::Pose> &detections) const {
+bool stair_detector_2::getDetections(std::vector<geometry_msgs::Pose> &detections) {
     if (detections_.size() > 3) {
         detections = detections_.back();
+        ROS_INFO("Walking goal %f %f %f",detections[0].position.x,detections[0].position.y,detections[0].position.z);
+        utils_.task3LogPub("stair_detector_2::getDetections x : " + std::to_string(detections[0].position.x)
+                +  " y : " + std::to_string(detections[0].position.y) + " z : "  + std::to_string(detections[0].position.z));
         return true;
     }
     return false;
