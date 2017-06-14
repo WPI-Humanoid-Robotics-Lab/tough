@@ -5,6 +5,7 @@
 #include <val_controllers/val_head_navigation.h>
 #include <val_controllers/robot_state.h>
 #include <eigen_conversions/eigen_msg.h>
+#include <std_msgs/String.h>
 
 // minimum time it takes to execute a head trajectory, in seconds
 #define TRAJ_STEP_TIME 0.5f
@@ -14,7 +15,7 @@
 
 std::unique_ptr<HeadTrajectory> headTraj;
 RobotStateInformer *current_state;
-//ros::Publisher pub;
+std::function<void(const std::string &)> log_msg;
 
 void clickedPointCB(const geometry_msgs::PointStamped &point_in) {
     geometry_msgs::Point point_pelvisframe;
@@ -34,10 +35,6 @@ void clickedPointCB(const geometry_msgs::PointStamped &point_in) {
     // From this point down, all computations use degrees (including headTraj->moveHead)
     yaw *= 180.f / M_PI;
     pitch *= 180.f / M_PI;
-
-    ROS_INFO_STREAM(std::fixed << std::setprecision(1)
-                               << "angles before limit are 0, " << pitch << ", " << yaw);
-
 
     // Apply limits: -90 <= yaw <= 90
     yaw = std::max(-90., std::min(yaw, 90.));
@@ -78,28 +75,43 @@ void clickedPointCB(const geometry_msgs::PointStamped &point_in) {
         double pitch_i = prev_pitch + pitch_err * i / n_steps;
         double yaw_i = prev_yaw + yaw_err * i / n_steps;
 
-        ROS_INFO_STREAM(std::fixed << std::setprecision(1)
-                                   << "waypoint " << roll_i << ", " << pitch_i << ", " << yaw_i);
-
         waypoints[i] = {static_cast<float>(roll_i), static_cast<float>(pitch_i), static_cast<float>(yaw_i)};
     }
 
+    log_msg("turning head to " + std::to_string(roll) + ", " + std::to_string(pitch) + ", " + std::to_string(yaw)
+            + " over " + std::to_string(TRAJ_STEP_TIME * (n_steps + 1)) + " seconds");
     headTraj->moveHead(waypoints, TRAJ_STEP_TIME);
 
     ros::Duration(TRAJ_STEP_TIME * (n_steps + 1));
-    ROS_INFO_STREAM(std::fixed << std::setprecision(1)
-                               << "val_gaze_controller turned head to " << roll << ", " << pitch << ", " << yaw);
+
+    log_msg("head motion complete");
 }
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "val_gaze_controller");
     ros::NodeHandle nh;
 
+    ros::Publisher log_pub = nh.advertise<std_msgs::String>(VAL_COMMON_NAMES::LOG_TOPIC, 10);
+    log_msg = [&log_pub](const std::string &str) {
+        std_msgs::String msg;
+        msg.data = ros::this_node::getName() + ": " + str;
+        log_pub.publish(msg);
+        ROS_INFO("%s", msg.data.c_str());
+    };
+
+    // wait a reasonable amount of time for the subscriber to connect
+    ros::Time wait_until = ros::Time::now() + ros::Duration(0.5);
+    while (log_pub.getNumSubscribers() == 0 && ros::Time::now() < wait_until) {
+        ros::spinOnce();
+        ros::WallDuration(0.1).sleep();
+    }
+
     headTraj.reset(new HeadTrajectory(nh));
     current_state = RobotStateInformer::getRobotStateInformer(nh);
 
     ros::Subscriber clicked_point_subs = nh.subscribe("clicked_point", 1, &clickedPointCB);
-//    pub = nh.advertise<geometry_msgs::PoseStamped>("gaze_controller_pose", 1);
+
+    log_msg("ready");
 
     ros::spin();
 }

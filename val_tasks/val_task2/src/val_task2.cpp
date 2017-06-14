@@ -1551,6 +1551,10 @@ decision_making::TaskResult valTask2::detectCableTask(string name, const FSMCall
 
     int retry = 0;
     while (!cable_detector_->findCable(cable_pose_) && retry++ < 5);
+    task2_utils_->taskLogPub("valTask2::detectCableTask: retry count " + std::to_string(retry) +
+                                     "\ncable x: " + std::to_string(cable_pose_.position.x) +
+                                     " y: " + std::to_string(cable_pose_.position.y) +
+                                     " z: " + std::to_string(cable_pose_.position.z));
     std::cout<<"valTask2::detectCableTask: retry count : "<<retry<<"\n";
     std::cout<<"cable x: "<<cable_pose_.position.x<<" cable y: "<<cable_pose_.position.y<<" cable z: "<<cable_pose_.position.z<<"\n";
 
@@ -1578,6 +1582,10 @@ decision_making::TaskResult valTask2::detectCableTask(string name, const FSMCall
     else
     {
         // cable found
+        task2_utils_->taskLogPub("valTask2::detectCableTask: cable found at"
+                                 " x: " + std::to_string(cable_pose_.position.x) +
+                                 " y: " + std::to_string(cable_pose_.position.y) +
+                                 " z: " + std::to_string(cable_pose_.position.z));
 
         std::cout<<"cable x: "<<cable_pose_.position.x<<" cable y: "<<cable_pose_.position.y<<" cable z: "<<cable_pose_.position.z<<"\n";
         eventQueue.riseEvent("/DETECTED_CABLE");

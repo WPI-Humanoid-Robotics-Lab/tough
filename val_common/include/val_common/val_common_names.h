@@ -5,6 +5,11 @@
 
 namespace VAL_COMMON_NAMES
 {
+/********* Topic Names *********/
+static const std::string LOG_TOPIC = "/field/log";
+static const std::string MARKER_TOPIC = "/visualization_marker";
+static const std::string MARKER_ARRAY_TOPIC = "/visualization_marker_array";
+
 /********* TF Frames *********/
 
 /* Multisense */
