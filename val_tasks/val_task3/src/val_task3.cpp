@@ -251,7 +251,10 @@ decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCal
 
         task3_utils_->task3LogPub("Walking towards stairs");
         // TODO: check if robot rechead the panel
-        eventQueue.riseEvent("/REACHED_STAIRS");
+        // eventQueue.riseEvent("/REACHED_STAIRS");
+
+        ROS_INFO(" go for manual execution");
+        task3_utils_->task3LogPub("go for manual execution");
 
         ros::Duration(1).sleep();
     }
