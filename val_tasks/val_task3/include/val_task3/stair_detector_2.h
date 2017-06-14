@@ -12,7 +12,7 @@
 #include <visualization_msgs/MarkerArray.h>
 
 #include <tf/transform_broadcaster.h>
-
+#include "val_task3_utils.h"
 #include <iostream>
 #include <vector>
 
@@ -42,7 +42,7 @@ public:
     stair_detector_2(ros::NodeHandle nh);
 
     void cloudCB(const stair_detector_2::PointCloud::ConstPtr &cloud);
-    bool getDetections(std::vector<geometry_msgs::Pose> &detections) const;
+    bool getDetections(std::vector<geometry_msgs::Pose> &detections);
 
     ~stair_detector_2();
 
@@ -65,5 +65,6 @@ private:
 
     Eigen::Vector3f modelToVector(const pcl::ModelCoefficients &model) const;
 
+    task3Utils utils_;
 };
 #endif // STAIR_DETECTOR_2_H
