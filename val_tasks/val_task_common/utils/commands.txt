@@ -10,9 +10,10 @@ Don't run the command below before seeing current checkpoint 1 message in reader
 !/task1/checkpoint2/satellite
 
 Task 2
-======
+====
+----+rosservice call /srcsim/finals/start_task 2 1
 
-+rosservice call /srcsim/finals/start_task 2 1
++roslaunch val_task2 task2.launch
 
 /REGULAR
 
@@ -28,7 +29,7 @@ GOTO_STATE_ROTATE_PANEL
 
 +rosrun val_controllers test_arm_navigation 1 1.2 -1.8 0 0 0 0 0
 
-+roslaunch val_task2 task2.launch
+
  
 +rosservice call /srcsim/finals/start_task 2 1
  

@@ -307,6 +307,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
             // get the theta
             pose2D.theta = tf::getYaw(roverPoseWaypoints[Idx][i].orientation);
             detectedPoses2D.push_back(pose2D);
+            task2_utils_->taskLogPub("Rover location X:"+ std::to_string(pose2D.x) + " Y:" + std::to_string(pose2D.y) + " theta:" + std::to_string(pose2D.theta));
         }
         setRoverWalkGoal(detectedPoses2D);
 
@@ -618,7 +619,8 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
         if (panel_grabber_->grasp_handles(hand, solar_panel_handle_pose_, is_rotation_required_)) {
             ROS_INFO("valTask2::graspPanelTask : Plan is 100 % Maybe Grasp is successful. Going to Pick Pannel Task");
             task2_utils_->taskLogPub("valTask2::graspPanelTask : Plan is 100 % Maybe Grasp is successful. Going to Pick Pannel Task");
-            eventQueue.riseEvent("/GRASPED_PANEL");
+//            eventQueue.riseEvent("/GRASPED_PANEL");
+            eventQueue.riseEvent("/MANUAL_EXECUTION");
             task2_utils_->taskLogPub("valTask2::graspPanelTask : Moving panel closer to chest to avoid collision with trailer");
             task2_utils_->afterPanelGraspPose(panel_grasping_hand_, is_rotation_required_);
         }
