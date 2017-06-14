@@ -39,9 +39,14 @@ void climbStairs::approach_1 (void)
   ros::Duration(1).sleep();
 
   // set the arms orientation
-  arm_->moveArmJoint(RIGHT, 1, 0.7);
-  ros::Duration(1).sleep();
-  arm_->moveArmJoint(LEFT, 1, -0.7);
+  std::vector< std::vector<float> > armData;
+  armData.clear();
+  armData.push_back({-0.67,1.24,0.49,1.49,0.97,0.0,0.});
+  arm_->moveArmJoints(RIGHT, armData, 2.0f);
+  ros::Duration(0.2).sleep();
+  armData.clear();
+  armData.push_back({-0.67,-1.24,0.49,-1.49,0.97,0.0,0.});
+  arm_->moveArmJoints(LEFT, armData, 2.0f);
   ros::Duration(1).sleep();
 
   // first step
@@ -73,11 +78,11 @@ void climbStairs::approach_1 (void)
   // reset the robot configuration
   chest_->controlChest(0, 0, 0);
   ros::Duration(0.4).sleep();
-  arm_->moveArmJoint(RIGHT, 1, 1.2);
+  arm_->moveToDefaultPose(RIGHT);
   ros::Duration(0.4).sleep();
-  arm_->moveArmJoint(LEFT, 1, -1.2);
+  arm_->moveToZeroPose(LEFT);
   ros::Duration(0.4).sleep();
-  pelvis_->controlPelvisHeight(1.0);
+  pelvis_->controlPelvisHeight(0.9);
   ros::Duration(0.4).sleep();
 
   // last step required to finish the check point
