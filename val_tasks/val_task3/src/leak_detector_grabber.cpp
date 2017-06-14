@@ -118,16 +118,18 @@ void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float exe
     ROS_DEBUG_STREAM("Grasping with " << (side == armSide::LEFT ? "left" : "right") << " hand");
 
     ROS_INFO("Moving hand to pre-grasp");
+    task3_utils_.task3LogPub("Moving hand to pre-grasp");
+    ("Moving hand to pre-grasp");
     if (side == armSide::LEFT) {
         gripper_.controlGripper(side, PREGRASP_LEFT);
     } else {
         gripper_.controlGripper(side, PREGRASP_RIGHT);
     }
 
-    float standing_offset = getStandingOffset(side, user_goal);
-
-    ROS_INFO_STREAM("Walking to standing pose (TODO) (offset " << standing_offset << ")");
-    task3_utils_.walkSideways(standing_offset);
+//    float standing_offset = getStandingOffset(side, user_goal);
+//
+//    ROS_INFO_STREAM("Walking to standing pose");
+//    task3_utils_.walkSideways(standing_offset);
 
     //move arm to given point with known orientation and higher z
     geometry_msgs::Pose grasp_goal = getGraspGoal(side, user_goal);
@@ -137,7 +139,8 @@ void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float exe
     pubPoseArrow(reach_goal, "detector_reach_goal", 1.f, 0.f, 1.f);
     pubPoseArrow(grasp_goal, "detector_grasp_goal", 0.f, 1.f, 0.f);
 
-    ROS_INFO("Moving to reach goal (reaches towards a point above the detector with the arm only)");
+    ROS_INFO("Moving to reach goal");
+    task3_utils_.task3LogPub("Moving to reach goal");
 
     armTraj_.moveArmInTaskSpace(side, reach_goal, executionTime * 2);
     ros::Duration(executionTime * 2).sleep();
@@ -153,6 +156,7 @@ void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float exe
 //    ros::Duration(5).sleep();
 
     ROS_INFO("Calculating trajectory for grasp");
+    task3_utils_.task3LogPub("Calculating trajectory for grasp");
     if(side == armSide::LEFT) {
         left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
     } else{
@@ -160,11 +164,13 @@ void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float exe
     }
 
     ROS_INFO("Executing grasp trajectory");
+    task3_utils_.task3LogPub("Executing grasp trajectory");
     wholebody_controller_.compileMsg(side, traj.joint_trajectory);
 
     ros::Duration(executionTime + 0.5).sleep();
 
     ROS_INFO("Closing gripper");
+    task3_utils_.task3LogPub("Closing gripper");
     if (side == armSide::LEFT) {
         taskCommonUtils::slowGrip(nh_, side, PREGRASP_LEFT, GRASP_LEFT);
     } else {
@@ -174,6 +180,7 @@ void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float exe
 
 
     ROS_INFO("Moving back to reach goal");
+    task3_utils_.task3LogPub("Moving back to reach goal");
 
     armTraj_.moveArmInTaskSpace(side, reach_goal, executionTime * 2);
     ros::Duration(executionTime * 2).sleep();

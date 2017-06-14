@@ -13,22 +13,25 @@ class leakDetector{
 private:
     ros::NodeHandle nh_;
     ros::Subscriber leak_sb_;
+    ros::Publisher  leak_loc_pub_;
     ros::Publisher  marker_pub_;
-    cartesianPlanner* left_arm_planner_;
-    wholebodyManipulation* wholebody_controller_;
+    RobotStateInformer *current_state_;
+    task3Utils task3Utils_;
+    pelvisTrajectory* pelvis_controller_;
+    armTrajectory*  arm_controller_;
 
-    double leak_value_;
+    armSide side_;
+    bool thumbwards_;
+
+    bool leak_found_;
 
     void visulatiseSearchPoints(std::vector<geometry_msgs::Pose> &poses, geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom);
 
 public:
-    leakDetector(ros::NodeHandle nh);
+    leakDetector(ros::NodeHandle nh, armSide side, bool thumbwards);
     ~leakDetector();
 
 
-    void generateSearchWayPoints(geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom, float ver_low_limit, float ver_high_limit, std::vector<geometry_msgs::Pose> &way_points);
     void leakMsgCB(const srcsim::Leak &leakmsg);
-    double getLeakValue() const;
-    void setLeakValue(double getLeakValue);
-    void findLeak (std::vector<geometry_msgs::Pose> &way_points, geometry_msgs::Point& leak_point);
+    void findLeak();
 };
