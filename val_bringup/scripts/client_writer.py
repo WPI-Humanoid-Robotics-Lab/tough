@@ -51,7 +51,9 @@ def broadcast_client():
                 # user entered a message
                 msg = sys.stdin.readline()
                 if msg.strip() == "?":
-                    print " + : Linux command \n ! : rostopic echo -1\n / : state machine trigger\n $ : Panel offset\n * : Nudge function \n & : Head Control\n"
+                    print "\n + : Linux command.\t\t +<command>\n ! : rostopic echo -1\t\t !</topic_name>\n / : state machine trigger\t /MANUAL_EXECUTION\n " \
+                          "$ : Panel offset\t\t $<offset value>\n * : Nudge function\t\t *<side> <local=0/pelvis=1> <x> <y> <z>\n " \
+                          "& : Head Control\t\t & 0 <pitch> <yaw>\n | : Abort Walking\t\t |\n _ : Stop all trajectories\t _"
                 else:
                     s.send(msg)
                 sys.stdout.write('[OCU] ')
