@@ -34,8 +34,8 @@ void publish_footsteps_cb(const std_msgs::Empty msg){
     geometry_msgs::Pose currPelvisPose;
     current_state->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, currPelvisPose);
 
-    if(distanceBetweenPoints(currPelvisPose.position, pelvisPose.position) > 0.05)
-        return;
+//    if(distanceBetweenPoints(currPelvisPose.position, pelvisPose.position) > 0.05)
+//        return;
 
     walk->walkGivenSteps(list, false);
     list.footstep_data_list.clear();
