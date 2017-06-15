@@ -1,0 +1,65 @@
+<launch>
+    <node pkg="nodelet" type="nodelet" name="task3_pcl_filters_nodelet"  args="manager"/>
+
+
+    <!-- Filter out the hab ceiling -->
+    <node pkg="nodelet" type="nodelet" name="points_in_hab_filter" args="load pcl/PassThrough task3_pcl_filters_nodelet">
+        <!-- Topics -->
+        <remap from="~input" to="/field/assembled_cloud2" />
+        <remap from="~output" to="/field/assembled_cloud2_hab" />
+
+        <!-- Params -->
+        <param name="filter_field_name" value="z" />
+        <param name="filter_limit_min" value="-10" />
+        <param name="filter_limit_max" value="2" />
+        <param name="input_frame" value="/leftFoot" />
+        <param name="output_frame" value="/world" />
+    </node>
+
+    <!-- Filter out the points the robot could collide with -->
+    <!-- Limits to 10m in the x and y because otherwise VoxelFilter doesn't always work -->
+    <node pkg="nodelet" type="nodelet" name="collision_points_crop"
+          args="load pcl/CropBox task3_pcl_filters_nodelet">
+        <!-- Topics -->
+        <remap from="~input" to="/field/assembled_cloud2_hab" />
+        <remap from="~output" to="/field/collision_map_blocker/cropped" />
+
+        <!-- Params -->
+        <param name="min_x" value="-5" />
+        <param name="max_x" value="5" />
+        <param name="min_y" value="-5" />
+        <param name="max_y" value="5" />
+        <param name="min_z" value="0" />
+        <param name="max_z" value="1.7" />
+
+        <param name="input_frame" value="/leftFoot" />
+        <param name="output_frame" value="/world" />
+    </node>
+
+
+    <!-- Downsample -->
+    <node pkg="nodelet" type="nodelet" name="collision_points_downsample"
+          args="load pcl/VoxelGrid task3_pcl_filters_nodelet">
+        <!-- Topics -->
+        <remap from="~input" to="/field/collision_map_blocker/cropped" />
+        <remap from="~output" to="/field/collision_map_blocker/downsampled" />
+
+        <!-- Params -->
+        <param name="leaf_size" value="0.02" />
+        <param name="filter_field_name" value="" /> <!--Defaults to z for some stupid reason-->
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="collision_points_outlier_removal"
+          args="load pcl/RadiusOutlierRemoval task3_pcl_filters_nodelet">
+        <!-- Topics -->
+        <remap from="~input" to="/field/collision_map_blocker/downsampled" />
+        <remap from="~output" to="/field/collision_map_blocker/no_outliers" />
+
+        <!-- Params -->
+        <param name="radius_search" value="0.05" />
+        <param name="min_neighbors" value="10" />
+    </node>
+
+    <node pkg="val_task3" type="obstacle_expansion_node" name="obstacle_expansion_node" />
+
+</launch>

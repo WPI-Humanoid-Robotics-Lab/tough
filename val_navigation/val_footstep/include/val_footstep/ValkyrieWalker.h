@@ -119,9 +119,10 @@ public:
     void load_eff(armSide side, EE_LOADING load);
     bool walk_rotate(float angle);
     bool climbStair(const std::vector<float> x_offset, const std::vector<float> z_offset, armSide startLeg);
-
-private:
+    bool getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list);
     static int id ;
+private:
+
     double transfer_time,swing_time, swing_height;
     int execution_mode;
     int step_counter;
@@ -137,7 +138,6 @@ private:
     void footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage & msg);
 
     void waitForSteps( int n);
-    bool getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list);
     ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStep(int side, float x, float y);
     ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStepWRTPelvis(int side , float x, float y);
 

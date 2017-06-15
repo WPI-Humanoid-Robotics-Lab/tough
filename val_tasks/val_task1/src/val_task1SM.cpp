@@ -6,6 +6,7 @@ FSM(val_task1)
   //define the states
   FSM_STATES
   {
+    STATE_PRE_INIT,
     STATE_INIT, // fails --> error
     STATE_DETECT_PANEL_COARSE, // fails --> indicate error and stay transition to error
     STATE_WALK_TO_SEE_PANEL, // fails --> go back, error,
@@ -26,11 +27,23 @@ FSM(val_task1)
   }
 
   // give the start state
-  FSM_START(STATE_INIT);
+  FSM_START(STATE_PRE_INIT);
 
   // state machine structure and logic, describe the states tansitions
   FSM_BGN // begin state machine
   {
+      FSM_STATE(STATE_PRE_INIT)
+      {
+        // state excecution, call the task
+        FSM_CALL_TASK(STATE_PRE_INIT)
+
+         // state transitions
+         FSM_TRANSITIONS
+        {
+          FSM_ON_EVENT("/GOTO_STATE_INIT", FSM_NEXT(STATE_INIT))
+         FSM_ON_EVENT("/GOTO_STATE_DETECT_FINISH", FSM_NEXT(STATE_DETECT_FINISH))
+        }
+      }
     FSM_STATE(STATE_INIT)
     {
       // state excecution, call the task
