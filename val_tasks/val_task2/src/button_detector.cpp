@@ -122,7 +122,7 @@ bool ButtonDetector::getButtonLocation(geometry_msgs::Point& buttonLoc)
     buttonLoc.x = double (geom_point.point.x);
     buttonLoc.y = double (geom_point.point.y);
     buttonLoc.z = double (geom_point.point.z);
-    //ROS_INFO_STREAM(buttonLoc.x<<"\t"<<buttonLoc.y<<"\t"<<buttonLoc.z<<std::endl);
+    ROS_INFO_STREAM("Button location" <<buttonLoc.x<<"\t"<<buttonLoc.y<<"\t"<<buttonLoc.z);
 
     visualize_point(geom_point.point);
 
@@ -147,7 +147,7 @@ bool ButtonDetector::findButtons(geometry_msgs::Point &buttonLoc)
 
 void ButtonDetector::visualize_point(const geometry_msgs::Point &point){
 
-    std::cout<< "goal origin :\n"<< point << std::endl;
+    ROS_INFO_STREAM("goal origin :\n"<< point );
     static int id = 0;
     visualization_msgs::Marker marker;
     // Set the frame ID and timestamp.  See the TF tutorials for information on these.

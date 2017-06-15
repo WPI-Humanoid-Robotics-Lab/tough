@@ -404,7 +404,7 @@ bool CableDetector::findCable(geometry_msgs::Point &cableLoc)
         if( ms_sensor_->giveDisparityImage(current_disparity_))
         {
             result= getCableLocation(cableLoc);
-            std::cout<<"Cable position x: "<<cableLoc.x<<"\t"<<"Cable position y: "<<cableLoc.y<<"\t"<<"Cable position z: "<<cableLoc.z<<"\n";
+            ROS_INFO_STREAM("Cable position x: "<<cableLoc.x<<"\t"<<"Cable position y: "<<cableLoc.y<<"\t"<<"Cable position z: "<<cableLoc.z<<"\n");
             ros::Duration(0.1).sleep(); // this is required to avoid processing same image in next request
             return result;
         }
@@ -511,7 +511,7 @@ void CableDetector::setTrackbar()
 
 void CableDetector::visualize_point(geometry_msgs::Point point, double r, double g, double b){
 
-    //std::cout<< "goal origin :\n"<< point << std::endl;
+    ROS_INFO_STREAM("goal origin :\n"<< point );
     static int id = 0;
     visualization_msgs::Marker marker;
     // Set the frame ID and timestamp.  See the TF tutorials for information on these.

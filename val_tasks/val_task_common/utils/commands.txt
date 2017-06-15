@@ -47,6 +47,7 @@ GOTO_STATE_ROTATE_PANEL
 
 Helper Functions
 ================
++rostopic pub -1 /approve_footsteps std_msgs/Empty
 
 +rostopic pub -1 /field/reset_pointcloud std_msgs/Empty
 
