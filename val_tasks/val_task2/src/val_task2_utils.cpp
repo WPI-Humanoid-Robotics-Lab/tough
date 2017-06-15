@@ -291,6 +291,7 @@ void task2Utils::rotatePanel(const armSide graspingHand)
     ros::Duration(2).sleep();
     //    arm_controller_->moveArmJoint(nonGraspingHand, 3, -1*tempOffset);
     //    ros::Duration(1).sleep();
+    gripper_controller_->controlGripper(graspingHand, GRIPPER_STATE::TIGHT_HOLD);
 
 }
 
