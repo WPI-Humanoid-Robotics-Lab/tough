@@ -1295,10 +1295,10 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
             arm_controller_->moveArmInTaskSpace(panel_grasping_hand_, currentPalmPose, 1.0f);
             ros::Duration(1).sleep();
 
-            arm_controller_->moveToZeroPose((armSide)!panel_grasping_hand_);
-            ros::Duration(0.5).sleep();
-            arm_controller_->moveToZeroPose(panel_grasping_hand_);
-            ros::Duration(0.5).sleep();
+//            arm_controller_->moveToZeroPose((armSide)!panel_grasping_hand_);
+//            ros::Duration(0.5).sleep();
+//            arm_controller_->moveToZeroPose(panel_grasping_hand_);
+//            ros::Duration(0.5).sleep();
 
             handsPulledOff = true;
             eventQueue.riseEvent("/PLACE_ON_GROUND_RETRY");

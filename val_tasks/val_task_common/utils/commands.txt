@@ -47,6 +47,7 @@ ostopic pub /field/pause_pointcloud std_msgs/Bool false
 
 Helper Functions
 ================
++rostopic pub -1 /approve_footsteps std_msgs/Empty
 
 +rostopic pub /field/reset_pointcloud std_msgs/Empty
 
