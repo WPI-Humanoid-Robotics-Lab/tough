@@ -49,7 +49,6 @@ int main(int argc, char **argv)
     const std::vector<float> leftShoulderSeed6_= {-0.81,-1.11,0.65,-1.14,-0.26,0.19,-0.30};
     const std::vector<float> rightShoulderSeed6_= {-0.81,1.11,0.65,1.14,-0.26,-0.19,0.30};
 
-
     const std::vector<float> leftShoulderSeed7_= {-1.35,-0.76,1.70,-1.07,1.44,-0.62,-0.06};
     const std::vector<float> rightShoulderSeed7_= {-1.35,0.76,1.70,1.07,1.44,0.62,0.06};
 

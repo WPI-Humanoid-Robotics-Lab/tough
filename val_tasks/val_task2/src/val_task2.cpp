@@ -1295,10 +1295,10 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
             arm_controller_->moveArmInTaskSpace(panel_grasping_hand_, currentPalmPose, 1.0f);
             ros::Duration(1).sleep();
 
-            arm_controller_->moveToZeroPose((armSide)!panel_grasping_hand_);
-            ros::Duration(0.5).sleep();
-            arm_controller_->moveToZeroPose(panel_grasping_hand_);
-            ros::Duration(0.5).sleep();
+//            arm_controller_->moveToZeroPose((armSide)!panel_grasping_hand_);
+//            ros::Duration(0.5).sleep();
+//            arm_controller_->moveToZeroPose(panel_grasping_hand_);
+//            ros::Duration(0.5).sleep();
 
             handsPulledOff = true;
             eventQueue.riseEvent("/PLACE_ON_GROUND_RETRY");
@@ -1406,7 +1406,7 @@ decision_making::TaskResult valTask2::detectButtonTask(string name, const FSMCal
         ///@todo use goal position rather than hard coded steps. determine after experimenation
         /// the robot is expected to stand atleast 0.15 meters to the right of the button to press it.
 
-        task2_utils_->reOrientTowardsGoal(button_coordinates_,-0.25);
+        task2_utils_->reOrientTowardsGoal(button_coordinates_,-0.35);
         ros::Duration(1).sleep();
     }
 
