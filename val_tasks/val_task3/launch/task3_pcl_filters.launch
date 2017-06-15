@@ -60,6 +60,6 @@
         <param name="min_neighbors" value="10" />
     </node>
 
-    <node pkg="val_task3" type="obstacle_expansion_node" name="obstacle_expansion_node" />
+    <node pkg="val_task3" type="obstacle_expansion_node" name="obstacle_expansion_node" required="true"/>
 
 </launch>
