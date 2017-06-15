@@ -202,6 +202,20 @@ void valTask2::visited_map_cb(const nav_msgs::OccupancyGrid::Ptr msg)
 
 // This functions are called based on the remaping in the main.
 // when ever a action is published one of these functions will be called
+
+// state machine state executions
+decision_making::TaskResult valTask2::pre_initTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+    ROS_INFO_STREAM("valTask2::pre-initTask : executing " << name);
+    task2_utils_->taskLogPub("valTask2::pre-initTask : executing " + name + "/GOTO_STATE_INIT to start state machine");
+
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("valTask2::pre-initTask: waiting for transition");
+        task2_utils_->taskLogPub("valTask2::pre-initTask: waiting for transition");
+    }
+
+    return TaskResult::SUCCESS();
+}
 decision_making::TaskResult valTask2::initTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
 

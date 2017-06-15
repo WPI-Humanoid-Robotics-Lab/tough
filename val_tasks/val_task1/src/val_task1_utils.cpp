@@ -536,12 +536,15 @@ void task1Utils::taskStatusSubCB(const srcsim::Task &msg){
 void task1Utils::terminator(const ros::TimerEvent& e){
 
     ROS_INFO("Killing! Kill! Kill! Fire in the Hole! Headshot!");
-//    int status = system("killall roscore rosmaster rosout gzserver gzclient roslaunch");
+    //    int status = system("killall roscore rosmaster rosout gzserver gzclient roslaunch");
 }
 
 void task1Utils::taskLogPub(std::string data){
-
-    std_msgs::String ms;
-    ms.data = data;
-    task1_log_pub_.publish(ms);
+    static std::string prev_msg = "";
+    if(prev_msg != data){
+        std_msgs::String ms;
+        ms.data = data;
+        task1_log_pub_.publish(ms);
+        prev_msg = data;
+    }
 }

@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     armSide side;
     std::vector< std::vector<float> > armData;
     // seed values
-    const std::vector<float> leftShoulderSeed1_={0.2,-0.2,0.2,-0.2,0.2,-0.2,0.2};
+    const std::vector<float> leftShoulderSeed1_={0.2,-0.2,0.2,-0.2,0.2,-0.2,-0.2};
     const std::vector<float> rightShoulderSeed1_={0.2, 0.2,0.2, 0.2,0.2, 0.2,0.2};
 
     const std::vector<float> leftShoulderSeed2_= {-0.23,0.0,0.65,-1.49,1.29,0.0,0.0};
@@ -40,20 +40,20 @@ int main(int argc, char **argv)
     const std::vector<float> leftShoulderSeed3_= {-0.81,-0.60,1.12,-1.16,1.91,0.0,0.0};
     const std::vector<float> rightShoulderSeed3_= {-0.81,0.60,1.12,1.16,1.91,0.0,0.0};
 
-    const std::vector<float> leftShoulderSeed4_= {-0.57, -1.09, 0.65, -1.1, 1.18, 0.19, 0.31};
+    const std::vector<float> leftShoulderSeed4_= {-0.57, -1.09, 0.65, -1.1, 1.18, 0.19, -0.31};
     const std::vector<float> rightShoulderSeed4_= {-0.57, 1.09, 0.65, 1.1, 1.18, -0.19, 0.31};
 
-    const std::vector<float> leftShoulderSeed5_= {-0.57, -1.09, 0.65, -1.1, 0.30, 0.19, 0.31};
+    const std::vector<float> leftShoulderSeed5_= {-0.57, -1.09, 0.65, -1.1, 0.30, 0.19, -0.31};
     const std::vector<float> rightShoulderSeed5_= {-0.57, 1.09, 0.65, 1.1, 0.30, -0.19, 0.31};
 
-    const std::vector<float> leftShoulderSeed6_= {-0.81,-1.11,0.65,-1.14,-0.26,0.19,0.30};
+    const std::vector<float> leftShoulderSeed6_= {-0.81,-1.11,0.65,-1.14,-0.26,0.19,-0.30};
     const std::vector<float> rightShoulderSeed6_= {-0.81,1.11,0.65,1.14,-0.26,-0.19,0.30};
 
 
-    const std::vector<float> leftShoulderSeed7_= {-1.35,-0.76,1.70,-1.07,1.44,-0.62,0.06};
+    const std::vector<float> leftShoulderSeed7_= {-1.35,-0.76,1.70,-1.07,1.44,-0.62,-0.06};
     const std::vector<float> rightShoulderSeed7_= {-1.35,0.76,1.70,1.07,1.44,0.62,0.06};
 
-    const std::vector<float> leftShoulderSeed8_= {-1.56, -0.97, 2.18, -0.63, 0.86, -0.62, 0.15};
+    const std::vector<float> leftShoulderSeed8_= {-1.56, -0.97, 2.18, -0.63, 0.86, -0.62, -0.15};
     const std::vector<float> rightShoulderSeed8_= {-1.56, 0.97, 2.18, 0.63, 0.86, 0.62, 0.15};
 
 
@@ -62,9 +62,9 @@ int main(int argc, char **argv)
 
 
     const std::vector<float> leftShoulderSeed10_= {-0.04, -0.24, 0.49, -1.30, 0.71, 0.61, -0.24};
-    const std::vector<float> rightShoulderSeed10_= {-0.04, 0.24, 0.49, 1.30, 0.71, -0.61, -0.24};
+    const std::vector<float> rightShoulderSeed10_= {-0.04, 0.24, 0.49, 1.30, 0.71, -0.61, 0.24};
 
-    const std::vector<float> leftShoulderSeed11_= {-0.81, 0.15, 1.65, -1.42, 1.28, 0.0, -0.23};
+    const std::vector<float> leftShoulderSeed11_= {-0.81, 0.15, 1.65, -1.42, 1.28, 0.0, 0.23};
     const std::vector<float> rightShoulderSeed11_= {-0.81, -0.15, 1.65, 1.42, 1.28, 0.0, -0.23};
 
 
@@ -82,45 +82,48 @@ int main(int argc, char **argv)
     const std::vector<float> rightShoulderSeed15_= {-0.81,0.19,0.65,1.49,1.29,0.0,0.0};
 
 
-    const std::vector<float> leftShoulderSeed16_= {-1.70, -1.04, 1.39, -1.85, 1.50, 0, 0};
-    const std::vector<float> rightShoulderSeed16_= {-1.70, 1.04, 1.39, 1.85, 1.50, 0, 0};
+    const std::vector<float> leftShoulderSeed16_= {-1.70, -1.04, 1.39, -1.85, 1.50, 0.0, 0.0};
+    const std::vector<float> rightShoulderSeed16_= {-1.70, 1.04, 1.39, 1.85, 1.50, 0.0, 0.0};
 
 
-    const std::vector<float> leftShoulderSeed17_= {-1.5, -1.04, 1.6, -1.85, -1.50, 0, 0};
-    const std::vector<float> rightShoulderSeed17_= {-1.5, 1.04, 1.6, 1.85, -1.50, 0, 0};
+    const std::vector<float> leftShoulderSeed17_= {-1.5, -1.04, 1.6, -1.85, -1.50, 0.0, 0.0};
+    const std::vector<float> rightShoulderSeed17_= {-1.5, 1.04, 1.6, 1.85, -1.50, 0.0, 0.0};
 
 
-    const std::vector<float> leftShoulderSeed18_= {0.21, -1.16, 0.0, -1.07, 1.52, 0, 0};
-    const std::vector<float> rightShoulderSeed18_= {0.21, 1.16, 0.0, 1.07, 1.52, 0, 0};
+    const std::vector<float> leftShoulderSeed18_= {0.21, -1.16, 0.0, -1.07, 1.52, 0.0, 0.0};
+    const std::vector<float> rightShoulderSeed18_= {0.21, 1.16, 0.0, 1.07, 1.52, 0.0, 0.0};
 
 
-    const std::vector<float> leftShoulderSeed19_= {-1.5, -1.4, 1.39, -0.9, 1.10, 0.5, 0};
-    const std::vector<float> rightShoulderSeed19_= {-1.5, 1.4, 1.39, 0.9, 1.10, -0.5, 0};
+    const std::vector<float> leftShoulderSeed19_= {-1.5, -1.4, 1.39, -0.9, 1.10, 0.5, 0.0};
+    const std::vector<float> rightShoulderSeed19_= {-1.5, 1.4, 1.39, 0.9, 1.10, -0.5, 0.0};
 
 
     const std::vector<float> leftShoulderSeed20_= {-1.2, -1.4, 1.39, -0.9, 1.10, 0.5, 0.4};
-    const std::vector<float> rightShoulderSeed20_= {-1.2, 1.4, 1.39,  0.9, 1.10, -0.5, 0.4};
+    const std::vector<float> rightShoulderSeed20_= {-1.2, 1.4, 1.39,  0.9, 1.10, -0.5, -0.4};
 
 
-    const std::vector<float> leftShoulderSeed21_= {-1.5, -1.4, 1.39, -0.9, -1.10, -0.5, 0};
-    const std::vector<float> rightShoulderSeed21_= {-1.5, 1.4, 1.39, 0.9, -1.10,  0.5, 0};
+    const std::vector<float> leftShoulderSeed21_= {-1.5, -1.4, 1.39, -0.9, -1.10, -0.5, 0.0};
+    const std::vector<float> rightShoulderSeed21_= {-1.5, 1.4, 1.39, 0.9, -1.10,  0.5, 0.0};
 
 
-    const std::vector<float> leftShoulderSeed22_= {-0.66, -1.4, 1.2, -1.49, 1.29, 0, 0.26};
-    const std::vector<float> rightShoulderSeed22_= {-0.66, 1.4, 1.2, 1.49, 1.29, 0, 0.26};
+    const std::vector<float> leftShoulderSeed22_= {-0.66, -1.4, 1.2, -1.49, 1.29, 0.0, 0.26};
+    const std::vector<float> rightShoulderSeed22_= {-0.66, 1.4, 1.2, 1.49, 1.29, 0.0, -0.26};
 
 
-    const std::vector<float> leftShoulderSeed23_= {-0.66, -1.4, 0.75, -1.49, 1.29, 0, 0.26};
-    const std::vector<float> rightShoulderSeed23_= {-0.66, 1.4, 0.75, 1.49, 1.29, 0, 0.26};
+    const std::vector<float> leftShoulderSeed23_= {-0.66, -1.4, 0.75, -1.49, 1.29, 0.0, 0.26};
+    const std::vector<float> rightShoulderSeed23_= {-0.66, 1.4, 0.75, 1.49, 1.29, 0.0, -0.26};
 
     const std::vector<float> leftShoulderSeed24_= {0.f, 0, 0.f, -0.68f, 1.45, -0.5f, 0.f};
     const std::vector<float> rightShoulderSeed24_= {0.f, 0, 0.f, 0.6f, 1.44f, 0.6f, 0.f};
 
-    const std::vector<float> leftShoulderSeed25_= {0.f, -1.45f, 0.f, -0.68f, 1.45, -0.5f, 0.f};
-    const std::vector<float> rightShoulderSeed25_= {0.f, 1.45f, 0.f, 0.6f, 1.44f, 0.6f, 0.f};
+    const std::vector<float> leftShoulderSeed25_= {0.0f, -1.45f, 0.0f, -0.68f, 1.45, -0.5f, 0.0f};
+    const std::vector<float> rightShoulderSeed25_= {0.0f, 1.45f, 0.0f, 0.6f, 1.44f, 0.6f, 0.0f};
 
     const std::vector<float> leftShoulderSeed26_= {-0.2f, -1.2f, 0.7222f, -1.5101f, 0.0f, 0.0f, 0.0f};
     const std::vector<float> rightShoulderSeed26_= {-0.2f, 1.2f, 0.7222f, 1.5101f, 0.0f, 0.0f, 0.0f};
+
+    const std::vector<float> leftShoulderSeed27_= {-0.67, -1.41, -0.41, -0.93, 1.28, 0.0, 0.25};
+    const std::vector<float> rightShoulderSeed27_= {-0.67, 1.41, -0.41, 0.93, 1.28, 0.0, -0.25};
 
 
 
@@ -157,6 +160,7 @@ int main(int argc, char **argv)
             if(std::stoi(argv[2]) == 24) armData.push_back(leftShoulderSeed24_);
             if(std::stoi(argv[2]) == 25) armData.push_back(leftShoulderSeed25_);
             if(std::stoi(argv[2]) == 26) armData.push_back(leftShoulderSeed26_);
+            if(std::stoi(argv[2]) == 27) armData.push_back(leftShoulderSeed27_);
 
             log_msg("Moving left arm to seed " + std::to_string(std::stoi(argv[2])));
         }
@@ -188,6 +192,7 @@ int main(int argc, char **argv)
             if(std::stoi(argv[2]) == 24) armData.push_back(rightShoulderSeed24_);
             if(std::stoi(argv[2]) == 25) armData.push_back(rightShoulderSeed25_);
             if(std::stoi(argv[2]) == 26) armData.push_back(rightShoulderSeed26_);
+            if(std::stoi(argv[2]) == 27) armData.push_back(rightShoulderSeed27_);
 
             log_msg("Moving right arm to seed " + std::to_string(std::stoi(argv[2])));
         }

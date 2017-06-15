@@ -6,6 +6,7 @@ FSM(val_task2)
     //define the states
     FSM_STATES
     {
+        STATE_PRE_INIT,
         STATE_INIT,
         STATE_DETECT_ROVER,
         STATE_WALK_TO_ROVER,
@@ -38,12 +39,24 @@ FSM(val_task2)
     }
 
     // give the start state
-    FSM_START(STATE_INIT);
+    FSM_START(STATE_PRE_INIT);
 
     // state machine structure and logic, describe the states tansitions
     FSM_BGN // begin state machine
     {
 
+        FSM_STATE(STATE_PRE_INIT)
+        {
+          // state excecution, call the task
+          FSM_CALL_TASK(STATE_PRE_INIT)
+
+           // state transitions
+           FSM_TRANSITIONS
+          {
+            FSM_ON_EVENT("/GOTO_STATE_INIT", FSM_NEXT(STATE_INIT))
+            FSM_ON_EVENT("/MANUAL_EXECUTION", FSM_NEXT(STATE_MANUAL_EXECUTION))
+          }
+        }
         FSM_STATE(STATE_INIT)
         {
           // state excecution, call the task

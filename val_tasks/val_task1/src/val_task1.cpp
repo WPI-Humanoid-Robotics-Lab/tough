@@ -118,6 +118,20 @@ bool valTask1::preemptiveWait(double ms, decision_making::EventQueue& queue) {
 }
 
 // state machine state executions
+decision_making::TaskResult valTask1::pre_initTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
+{
+    ROS_INFO_STREAM("valTask1::pre-initTask : executing " << name);
+    task1_utils_->taskLogPub("valTask1::pre-initTask : executing " + name + "/GOTO_STATE_INIT to start state machine");
+
+
+    while(!preemptiveWait(1000, eventQueue)){
+        ROS_INFO("valTask1::pre-initTask: waiting for transition");
+        task1_utils_->taskLogPub("valTask1::pre-initTask: waiting for transition");
+    }
+
+    return TaskResult::SUCCESS();
+}
+
 decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM("valTask1::initTask : executing " << name);
@@ -1428,7 +1442,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
 
     if(execute_once){
         ROS_INFO("Walking 1 step back");
-        task1_utils_->taskLogPub("Walking 1 step back");
+        task1_utils_->taskLogPub("Walking 2 step back");
         ros::Duration(0.5).sleep();
         std::vector<float> x_offset={-0.25,-0.25, -0.5, -0.5};
         std::vector<float> y_offset={0.0, 0.0, 0.0, 0.1};
