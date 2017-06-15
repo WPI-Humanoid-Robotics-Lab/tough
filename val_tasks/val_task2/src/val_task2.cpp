@@ -1406,7 +1406,7 @@ decision_making::TaskResult valTask2::detectButtonTask(string name, const FSMCal
         ///@todo use goal position rather than hard coded steps. determine after experimenation
         /// the robot is expected to stand atleast 0.15 meters to the right of the button to press it.
 
-        task2_utils_->reOrientTowardsGoal(button_coordinates_,-0.25);
+        task2_utils_->reOrientTowardsGoal(button_coordinates_,-0.35);
         ros::Duration(1).sleep();
     }
 
