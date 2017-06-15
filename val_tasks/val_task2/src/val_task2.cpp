@@ -303,7 +303,7 @@ decision_making::TaskResult valTask2::detectRoverTask(string name, const FSMCall
             pose2D.y = roverPoseWaypoints[Idx][i].position.y;
 
             std::cout << "x " << pose2D.x << " y " << pose2D.y << std::endl;
-
+            //  task2_utils_->taskLogPub("Rover 2D Pose"+ "x: "  + pose2D.x + " y: " + pose2D.y);
             // get the theta
             pose2D.theta = tf::getYaw(roverPoseWaypoints[Idx][i].orientation);
             detectedPoses2D.push_back(pose2D);
@@ -386,7 +386,7 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
         goal_waypoints = temp1;
         for (auto pose : rover_walk_goal_waypoints_){
             ROS_INFO("X: %.2f  Y:%.2f  Theta:%.2f", pose.x, pose.y, pose.theta);
-            task2_utils_->taskLogPub("X: " + std::to_string(pose.x) + " Y: " + std::to_string(pose.y) + " Theta: " + std::to_string(pose.theta));
+            task2_utils_->taskLogPub("Goal X: " + std::to_string(pose.x) + " Y: " + std::to_string(pose.y) + " Theta: " + std::to_string(pose.theta));
             goal_waypoints.push(pose);
         }
         goal = goal_waypoints.front();
@@ -996,8 +996,8 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
     geometry_msgs::Point cable_point;
     int retry = 0;
     while (!cable_detector_->findCable(cable_point) && retry++ < 5);
-    std::cout<<"valTask2::findCableIntermediateTask : retry count : "<<retry<<"\n";
-    std::cout<<"cable_point x: "<<cable_point.x<<" cable_point y: "<<cable_point.y<<" cable_point z: "<<cable_point.z<<"\n";
+    task2_utils_->taskLogPub("valTask2::findCableIntermediateTask : retry count : " + std::to_string(retry));
+    task2_utils_->taskLogPub("cable_point x: " +std::to_string(cable_point.x) + " cable_point y: " + std::to_string(cable_point.y) + " cable_point z: " + std::to_string(cable_point.z));
 
     if(cable_point.x == 0 && !head_yaw_ranges.empty())
     {
@@ -1027,6 +1027,7 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         std::cout<<"Cable position x: "<<cable_point.x<<"\t"<<"Cable position y: "<<cable_point.y<<"\t"<<"Cable position z: "<<cable_point.z<<"\n";
         ROS_INFO("valTask2::findCableIntermediateTask : Cable found! Setting motion back. exiting");
         task2_utils_->taskLogPub("valTask2::findCableIntermediateTask : Cable found! Setting motion back. exiting");
+        task2_utils_->taskLogPub("cable_point x: " +std::to_string(cable_point.x) + " cable_point y: " + std::to_string(cable_point.y) + " cable_point z: " + std::to_string(cable_point.z));
 
         eventQueue.riseEvent("/FOUND_CABLE");
 
@@ -1131,7 +1132,7 @@ decision_making::TaskResult valTask2::detectSolarArrayFineTask(string name, cons
 decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
     ROS_INFO_STREAM_ONCE("valTask2::alignSolarArrayTask : executing " << name);
-    
+
     static int fail_count = 0;
     static bool executeOnce = true;
     if(skip_3 || skip_4)
@@ -1344,7 +1345,7 @@ decision_making::TaskResult valTask2::detectButtonTask(string name, const FSMCal
     while (!button_detector_->findButtons(button_coordinates_) && retry++ < 5);
     std::cout<<"valTask2::detectButtonTask : retry count : "<<retry<<"\n";
     std::cout<<"button x: "<<button_coordinates_.x<<" button y: "<<button_coordinates_.y<<" button z: "<<button_coordinates_.z<<"\n";
-
+    task2_utils_->taskLogPub("Button coordinates: x : " + std::to_string(button_coordinates_.x) + "y :" + std::to_string(button_coordinates_.y) + "z :" + std::to_string(button_coordinates_.z));
     if(button_coordinates_.x == 0 && !head_yaw_ranges.empty())
     {
         // wrong point detected. move head and try again
@@ -1371,6 +1372,7 @@ decision_making::TaskResult valTask2::detectButtonTask(string name, const FSMCal
         // button found
 
         std::cout<<"button x: "<<button_coordinates_.x<<" button y: "<<button_coordinates_.y<<" button z: "<<button_coordinates_.z<<"\n";
+        task2_utils_->taskLogPub("Button coordinates: x : " + std::to_string(button_coordinates_.x) + "y :" + std::to_string(button_coordinates_.y) + "z :" + std::to_string(button_coordinates_.z));
         eventQueue.riseEvent("/BUTTON_DETECTED");
         executingOnce= true;
         head_controller_->moveHead(0,0,0,2.0f);
@@ -1588,6 +1590,7 @@ decision_making::TaskResult valTask2::detectCableTask(string name, const FSMCall
                                  " z: " + std::to_string(cable_pose_.position.z));
 
         std::cout<<"cable x: "<<cable_pose_.position.x<<" cable y: "<<cable_pose_.position.y<<" cable z: "<<cable_pose_.position.z<<"\n";
+
         eventQueue.riseEvent("/DETECTED_CABLE");
         executingOnce= true;
         task2_utils_->reOrientTowardsGoal(cable_pose_.position,0.4);
@@ -1715,7 +1718,7 @@ TaskResult valTask2::detectSocketTask(string name, const FSMCallContext &context
     while (!socket_detector_->findPlug(socket_coordinates_) && retry++ < 5);
     std::cout<<"valTask2::detectSocketTask:: retry count : "<<retry<<"\n";
     std::cout<<"socket x: "<<socket_coordinates_.x<<" socket y: "<<socket_coordinates_.y<<" socket z: "<<socket_coordinates_.z<<"\n";
-
+    task2_utils_->taskLogPub("socket  x: " + std::to_string(socket_coordinates_.x) + " y: " + std::to_string(socket_coordinates_.y) + "z: " + std::to_string(socket_coordinates_.z));
     if(socket_coordinates_.x == 0 && !head_yaw_ranges.empty())
     {
         // wrong point detected. move head and try again
@@ -1742,6 +1745,7 @@ TaskResult valTask2::detectSocketTask(string name, const FSMCallContext &context
         // socket found
 
         std::cout<<"socket x: "<<socket_coordinates_.x<<" socket y: "<<socket_coordinates_.y<<" socket z: "<<socket_coordinates_.z<<"\n";
+        task2_utils_->taskLogPub("socket  x: " + std::to_string(socket_coordinates_.x) + " y: " + std::to_string(socket_coordinates_.y) + "z: " + std::to_string(socket_coordinates_.z));
         eventQueue.riseEvent("/DETECTED_SOCKET");
         executingOnce= true;
         head_controller_->moveHead(0,0,0,2.0f);
@@ -1936,7 +1940,7 @@ decision_making::TaskResult valTask2::walkToFinishTask(string name, const FSMCal
     else if (taskCommonUtils::isPoseChanged(pose_prev, next_finishbox_center_))
     {
         ROS_INFO("walkToFinishTask: pose changed");
-        task2_utils_->taskLogPub("walkToFinishTask: pose changed");
+        task2_utils_->taskLogPub("walkToFinishTask: pose changed x: " + std::to_string(next_finishbox_center_.x) + " y: " + std::to_string(next_finishbox_center_.y) + " theta: " + std::to_string(next_finishbox_center_.theta));
         walker_->walkToGoal(next_finishbox_center_, false);
         ROS_INFO("walkToFinishTask: Footsteps should be published now");
         task2_utils_->taskLogPub("walkToFinishTask: Footsteps should be published now");
