@@ -1,6 +1,7 @@
 #include <iostream>
 #include "val_common/val_common_defines.h"
 #include <val_controllers/val_arm_navigation.h>
+#include <std_msgs/String.h>
 
 
 using namespace std;
@@ -11,6 +12,21 @@ int main(int argc, char **argv)
 
     // initializing objects
     armTrajectory armTraj(nh);
+
+    ros::Publisher log_pub = nh.advertise<std_msgs::String>(VAL_COMMON_NAMES::LOG_TOPIC, 10);
+    const auto log_msg = [&log_pub](const std::string &str) {
+        std_msgs::String msg;
+        msg.data = ros::this_node::getName() + ": " + str;
+        log_pub.publish(msg);
+        ROS_INFO("%s", msg.data.c_str());
+    };
+
+    // wait a reasonable amount of time for the subscriber to connect
+    ros::Time wait_until = ros::Time::now() + ros::Duration(0.5);
+    while (log_pub.getNumSubscribers() == 0 && ros::Time::now() < wait_until) {
+        ros::spinOnce();
+        ros::WallDuration(0.1).sleep();
+    }
 
     armSide side;
     std::vector< std::vector<float> > armData;
@@ -141,6 +157,8 @@ int main(int argc, char **argv)
             if(std::stoi(argv[2]) == 24) armData.push_back(leftShoulderSeed24_);
             if(std::stoi(argv[2]) == 25) armData.push_back(leftShoulderSeed25_);
             if(std::stoi(argv[2]) == 26) armData.push_back(leftShoulderSeed26_);
+
+            log_msg("Moving left arm to seed " + std::to_string(std::stoi(argv[2])));
         }
         else
         {
@@ -170,9 +188,13 @@ int main(int argc, char **argv)
             if(std::stoi(argv[2]) == 24) armData.push_back(rightShoulderSeed24_);
             if(std::stoi(argv[2]) == 25) armData.push_back(rightShoulderSeed25_);
             if(std::stoi(argv[2]) == 26) armData.push_back(rightShoulderSeed26_);
+
+            log_msg("Moving right arm to seed " + std::to_string(std::stoi(argv[2])));
         }
         armTraj.moveArmJoints(side, armData, 2.0f);
         ros::Duration(2.0f).sleep();
-
+        log_msg("seed motion complete");
+    } else {
+        log_msg("expected arguments: side [0: left, 1: right], seed_number [see val_task_common/images]");
     }
 }

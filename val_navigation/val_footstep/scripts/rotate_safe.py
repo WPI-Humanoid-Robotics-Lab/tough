@@ -6,7 +6,9 @@ import rospy
 from tf import transformations
 import tf2_ros
 import numpy
+from StringIO import StringIO
 
+from std_msgs.msg import String
 from visualization_msgs.msg import Marker, MarkerArray
 
 from ihmc_msgs.msg import FootstepDataListRosMessage
@@ -50,6 +52,14 @@ footstep_sets = {
         ]
     )
 }
+
+
+class ArgumentParserError(Exception): pass
+
+
+class ThrowingArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        raise ArgumentParserError(message)
 
 
 def footstep_marker(i, step):
@@ -151,12 +161,31 @@ def make_footstep(reference_pose, side, offset_posn, offset_quat):
 
 if __name__ == '__main__':
     try:
-        parser = argparse.ArgumentParser(description='Rotate valkyrie using predefined footsteps that are known collision-free.')
+        parser = ThrowingArgumentParser(description='Rotate valkyrie using predefined footsteps that are known collision-free.')
         parser.add_argument('angle', type=int, choices=footstep_sets.keys(),
                             help="The angle to rotate relative to pelvis")
-        args = parser.parse_args()
 
         rospy.init_node('walk_rotate_safe')
+
+        log_pub = rospy.Publisher('/field/log', String, queue_size=10)
+        def log_msg(val):
+            val = rospy.get_name() + ": " + val
+            msg = String(val)
+            log_pub.publish(msg)
+            rospy.loginfo(val)
+
+        # Wait a reasonable amount of time for log_pub to connect
+        wait_until = rospy.Time.now() + rospy.Duration(0.5)
+        while log_pub.get_num_connections() == 0 and rospy.Time.now() < wait_until:
+            rospy.sleep(0.1)
+
+        try:
+            args = parser.parse_args()
+        except ArgumentParserError as e:
+            f = StringIO()
+            parser.print_usage(f)
+            log_msg(f.getvalue() + e.message)
+            argparse.ArgumentParser.error(parser, e.message)
 
         footStepListPublisher = rospy.Publisher('/ihmc_ros/valkyrie/control/footstep_list', FootstepDataListRosMessage, queue_size=1)
 
@@ -169,7 +198,6 @@ if __name__ == '__main__':
 
         rospy.sleep(1)
 
-
         msg = make_steps(footstep_sets[args.angle])
 
         ma = MarkerArray()
@@ -177,7 +205,9 @@ if __name__ == '__main__':
         ma.markers.extend([empty_marker(i) for i in range(len(ma.markers), 100)])
         vis_pub.publish(ma)
 
+        log_msg("Rotating " + args.angle + " using hard coded step list")
         footStepListPublisher.publish(msg)
 
+        log_msg("Node finished, footsteps may still be executing")
     except rospy.ROSInterruptException:
         pass

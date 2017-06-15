@@ -110,16 +110,16 @@ decision_making::TaskResult valTask3::initTask(string name, const FSMCallContext
         retry_count = 0;
 
         // reset robot to defaults
-        resetRobotToDefaults();
+//        resetRobotToDefaults();
 
         // start the task
         ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
         srcsim::StartTask   srv;
         srv.request.checkpoint_id = 1;
         srv.request.task_id       = 3;
-        if(client.call(srv)) {
+//        if(client.call(srv)) {
             //what do we do if this call fails or succeeds?
-        }
+//        }
         // generate the event
         eventQueue.riseEvent("/INIT_SUCESSFUL");
     }
