@@ -76,7 +76,7 @@ public:
     geometry_msgs::Pose getPose() const;
 
     geometry_msgs::PointStamped getOffsetPoint() const;
-    std::vector<geometry_msgs::Quaternion> quat() const;
+    std::vector<geometry_msgs::Quaternion> getQuat() const;
 };
 
 #endif // CABLE_DETECTOR_H

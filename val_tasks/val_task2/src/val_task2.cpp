@@ -621,9 +621,9 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
             task2_utils_->taskLogPub(task2_utils_->TEXT_RED + "valTask2::graspPanelTask : Using manually provided rotation."+ task2_utils_->TEXT_NC);
         }
         else {
-//            is_rotation_required_=task2_utils_->isRotationReq(hand,solar_panel_handle_pose_.position,button_coordinates_temp_);
-//            this fails when Button detected at x: 3.383462 y: -2.435008 z:0.782448 and Position 3.390681 -2.593678 0.886687
-             task2_utils_->taskLogPub(task2_utils_->TEXT_RED + "valTask2::graspPanelTask : Using manually provided rotation."+ task2_utils_->TEXT_NC);
+            //            is_rotation_required_=task2_utils_->isRotationReq(hand,solar_panel_handle_pose_.position,button_coordinates_temp_);
+            //            this fails when Button detected at x: 3.383462 y: -2.435008 z:0.782448 and Position 3.390681 -2.593678 0.886687
+            task2_utils_->taskLogPub(task2_utils_->TEXT_RED + "valTask2::graspPanelTask : Using manually provided rotation."+ task2_utils_->TEXT_NC);
         }
 
         ROS_INFO("valTask2::graspPanelTask : Rotation is %d ", is_rotation_required_);
@@ -638,7 +638,7 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
             //            eventQueue.riseEvent("/GRASPED_PANEL");
             eventQueue.riseEvent("/MANUAL_EXECUTION");
             task2_utils_->taskLogPub("valTask2::graspPanelTask : Moving panel closer to chest to avoid collision with trailer");
-//            task2_utils_->afterPanelGraspPose(panel_grasping_hand_, is_rotation_required_);
+            //            task2_utils_->afterPanelGraspPose(panel_grasping_hand_, is_rotation_required_);
         }
         else
         {
@@ -945,7 +945,7 @@ decision_making::TaskResult valTask2::rotatePanelTask(string name, const FSMCall
         task2_utils_->taskLogPub("valTask2::rotatePanelTask : Rotating the panel");
         task2_utils_->rotatePanel(panel_grasping_hand_);
     }
-//    eventQueue.riseEvent("/ROTATED_PANEL");
+    //    eventQueue.riseEvent("/ROTATED_PANEL");
     eventQueue.riseEvent("/MANUAL_EXECUTION");
 
     // generate the event
@@ -1280,10 +1280,10 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
         ros::Duration(1).sleep();
 
         if (task2_utils_->isPanelPicked(panel_grasping_hand_)){
-                ROS_INFO("valTask2::placePanelTask : panel is still in hand. place it manually");
-                task2_utils_->taskLogPub(task2_utils_->TEXT_RED + "valTask2::placePanelTask : panel is still in hand. place it manually"+ task2_utils_->TEXT_NC);
-                eventQueue.riseEvent("/MANUAL_EXECUTION");
-            }
+            ROS_INFO("valTask2::placePanelTask : panel is still in hand. place it manually");
+            task2_utils_->taskLogPub(task2_utils_->TEXT_RED + "valTask2::placePanelTask : panel is still in hand. place it manually"+ task2_utils_->TEXT_NC);
+            eventQueue.riseEvent("/MANUAL_EXECUTION");
+        }
         else {
             geometry_msgs::Pose currentPalmPose;
             std::string palmFrame = panel_grasping_hand_ == armSide ::LEFT ? VAL_COMMON_NAMES::L_PALM_TF : VAL_COMMON_NAMES::R_PALM_TF;
@@ -1295,10 +1295,10 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
             arm_controller_->moveArmInTaskSpace(panel_grasping_hand_, currentPalmPose, 1.0f);
             ros::Duration(1).sleep();
 
-//            arm_controller_->moveToZeroPose((armSide)!panel_grasping_hand_);
-//            ros::Duration(0.5).sleep();
-//            arm_controller_->moveToZeroPose(panel_grasping_hand_);
-//            ros::Duration(0.5).sleep();
+            //            arm_controller_->moveToZeroPose((armSide)!panel_grasping_hand_);
+            //            ros::Duration(0.5).sleep();
+            //            arm_controller_->moveToZeroPose(panel_grasping_hand_);
+            //            ros::Duration(0.5).sleep();
 
             handsPulledOff = true;
             eventQueue.riseEvent("/PLACE_ON_GROUND_RETRY");
@@ -1646,6 +1646,20 @@ decision_making::TaskResult valTask2::detectCableTask(string name, const FSMCall
                                  " z: " + std::to_string(cable_pose_.position.z));
 
         std::cout<<"cable x: "<<cable_pose_.position.x<<" cable y: "<<cable_pose_.position.y<<" cable z: "<<cable_pose_.position.z<<"\n";
+
+        std::vector<geometry_msgs::Quaternion> quats;
+        quats = cable_detector_->getQuat();
+
+        std::cout<<"size of quaternions "<<quats.size()<<"\n";
+
+        for (int i = 0; i < quats.size(); ++i) {
+            task2_utils_->taskLogPub("valTask2::detectCableTask: quats at"
+                                     " quat_x: " + std::to_string(quats[i].x) +
+                                     " quat_y: " + std::to_string(quats[i].y) +
+                                     " quat_z: " + std::to_string(quats[i].z) +
+                                     " quat_w: " + std::to_string(quats[i].w));
+
+        }
 
         eventQueue.riseEvent("/DETECTED_CABLE");
         executingOnce= true;

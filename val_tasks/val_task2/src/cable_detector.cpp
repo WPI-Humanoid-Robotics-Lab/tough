@@ -14,7 +14,7 @@ CableDetector::CableDetector(ros::NodeHandle nh, src_perception::MultisenseImage
     ms_sensor_->giveQMatrix(qMatrix_);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array",1);
     eigenVecs_.reserve(2);
-    quat_.reserve(12);
+    quat_.resize(12);
 }
 
 void CableDetector::showImage(cv::Mat image, std::string caption)
@@ -314,7 +314,7 @@ bool CableDetector::getCablePose(geometry_msgs::Pose& cablePose)
         float sin_theta = dir_vector.y / std::sqrt(std::pow(dir_vector.x ,2) + std::pow(dir_vector.y ,2) );
         float theta = std::atan2(sin_theta, cos_theta);
 
-        for (size_t i = 1 ;i <= 12 ; i++)
+        for (int i = 1 ;i <= 12 ; i++)
         {
             float theta1 = theta + i * 30 * (M_PI/180.0);
             geometry_msgs::Quaternion quaternion1 = tf::createQuaternionMsgFromYaw(theta1);
@@ -588,7 +588,7 @@ geometry_msgs::PointStamped CableDetector::getOffsetPoint() const
 }
 
 
-std::vector<geometry_msgs::Quaternion> CableDetector::quat() const
+std::vector<geometry_msgs::Quaternion> CableDetector::getQuat() const
 {
     return quat_;
 }
