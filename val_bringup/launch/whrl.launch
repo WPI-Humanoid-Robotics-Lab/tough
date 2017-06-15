@@ -18,7 +18,7 @@
    <!--IS_FIELD variable is set true on field docker container-->
    <group if="$(optenv IS_FIELD false)">
        <node pkg="val_bringup" type="broadcast_server.py" name="broadcast_server" respawn="true" />
-       <node pkg="val_bringup" type="message_parser.py"   name="message_parser"   />
+       <node pkg="val_bringup" type="message_parser.py"   name="message_parser"   respawn="true"/>
    </group>
    
    
