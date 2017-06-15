@@ -69,13 +69,13 @@ int main(int argc, char **argv)
 
         current_state_->transformPose(pt,pt,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
 
-        x_offset =pelvisPoseinPelvis.position.x -pt.position.x;
-        y_offset =pelvisPoseinPelvis.position.y -pt.position.y;
-        z_offset =pelvisPoseinPelvis.position.z -pt.position.z;
-        w =pelvisPoseinPelvis.orientation.w -pt.orientation.w;
-        x =pelvisPoseinPelvis.orientation.x -pt.orientation.x;
-        y =pelvisPoseinPelvis.orientation.y -pt.orientation.y;
-        z =pelvisPoseinPelvis.orientation.z -pt.orientation.z;
+        x_offset =-1*(pelvisPoseinPelvis.position.x -pt.position.x);
+        y_offset =-1*(pelvisPoseinPelvis.position.y -pt.position.y);
+        z_offset =-1*(pelvisPoseinPelvis.position.z -pt.position.z);
+        w =-1*(pelvisPoseinPelvis.orientation.w -pt.orientation.w);
+        x =-1*(pelvisPoseinPelvis.orientation.x -pt.orientation.x);
+        y =-1*(pelvisPoseinPelvis.orientation.y -pt.orientation.y);
+        z =-1*(pelvisPoseinPelvis.orientation.z -pt.orientation.z);
 
         log_msg("Offset in pelvis:  x : " + std::to_string(x_offset) + " y: " + std::to_string(y_offset) + " z: "
                 + std::to_string(z_offset) + " orientatio x : "  + std::to_string(x) + " y: " + std::to_string(y) + " z: "
@@ -103,9 +103,9 @@ int main(int argc, char **argv)
         current_state_->getCurrentPose("/pelvis",pelvisPoseinPelvis,VAL_COMMON_NAMES::PELVIS_TF);
         ros::spinOnce();
 
-        float x_offset =pelvisPose.position.x -pt.x;
-        float y_offset =pelvisPose.position.y -pt.y;
-        float z_offset =pelvisPose.position.z -pt.z;
+        float x_offset =-1*(pelvisPose.position.x -pt.x);
+        float y_offset =-1*(pelvisPose.position.y -pt.y);
+        float z_offset =-1*(pelvisPose.position.z -pt.z);
 
         log_msg("Offset in world:  x : " + std::to_string(x_offset) + " y: " + std::to_string(y_offset) + " z: "
                 + std::to_string(z_offset));
@@ -116,9 +116,9 @@ int main(int argc, char **argv)
 
         current_state_->transformPoint(pt,pt,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
 
-        x_offset =pelvisPoseinPelvis.position.x -pt.x;
-        y_offset =pelvisPoseinPelvis.position.y -pt.y;
-        z_offset =pelvisPoseinPelvis.position.z -pt.z;
+        x_offset =-1*(pelvisPoseinPelvis.position.x -pt.x);
+        y_offset =-1*(pelvisPoseinPelvis.position.y -pt.y);
+        z_offset =-1*(pelvisPoseinPelvis.position.z -pt.z);
 
         log_msg("Offset in pelvis:  x : " + std::to_string(x_offset) + " y: " + std::to_string(y_offset) + " z: "
                 + std::to_string(z_offset));
