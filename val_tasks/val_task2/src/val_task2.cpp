@@ -621,7 +621,9 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
             task2_utils_->taskLogPub(task2_utils_->TEXT_RED + "valTask2::graspPanelTask : Using manually provided rotation."+ task2_utils_->TEXT_NC);
         }
         else {
-            is_rotation_required_=task2_utils_->isRotationReq(hand,solar_panel_handle_pose_.position,button_coordinates_temp_);
+//            is_rotation_required_=task2_utils_->isRotationReq(hand,solar_panel_handle_pose_.position,button_coordinates_temp_);
+//            this fails when Button detected at x: 3.383462 y: -2.435008 z:0.782448 and Position 3.390681 -2.593678 0.886687
+             task2_utils_->taskLogPub(task2_utils_->TEXT_RED + "valTask2::graspPanelTask : Using manually provided rotation."+ task2_utils_->TEXT_NC);
         }
 
         ROS_INFO("valTask2::graspPanelTask : Rotation is %d ", is_rotation_required_);
@@ -636,7 +638,7 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
             //            eventQueue.riseEvent("/GRASPED_PANEL");
             eventQueue.riseEvent("/MANUAL_EXECUTION");
             task2_utils_->taskLogPub("valTask2::graspPanelTask : Moving panel closer to chest to avoid collision with trailer");
-            task2_utils_->afterPanelGraspPose(panel_grasping_hand_, is_rotation_required_);
+//            task2_utils_->afterPanelGraspPose(panel_grasping_hand_, is_rotation_required_);
         }
         else
         {
