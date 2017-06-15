@@ -777,6 +777,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         {
             // retry planning
             // redetect the handles (retry)
+            execute_once = true;
             eventQueue.riseEvent("/PITCH_CORRECTION_RETRY");
 
             return TaskResult::SUCCESS();
@@ -1092,6 +1093,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         {
             // retry planning
             // redetect the handles (retry)
+            execute_once = true;
             eventQueue.riseEvent("/YAW_CORRECTION_RETRY");
 
             return TaskResult::SUCCESS();
@@ -1294,7 +1296,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
 
         // reset the count
         retry_count = 0;
-
+        execute_once = true;
         //error state
         eventQueue.riseEvent("/YAW_CORRECTION_FAILED");
 
