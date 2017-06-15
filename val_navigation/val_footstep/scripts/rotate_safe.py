@@ -205,7 +205,7 @@ if __name__ == '__main__':
         ma.markers.extend([empty_marker(i) for i in range(len(ma.markers), 100)])
         vis_pub.publish(ma)
 
-        log_msg("Rotating " + args.angle + " using hard coded step list")
+        log_msg("Rotating " + str(args.angle) + " using hard coded step list")
         footStepListPublisher.publish(msg)
 
         log_msg("Node finished, footsteps may still be executing")
