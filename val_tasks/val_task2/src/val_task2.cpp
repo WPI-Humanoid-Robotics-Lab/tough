@@ -1454,37 +1454,67 @@ decision_making::TaskResult valTask2::deployPanelTask(string name, const FSMCall
         points.push(button_coordinates_);
 
         // define 4 retry points before going back to detection
-        float offset=0.08;
+        float offset1=0.08;
+        float offset2=0.02;
         geometry_msgs::Point buttonPelvis;
         robot_state_->transformPoint(button_coordinates_,buttonPelvis,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
         std::vector<geometry_msgs::Point> retryPoints;
 
-        retryPoints.resize(4);
+        retryPoints.resize(8);
         // First Retry Point
         retryPoints[0]=buttonPelvis;
-        retryPoints[0].x-=offset;
+        retryPoints[0].x-=offset1;
         robot_state_->transformPoint(retryPoints[0],retryPoints[0],VAL_COMMON_NAMES::PELVIS_TF);
 
         // Second Retry Point
         retryPoints[1]=buttonPelvis;
-        retryPoints[1].x+=offset;
+        retryPoints[1].x+=offset1;
         robot_state_->transformPoint(retryPoints[1],retryPoints[1],VAL_COMMON_NAMES::PELVIS_TF);
 
         // Third Retry Point
         retryPoints[2]=buttonPelvis;
-        retryPoints[2].y+=offset;
+        retryPoints[2].y+=offset1;
         robot_state_->transformPoint(retryPoints[2],retryPoints[2],VAL_COMMON_NAMES::PELVIS_TF);
 
         // Fourth Retry Point
         retryPoints[3]=buttonPelvis;
-        retryPoints[3].y-=offset;
+        retryPoints[3].y-=offset1;
         robot_state_->transformPoint(retryPoints[3],retryPoints[3],VAL_COMMON_NAMES::PELVIS_TF);
+
+        // new offset
+
+        // Fifth Retry Point
+        retryPoints[4]=buttonPelvis;
+        retryPoints[4].x-=offset2;
+        robot_state_->transformPoint(retryPoints[4],retryPoints[4],VAL_COMMON_NAMES::PELVIS_TF);
+
+        // Sixth Retry Point
+        retryPoints[5]=buttonPelvis;
+        retryPoints[5].x+=offset2;
+        robot_state_->transformPoint(retryPoints[5],retryPoints[5],VAL_COMMON_NAMES::PELVIS_TF);
+
+        // Seventh Retry Point
+        retryPoints[6]=buttonPelvis;
+        retryPoints[6].y+=offset2;
+        robot_state_->transformPoint(retryPoints[6],retryPoints[6],VAL_COMMON_NAMES::PELVIS_TF);
+
+        // Eight Retry Point
+        retryPoints[7]=buttonPelvis;
+        retryPoints[7].y-=offset2;
+        robot_state_->transformPoint(retryPoints[7],retryPoints[7],VAL_COMMON_NAMES::PELVIS_TF);
+
 
         // pushing all points in queue
         points.push(retryPoints[0]);
         points.push(retryPoints[1]);
         points.push(retryPoints[2]);
         points.push(retryPoints[3]);
+        points.push(retryPoints[4]);
+        points.push(retryPoints[5]);
+        points.push(retryPoints[6]);
+        points.push(retryPoints[7]);
+
+
 
         // setting executing once to false to ensure it does not enter this loop again unless a new detection comes in.
         executeOnce=false;
