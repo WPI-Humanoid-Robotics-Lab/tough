@@ -2,14 +2,26 @@
 //#include <val_footstep/ValkyrieWalker.h>
 #include "val_controllers/robot_state.h"
 #include "std_msgs/String.h"
+
+void logpub(geometry_msgs::Point,std_msgs::String strdata){
+
+}
+
+
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "check_goal_offset");
     ros::NodeHandle nh;
     RobotStateInformer *current_state_;
     current_state_ = RobotStateInformer::getRobotStateInformer(nh);
-    ros::Publisher tasklogPB = nh.advertise<std_msgs::String>("/field/log",10);
-
+    ros::Publisher log_pub = nh.advertise<std_msgs::String>("/field/log",10);
+    const auto log_msg = [&log_pub](const std::string &str) {
+        std_msgs::String msg;
+        msg.data = ros::this_node::getName() + ": " + str;
+        log_pub.publish(msg);
+        ROS_INFO("%s", msg.data.c_str());
+    };
     ros::AsyncSpinner spinner(1);
     spinner.start();
     ros::Duration(2).sleep();
@@ -43,13 +55,17 @@ int main(int argc, char **argv)
         float y =pelvisPose.orientation.y -pt.orientation.y;
         float z =pelvisPose.orientation.z -pt.orientation.z;
 
-        std::cout<<"x offset in world frame: "<<x_offset<<"\n";
-        std::cout<<"y offset in world frame: "<<y_offset<<"\n";
-        std::cout<<"z offset in world frame: "<<z_offset<<"\n";
-        std::cout<<"w offset in world frame: "<<w<<"\n";
-        std::cout<<"x offset in world frame: "<<x<<"\n";
-        std::cout<<"y offset in world frame: "<<y<<"\n";
-        std::cout<<"z offset in world frame: "<<z<<"\n";
+        log_msg("Offset in world:  x : " + std::to_string(x_offset) + " y: " + std::to_string(y_offset) + " z: "
+                + std::to_string(z_offset) + " orientatio x : "  + std::to_string(x) + " y: " + std::to_string(y) + " z: "
+                + std::to_string(z_offset) + " w: " + std::to_string(z_offset));
+
+//        std::cout<<"x offset in world frame: "<<x_offset<<"\n";
+//        std::cout<<"y offset in world frame: "<<y_offset<<"\n";
+//        std::cout<<"z offset in world frame: "<<z_offset<<"\n";
+//        std::cout<<"w offset in world frame: "<<w<<"\n";
+//        std::cout<<"x offset in world frame: "<<x<<"\n";
+//        std::cout<<"y offset in world frame: "<<y<<"\n";
+//        std::cout<<"z offset in world frame: "<<z<<"\n";
 
         current_state_->transformPose(pt,pt,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
 
@@ -61,13 +77,17 @@ int main(int argc, char **argv)
         y =pelvisPoseinPelvis.orientation.y -pt.orientation.y;
         z =pelvisPoseinPelvis.orientation.z -pt.orientation.z;
 
-        std::cout<<"x offset in pelvis frame: "<<x_offset<<"\n";
-        std::cout<<"y offset in pelvis frame: "<<y_offset<<"\n";
-        std::cout<<"z offset in pelvis frame: "<<z_offset<<"\n";
-        std::cout<<"w offset in pelvis frame: "<<w<<"\n";
-        std::cout<<"x offset in pelvis frame: "<<x<<"\n";
-        std::cout<<"y offset in pelvis frame: "<<y<<"\n";
-        std::cout<<"z offset in pelvis frame: "<<z<<"\n";
+        log_msg("Offset in pelvis:  x : " + std::to_string(x_offset) + " y: " + std::to_string(y_offset) + " z: "
+                + std::to_string(z_offset) + " orientatio x : "  + std::to_string(x) + " y: " + std::to_string(y) + " z: "
+                + std::to_string(z_offset) + " w: " + std::to_string(z_offset));
+
+//        std::cout<<"x offset in pelvis frame: "<<x_offset<<"\n";
+//        std::cout<<"y offset in pelvis frame: "<<y_offset<<"\n";
+//        std::cout<<"z offset in pelvis frame: "<<z_offset<<"\n";
+//        std::cout<<"w offset in pelvis frame: "<<w<<"\n";
+//        std::cout<<"x offset in pelvis frame: "<<x<<"\n";
+//        std::cout<<"y offset in pelvis frame: "<<y<<"\n";
+//        std::cout<<"z offset in pelvis frame: "<<z<<"\n";
 
 
     }
@@ -87,9 +107,12 @@ int main(int argc, char **argv)
         float y_offset =pelvisPose.position.y -pt.y;
         float z_offset =pelvisPose.position.z -pt.z;
 
-        std::cout<<"x offset in world frame: "<<x_offset<<"\n";
-        std::cout<<"y offset in world frame: "<<y_offset<<"\n";
-        std::cout<<"z offset in world frame: "<<z_offset<<"\n";
+        log_msg("Offset in world:  x : " + std::to_string(x_offset) + " y: " + std::to_string(y_offset) + " z: "
+                + std::to_string(z_offset));
+
+//        std::cout<<"x offset in world frame: "<<x_offset<<"\n";
+//        std::cout<<"y offset in world frame: "<<y_offset<<"\n";
+//        std::cout<<"z offset in world frame: "<<z_offset<<"\n";
 
         current_state_->transformPoint(pt,pt,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
 
@@ -97,9 +120,12 @@ int main(int argc, char **argv)
         y_offset =pelvisPoseinPelvis.position.y -pt.y;
         z_offset =pelvisPoseinPelvis.position.z -pt.z;
 
-        std::cout<<"x offset in pelvis frame: "<<x_offset<<"\n";
-        std::cout<<"y offset in pelvis frame: "<<y_offset<<"\n";
-        std::cout<<"z offset in pelvis frame: "<<z_offset<<"\n";
+        log_msg("Offset in pelvis:  x : " + std::to_string(x_offset) + " y: " + std::to_string(y_offset) + " z: "
+                + std::to_string(z_offset));
+
+//        std::cout<<"x offset in pelvis frame: "<<x_offset<<"\n";
+//        std::cout<<"y offset in pelvis frame: "<<y_offset<<"\n";
+//        std::cout<<"z offset in pelvis frame: "<<z_offset<<"\n";
     }
 
     return 0;
