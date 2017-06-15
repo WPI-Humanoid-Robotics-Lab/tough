@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     }
     std::vector< std::vector<float> > armData;
     armData.push_back(positions);
-    armSide side = argv[0] == "0" ? armSide::LEFT : armSide::RIGHT;
+    armSide side = argv[1] == "0" ? armSide::LEFT : armSide::RIGHT;
 
     armData.push_back(positions);
     armTraj.moveArmJoints(side, armData, 2.0f);
