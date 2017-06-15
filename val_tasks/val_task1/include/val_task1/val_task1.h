@@ -135,6 +135,7 @@ class valTask1 {
     ~valTask1();
 
     bool preemptiveWait(double ms, decision_making::EventQueue& queue);
+    decision_making::TaskResult pre_initTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult initTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectPanelCoarseTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult walkToSeePanelTask(string name, const FSMCallContext& context, EventQueue& eventQueue);

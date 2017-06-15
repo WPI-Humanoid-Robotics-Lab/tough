@@ -9,9 +9,9 @@ from std_msgs.msg import Float32
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import PointStamped
+from ihmc_msgs.msg import AbortWalkingRosMessage
+from ihmc_msgs.msg import StopAllTrajectoryRosMessage
 
-from sensor_msgs.msg import JointState
-import sched
 
 FIELD_IP = "192.168.2.10"
 # FIELD_IP = "localhost"
@@ -77,6 +77,8 @@ if __name__ == '__main__':
     panel_offset_pub = rospy.Publisher('/panel_offset', Float32, queue_size=10)
     nudge_pub  = rospy.Publisher('/nudge_pose', Float64MultiArray, queue_size=10)
     head_pub   = rospy.Publisher('/head_control', Float32MultiArray, queue_size=10)
+    abort_walk_pub = rospy.Publisher('/ihmc_ros/valkyrie/control/abort_walking', AbortWalkingRosMessage, queue_size=1)
+    stop_all_traj_pub = rospy.Publisher('/ihmc_ros/valkyrie/control/stop_all_trajectories', StopAllTrajectoryRosMessage, queue_size=1)
     prev_time = time.time()
     prev_ros_time = rospy.get_rostime().secs
     while True:
@@ -137,6 +139,20 @@ if __name__ == '__main__':
             ros_msg.data = [float(x) for x in data_str]
             print ros_msg.data
             head_pub.publish(ros_msg)
+
+        # | is message to abort walking
+        elif (msg[start_index] == "|"):
+            print msg[:start_index] + "**Abort walking message received** " + msg[start_index:-1]
+            ros_msg = AbortWalkingRosMessage()
+            ros_msg.unique_id = 1
+            abort_walk_pub.publish(ros_msg)
+
+        # _ is message to stop all trajectories
+        elif (msg[start_index] == "_"):
+            print msg[:start_index] + "**Stopping all trajectories** " + msg[start_index:-1]
+            ros_msg = StopAllTrajectoryRosMessage()
+            ros_msg.unique_id = 1
+            stop_all_traj_pub.publish(ros_msg)
 
         # rest of the messages
         else:

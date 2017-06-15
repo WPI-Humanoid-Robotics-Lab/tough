@@ -19,6 +19,7 @@ task2Node::~task2Node()
 void task2Node::registerStateMethods(void)
 {
     // Register all the functions
+    LocalTasks::registrate("STATE_PRE_INIT",                       std::bind(&valTask2::pre_initTask,                   task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_INIT",                       std::bind(&valTask2::initTask,                   task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_DETECT_ROVER",               std::bind(&valTask2::detectRoverTask,            task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     LocalTasks::registrate("STATE_WALK_TO_ROVER",              std::bind(&valTask2::walkToRoverTask,            task2_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));

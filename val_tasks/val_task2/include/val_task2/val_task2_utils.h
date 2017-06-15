@@ -81,11 +81,16 @@ private:
 
 
     // panel placement poses
-    const std::vector<float> leftPanelPlacementUpPose1_  = {-1.5, -1.4, 1.39, -0.9, 1.10, -0.5, 0}; // 0 -1.5  -1.4  1.39  -0.9  1.10  -0.5  0
-    const std::vector<float> leftPanelPlacementDownPose1_= {-1.2, -1.4, 1.39, -0.9, 1.10, -0.5, 0}; // 0 -1.2  -1.4  1.39  -0.9  1.10  -0.5  0
+    //const std::vector<float> leftPanelPlacementUpPose1_  = {-1.5, -1.4, 1.39, -0.9, 1.10, -0.5, 0}; // 0 -1.5  -1.4  1.39  -0.9  1.10  -0.5  0
+    //const std::vector<float> leftPanelPlacementDownPose1_= {-1.2, -1.4, 1.39, -0.9, 1.10, -0.5, 0}; // 0 -1.2  -1.4  1.39  -0.9  1.10  -0.5  0
+    const std::vector<float> leftPanelPlacementUpPose1_ = {-1.9, -1.4, 1.39, -0.9, 1.10, -0.5, 0};// 0 -1.9  -1.4  1.39  -0.9  1.10  -0.5  0
+    const std::vector<float> leftPanelPlacementDownPose1_ = {-1.3, -1.4, 1.39, -0.9, 1.10, -0.5, 0};
 
-    const std::vector<float> rightPanelPlacementUpPose1_  = {-1.5, 1.4, 1.39, 0.9, 1.10, 0.5, 0}; // 1 -1.5  1.4  1.39  0.9  1.10  0.5  0
-    const std::vector<float> rightPanelPlacementDownPose1_= {-1.2, 1.4, 1.39, 0.9, 1.10, 0.5, 0}; // 1 -1.2  1.4  1.39  0.9  1.10  0.5  0
+    //const std::vector<float> rightPanelPlacementUpPose1_  = {-1.5, 1.4, 1.39, 0.9, 1.10, 0.5, 0}; // 1 -1.5  1.4  1.39  0.9  1.10  0.5  0
+    //const std::vector<float> rightPanelPlacementDownPose1_= {-1.2, 1.4, 1.39, 0.9, 1.10, 0.5, 0}; // 1 -1.2  1.4  1.39  0.9  1.10  0.5  0
+
+    const std::vector<float> rightPanelPlacementUpPose1_ = {-1.9, 1.4, 1.39, 0.9, 1.10, 0.5, 0}; // 1 -1.9  1.4  1.39  0.9  1.10  0.5  0
+    const std::vector<float> rightPanelPlacementDownPose1_ = {-1.3, 1.4, 1.39, 0.9, 1.10, 0.5, 0};
 
     const std::vector<float> leftPanelPlacementUpPose2_  = {-1.5, -1.4, 1.39, -0.9, -1.10, 0.5, 0}; // 0 -1.5  -1.4  1.39  -0.9  -1.10  0.5  0
     const std::vector<float> leftPanelPlacementDownPose2_= {-1.2, -1.4, 1.39, -0.9, -1.10, 0.5, 0.4}; // 0 -1.2  -1.4  1.39  -0.9  -1.10  0.5  0.4

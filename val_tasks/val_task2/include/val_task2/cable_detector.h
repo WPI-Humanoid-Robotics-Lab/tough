@@ -50,6 +50,7 @@ class CableDetector
     geometry_msgs::PointStamped geom_point0_;
     geometry_msgs::Pose pose_;
     RobotStateInformer* robot_state_;
+    std::vector<geometry_msgs::Quaternion> quat_;
 
     void visualize_direction(geometry_msgs::Point point1, geometry_msgs::Point point2);
     void visualize_point(geometry_msgs::Point point, double r, double g, double b);
@@ -75,6 +76,7 @@ public:
     geometry_msgs::Pose getPose() const;
 
     geometry_msgs::PointStamped getOffsetPoint() const;
+    std::vector<geometry_msgs::Quaternion> quat() const;
 };
 
 #endif // CABLE_DETECTOR_H

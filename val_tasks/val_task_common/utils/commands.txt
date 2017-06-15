@@ -27,6 +27,10 @@ GOTO_STATE_ROTATE_PANEL
 
 /GOTO_STATE_FIND_CABLE_INTERMEDIATE
 
++rostopic pub /set_panel_rotation std_msgs/Bool
+
+ostopic pub /field/pause_pointcloud std_msgs/Bool false
+
 +rosrun val_controllers test_arm_navigation 1 1.2 -1.8 0 0 0 0 0
 
 
@@ -47,6 +51,8 @@ Helper Functions
 +rostopic pub /field/reset_pointcloud std_msgs/Empty
 
 +rostopic pub /field/reset_map std_msgs/Empty
+
++rostopic pub -1 /approve_footsteps std_msgs/Empty
 
 +rosrun val_controllers test_arm_navigation 0 0 0 0 0 0 0 0
 

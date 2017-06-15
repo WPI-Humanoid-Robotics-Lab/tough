@@ -1,4 +1,4 @@
-    #include <val_task2/val_task2_utils.h>
+#include <val_task2/val_task2_utils.h>
 #include <std_msgs/Bool.h>
 
 
@@ -72,7 +72,7 @@ task2Utils::~task2Utils()
 }
 void task2Utils::isDetachedCB(const srcsim::Harness &harnessMsg)
 {
-     mtx_.lock();
+    mtx_.lock();
     if(harnessMsg.status == 5)
     {
         isHarnessDetached = true;
@@ -83,8 +83,8 @@ void task2Utils::isDetachedCB(const srcsim::Harness &harnessMsg)
 bool task2Utils::afterPanelGraspPose(const armSide side, bool isRotationRequired)
 {
     // reorienting the chest would bring the panel above the rover
-//    chest_controller_->controlChest(0,0,0);
-//    ros::Duration(2).sleep();
+    //    chest_controller_->controlChest(0,0,0);
+    //    ros::Duration(2).sleep();
 
     const std::vector<float> *seed1,*seed2;
     if(side == armSide::LEFT){
@@ -225,8 +225,6 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRo
     arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
     ros::Duration(2).sleep();
 
-    gripper_controller_->openGripper(graspingHand);
-    ros::Duration(0.5).sleep();
 
     if (isPanelPicked(graspingHand)){
         armData.clear();
@@ -234,6 +232,9 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRo
         arm_controller_->moveArmJoints(graspingHand, armData, 1.0f);
         ros::Duration(1).sleep();
     }
+
+    gripper_controller_->openGripper(graspingHand);
+    ros::Duration(0.5).sleep();
 
     std::vector<armTrajectory::armJointData> pushPanel;
     pushPanel.resize(3);
@@ -266,13 +267,15 @@ void task2Utils::rotatePanel(const armSide graspingHand)
     std::vector<armTrajectory::armJointData>* reOrientPanelTraj;
     float tempOffset;
     if(graspingHand == armSide::LEFT){
-        graspingHandPoseUp = &leftNearChestPalmDown_;
+//        graspingHandPoseUp = &leftNearChestPalmDown_;
+        graspingHandPoseUp = &leftPanelPlacementUpPose1_;
         reOrientPanelTraj = &reOrientPanelTrajLeft_;
         tempOffset = -0.5;
     }
     else
     {
-        graspingHandPoseUp = &rightNearChestPalmDown_;
+//        graspingHandPoseUp = &rightNearChestPalmDown_;
+        graspingHandPoseUp = &rightPanelPlacementUpPose1_;
         reOrientPanelTraj = &reOrientPanelTrajRight_;
         tempOffset = 0.5;
     }
@@ -283,14 +286,15 @@ void task2Utils::rotatePanel(const armSide graspingHand)
     arm_controller_->moveArmJoints(*reOrientPanelTraj);
     ros::Duration(3).sleep();
 
-//    gripper_controller_->controlGripper(graspingHand, GRIPPER_STATE::TIGHT_HOLD);
+    //    gripper_controller_->controlGripper(graspingHand, GRIPPER_STATE::TIGHT_HOLD);
     std::vector< std::vector<float> > armData;
     armData.clear();
     armData.push_back(*graspingHandPoseUp);
     arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
     ros::Duration(2).sleep();
-//    arm_controller_->moveArmJoint(nonGraspingHand, 3, -1*tempOffset);
-//    ros::Duration(1).sleep();
+    //    arm_controller_->moveArmJoint(nonGraspingHand, 3, -1*tempOffset);
+    //    ros::Duration(1).sleep();
+    gripper_controller_->controlGripper(graspingHand, GRIPPER_STATE::TIGHT_HOLD);
 
 }
 
@@ -487,7 +491,7 @@ bool task2Utils::isRotationReq(armSide side, geometry_msgs::Point handle_coordin
 
 bool task2Utils::checkpoint_init()
 {
-    ROS_INFO("[SKIP] Resetting point cloud and map for skipped checkpoint");    
+    ROS_INFO("[SKIP] Resetting point cloud and map for skipped checkpoint");
     taskLogPub("[SKIP] Resetting point cloud and map for skipped checkpoint");
 
     ros::Duration(3).sleep(); // 3 seconds sleep to get the most recent-new point cloud
@@ -613,10 +617,13 @@ void task2Utils::resumePointCloud() {
 }
 
 void task2Utils::taskLogPub(std::string data){
-
-    std_msgs::String ms;
-    ms.data = data;
-    task2_log_pub_.publish(ms);
+    static std::string prev_msg = "";
+    if(prev_msg != data){
+        std_msgs::String ms;
+        ms.data = data;
+        task2_log_pub_.publish(ms);
+        prev_msg = data;
+    }
 }
 
 bool task2Utils::planWholeBodyMotion(armSide side, std::vector<geometry_msgs::Pose> waypoints)

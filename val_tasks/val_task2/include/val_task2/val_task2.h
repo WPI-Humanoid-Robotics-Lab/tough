@@ -162,6 +162,7 @@ class valTask2 {
     ~valTask2();
     static valTask2* getValTask2(ros::NodeHandle nh);
     bool preemptiveWait(double ms, decision_making::EventQueue& queue);
+    decision_making::TaskResult pre_initTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult initTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult detectRoverTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
     decision_making::TaskResult walkToRoverTask(string name, const FSMCallContext& context, EventQueue& eventQueue);
