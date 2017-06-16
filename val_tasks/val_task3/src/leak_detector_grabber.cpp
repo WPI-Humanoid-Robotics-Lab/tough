@@ -13,7 +13,7 @@
 #define PREGRASP_RIGHT  PREGRASP_LEFT
 
 #define GRASP_LEFT      {1.3999, -0.55, -1.1, -0.9, -1.0}
-#define GRASP_RIGHT     {1.3999, -0.55, 1.1, 0.9, 1.0}
+#define GRASP_RIGHT     {1.3999, 0.55, 1.1, 0.9, 1.0}
 
 leakDetectorGrabber::leakDetectorGrabber(ros::NodeHandle nh):nh_(nh),
     armTraj_(nh_), gripper_(nh_), wholebody_controller_(nh_), task3_utils_(nh_)
