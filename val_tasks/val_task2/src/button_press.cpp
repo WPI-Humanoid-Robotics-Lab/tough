@@ -165,23 +165,23 @@ bool ButtonPress::pressButton(const armSide side, geometry_msgs::Point &goal, fl
 
     ros::Duration(executionTime).sleep();
 
-//    ROS_INFO("Moving chest to zero position");
-//    chest_controller_->controlChest(0,0,0);
+    ROS_INFO("Moving chest to zero position");
+    chest_controller_->controlChest(0,0,0);
 
-//    armData.clear();
-//    armData.push_back(leftShoulderSeedInitial_);
-//    armTraj_.moveArmJoints(LEFT, armData, executionTime);
-//    ros::Duration(executionTime).sleep();
-//    armData.clear();
-//    armData.push_back(rightShoulderSeedInitial_);
-//    armTraj_.moveArmJoints(RIGHT, armData, executionTime);
-//    ros::Duration(executionTime).sleep();
+    armData.clear();
+    armData.push_back(leftShoulderSeedInitial_);
+    armTraj_.moveArmJoints(LEFT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
+    armData.clear();
+    armData.push_back(rightShoulderSeedInitial_);
+    armTraj_.moveArmJoints(RIGHT, armData, executionTime);
+    ros::Duration(executionTime).sleep();
     return true;
 }
 
 void ButtonPress::getButtonPosition( geometry_msgs::Point &goal)
 {
-//    bd_.findButtons(goal);
+    //    bd_.findButtons(goal);
     ROS_ERROR("Don't do it");
 
 }
