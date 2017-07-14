@@ -223,7 +223,7 @@ void PeriodicSnapshotter::pairAlign (const pcl::PointCloud<pcl::PointXYZ>::Ptr c
 
 
     //
-    // Run the same optimization in a loop and visualize the results
+    // Run the same optimization in a loop
     Eigen::Matrix4f Ti = Eigen::Matrix4f::Identity (), prev, targetToSource;
     PointCloudWithNormals::Ptr reg_result = points_with_normals_src;
     reg.setMaximumIterations (2);
@@ -403,57 +403,13 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
 
         //update the global transform
         GlobalTransform = GlobalTransform * pairTransform;
-        pcl::PointCloud<pcl::PointXYZ>::Ptr tgt (new pcl::PointCloud<pcl::PointXYZ>);
         /*  Disabling voxel filter -- enabling this will impact rover detection
         float leafsize  = 0.05;
         pcl::VoxelGrid<PointT> grid;
         grid.setLeafSize (leafsize, leafsize, leafsize);
         grid.setInputCloud (result);
-        grid.filter (*tgt);
+        grid.filter (*result);
         */
-
-        // Create the filtering object
-//        pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-//        sor.setInputCloud (result);
-//        sor.setMeanK (50);
-//        sor.setStddevMulThresh (1.0);
-//        sor.filter (*tgt);
-
-        //        if (enable_box_filter_){
-        //            geometry_msgs::Pose pelvisPose;
-        //            robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
-        //            Eigen::Vector4f minPoint;
-        //            Eigen::Vector4f maxPoint;
-        //            minPoint[0]=-1;
-        //            minPoint[1]=-1;
-        //            minPoint[2]=-0.5;
-
-        //            maxPoint[0]=2;
-        //            maxPoint[1]=1;
-        //            maxPoint[2]=1;
-        //            Eigen::Vector3f boxTranslatation;
-        //            boxTranslatation[0]=pelvisPose.position.x;
-        //            boxTranslatation[1]=pelvisPose.position.y;
-        //            boxTranslatation[2]=pelvisPose.position.z;
-        //            Eigen::Vector3f boxRotation;
-        //            boxRotation[0]=0;  // rotation around x-axis
-        //            boxRotation[1]=0;  // rotation around y-axis
-        //            boxRotation[2]= tf::getYaw(pelvisPose.orientation);  //in radians rotation around z-axis. this rotates your cube 45deg around z-axis.
-
-
-        //            pcl::CropBox<pcl::PointXYZ> box_filter;
-        //            std::vector<int> indices;
-        //            indices.clear();
-        //            box_filter.setInputCloud(tgt);
-        //            box_filter.setMin(minPoint);
-        //            box_filter.setMax(maxPoint);
-        //            box_filter.setTranslation(boxTranslatation);
-        //            box_filter.setRotation(boxRotation);
-        //            box_filter.setNegative(true);
-        //            box_filter.filter(*tgt);
-        //            enable_box_filter_ = false;
-        //        }
-
 
         convertPCLtoROS(result,merged_cloud);
         // publish the merged message

@@ -76,12 +76,12 @@ void FinishBoxDetector::detectFinishBox(const nav_msgs::OccupancyGrid::Ptr msg) 
         for( int i = 0; i< contours.size(); i++ )
         {
             Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-            //drawContours( map_image_, contours_poly, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
-            //        std::cout<<"Area of contour :"<<contourArea( contours[i])<<std::endl;
+//            drawContours( map_image_, contours_poly, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
+                    std::cout<<"Area of contour :"<<contourArea( contours[i])<<std::endl;
             if(contourArea( contours[i] )>3000) // because area of just the finish box will be 3600 pixels
             {
                 rectangle( map_image_, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
-                if(boundRect[i].tl().x>1 && boundRect[i].br().x<999) // To avoid largest bounding box which encompasses the entire image
+                if(boundRect[i].tl().x>1 && boundRect[i].br().x<99999) // To avoid largest bounding box which encompasses the entire image
                 {
                     xMin.push_back(boundRect[i].tl().x); xMax.push_back(boundRect[i].br().x);
                     yMin.push_back(boundRect[i].tl().y); yMax.push_back(boundRect[i].br().y);
@@ -92,7 +92,7 @@ void FinishBoxDetector::detectFinishBox(const nav_msgs::OccupancyGrid::Ptr msg) 
             }
 
         }
-        //    showImage(map_image_);
+//            showImage(map_image_);
 
         float radius=1.3/map_resolution; // side of square is 3 meters
 

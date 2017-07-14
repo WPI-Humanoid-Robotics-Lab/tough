@@ -122,7 +122,8 @@ decision_making::TaskResult valTask1::pre_initTask(string name, const FSMCallCon
 {
     ROS_INFO_STREAM("valTask1::pre-initTask : executing " << name);
     task1_utils_->taskLogPub("valTask1::pre-initTask : executing " + name + "/GOTO_STATE_INIT to start state machine");
-
+    m_output_ss<<"start time\t"<<ros::Time::now().toSec()<<"\n";
+    eventQueue.riseEvent("/GOTO_STATE_INIT");
 
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("valTask1::pre-initTask: waiting for transition");
@@ -156,16 +157,17 @@ decision_making::TaskResult valTask1::initTask(string name, const FSMCallContext
         resetRobotToDefaults();
 
         // start the task
-//        ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
-//        srcsim::StartTask   srv;
-//        srv.request.checkpoint_id = 1;
-//        srv.request.task_id       = 1;
-//        if(client.call(srv)) {
-//            //what do we do if this call fails or succeeds?
-//        }
+        ros::ServiceClient  client = nh_.serviceClient<srcsim::StartTask>("/srcsim/finals/start_task");
+        srcsim::StartTask   srv;
+        srv.request.checkpoint_id = 1;
+        srv.request.task_id       = 1;
+        if(client.call(srv)) {
+            //what do we do if this call fails or succeeds?
+        }
         // generate the event
         head_controller_->moveHead(0,0,0);
-        //        eventQueue.riseEvent("/REGULAR");
+        m_output_ss<<"INIT COMPLETE\t"<<ros::Time::now().toSec()<<"\n";
+        eventQueue.riseEvent("/REGULAR");
 
     }
     else if (retry_count++ < 40) {
@@ -234,6 +236,7 @@ decision_making::TaskResult valTask1::detectPanelCoarseTask(string name, const F
         retry_count = 0;
         // update the plane coeffecients
         if(panel_detector_->getPanelPlaneModel(panel_coeff_)){
+            m_output_ss<<"PANEL DETECTED\t"<<ros::Time::now().toSec()<<"\n";
             eventQueue.riseEvent("/DETECTED_PANEL");
             ROS_INFO("valTask1::detectPanelCoarseTask : detected panel");
             task1_utils_->taskLogPub("valTask1::detectPanelCoarseTask : detected panel");
@@ -304,6 +307,7 @@ decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMC
     if (taskCommonUtils::isGoalReached(current_pelvis_pose, panel_walk_goal_coarse_))
     {
         ROS_INFO("reached panel");
+        m_output_ss<<"REACHED PANEL\t"<<ros::Time::now().toSec()<<"\n";
         task1_utils_->taskLogPub("reached panel");
 
         // TODO: check if robot rechead the panel
@@ -383,6 +387,7 @@ decision_making::TaskResult valTask1::detectHandleCenterTask(string name, const 
         task1_utils_->taskLogPub("Handles detected at x : "  + std::to_string(handle_loc_[0].x) + " y: " + std::to_string(handle_loc_[0].y)
                 + "and x: " + std::to_string(handle_loc_[2].x)  + " y: " + std::to_string(handle_loc_[2].y));
         // generate the event
+        m_output_ss<<"HANDLES DETECTED\t"<<ros::Time::now().toSec()<<"\n";
         eventQueue.riseEvent("/DETECTED_HANDLE");
 
         // reset the neck
@@ -461,6 +466,7 @@ decision_making::TaskResult valTask1::detectPanelFineTask(string name, const FSM
         retry_count = 0;
         // update the plane coeffecients
         if(panel_detector_->getPanelPlaneModel(panel_coeff_)){
+            m_output_ss<<"PANEL_FINE DETECTED\t"<<ros::Time::now().toSec()<<"\n";
             eventQueue.riseEvent("/DETECTED_PANEL_FINE");
             if(panel_detector_ != nullptr) delete panel_detector_;
             panel_detector_ = nullptr;
@@ -530,6 +536,7 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
         ROS_INFO("reached panel");
         task1_utils_->taskLogPub("reached panel");
         // TODO: check if robot rechead the panel
+        m_output_ss<<"REACHED PANEL FINE\t"<<ros::Time::now().toSec()<<"\n";
         eventQueue.riseEvent("/REACHED_PANEL_FINE");
         // required for robot to stablize as goal tolerance is high
         ros::Duration(1).sleep();
@@ -624,6 +631,7 @@ decision_making::TaskResult valTask1::fixHandle(string name, const FSMCallContex
         }
 
         // generate the event
+        m_output_ss<<"FIXED HANDLE CENTERS\t"<<ros::Time::now().toSec()<<"\n";
         eventQueue.riseEvent("/FIXED_HANDLE");
 
 
@@ -704,7 +712,8 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
     }
     else if (robot_state_->isGraspped(armSide::RIGHT)){
         ROS_INFO("Grasp is successful");
-        task1_utils_->taskLogPub("Grasp is successfu");
+        task1_utils_->taskLogPub("Grasp is successful");
+        m_output_ss<<"GRASPED PITCH HANDLE\t"<<ros::Time::now().toSec()<<"\n";
         eventQueue.riseEvent("/GRASPED_PITCH_HANDLE");
     }
     else if (retry_count < 20 ){
@@ -838,6 +847,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         if (task1_utils_->isPitchCompleted())
         {
             // sucessuflly done
+            m_output_ss<<"PITCH FIXED\t"<<ros::Time::now().toSec()<<"\n";
             eventQueue.riseEvent("/PITCH_CORRECTION_SUCESSFUL");
 
             // set the execute flag
@@ -1021,6 +1031,7 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
     else if (robot_state_->isGraspped(armSide::LEFT)){
         ROS_INFO("Grasp is successful");
         task1_utils_->taskLogPub("Grasp is successful");
+        m_output_ss<<"GRASPED YAW HANDLE\t"<<ros::Time::now().toSec()<<"\n";
         eventQueue.riseEvent("/GRASPED_YAW_HANDLE");
     }
     else if (retry_count < 20 ){
@@ -1159,6 +1170,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
             // check if pitch is still correct
             if(task1_utils_->isPitchCompleted()){
                 // sucessuflly done
+                m_output_ss<<"FIXED YAW\t"<<ros::Time::now().toSec()<<"\n";
                 eventQueue.riseEvent("/YAW_CORRECTION_SUCESSFUL");
 
                 // set the execute flag
@@ -1335,6 +1347,7 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
 
     if( execute_once)
     {
+        m_output_ss<<"REDETECT HANDLE START\t"<<ros::Time::now().toSec()<<"\n";
         // based on the previous state set the state transition
         if (prev_grasp_state_ == prevGraspState::GRASP_PITCH_HANDLE)
         {
@@ -1398,6 +1411,7 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
         pelvis_controller_->controlPelvisHeight(0.9);
 
         // state transition
+        m_output_ss<<"REDETECTED HANDLES\t"<<ros::Time::now().toSec()<<"\n";
         eventQueue.riseEvent(next_state_transition);
     }
     else if (retry_count > 10)
@@ -1486,6 +1500,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
             resetRobotToDefaults();
             ROS_INFO("finish box detected");
             task1_utils_->taskLogPub("finish box detected");
+            m_output_ss<<"DETECTED FINISHBOX\t"<<ros::Time::now().toSec()<<"\n";
             eventQueue.riseEvent("/DETECT_FINISH_SUCESSFUL");
             retry_count=0;
 
@@ -1497,7 +1512,6 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
         }
         // this is to avoid detecting points that will always be in collision
         retry_count++;
-        eventQueue.riseEvent("/DETECT_FINISH_RETRY");
     }
     else if(retry_count++ < 5){
         ros::Duration(3).sleep();
@@ -1516,6 +1530,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
         task1_utils_->taskLogPub("waiting for transition");
+        eventQueue.riseEvent("/DETECT_FINISH_RETRY");
     }
 
     return TaskResult::SUCCESS();
@@ -1528,22 +1543,22 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
     task1_utils_->taskLogPub("valTask1::walkToFinishTask : Walk Manually : " + name);
 
     // set the robot to default state to walk
-    resetRobotToDefaults();
+//    resetRobotToDefaults();
 
 
-    // kill the node and exit
-    ROS_INFO("task1 completed killing the node");
-    task1_utils_->taskLogPub("task1 completed killing the node");
+//    // kill the node and exit
+//    ROS_INFO("task1 completed killing the node");
+//    task1_utils_->taskLogPub("task1 completed killing the node");
 
-    int ret = std::system("rosnode kill task1");
+//    int ret = std::system("rosnode kill task1");
 
     // wait infinetly until an external even occurs
-    while(!preemptiveWait(1000, eventQueue)){
-        ROS_INFO("waiting for transition");
-        task1_utils_->taskLogPub("Give manual walk goal");
-    }
+//    while(!preemptiveWait(1000, eventQueue)){
+//        ROS_INFO("waiting for transition");
+//        task1_utils_->taskLogPub("Give manual walk goal");
+//    }
 
-    return TaskResult::SUCCESS();
+//    return TaskResult::SUCCESS();
 
     static int fail_count = 0;
 
@@ -1559,7 +1574,9 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
         ROS_INFO("reached panel");
         task1_utils_->taskLogPub("reached panel");
         // TODO: check if robot rechead the panel
+        m_output_ss<<"REACHED FINISHBOX\t"<<ros::Time::now().toSec()<<"\n";
         eventQueue.riseEvent("/WALK_TO_FINISH_SUCESSFUL");
+        ROS_INFO(m_output_ss.str().c_str());
     }
     // the goal can be updated on the run time
     else if (taskCommonUtils::isPoseChanged(pose_prev, next_finishbox_center_))
