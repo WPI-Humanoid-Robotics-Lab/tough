@@ -134,18 +134,12 @@ include_directories(
 ## Declare a C++ executable
  add_executable(test_sens_node src/test_sens.cpp)
  add_executable(test_com_stability_node src/test_com_stability.cpp)
- add_executable(jointcommand_node src/jointcommand.cpp)
- add_executable(jointstate_node src/jointstate.cpp)
- add_executable(test_standing_controller_node src/test_standing_controller.cpp)
 # add_executable(test_jointstate_node src/test_jointstate.cpp)	
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
  add_dependencies(test_sens_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
  add_dependencies(test_com_stability_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
- add_dependencies(jointcommand_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
- add_dependencies(jointstate_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
- add_dependencies(test_standing_controller_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
  #add_dependencies(test_jointstate_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
@@ -157,19 +151,7 @@ include_directories(
   ${catkin_LIBRARIES}
  )
 
- target_link_libraries( jointcommand_node
-   ${catkin_LIBRARIES}
- )
-
- target_link_libraries( jointstate_node
-   ${catkin_LIBRARIES}
- )
-
- target_link_libraries( test_standing_controller_node
-   ${catkin_LIBRARIES}
- )
- 
- #target_link_libraries( test_jointstate_node
+#target_link_libraries( test_jointstate_node
   # ${catkin_LIBRARIES}
  #)
 #############

@@ -9,27 +9,26 @@
 // test file for the com and stabiltiy criteria
 //////////
 
-class testCOMStability {
+class TestCOM {
 public:
-    testCOMStability(ros::NodeHandle nh);
-    ~testCOMStability();
-    void jointStateCb(const sensor_msgs::JointStateConstPtr& state);
+    TestCOM(ros::NodeHandle nh);
+    ~TestCOM();
     void test(void);
 
 protected:
     ros::NodeHandle nh_;
     ros::Publisher visualization_pub_, support_polygon_pub_, pcom_pub_, act_com_marker_;
-    stability* S;
+    stability* Stability;
     com* COM;
     stability::FootSupport support_mode_;
     valJointState* joint;
 };
 
-testCOMStability::testCOMStability(ros::NodeHandle nh)
+TestCOM::TestCOM(ros::NodeHandle nh)
     : nh_(nh)
 {
     COM = new com(nh, "pelvis", "rightFoot", "leftFoot", true);
-    S = new stability(1, nh, "rightFoot", "pelvis", "rightFoot", "leftFoot");
+    Stability = new stability(1, nh, "rightFoot", "pelvis", "rightFoot", "leftFoot");
     joint = new valJointState(nh);
 
     // create publisher and suscribers
@@ -40,11 +39,12 @@ testCOMStability::testCOMStability(ros::NodeHandle nh)
     support_mode_=stability::SUPPORT_DOUBLE;
 }
 
-testCOMStability::~testCOMStability(){
-
+TestCOM::~TestCOM(){
+    delete COM;
+    delete Stability;
 }
 
-void testCOMStability::test(void){
+void TestCOM::test(void){
 
     // get joint positions from state message
     std::map<std::string, double> joint_positions_;
@@ -59,11 +59,10 @@ void testCOMStability::test(void){
     // for testing, normal vector of arbitrary plane:
     normal_vector.normalize();
 
-    //ROS_INFO("callback");
-    bool stable = S->isPoseStable(joint_positions_, support_mode_, normal_vector);
+    bool stable = Stability->isPoseStable(joint_positions_, support_mode_, normal_vector);
 
     // print info
-    tf::Point com = S->getCOM();
+    tf::Point com = Stability->getCOM();
 
     tf::Transform tf_right_foot, tf_left_foot;
     tf::Point com_act;
@@ -86,14 +85,36 @@ void testCOMStability::test(void){
     com_marker.color.r = 0.0;
     com_marker.color.b = 1.0;
 
-    if (stable)
-      ROS_INFO("Pose is stable, pCOM at %f %f", com.x(), com.y());
-    else
-      ROS_INFO("Pose is NOT stable, pCOM at %f %f", com.x(), com.y());
+    geometry_msgs::PolygonStamped support_polygon = Stability->getSupportPolygon();
 
-    support_polygon_pub_.publish(S->getSupportPolygon());
-    pcom_pub_.publish(S->getProjectedCOMMarker());
+    std::cout<<support_polygon.polygon.points.size()<<"\n";
+
+    std::vector<float> x,y;
+    for (int i = 0; i < support_polygon.polygon.points.size(); ++i) {
+           x.push_back(support_polygon.polygon.points[i].x);
+           std::cout<<"x at "<<i<<" :"<<x[i]<<"\n";
+           y.push_back(support_polygon.polygon.points[i].y);
+           std::cout<<"y at "<<i<<" :"<<y[i]<<"\n";
+    }
+
+    float max_x = *std::max_element(std::begin(x),std::end(x));
+    float max_y = *std::max_element(std::begin(y),std::end(y));
+
+    support_polygon_pub_.publish(support_polygon);
+    pcom_pub_.publish(Stability->getProjectedCOMMarker());
     act_com_marker_.publish(com_marker);
+
+    float stability_margin = 200- (std::fabs(com.x())/max_x + std::fabs(com.y())/max_y)*50;
+    if (stable)
+    {
+        ROS_INFO("COM inside polygon, pCOM at %f %f", com.x(), com.y());
+
+        std::cout<<"stability margin is: "<<stability_margin<<"\n";
+    }
+    else
+    {
+        ROS_ERROR("COM not inside polygon, pCOM at %f %f", com.x(), com.y());
+    }
 }
 
 // test code
@@ -105,7 +126,7 @@ int main(int argc, char *argv[])
 
     ros::Rate loop_rate(100);
 
-    testCOMStability T(nh);
+    TestCOM T(nh);
 
     while(ros::ok())
     {
