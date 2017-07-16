@@ -87,7 +87,7 @@ void TestCOM::test(void){
 
     geometry_msgs::PolygonStamped support_polygon = Stability->getSupportPolygon();
 
-    std::cout<<support_polygon.polygon.points.size()<<"\n";
+//    std::cout<<support_polygon.polygon.points.size()<<"\n";
 
     std::vector<float> x,y;
     for (int i = 0; i < support_polygon.polygon.points.size(); ++i) {
@@ -100,21 +100,23 @@ void TestCOM::test(void){
     float max_x = *std::max_element(std::begin(x),std::end(x));
     float max_y = *std::max_element(std::begin(y),std::end(y));
 
-    support_polygon_pub_.publish(support_polygon);
-    pcom_pub_.publish(Stability->getProjectedCOMMarker());
-    act_com_marker_.publish(com_marker);
+    std::cout<<max_x<<"\t"<<max_y<<"\n";
 
     float stability_margin = 200- (std::fabs(com.x())/max_x + std::fabs(com.y())/max_y)*50;
+
     if (stable)
     {
         ROS_INFO("COM inside polygon, pCOM at %f %f", com.x(), com.y());
 
-        std::cout<<"stability margin is: "<<stability_margin<<"\n";
+        std::cout<<"stability margin is: "<<stability_margin<<" % \n";
     }
     else
     {
         ROS_ERROR("COM not inside polygon, pCOM at %f %f", com.x(), com.y());
     }
+    support_polygon_pub_.publish(support_polygon);
+    pcom_pub_.publish(Stability->getProjectedCOMMarker());
+    act_com_marker_.publish(com_marker);
 }
 
 // test code
