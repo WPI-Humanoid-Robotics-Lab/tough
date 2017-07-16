@@ -1,0 +1,19 @@
+<?xml version="1.0" ?> 
+<launch>
+
+  <arg name="init" default="true" />
+
+  <!-- launch valkyire -->
+  <include file="$(find val_sim)/launch/valkyire_emptyworld.launch">
+         <arg name="init" value="$(arg init)" />
+  </include>
+
+  <!-- run the test com node -->
+  <node name="comstability" pkg="test" type="test_com_stability_node" output="screen"> 	
+    <param name="publish_frequency" value="100" /> 	
+  </node>
+
+  <!-- run rviz with default config -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find test)/launch/comStabilityConfig.rviz"/>
+
+</launch>

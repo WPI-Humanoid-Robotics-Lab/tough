@@ -50,9 +50,26 @@ double cartesianPlanner::getTrajFromCartPoints(std::vector<geometry_msgs::Pose> 
        * Goal tolerance is required as we dont have a defined orientation
        **********************************************************************/
     group_->setPlannerId("RRTkConfigDefault");
+    /*
+     * Other planners to experiment
+    - SBLkConfigDefault
+    - ESTkConfigDefault
+    - LBKPIECEkConfigDefault
+    - BKPIECEkConfigDefault
+    - KPIECEkConfigDefault
+    - RRTkConfigDefault
+    - RRTConnectkConfigDefault
+    - RRTstarkConfigDefault
+    - TRRTkConfigDefault
+    - PRMkConfigDefault
+    - PRMstarkConfigDefault
+     */
+
     group_->setNumPlanningAttempts(1);
     group_->setPlanningTime(30);
     group_->setGoalTolerance(0.1);
+
+
 
 
     // compute the trajectory

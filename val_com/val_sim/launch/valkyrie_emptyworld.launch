@@ -1,0 +1,38 @@
+<launch>
+  <arg name="debug" default="false" />
+  <arg name="extra_gazebo_args" default=""/>
+  <arg name="init" default="true" />
+  <arg name="paused" default="false" />
+  <arg name="use_local_build" default="false" />
+  <arg name="verbose" default="true" />
+  <arg name="walk_test" default="false"/>
+  <arg name="world_name" default="$(find val_gazebo)/worlds/empty.world"/>
+
+  <!--param name="robot_description" textfile="$(find val_sim)/urdf/valkyrie_sim_gazebo_sync.urdf"/--> 
+  <param name="robot_description" textfile="$(find val_description)/model/urdf/valkyrie_sim_gazebo_sync.urdf"/> 
+         
+  <include file="$(find val_gazebo)/launch/val_sim_gazebo_sync.launch" pass_all_args="false">
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="extra_gazebo_args" default="$(arg extra_gazebo_args)"/>
+    <arg name="paused" value="$(arg paused)" />
+    <arg name="verbose" value="$(arg verbose)" />
+    <arg name="world_name" value="$(arg world_name)" />
+  </include>
+
+  <!-- Combine joint values -->     
+  <!-- joint state publisher launched from sync.launch -->	
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher"> 		
+    <param name="publish_frequency" value="50" /> 	
+  </node>
+
+  <!-- launch ros controllers -->
+  <include file="$(find val_ros_control)/launch/val_ros_controller.launch" />
+
+  <group if="$(arg init)">
+    <node name="startup_robot" pkg="srcsim" type="init_robot.sh" args="$(arg walk_test)" output="screen"/>
+  </group>
+
+  <node name="jointstate_node" pkg="test" type="jointstate_node">
+  </node>
+
+</launch>
