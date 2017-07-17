@@ -13,6 +13,7 @@ using namespace cv;
 FinishBoxDetector::FinishBoxDetector(ros::NodeHandle &n):nh_(n) {
 
     pointcloudSub_ = nh_.subscribe("/map", 10, &FinishBoxDetector::detectFinishBox, this);
+    start_detection = true;
 }
 
 FinishBoxDetector::~FinishBoxDetector()
@@ -20,13 +21,15 @@ FinishBoxDetector::~FinishBoxDetector()
     pointcloudSub_.shutdown();
 }
 
-bool FinishBoxDetector::getFinishBoxCenters(std::vector<geometry_msgs::Point> &centers)
+bool FinishBoxDetector::getFinishBoxCenters(std::vector<geometry_msgs::Point> &centers, bool force_detection)
 {
     centers.clear();
 
     if(finish_box_centers_.empty()){
         return false;
     }
+    if(force_detection)
+        start_detection = true;
     std::set<Point2D> temp_centers = finish_box_centers_;
     for(auto it = temp_centers.begin(); it != temp_centers.end(); ++it) {
         geometry_msgs::Point pt;
@@ -40,6 +43,8 @@ bool FinishBoxDetector::getFinishBoxCenters(std::vector<geometry_msgs::Point> &c
 }
 
 void FinishBoxDetector::detectFinishBox(const nav_msgs::OccupancyGrid::Ptr msg) {
+    if (!start_detection)
+        return;
     static bool isProcessing = false;
     if(!isProcessing){
         isProcessing = true;
@@ -119,6 +124,9 @@ void FinishBoxDetector::detectFinishBox(const nav_msgs::OccupancyGrid::Ptr msg) 
                         circle( map_image_, Point(i, j), 5,  Scalar(255), 2, 8, 0 );
                         //                showImage(map_image_);
                         //                    exit(0);
+                        j+= 10;
+                        i+= 10;
+                        start_detection = false;
                     }
                 }
             }

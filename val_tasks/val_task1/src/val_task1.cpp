@@ -539,7 +539,7 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
         m_output_ss<<"REACHED PANEL FINE\t"<<ros::Time::now().toSec()<<"\n";
         eventQueue.riseEvent("/REACHED_PANEL_FINE");
         // required for robot to stablize as goal tolerance is high
-        ros::Duration(1).sleep();
+        ros::Duration(3).sleep();
     }
     else if (taskCommonUtils::isPoseChanged(pose_prev, panel_walk_goal_fine_))
     {
@@ -1455,32 +1455,40 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
 
     static int retry_count = 0;
     static bool execute_once = true;
+    static bool force_detection = false;
+    // generate the event
 
+    // start detecting finish box
+    if (finish_box_detector_ == nullptr){
+        finish_box_detector_ = new FinishBoxDetector(nh_);
+    }
+    // walk 2 steps back and turn towards finishbox. This helps in case where finishbox is not completely available in map.
     if(execute_once){
-        ROS_INFO("Walking 1 step back");
-        task1_utils_->taskLogPub("Walking 2 step back");
-        ros::Duration(0.5).sleep();
+        ROS_INFO("Walking 2 steps back");
+        task1_utils_->taskLogPub("Walking 2 steps back");
         std::vector<float> x_offset={-0.25,-0.25, -0.5, -0.5};
         std::vector<float> y_offset={0.0, 0.0, 0.0, 0.1};
         walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
-        ros::Duration(3).sleep();
+        ros::Duration(5).sleep();
+        walker_->walk_rotate(-1*panel_walk_goal_coarse_.theta);
+        ros::Duration(5).sleep();
         task1_utils_->resetPointCloud(); // Pointcloud generated from this point onwards is for Task2
         execute_once = false;
     }
-    // generate the event
-    if (finish_box_detector_ == nullptr){
-        finish_box_detector_ = new FinishBoxDetector(nh_);
-        ros::Duration(2).sleep();
-    }
 
     std::vector<geometry_msgs::Point> detections;
+    // this is just a safety check. visited map should already be populated if we reached this stage
     if(visited_map_.data.empty()){
         retry_count++;
         ROS_INFO("visited map is empty");
         task1_utils_->taskLogPub("visited map is empty");
         ros::Duration(3).sleep();
         eventQueue.riseEvent("/DETECT_FINISH_RETRY");
-    } else  if(finish_box_detector_->getFinishBoxCenters(detections)){
+        // else map is good. check if finish box detector detected any points.
+    } else  if(finish_box_detector_->getFinishBoxCenters(detections, force_detection)){
+        // by default finishbox detector will run detector only once. if the detected point is already visited, set force_detection flag
+        force_detection = false;
+        bool success = false;
         for(size_t i = 0; i < detections.size(); ++i){
             size_t index = MapGenerator::getIndex(detections[i].x, detections[i].y);
             ROS_INFO("Index in map %d and size of visited map is %d", (int)index, (int)visited_map_.data.size());
@@ -1502,6 +1510,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
             task1_utils_->taskLogPub("finish box detected");
             m_output_ss<<"DETECTED FINISHBOX\t"<<ros::Time::now().toSec()<<"\n";
             eventQueue.riseEvent("/DETECT_FINISH_SUCESSFUL");
+            success = true;
             retry_count=0;
 
             if(finish_box_detector_ != nullptr) delete finish_box_detector_;
@@ -1510,9 +1519,15 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
             ros::Duration(2).sleep();
             break;
         }
-        // this is to avoid detecting points that will always be in collision
-        retry_count++;
+
+        // This condition checks if detection was succesful, if not retry detection with force_detection enabled
+        if (!success){
+            eventQueue.riseEvent("/DETECT_FINISH_RETRY");
+            force_detection = true;
+            retry_count++;
+        }
     }
+    // retry 5 times before going to fail state
     else if(retry_count++ < 5){
         ros::Duration(3).sleep();
         eventQueue.riseEvent("/DETECT_FINISH_RETRY");
@@ -1530,7 +1545,6 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
     while(!preemptiveWait(1000, eventQueue)){
         ROS_INFO("waiting for transition");
         task1_utils_->taskLogPub("waiting for transition");
-        eventQueue.riseEvent("/DETECT_FINISH_RETRY");
     }
 
     return TaskResult::SUCCESS();
@@ -1538,9 +1552,9 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
 
 decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCallContext& context, EventQueue& eventQueue)
 {
-    ROS_INFO_STREAM("valTask1::walkToFinishTask : executing " << name);
+     ROS_INFO_STREAM_ONCE("valTask1::walkToSeePanelTask : executing " << name);
 
-    task1_utils_->taskLogPub("valTask1::walkToFinishTask : Walk Manually : " + name);
+//    task1_utils_->taskLogPub("valTask1::walkToFinishTask : Walk Manually : " + name);
 
     // set the robot to default state to walk
 //    resetRobotToDefaults();

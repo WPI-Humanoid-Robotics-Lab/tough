@@ -124,6 +124,8 @@ class valTask1 {
     // helper functions
     void resetRobotToDefaults(int arm_pose=1);
 
+    std::stringstream m_output_ss;
+
     public:
 
     // goal location for the panel
