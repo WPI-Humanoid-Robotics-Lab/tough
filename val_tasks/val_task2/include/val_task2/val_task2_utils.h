@@ -136,8 +136,9 @@ public:
     bool isPointOnWalkway(float x, float y);
     void movePanelToWalkSafePose(const armSide side, bool isRotationRequired);
     bool isPanelPicked(const armSide side);
-    void moveToPlacePanelPose(const armSide graspingHand, bool isPanelRotated);
+    void placePanel(const armSide graspingHand, bool isPanelRotated);
     void rotatePanel(const armSide graspingHand);
+    void raisePanel(const armSide graspingHand);
     void clearPointCloud();
     void clearMap();
     void pausePointCloud();

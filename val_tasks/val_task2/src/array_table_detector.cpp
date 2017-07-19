@@ -24,7 +24,7 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
         return false;
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
-    //fetch the cloud which would have table. assuming robot is standing less than 2m away from th etable
+    //fetch the cloud which would have table. assuming robot is standing less than 2m away from the table
     extractCloudOfInterest(input, *output_cloud);
     ROS_INFO("ArrayTableDetector::planeSegmentation : Trimmed Cloud");
 

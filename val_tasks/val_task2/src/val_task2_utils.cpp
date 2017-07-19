@@ -178,7 +178,7 @@ bool task2Utils::isPanelPicked(const armSide side)
     return false;
 }
 
-void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRotated)
+void task2Utils::placePanel(const armSide graspingHand, bool isPanelRotated)
 {
     isPanelRotated = true; // this is to avoid rework. I'll fix it the right way when I have time
 
@@ -199,7 +199,7 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRo
         nonGraspingHandPose1 = &rightPanelPlacementSupport1_;
         nonGraspingHandPose2 = &rightPanelPlacementSupport2_;
         // take non-GraspingHand out
-        arm_controller_->moveArmJoint(nonGraspingHand, 3, 0.5);
+//        arm_controller_->moveArmJoint(nonGraspingHand, 3, 0.5);
         ros::Duration(1).sleep();
     }
     else
@@ -215,8 +215,8 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRo
         nonGraspingHandPose1 = &leftPanelPlacementSupport1_;
         nonGraspingHandPose2 = &leftPanelPlacementSupport2_;
         // take non-GraspingHand out
-        arm_controller_->moveArmJoint(nonGraspingHand, 3, -0.5);
-        ros::Duration(1).sleep();
+//        arm_controller_->moveArmJoint(nonGraspingHand, 3, -0.5);
+//        ros::Duration(1).sleep();
     }
 
     std::vector< std::vector<float> > armData;
@@ -234,8 +234,16 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRo
     //    }
 
     gripper_controller_->openGripper(graspingHand);
-    ros::Duration(0.5).sleep();
+    ros::Duration(1).sleep();
 
+    armData.clear();
+    armData.push_back(*graspingHandPoseUp);
+    arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
+    ros::Duration(2).sleep();
+
+
+    /* push is not required as we always place the panel with palm down configuration
+     *
     std::vector<armTrajectory::armJointData> pushPanel;
     pushPanel.resize(3);
     pushPanel[0].side = nonGraspingHand;
@@ -251,8 +259,9 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRo
     pushPanel[2].time = 5;
 
     arm_controller_->moveArmJoints(pushPanel);
-    // Duration is less than trajectory time as the next step should execute before moving non-grasping hand
+     Duration is less than trajectory time as the next step should execute before moving non-grasping hand
     ros::Duration(2.5).sleep();
+    */
 
 }
 
@@ -296,6 +305,26 @@ void task2Utils::rotatePanel(const armSide graspingHand)
     //    ros::Duration(1).sleep();
     gripper_controller_->controlGripper(graspingHand, GRIPPER_STATE::TIGHT_HOLD);
 
+}
+
+void task2Utils::raisePanel(const armSide graspingHand)
+{
+    const std::vector<float> *graspingHandPoseUp;
+    if(graspingHand == armSide::LEFT){
+        //        graspingHandPoseUp = &leftNearChestPalmDown_;
+        graspingHandPoseUp = &leftPanelPlacementUpPose1_;
+    }
+    else
+    {
+        //        graspingHandPoseUp = &rightNearChestPalmDown_;
+        graspingHandPoseUp = &rightPanelPlacementUpPose1_;
+    }
+
+    std::vector< std::vector<float> > armData;
+    armData.clear();
+    armData.push_back(*graspingHandPoseUp);
+    arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
+    ros::Duration(2).sleep();
 }
 
 void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset){
