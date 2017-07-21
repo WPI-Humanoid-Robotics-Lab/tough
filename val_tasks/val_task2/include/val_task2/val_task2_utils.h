@@ -149,6 +149,7 @@ public:
     void reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
     bool shakeTest(const armSide graspingHand);
+    bool pushDeployedPanel();
 
     boost::posix_time::ptime timeNow;
     bool isCableOnTable(geometry_msgs::Pose &cable_pose);

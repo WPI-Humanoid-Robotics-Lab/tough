@@ -564,6 +564,39 @@ bool task2Utils::shakeTest(const armSide graspingHand)
     return true;
 
 }
+/**
+ * @brief task2Utils::pushDeployedPanel walks a fixed step back, moves both arms in position and moves the same fixed distance forward to push the deployed panel.
+ * After pushing the panel, the socket is in a more convenient position to attempt cable plug-in
+ * @return success
+ */
+bool task2Utils::pushDeployedPanel()
+{
+    std::vector<float> x_offset={-0.2, -0.4, -0.4};
+    std::vector<float> y_offset={0.0, 0.0, 0.0};
+    walk_->walkLocalPreComputedSteps(x_offset,y_offset,LEFT);
+    ros::Duration(4).sleep();
+
+    x_offset={0.2, 0.4, 0.4};
+    y_offset={0.0, 0.0, 0.0};
+
+    std::vector< std::vector<float> > armData;
+    std::vector<float> leftHandData = {-0.23, -1.24, 0.07, -1.25, 1.23, 0.0, 0.0};
+    std::vector<float> rightHandData = {-0.42, 1.38, 0.60, 1.15,  1.28, 0.0, 0.0};
+
+    armData.clear();
+    armData.push_back(leftHandData);
+    arm_controller_->moveArmJoints(armSide::LEFT, armData, 0.2f);
+    armData.clear();
+    armData.push_back(rightHandData);
+    arm_controller_->moveArmJoints(armSide::RIGHT, armData, 2.0f);
+
+    ros::Duration(2).sleep();
+    walk_->walkLocalPreComputedSteps(x_offset,y_offset,LEFT);
+    ros::Duration(4).sleep();
+
+    return true;
+
+}
 
 
 void task2Utils::taskStatusCB(const srcsim::Task &msg)

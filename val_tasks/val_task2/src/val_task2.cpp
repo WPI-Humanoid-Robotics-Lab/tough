@@ -1544,17 +1544,7 @@ decision_making::TaskResult valTask2::deployPanelTask(string name, const FSMCall
         ROS_INFO("valTask2::deployPanelTask : Panel deployed successfully");
         task2_utils_->taskLogPub("valTask2::deployPanelTask : Panel deployed successfully");
 
-        std::vector<float> x_offset={-0.2, -0.4, -0.4};
-        std::vector<float> y_offset={0.0, 0.0, 0.0};
-        walker_->walkLocalPreComputedSteps(x_offset,y_offset,LEFT);
-        ros::Duration(4).sleep();
-
-        ///@todo Shlok, please set the arms in position to push the panel
-
-        x_offset={0.2, 0.4, 0.4};
-        y_offset={0.0, 0.0, 0.0};
-        walker_->walkLocalPreComputedSteps(x_offset,y_offset,LEFT);
-        ros::Duration(4).sleep();
+        task2_utils_->pushDeployedPanel();
 
         taskCommonUtils::moveToInitPose(nh_);
         eventQueue.riseEvent("/DEPLOYED");
