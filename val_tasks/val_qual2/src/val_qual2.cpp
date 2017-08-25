@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <val_controllers/val_arm_navigation.h>
 #include <val_controllers/val_pelvis_navigation.h>
-#include <val_footstep/ValkyrieWalker.h>
+#include <val_footstep/RobotWalker.h>
 #include <val_controllers/val_chest_navigation.h>
 #include <ihmc_msgs/ChestTrajectoryRosMessage.h>
 #include <ihmc_msgs/FootTrajectoryRosMessage.h>
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     // optimum values for walking
     //ValkyrieWalker walk(nh, 0.34, 0.44);
 
-    ValkyrieWalker walk(nh, transferTime, swingTime);
+    RobotWalker walk(nh, transferTime, swingTime);
     walk.setSwingHeight(swingHeight);
 
     sm state = PREPARE_START;
