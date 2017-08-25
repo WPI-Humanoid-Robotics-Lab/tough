@@ -1,5 +1,5 @@
 #include <iostream>
-#include<val_footstep/ValkyrieWalker.h>
+#include<val_footstep/RobotWalker.h>
 #include<ihmc_msgs/FootstepDataListRosMessage.h>
 #include"geometry_msgs/Pose2D.h"
 #include "val_common/val_common_defines.h"
@@ -12,7 +12,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "walk_test");
     ros::NodeHandle nh;
     ros::Rate loop_rate(10);
-    ValkyrieWalker walk(nh, 1.0,1.0,0);
+    RobotWalker walk(nh, 1.0,1.0,0);
     ros::Publisher stopTraj= nh.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/stop_all_trajectories",1,true);
     ihmc_msgs::StopAllTrajectoryRosMessage stopMsg;
     stopMsg.unique_id=45;
@@ -74,9 +74,9 @@ int main(int argc, char **argv)
             cout<<"enter side \n";
             cin>>hand;
             if(hand==0){
-                walk.load_eff(LEFT,EE_LOADING::LOAD);
+                walk.loadEEF(LEFT,EE_LOADING::LOAD);
             }
-            else  walk.load_eff(RIGHT,EE_LOADING::LOAD);
+            else  walk.loadEEF(RIGHT,EE_LOADING::LOAD);
         }
         else if(input=='c')
         {

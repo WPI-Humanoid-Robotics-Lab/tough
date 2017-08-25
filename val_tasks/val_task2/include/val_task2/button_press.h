@@ -3,7 +3,7 @@
 #include <val_task2/button_detector.h>
 #include <val_controllers/val_arm_navigation.h>
 #include <val_controllers/val_gripper_control.h>
-#include <val_footstep/ValkyrieWalker.h>
+#include <val_footstep/RobotWalker.h>
 #include <val_common/val_common_defines.h>
 #include <val_common/val_common_names.h>
 #include "val_moveit_planners/val_cartesian_planner.h"

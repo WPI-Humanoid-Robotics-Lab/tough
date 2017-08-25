@@ -11,7 +11,7 @@ int main(int argc, char **argv)
     ROS_INFO("Starting valve grabber");
 
 
-    rotateValve rotate(nh);
+    RotateValve rotate(nh);
     gripperControl gc(nh);
 
 

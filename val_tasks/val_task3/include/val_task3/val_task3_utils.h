@@ -15,7 +15,7 @@
 #include <val_controllers/val_head_navigation.h>
 #include <val_controllers/val_arm_navigation.h>
 #include <val_controllers/robot_state.h>
-#include <val_footstep/ValkyrieWalker.h>
+#include <val_footstep/RobotWalker.h>
 #include "navigation_common/map_generator.h"
 #include <srcsim/Task.h>
 #include <mutex>
@@ -45,7 +45,7 @@ private:
 
     RobotStateInformer *current_state_;
     pelvisTrajectory* pelvis_controller_;
-    ValkyrieWalker *walk_;
+    RobotWalker *walk_;
 
     // Visited map
     ros::Subscriber visited_map_sub_, task_status_sub_;

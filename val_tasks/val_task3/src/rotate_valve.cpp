@@ -1,6 +1,6 @@
 #include "val_task3/rotate_valve.h"
 
-rotateValve::rotateValve(ros::NodeHandle n):nh_(n), armTraj_(nh_),
+RotateValve::RotateValve(ros::NodeHandle n):nh_(n), armTraj_(nh_),
     gripper_(nh_), walk_(nh_), t3Utils(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
@@ -39,7 +39,7 @@ rotateValve::rotateValve(ros::NodeHandle n):nh_(n), armTraj_(nh_),
     marker_pub               = nh_.advertise<visualization_msgs::MarkerArray>( "valve_path", 10, true);
 }
 
-bool rotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTime)
+bool RotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTime)
 {
     // set initial gripper pose with index fingers rounded
     // move to seed point somewhere above the valve
@@ -122,7 +122,7 @@ bool rotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTi
 
 }
 
-bool rotateValve::compute_traj(geometry_msgs::Point center, float radius, std::vector<geometry_msgs::Pose> &points)
+bool RotateValve::compute_traj(geometry_msgs::Point center, float radius, std::vector<geometry_msgs::Pose> &points)
 {
     // using center point and radius, find points of the circle
     // plot using markers
@@ -165,7 +165,7 @@ bool rotateValve::compute_traj(geometry_msgs::Point center, float radius, std::v
 
 }
 
-bool rotateValve::visualise_traj(std::vector<geometry_msgs::Pose> &points)
+bool RotateValve::visualise_traj(std::vector<geometry_msgs::Pose> &points)
 {
     visualization_msgs::MarkerArray markers = visualization_msgs::MarkerArray();
     visualization_msgs::Marker marker;
@@ -196,7 +196,7 @@ bool rotateValve::visualise_traj(std::vector<geometry_msgs::Pose> &points)
 
 }
 
-bool rotateValve::move_valve(std::vector<geometry_msgs::Pose> poses, float executionTime)
+bool RotateValve::move_valve(std::vector<geometry_msgs::Pose> poses, float executionTime)
 {
     // using whole body controller follow the seed points
     // leave grasp
@@ -250,7 +250,7 @@ bool rotateValve::move_valve(std::vector<geometry_msgs::Pose> poses, float execu
     else return false;
 }
 
-bool rotateValve::reOrientbeforgrab(geometry_msgs::Point valveCenter)
+bool RotateValve::reOrientbeforgrab(geometry_msgs::Point valveCenter)
 {
     //Alligning relative to the centre of the valve
     geometry_msgs::Pose   pelvisPose;
@@ -276,7 +276,7 @@ bool rotateValve::reOrientbeforgrab(geometry_msgs::Point valveCenter)
     return result;
 }
 
-rotateValve::~rotateValve(){
+RotateValve::~RotateValve(){
 
     if (left_arm_planner_!= nullptr)        delete left_arm_planner_;
     if (wholebody_controller_!= nullptr)    delete wholebody_controller_;

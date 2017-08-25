@@ -13,7 +13,7 @@
 #include <val_controllers/val_gripper_control.h>
 #include <val_controllers/val_head_navigation.h>
 #include <val_controllers/val_arm_navigation.h>
-#include <val_footstep/ValkyrieWalker.h>
+#include <val_footstep/RobotWalker.h>
 #include <val_task2/cable_detector.h>
 #include "val_controllers/val_wholebody_manipulation.h"
 #include "val_moveit_planners/val_cartesian_planner.h"
@@ -47,7 +47,7 @@ private:
     // arm
     armTrajectory* arm_controller_;
     // walker class
-    ValkyrieWalker *walk_;
+    RobotWalker *walk_;
     // robot state
     RobotStateInformer *current_state_;
     ros::Publisher reset_pointcloud_pub, reset_map_pub, pause_pointcloud_pub , clearbox_pointcloud_pub , task2_log_pub_,clear_pose_map;

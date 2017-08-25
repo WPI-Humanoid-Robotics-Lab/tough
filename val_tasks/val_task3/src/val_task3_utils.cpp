@@ -5,7 +5,7 @@ task3Utils::task3Utils(ros::NodeHandle nh): nh_(nh),arm_controller_(nh_)
 {
     current_state_       = RobotStateInformer::getRobotStateInformer(nh_);
     pelvis_controller_   = new pelvisTrajectory(nh_);
-    walk_                = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
+    walk_                = new RobotWalker(nh_, 0.7, 0.7, 0, 0.18);
 
     visited_map_sub_  = nh_.subscribe("/visited_map",10, &task3Utils::visited_map_cb, this);
     task_status_sub_  = nh_.subscribe("/srcsim/finals/task", 10, &task3Utils::taskStatusCB, this);

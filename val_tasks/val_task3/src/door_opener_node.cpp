@@ -9,7 +9,7 @@ int main(int argc, char** argv){
 
     ros::init(argc, argv, "door_opener_node");
     ros::NodeHandle nh;
-    doorOpener doorOpen(nh);
+    DoorOpener doorOpen(nh);
     geometry_msgs::Pose valveCenter;
 
     valveCenter.position.x = std::atof(argv[1]);

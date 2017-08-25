@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-//#include <val_footstep/ValkyrieWalker.h>
+//#include <val_footstep/RobotWalker.h>
 #include "val_controllers/robot_state.h"
 #include "std_msgs/String.h"
 

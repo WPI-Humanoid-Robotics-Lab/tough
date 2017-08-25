@@ -16,7 +16,7 @@
 #include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/OccupancyGrid.h>
 
-#include "val_footstep/ValkyrieWalker.h"
+#include "val_footstep/RobotWalker.h"
 #include "val_task_common/val_walk_tracker.h"
 #include "val_task_common/panel_detection.h"
 #include "val_controllers/val_chest_navigation.h"
@@ -55,7 +55,7 @@ class valTask1 {
     valTask1(ros::NodeHandle nh);
 
     // object for the walker api
-    ValkyrieWalker* walker_;
+    RobotWalker* walker_;
     // object for tracking robot walk
     walkTracking* walk_track_;
 

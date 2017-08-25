@@ -1,12 +1,12 @@
 #include "val_task3/val_stairclimb.h"
 #include "val_common/val_common_defines.h"
-#include "val_footstep/ValkyrieWalker.h"
+#include "val_footstep/RobotWalker.h"
 #include "val_controllers/val_arm_navigation.h"
 
 
 StairClimb::StairClimb(ros::NodeHandle n)
 {
-    walker_ = new ValkyrieWalker(n, 0.7, 0.7, 0, 0.18);
+    walker_ = new RobotWalker(n, 0.7, 0.7, 0, 0.18);
     robot_state_=RobotStateInformer::getRobotStateInformer(n);
     chest_controller_ = new chestTrajectory(n);
 
@@ -24,7 +24,7 @@ int main(int argc, char** argv){
     ros::init(argc, argv, "stair_climb",ros::init_options::NoSigintHandler);
     ros::NodeHandle nh;
 
-    ValkyrieWalker walk(nh, 1.0,1.0,0);
+    RobotWalker walk(nh, 1.0,1.0,0);
     StairClimb stair(nh);
     chestTrajectory chest_controller(nh);
     armTrajectory arm_controller(nh);

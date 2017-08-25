@@ -50,7 +50,7 @@
 #include <val_controllers/val_chest_navigation.h>
 #include <val_controllers/val_pelvis_navigation.h>
 #include <val_controllers/val_head_navigation.h>
-#include <val_footstep/ValkyrieWalker.h>
+#include <val_footstep/RobotWalker.h>
 #include <val_controllers/val_gripper_control.h>
 
 // Constants
@@ -224,7 +224,7 @@ private:
   chestTrajectory  *chestController_;
   pelvisTrajectory *pelvisHeightController_;
   armTrajectory    *armJointController_;
-  ValkyrieWalker   *walkingController_;
+  RobotWalker   *walkingController_;
   HeadTrajectory   *headController_;
   gripperControl   *gripperController_;
 

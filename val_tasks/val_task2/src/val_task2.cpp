@@ -39,7 +39,7 @@ valTask2::valTask2(ros::NodeHandle nh):
 {
 
     // object for the valkyrie walker
-    walker_             = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
+    walker_             = new RobotWalker(nh_, 0.7, 0.7, 0, 0.18);
     pelvis_controller_  = new pelvisTrajectory(nh_);
     walk_track_         = new walkTracking(nh_);
     chest_controller_   = new chestTrajectory(nh_);
@@ -2173,13 +2173,13 @@ decision_making::TaskResult valTask2::skipToCP6Task(string name, const FSMCallCo
     ros::Duration(1).sleep();
     task2_utils_->clearCurrentPoseMap();
     ros::Duration(1).sleep();
-    walker_->walk_rotate(1.57);
+    walker_->walkRotate(1.57);
     ros::Duration(2).sleep();
-    walker_->walk_rotate(1.57);
+    walker_->walkRotate(1.57);
     ros::Duration(2).sleep();
-    walker_->walk_rotate(1.57);
+    walker_->walkRotate(1.57);
     ros::Duration(2).sleep();
-    walker_->walk_rotate(1.57);
+    walker_->walkRotate(1.57);
     ros::Duration(2).sleep();
     task2_utils_->taskLogPub("valTask2::skipToCP6Task: going to next state of detecting finish box");
     eventQueue.riseEvent("/SKIPPED_TO_CP_6");

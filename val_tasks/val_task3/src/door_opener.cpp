@@ -1,17 +1,17 @@
 #include "val_task3/door_opener.h"
 
 
-doorOpener::doorOpener(ros::NodeHandle nh)
+DoorOpener::DoorOpener(ros::NodeHandle nh)
     :nh_(nh),armTraj_(nh_),gripper_(nh_), task3_(nh_), walker_(nh), control_common_(nh_){
 
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
 }
 
-doorOpener::~doorOpener(){
+DoorOpener::~DoorOpener(){
 
 }
 
-void doorOpener::openDoor(geometry_msgs::Pose &valveCenterWorld){
+void DoorOpener::openDoor(geometry_msgs::Pose &valveCenterWorld){
 
     //Alligning relative to the centre of the valve
     geometry_msgs::Pose   pelvisPose;

@@ -9,13 +9,13 @@
 #include <val_controllers/robot_state.h>
 #include "val_moveit_planners/val_cartesian_planner.h"
 #include "val_controllers/val_wholebody_manipulation.h"
-#include "val_footstep/ValkyrieWalker.h"
+#include "val_footstep/RobotWalker.h"
 #include "val_task3/val_task3_utils.h"
 
-class rotateValve
+class RotateValve
 {
 public:
-    rotateValve(ros::NodeHandle n);
+    RotateValve(ros::NodeHandle n);
     bool grab_valve(const geometry_msgs::Point &goal, float executionTime=2.0f);
     bool compute_traj(geometry_msgs::Point center, float radius, std::vector<geometry_msgs::Pose> &points);
     bool visualise_traj(std::vector<geometry_msgs::Pose> &points);
@@ -23,7 +23,7 @@ public:
     std::vector<geometry_msgs::Pose> poses;
     geometry_msgs::QuaternionStamped leftHandOrientationTop_,leftHandOrientationSide_,leftHandOrientationSideDown_,leftHandOrientationSideUp_;
     bool reOrientbeforgrab(geometry_msgs::Point valveCenter);
-    ~rotateValve();
+    ~RotateValve();
 
 private:
     ros::NodeHandle nh_;
@@ -33,7 +33,7 @@ private:
     cartesianPlanner* left_arm_planner_;
     wholebodyManipulation* wholebody_controller_;
     chestTrajectory* chest_controller_;
-    ValkyrieWalker walk_;
+    RobotWalker walk_;
     task3Utils t3Utils;
     const std::vector<float> LEFT_SHOULDER_SEED_INITIAL = {-0.81,0.0,0.65,-1.51,1.26,0.0,0.0};
     ros::Publisher marker_pub;

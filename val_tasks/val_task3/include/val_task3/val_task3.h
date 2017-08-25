@@ -13,12 +13,11 @@
 #include <decision_making/FSM.h>
 #include <decision_making/ROSTask.h>
 #include <decision_making/DecisionMaking.h>
-#include <val_footstep/ValkyrieWalker.h>
+#include <val_footstep/RobotWalker.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <val_task3/val_task3_utils.h>
 
 #include "val_task_common/val_task_common_utils.h"
-#include "val_footstep/ValkyrieWalker.h"
 #include "val_task_common/val_walk_tracker.h"
 #include "val_task_common/panel_detection.h"
 #include "val_controllers/val_chest_navigation.h"
@@ -45,7 +44,7 @@ class valTask3{
     ros::NodeHandle nh_;
     valTask3(ros::NodeHandle nh);
 
-    ValkyrieWalker*     walker_;
+    RobotWalker*     walker_;
     walkTracking*       walk_track_;
     chestTrajectory*    chest_controller_;
     pelvisTrajectory*   pelvis_controller_;
@@ -62,7 +61,7 @@ class valTask3{
     DoorValvedetector*  door_valve_detcetor_;
 
     climbStairs*        climb_stairs_;
-    doorOpener*         door_opener_;
+    DoorOpener*         door_opener_;
 
     //map and occupancy grid
     ros::Subscriber occupancy_grid_sub_;

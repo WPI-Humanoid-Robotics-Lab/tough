@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-//#include "val_footstep/ValkyrieWalker.h"
+//#include "val_footstep/RobotWalker.h"
 #include <val_controllers/val_head_navigation.h>
 //#include <val_task2/val_task2_utils.h>
 
@@ -10,7 +10,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
 
     /*
-    ValkyrieWalker walk(nh, 1.0,1.0,0);
+    RobotWalker walk(nh, 1.0,1.0,0);
     HeadTrajectory head_controller(nh);
     task2Utils utils; // only req to print logs
 
