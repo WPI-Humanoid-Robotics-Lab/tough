@@ -136,8 +136,9 @@ public:
     bool isPointOnWalkway(float x, float y);
     void movePanelToWalkSafePose(const armSide side, bool isRotationRequired);
     bool isPanelPicked(const armSide side);
-    void moveToPlacePanelPose(const armSide graspingHand, bool isPanelRotated);
+    void placePanel(const armSide graspingHand, bool isPanelRotated);
     void rotatePanel(const armSide graspingHand);
+    void raisePanel(const armSide graspingHand);
     void clearPointCloud();
     void clearMap();
     void pausePointCloud();
@@ -148,6 +149,7 @@ public:
     void reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
     bool shakeTest(const armSide graspingHand);
+    bool pushDeployedPanel();
 
     boost::posix_time::ptime timeNow;
     bool isCableOnTable(geometry_msgs::Pose &cable_pose);

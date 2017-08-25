@@ -178,7 +178,7 @@ bool task2Utils::isPanelPicked(const armSide side)
     return false;
 }
 
-void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRotated)
+void task2Utils::placePanel(const armSide graspingHand, bool isPanelRotated)
 {
     isPanelRotated = true; // this is to avoid rework. I'll fix it the right way when I have time
 
@@ -199,7 +199,7 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRo
         nonGraspingHandPose1 = &rightPanelPlacementSupport1_;
         nonGraspingHandPose2 = &rightPanelPlacementSupport2_;
         // take non-GraspingHand out
-        arm_controller_->moveArmJoint(nonGraspingHand, 3, 0.5);
+//        arm_controller_->moveArmJoint(nonGraspingHand, 3, 0.5);
         ros::Duration(1).sleep();
     }
     else
@@ -215,8 +215,8 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRo
         nonGraspingHandPose1 = &leftPanelPlacementSupport1_;
         nonGraspingHandPose2 = &leftPanelPlacementSupport2_;
         // take non-GraspingHand out
-        arm_controller_->moveArmJoint(nonGraspingHand, 3, -0.5);
-        ros::Duration(1).sleep();
+//        arm_controller_->moveArmJoint(nonGraspingHand, 3, -0.5);
+//        ros::Duration(1).sleep();
     }
 
     std::vector< std::vector<float> > armData;
@@ -234,8 +234,16 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRo
     //    }
 
     gripper_controller_->openGripper(graspingHand);
-    ros::Duration(0.5).sleep();
+    ros::Duration(1).sleep();
 
+    armData.clear();
+    armData.push_back(*graspingHandPoseUp);
+    arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
+    ros::Duration(2).sleep();
+
+
+    /* push is not required as we always place the panel with palm down configuration
+     *
     std::vector<armTrajectory::armJointData> pushPanel;
     pushPanel.resize(3);
     pushPanel[0].side = nonGraspingHand;
@@ -251,8 +259,9 @@ void task2Utils::moveToPlacePanelPose(const armSide graspingHand, bool isPanelRo
     pushPanel[2].time = 5;
 
     arm_controller_->moveArmJoints(pushPanel);
-    // Duration is less than trajectory time as the next step should execute before moving non-grasping hand
+     Duration is less than trajectory time as the next step should execute before moving non-grasping hand
     ros::Duration(2.5).sleep();
+    */
 
 }
 
@@ -296,6 +305,26 @@ void task2Utils::rotatePanel(const armSide graspingHand)
     //    ros::Duration(1).sleep();
     gripper_controller_->controlGripper(graspingHand, GRIPPER_STATE::TIGHT_HOLD);
 
+}
+
+void task2Utils::raisePanel(const armSide graspingHand)
+{
+    const std::vector<float> *graspingHandPoseUp;
+    if(graspingHand == armSide::LEFT){
+        //        graspingHandPoseUp = &leftNearChestPalmDown_;
+        graspingHandPoseUp = &leftPanelPlacementUpPose1_;
+    }
+    else
+    {
+        //        graspingHandPoseUp = &rightNearChestPalmDown_;
+        graspingHandPoseUp = &rightPanelPlacementUpPose1_;
+    }
+
+    std::vector< std::vector<float> > armData;
+    armData.clear();
+    armData.push_back(*graspingHandPoseUp);
+    arm_controller_->moveArmJoints(graspingHand, armData, 2.0f);
+    ros::Duration(2).sleep();
 }
 
 void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset){
@@ -531,6 +560,39 @@ bool task2Utils::shakeTest(const armSide graspingHand)
     ros::Duration(0.2).sleep();
     gripper_controller_->closeGripper(graspingHand);
     ros::Duration(0.2).sleep();
+
+    return true;
+
+}
+/**
+ * @brief task2Utils::pushDeployedPanel walks a fixed step back, moves both arms in position and moves the same fixed distance forward to push the deployed panel.
+ * After pushing the panel, the socket is in a more convenient position to attempt cable plug-in
+ * @return success
+ */
+bool task2Utils::pushDeployedPanel()
+{
+    std::vector<float> x_offset={-0.2, -0.4, -0.4};
+    std::vector<float> y_offset={0.0, 0.0, 0.0};
+    walk_->walkLocalPreComputedSteps(x_offset,y_offset,LEFT);
+    ros::Duration(4).sleep();
+
+    x_offset={0.2, 0.4, 0.4};
+    y_offset={0.0, 0.0, 0.0};
+
+    std::vector< std::vector<float> > armData;
+    std::vector<float> leftHandData = {-0.23, -1.24, 0.07, -1.25, 1.23, 0.0, 0.0};
+    std::vector<float> rightHandData = {-0.42, 1.38, 0.60, 1.15,  1.28, 0.0, 0.0};
+
+    armData.clear();
+    armData.push_back(leftHandData);
+    arm_controller_->moveArmJoints(armSide::LEFT, armData, 0.2f);
+    armData.clear();
+    armData.push_back(rightHandData);
+    arm_controller_->moveArmJoints(armSide::RIGHT, armData, 2.0f);
+
+    ros::Duration(2).sleep();
+    walk_->walkLocalPreComputedSteps(x_offset,y_offset,LEFT);
+    ros::Duration(4).sleep();
 
     return true;
 
