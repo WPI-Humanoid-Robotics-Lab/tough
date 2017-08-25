@@ -58,7 +58,7 @@ void climbStairs::approach_1 (void)
   walker_->walkNStepsWRTPelvis(1, FIRSTSTEP_OFFSET, 0.0, true, LEFT);
 
   // increase the swing height
-  walker_->setSwing_height(STEP_HEIGHT);
+  walker_->setSwingHeight(STEP_HEIGHT);
 
   // next 8 steps
   for (int i=0; i<8; i++)
@@ -86,7 +86,7 @@ void climbStairs::approach_1 (void)
   ros::Duration(0.4).sleep();
 
   // last step required to finish the check point
-  walker_->setSwing_height(DEFAULT_SWINGHEIGHT);
+  walker_->setSwingHeight(DEFAULT_SWINGHEIGHT);
   walker_->walkNStepsWRTPelvis(2, 0.3, 0.0);
   ros::Duration(0.1).sleep();
 }

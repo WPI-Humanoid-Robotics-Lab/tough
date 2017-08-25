@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     //ValkyrieWalker walk(nh, 0.34, 0.44);
 
     ValkyrieWalker walk(nh, transferTime, swingTime);
-    walk.setSwing_height(swingHeight);
+    walk.setSwingHeight(swingHeight);
 
     sm state = PREPARE_START;
     // The code structure is so as to get the fastest and optimum execution
