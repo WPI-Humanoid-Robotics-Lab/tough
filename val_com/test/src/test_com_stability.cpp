@@ -36,7 +36,7 @@ TestCOM::TestCOM(ros::NodeHandle nh)
     pcom_pub_ = nh_.advertise<visualization_msgs::Marker>("projected_COM", 10);
     act_com_marker_ = nh_.advertise<visualization_msgs::Marker>("actualCOM", 10);
 
-    support_mode_=stability::SUPPORT_DOUBLE;
+    support_mode_=stability::FootSupport::SUPPORT_DOUBLE;
 }
 
 TestCOM::~TestCOM(){

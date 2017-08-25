@@ -11,7 +11,7 @@
 class stability {
 
 public:
-    enum FootSupport {SUPPORT_DOUBLE, SUPPORT_SINGLE_RIGHT, SUPPORT_SINGLE_LEFT};
+    enum class FootSupport {SUPPORT_DOUBLE, SUPPORT_SINGLE_RIGHT, SUPPORT_SINGLE_LEFT};
     stability(float foot_polygon_scale, ros::NodeHandle nh, std::string foot_mesh_link, std::string root_link, std::string rfoot, std::string lfoot);
     ~stability();
     float getSupportPolygonScale() const;

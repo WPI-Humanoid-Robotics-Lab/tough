@@ -147,7 +147,7 @@ void stableController::updateCOM(void)
     tf::Vector3 normal_vector(0.0, 0.0, 1.0); // planar support
     // for testing, normal vector of arbitrary plane:
     normal_vector.normalize();
-    pose_stable_ = stability_->isPoseStable(joint_positions_, stability::SUPPORT_DOUBLE, normal_vector);
+    pose_stable_ = stability_->isPoseStable(joint_positions_, stability::FootSupport::SUPPORT_DOUBLE, normal_vector);
 
     ROS_INFO("mass: %f", mass_robot_);
     ROS_INFO("com wrt root: x %f, y: %f, z: %f",com_wrt_root_.getX(), com_wrt_root_.getY(), com_wrt_root_.getZ());

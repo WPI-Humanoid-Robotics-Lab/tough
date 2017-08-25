@@ -263,7 +263,7 @@ bool stability::isPoseStable(const std::map<std::string, double>& joint_position
 
   tf::Transform tf_to_support;
 
-  if (support_mode == SUPPORT_SINGLE_LEFT){
+  if (support_mode == FootSupport::SUPPORT_SINGLE_LEFT){
     support_polygon_ = support_polygon_foot_left_;
     tf_to_support_ = tf_left_foot;
   } else { // RIGHT or DOUBLE
@@ -278,7 +278,7 @@ bool stability::isPoseStable(const std::map<std::string, double>& joint_position
   }
 
   // append left if double support:
-  if (support_mode == SUPPORT_DOUBLE){
+  if (support_mode == FootSupport::SUPPORT_DOUBLE){
     tf::Transform tf_right_to_left = tf_right_foot.inverseTimes(tf_left_foot);
     for (unsigned i = 0; i < support_polygon_foot_left_.size(); ++i){
       support_polygon_.push_back(rotate_plane * tf_right_to_left * support_polygon_foot_left_[i]);
