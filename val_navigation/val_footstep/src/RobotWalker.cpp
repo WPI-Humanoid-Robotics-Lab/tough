@@ -123,8 +123,10 @@ bool RobotWalker::walkPreComputedSteps(const std::vector<float> xOffset, const s
     list.execution_mode = execution_mode_;
     list.unique_id = RobotWalker::id;
 
-    if (xOffset.size() != yOffset.size())
+    if (xOffset.size() != yOffset.size()){
         ROS_ERROR("X Offset and Y Offset have different size");
+        return false;
+    }
 
 
     size_t numberOfSteps = xOffset.size();
