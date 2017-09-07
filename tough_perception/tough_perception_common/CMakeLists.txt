@@ -7,6 +7,10 @@ set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FL
 
 find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
 find_package(PCL 1.7 REQUIRED io)
+
+find_package(Qt5Test)
+find_package(Qt5Concurrent)
+
 find_package(catkin REQUIRED COMPONENTS roscpp
                                         rospy
                                         geometric_shapes
@@ -47,7 +51,7 @@ add_library(${PROJECT_NAME}  src/MultisensePointCloud.cpp
 									
 set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_DEFINITIONS GAZEBO_SIMULATION)
 
-target_link_libraries(${PROJECT_NAME} ${PCL_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}  ${PCL_LIBRARIES} ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
 add_executable(test_lasercloud  src/test_laser.cpp)
