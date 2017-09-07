@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_msgs
   moveit_planners_ompl
   moveit_ros_benchmarks
-  moveit_ros_benchmarks_gui
+#  moveit_ros_benchmarks_gui
   moveit_ros_control_interface
   moveit_ros_manipulation
   moveit_ros_move_group
