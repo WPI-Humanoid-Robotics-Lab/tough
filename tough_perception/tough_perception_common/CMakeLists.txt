@@ -52,7 +52,7 @@ add_library(${PROJECT_NAME}  src/MultisensePointCloud.cpp
 set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_DEFINITIONS GAZEBO_SIMULATION)
 
 target_link_libraries(${PROJECT_NAME}  ${PCL_LIBRARIES} ${catkin_LIBRARIES} ${OpenCV_LIBS})
-add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}  ${catkin_EXPORTED_TARGETS} )
 
 add_executable(test_lasercloud  src/test_laser.cpp)
 target_link_libraries(test_lasercloud  ${PROJECT_NAME})
