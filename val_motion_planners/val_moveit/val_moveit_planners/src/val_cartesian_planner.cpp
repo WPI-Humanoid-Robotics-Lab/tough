@@ -11,7 +11,7 @@ cartesianPlanner::cartesianPlanner(std::string group_name, std::string reference
     spinner.start();
 
     // set the planning group
-    group_ = new moveit::planning_interface::MoveGroup(group_name_);
+    group_ = new moveit::planning_interface::MoveGroupInterface(group_name_);
 }
 
 cartesianPlanner::~cartesianPlanner(){

@@ -1,6 +1,6 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit/move_group_interface/move_group.h>
+#include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit_msgs/DisplayRobotState.h>
@@ -25,12 +25,12 @@ armTrajectory *right_armTraj_port,*left_armTraj_port;
 interactive_markers::MenuHandler menu_handler;
 tf::TransformListener* listener_port;
 geometry_msgs::PoseStamped right_pose,left_pose;
-moveit::planning_interface::MoveGroup::Plan *right_plan,*left_plan;
+moveit::planning_interface::MoveGroupInterface::Plan *right_plan,*left_plan;
 bool planning = false,pose_received = false,execute = false,push_back = false;
 bool left_pose_received = false, right_pose_received = false;
 pthread_t input_thread;
 
-void print_joints(moveit::planning_interface::MoveGroup* group)
+void print_joints(moveit::planning_interface::MoveGroupInterface* group)
 {
     // get the cuurent joints and their positions
     std::vector<std::string> jNames;
@@ -46,10 +46,10 @@ void print_joints(moveit::planning_interface::MoveGroup* group)
 }
 
 
-int plan_trajectory(std::string MoveGroup_name,geometry_msgs::PoseStamped &input_pose,moveit::planning_interface::MoveGroup::Plan* ret_plan,string planner_type)
+int plan_trajectory(std::string MoveGroup_name,geometry_msgs::PoseStamped &input_pose,moveit::planning_interface::MoveGroupInterface::Plan* ret_plan,string planner_type)
 {
-    moveit::planning_interface::MoveGroup* group;
-    group = new moveit::planning_interface::MoveGroup(MoveGroup_name);
+    moveit::planning_interface::MoveGroupInterface* group;
+    group = new moveit::planning_interface::MoveGroupInterface(MoveGroup_name);
     group->setStartStateToCurrentState();
     print_joints(group);
     group->setPoseTarget(input_pose.pose);
@@ -427,8 +427,8 @@ int main(int argc, char** argv){
     armTrajectory right_armTraj(*nh_port);
     right_armTraj_port = &right_armTraj;
     // right_pose = (geometry_msgs::PoseStamped*)malloc(sizeof(geometry_msgs::PoseStamped));
-    left_plan = new moveit::planning_interface::MoveGroup::Plan();
-    right_plan = new moveit::planning_interface::MoveGroup::Plan();
+    left_plan = new moveit::planning_interface::MoveGroupInterface::Plan();
+    right_plan = new moveit::planning_interface::MoveGroupInterface::Plan();
     // make6DofMarker( false, visualization_msgs::InteractiveMarkerControl::MOVE_ROTATE_3D, true,&server );
     /**************************************
      * ALWAYS START SPINNER IF USING MOVEIT

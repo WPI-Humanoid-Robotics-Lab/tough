@@ -1,7 +1,7 @@
 #pragma once
 
 #include <moveit_msgs/RobotTrajectory.h>
-#include <moveit/move_group_interface/move_group.h>
+#include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 
 class cartesianPlanner {
@@ -10,7 +10,7 @@ private:
     std::string reference_frame_;
 
     // planning group
-    moveit::planning_interface::MoveGroup* group_;
+    moveit::planning_interface::MoveGroupInterface* group_;
 
 public:
     cartesianPlanner(std::string group_name, std::string reference_frame="/world");

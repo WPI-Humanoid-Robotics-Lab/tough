@@ -26,7 +26,12 @@ find_package(catkin REQUIRED COMPONENTS roscpp
                                         val_common
                                         val_controllers
 )
-
+find_package(Qt5Gui)
+find_package(Qt5Core)
+find_package(Qt5Widgets)
+find_package(Qt5Test)
+find_package(Qt5Concurrent)
+find_package(Qt5OpenGL)
 ###################################
 ## catkin specific configuration ##
 ###################################
