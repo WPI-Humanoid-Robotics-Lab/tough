@@ -11,12 +11,14 @@ armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
     DEFAULT_LEFT_POSE{-0.2f, -1.2f, 0.7222f, -1.5101f, 0.0f, 0.0f, 0.0f},
     NUM_ARM_JOINTS(7){
     //tf_listener_ = new tf2_ros::TransformListener(this->tf_buffer_);
-    armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/arm_trajectory", 1,true);
-    handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>("/ihmc_ros/valkyrie/control/hand_desired_configuration", 1,true);
-    taskSpaceTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/hand_trajectory", 1, true);
+    std::string robot_name;
+    nh.getParam("ihmc_ros/robot_name", robot_name);
+    armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/arm_trajectory", 1,true);
+    handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>("/ihmc_ros/"+ robot_name +"/control/hand_desired_configuration", 1,true);
+    taskSpaceTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/hand_trajectory", 1, true);
     markerPub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
     stateInformer_ = RobotStateInformer::getRobotStateInformer(nh_);
-    //this->armTrajectorySunscriber = nh_.subscribe("/ihmc_ros/valkyrie/output/ha", 20,&ValkyrieWalker::footstepStatusCB, this);
+    //this->armTrajectorySunscriber = nh_.subscribe("/ihmc_ros/"+ robot_name +"/output/ha", 20,&ValkyrieWalker::footstepStatusCB, this);
     joint_limits_left_.resize(NUM_ARM_JOINTS);
     joint_limits_right_.resize(NUM_ARM_JOINTS);
 

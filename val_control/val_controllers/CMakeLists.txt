@@ -22,7 +22,7 @@ catkin_package(
 include_directories(${catkin_INCLUDE_DIRS} include)
 
  add_library(val_controllers
-   src/val_arm_navigation.cpp
+   src/RobotArmManipulation.cpp
    src/val_pelvis_navigation.cpp
    src/val_chest_navigation.cpp
    src/val_head_navigation.cpp

@@ -1,4 +1,4 @@
-#include <val_controllers/val_arm_navigation.h>
+#include <val_controllers/RobotArmManipulation.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <std_msgs/String.h>
