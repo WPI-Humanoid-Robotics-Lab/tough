@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 
     std::string filename;
     if(singleStage){
-        filename = ros::package::getPath("test") + "/log/singleStageResults.csv";
+        filename = ros::package::getPath("test") + "/log/1StageResults.csv";
     }
     else{
         filename = ros::package::getPath("test") + "/log/2StageResults.csv";
