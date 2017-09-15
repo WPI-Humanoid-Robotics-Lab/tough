@@ -9,39 +9,56 @@
 #include "val_moveit_planners/val_cartesian_planner.h"
 #include "val_controllers/val_wholebody_manipulation.h"
 #include "val_controllers/val_pelvis_navigation.h"
+#include "val_controllers/robot_state.h"
 #include <navigation_common/fall_detector.h>
+#include "val_common/val_common_names.h"
 
 float COM_X, COM_Y, COM_Z;
 bool READ_COM=false;
 const int NUMBER_OF_ITERATIONS=10;
+const float POSITION_ERROR_THRESHOLD=0.05; // 5 cm
+RobotStateInformer* CURRENT_STATE;
 
-void executeTrajectorySingleStage(wholebodyManipulation* wholebody_controller,cartesianPlanner* traj_planner, geometry_msgs::Pose &pose){
+bool distanceBetweenPositions(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2){
+    bool ret = true;
+    if (sqrt(pow((point1.y - point2.y),2) + pow((point1.x - point2.x),2)) > POSITION_ERROR_THRESHOLD)
+    {
+        ret = false;
+    }
+    return ret;
+
+}
+
+bool executeTrajectorySingleStage(wholebodyManipulation* wholebody_controller,cartesianPlanner* traj_planner, geometry_msgs::Pose &goalPose){
 
     std::vector<geometry_msgs::Pose> waypoints;
     moveit_msgs::RobotTrajectory traj;
-    waypoints.push_back(pose);
+    waypoints.push_back(goalPose);
     traj_planner->getTrajFromCartPoints(waypoints, traj,false);
     wholebody_controller->compileMsg(armSide::RIGHT, traj.joint_trajectory);
-    ros::Duration(5.0).sleep();
-    return;
+    ros::Duration(8.0).sleep();
+
+    geometry_msgs::Pose palmPose;
+    CURRENT_STATE->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF,palmPose);
+    return distanceBetweenPositions(palmPose.position, goalPose.position);
 }
 
-void executeTrajectory2Stage(wholebodyManipulation* wholebody_controller,armTrajectory* arm_traj, cartesianPlanner* traj_planner, geometry_msgs::Pose &pose){
+bool executeTrajectory2Stage(wholebodyManipulation* wholebody_controller,armTrajectory* arm_traj, cartesianPlanner* traj_planner, geometry_msgs::Pose &goalPose){
 
-    arm_traj->moveArmInTaskSpace(armSide::RIGHT, pose, 3.0);
+    arm_traj->moveArmInTaskSpace(armSide::RIGHT, goalPose, 3.0);
     ros::Duration(3.0).sleep();
     std::vector<geometry_msgs::Pose> waypoints;
     moveit_msgs::RobotTrajectory traj;
-    waypoints.push_back(pose);
+    waypoints.push_back(goalPose);
     traj_planner->getTrajFromCartPoints(waypoints, traj,false);
     wholebody_controller->compileMsg(armSide::RIGHT, traj.joint_trajectory);
-    ros::Duration(3.0).sleep();
-    return;
+    ros::Duration(8.0).sleep();
+
+    geometry_msgs::Pose palmPose;
+    CURRENT_STATE->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF,palmPose);
+    return distanceBetweenPositions(palmPose.position, goalPose.position);
 }
 
-void logToFile(){
-
-}
 
 void readCoMPosition(visualization_msgs::Marker::Ptr msg){
     if(READ_COM){
@@ -58,23 +75,27 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "com_experiment");
     ros::NodeHandle nh;
+    bool singleStage = true;
+    if(argc > 1){
+        singleStage = false;
+    }
 
     ros::Subscriber com_reader = nh.subscribe("actualCOM",5,readCoMPosition);
     ros::AsyncSpinner spinner(1);
     spinner.start();
-
+    CURRENT_STATE = RobotStateInformer::getRobotStateInformer(nh);
 
     armTrajectory armTraj(nh);
     chestTrajectory chestTraj(nh);
     pelvisTrajectory pelvisTraj(nh);
 
     wholebodyManipulation* wholebody_controller = new wholebodyManipulation(nh);
-    cartesianPlanner* traj_planner = new cartesianPlanner("rightPalm", VAL_COMMON_NAMES::WORLD_TF); //rightMiddleFingerGroup
+    cartesianPlanner* traj_planner = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_PALM_GROUP, VAL_COMMON_NAMES::WORLD_TF); //rightMiddleFingerGroup
 
     fallDetector fall_detector(nh, "leftFoot", "pelvis", "world");
-     if (fall_detector.isRobotFallen()){
-         return -1;
-     }
+    if (fall_detector.isRobotFallen()){
+        return -1;
+    }
     pelvisTraj.controlPelvisHeight(0.9);
     ros::Duration(1.5).sleep();
     chestTraj.controlChest(2,2,2);
@@ -90,7 +111,13 @@ int main(int argc, char **argv)
     int runID;
 
 
-    std::string filename = ros::package::getPath("test") + "/log/singleStageResults.csv";
+    std::string filename;
+    if(singleStage){
+        filename = ros::package::getPath("test") + "/log/singleStageResults.csv";
+    }
+    else{
+        filename = ros::package::getPath("test") + "/log/2StageResults.csv";
+    }
     std::ofstream logger;
     struct stat buffer;
     if (stat (filename.c_str(), &buffer) != 0){
@@ -132,15 +159,30 @@ int main(int argc, char **argv)
     }
 
 
-    for(;goal.position.x < 1.1;goal.position.x += 0.1){
-        for(;goal.position.y > -1.1;goal.position.y -= 0.1){
+    for(;goal.position.x < 1.6;goal.position.x += 0.1){
+        for(;goal.position.y > -1.6;goal.position.y -= 0.1){
             for(;goal.position.z < 1.1;goal.position.z += 0.1){
 
                 for (; iterator <= NUMBER_OF_ITERATIONS; ++iterator){
                     std::cout<<"goal position :"<<goal.position.x <<", "<<goal.position.y <<", "<<goal.position.z <<"Iterator :"<<iterator<<" RunID:"<<runID<<std::endl;
+                    bool result;
                     //execute trajectory in single stage
-                    //            executeTrajectorySingleStage(wholebody_controller, traj_planner, goal);
-                    executeTrajectory2Stage(wholebody_controller,&armTraj,traj_planner,goal);
+                    if (singleStage) {
+                        for(int retry = 0; retry < 2; ++retry ){
+                            result = executeTrajectorySingleStage(wholebody_controller, traj_planner, goal) ;
+                            if (result){
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        for(int retry = 0; retry < 2; ++retry ){
+                            result = executeTrajectory2Stage(wholebody_controller,&armTraj,traj_planner,goal) ;
+                            if (result){
+                                break;
+                            }
+                        }
+                    }
 
                     READ_COM = true;
                     ros::Duration(1.0).sleep();
@@ -163,7 +205,8 @@ int main(int argc, char **argv)
                         logger.close();
                         return -1;
                     }
-                    logger << "true" << std::endl;
+
+                    logger << (result ? "true" : "false") << std::endl;
 
                     //reset to default pose
                     pelvisTraj.controlPelvisHeight(0.9);
@@ -184,7 +227,7 @@ int main(int argc, char **argv)
             }
             goal.position.z = 0.90;
         }
-        goal.position.y = -0.28;
+        goal.position.y = -1.08;
     }
     logger.close();
     return 0;
