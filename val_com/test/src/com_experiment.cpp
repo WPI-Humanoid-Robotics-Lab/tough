@@ -29,30 +29,43 @@ bool distanceBetweenPositions(const geometry_msgs::Point &point1, const geometry
 
 }
 
-bool executeTrajectorySingleStage(wholebodyManipulation* wholebody_controller,cartesianPlanner* traj_planner, geometry_msgs::Pose &goalPose){
+bool executeTrajectorySingleStage(wholebodyManipulation* wholebody_controller,cartesianPlanner* traj_planner, geometry_msgs::Pose &goalPose, int &planningTime){
 
     std::vector<geometry_msgs::Pose> waypoints;
     moveit_msgs::RobotTrajectory traj;
     waypoints.push_back(goalPose);
+    int tic = ros::Time::now().nsec;
     traj_planner->getTrajFromCartPoints(waypoints, traj,false);
+    planningTime = ros::Time::now().nsec - tic;
     wholebody_controller->compileMsg(armSide::RIGHT, traj.joint_trajectory);
-    ros::Duration(8.0).sleep();
+    ros::Duration(5.0).sleep();
 
     geometry_msgs::Pose palmPose;
     CURRENT_STATE->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF,palmPose);
     return distanceBetweenPositions(palmPose.position, goalPose.position);
 }
 
-bool executeTrajectory2Stage(wholebodyManipulation* wholebody_controller,armTrajectory* arm_traj, cartesianPlanner* traj_planner, geometry_msgs::Pose &goalPose){
+bool executeTrajectory2Stage(wholebodyManipulation* wholebody_controller,armTrajectory* arm_traj, cartesianPlanner* traj_planner, geometry_msgs::Pose &goalPose, int &planningTime, cartesianPlanner* dummy_traj_planner){
+
+    std::vector<geometry_msgs::Pose> waypoints1;
+    moveit_msgs::RobotTrajectory traj1;
+
+    int tic = ros::Time::now().nsec;
+    dummy_traj_planner->getTrajFromCartPoints(waypoints1, traj1,false);
+    planningTime = ros::Time::now().nsec - tic;
 
     arm_traj->moveArmInTaskSpace(armSide::RIGHT, goalPose, 3.0);
     ros::Duration(3.0).sleep();
     std::vector<geometry_msgs::Pose> waypoints;
     moveit_msgs::RobotTrajectory traj;
     waypoints.push_back(goalPose);
+
+    tic = ros::Time::now().nsec;
     traj_planner->getTrajFromCartPoints(waypoints, traj,false);
+    planningTime += ros::Time::now().nsec - tic;
+
     wholebody_controller->compileMsg(armSide::RIGHT, traj.joint_trajectory);
-    ros::Duration(8.0).sleep();
+    ros::Duration(5.0).sleep();
 
     geometry_msgs::Pose palmPose;
     CURRENT_STATE->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF,palmPose);
@@ -91,6 +104,7 @@ int main(int argc, char **argv)
 
     wholebodyManipulation* wholebody_controller = new wholebodyManipulation(nh);
     cartesianPlanner* traj_planner = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_PALM_GROUP, VAL_COMMON_NAMES::WORLD_TF); //rightMiddleFingerGroup
+    cartesianPlanner* dummy_traj_planner = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ARM_GROUP, VAL_COMMON_NAMES::WORLD_TF);
 
     fallDetector fall_detector(nh, "leftFoot", "pelvis", "world");
     if (fall_detector.isRobotFallen()){
@@ -124,8 +138,8 @@ int main(int argc, char **argv)
         logger.open(filename.c_str());
         logger << "runID, iterator, position.x, position.y, position.x, orientation.x, orientation.y, orientation.z,orientation.w, CoM.x, CoM.y, CoM.z, CoM.x_ddot, CoM.y_ddot, success_flag"<<std::endl;
 
-        goal.position.x =  0.28;
-        goal.position.y = -0.28;
+        goal.position.x =  0.45;
+        goal.position.y = -0.55;
         goal.position.z =  0.90;
 
         goal.orientation.x = -0.576;
@@ -159,17 +173,18 @@ int main(int argc, char **argv)
     }
 
 
-    for(;goal.position.x < 1.6;goal.position.x += 0.1){
-        for(;goal.position.y > -1.6;goal.position.y -= 0.1){
+    for(;goal.position.x < 0.75;goal.position.x += 0.1){
+        for(;goal.position.y > -0.75;goal.position.y -= 0.1){
             for(;goal.position.z < 1.1;goal.position.z += 0.1){
 
                 for (; iterator <= NUMBER_OF_ITERATIONS; ++iterator){
                     std::cout<<"goal position :"<<goal.position.x <<", "<<goal.position.y <<", "<<goal.position.z <<"Iterator :"<<iterator<<" RunID:"<<runID<<std::endl;
                     bool result;
+                    int planning_time;
                     //execute trajectory in single stage
                     if (singleStage) {
                         for(int retry = 0; retry < 2; ++retry ){
-                            result = executeTrajectorySingleStage(wholebody_controller, traj_planner, goal) ;
+                            result = executeTrajectorySingleStage(wholebody_controller, traj_planner, goal,planning_time) ;
                             if (result){
                                 break;
                             }
@@ -177,7 +192,7 @@ int main(int argc, char **argv)
                     }
                     else {
                         for(int retry = 0; retry < 2; ++retry ){
-                            result = executeTrajectory2Stage(wholebody_controller,&armTraj,traj_planner,goal) ;
+                            result = executeTrajectory2Stage(wholebody_controller,&armTraj,traj_planner,goal, planning_time,dummy_traj_planner) ;
                             if (result){
                                 break;
                             }
@@ -201,12 +216,12 @@ int main(int argc, char **argv)
 
                     //check if robot is standing
                     if (fall_detector.isRobotFallen()){
-                        logger << "false" << std::endl;
+                        logger << "false," << planning_time<<std::endl;
                         logger.close();
                         return -1;
                     }
 
-                    logger << (result ? "true" : "false") << std::endl;
+                    logger << (result ? "true," : "false,") << planning_time<<std::endl;
 
                     //reset to default pose
                     pelvisTraj.controlPelvisHeight(0.9);
@@ -227,7 +242,7 @@ int main(int argc, char **argv)
             }
             goal.position.z = 0.90;
         }
-        goal.position.y = -1.08;
+        goal.position.y = -0.55;
     }
     logger.close();
     return 0;

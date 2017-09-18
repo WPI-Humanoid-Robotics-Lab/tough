@@ -20,6 +20,7 @@ do
   source ~/indigo_ws/devel/setup.bash
   echo -e "\e[32mINFO:\e[0m Killing exisitng ros/gazebo instances"
   killall roslaunch gzserver rosmaster rosout gzclient
+  rosclean purge -y
   sleep 15
 
   # roscd val_common/scripts/task2
@@ -27,7 +28,7 @@ do
   roslaunch val_bringup final1.launch &
 
   sleep 150
-  rosrun test test_com_stability_node &
+  rosrun test test_com_stability_node >/dev/null 2>/dev/null &
 
   rosrun test com_experiment
   echo -e "\e[32mINFO:\e[0m Killing exisitng ros/gazebo instances"
