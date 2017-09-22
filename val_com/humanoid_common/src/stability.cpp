@@ -9,6 +9,7 @@ stability::stability(float foot_polygon_scale, ros::NodeHandle nh, std::string f
     CoM = new com(nh_, root_link_name_, rfoot_link_, lfoot_link_);
     // initialise
     init();
+    std::cout<<"scale :"<<support_polygon_scale_<<std::endl;
 }
 
 // destructor
@@ -57,12 +58,12 @@ void stability::init(void)
 void stability::initSupportPolygon(void)
 {
     if (!constructSupportPolygon()){
-        ROS_WARN("Could not load foot end mesgh, using default points...!!!!!!!!!!!");
-
-        support_polygon_foot_right_.push_back(tf::Point(0.07f, 0.023f, 0.0));
-        support_polygon_foot_right_.push_back(tf::Point(0.07f, -0.03f, 0.0));
-        support_polygon_foot_right_.push_back(tf::Point(-0.03f, -0.03f, 0.0));
-        support_polygon_foot_right_.push_back(tf::Point(-0.03f, 0.02, 0.0));
+        ROS_ERROR("Could not load foot end mesgh, using default points...!!!!!!!!!!!");
+        float x_shift = 0.04;
+        support_polygon_foot_right_.push_back(tf::Point(0.13f+x_shift, 0.075f, 0.0));
+        support_polygon_foot_right_.push_back(tf::Point(0.13f+x_shift, -0.075f, 0.0));
+        support_polygon_foot_right_.push_back(tf::Point(-0.13f+x_shift, -0.075f, 0.0));
+        support_polygon_foot_right_.push_back(tf::Point(-0.13f+x_shift, 0.075f, 0.0));
     }
 
     // mirror for left:
@@ -326,8 +327,8 @@ visualization_msgs::Marker stability::getProjectedCOMMarker() const{
   com_marker.type = visualization_msgs::Marker::SPHERE;
   tf::pointTFToMsg(tf_to_support_ * projected_COM_, com_marker.pose.position);
   tf::quaternionTFToMsg(tf_to_support_.getRotation(), com_marker.pose.orientation);
-  com_marker.scale.x = 0.03;
-  com_marker.scale.y = 0.03;
+  com_marker.scale.x = 0.01;
+  com_marker.scale.y = 0.01;
   com_marker.scale.z = 0.01;
   com_marker.color.a = 1.0;
   com_marker.color.g = 0.0;
