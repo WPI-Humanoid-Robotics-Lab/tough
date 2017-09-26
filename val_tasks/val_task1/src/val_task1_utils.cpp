@@ -22,7 +22,7 @@ task1Utils::task1Utils(ros::NodeHandle nh):
     logFile = ros::package::getPath("val_task1") + "/log/task1.csv";
 
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-    walk_          = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
+    walk_          = new RobotWalker(nh_, 0.7, 0.7, 0, 0.18);
     current_checkpoint_ = 0;
 
     timeNow = boost::posix_time::second_clock::local_time();

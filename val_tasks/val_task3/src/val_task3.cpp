@@ -34,7 +34,7 @@ valTask3::valTask3(ros::NodeHandle nh):nh_(nh){
     task3_utils_->task3LogPub(TEXT_GREEN + "Starting Task 3"  + TEXT_NC);
 
     // walker
-    walker_              = new ValkyrieWalker(nh_,0.7,0.7,0,0.18);
+    walker_              = new RobotWalker(nh_,0.7,0.7,0,0.18);
     // walk tracker
     walk_track_          = new walkTracking(nh_);
 
@@ -51,7 +51,7 @@ valTask3::valTask3(ros::NodeHandle nh):nh_(nh){
     door_valve_detcetor_ = nullptr;
 
     climb_stairs_        = new climbStairs(nh_);
-    door_opener_         = new doorOpener(nh_);
+    door_opener_         = new DoorOpener(nh_);
 
     robot_state_         = RobotStateInformer::getRobotStateInformer(nh_);
     map_update_count_    = 0;

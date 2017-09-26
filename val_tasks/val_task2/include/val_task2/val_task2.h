@@ -13,10 +13,9 @@
 #include <decision_making/FSM.h>
 #include <decision_making/ROSTask.h>
 #include <decision_making/DecisionMaking.h>
-#include <val_footstep/ValkyrieWalker.h>
+#include <val_footstep/RobotWalker.h>
 #include <nav_msgs/OccupancyGrid.h>
 
-#include "val_footstep/ValkyrieWalker.h"
 #include "val_task_common/val_walk_tracker.h"
 #include "val_task_common/panel_detection.h"
 #include "tough_controller_interface/chest_control_interface.h"
@@ -56,7 +55,7 @@ class valTask2 {
     task2Utils* task2_utils_;
 
     // object for the walker api
-    ValkyrieWalker* walker_;
+    RobotWalker* walker_;
     // object for tracking robot walk
     walkTracking* walk_track_;
 

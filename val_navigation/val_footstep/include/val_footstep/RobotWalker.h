@@ -1,9 +1,7 @@
+#ifndef ROBOT_WALKER_H
+#define ROBOT_WALKER_H
 
-// There is no status feed back from VAl only if the step is taken or not
 
-
-#ifndef VALKYRIE_WALKER_H
-#define VALKYRIE_WALKER_H
 
 #include "ros/ros.h"
 #include"geometry_msgs/Pose2D.h"
@@ -28,10 +26,13 @@
  * @brief The ValkyrieWalker class This class provides access to the footsteps of valkyrie. It can be used
  * to get current position of the steps or to make Valkyrie walk given number of steps.
  */
-class ValkyrieWalker
+class RobotWalker
 {
 
 public:
+    RobotStateInformer *current_state_;
+    static int id ;
+
     /**
      * @brief ValkyrieWalker This class provides access to the footsteps of valkyrie. It can be used
      * to get current position of the steps or to make Valkyrie walk given number of steps.
@@ -42,8 +43,8 @@ public:
      * @param swingHeight   swing height to be used for every step
      * @todo Implement singleton pattern. There should be only one object of this class available of this class.
      */
-    ValkyrieWalker(ros::NodeHandle nh, double InTransferTime = 1.5,double InSwingTime =1.5 , int InMode = 0, double swingHeight = 0.2);
-    ~ValkyrieWalker();
+    RobotWalker(ros::NodeHandle nh, double inTransferTime = 1.5,double inSwingTime =1.5 , int inMode = 0, double swing_height_ = 0.2);
+    ~RobotWalker();
 
     /**
      * @brief walkToGoal walks to a given 2D point in a map. needs a map either from map server or from octomap server
@@ -89,16 +90,16 @@ public:
      */
     inline void setWalkParms(float InTransferTime,float InSwingTime, int InMode)
     {
-        this->transfer_time = InTransferTime;
-        this->swing_time = InSwingTime;
-        this->execution_mode = InMode;
+        this->transfer_time_  = InTransferTime;
+        this->swing_time_     = InSwingTime;
+        this->execution_mode_ = InMode;
     }
 
     /**
-     * @brief getSwing_height fetch the swing height used for steps.
+     * @brief getSwingHeight fetch the swing height used for steps.
      * @return returns the swing_height of the current object.
      */
-    double getSwing_height() const;
+    double getSwingHeight() const;
 
     /**
      * @brief setSwing_height Sets swing_height for walking.
@@ -106,42 +107,120 @@ public:
      */
     inline void setSwing_height(double value)
     {
-        swing_height = value;
+        swing_height_ = value;
     }
+
+    /**
+     * @brief turn contains precomputed footsteps to make a left or right 90 degree turn
+     * @param side left- anticlockwise, right - clockwise.
+     * DO NOT USE. ROBOT MIGHT FALL.
+     * @return
+     */
     bool turn(armSide side);
-    bool walkLocalPreComputedSteps(const std::vector<float> x_offset, const std::vector<float> y_offset, armSide startLeg);
-    RobotStateInformer *current_state_;
+
+    /**
+     * @brief walkLocalPreComputedSteps walks predefined steps which could have varying step length and step widths. This is defined wrt Pelvis frame.
+     * @param xOffset  Is a vector of float. Each value represents offset in x direction of individual step.
+     *                 you can define a set a predefined step length offsets.
+     * @param yOffset  Is a vector of float with size same as that of x_offset. Each value represents offset in y direction of individual step
+     *                 you can define a set a predefined step widths offsets.
+     * @param startleg Leg to be used to start walking. It can be RIGHT or LEFT
+     * @return
+     */
+    bool walkLocalPreComputedSteps(const std::vector<float> xOffset, const std::vector<float> yOffset, armSide startLeg);
+
+    /**
+     * @brief curlLeg would curl the leg behind with a defined radius. it is similar to the flamingo position.
+     * @param side LEFT/RIGHT
+     * @param radius is the radius of this backward curled trajectory
+     * @return
+     */
     bool curlLeg(armSide side, float radius);
+
+    /**
+     * @brief placeLeg is used when the swing leg is in a arbitrary lifted position and has to be placed within a z-offset with the support leg.
+     *        it can be thought as a way to bring the robot from the flamingo position to a normal position with a z-offset.
+     * @param side LEFT/RIGHT
+     * @param offset is the offset in the z-axis
+     * @return
+     */
     bool placeLeg(armSide side, float offset=0.1f);
+
+    /**
+     * @brief nudgeFoot nudges the foot forward or backward
+     * @param side LEFT/RIGHT
+     * @param distance is the offset distance
+     * @return
+     */
     bool nudgeFoot(armSide side, float distance);
+
+    /**
+     * @brief getCurrentStep gives the current position of the robot wrt to world frame
+     * @param side LEFT/ RIGHT leg
+     * @param foot is the foot msg which stores the location of the foot in world frame.
+     */
     void getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage& foot);
+
+    /**
+     * @brief raiseLeg raises the leg forward at a desired height.
+     * @param side  LEFT/RIGHT
+     * @param height is the height to raise the leg
+     * @param stepLength is the forward step length
+     * @return
+     */
     bool raiseLeg(armSide side, float height,float stepLength);
-    void load_eff(armSide side, EE_LOADING load);
-    bool walk_rotate(float angle);
-    bool climbStair(const std::vector<float> x_offset, const std::vector<float> z_offset, armSide startLeg);
+
+    /**
+     * @brief loadEEF loads the endeffector to distribute weight evenly in both legs.
+     * @param side  LEFT/RIGHT
+     * @param load enum stating loading or unloading.
+     * Note: After current testing, it seems that only loading condition works. Means that if the robot is in flamingo position,
+     * it can be bought back to normal stance position with weight evenly distributed in both legs.
+     */
+    void loadEEF(armSide side, EE_LOADING load);
+
+    /**
+     * @brief walkRotate rotates the robot by desired angle. this is relative to the current yaw angle.
+     * @param angle is the angle expressed in radians
+     * @return
+     */
+    bool walkRotate(float angle);
+
+    /**
+     * @brief climbStair is a function which can make the robot climb steps given a list of step placement locations.
+     * @param xOffset is a list of forward displacements.
+     * @param zOffset is a list of height displacements.
+     * @param startLeg LEFT/ RIGHT
+     * @return
+     */
+    bool climbStair(const std::vector<float> xOffset, const std::vector<float> zOffset, armSide startLeg);
+
+    /**
+     * @brief getFootstep plans footsteps to a goal.
+     * @param goal is 2D goal pose
+     * @param Is a list of footstep list
+     * @return
+     */
     bool getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list);
-    static int id ;
+
 private:
 
-    double transfer_time,swing_time, swing_height;
-    int execution_mode;
-    int step_counter;
-    ros::NodeHandle     nh_;
-    ros::Time           cbTime_;
-    ros::Publisher      footsteps_pub_ ,nudgestep_pub_,loadeff_pub;
-    ros::Subscriber     footstep_status_ ;
-    ros::ServiceClient  footstep_client_ ;
+    double                      transfer_time_,swing_time_, swing_height_;
+    int                         execution_mode_, step_counter_;
+    ros::NodeHandle             nh_;
+    ros::Time                   cbTime_;
+    ros::Publisher              footsteps_pub_ ,nudgestep_pub_,loadeff_pub;
+    ros::Subscriber             footstep_status_ ;
+    ros::ServiceClient          footstep_client_ ;
     tf::TransformListener       tf_listener_;
-
-    std_msgs::String right_foot_frame_,left_foot_frame_;
+    std_msgs::String            right_foot_frame_,left_foot_frame_;
 
     void footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage & msg);
-
-    void waitForSteps( int n);
+    void waitForSteps( int numSteps);
     ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStep(int side, float x, float y);
     ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStepWRTPelvis(int side , float x, float y);
 
 
 };
 
-#endif  //VALKYRIE_WALKER_H
+#endif  //ROBOT_WALKER_H

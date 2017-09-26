@@ -11,7 +11,7 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     head_controller_     = new HeadTrajectory(nh_);
     gripper_controller_  = new gripperControl(nh_);
     arm_controller_      = new armTrajectory(nh_);
-    walk_                = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
+    walk_                = new RobotWalker(nh_, 0.7, 0.7, 0, 0.18);
     current_state_       = RobotStateInformer::getRobotStateInformer(nh_);
     cable_detector_      = nullptr;
 

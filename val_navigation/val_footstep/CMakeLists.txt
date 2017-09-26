@@ -57,7 +57,7 @@ include_directories( include
 
 ## Declare a C++ library
  add_library(${PROJECT_NAME}
-   src/ValkyrieWalker.cpp
+   src/RobotWalker.cpp
  )
 
 ## Add cmake target dependencies of the library
@@ -72,8 +72,8 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 add_executable(footstep_node src/footstep_node.cpp)
 target_link_libraries(footstep_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
 
-#add_executable(ValkyrieWalker src/ValkyrieWalker.cpp)
-#add_dependencies(ValkyrieWalker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_executable(RobotWalker src/RobotWalker.cpp)
+#add_dependencies(RobotWalker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(test_footstep src/test_footstep.cpp)
 add_dependencies(test_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

@@ -1,11 +1,11 @@
 #include <footstep_planner/FootstepPlannerNode.h>
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
-#include <val_footstep/ValkyrieWalker.h>
+#include <val_footstep/RobotWalker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <thread>
 
-ValkyrieWalker *walk;
+RobotWalker *walk;
 RobotStateInformer *current_state;
 ihmc_msgs::FootstepDataListRosMessage list;
 geometry_msgs::Pose pelvisPose;
@@ -17,7 +17,7 @@ void WalkToGoal(geometry_msgs::Pose2D goal) {
     list.default_transfer_time = 1.0;
     list.default_swing_time = 1.0;
     list.execution_mode = 0;
-    list.unique_id = ValkyrieWalker::id;
+    list.unique_id = RobotWalker::id;
 
     bool success = walk->getFootstep(goal,list);
     std::string result = success ? "Succeded" : "Failed";
@@ -67,7 +67,7 @@ int main(int argc, char** argv)
     ros::NodeHandle nh_;
     //    ros::Publisher temp = nh_.advertise<visualization_msgs::MarkerArray>("/valkyrie/footstep_markers",10);
     //    footstep_marker_pub = &temp;
-    walk = new ValkyrieWalker(nh_, 0.8f, 0.8f, 0, 0.18);
+    walk = new RobotWalker(nh_, 0.8f, 0.8f, 0, 0.18);
     current_state = RobotStateInformer::getRobotStateInformer(nh_);
     ros::Subscriber nav_goal_sub    = nh_.subscribe("/valkyrie/goal", 1, &nav_goal_cb);
     ros::Subscriber nav_goal_sub2    = nh_.subscribe("/move_base_simple/goal", 1, &nav_goal_cb);

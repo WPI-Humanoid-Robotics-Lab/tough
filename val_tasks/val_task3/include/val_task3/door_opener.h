@@ -10,15 +10,15 @@
 #include "tough_controller_interface/gripper_control_interface.h"
 #include <val_task_common/val_task_common_utils.h>
 #include <tf/transform_datatypes.h>
-#include "val_footstep/ValkyrieWalker.h"
+#include "val_footstep/RobotWalker.h"
 #include "val_task3_utils.h"
 #include "val_control_common/val_control_common.h"
 
-class doorOpener{
+class DoorOpener{
 
 public:
-    doorOpener(ros::NodeHandle nh);
-    ~doorOpener();
+    DoorOpener(ros::NodeHandle nh);
+    ~DoorOpener();
 
     void openDoor(geometry_msgs::Pose &valveCenterWorld);
 
@@ -27,7 +27,7 @@ private:
     armTrajectory armTraj_;
     gripperControl gripper_;
     task3Utils task3_;
-    ValkyrieWalker walker_;
+    RobotWalker walker_;
     RobotStateInformer *robot_state_;
     valControlCommon control_common_;
 };

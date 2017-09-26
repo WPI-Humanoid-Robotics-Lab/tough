@@ -344,7 +344,7 @@ void ValkyrieGUI::initValkyrieControllers() {
     pelvisHeightController_ = new pelvisTrajectory(nh_);
 
     //create walking controller object
-    walkingController_ = new ValkyrieWalker(nh_, 1.0, 1.0, 0, 0.18);
+    walkingController_ = new RobotWalker(nh_, 1.0, 1.0, 0, 0.18);
 
     //create arm joint controller object
     armJointController_ = new armTrajectory(nh_);

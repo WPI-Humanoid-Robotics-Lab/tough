@@ -39,7 +39,7 @@ valTask1::valTask1(ros::NodeHandle nh):
     task1_utils_->taskLogPub(task1_utils_->TEXT_GREEN + "Starting task 1" + task1_utils_->TEXT_NC);
 
     // object for the valkyrie walker
-    walker_ = new ValkyrieWalker(nh_, 0.7, 0.7, 0, 0.18);
+    walker_ = new RobotWalker(nh_, 0.7, 0.7, 0, 0.18);
 
     // object for tracking walk
     walk_track_ = new walkTracking(nh);
@@ -1470,7 +1470,7 @@ decision_making::TaskResult valTask1::detectfinishBoxTask(string name, const FSM
         std::vector<float> y_offset={0.0, 0.0, 0.0, 0.1};
         walker_->walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
         ros::Duration(5).sleep();
-        walker_->walk_rotate(-1*panel_walk_goal_coarse_.theta);
+        walker_->walkRotate(-1*panel_walk_goal_coarse_.theta);
         ros::Duration(5).sleep();
         task1_utils_->resetPointCloud(); // Pointcloud generated from this point onwards is for Task2
         execute_once = false;

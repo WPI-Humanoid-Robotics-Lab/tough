@@ -1,5 +1,5 @@
 #include <iostream>
-#include<val_footstep/ValkyrieWalker.h>
+#include<val_footstep/RobotWalker.h>
 #include<ihmc_msgs/FootstepDataListRosMessage.h>
 #include"geometry_msgs/Pose2D.h"
 #include "val_common/val_common_defines.h"
@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     }
 
 
-    ValkyrieWalker walk(nh, 1.0,1.0,0);
+    RobotWalker walk(nh, 1.0,1.0,0);
     armSide side;
     std::vector<float> x_offset,y_offset;
     if(argc == 4 )

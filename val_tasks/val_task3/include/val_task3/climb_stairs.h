@@ -1,7 +1,7 @@
 # pragma once
 
 #include <ros/ros.h>
-#include <val_footstep/ValkyrieWalker.h>
+#include <val_footstep/RobotWalker.h>
 #include <tough_controller_interface/chest_control_interface.h>
 #include <tough_controller_interface/pelvis_control_interface.h>
 #include <tough_controller_interface/arm_control_interface.h>
@@ -18,7 +18,7 @@
 class climbStairs {
 private:
     ros::NodeHandle nh_;
-    ValkyrieWalker *walker_;
+    RobotWalker *walker_;
     chestTrajectory *chest_;
     pelvisTrajectory *pelvis_;
     armTrajectory *arm_;

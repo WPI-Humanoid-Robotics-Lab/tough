@@ -14,9 +14,9 @@ int main(int argc, char **argv)
     ros::Rate loop(0.3);
     size_t retry_count = 0;
 
-    rotateValve rotate(nh);
+    RotateValve rotate(nh);
     gripperControl gc(nh);
-    doorOpener doorOpen(nh);
+    DoorOpener doorOpen(nh);
 
 
     geometry_msgs::Point valveCentre;
