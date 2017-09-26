@@ -87,7 +87,7 @@ bool RobotWalker::walkToGoal( geometry_msgs::Pose2D &goal, bool waitForSteps)
 }
 
 // walks certain number of defined footsteps. steps defined wrt world frame.
-bool RobotWalker::walkNSteps(int nunOfSteps, float xOffset, float yOffset, bool continous, armSide startLeg, bool waitForSteps)
+bool RobotWalker::walkNSteps(int numSteps, float xOffset, float yOffset, bool continous, armSide startLeg, bool waitForSteps)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.default_transfer_time = transfer_time_;
@@ -96,7 +96,7 @@ bool RobotWalker::walkNSteps(int nunOfSteps, float xOffset, float yOffset, bool 
 
     list.unique_id = RobotWalker::id ;
 
-    for (int m =1; m <= nunOfSteps ; m++) {
+    for (int m =1; m <= numSteps ; m++) {
         if(m%2 == 1) {
             list.footstep_data_list.push_back(*getOffsetStep(startLeg , m*xOffset, m*yOffset));
         }
@@ -106,11 +106,11 @@ bool RobotWalker::walkNSteps(int nunOfSteps, float xOffset, float yOffset, bool 
 
     }
     if(!continous){
-        if (nunOfSteps%2 ==1) {
-            list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2  , nunOfSteps*xOffset, nunOfSteps*yOffset));
+        if (numSteps%2 ==1) {
+            list.footstep_data_list.push_back(*getOffsetStep((startLeg+1)%2  , numSteps*xOffset, numSteps*yOffset));
         }
-        if (nunOfSteps%2 ==0) {
-            list.footstep_data_list.push_back(*getOffsetStep(startLeg , nunOfSteps*xOffset, nunOfSteps*yOffset));
+        if (numSteps%2 ==0) {
+            list.footstep_data_list.push_back(*getOffsetStep(startLeg , numSteps*xOffset, numSteps*yOffset));
         }
     }
 
@@ -119,7 +119,7 @@ bool RobotWalker::walkNSteps(int nunOfSteps, float xOffset, float yOffset, bool 
 }
 
 // walks certain number of defined footsteps. steps defined wrt pelvis frame.
-bool RobotWalker::walkNStepsWRTPelvis(int nunOfSteps, float xOffset, float yOffset, bool continous, armSide startLeg, bool waitForSteps)
+bool RobotWalker::walkNStepsWRTPelvis(int numSteps, float xOffset, float yOffset, bool continous, armSide startLeg, bool waitForSteps)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
     list.default_transfer_time = transfer_time_;
@@ -128,7 +128,7 @@ bool RobotWalker::walkNStepsWRTPelvis(int nunOfSteps, float xOffset, float yOffs
 
     list.unique_id = RobotWalker::id ;
 
-    for (int m =1; m <= nunOfSteps ; m++) {
+    for (int m =1; m <= numSteps ; m++) {
         if(m%2 == 1) {
             list.footstep_data_list.push_back(*getOffsetStepWRTPelvis(startLeg , m*xOffset, m*yOffset));
         }
@@ -138,11 +138,11 @@ bool RobotWalker::walkNStepsWRTPelvis(int nunOfSteps, float xOffset, float yOffs
 
     }
     if(!continous){
-        if (nunOfSteps%2 ==1) {
-            list.footstep_data_list.push_back(*getOffsetStepWRTPelvis((startLeg+1)%2  , nunOfSteps*xOffset, nunOfSteps*yOffset));
+        if (numSteps%2 ==1) {
+            list.footstep_data_list.push_back(*getOffsetStepWRTPelvis((startLeg+1)%2  , numSteps*xOffset, numSteps*yOffset));
         }
-        if (nunOfSteps%2 ==0) {
-            list.footstep_data_list.push_back(*getOffsetStepWRTPelvis(startLeg , nunOfSteps*xOffset, nunOfSteps*yOffset));
+        if (numSteps%2 ==0) {
+            list.footstep_data_list.push_back(*getOffsetStepWRTPelvis(startLeg , numSteps*xOffset, numSteps*yOffset));
         }
     }
 
@@ -159,8 +159,10 @@ bool RobotWalker::walkPreComputedSteps(const std::vector<float> xOffset, const s
     list.execution_mode = execution_mode_;
     list.unique_id = RobotWalker::id;
 
-    if (xOffset.size() != yOffset.size())
+    if (xOffset.size() != yOffset.size()){
         ROS_ERROR("X Offset and Y Offset have different size");
+        return false;
+    }
 
 
     size_t numberOfSteps = xOffset.size();
@@ -589,44 +591,6 @@ double RobotWalker::getSwingHeight() const
     return swing_height_;
 }
 
-
-//RobotWalker::RobotWalker(ros::NodeHandle nh, double inTransferTime , double inSwingTime, int inMode, double swingHeight):nh_(nh)
-//{
-//    //    this->footstep_client_ = nh_.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("/plan_footsteps");
-//    this->footsteps_pub_   = nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/valkyrie/control/footstep_list",1,true);
-//    this->footstep_status_ = nh_.subscribe("/ihmc_ros/valkyrie/output/footstep_status", 20,&RobotWalker::footstepStatusCB, this);
-//    current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-//    this->nudgestep_pub_   = nh_.advertise<ihmc_msgs::FootTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/foot_trajectory",1,true);
-//    this->loadeff_pub      = nh_.advertise<ihmc_msgs::EndEffectorLoadBearingRosMessage>("/ihmc_ros/valkyrie/control/end_effector_load_bearing",1,true);
-
-//    transfer_time_  = inTransferTime;
-//    swing_time_     = inSwingTime;
-//    execution_mode_ = inMode;
-//    swingHeight   = swingHeight;
-
-//    ros::Duration(0.5).sleep();
-//    step_counter_ = 0;
-
-//    //start timer
-//    cbTime_=ros::Time::now();
-//    std::string robot_name;
-
-//    if (nh_.getParam("/ihmc_ros/robot_name",robot_name))
-//    {
-//        if(nh_.getParam("/ihmc_ros/valkyrie/right_foot_frame_name", right_foot_frame_.data) && nh_.getParam("/ihmc_ros/valkyrie/left_foot_frame_name", left_foot_frame_.data))
-//        {
-//            ROS_DEBUG("%s", right_foot_frame_.data.c_str());
-//            ROS_DEBUG("%s", left_foot_frame_.data.c_str());
-//        }
-//    }
-//    else
-//    {
-//        ROS_ERROR("Failed to get param foot frames.");
-//    }
-//}
-//// Destructor
-//RobotWalker::~RobotWalker(){
-//}
 
 // Get starting location of the foot
 

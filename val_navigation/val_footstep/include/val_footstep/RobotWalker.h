@@ -105,7 +105,7 @@ public:
      * @brief setSwing_height Sets swing_height for walking.
      * @param value           Value is the swing_height that determines how high a feet should be lifted while walking in meters. It should be between 0.1 and 0.25     *
      */
-    inline void setSwing_height(double value)
+    inline void setSwingHeight(double value)
     {
         swing_height_ = value;
     }
