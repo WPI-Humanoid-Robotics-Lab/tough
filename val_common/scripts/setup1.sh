@@ -47,9 +47,15 @@ sudo apt-get install -y srcsim
 
 #jdk 8
 echo "$(tput setaf 1)Installing jdk 8$(tput sgr0)"
-sudo add-apt-repository ppa:openjdk-r/ppa -y
+# Installing Oracle JDK
+sudo apt-add-repository ppa:webupd8team/java
 sudo apt-get update
-sudo apt-get install -y openjdk-8-jdk
+sudo apt-get install oracle-java8-installer
+
+#OpenJDK - doesn't have javafx
+#sudo add-apt-repository ppa:openjdk-r/ppa -y
+#sudo apt-get update
+#sudo apt-get install -y openjdk-8-jdk
 
 echo "$(tput setaf 1)change owner ship of ihmc_ros_java_adapter$(tput sgr0)"
 sudo chmod -R 777 /opt/ros/indigo/share/ihmc_ros_java_adapter
