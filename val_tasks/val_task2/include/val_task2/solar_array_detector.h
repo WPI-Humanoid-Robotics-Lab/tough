@@ -40,7 +40,7 @@
 #include <pcl/octree/octree_pointcloud_voxelcentroid.h>
 #include <pcl/octree/octree_impl.h>
 
-#include "val_controllers/robot_state.h"
+#include "tough_controller_interface/robot_state.h"
 
 
 #define ARRAY_OFFSET 0.96    //Offset to get the correct stand pose near array

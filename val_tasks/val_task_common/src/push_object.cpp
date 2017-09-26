@@ -1,7 +1,7 @@
 #include <ros/ros.h>
-#include <val_controllers/robot_state.h>
+#include <tough_controller_interface/robot_state.h>
 #include "val_moveit_planners/val_cartesian_planner.h"
-#include "val_controllers/val_wholebody_manipulation.h"
+#include "tough_controller_interface/wholebody_control_interface.h"
 #include "val_control_common/val_control_common.h"
 
 

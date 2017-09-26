@@ -14,7 +14,7 @@
 #include <tf/transform_listener.h>
 #include <tf/tf.h>
 #include <val_common/val_common_names.h>
-#include "val_controllers/robot_state.h"
+#include "tough_controller_interface/robot_state.h"
 
 /**
  * @brief The armTrajectory class provides ability to move arms of valkyrie. Current implementation provides joint level without collision detection.

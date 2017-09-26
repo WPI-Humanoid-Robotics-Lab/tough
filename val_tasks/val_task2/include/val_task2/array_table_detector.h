@@ -30,7 +30,7 @@
 
 #include <pcl/sample_consensus/sac_model_sphere.h>
 #include <pcl/sample_consensus/ransac.h>
-#include "val_controllers/robot_state.h"
+#include "tough_controller_interface/robot_state.h"
 
 #include <iostream>
 #include <vector>

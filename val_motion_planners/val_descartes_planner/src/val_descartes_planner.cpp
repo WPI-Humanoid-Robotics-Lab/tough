@@ -134,8 +134,11 @@ void dplanner::plantrajectory(ros::NodeHandle nh, std::vector<geometry_msgs::Pos
     planner.getPlanningGraph();
     // 5. Translate the result into a type that ROS understands
     // Get Joint Names
+    std::string robot_name;
+    nh.getParam("ihmc_ros/robot_name", robot_name);
+
     std::vector<std::string> names;
-    nh.getParam("/ihmc_ros/valkyrie/right_arm_joint_names", names);
+    nh.getParam("/ihmc_ros/"+ robot_name +"/right_arm_joint_names", names);
     // Generate a ROS joint trajectory with the result path, robot model,
     // joint names, and a certain time delta between each trajectory point
     toROSJointTrajectory(result, *model, names, 1.0, traj);

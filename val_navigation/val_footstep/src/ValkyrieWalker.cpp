@@ -11,6 +11,42 @@
 
 int ValkyrieWalker::id = -1;
 
+// constructor
+ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double InSwingTime, int InMode, double swingHeight):nh_(nh)
+{
+    std::string robot_name;
+    nh_.getParam("/ihmc_ros/robot_name",robot_name);
+
+    this->footsteps_pub_   = nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/"+robot_name+"/control/footstep_list",1,true);
+    this->footstep_status_ = nh_.subscribe("/ihmc_ros/"+robot_name+"/output/footstep_status", 20,&ValkyrieWalker::footstepStatusCB, this);
+    current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    this->nudgestep_pub_   = nh_.advertise<ihmc_msgs::FootTrajectoryRosMessage>("/ihmc_ros/"+robot_name+"/control/foot_trajectory",1,true);
+    this->loadeff_pub      = nh_.advertise<ihmc_msgs::EndEffectorLoadBearingRosMessage>("/ihmc_ros/"+robot_name+"/control/end_effector_load_bearing",1,true);
+
+    transfer_time  = InTransferTime;
+    swing_time     = InSwingTime;
+    execution_mode = InMode;
+    swing_height   = swingHeight;
+
+    ros::Duration(0.5).sleep();
+    step_counter = 0;
+
+    //start timer
+    cbTime_=ros::Time::now();
+
+        if(nh_.getParam("/ihmc_ros/"+robot_name+"/right_foot_frame_name", right_foot_frame_.data) && nh_.getParam("/ihmc_ros/"+robot_name+"/left_foot_frame_name", left_foot_frame_.data))
+        {
+            ROS_DEBUG("%s", right_foot_frame_.data.c_str());
+            ROS_DEBUG("%s", left_foot_frame_.data.c_str());
+        }
+
+}
+
+// Destructor
+ValkyrieWalker::~ValkyrieWalker(){
+}
+
+
 // CallBack function for walking status
 void ValkyrieWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage & msg)
 {
@@ -553,47 +589,6 @@ double ValkyrieWalker::getSwing_height() const
     return swing_height;
 }
 
-
-
-
-// constructor
-ValkyrieWalker::ValkyrieWalker(ros::NodeHandle nh,double InTransferTime ,double InSwingTime, int InMode, double swingHeight):nh_(nh)
-{
-    //    this->footstep_client_ = nh_.serviceClient <humanoid_nav_msgs::PlanFootsteps> ("/plan_footsteps");
-    this->footsteps_pub_   = nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/valkyrie/control/footstep_list",1,true);
-    this->footstep_status_ = nh_.subscribe("/ihmc_ros/valkyrie/output/footstep_status", 20,&ValkyrieWalker::footstepStatusCB, this);
-    current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-    this->nudgestep_pub_   = nh_.advertise<ihmc_msgs::FootTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/foot_trajectory",1,true);
-    this->loadeff_pub      = nh_.advertise<ihmc_msgs::EndEffectorLoadBearingRosMessage>("/ihmc_ros/valkyrie/control/end_effector_load_bearing",1,true);
-
-    transfer_time  = InTransferTime;
-    swing_time     = InSwingTime;
-    execution_mode = InMode;
-    swing_height   = swingHeight;
-
-    ros::Duration(0.5).sleep();
-    step_counter = 0;
-
-    //start timer
-    cbTime_=ros::Time::now();
-    std::string robot_name;
-
-    if (nh_.getParam("/ihmc_ros/robot_name",robot_name))
-    {
-        if(nh_.getParam("/ihmc_ros/valkyrie/right_foot_frame_name", right_foot_frame_.data) && nh_.getParam("/ihmc_ros/valkyrie/left_foot_frame_name", left_foot_frame_.data))
-        {
-            ROS_DEBUG("%s", right_foot_frame_.data.c_str());
-            ROS_DEBUG("%s", left_foot_frame_.data.c_str());
-        }
-    }
-    else
-    {
-        ROS_ERROR("Failed to get param foot frames.");
-    }
-}
-// Destructor
-ValkyrieWalker::~ValkyrieWalker(){
-}
 
 // Get starting location of the foot
 

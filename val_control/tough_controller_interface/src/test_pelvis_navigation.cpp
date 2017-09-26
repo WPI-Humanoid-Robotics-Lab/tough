@@ -1,13 +1,13 @@
-#include <val_controllers/val_chest_navigation.h>
+#include <tough_controller_interface/pelvis_control_interface.h>
 #include <stdlib.h>
 #include <std_msgs/String.h>
 #include <val_common/val_common_names.h>
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "test_chest_navigation");
+  ros::init(argc, argv, "test_pelvis_navigation");
   ros::NodeHandle nh;
-  ROS_INFO("Moving the chest");
+  ROS_INFO("Moving the pelvis");
 
   ros::Publisher log_pub = nh.advertise<std_msgs::String>(VAL_COMMON_NAMES::LOG_TOPIC, 10);
   const auto log_msg = [&log_pub](const std::string &str) {
@@ -24,23 +24,27 @@ int main(int argc, char **argv)
     ros::WallDuration(0.1).sleep();
   }
 
-  chestTrajectory chestTraj(nh);
+  pelvisTrajectory pelvisTraj(nh);
 
-  if(argc != 4) {
-    chestTraj.controlChest(10, 0, 0);
-    log_msg("Moving chest angle to 10, 0, 0");
-  } else {
-    float roll = std::atof(argv[1]);
-    float pitch = std::atof(argv[2]);
-    float yaw = std::atof(argv[3]);
-
-    log_msg("Moving chest angle to " + std::to_string(roll) + ", " + std::to_string(pitch) + ", " + std::to_string(yaw));
-    chestTraj.controlChest(roll, pitch, yaw);
+  if(argc != 2) {
+    log_msg("making pelvis do a dance");
+    pelvisTraj.controlPelvisHeight(1.25f);
+    ros::Duration(2).sleep();
+    pelvisTraj.controlPelvisHeight(0.9f);
+    ros::Duration(2).sleep();
+    pelvisTraj.controlPelvisHeight(1.0f);
   }
+  else {
+    float height = std::atof(argv[1]);
+    log_msg("moving pelvis to height " + std::to_string(height));
+    pelvisTraj.controlPelvisHeight(height);
+  }
+
 
   ros::spinOnce();
   ros::Duration(2).sleep();
 
-  log_msg("Motion finished");
+  log_msg("motion complete");
+
   return 0;
 }

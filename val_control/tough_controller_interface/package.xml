@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <package>
-<name>val_controllers</name>
+<name>tough_controller_interface</name>
 <version>0.0.0</version>
-<description>The val_controllers package</description>
+<description>The tough_controller_interface package</description>
 
   <maintainer email="sumanth@todo.todo">sumanth</maintainer>
 
   <license>TODO</license>
 
-  <!-- <url type="website">http://wiki.ros.org/val_controllers</url> -->
+  <!-- <url type="website">http://wiki.ros.org/tough_controller_interface</url> -->
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>geometry_msgs</build_depend>

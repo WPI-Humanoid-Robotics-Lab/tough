@@ -20,7 +20,7 @@
 #include "tf/tf.h"
 #include <tf/transform_listener.h>
 #include <val_common/val_common_defines.h>
-#include <val_controllers/robot_state.h>
+#include <tough_controller_interface/robot_state.h>
 
 
 
@@ -140,6 +140,7 @@ private:
     void waitForSteps( int n);
     ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStep(int side, float x, float y);
     ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStepWRTPelvis(int side , float x, float y);
+
 
 };
 

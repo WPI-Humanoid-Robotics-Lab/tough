@@ -6,8 +6,8 @@
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
 #include "val_moveit_planners/val_cartesian_planner.h"
-#include "val_controllers/val_wholebody_manipulation.h"
-#include "val_controllers/val_gripper_control.h"
+#include "tough_controller_interface/wholebody_control_interface.h"
+#include "tough_controller_interface/gripper_control_interface.h"
 #include <val_task_common/val_task_common_utils.h>
 #include <tf/transform_datatypes.h>
 #include "val_footstep/ValkyrieWalker.h"

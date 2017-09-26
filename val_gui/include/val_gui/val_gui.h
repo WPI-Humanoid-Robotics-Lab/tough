@@ -46,12 +46,12 @@
 #include <opencv2/opencv.hpp>
 
 // custom Valkyrie APIs
-#include <val_controllers/val_arm_navigation.h>
-#include <val_controllers/val_chest_navigation.h>
-#include <val_controllers/val_pelvis_navigation.h>
-#include <val_controllers/val_head_navigation.h>
+#include <tough_controller_interface/arm_control_interface.h>
+#include <tough_controller_interface/chest_control_interface.h>
+#include <tough_controller_interface/pelvis_control_interface.h>
+#include <tough_controller_interface/head_control_interface.h>
 #include <val_footstep/ValkyrieWalker.h>
-#include <val_controllers/val_gripper_control.h>
+#include <tough_controller_interface/gripper_control_interface.h>
 
 // Constants
 #define TO_RADIANS 3.1415926535f / 180.0f

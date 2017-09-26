@@ -13,7 +13,11 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ros::Rate loop_rate(10);
     ValkyrieWalker walk(nh, 1.0,1.0,0);
-    ros::Publisher stopTraj= nh.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/stop_all_trajectories",1,true);
+
+    std::string robot_name;
+    nh.getParam("ihmc_ros/robot_name", robot_name);
+
+    ros::Publisher stopTraj= nh.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/stop_all_trajectories",1,true);
     ihmc_msgs::StopAllTrajectoryRosMessage stopMsg;
     stopMsg.unique_id=45;
 

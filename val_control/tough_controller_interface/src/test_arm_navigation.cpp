@@ -1,4 +1,4 @@
-#include <val_controllers/RobotArmManipulation.h>
+#include <tough_controller_interface/arm_control_interface.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <std_msgs/String.h>

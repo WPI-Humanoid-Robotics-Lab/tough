@@ -8,8 +8,8 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
 #include <val_common/val_common_names.h>
-#include <val_controllers/robot_state.h>
-#include <val_controllers/val_arm_navigation.h>
+#include <tough_controller_interface/robot_state.h>
+#include <tough_controller_interface/arm_control_interface.h>
 #include <vector>
 #include <stdio.h>      /* printf */
 #include <iostream>

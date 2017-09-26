@@ -4,8 +4,8 @@
 #include "tf/tf.h"
 #include <tf/transform_listener.h>
 #include "val_common/val_common_names.h"
-#include <val_controllers/robot_state.h>
-#include <val_controllers/val_arm_navigation.h>
+#include <tough_controller_interface/robot_state.h>
+#include <tough_controller_interface/arm_control_interface.h>
 using namespace std;
 
 
@@ -34,7 +34,10 @@ int main(int argc, char** argv){
     geometry_msgs::Pose current_pose,new_pose;
     string sideName,arm;
     std::vector<float> jointEfforts,jointPositions;
-    ros::Publisher stopTraj= nh.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/stop_all_trajectories",1,true);
+    std::string robot_name;
+    nh.getParam("ihmc_ros/robot_name", robot_name);
+
+    ros::Publisher stopTraj= nh.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/stop_all_trajectories",1,true);
     ihmc_msgs::StopAllTrajectoryRosMessage stopMsg;
     stopMsg.unique_id=45;
     int retry=0;

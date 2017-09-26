@@ -3,10 +3,10 @@
 
 #include <ros/ros.h>
 #include "val_common/val_common_defines.h"
-#include "val_controllers/robot_state.h"
+#include "tough_controller_interface/robot_state.h"
 #include <trajectory_msgs/JointTrajectory.h>
-#include <val_controllers/val_arm_navigation.h>
-#include <val_controllers/val_chest_navigation.h>
+#include <tough_controller_interface/arm_control_interface.h>
+#include <tough_controller_interface/chest_control_interface.h>
 #include <ihmc_msgs/WholeBodyTrajectoryRosMessage.h>
 #include <ihmc_msgs/SO3TrajectoryPointRosMessage.h>
 

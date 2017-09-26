@@ -4,7 +4,7 @@
 #include <val_task3/val_task3_utils.h>
 #include <srcsim/Leak.h>
 #include <val_moveit_planners/val_cartesian_planner.h>
-#include <val_controllers/val_wholebody_manipulation.h>
+#include <tough_controller_interface/wholebody_control_interface.h>
 
 #define VERTICAL_WIDTH    0.25
 #define HORIZONTAL_WIDTH  0.25

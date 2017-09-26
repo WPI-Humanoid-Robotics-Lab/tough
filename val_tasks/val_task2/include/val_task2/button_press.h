@@ -1,14 +1,14 @@
 #ifndef BUTTON_PRESS_H
 #define BUTTON_PRESS_H
 #include <val_task2/button_detector.h>
-#include <val_controllers/val_arm_navigation.h>
-#include <val_controllers/val_gripper_control.h>
+#include <tough_controller_interface/arm_control_interface.h>
+#include <tough_controller_interface/gripper_control_interface.h>
 #include <val_footstep/ValkyrieWalker.h>
 #include <val_common/val_common_defines.h>
 #include <val_common/val_common_names.h>
 #include "val_moveit_planners/val_cartesian_planner.h"
-#include "val_controllers/val_wholebody_manipulation.h"
-#include "val_controllers/val_chest_navigation.h"
+#include "tough_controller_interface/wholebody_control_interface.h"
+#include "tough_controller_interface/chest_control_interface.h"
 
 
 class ButtonPress

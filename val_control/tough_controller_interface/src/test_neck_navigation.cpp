@@ -1,13 +1,13 @@
-#include <val_controllers/val_pelvis_navigation.h>
+#include <tough_controller_interface/head_control_interface.h>
 #include <stdlib.h>
 #include <std_msgs/String.h>
 #include <val_common/val_common_names.h>
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "test_pelvis_navigation");
+  ros::init(argc, argv, "test_neck_navigation");
   ros::NodeHandle nh;
-  ROS_INFO("Moving the pelvis");
+  ROS_INFO("Moving the neck");
 
   ros::Publisher log_pub = nh.advertise<std_msgs::String>(VAL_COMMON_NAMES::LOG_TOPIC, 10);
   const auto log_msg = [&log_pub](const std::string &str) {
@@ -24,27 +24,15 @@ int main(int argc, char **argv)
     ros::WallDuration(0.1).sleep();
   }
 
-  pelvisTrajectory pelvisTraj(nh);
 
-  if(argc != 2) {
-    log_msg("making pelvis do a dance");
-    pelvisTraj.controlPelvisHeight(1.25f);
-    ros::Duration(2).sleep();
-    pelvisTraj.controlPelvisHeight(0.9f);
-    ros::Duration(2).sleep();
-    pelvisTraj.controlPelvisHeight(1.0f);
-  }
-  else {
-    float height = std::atof(argv[1]);
-    log_msg("moving pelvis to height " + std::to_string(height));
-    pelvisTraj.controlPelvisHeight(height);
-  }
+  HeadTrajectory headTraj(nh);
 
+  log_msg("Moving neck joints to 0, 0, 0");
+  headTraj.moveNeckJoints({{ 0.0f, 0.0f, 0.0f }}, 2.0f);
 
   ros::spinOnce();
   ros::Duration(2).sleep();
 
-  log_msg("motion complete");
-
+  log_msg("Motion finished");
   return 0;
 }

@@ -1,7 +1,7 @@
 #include "val_task3/val_stairclimb.h"
 #include "val_common/val_common_defines.h"
 #include "val_footstep/ValkyrieWalker.h"
-#include "val_controllers/val_arm_navigation.h"
+#include "tough_controller_interface/arm_control_interface.h"
 
 
 StairClimb::StairClimb(ros::NodeHandle n)

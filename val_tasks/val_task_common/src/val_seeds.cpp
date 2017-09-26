@@ -1,6 +1,6 @@
 #include <iostream>
 #include "val_common/val_common_defines.h"
-#include <val_controllers/val_arm_navigation.h>
+#include <tough_controller_interface/arm_control_interface.h>
 #include <std_msgs/String.h>
 
 

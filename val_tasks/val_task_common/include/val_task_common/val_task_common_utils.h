@@ -3,7 +3,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Pose.h>
-#include <val_controllers/val_arm_navigation.h>
+#include <tough_controller_interface/arm_control_interface.h>
 
 #define DISTANCE_TOLERANCE      0.02      // 2cm
 #define ANGLE_TOLERANCE         0.0174533   // 1 degree

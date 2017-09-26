@@ -1,5 +1,5 @@
 #include "val_task3/rotate_valve.h"
-#include "val_controllers/val_gripper_control.h"
+#include "tough_controller_interface/gripper_control_interface.h"
 #include <ihmc_msgs/StopAllTrajectoryRosMessage.h>
 
 int main(int argc, char **argv)
@@ -21,7 +21,10 @@ int main(int argc, char **argv)
     task3Utils t3Utils(nh);
     t3Utils.task3LogPub("grab_valve_node: Starting the grab valve node");
 
-    ros::Publisher stopTraj= nh.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/stop_all_trajectories",1,true);
+    std::string robot_name;
+    nh.getParam("ihmc_ros/robot_name", robot_name);
+
+    ros::Publisher stopTraj= nh.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/stop_all_trajectories",1,true);
     ihmc_msgs::StopAllTrajectoryRosMessage stopMsg;
     stopMsg.unique_id=45;
 

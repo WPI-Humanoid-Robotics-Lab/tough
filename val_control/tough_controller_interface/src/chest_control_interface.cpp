@@ -1,4 +1,4 @@
-#include <val_controllers/val_chest_navigation.h>
+#include <tough_controller_interface/chest_control_interface.h>
 #include <tf/transform_listener.h>
 #include <val_common/val_common_names.h>
 
@@ -6,8 +6,11 @@
 
 chestTrajectory::chestTrajectory(ros::NodeHandle nh):nh_(nh)
 {
+    std::string robot_name;
+    nh.getParam("ihmc_ros/robot_name", robot_name);
+
     chestTrajPublisher =
-            nh_.advertise<ihmc_msgs::ChestTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/chest_trajectory",1,true);
+            nh_.advertise<ihmc_msgs::ChestTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/chest_trajectory",1,true);
 }
 
 chestTrajectory::~chestTrajectory()

@@ -39,7 +39,7 @@
 
 #include <visualization_msgs/MarkerArray.h>
 #include "val_common/val_common_names.h"
-#include "val_controllers/robot_state.h"
+#include "tough_controller_interface/robot_state.h"
 
 struct PanelSettings{
 

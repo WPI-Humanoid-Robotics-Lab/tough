@@ -10,7 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   val_common
-  val_controllers
+  tough_controller_interface
   val_footstep
 )
 
@@ -106,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
   LIBRARIES val_qual2
-  CATKIN_DEPENDS roscpp std_msgs tf val_common val_controllers val_footstep
+  CATKIN_DEPENDS roscpp std_msgs tf val_common tough_controller_interface val_footstep
   DEPENDS system_lib
 )
 
@@ -145,7 +145,7 @@ add_executable(val_qual2_node
 add_dependencies(val_qual2_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(val_qual2_node
-   ${catkin_LIBRARIES} val_controllers
+   ${catkin_LIBRARIES} tough_controller_interface
  )
 #############
 ## Install ##

@@ -1,12 +1,12 @@
-#include <val_controllers/val_arm_navigation.h>
+#include <tough_controller_interface/arm_control_interface.h>
 #include <ros/ros.h>
 #include <val_moveit_planners/val_cartesian_planner.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <val_task1/val_task1_utils.h>
-#include <val_controllers/robot_state.h>
+#include <tough_controller_interface/robot_state.h>
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
-#include "val_controllers/val_wholebody_manipulation.h"
+#include "tough_controller_interface/wholebody_control_interface.h"
 
 int main(int argc, char** argv){
 

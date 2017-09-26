@@ -1,7 +1,7 @@
 #include <val_task2/cable_detector.h>
 #include <val_task2/cable_task.h>
-#include <val_controllers/val_arm_navigation.h>
-#include <val_controllers/val_chest_navigation.h>
+#include <tough_controller_interface/arm_control_interface.h>
+#include <tough_controller_interface/chest_control_interface.h>
 
 using namespace std;
 
