@@ -27,6 +27,8 @@ else
   echo "$(tput setaf 1)setting up workspace$(tput sgr0)"
   mkdir -p ~/indigo_ws/src && cd ~/indigo_ws/src
   catkin_init_workspace
+  cp /opt/ros/indigo/share/catkin/cmake/toplevel.cmake .
+  mv toplevel.cmake CMakeLists.txt
   cd ~/indigo_ws
   catkin_make
 fi
@@ -41,12 +43,13 @@ wget -O - http://srcsim.gazebosim.org/src/src.key | sudo apt-key add -
 wget -O - https://bintray.com/user/downloadSubjectPublicKey?username=bintray | sudo apt-key add -
 echo "$(tput setaf 1)installing srcsim$(tput sgr0)"
 sudo apt-get update
-sudo apt-get install srcsim
+sudo apt-get install -y srcsim
 
-#Environment Variables
-echo "$(tput setaf 1)updating env variables for java$(tput sgr0)"
-echo 'export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64' >> ~/.bashrc
-echo 'export IS_GAZEBO=true' >> ~/.bashrc
+#jdk 8
+echo "$(tput setaf 1)Installing jdk 8$(tput sgr0)"
+sudo add-apt-repository ppa:openjdk-r/ppa -y
+sudo apt-get update
+sudo apt-get install -y openjdk-8-jdk
 
 echo "$(tput setaf 1)change owner ship of ihmc_ros_java_adapter$(tput sgr0)"
 sudo chmod -R 777 /opt/ros/indigo/share/ihmc_ros_java_adapter

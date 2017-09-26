@@ -2,10 +2,10 @@
 
 #include <ros/ros.h>
 #include <val_footstep/RobotWalker.h>
-#include <val_controllers/val_chest_navigation.h>
-#include <val_controllers/val_pelvis_navigation.h>
-#include <val_controllers/val_arm_navigation.h>
-#include <val_controllers/robot_state.h>
+#include <tough_controller_interface/chest_control_interface.h>
+#include <tough_controller_interface/pelvis_control_interface.h>
+#include <tough_controller_interface/arm_control_interface.h>
+#include <tough_controller_interface/robot_state.h>
 
 #define FIRSTSTEP_OFFSET    0.3
 #define STEP_HEIGHT         0.3    // 0.2031 actual height

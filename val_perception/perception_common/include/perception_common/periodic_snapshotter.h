@@ -41,7 +41,7 @@
 #include <val_common/val_common_names.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int8.h>
-#include <val_controllers/robot_state.h>
+#include <tough_controller_interface/robot_state.h>
 
 namespace laser_assembler
 {

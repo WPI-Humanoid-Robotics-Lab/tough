@@ -1,8 +1,11 @@
-#include "val_controllers/val_wholebody_manipulation.h"
+#include "tough_controller_interface/wholebody_control_interface.h"
 
 wholebodyManipulation::wholebodyManipulation(ros::NodeHandle &nh):nh_(nh)
 {
-    m_wholebodyPub = nh_.advertise<ihmc_msgs::WholeBodyTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/whole_body_trajectory", 10, true);
+    std::string robot_name;
+    nh.getParam("ihmc_ros/robot_name", robot_name);
+
+    m_wholebodyPub = nh_.advertise<ihmc_msgs::WholeBodyTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/whole_body_trajectory", 10, true);
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     joint_limits_left_.resize(7);
     joint_limits_right_.resize(7);

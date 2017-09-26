@@ -14,7 +14,7 @@
 #include <visualization_msgs/MarkerArray.h>
 
 #include <tf/transform_broadcaster.h>
-#include "val_controllers/robot_state.h"
+#include "tough_controller_interface/robot_state.h"
 
 
 #include <iostream>

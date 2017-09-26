@@ -11,7 +11,7 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
-#include "val_controllers/robot_state.h"
+#include "tough_controller_interface/robot_state.h"
 #include <mutex>
 
 

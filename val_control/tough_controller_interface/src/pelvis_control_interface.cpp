@@ -1,11 +1,14 @@
-#include <val_controllers/val_pelvis_navigation.h>
+#include <tough_controller_interface/pelvis_control_interface.h>
 #include <val_common/val_common_names.h>
 
 int pelvisTrajectory::pelvis_id = -1;
 
 pelvisTrajectory::pelvisTrajectory(ros::NodeHandle nh):nh_(nh)
 {
-    pelvisHeightPublisher = nh_.advertise<ihmc_msgs::PelvisHeightTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/pelvis_height_trajectory",1,true);
+    std::string robot_name;
+    nh.getParam("ihmc_ros/robot_name", robot_name);
+
+    pelvisHeightPublisher = nh_.advertise<ihmc_msgs::PelvisHeightTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/pelvis_height_trajectory",1,true);
 }
 
 pelvisTrajectory::~pelvisTrajectory()

@@ -5,6 +5,8 @@ if(NOT WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter")
 endif()
 
+add_definitions(-D$ENV{ROBOT_NAME})
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -30,7 +32,7 @@ find_package(catkin REQUIRED COMPONENTS
   trac_ik_examples
   trac_ik_kinematics_plugin
   trac_ik_lib
-  val_controllers
+  tough_controller_interface
 #  descartes_core
 #  descartes_planner
 #  descartes_moveit

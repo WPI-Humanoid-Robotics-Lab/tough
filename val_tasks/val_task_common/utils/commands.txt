@@ -31,7 +31,7 @@ GOTO_STATE_ROTATE_PANEL
 
 +rostopic pub -1 /field/pause_pointcloud std_msgs/Bool false
 
-+rosrun val_controllers test_arm_navigation 1 1.2 -1.8 0 0 0 0 0
++rosrun tough_controller_interface test_arm_navigation 1 1.2 -1.8 0 0 0 0 0
 
 
  
@@ -55,7 +55,7 @@ Helper Functions
 
 +rostopic pub -1 /approve_footsteps std_msgs/Empty
 
-+rosrun val_controllers test_arm_navigation 0 0 0 0 0 0 0 0
++rosrun tough_controller_interface test_arm_navigation 0 0 0 0 0 0 0 0
 
 +rosrun val_footstep walk_rotate -1.57
 

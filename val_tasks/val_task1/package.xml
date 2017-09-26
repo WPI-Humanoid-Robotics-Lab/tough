@@ -79,7 +79,7 @@
   <build_depend>trac_ik_kinematics_plugin</build_depend>
   <build_depend>trac_ik_lib</build_depend>
   <build_depend>val_gui</build_depend>
-  <build_depend>val_controllers</build_depend>
+  <build_depend>tough_controller_interface</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>val_moveit_planners</build_depend>
   <build_depend>val_control_common</build_depend>
@@ -126,7 +126,7 @@
   <run_depend>trac_ik_kinematics_plugin</run_depend>
   <run_depend>trac_ik_lib</run_depend>
   <run_depend>val_gui</run_depend>
-  <run_depend>val_controllers</run_depend>
+  <run_depend>tough_controller_interface</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>val_moveit_planners</run_depend>
   <run_depend>val_control_common</run_depend>

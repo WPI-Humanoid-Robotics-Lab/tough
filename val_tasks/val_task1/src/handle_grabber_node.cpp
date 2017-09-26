@@ -1,5 +1,5 @@
 #include "val_task1/handle_grabber.h"
-#include "val_controllers/val_gripper_control.h"
+#include "tough_controller_interface/gripper_control_interface.h"
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "handle_grabber");

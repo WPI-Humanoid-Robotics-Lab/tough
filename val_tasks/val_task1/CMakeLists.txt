@@ -5,6 +5,8 @@ SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
 
+add_definitions(-D$ENV{ROBOT_NAME})
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -50,7 +52,7 @@ find_package(catkin REQUIRED COMPONENTS
   trac_ik_kinematics_plugin
   trac_ik_lib
 
-  val_controllers
+  tough_controller_interface
   val_gui
   val_footstep
   val_task_common

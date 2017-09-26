@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(val_task_common)
 
+add_definitions(-D$ENV{ROBOT_NAME})
+
 ## Add support for C++11, supported in ROS Kinetic and newer
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
@@ -18,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   navigation_common
   perception_common
   roscpp
-  val_controllers
+  tough_controller_interface
   image_transport
   val_moveit_planners
   val_control_common
@@ -116,7 +118,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES val_task_common
-  CATKIN_DEPENDS perception_common roscpp val_controllers navigation_common
+  CATKIN_DEPENDS perception_common roscpp tough_controller_interface navigation_common
 #  DEPENDS system_lib
 )
 
@@ -214,7 +216,7 @@ target_link_libraries(build_world  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(test_nudgeOffset src/test_nudgeOffset.cpp)
 add_dependencies(test_nudgeOffset ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_nudgeOffset  ${catkin_LIBRARIES} val_controllers)
+target_link_libraries(test_nudgeOffset  ${catkin_LIBRARIES} tough_controller_interface)
 add_executable(val_gaze_controller src/val_gaze_controller.cpp)
 
 add_dependencies(val_gaze_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

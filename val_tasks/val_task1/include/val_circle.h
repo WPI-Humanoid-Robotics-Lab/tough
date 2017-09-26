@@ -7,7 +7,7 @@
 #include <vector>
 #include <string>
 #include <interactive_markers/interactive_marker_server.h>
-#include <val_controllers/val_arm_navigation.h>
+#include <tough_controller_interface/arm_control_interface.h>
 #include <val_common/val_common_names.h>
 #include <val_common/val_common_defines.h>
 #include <geometry_msgs/PoseStamped.h>

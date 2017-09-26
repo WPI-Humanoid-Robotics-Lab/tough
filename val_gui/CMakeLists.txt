@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   cv_bridge
   image_transport
-  val_controllers
+  tough_controller_interface
   val_footstep
 )
 
@@ -63,7 +63,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES val_marker
-  CATKIN_DEPENDS roscpp rviz sensor_msgs std_msgs val_controllers val_footstep
+  CATKIN_DEPENDS roscpp rviz sensor_msgs std_msgs tough_controller_interface val_footstep
   DEPENDS system_lib
 )
 
