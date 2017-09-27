@@ -29,7 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
   trac_ik_examples
   trac_ik_kinematics_plugin
   trac_ik_lib
-  val_controllers
+  tough_controller_interface
   geometry_msgs
 )
 

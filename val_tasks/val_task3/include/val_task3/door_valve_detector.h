@@ -40,7 +40,7 @@
 
 #include <pcl/filters/statistical_outlier_removal.h>
 
-#include "val_controllers/robot_state.h"
+#include "tough_controller_interface/robot_state.h"
 #include <visualization_msgs/MarkerArray.h>
 
 struct model_param

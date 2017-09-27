@@ -1,4 +1,4 @@
-#include <val_controllers/val_head_navigation.h>
+#include <tough_controller_interface/head_control_interface.h>
 #include <stdlib.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/String.h>

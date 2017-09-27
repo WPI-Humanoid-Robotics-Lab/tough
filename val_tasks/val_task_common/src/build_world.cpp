@@ -1,6 +1,6 @@
 #include <ros/ros.h>
 //#include "val_footstep/RobotWalker.h"
-#include <val_controllers/val_head_navigation.h>
+#include <tough_controller_interface/head_control_interface.h>
 //#include <val_task2/val_task2_utils.h>
 
 // This node makes the robot rotate 360 degrees and moves head around to generate map and point cloud

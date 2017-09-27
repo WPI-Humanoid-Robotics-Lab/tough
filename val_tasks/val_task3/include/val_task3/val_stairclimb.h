@@ -5,8 +5,8 @@
 #include <ros/ros.h>
 #include <val_footstep/RobotWalker.h>
 #include "ihmc_msgs/FootstepDataRosMessage.h"
-#include "val_controllers/robot_state.h"
-#include "val_controllers/val_chest_navigation.h"
+#include "tough_controller_interface/robot_state.h"
+#include "tough_controller_interface/chest_control_interface.h"
 #include <val_task3/stair_detector_2.h>
 
 class StairClimb

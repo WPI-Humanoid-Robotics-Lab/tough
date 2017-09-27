@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(val_footstep)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-
+add_definitions(-D$ENV{ROBOT_NAME})
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -19,7 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
   ihmc_msgs
   val_common
-  val_controllers
+  tough_controller_interface
   )
 #find_package(PkgConfig REQUIRED)
 

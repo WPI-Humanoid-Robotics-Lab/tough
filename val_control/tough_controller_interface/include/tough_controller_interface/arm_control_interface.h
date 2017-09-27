@@ -1,5 +1,5 @@
-#ifndef VAL_ARM_NAVIGATION_H
-#define VAL_ARM_NAVIGATION_H
+#ifndef ROBOTARMMANIPULATION_H
+#define ROBOTARMMANIPULATION_H
 
 #include <ros/ros.h>
 #include <ihmc_msgs/ArmTrajectoryRosMessage.h>
@@ -14,7 +14,7 @@
 #include <tf/transform_listener.h>
 #include <tf/tf.h>
 #include <val_common/val_common_names.h>
-#include "val_controllers/robot_state.h"
+#include "tough_controller_interface/robot_state.h"
 
 /**
  * @brief The armTrajectory class provides ability to move arms of valkyrie. Current implementation provides joint level without collision detection.
@@ -168,4 +168,4 @@ private:
 
 };
 
-#endif // VAL_ARM_NAVIGATION_H
+#endif // ROBOTARMMANIPULATION_H

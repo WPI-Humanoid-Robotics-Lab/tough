@@ -1,4 +1,4 @@
-#include "val_controllers/robot_state.h"
+#include "tough_controller_interface/robot_state.h"
 
 RobotStateInformer* RobotStateInformer::currentObject_ = nullptr;
 
@@ -19,6 +19,8 @@ RobotStateInformer::RobotStateInformer(ros::NodeHandle nh):nh_(nh){
     closeRightGrasp={1.09,1.47,1.84,0.90,1.20,1.51,0.99,1.34,1.68,0.55,0.739,0.92,1.40};
     closeLeftGrasp={0.0,-1.47,-1.84,-0.90,-1.20,-1.51,-0.99,-1.34,-1.68,-0.55,-0.739,-0.92,1.40};
     openGrasp={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+
+    nh.getParam("ihmc_ros/robot_name", robotName_);
 }
 
 RobotStateInformer::~RobotStateInformer(){
@@ -54,10 +56,10 @@ bool RobotStateInformer::getJointPositions(const std::string &paramName, std::ve
     std::vector<std::string> jointNames;
     std::string parameter;
     if(paramName == "left_arm_joint_names" || paramName == "left_arm"){
-        parameter.assign("/ihmc_ros/valkyrie/left_arm_joint_names");
+        parameter.assign("/ihmc_ros/"+robotName_ + "/left_arm_joint_names");
     }
     else if (paramName == "right_arm_joint_names"  || paramName == "right_arm"){
-        parameter.assign("/ihmc_ros/valkyrie/right_arm_joint_names");
+        parameter.assign("/ihmc_ros/"+robotName_ + "/right_arm_joint_names");
     }
     else{
         parameter.assign(paramName);
@@ -87,10 +89,10 @@ bool RobotStateInformer::getJointVelocities(const std::string &paramName, std::v
     std::vector<std::string> jointNames;
     std::string parameter;
     if(paramName == "left_arm_joint_names" || paramName == "left_arm"){
-        parameter.assign("/ihmc_ros/valkyrie/left_arm_joint_names");
+        parameter.assign("/ihmc_ros/"+robotName_ + "/left_arm_joint_names");
     }
     else if (paramName == "right_arm_joint_names"  || paramName == "right_arm"){
-        parameter.assign("/ihmc_ros/valkyrie/right_arm_joint_names");
+        parameter.assign("/ihmc_ros/"+robotName_ + "/right_arm_joint_names");
     }
     else{
         parameter.assign(paramName);
@@ -121,10 +123,10 @@ bool RobotStateInformer::getJointEfforts(const std::string &paramName, std::vect
     std::vector<std::string> jointNames;
     std::string parameter;
     if(paramName == "left_arm_joint_names" || paramName == "left_arm"){
-        parameter.assign("/ihmc_ros/valkyrie/left_arm_joint_names");
+        parameter.assign("/ihmc_ros/"+robotName_ + "/left_arm_joint_names");
     }
     else if (paramName == "right_arm_joint_names"  || paramName == "right_arm"){
-        parameter.assign("/ihmc_ros/valkyrie/right_arm_joint_names");
+        parameter.assign("/ihmc_ros/"+robotName_ + "/right_arm_joint_names");
     }
     else{
         parameter.assign(paramName);

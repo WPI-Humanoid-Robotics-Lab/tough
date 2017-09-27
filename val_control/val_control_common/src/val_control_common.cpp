@@ -3,8 +3,11 @@
 valControlCommon::valControlCommon(ros::NodeHandle nh): nh_(nh), armTraj(nh), chestTraj(nh), pelvisTraj(nh)
 
 {
+    std::string robot_name;
+    nh.getParam("ihmc_ros/robot_name", robot_name);
+
     // set the publisher
-    stop_traj_pub_ = nh_.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/stop_all_trajectories",1,true);
+    stop_traj_pub_ = nh_.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/stop_all_trajectories",1,true);
 }
 
 valControlCommon::~valControlCommon()

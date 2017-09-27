@@ -1,17 +1,22 @@
-#include <val_controllers/val_head_navigation.h>
+#include <tough_controller_interface/head_control_interface.h>
 #include <tf/transform_listener.h>
 #include <val_common/val_common_names.h>
+#include <tough_controller_interface/robot_state.h>
 
 int HeadTrajectory::head_id = -1;
 
 const double degToRad = M_PI / 180;
 
-HeadTrajectory::HeadTrajectory(ros::NodeHandle nh):nh_(nh), NUM_NECK_JOINTS(3)
+HeadTrajectory::HeadTrajectory(ros::NodeHandle nh):nh_(nh), NUM_NECK_JOINTS(VAL_COMMON_NAMES::NUM_NECK_JOINTS)
 {
+    std::string robot_name;
+    nh.getParam("ihmc_ros/robot_name", robot_name);
+
   neckTrajPublisher =
-          nh_.advertise<ihmc_msgs::NeckTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/neck_trajectory",1,true);
-    headTrajPublisher =
-            nh_.advertise<ihmc_msgs::HeadTrajectoryRosMessage>("/ihmc_ros/valkyrie/control/head_trajectory",1,true);
+          nh_.advertise<ihmc_msgs::NeckTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/neck_trajectory",1,true);
+  headTrajPublisher =
+            nh_.advertise<ihmc_msgs::HeadTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/head_trajectory",1,true);
+  currentState_ = RobotStateInformer::getRobotStateInformer(nh);
 }
 
 HeadTrajectory::~HeadTrajectory()
@@ -64,13 +69,7 @@ void HeadTrajectory::moveHead(const geometry_msgs::Quaternion &quaternion, const
   quatInWorldFrame.header.stamp = ros::Time(0);
   quatInWorldFrame.quaternion = quaternion;
 
-  try {
-    listener.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
-    listener.transformQuaternion(VAL_COMMON_NAMES::WORLD_TF, quatInWorldFrame, quatInWorldFrame);
-  } catch (tf::TransformException ex) {
-    ROS_WARN("%s",ex.what());
-    return;
-  }
+  currentState_->transformQuaternion(quatInWorldFrame,quatInWorldFrame);
 
   data.orientation = quatInWorldFrame.quaternion;
 
@@ -124,13 +123,7 @@ void HeadTrajectory::moveHead(const std::vector<std::vector<float> > &trajectory
 
     tf::quaternionTFToMsg(q, quatInWorldFrame.quaternion);
 
-    try {
-      listener.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
-      listener.transformQuaternion(VAL_COMMON_NAMES::WORLD_TF, quatInWorldFrame, quatInWorldFrame);
-    } catch (tf::TransformException ex) {
-      ROS_WARN("%s",ex.what());
-      return;
-    }
+    currentState_->transformQuaternion(quatInWorldFrame,quatInWorldFrame);
 
     data.orientation = quatInWorldFrame.quaternion;
 

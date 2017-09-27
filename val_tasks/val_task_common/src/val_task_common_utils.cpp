@@ -1,10 +1,10 @@
 #include <val_task_common/val_task_common_utils.h>
 #include <tf/tf.h>
-#include <val_controllers/val_chest_navigation.h>
-#include <val_controllers/val_pelvis_navigation.h>
-#include <val_controllers/val_gripper_control.h>
-#include <val_controllers/val_head_navigation.h>
-#include <val_controllers/val_arm_navigation.h>
+#include <tough_controller_interface/chest_control_interface.h>
+#include <tough_controller_interface/pelvis_control_interface.h>
+#include <tough_controller_interface/gripper_control_interface.h>
+#include <tough_controller_interface/head_control_interface.h>
+#include <tough_controller_interface/arm_control_interface.h>
 
 bool taskCommonUtils::isPoseChanged(geometry_msgs::Pose2D pose_old, geometry_msgs::Pose2D pose_new)
 {

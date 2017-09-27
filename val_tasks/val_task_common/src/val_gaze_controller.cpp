@@ -2,8 +2,8 @@
 // Created by will on 6/11/17.
 //
 
-#include <val_controllers/val_head_navigation.h>
-#include <val_controllers/robot_state.h>
+#include <tough_controller_interface/head_control_interface.h>
+#include <tough_controller_interface/robot_state.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <std_msgs/String.h>
 

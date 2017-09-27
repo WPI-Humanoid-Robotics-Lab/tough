@@ -14,7 +14,7 @@
 #include "val_task1/val_task1.h"
 #include "navigation_common/map_generator.h"
 #include "srcsim/StartTask.h"
-#include <val_controllers/robot_state.h>
+#include <tough_controller_interface/robot_state.h>
 
 #define foreach BOOST_FOREACH
 

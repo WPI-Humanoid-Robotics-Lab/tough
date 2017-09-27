@@ -24,7 +24,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp
                                         sensor_msgs
                                         std_msgs
                                         val_common
-                                        val_controllers
+                                        tough_controller_interface
 )
 
 ###################################
@@ -34,7 +34,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES val_perception_bringup
-  CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros laser_assembler val_common val_controllers
+  CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros laser_assembler val_common tough_controller_interface
   DEPENDS opencv pcl
 )
 

@@ -5,6 +5,8 @@ SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
 
+add_definitions(-D$ENV{ROBOT_NAME})
+
 find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
 find_package(PCL 1.7 REQUIRED io)
 find_package(catkin REQUIRED COMPONENTS roscpp
@@ -23,7 +25,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp
                                         sensor_msgs
                                         std_msgs
                                         val_common
-                                        val_controllers
+                                        tough_controller_interface
 )
 
 include_directories(include)
@@ -35,7 +37,7 @@ add_definitions(${PCL_DEFINITIONS})
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}
-   CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros laser_assembler val_common val_controllers
+   CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros laser_assembler val_common tough_controller_interface
    DEPENDS opencv pcl
 )
 

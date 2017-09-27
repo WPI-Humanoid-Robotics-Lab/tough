@@ -357,7 +357,7 @@
               <item>
                <widget class="QWidget" name="widget_8" native="true">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_15">
                  <item>
@@ -380,7 +380,7 @@
               <item>
                <widget class="QPushButton" name="btnMoveToPoint">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>Move to Point</string>
@@ -526,7 +526,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>127</width>
+                   <width>437</width>
                    <height>87</height>
                   </rect>
                  </property>
@@ -800,7 +800,7 @@
          </widget>
          <widget class="QWidget" name="tabNeck">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <attribute name="title">
            <string>Neck</string>
@@ -808,6 +808,9 @@
           <layout class="QGridLayout" name="gridLayout_12">
            <item row="0" column="1">
             <widget class="QWidget" name="widget111" native="true">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <layout class="QGridLayout" name="gridLayout_7">
               <item row="1" column="0">
                <widget class="QLabel" name="label_10">
@@ -851,6 +854,9 @@
               </item>
               <item row="0" column="1">
                <widget class="QSlider" name="sliderLowerNeckPitch">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimum">
                  <number>0</number>
                 </property>
@@ -876,7 +882,7 @@
          </widget>
          <widget class="QWidget" name="tabWalk">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <attribute name="title">
            <string>Walk</string>
@@ -884,9 +890,15 @@
           <layout class="QHBoxLayout" name="horizontalLayout_6">
            <item>
             <widget class="QWidget" name="widget_5" native="true">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <layout class="QGridLayout" name="gridLayout_14">
               <item row="0" column="0">
                <widget class="QLabel" name="label_13">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <property name="text">
                  <string>No. of steps:</string>
                 </property>
@@ -894,6 +906,9 @@
               </item>
               <item row="0" column="1">
                <widget class="QLineEdit" name="lineEditNumSteps">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <property name="inputMethodHints">
                  <set>Qt::ImhDigitsOnly</set>
                 </property>
@@ -901,6 +916,9 @@
               </item>
               <item row="2" column="0">
                <widget class="QLabel" name="label_17">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <property name="text">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Lateral Distance&lt;br/&gt;(y-offset)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
@@ -908,6 +926,9 @@
               </item>
               <item row="1" column="0">
                <widget class="QLabel" name="label_12">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <property name="text">
                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -919,6 +940,9 @@ p, li { white-space: pre-wrap; }
               </item>
               <item row="3" column="0">
                <widget class="QLabel" name="label_22">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <property name="text">
                  <string>Starting foot:</string>
                 </property>
@@ -926,6 +950,9 @@ p, li { white-space: pre-wrap; }
               </item>
               <item row="1" column="1">
                <widget class="QLineEdit" name="lineEditXOffset">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <property name="inputMethodHints">
                  <set>Qt::ImhDigitsOnly</set>
                 </property>
@@ -933,6 +960,9 @@ p, li { white-space: pre-wrap; }
               </item>
               <item row="2" column="1">
                <widget class="QLineEdit" name="lineEditYOffset">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <property name="inputMethodHints">
                  <set>Qt::ImhDigitsOnly</set>
                 </property>
@@ -940,6 +970,9 @@ p, li { white-space: pre-wrap; }
               </item>
               <item row="4" column="0" colspan="2">
                <widget class="QPushButton" name="btnWalk">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <property name="text">
                  <string>Walk steps</string>
                 </property>
@@ -947,9 +980,15 @@ p, li { white-space: pre-wrap; }
               </item>
               <item row="3" column="1">
                <widget class="QWidget" name="btnGroupWalkFoot" native="true">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_8">
                  <item>
                   <widget class="QRadioButton" name="radioLeftFoot">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
                    <property name="text">
                     <string>Left</string>
                    </property>
@@ -960,6 +999,9 @@ p, li { white-space: pre-wrap; }
                  </item>
                  <item>
                   <widget class="QRadioButton" name="radioRightFoot">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
                    <property name="text">
                     <string>Right</string>
                    </property>
@@ -976,9 +1018,15 @@ p, li { white-space: pre-wrap; }
            </item>
            <item>
             <widget class="QWidget" name="widget_41" native="true">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <layout class="QGridLayout" name="gridLayout_11">
               <item row="1" column="2">
                <widget class="QSlider" name="sliderPelvisHeight">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
                 </property>
@@ -992,6 +1040,9 @@ p, li { white-space: pre-wrap; }
               </item>
               <item row="0" column="0" colspan="4">
                <widget class="QLabel" name="label_11">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <property name="text">
                  <string>Pelvis Height</string>
                 </property>
@@ -1168,10 +1219,10 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="btnGroupFeet"/>
-  <buttongroup name="btnGroupRvizTools"/>
   <buttongroup name="btnGroupNudge"/>
+  <buttongroup name="btnGroupFeet"/>
   <buttongroup name="btnGroupArm"/>
+  <buttongroup name="btnGroupRvizTools"/>
   <buttongroup name="btnGroupDisplays"/>
  </buttongroups>
 </ui>

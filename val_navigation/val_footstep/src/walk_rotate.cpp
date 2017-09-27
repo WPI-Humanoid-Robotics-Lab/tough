@@ -3,7 +3,7 @@
 #include<ihmc_msgs/FootstepDataListRosMessage.h>
 #include"geometry_msgs/Pose2D.h"
 #include "val_common/val_common_defines.h"
-#include "val_controllers/robot_state.h"
+#include "tough_controller_interface/robot_state.h"
 
 
 using namespace std;

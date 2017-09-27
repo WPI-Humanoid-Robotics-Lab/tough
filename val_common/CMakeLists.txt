@@ -6,6 +6,8 @@ project(val_common)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED)
 
+add_definitions(-D$ENV{ROBOT_NAME})
+
 set(KDSourcesList src/kdtree/alglibinternal.cpp src/kdtree/ap.cpp src/kdtree/alglibmisc.cpp)
 
 set(HEADERS

@@ -1,4 +1,4 @@
-#include <val_controllers/val_gripper_control.h>
+#include <tough_controller_interface/gripper_control_interface.h>
 #include <stdlib.h>
 #include <std_msgs/String.h>
 #include <val_common/val_common_names.h>

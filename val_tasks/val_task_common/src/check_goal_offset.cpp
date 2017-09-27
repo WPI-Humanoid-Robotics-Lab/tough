@@ -1,6 +1,6 @@
 #include <ros/ros.h>
 //#include <val_footstep/RobotWalker.h>
-#include "val_controllers/robot_state.h"
+#include "tough_controller_interface/robot_state.h"
 #include "std_msgs/String.h"
 
 void logpub(geometry_msgs::Point,std_msgs::String strdata){

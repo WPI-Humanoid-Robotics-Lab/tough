@@ -30,6 +30,7 @@ private:
 
      std::map<std::string, RobotState> currentState_;
      std::mutex currentStateMutex_;
+     std::string robotName_;
     ~RobotStateInformer();
 
 public:

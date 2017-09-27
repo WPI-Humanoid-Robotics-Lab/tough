@@ -1,5 +1,5 @@
-#include <val_controllers/val_arm_navigation.h>
-#include "val_controllers/val_wholebody_manipulation.h"
+#include <tough_controller_interface/arm_control_interface.h>
+#include "tough_controller_interface/wholebody_control_interface.h"
 #include "val_moveit_planners/val_cartesian_planner.h"
 #include <stdlib.h>
 #include <stdio.h>
