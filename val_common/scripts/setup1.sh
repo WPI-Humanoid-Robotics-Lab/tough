@@ -50,7 +50,7 @@ echo "$(tput setaf 1)Installing jdk 8$(tput sgr0)"
 # Installing Oracle JDK
 sudo apt-add-repository ppa:webupd8team/java
 sudo apt-get update
-sudo apt-get install oracle-java8-installer
+sudo apt-get install -y oracle-java8-installer
 
 #OpenJDK - doesn't have javafx
 #sudo add-apt-repository ppa:openjdk-r/ppa -y
