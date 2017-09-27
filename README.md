@@ -7,7 +7,7 @@ This is the main repo for Team-WPI's participation in Space Robotics Challenge.
   * Ros Indigo
 
 ### Installation using scripts
-Download the scripts from [this location](https://gitlab.com/whrl/space_robotics_challenge/tree/master/val_common/scripts) and run the following commands:
+Download the scripts from [this location](val_common/scripts) and run the following commands:
 ```bash
     bash setup1.sh
 ```
