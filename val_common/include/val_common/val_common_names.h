@@ -69,9 +69,8 @@ const std::string L_FOOT_TF = "/l_foot";
 
 /* Number of neck joint */
 const int NUM_NECK_JOINTS = 1;
-
-#endif
-#ifdef VALKYRIE
+#else
+// Build for Valkyrie by default
 //valkyrie Hand
 const std::string R_PALM_TF = "/rightPalm";
 const std::string L_PALM_TF = "/leftPalm";

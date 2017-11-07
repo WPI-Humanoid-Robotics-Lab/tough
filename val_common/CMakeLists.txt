@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(val_common)
 
+## Add support for C++11, supported in ROS Kinetic and newer
+add_definitions(-std=c++11)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS roscpp urdf)
 
 add_definitions(-D$ENV{ROBOT_NAME})
 
@@ -12,7 +15,12 @@ set(KDSourcesList src/kdtree/alglibinternal.cpp src/kdtree/ap.cpp src/kdtree/alg
 
 set(HEADERS
     include/${PROJECT_NAME}/val_common_names.h
-    include/${PROJECT_NAME}/val_common_defines.h)
+    include/${PROJECT_NAME}/val_common_defines.h
+    include/${PROJECT_NAME}/robot_description.h)
+
+
+set(SOURCES
+    src/robot_description.cpp)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -123,23 +131,26 @@ catkin_package(
    ${KDSourcesList}
  )
 
-add_library(val_common ${HEADERS})
+add_library(val_common ${HEADERS} ${SOURCES})
 set_target_properties(val_common PROPERTIES LINKER_LANGUAGE CXX)
-
+add_dependencies(val_common ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
- add_dependencies(val_common ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 
 ## Declare a C++ executable
-# add_executable(val_common_node src/val_common_node.cpp)
-
+add_executable(robot_description src/robot_description.cpp)
+add_dependencies(robot_description ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ target_link_libraries(robot_description
+   ${catkin_LIBRARIES}
+ )
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(val_common_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(val_common_node
+# target_link_libraries(robot_description
 #   ${catkin_LIBRARIES}
 # )
 
