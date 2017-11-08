@@ -15,6 +15,7 @@
 #include <tf/tf.h>
 #include <val_common/val_common_names.h>
 #include "tough_controller_interface/robot_state.h"
+#include "val_common/robot_description.h"
 
 /**
  * @brief The armTrajectory class provides ability to move arms of valkyrie. Current implementation provides joint level without collision detection.
@@ -165,6 +166,7 @@ private:
     void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos);
     void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point);
     RobotStateInformer *stateInformer_;
+    RobotDescription *rd_;
 
 };
 

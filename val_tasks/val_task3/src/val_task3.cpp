@@ -54,6 +54,7 @@ valTask3::valTask3(ros::NodeHandle nh):nh_(nh){
     door_opener_         = new DoorOpener(nh_);
 
     robot_state_         = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
     map_update_count_    = 0;
     occupancy_grid_sub_  = nh_.subscribe("/map",10,&valTask3::occupancy_grid_cb,this);
 }
@@ -242,7 +243,7 @@ decision_making::TaskResult valTask3::walkToStairsTask(string name, const FSMCal
     static geometry_msgs::Pose2D pose_prev;
 
     geometry_msgs::Pose current_pelvis_pose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(),current_pelvis_pose);
 
     // Check if goal is reached before walking
     if (taskCommonUtils::isGoalReached(current_pelvis_pose, stair_detect_walk_pose_))

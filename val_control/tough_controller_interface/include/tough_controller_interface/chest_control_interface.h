@@ -8,13 +8,17 @@
 #include <time.h>
 #include <geometry_msgs/Quaternion.h>
 #include <geometry_msgs/Vector3.h>
+#include "tough_controller_interface/robot_state.h"
+#include "val_common/robot_description.h"
+
 class chestTrajectory {
 
 private:
 
     ros::NodeHandle nh_;
-    ros::Publisher chestTrajPublisher;
-
+    ros::Publisher chestTrajPublisher_;
+    RobotStateInformer *state_informer_;
+    RobotDescription * rd_;
 public:
 
     chestTrajectory(ros::NodeHandle nh);

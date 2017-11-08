@@ -9,8 +9,10 @@ chestTrajectory::chestTrajectory(ros::NodeHandle nh):nh_(nh)
     std::string robot_name;
     nh.getParam("ihmc_ros/robot_name", robot_name);
 
-    chestTrajPublisher =
+    chestTrajPublisher_ =
             nh_.advertise<ihmc_msgs::ChestTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/chest_trajectory",1,true);
+    state_informer_ = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
 }
 
 chestTrajectory::~chestTrajectory()
@@ -28,27 +30,30 @@ void chestTrajectory::controlChest(float roll , float pitch , float yaw, float t
     data.time = time;
     tf::Quaternion quatInPelvisFrame;
     quatInPelvisFrame.setRPY(roll,pitch,yaw);
+    geometry_msgs::Quaternion quatInWorldFrame;
+    tf::quaternionTFToMsg(quatInPelvisFrame, quatInWorldFrame);
+    state_informer_->transformQuaternion(quatInWorldFrame, quatInWorldFrame, rd_->getPelvisFrame());
 
-    //transorm point from pelvis to world frame
-    tf::TransformListener listener;
+//    //transorm point from pelvis to world frame
+//    tf::TransformListener listener;
 
-    geometry_msgs::QuaternionStamped quatInWorldFrame;
-    quatInWorldFrame.header.frame_id= VAL_COMMON_NAMES::PELVIS_TF;
-    quatInWorldFrame.header.stamp = ros::Time(0);
-    tf::quaternionTFToMsg(quatInPelvisFrame, quatInWorldFrame.quaternion);
+//    geometry_msgs::QuaternionStamped quatInWorldFrame;
+//    quatInWorldFrame.header.frame_id= VAL_COMMON_NAMES::PELVIS_TF;
+//    quatInWorldFrame.header.stamp = ros::Time(0);
+//    tf::quaternionTFToMsg(quatInPelvisFrame, quatInWorldFrame.quaternion);
 
-    try
-    {
-        listener.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
-        listener.transformQuaternion(VAL_COMMON_NAMES::WORLD_TF, quatInWorldFrame, quatInWorldFrame);
+//    try
+//    {
+//        listener.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
+//        listener.transformQuaternion(VAL_COMMON_NAMES::WORLD_TF, quatInWorldFrame, quatInWorldFrame);
 
-    }
-    catch (tf::TransformException ex)
-    {
-        ROS_WARN("%s",ex.what());
-        return;
-    }
-    data.orientation = quatInWorldFrame.quaternion;
+//    }
+//    catch (tf::TransformException ex)
+//    {
+//        ROS_WARN("%s",ex.what());
+//        return;
+//    }
+    data.orientation = quatInWorldFrame;
 
     geometry_msgs::Vector3 v;
     v.x = 0.3;
@@ -63,5 +68,5 @@ void chestTrajectory::controlChest(float roll , float pitch , float yaw, float t
     msg.taskspace_trajectory_points.push_back(data);
 
     // publish the message
-    chestTrajPublisher.publish(msg);
+    chestTrajPublisher_.publish(msg);
 }

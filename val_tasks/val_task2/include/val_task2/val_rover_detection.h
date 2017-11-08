@@ -58,6 +58,8 @@ private:
 
   RobotStateInformer* current_state_;
 
+  RobotDescription *rd_;
+
   ROVER_SIDE roverSide_;
 
   bool finePose_;

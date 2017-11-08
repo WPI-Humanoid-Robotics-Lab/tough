@@ -62,6 +62,8 @@ private:
 
     RobotStateInformer* robot_state_;
 
+    RobotDescription *rd_;
+
     float min_x,max_x,min_y,max_y,min_z,max_z;
 
     model_param circle_param;

@@ -7,6 +7,7 @@ ArrayTableDetector::ArrayTableDetector(ros::NodeHandle nh, geometry_msgs::Point 
     marker_pub_= nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
 
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
     cable_loc_ = cable_location;
 }
 
@@ -118,14 +119,14 @@ bool ArrayTableDetector::planeSegmentation(const pcl::PointCloud<pcl::PointXYZ>:
     geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromYaw(theta);
     pose.orientation = quaternion;
 
-    robot_state_->transformPose(pose, pose, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->transformPose(pose, pose, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
     ROS_INFO_STREAM("acos " << tf::getYaw(pose.orientation) << std::endl);
 
     if (!(tf::getYaw(pose.orientation) < M_PI_2 && tf::getYaw(pose.orientation) > -M_PI_2))
     {
         pose.orientation = tf::createQuaternionMsgFromYaw(tf::getYaw(pose.orientation) - M_PI);
     }
-    robot_state_->transformPose(pose, pose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    robot_state_->transformPose(pose, pose, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
     ROS_INFO_STREAM("acos1 " << tf::getYaw(pose.orientation) << std::endl);
     pose.position.x = table_center.x + TABLE_OFFSET * std::cos(tf::getYaw(pose.orientation));
     pose.position.y = table_center.y + TABLE_OFFSET * std::sin(tf::getYaw(pose.orientation));
@@ -147,9 +148,9 @@ void ArrayTableDetector::extractCloudOfInterest(const pcl::PointCloud<pcl::Point
     geometry_msgs::Point cableLocation;
     cableLocation.x = cable_loc_.x;
     cableLocation.y = cable_loc_.y;
-    robot_state_->transformPoint(cableLocation, cableLocation, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->transformPoint(cableLocation, cableLocation, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
     geometry_msgs::Pose pelvisPose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;
     minPoint[0]=0;

@@ -60,6 +60,7 @@ private:
     geometry_msgs::Point cable_loc_;
     std::mutex mtx_;
     RobotStateInformer* robot_state_;
+    RobotDescription *rd_;
 };
 
 #endif // ARRAY_TABLE_DETECTOR_H

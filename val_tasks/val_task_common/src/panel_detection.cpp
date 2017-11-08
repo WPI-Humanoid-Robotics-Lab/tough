@@ -3,6 +3,7 @@
 PanelDetector::PanelDetector(ros::NodeHandle &nh, DETECTOR_TYPE detector_type)
 {
     current_state_ =  RobotStateInformer::getRobotStateInformer(nh);
+    rd_ = RobotDescription::getRobotDescription(nh);
     pcl_sub_ =  nh.subscribe("/field/assembled_cloud2", 10, &PanelDetector::cloudCB, this);
     pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_filter/filteredPointCloud", 1);
 
@@ -89,8 +90,8 @@ void PanelDetector::passThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud
     max.y = preset_configs_[currentDetector].y_max_limit;
     max.z = preset_configs_[currentDetector].z_max_limit;
 
-    current_state_->transformPoint(min, min, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
-    current_state_->transformPoint(max, max, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPoint(min, min, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPoint(max, max, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
     float x_min = std::min(min.x, max.x);
     float x_max = std::max(min.x, max.x);
 

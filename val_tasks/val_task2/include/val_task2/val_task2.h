@@ -101,6 +101,7 @@ class valTask2 {
     //robot state informer
     RobotStateInformer* robot_state_;
 
+    RobotDescription *rd_;
     valControlCommon* control_common_;
 
     ros::Subscriber occupancy_grid_sub_;

@@ -22,6 +22,7 @@ leakDetectorGrabber::leakDetectorGrabber(ros::NodeHandle nh):nh_(nh),
     right_arm_planner_ = new cartesianPlanner("rightPalm");
     left_arm_planner_ = new cartesianPlanner("leftPalm");
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
 }
 
 leakDetectorGrabber::~leakDetectorGrabber(){
@@ -69,11 +70,11 @@ geometry_msgs::Pose leakDetectorGrabber::getReachGoal(const armSide &side, const
     // Reach goal is the same pose as grasp goal except higher above the table
     geometry_msgs::Pose reach_goal;
 
-    current_state_->transformPose(grasp_goal, reach_goal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPose(grasp_goal, reach_goal, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
     reach_goal.position.z += INTERMEDIATE_GOAL_OFFSET;
 
     //transform that point back to world frame
-    current_state_->transformPose(reach_goal, reach_goal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPose(reach_goal, reach_goal, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
 
     return reach_goal;
 }
@@ -82,8 +83,8 @@ float leakDetectorGrabber::getStandingOffset(const armSide side, const geometry_
     std::string shoulder_frame = (side == armSide::LEFT) ? "/leftShoulderRollLink" : "/rightShoulderRollLink";
 
     geometry_msgs::Pose goal_wrt_pelvis, shoulder_wrt_pelvis;
-    current_state_->transformPose(user_goal, goal_wrt_pelvis, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
-    current_state_->getCurrentPose(shoulder_frame, shoulder_wrt_pelvis, VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPose(user_goal, goal_wrt_pelvis, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
+    current_state_->getCurrentPose(shoulder_frame, shoulder_wrt_pelvis, rd_->getPelvisFrame());
 
     double yaw = tf::getYaw(goal_wrt_pelvis.orientation);
 
@@ -94,7 +95,7 @@ float leakDetectorGrabber::getStandingOffset(const armSide side, const geometry_
     geometry_msgs::Pose standing_pose;
     standing_pose.position.y = offset;
     standing_pose.orientation.w = 1;
-    current_state_->transformPose(standing_pose, standing_pose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPose(standing_pose, standing_pose, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
 
     pubPoseArrow(standing_pose, "detector_standing_pose", 1.f, 0.f, 0.f);
 

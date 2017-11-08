@@ -44,6 +44,7 @@ private:
 
 
     RobotStateInformer *current_state_;
+    RobotDescription *rd_;
     pelvisTrajectory* pelvis_controller_;
     RobotWalker *walk_;
 

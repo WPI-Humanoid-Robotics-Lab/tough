@@ -44,7 +44,8 @@ MapGenerator::MapGenerator(ros::NodeHandle &n):nh_(n) {
 
     geometry_msgs::Pose pelvisPose;
     currentState_  = RobotStateInformer::getRobotStateInformer(nh_);
-    currentState_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pelvisPose);
+    rd_ = RobotDescription::getRobotDescription(nh_);
+    currentState_->getCurrentPose(rd_->getPelvisFrame(),pelvisPose);
     ros::Duration(0.2).sleep();
 
     for (float x = -0.5f; x < 0.5f; x += MAP_RESOLUTION/10){
@@ -90,7 +91,7 @@ void MapGenerator::resetMap(const std_msgs::Empty &msg) {
             pelvisPose.position.x = x;
             pelvisPose.position.y = y;
             pelvisPose.orientation.w = 1.0f;
-            currentState_->transformPose(pelvisPose, pelvisPose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+            currentState_->transformPose(pelvisPose, pelvisPose, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
             occGrid_.data.at(getIndex(pelvisPose.position.x, pelvisPose.position.y)) =  FREE;
             visitedOccGrid_.data.at(getIndex(pelvisPose.position.x, pelvisPose.position.y)) =  FREE;
         }
@@ -110,7 +111,7 @@ void MapGenerator::clearCurrentPoseCB(const std_msgs::Empty &msg)
             pelvisPose.position.x = x;
             pelvisPose.position.y = y;
             pelvisPose.orientation.w = 1.0f;
-            currentState_->transformPose(pelvisPose, pelvisPose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+            currentState_->transformPose(pelvisPose, pelvisPose, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
             occGrid_.data.at(getIndex(pelvisPose.position.x + x, pelvisPose.position.y +y)) =  FREE;
         }
     }
@@ -121,7 +122,7 @@ void MapGenerator::clearCurrentPoseCB(const std_msgs::Empty &msg)
 void MapGenerator::timerCallback(const ros::TimerEvent& e){
     //update visited map
     geometry_msgs::Pose pelvisPose;
-    currentState_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pelvisPose);
+    currentState_->getCurrentPose(rd_->getPelvisFrame(),pelvisPose);
 
     // mark a box of 1m X 1m around robot as visited area
     mtx.lock();

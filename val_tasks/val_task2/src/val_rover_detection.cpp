@@ -27,6 +27,7 @@ RoverDetector::RoverDetector(ros::NodeHandle nh, bool getFine)
     roverSide_ = ROVER_SIDE::UNKOWN;
     finePose_ = getFine;
     current_state_ = RobotStateInformer::getRobotStateInformer(nh);
+    rd_ = RobotDescription::getRobotDescription(nh);
 }
 
 RoverDetector::~RoverDetector()
@@ -288,7 +289,7 @@ bool RoverDetector::getRoverSide(ROVER_SIDE &side) const
 
 void RoverDetector::lowerBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
     geometry_msgs::Pose pelvisPose;
-    current_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+    current_state_->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
 
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);
@@ -313,7 +314,7 @@ void RoverDetector::lowerBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Pt
 
 void RoverDetector::upperBoxPassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
     geometry_msgs::Pose pelvisPose;
-    current_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+    current_state_->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
 
     pcl::PassThrough<pcl::PointXYZ> pass_x;
     pass_x.setInputCloud(cloud);

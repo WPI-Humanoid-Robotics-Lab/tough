@@ -79,6 +79,7 @@ private:
     srcsim::Satellite msg_;
     ros::Subscriber task_status_sub_;
     RobotStateInformer* current_state_;
+    RobotDescription *rd_;
 
     ros::Publisher marker_pub_, clearbox_pointcloud_pub_, reset_pointcloud_pub_, task1_log_pub_, reset_map_pub_;
     void satelliteMsgCB (const srcsim::Satellite &msg);

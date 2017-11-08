@@ -29,11 +29,13 @@ ValkyrieGUI::ValkyrieGUI(QWidget *parent) :
     walkingController_      = nullptr;
     headController_         = nullptr;
     gripperController_      = nullptr;
+    rd_ = RobotDescription::getRobotDescription(nh_);
 
     //clickedpoint is used for moving arm in taskspace
     clickedPoint_           = nullptr;
 
     //initialize everything
+    initJointLimits();
     initVariables();
     initDisplayWidgets();
     initTools();
@@ -290,6 +292,58 @@ void ValkyrieGUI::initTools(){
     // Find the entry in propertytreemodel and set the value for Topic
     setGoalTool_->getPropertyContainer()->subProp("Topic")->setValue(goalTopic_);
     setMapGoalTool_->getPropertyContainer()->subProp("Topic")->setValue(goalTopic_);
+
+}
+
+void ValkyrieGUI::initJointLimits() {
+    std::vector<std::pair<float, float> > left_arm_joint_limits;
+    std::vector<std::pair<float, float> > right_arm_joint_limits;
+
+    rd_->getLeftArmJointLimits(left_arm_joint_limits);
+    rd_->getRightArmJointLimits(right_arm_joint_limits);
+
+    RIGHT_SHOULDER_PITCH_MAX= right_arm_joint_limits[0].second*TO_DEGREES;
+    RIGHT_SHOULDER_PITCH_MIN= right_arm_joint_limits[0].first*TO_DEGREES;
+
+    RIGHT_SHOULDER_ROLL_MAX = right_arm_joint_limits[1].second*TO_DEGREES;
+    RIGHT_SHOULDER_ROLL_MIN = right_arm_joint_limits[1].first*TO_DEGREES;
+
+    RIGHT_SHOULDER_YAW_MAX  = right_arm_joint_limits[2].second*TO_DEGREES;
+    RIGHT_SHOULDER_YAW_MIN  = right_arm_joint_limits[2].first*TO_DEGREES;
+
+    RIGHT_ELBOW_MAX         = right_arm_joint_limits[3].second*TO_DEGREES;
+    RIGHT_ELBOW_MIN         = right_arm_joint_limits[3].first*TO_DEGREES;
+
+    RIGHT_WRIST_YAW_MAX     = right_arm_joint_limits[4].second*TO_DEGREES;
+    RIGHT_WRIST_YAW_MIN     = right_arm_joint_limits[4].first*TO_DEGREES;
+
+    RIGHT_WRIST_ROLL_MAX    = right_arm_joint_limits[5].second*TO_DEGREES;
+    RIGHT_WRIST_ROLL_MIN    = right_arm_joint_limits[5].first*TO_DEGREES;
+
+    RIGHT_WRIST_PITCH_MAX   = right_arm_joint_limits[6].second*TO_DEGREES;
+    RIGHT_WRIST_PITCH_MIN   = right_arm_joint_limits[6].first*TO_DEGREES;
+
+
+    LEFT_SHOULDER_PITCH_MAX = left_arm_joint_limits[0].second*TO_DEGREES;
+    LEFT_SHOULDER_PITCH_MIN = left_arm_joint_limits[0].first*TO_DEGREES;
+
+    LEFT_SHOULDER_ROLL_MAX  = left_arm_joint_limits[1].second*TO_DEGREES;
+    LEFT_SHOULDER_ROLL_MIN  = left_arm_joint_limits[1].first*TO_DEGREES;
+
+    LEFT_SHOULDER_YAW_MAX   = left_arm_joint_limits[2].second*TO_DEGREES;
+    LEFT_SHOULDER_YAW_MIN   = left_arm_joint_limits[2].first*TO_DEGREES;
+
+    LEFT_ELBOW_MAX          = left_arm_joint_limits[3].second*TO_DEGREES;
+    LEFT_ELBOW_MIN          = left_arm_joint_limits[3].first*TO_DEGREES;
+
+    LEFT_WRIST_YAW_MAX      = left_arm_joint_limits[4].second*TO_DEGREES;
+    LEFT_WRIST_YAW_MIN      = left_arm_joint_limits[4].first*TO_DEGREES;
+
+    LEFT_WRIST_ROLL_MAX     = left_arm_joint_limits[5].second*TO_DEGREES;
+    LEFT_WRIST_ROLL_MIN     = left_arm_joint_limits[5].first*TO_DEGREES;
+
+    LEFT_WRIST_PITCH_MAX    = left_arm_joint_limits[6].second*TO_DEGREES;
+    LEFT_WRIST_PITCH_MIN    = left_arm_joint_limits[6].first*TO_DEGREES;
 
 }
 

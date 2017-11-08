@@ -29,6 +29,7 @@ private:
     task3Utils task3_;
     RobotWalker walker_;
     RobotStateInformer *robot_state_;
+    RobotDescription *rd_;
     valControlCommon control_common_;
 };
 

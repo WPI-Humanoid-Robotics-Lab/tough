@@ -30,6 +30,7 @@ private:
     armTrajectory armTraj_;
     gripperControl gripper_;
     RobotStateInformer *current_state_;
+    RobotDescription *rd_;
     cartesianPlanner* left_arm_planner_;
     wholebodyManipulation* wholebody_controller_;
     chestTrajectory* chest_controller_;

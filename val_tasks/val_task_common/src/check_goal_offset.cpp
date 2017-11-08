@@ -15,6 +15,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     RobotStateInformer *current_state_;
     current_state_ = RobotStateInformer::getRobotStateInformer(nh);
+    RobotDescription *rd_ = RobotDescription::getRobotDescription(nh);
     ros::Publisher log_pub = nh.advertise<std_msgs::String>("/field/log",10);
     const auto log_msg = [&log_pub](const std::string &str) {
         std_msgs::String msg;
@@ -42,9 +43,9 @@ int main(int argc, char **argv)
         pt.orientation.z = std::atof(argv[6]);
         pt.orientation.w = std::atof(argv[7]);
 
-        current_state_->getCurrentPose("/pelvis",pelvisPose);
+        current_state_->getCurrentPose(rd_->getPelvisFrame(),pelvisPose);
         ros::Duration(1.0).sleep();
-        current_state_->getCurrentPose("/pelvis",pelvisPoseinPelvis,VAL_COMMON_NAMES::PELVIS_TF);
+        current_state_->getCurrentPose(rd_->getPelvisFrame(),pelvisPoseinPelvis,rd_->getPelvisFrame());
         ros::spinOnce();
 
         float x_offset =pelvisPose.position.x -pt.position.x;
@@ -67,7 +68,7 @@ int main(int argc, char **argv)
 //        std::cout<<"y offset in world frame: "<<y<<"\n";
 //        std::cout<<"z offset in world frame: "<<z<<"\n";
 
-        current_state_->transformPose(pt,pt,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+        current_state_->transformPose(pt,pt,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
 
         x_offset =-1*(pelvisPoseinPelvis.position.x -pt.position.x);
         y_offset =-1*(pelvisPoseinPelvis.position.y -pt.position.y);
@@ -98,9 +99,9 @@ int main(int argc, char **argv)
         pt.y = std::atof(argv[2]);
         pt.z = std::atof(argv[3]);
 
-        current_state_->getCurrentPose("/pelvis",pelvisPose);
+        current_state_->getCurrentPose(rd_->getPelvisFrame(),pelvisPose);
         ros::Duration(1.0).sleep();
-        current_state_->getCurrentPose("/pelvis",pelvisPoseinPelvis,VAL_COMMON_NAMES::PELVIS_TF);
+        current_state_->getCurrentPose(rd_->getPelvisFrame(),pelvisPoseinPelvis,rd_->getPelvisFrame());
         ros::spinOnce();
 
         float x_offset =-1*(pelvisPose.position.x -pt.x);
@@ -114,7 +115,7 @@ int main(int argc, char **argv)
 //        std::cout<<"y offset in world frame: "<<y_offset<<"\n";
 //        std::cout<<"z offset in world frame: "<<z_offset<<"\n";
 
-        current_state_->transformPoint(pt,pt,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+        current_state_->transformPoint(pt,pt,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
 
         x_offset =-1*(pelvisPoseinPelvis.position.x -pt.x);
         y_offset =-1*(pelvisPoseinPelvis.position.y -pt.y);

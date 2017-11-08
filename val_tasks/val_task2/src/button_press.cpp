@@ -3,7 +3,7 @@
 ButtonPress::ButtonPress(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(nh)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-
+    rd_ = RobotDescription::getRobotDescription(nh_);
 
     /* Top Grip */
     //    leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
@@ -19,14 +19,14 @@ ButtonPress::ButtonPress(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(nh
     //    leftHandOrientation_.quaternion.z = -0.430;
     //    leftHandOrientation_.quaternion.w = 0.627;
 
-    leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientation_.header.frame_id = rd_->getPelvisFrame();
     leftHandOrientation_.quaternion.x = 0.492;
     leftHandOrientation_.quaternion.y = 0.504;
     leftHandOrientation_.quaternion.z = -0.494;
     leftHandOrientation_.quaternion.w = 0.509;
 
     /* Top Grip Flat Hand */
-    rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    rightHandOrientation_.header.frame_id = rd_->getPelvisFrame();
     rightHandOrientation_.quaternion.x = -0.549;
     rightHandOrientation_.quaternion.y = 0.591;
     rightHandOrientation_.quaternion.z = 0.560;

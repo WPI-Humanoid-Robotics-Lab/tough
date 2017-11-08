@@ -19,7 +19,7 @@
 #include <tf/transform_listener.h>
 #include <val_common/val_common_defines.h>
 #include <tough_controller_interface/robot_state.h>
-
+#include "val_common/robot_description.h"
 
 
 /**
@@ -30,9 +30,7 @@ class RobotWalker
 {
 
 public:
-    RobotStateInformer *current_state_;
     static int id ;
-
     /**
      * @brief ValkyrieWalker This class provides access to the footsteps of valkyrie. It can be used
      * to get current position of the steps or to make Valkyrie walk given number of steps.
@@ -204,6 +202,8 @@ public:
     bool getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list);
 
 private:
+    RobotStateInformer *current_state_;
+    RobotDescription *rd_;
 
     double                      transfer_time_,swing_time_, swing_height_;
     int                         execution_mode_, step_counter_;

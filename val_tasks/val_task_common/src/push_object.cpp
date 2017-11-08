@@ -9,16 +9,16 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "push_object1");
     ros::NodeHandle nh;
-
+    RobotDescription *rd_ = RobotDescription::getRobotDescription(nh);
     geometry_msgs::QuaternionStamped leftHandOrientation_,rightHandOrientation_;
-    leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientation_.header.frame_id = rd_->getPelvisFrame();
     leftHandOrientation_.quaternion.x = 0.492;
     leftHandOrientation_.quaternion.y = 0.504;
     leftHandOrientation_.quaternion.z = -0.494;
     leftHandOrientation_.quaternion.w = 0.509;
 
     /* Top Grip Flat Hand */
-    rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    rightHandOrientation_.header.frame_id = rd_->getPelvisFrame();
     rightHandOrientation_.quaternion.x = -0.549;
     rightHandOrientation_.quaternion.y = 0.591;
     rightHandOrientation_.quaternion.z = 0.560;
@@ -63,11 +63,11 @@ int main(int argc, char **argv)
             ros::Duration(2).sleep();
             control_common_->stopAllTrajectories();
 
-            current_state_->transformPose(intermGoal1,intermGoal2,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+            current_state_->transformPose(intermGoal1,intermGoal2,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
             intermGoal2.position.x+=std::atof(argv[5]);
             intermGoal2.position.y+=std::atof(argv[6]);
             intermGoal2.position.z+=std::atof(argv[7]);
-            current_state_->transformPose(intermGoal2,intermGoal2,VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF);
+            current_state_->transformPose(intermGoal2,intermGoal2,rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF);
             waypoints.push_back(intermGoal2);
 
             left_arm_planner->getTrajFromCartPoints(waypoints, traj, false);
@@ -87,11 +87,11 @@ int main(int argc, char **argv)
             ros::Duration(2).sleep();
             control_common_->stopAllTrajectories();
 
-            current_state_->transformPose(intermGoal1,intermGoal2,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+            current_state_->transformPose(intermGoal1,intermGoal2,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
             intermGoal2.position.x+=std::atof(argv[5]);
             intermGoal2.position.y+=std::atof(argv[6]);
             intermGoal2.position.z+=std::atof(argv[7]);
-            current_state_->transformPose(intermGoal2,intermGoal2,VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF);
+            current_state_->transformPose(intermGoal2,intermGoal2,rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF);
             waypoints.push_back(intermGoal2);
 
             right_arm_planner->getTrajFromCartPoints(waypoints, traj, false);

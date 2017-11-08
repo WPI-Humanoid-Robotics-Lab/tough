@@ -10,6 +10,7 @@
 CableDetector::CableDetector(ros::NodeHandle nh, src_perception::MultisenseImage *ms_sensor) : nh_(nh), organizedCloud_(new src_perception::StereoPointCloudColor)
 {
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
     ms_sensor_ = ms_sensor;
     ms_sensor_->giveQMatrix(qMatrix_);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array",1);
@@ -292,12 +293,12 @@ bool CableDetector::getCablePose(geometry_msgs::Pose& cablePose)
         new_point.y = geom_point3.point.y - C/double(dir_vec.y);
         new_point.z = geom_point3.point.z;
 
-        robot_state_->transformPoint(geom_point3, geom_point3, VAL_COMMON_NAMES::PELVIS_TF);
-        robot_state_->transformPoint(new_point, new_point, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+        robot_state_->transformPoint(geom_point3, geom_point3, rd_->getPelvisFrame());
+        robot_state_->transformPoint(new_point, new_point, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
         double geom_norm = std::pow(geom_point3.point.x, 2) + std::pow(geom_point3.point.y, 2);
         double dir_norm = std::pow(new_point.x, 2) + std::pow(new_point.y, 2);
         robot_state_->transformPoint(geom_point3, geom_point3, VAL_COMMON_NAMES::WORLD_TF);
-        robot_state_->transformPoint(new_point, new_point, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+        robot_state_->transformPoint(new_point, new_point, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
 
         if(dir_norm <= geom_norm)
         {

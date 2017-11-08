@@ -7,7 +7,7 @@ climbStairs::climbStairs(ros::NodeHandle nh): nh_(nh)
   pelvis_         = new pelvisTrajectory(nh_);
   arm_            = new armTrajectory(nh_);
   current_state_  = RobotStateInformer::getRobotStateInformer(nh_);
-
+  rd_ = RobotDescription::getRobotDescription(nh_);
   approach_ = APPROACH;
 }
 
@@ -126,14 +126,14 @@ void climbStairs::approach_2 (void)
   currentWorldLocation.y = r_foot.location.y;
   currentWorldLocation.z = r_foot.location.z;
   // transform the step to pelvis
-  current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+  current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
   r_x = currentPelvisLocation.x;
 
   currentWorldLocation.x = l_foot.location.x;
   currentWorldLocation.y = l_foot.location.y;
   currentWorldLocation.z = l_foot.location.z;
   // transform the step to pelvis
-  current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+  current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
   l_x = currentPelvisLocation.x;
 
   ihmc_msgs::FootstepDataListRosMessage step_list;
@@ -154,14 +154,14 @@ void climbStairs::approach_2 (void)
     currentWorldLocation.y = r_foot.location.y;
     currentWorldLocation.z = r_foot.location.z;
     // transform the step to pelvis
-    current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
     // add the offsets wrt to pelvis
     ROS_INFO("right foot %f", (r_x + (0.2389*i) - currentPelvisLocation.x));
     currentPelvisLocation.x+= (r_x + (0.2389*i) - currentPelvisLocation.x) ;
 
     //currentPelvisLocation.y+=y;
     // tranform back the point to world
-    current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF);
 
     // update the new location
     r_foot.location.x=currentWorldLocation.x;
@@ -183,13 +183,13 @@ void climbStairs::approach_2 (void)
     currentWorldLocation.y = l_foot.location.y;
     currentWorldLocation.z = l_foot.location.z;
     // transform the step to pelvis
-    current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
     // add the offsets wrt to pelvis
     ROS_INFO("left foot %f", (l_x + (0.2389*i) - currentPelvisLocation.x));
     currentPelvisLocation.x+= (l_x + (0.2389*i) - currentPelvisLocation.x) ;
     //currentPelvisLocation.y+=y
     // tranform back the point to world
-    current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF);
 
     // update the new location
     l_foot.location.x=currentWorldLocation.x;

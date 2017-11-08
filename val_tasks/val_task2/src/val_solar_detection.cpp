@@ -24,6 +24,7 @@ SolarArrayDetector::SolarArrayDetector(ros::NodeHandle nh, geometry_msgs::Pose2D
 
   rover_loc_ = rover_loc;
   robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
+  rd_ = RobotDescription::getRobotDescription(nh);
   detection_tries_ = 0;
   detections_.clear();
   isroverRight_ = isroverRight;
@@ -189,22 +190,22 @@ void SolarArrayDetector::PassThroughFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& 
     pt_in.x = solar_pass_x_min;
     pt_in.y =  0;
     pt_in.z =  0;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->transformPoint(pt_in,pt_out,rd_->getPelvisFrame());
     min_x = pt_out.x;
     pt_in.x = solar_pass_x_max;
     pt_in.y =  0;
     pt_in.z =  0;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->transformPoint(pt_in,pt_out,rd_->getPelvisFrame());
     max_x = pt_out.x;
     pt_in.x =  0;
     pt_in.y = solar_pass_y_min;
     pt_in.z =  0;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->transformPoint(pt_in,pt_out,rd_->getPelvisFrame());
     min_y = pt_out.y;
     pt_in.x =  0;
     pt_in.y = solar_pass_y_max;
     pt_in.z =  0;
-    robot_state_->transformPoint(pt_in,pt_out,VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->transformPoint(pt_in,pt_out,rd_->getPelvisFrame());
     max_y = pt_out.y;
 
 

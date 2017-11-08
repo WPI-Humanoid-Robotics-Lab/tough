@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include "val_common/val_common_defines.h"
+#include "val_common/robot_description.h"
 #include "tough_controller_interface/robot_state.h"
 #include <trajectory_msgs/JointTrajectory.h>
 #include <tough_controller_interface/arm_control_interface.h>
@@ -20,6 +21,7 @@ private :
     ros::NodeHandle nh_;
     ros::Publisher m_wholebodyPub;
     RobotStateInformer* robot_state_;
+    RobotDescription* rd_;
     void rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_);
     void leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_);
     void chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj);

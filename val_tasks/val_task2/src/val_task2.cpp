@@ -69,7 +69,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     task2_utils_    = new task2Utils(nh_);
     task2_utils_->taskLogPub(task2_utils_->TEXT_GREEN + "Starting task 2"+ task2_utils_->TEXT_NC);
     robot_state_    = RobotStateInformer::getRobotStateInformer(nh_);
-
+    rd_ = RobotDescription::getRobotDescription(nh_);
     control_common_ = new valControlCommon(nh_);
 
     // Variables
@@ -415,7 +415,7 @@ decision_making::TaskResult valTask2::walkToRoverTask(string name, const FSMCall
     }
 
     geometry_msgs::Pose current_pelvis_pose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(),current_pelvis_pose);
     // Robot will walk to coarse goal first. once that is reached, goal is changed to fine goal and the flag variable is updated
     if ( taskCommonUtils::isGoalReached(current_pelvis_pose, goal) ) {
         ROS_INFO("Local goal reached. Number of waypoints remaining %d", goal_waypoints.size());
@@ -701,7 +701,7 @@ decision_making::TaskResult valTask2::pickPanelTask(string name, const FSMCallCo
                 pose.position.x = 0.0;
                 pose.position.y= is_rover_on_right_ == true ? 0.5 : -0.5;
                 pose.orientation.w = 1.0;
-                robot_state_->transformPose(pose, pose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+                robot_state_->transformPose(pose, pose, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
                 geometry_msgs::Pose2D pose2D;
                 pose2D.x = pose.position.x;
                 pose2D.y = pose.position.y;
@@ -866,7 +866,7 @@ decision_making::TaskResult valTask2::walkSolarArrayTask(string name, const FSMC
     static geometry_msgs::Pose2D pose_prev;
 
     geometry_msgs::Pose current_pelvis_pose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(),current_pelvis_pose);
 
     /// is this required?
     //task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
@@ -1194,7 +1194,7 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
         static geometry_msgs::Pose2D pose_prev;
 
         geometry_msgs::Pose current_pelvis_pose;
-        robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+        robot_state_->getCurrentPose(rd_->getPelvisFrame(),current_pelvis_pose);
         task2_utils_->clearBoxPointCloud(CLEAR_BOX_CLOUD::FULL_BOX);
         ros::Duration(1).sleep();
         if ( taskCommonUtils::isGoalReached(current_pelvis_pose, solar_array_fine_walk_goal_) ) {
@@ -1304,9 +1304,9 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
             geometry_msgs::Pose currentPalmPose;
             std::string palmFrame = panel_grasping_hand_ == armSide ::LEFT ? VAL_COMMON_NAMES::L_PALM_TF : VAL_COMMON_NAMES::R_PALM_TF;
 
-            robot_state_->getCurrentPose(palmFrame, currentPalmPose, VAL_COMMON_NAMES::PELVIS_TF);
+            robot_state_->getCurrentPose(palmFrame, currentPalmPose, rd_->getPelvisFrame());
             currentPalmPose.position.x -= 0.2;
-            robot_state_->transformPose(currentPalmPose, currentPalmPose, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+            robot_state_->transformPose(currentPalmPose, currentPalmPose, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
 
             arm_controller_->moveArmInTaskSpace(panel_grasping_hand_, currentPalmPose, 1.0f);
             ros::Duration(1).sleep();
@@ -1474,51 +1474,51 @@ decision_making::TaskResult valTask2::deployPanelTask(string name, const FSMCall
         float offset1=0.08;
         float offset2=0.02;
         geometry_msgs::Point buttonPelvis;
-        robot_state_->transformPoint(button_coordinates_,buttonPelvis,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+        robot_state_->transformPoint(button_coordinates_,buttonPelvis,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
         std::vector<geometry_msgs::Point> retryPoints;
 
         retryPoints.resize(8);
         // First Retry Point
         retryPoints[0]=buttonPelvis;
         retryPoints[0].x-=offset1;
-        robot_state_->transformPoint(retryPoints[0],retryPoints[0],VAL_COMMON_NAMES::PELVIS_TF);
+        robot_state_->transformPoint(retryPoints[0],retryPoints[0],rd_->getPelvisFrame());
 
         // Second Retry Point
         retryPoints[1]=buttonPelvis;
         retryPoints[1].x+=offset1;
-        robot_state_->transformPoint(retryPoints[1],retryPoints[1],VAL_COMMON_NAMES::PELVIS_TF);
+        robot_state_->transformPoint(retryPoints[1],retryPoints[1],rd_->getPelvisFrame());
 
         // Third Retry Point
         retryPoints[2]=buttonPelvis;
         retryPoints[2].y+=offset1;
-        robot_state_->transformPoint(retryPoints[2],retryPoints[2],VAL_COMMON_NAMES::PELVIS_TF);
+        robot_state_->transformPoint(retryPoints[2],retryPoints[2],rd_->getPelvisFrame());
 
         // Fourth Retry Point
         retryPoints[3]=buttonPelvis;
         retryPoints[3].y-=offset1;
-        robot_state_->transformPoint(retryPoints[3],retryPoints[3],VAL_COMMON_NAMES::PELVIS_TF);
+        robot_state_->transformPoint(retryPoints[3],retryPoints[3],rd_->getPelvisFrame());
 
         // new offset
 
         // Fifth Retry Point
         retryPoints[4]=buttonPelvis;
         retryPoints[4].x-=offset2;
-        robot_state_->transformPoint(retryPoints[4],retryPoints[4],VAL_COMMON_NAMES::PELVIS_TF);
+        robot_state_->transformPoint(retryPoints[4],retryPoints[4],rd_->getPelvisFrame());
 
         // Sixth Retry Point
         retryPoints[5]=buttonPelvis;
         retryPoints[5].x+=offset2;
-        robot_state_->transformPoint(retryPoints[5],retryPoints[5],VAL_COMMON_NAMES::PELVIS_TF);
+        robot_state_->transformPoint(retryPoints[5],retryPoints[5],rd_->getPelvisFrame());
 
         // Seventh Retry Point
         retryPoints[6]=buttonPelvis;
         retryPoints[6].y+=offset2;
-        robot_state_->transformPoint(retryPoints[6],retryPoints[6],VAL_COMMON_NAMES::PELVIS_TF);
+        robot_state_->transformPoint(retryPoints[6],retryPoints[6],rd_->getPelvisFrame());
 
         // Eight Retry Point
         retryPoints[7]=buttonPelvis;
         retryPoints[7].y-=offset2;
-        robot_state_->transformPoint(retryPoints[7],retryPoints[7],VAL_COMMON_NAMES::PELVIS_TF);
+        robot_state_->transformPoint(retryPoints[7],retryPoints[7],rd_->getPelvisFrame());
 
 
         // pushing all points in queue
@@ -2017,7 +2017,7 @@ decision_making::TaskResult valTask2::walkToFinishTask(string name, const FSMCal
     static geometry_msgs::Pose2D pose_prev;
 
     geometry_msgs::Pose current_pelvis_pose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(),current_pelvis_pose);
 
     // check if the pose is changed
     if ( taskCommonUtils::isGoalReached(current_pelvis_pose, next_finishbox_center_)) {

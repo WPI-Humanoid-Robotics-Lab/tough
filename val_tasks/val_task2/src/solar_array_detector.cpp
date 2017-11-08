@@ -7,6 +7,7 @@ CoarseArrayDetector::CoarseArrayDetector(ros::NodeHandle& nh) : nh_(nh), cloud_(
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array", 1);
     rover_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/block_map", 1, true);
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
 }
 
 CoarseArrayDetector::~CoarseArrayDetector()
@@ -155,7 +156,7 @@ void CoarseArrayDetector::normalSegmentation(const pcl::PointCloud<pcl::PointXYZ
 {
     //box filter to limit search space for normals
     geometry_msgs::Pose pelvisPose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;
     minPoint[0] = -2.0;
@@ -249,7 +250,7 @@ void CoarseArrayDetector::findArrayCluster(const pcl::PointCloud<pcl::PointXYZ>:
 {
     int counter = 0;
     geometry_msgs::Pose pelvisPose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
 
     //find all the candidate array clusters

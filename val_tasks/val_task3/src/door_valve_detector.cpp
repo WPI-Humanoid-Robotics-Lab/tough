@@ -7,6 +7,7 @@ DoorValvedetector::DoorValvedetector(ros::NodeHandle nh)
     pcl_filtered_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/val_door/cloud2", 1);
     vis_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/visualization_marker_array", 1 );
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
+    rd_ = RobotDescription::getRobotDescription(nh);
     setOffset();
 
 }
@@ -93,7 +94,7 @@ void DoorValvedetector::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input){
     center_loc.position.z = circle_param.center[2];
     center_loc.orientation = quaternion;
 
-    robot_state_->transformPose(center_loc,center_loc_pelvis,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->transformPose(center_loc,center_loc_pelvis,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
 
     float pelvis_theta = tf::getYaw(center_loc_pelvis.orientation);
 
@@ -173,7 +174,7 @@ void DoorValvedetector::panelSegmentation(pcl::PointCloud<pcl::PointXYZ>::Ptr& c
 void DoorValvedetector::boxfilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
        geometry_msgs::Pose pelvisPose;
-       robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+       robot_state_->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
        Eigen::Vector4f minPoint;
        Eigen::Vector4f maxPoint;
        minPoint[0]= 0;
@@ -454,7 +455,7 @@ void DoorValvedetector::transformCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr& clou
     pelvis.orientation.y = 0;
     pelvis.orientation.z = 0;
     pelvis.orientation.w = 1;
-    robot_state_->transformPose(pelvis,p2,VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->transformPose(pelvis,p2,rd_->getPelvisFrame());
     Eigen::Affine3f transform = Eigen::Affine3f::Identity();
     transform.translation() << p2.position.x,p2.position.y,0.0;
     transform.rotate (Eigen::AngleAxisf (-tf::getYaw(p2.orientation), Eigen::Vector3f::UnitZ()));

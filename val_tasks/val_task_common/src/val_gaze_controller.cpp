@@ -15,13 +15,14 @@
 
 std::unique_ptr<HeadTrajectory> headTraj;
 RobotStateInformer *current_state;
+RobotDescription *rd_ ;
 std::function<void(const std::string &)> log_msg;
 
 void clickedPointCB(const geometry_msgs::PointStamped &point_in) {
     geometry_msgs::Point point_pelvisframe;
-    current_state->transformPoint(point_in.point, point_pelvisframe, point_in.header.frame_id, VAL_COMMON_NAMES::PELVIS_TF);
+    current_state->transformPoint(point_in.point, point_pelvisframe, point_in.header.frame_id, rd_->getPelvisFrame());
     geometry_msgs::Pose head_pelvisframe;
-    current_state->getCurrentPose(VAL_COMMON_NAMES::ROBOT_HEAD_FRAME_TF, head_pelvisframe, VAL_COMMON_NAMES::PELVIS_TF);
+    current_state->getCurrentPose(VAL_COMMON_NAMES::ROBOT_HEAD_FRAME_TF, head_pelvisframe, rd_->getPelvisFrame());
 
     double x = point_pelvisframe.x - head_pelvisframe.position.x;
     double y = point_pelvisframe.y - head_pelvisframe.position.y;
@@ -90,7 +91,7 @@ void clickedPointCB(const geometry_msgs::PointStamped &point_in) {
 int main(int argc, char **argv) {
     ros::init(argc, argv, "val_gaze_controller");
     ros::NodeHandle nh;
-
+    rd_ = RobotDescription::getRobotDescription(nh);
     ros::Publisher log_pub = nh.advertise<std_msgs::String>(VAL_COMMON_NAMES::LOG_TOPIC, 10);
     log_msg = [&log_pub](const std::string &str) {
         std_msgs::String msg;

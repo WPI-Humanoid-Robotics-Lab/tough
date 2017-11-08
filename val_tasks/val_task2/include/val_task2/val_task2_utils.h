@@ -50,6 +50,7 @@ private:
     RobotWalker *walk_;
     // robot state
     RobotStateInformer *current_state_;
+    RobotDescription *rd_;
     ros::Publisher reset_pointcloud_pub, reset_map_pub, pause_pointcloud_pub , clearbox_pointcloud_pub , task2_log_pub_,clear_pose_map;
 
     ros::Subscriber task_status_sub_,detach_harness;

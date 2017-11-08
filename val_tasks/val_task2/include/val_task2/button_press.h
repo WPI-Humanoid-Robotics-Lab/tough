@@ -18,6 +18,7 @@ class ButtonPress
 //    ButtonDetector bd_;
     gripperControl gripper_;
     RobotStateInformer *current_state_;
+    RobotDescription *rd_;
     geometry_msgs::QuaternionStamped leftHandOrientation_ ;
     geometry_msgs::QuaternionStamped rightHandOrientation_;
 

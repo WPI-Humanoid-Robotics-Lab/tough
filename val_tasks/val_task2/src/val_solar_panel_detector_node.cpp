@@ -31,9 +31,10 @@ int main(int argc, char** argv){
           for (size_t i = 0; i < poses.size(); ++i){
 
               RobotStateInformer* robot_state = RobotStateInformer::getRobotStateInformer(nh);
+              RobotDescription *rd_ = RobotDescription::getRobotDescription(nh);
               geometry_msgs::Pose poseInPelvisFrame;
 
-              robot_state->transformPose(poses[i], poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+              robot_state->transformPose(poses[i], poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
 
               tfScalar r, p, y;
               tf::Quaternion q;

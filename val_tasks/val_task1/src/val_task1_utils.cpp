@@ -22,6 +22,7 @@ task1Utils::task1Utils(ros::NodeHandle nh):
     logFile = ros::package::getPath("val_task1") + "/log/task1.csv";
 
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
     walk_          = new RobotWalker(nh_, 0.7, 0.7, 0, 0.18);
     current_checkpoint_ = 0;
 
@@ -56,7 +57,7 @@ bool task1Utils::getNextPoseToWalk(geometry_msgs::Pose2D &pose2D, bool allowVisi
             pose2D.x = radius*cos(i*theta);
             pose2D.y = radius*sin(i*theta);
             pose2D.theta = i*theta;
-            current_state_->transformPose(pose2D, pose2D, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+            current_state_->transformPose(pose2D, pose2D, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
             size_t index = MapGenerator::getIndex(pose2D.x, pose2D.y);
             if (visited_map_.data.at(index) == CELL_STATUS::FREE || (allowVisitied && visited_map_.data.at(index) == CELL_STATUS::VISITED)){
                 ROS_INFO("task1Utils::getNextPoseToWalk : x:%f y:%f theta:%f",i, pose2D.x, pose2D.y, pose2D.theta);
@@ -80,7 +81,7 @@ void task1Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offs
     std::vector<float> x_offset;
 
     current_state_->transformPoint(goal_point,goal_point,VAL_COMMON_NAMES::WORLD_TF,
-                                   VAL_COMMON_NAMES::PELVIS_TF);
+                                   rd_->getPelvisFrame());
 
     double error = goal_point.y+offset;
     double abserror = std::fabs(error);

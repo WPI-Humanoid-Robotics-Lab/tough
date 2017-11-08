@@ -52,6 +52,7 @@ private:
   ros::Publisher vis_pub_array ;
 
   RobotStateInformer* robot_state_;
+  RobotDescription *rd_;
 
   geometry_msgs::Pose2D rover_loc_;
   std::vector<geometry_msgs::Pose> detections_;

@@ -12,6 +12,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include "tough_controller_interface/robot_state.h"
+#include "val_common/robot_description.h"
 #include <mutex>
 
 
@@ -52,7 +53,7 @@ private:
     sensor_msgs::PointCloud2 pointsToBlock_;
     ros::Timer timer_;
     RobotStateInformer* currentState_;
-
+    RobotDescription* rd_;
 };
 
 #endif // MAP_GENERATOR_H

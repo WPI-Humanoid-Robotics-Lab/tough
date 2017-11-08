@@ -51,6 +51,7 @@ private:
 
 
   RobotStateInformer* robot_state_;
+  RobotDescription *rd_;
 
   float optimal_dist;
   geometry_msgs::Point button_loc_;

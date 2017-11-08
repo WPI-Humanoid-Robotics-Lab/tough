@@ -42,6 +42,7 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int8.h>
 #include <tough_controller_interface/robot_state.h>
+#include "val_common/robot_description.h"
 
 namespace laser_assembler
 {
@@ -119,7 +120,7 @@ private:
     PCL_STATE_CONTROL state_request;
     bool enable_box_filter_;
     RobotStateInformer *robot_state_;
-
+    RobotDescription *rd_;
 
 } ;
 

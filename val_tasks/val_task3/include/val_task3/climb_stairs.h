@@ -23,6 +23,7 @@ private:
     pelvisTrajectory *pelvis_;
     armTrajectory *arm_;
     RobotStateInformer *current_state_;
+    RobotDescription *rd_;
 
     int approach_ ;
     void approach_1 (void);

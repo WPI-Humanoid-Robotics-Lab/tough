@@ -22,27 +22,31 @@ armTrajectory::armTrajectory(ros::NodeHandle nh):nh_(nh),
 
     stateInformer_ = RobotStateInformer::getRobotStateInformer(nh_);
 
-    //this->armTrajectorySunscriber = nh_.subscribe("/ihmc_ros/"+ robot_name +"/output/ha", 20,&ValkyrieWalker::footstepStatusCB, this);
-    joint_limits_left_.resize(NUM_ARM_JOINTS);
-    joint_limits_right_.resize(NUM_ARM_JOINTS);
+    rd_ = RobotDescription::getRobotDescription(nh_);
+    rd_->getLeftArmJointLimits(joint_limits_left_);
+    rd_->getRightArmJointLimits(joint_limits_right_);
 
-    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
-    joint_limits_left_[0]={-2.84,1.99};
-    joint_limits_left_[1]={-1.509,1.256};
-    joint_limits_left_[2]={-3.09,2.17};
-    joint_limits_left_[3]={-2.164,0.11};
-    joint_limits_left_[4]={-2.009,3.13};
-    joint_limits_left_[5]={-0.61,0.615};
-    joint_limits_left_[6]={-0.35,0.48};
+//    //this->armTrajectorySunscriber = nh_.subscribe("/ihmc_ros/"+ robot_name +"/output/ha", 20,&ValkyrieWalker::footstepStatusCB, this);
+//    joint_limits_left_.resize(NUM_ARM_JOINTS);
+//    joint_limits_right_.resize(NUM_ARM_JOINTS);
 
-    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
-    joint_limits_right_[0]={-2.84,1.99};
-    joint_limits_right_[1]={-1.256,1.509};
-    joint_limits_right_[2]={-3.09,2.17};
-    joint_limits_right_[3]={-0.11,2.164};
-    joint_limits_right_[4]={-2.009,3.13};
-    joint_limits_right_[5]={-0.615,0.61};
-    joint_limits_right_[6]={-0.47,0.35};
+//    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
+//    joint_limits_left_[0]={-2.84,1.99};
+//    joint_limits_left_[1]={-1.509,1.256};
+//    joint_limits_left_[2]={-3.09,2.17};
+//    joint_limits_left_[3]={-2.164,0.11};
+//    joint_limits_left_[4]={-2.009,3.13};
+//    joint_limits_left_[5]={-0.61,0.615};
+//    joint_limits_left_[6]={-0.35,0.48};
+
+//    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
+//    joint_limits_right_[0]={-2.84,1.99};
+//    joint_limits_right_[1]={-1.256,1.509};
+//    joint_limits_right_[2]={-3.09,2.17};
+//    joint_limits_right_[3]={-0.11,2.164};
+//    joint_limits_right_[4]={-2.009,3.13};
+//    joint_limits_right_[5]={-0.615,0.61};
+//    joint_limits_right_[6]={-0.47,0.35};
 
 
 }
@@ -285,47 +289,50 @@ void armTrajectory::moveArmTrajectory(const armSide side, const trajectory_msgs:
 
 bool armTrajectory::nudgeArm(const armSide side, const direction drct, float nudgeStep){
 
-    geometry_msgs::PoseStamped      world_values;
-    geometry_msgs::PoseStamped      palm_values;
+    geometry_msgs::Pose      world_pose;
+    geometry_msgs::Pose      palm_pose;
 
-    world_values.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
+//    world_pose.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
 
     std::string target_frame = side == LEFT ? "/leftMiddleFingerPitch1Link" : "/rightMiddleFingerPitch1Link";
 
-    try{
-        tf::StampedTransform            tf_palm_values;
-        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,target_frame, ros::Time(0),ros::Duration(2));
-        tf_listener_.lookupTransform(VAL_COMMON_NAMES::PELVIS_TF, target_frame, ros::Time(0),tf_palm_values);
+    stateInformer_->getCurrentPose(target_frame, palm_pose, rd_->getPelvisFrame());
 
-        tf::pointTFToMsg(tf_palm_values.getOrigin(), palm_values.pose.position);
-        tf::quaternionTFToMsg(tf_palm_values.getRotation(), palm_values.pose.orientation);
-        palm_values.header.frame_id=VAL_COMMON_NAMES::PELVIS_TF;
+//    try{
+//        tf::StampedTransform            tf_palm_values;
+//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,target_frame, ros::Time(0),ros::Duration(2));
+//        tf_listener_.lookupTransform(VAL_COMMON_NAMES::PELVIS_TF, target_frame, ros::Time(0),tf_palm_values);
 
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
+//        tf::pointTFToMsg(tf_palm_values.getOrigin(), palm_values.pose.position);
+//        tf::quaternionTFToMsg(tf_palm_values.getRotation(), palm_values.pose.orientation);
+//        palm_values.header.frame_id=VAL_COMMON_NAMES::PELVIS_TF;
 
-    if     (drct == direction::LEFT)     palm_values.pose.position.y += nudgeStep;
-    else if(drct == direction::RIGHT)    palm_values.pose.position.y -= nudgeStep;
-    else if(drct == direction::UP)       palm_values.pose.position.z += nudgeStep;
-    else if(drct == direction::DOWN)     palm_values.pose.position.z -= nudgeStep;
-    else if(drct == direction::FRONT)    palm_values.pose.position.x += nudgeStep;
-    else if(drct == direction::BACK)     palm_values.pose.position.x -= nudgeStep;
+//    }
+//    catch (tf::TransformException ex){
+//        ROS_WARN("%s",ex.what());
+//        ros::spinOnce();
+//        return false;
+//    }
 
-    try{
-        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-        tf_listener_.transformPose(VAL_COMMON_NAMES::WORLD_TF,palm_values,world_values);
-    }
-    catch (tf::TransformException ex) {
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
+    if     (drct == direction::LEFT)     palm_pose.position.y += nudgeStep;
+    else if(drct == direction::RIGHT)    palm_pose.position.y -= nudgeStep;
+    else if(drct == direction::UP)       palm_pose.position.z += nudgeStep;
+    else if(drct == direction::DOWN)     palm_pose.position.z -= nudgeStep;
+    else if(drct == direction::FRONT)    palm_pose.position.x += nudgeStep;
+    else if(drct == direction::BACK)     palm_pose.position.x -= nudgeStep;
 
-    moveArmInTaskSpace(side,world_values.pose, 0.0f);
+    stateInformer_->transformPose(palm_pose, world_pose, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
+//    try{
+//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPose(VAL_COMMON_NAMES::WORLD_TF,palm_values,world_pose);
+//    }
+//    catch (tf::TransformException ex) {
+//        ROS_WARN("%s",ex.what());
+//        ros::spinOnce();
+//        return false;
+//    }
+
+    moveArmInTaskSpace(side,world_pose, 0.0f);
     return true;
 }
 
@@ -472,7 +479,7 @@ bool armTrajectory::nudgeArmLocal(const armSide side, float x, float y, float z,
 bool armTrajectory::nudgeArmPelvis(const armSide side, float x, float y, float z, geometry_msgs::Pose &pose)
 {
     std::cout<<"Nudge arm pelvis called \n";
-    std::string target_frame = VAL_COMMON_NAMES::PELVIS_TF;
+    std::string target_frame = rd_->getPelvisFrame();
     std::string target_EE_frame = side == LEFT ? VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME : VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
     geometry_msgs::Pose value;
     geometry_msgs::Quaternion quat;

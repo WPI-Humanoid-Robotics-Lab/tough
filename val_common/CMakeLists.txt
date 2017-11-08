@@ -134,6 +134,8 @@ catkin_package(
 add_library(val_common ${HEADERS} ${SOURCES})
 set_target_properties(val_common PROPERTIES LINKER_LANGUAGE CXX)
 add_dependencies(val_common ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(val_common ${catkin_LIBRARIES})
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
@@ -142,7 +144,7 @@ add_dependencies(val_common ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTE
 ## Declare a C++ executable
 add_executable(robot_description src/robot_description.cpp)
 add_dependencies(robot_description ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
- target_link_libraries(robot_description
+target_link_libraries(robot_description
    ${catkin_LIBRARIES}
  )
 ## Add cmake target dependencies of the executable

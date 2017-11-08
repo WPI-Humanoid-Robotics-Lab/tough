@@ -39,6 +39,7 @@
 
 #include <visualization_msgs/MarkerArray.h>
 #include "val_common/val_common_names.h"
+#include "val_common/robot_description.h"
 #include "tough_controller_interface/robot_state.h"
 
 struct PanelSettings{
@@ -70,6 +71,7 @@ private:
     ros::Publisher vis_pub_;
     ros::Publisher vis_plane_pub_;
     RobotStateInformer* current_state_;
+    RobotDescription* rd_;
     std::vector<geometry_msgs::Pose> detections_;
 
     int detection_tries_;

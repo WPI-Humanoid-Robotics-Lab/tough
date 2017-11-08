@@ -17,6 +17,7 @@ HeadTrajectory::HeadTrajectory(ros::NodeHandle nh):nh_(nh), NUM_NECK_JOINTS(VAL_
   headTrajPublisher =
             nh_.advertise<ihmc_msgs::HeadTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/head_trajectory",1,true);
   currentState_ = RobotStateInformer::getRobotStateInformer(nh);
+  rd_ = RobotDescription::getRobotDescription(nh_);
 }
 
 HeadTrajectory::~HeadTrajectory()
@@ -65,7 +66,7 @@ void HeadTrajectory::moveHead(const geometry_msgs::Quaternion &quaternion, const
   tf::TransformListener listener;
 
   geometry_msgs::QuaternionStamped quatInWorldFrame;
-  quatInWorldFrame.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+  quatInWorldFrame.header.frame_id = rd_->getPelvisFrame();
   quatInWorldFrame.header.stamp = ros::Time(0);
   quatInWorldFrame.quaternion = quaternion;
 
@@ -118,7 +119,7 @@ void HeadTrajectory::moveHead(const std::vector<std::vector<float> > &trajectory
     tf::TransformListener listener;
 
     geometry_msgs::QuaternionStamped quatInWorldFrame;
-    quatInWorldFrame.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    quatInWorldFrame.header.frame_id = rd_->getPelvisFrame();
     quatInWorldFrame.header.stamp = ros::Time(0);
 
     tf::quaternionTFToMsg(q, quatInWorldFrame.quaternion);

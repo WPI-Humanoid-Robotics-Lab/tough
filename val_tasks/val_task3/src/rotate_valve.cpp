@@ -4,27 +4,27 @@ RotateValve::RotateValve(ros::NodeHandle n):nh_(n), armTraj_(nh_),
     gripper_(nh_), walk_(nh_), t3Utils(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-
+    rd_ = RobotDescription::getRobotDescription(nh_);
     /* Top Grip Flat Hand modified*/
-    leftHandOrientationTop_.header.frame_id         = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationTop_.header.frame_id         = rd_->getPelvisFrame();
     leftHandOrientationTop_.quaternion.x            = 0.604;
     leftHandOrientationTop_.quaternion.y            = 0.434;
     leftHandOrientationTop_.quaternion.z            = -0.583;
     leftHandOrientationTop_.quaternion.w            = 0.326;
 
-    leftHandOrientationSide_.header.frame_id        = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationSide_.header.frame_id        = rd_->getPelvisFrame();
     leftHandOrientationSide_.quaternion.x           = 0.155;
     leftHandOrientationSide_.quaternion.y           = -0.061;
     leftHandOrientationSide_.quaternion.z           = -0.696;
     leftHandOrientationSide_.quaternion.w           = 0.699;
 
-    leftHandOrientationSideUp_.header.frame_id      = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationSideUp_.header.frame_id      = rd_->getPelvisFrame();
     leftHandOrientationSideUp_.quaternion.x         = 0.211;
     leftHandOrientationSideUp_.quaternion.y         = 0.248;
     leftHandOrientationSideUp_.quaternion.z         = -0.644;
     leftHandOrientationSideUp_.quaternion.w         = 0.692;
 
-    leftHandOrientationSideDown_.header.frame_id    = VAL_COMMON_NAMES::PELVIS_TF;
+    leftHandOrientationSideDown_.header.frame_id    = rd_->getPelvisFrame();
     leftHandOrientationSideDown_.quaternion.x       = -0.341;
     leftHandOrientationSideDown_.quaternion.y       = -0.312;
     leftHandOrientationSideDown_.quaternion.z       = -0.655;
@@ -49,10 +49,10 @@ bool RotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTi
     ROS_INFO("rotateValve: Setting gripper position");
 
     //Converting the centre to the grasp point based on the dimensions calculated manually
-    current_state_->transformPoint(goal,grabGoal,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPoint(goal,grabGoal,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
     grabGoal.y -= 0.05241;
     grabGoal.z += 0.1601;
-    current_state_->transformPoint(grabGoal,grabGoal,VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPoint(grabGoal,grabGoal,rd_->getPelvisFrame());
 
     std::vector<double> gripper1,gripper2,gripper3;
 
@@ -80,11 +80,11 @@ bool RotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTi
 
     geometry_msgs::Point intermGoal;
 
-    current_state_->transformPoint(grabGoal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPoint(grabGoal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
 
     intermGoal.x += 0.03;
 
-    current_state_->transformPoint(intermGoal,intermGoal, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPoint(intermGoal,intermGoal, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
 
     geometry_msgs::Pose final;
     std::vector<geometry_msgs::Pose> waypoints;
@@ -129,7 +129,7 @@ bool RotateValve::compute_traj(geometry_msgs::Point center, float radius, std::v
 
     int NumSteps=21;
     geometry_msgs::Point centerPelvis;
-    current_state_->transformPoint(center,centerPelvis, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPoint(center,centerPelvis, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
     geometry_msgs::Pose point;
     for (int i = -2; i < (NumSteps-5)/2-1; ++i) {
         point.position.x=centerPelvis.x;
@@ -156,7 +156,7 @@ bool RotateValve::compute_traj(geometry_msgs::Point center, float radius, std::v
         {
             point.orientation=leftHandOrientationTop_.quaternion;
         }
-        current_state_->transformPose(point,point, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+        current_state_->transformPose(point,point, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
         points.push_back(point);
     }
     visualise_traj(points);
@@ -257,13 +257,13 @@ bool RotateValve::reOrientbeforgrab(geometry_msgs::Point valveCenter)
     geometry_msgs::Pose2D preDoorOpenGoal;
 
     current_state_->transformPoint(valveCenter,valveCenter,
-                                   VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
-    current_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+                                   VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
+    current_state_->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
 
     valveCenter.x  -= 0.5;
     valveCenter.y  -= 0.45;
     //Converting back to world
-    current_state_->transformPoint(valveCenter, valveCenter, VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPoint(valveCenter, valveCenter, rd_->getPelvisFrame());
 
     preDoorOpenGoal.x        = valveCenter.x;
     preDoorOpenGoal.y        = valveCenter.y;

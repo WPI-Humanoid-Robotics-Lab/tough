@@ -6,7 +6,8 @@
 handle_grabber::handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
 {
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-    leftHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    rd_ = RobotDescription::getRobotDescription(nh_);
+    leftHandOrientation_.header.frame_id = rd_->getPelvisFrame();
     /* Top Grip */
 
     leftHandOrientation_.quaternion.x = 0.604;
@@ -28,7 +29,7 @@ handle_grabber::handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper
     //    rightHandOrientation_.quaternion.w = -0.209;
 
     /* Top Grip */
-    rightHandOrientation_.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+    rightHandOrientation_.header.frame_id = rd_->getPelvisFrame();
     rightHandOrientation_.quaternion.x = -0.576;
     rightHandOrientation_.quaternion.y = 0.397;
     rightHandOrientation_.quaternion.z = 0.632;
@@ -132,11 +133,11 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
     geometry_msgs::Pose finalGoal, intermGoal;
     geometry_msgs::Point finalPoint, intermPoint;
 
-    current_state_->transformPoint(goal,intermPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPoint(goal,intermPoint, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
     intermPoint.z += 0.1;
 
     //transform that point back to world frame
-    current_state_->transformPoint(intermPoint, intermPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPoint(intermPoint, intermPoint, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
 
     ROS_INFO("Moving at an intermidate point before goal");
     intermGoal.position = intermPoint;
@@ -150,12 +151,12 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
 
     //move arm to final position with known orientation
 
-    current_state_->transformPoint(goal,finalPoint, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPoint(goal,finalPoint, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
     finalPoint.x -= 0.05; // this is to compensate for the distance between palm frame and center of palm
 //    finalPoint.y = side == armSide::LEFT ? (finalPoint.y-0.02) : (finalPoint.y+0.02);
 
     //transform that point back to world frame
-    current_state_->transformPoint(finalPoint, finalPoint, VAL_COMMON_NAMES::PELVIS_TF, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPoint(finalPoint, finalPoint, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
 
     ROS_INFO("Moving towards goal");
     finalGoal.position = finalPoint;

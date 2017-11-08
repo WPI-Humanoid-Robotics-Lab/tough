@@ -58,8 +58,8 @@ const std::string R_END_EFFECTOR_FRAME = "/r_hand";
 const std::string L_END_EFFECTOR_FRAME = "/l_hand";
 
 /* atlas Torso*/
-const std::string PELVIS_TF = "/pelvis";
-const std::string TORSO_TF = "/mtorso";
+//const std::string PELVIS_TF = "/pelvis";
+//const std::string TORSO_TF = "/mtorso";
 
 /* atlas Right Foot*/
 const std::string R_FOOT_TF = "/r_foot";
@@ -79,8 +79,8 @@ const std::string R_END_EFFECTOR_FRAME = "/rightMiddleFingerPitch1Link";
 const std::string L_END_EFFECTOR_FRAME = "/leftMiddleFingerPitch1Link";
 
 /* valkyrie Torso*/
-const std::string PELVIS_TF = "/pelvis";
-const std::string TORSO_TF = "/torso";
+//const std::string PELVIS_TF = "/pelvis";
+//const std::string TORSO_TF = "/torso";
 
 /* valkyrie Right Foot*/
 const std::string R_FOOT_TF = "/rightFoot";

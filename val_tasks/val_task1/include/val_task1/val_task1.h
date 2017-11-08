@@ -84,6 +84,8 @@ class valTask1 {
     wholebodyManipulation* wholebody_controller_;
     //robot state informer
     RobotStateInformer* robot_state_;
+    // robot descriptor
+    RobotDescription *rd_ ;
     // task1 utils
     task1Utils* task1_utils_;
     // cartesian planner

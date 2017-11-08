@@ -58,6 +58,7 @@ private:
   visualization_msgs::MarkerArray markers_;
 
   RobotStateInformer* robot_state_;
+  RobotDescription *rd_;
 
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_;
   geometry_msgs::Pose2D rover_pose_;

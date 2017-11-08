@@ -62,6 +62,7 @@ valTask1::valTask1(ros::NodeHandle nh):
 
     //state informer
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
     map_update_count_ = 0;
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask1::occupancy_grid_cb, this);
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask1::visited_map_cb, this);
@@ -301,7 +302,7 @@ decision_making::TaskResult valTask1::walkToSeePanelTask(string name, const FSMC
     static geometry_msgs::Pose2D pose_prev;
 
     geometry_msgs::Pose current_pelvis_pose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(),current_pelvis_pose);
 
     // Check if goal is reached before walking
     if (taskCommonUtils::isGoalReached(current_pelvis_pose, panel_walk_goal_coarse_))
@@ -527,7 +528,7 @@ decision_making::TaskResult valTask1::walkToPanel(string name, const FSMCallCont
     static geometry_msgs::Pose2D pose_prev;
 
     geometry_msgs::Pose current_pelvis_pose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(),current_pelvis_pose);
 
     // check if the pose is changed
     if (taskCommonUtils::isGoalReached(current_pelvis_pose, panel_walk_goal_fine_) )
@@ -1581,7 +1582,7 @@ decision_making::TaskResult valTask1::walkToFinishTask(string name, const FSMCal
     static geometry_msgs::Pose2D pose_prev;
 
     geometry_msgs::Pose current_pelvis_pose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(),current_pelvis_pose);
 
     // check if the pose is changed
     if ( taskCommonUtils::isGoalReached(current_pelvis_pose, next_finishbox_center_)) {

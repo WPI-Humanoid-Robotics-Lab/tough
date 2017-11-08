@@ -22,7 +22,9 @@ SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh, geometry_msgs::Point butt
     vis_pub = nh.advertise<visualization_msgs::Marker>( "/visualization_marker", 1 );
 
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+    rd_ = RobotDescription::getRobotDescription(nh);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(),current_pelvis_pose);
+
     ROS_INFO("pose : x %.2f y %.2f z %.2f yaw %.2f ",current_pelvis_pose.position.x,current_pelvis_pose.position.y,current_pelvis_pose.position.z,tf::getYaw(current_pelvis_pose.orientation));
 
 //    optimal_dist = 0.16;
@@ -41,7 +43,7 @@ SolarPanelDetect::SolarPanelDetect(ros::NodeHandle nh)
     pcl_filtered_pub = nh.advertise<sensor_msgs::PointCloud2>("/val_solar_panel/cloud2", 1);
     vis_pub = nh.advertise<visualization_msgs::Marker>( "/visualization_marker", 1 );
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,current_pelvis_pose);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(),current_pelvis_pose);
     ROS_INFO("pose : x %.2f y %.2f z %.2f yaw %.2f ",current_pelvis_pose.position.x,current_pelvis_pose.position.y,current_pelvis_pose.position.z,tf::getYaw(current_pelvis_pose.orientation));
 
 //    optimal_dist = 0.16;
@@ -181,7 +183,7 @@ void SolarPanelDetect::boxfilter(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
 {
 
        geometry_msgs::Pose pelvisPose;
-       robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+       robot_state_->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
        Eigen::Vector4f minPoint;
        Eigen::Vector4f maxPoint;
        minPoint[0]= 0 ;
@@ -323,7 +325,7 @@ void SolarPanelDetect::getOrientation(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud
     pose.orientation = quaternion;
 
     geometry_msgs::Pose pose_pelvis;
-//    robot_state_->transformPose(pose,pose_pelvis,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+//    robot_state_->transformPose(pose,pose_pelvis,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
     pose_pelvis = pose;
 
 

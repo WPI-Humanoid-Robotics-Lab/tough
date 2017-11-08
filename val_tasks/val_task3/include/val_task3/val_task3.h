@@ -54,6 +54,7 @@ class valTask3{
     armTrajectory*      arm_controller_;
     wholebodyManipulation* wholebody_controller_;
     RobotStateInformer* robot_state_;
+    RobotDescription *rd_;
     task3Utils*         task3_utils_;
 
     //detectors

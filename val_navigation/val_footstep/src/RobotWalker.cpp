@@ -20,6 +20,7 @@ RobotWalker::RobotWalker(ros::NodeHandle nh,double InTransferTime ,double InSwin
     this->footsteps_pub_   = nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/"+robot_name+"/control/footstep_list",1,true);
     this->footstep_status_ = nh_.subscribe("/ihmc_ros/"+robot_name+"/output/footstep_status", 20,&RobotWalker::footstepStatusCB, this);
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
     this->nudgestep_pub_   = nh_.advertise<ihmc_msgs::FootTrajectoryRosMessage>("/ihmc_ros/"+robot_name+"/control/foot_trajectory",1,true);
     this->loadeff_pub      = nh_.advertise<ihmc_msgs::EndEffectorLoadBearingRosMessage>("/ihmc_ros/"+robot_name+"/control/end_effector_load_bearing",1,true);
 
@@ -210,11 +211,11 @@ bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float> xOffset, co
         currentWorldLocation.x=current->location.x;
         currentWorldLocation.y=current->location.y;
         currentWorldLocation.z=current->location.z;
-        current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+        current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
 
         currentPelvisLocation.x+=xOffset[m-1];
         currentPelvisLocation.y+=yOffset[m-1];
-        current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF);
+        current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF);
         newFootStep->location.x=currentWorldLocation.x;
         newFootStep->location.y=currentWorldLocation.y;
         newFootStep->location.z=current->location.z;
@@ -269,34 +270,36 @@ bool RobotWalker::raiseLeg(armSide side, float height,float stepLength)
     pt_in.point.y=current->location.y;
     pt_in.point.z=current->location.z;
     pt_in.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
-    try{
+    current_state_->transformPoint(pt_in,pt_out, rd_->getPelvisFrame());
+//    try{
 
-        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
 
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
+//    }
+//    catch (tf::TransformException ex){
+//        ROS_WARN("%s",ex.what());
+//        ros::spinOnce();
+//        return false;
+//    }
 
     // add value of step length to x axis
     pt_out.point.x +=stepLength;
 
     // convert back to world frame
+    current_state_->transformPoint(pt_out, pt_out);
 
-    try{
+//    try{
 
-        tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
-        tf_listener_.transformPoint(VAL_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
+//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(VAL_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
 
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
+//    }
+//    catch (tf::TransformException ex){
+//        ROS_WARN("%s",ex.what());
+//        ros::spinOnce();
+//        return false;
+//    }
 
 
     // add to data
@@ -333,32 +336,33 @@ bool RobotWalker::nudgeFoot(armSide side, float distance)
     pt_in.point.y=current->location.y;
     pt_in.point.z=current->location.z;
     pt_in.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
-    try{
+    current_state_->transformPoint(pt_in,pt_out, rd_->getPelvisFrame());
+//    try{
 
-        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
 
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
+//    }
+//    catch (tf::TransformException ex){
+//        ROS_WARN("%s",ex.what());
+//        ros::spinOnce();
+//        return false;
+//    }
 
     // convert back to world frame
     pt_out.point.x+=distance;
+    current_state_->transformPoint(pt_out, pt_out);
+//    try{
 
-    try{
+//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(VAL_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
 
-        tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
-        tf_listener_.transformPoint(VAL_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
-
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
+//    }
+//    catch (tf::TransformException ex){
+//        ROS_WARN("%s",ex.what());
+//        ros::spinOnce();
+//        return false;
+//    }
 
 
     // add to data
@@ -397,52 +401,54 @@ bool RobotWalker::curlLeg(armSide side, float radius)
 
     // converting point in pelvis frame
     geometry_msgs::PointStamped pt_in,pt_out;
-    geometry_msgs::PoseStamped final;
+    geometry_msgs::Pose final;
     pt_in.point.x=current->location.x;
     pt_in.point.y=current->location.y;
     pt_in.point.z=current->location.z;
     pt_in.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
-    try{
+    current_state_->transformPoint(pt_in,pt_out, rd_->getPelvisFrame());
 
-        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+//    try{
 
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
+//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+
+//    }
+//    catch (tf::TransformException ex){
+//        ROS_WARN("%s",ex.what());
+//        ros::spinOnce();
+//        return false;
+//    }
 
     // converting back to world frame
-    final.pose.position.x=pt_out.point.x-radius;
-    final.pose.position.y=pt_out.point.y;
-    final.pose.position.z=pt_out.point.z+radius;
-    final.pose.orientation.x=0;
-    final.pose.orientation.y=0.5;
-    final.pose.orientation.z=0;
-    final.pose.orientation.w=0.866;
-    final.header.frame_id =VAL_COMMON_NAMES::PELVIS_TF;
-    final.header.stamp =ros::Time(0);
+    final.position.x=pt_out.point.x-radius;
+    final.position.y=pt_out.point.y;
+    final.position.z=pt_out.point.z+radius;
+    final.orientation.x=0;
+    final.orientation.y=0.5;
+    final.orientation.z=0;
+    final.orientation.w=0.866;
+//    final.header.frame_id =rd_->getPelvisFrame();
+//    final.header.stamp =ros::Time(0);
 
+    current_state_->transformPose(final,final,rd_->getPelvisFrame());
+//    try{
 
-    try{
+//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPose(VAL_COMMON_NAMES::WORLD_TF, final, final);
 
-        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-        tf_listener_.transformPose(VAL_COMMON_NAMES::WORLD_TF, final, final);
-
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
+//    }
+//    catch (tf::TransformException ex){
+//        ROS_WARN("%s",ex.what());
+//        ros::spinOnce();
+//        return false;
+//    }
 
     // get current position
-    data.position.x = final.pose.position.x;
-    data.position.y = final.pose.position.y;
-    data.position.z = final.pose.position.z;
-    data.orientation=final.pose.orientation;
+    data.position.x = final.position.x;
+    data.position.y = final.position.y;
+    data.position.z = final.position.z;
+    data.orientation=final.orientation;
     data.unique_id=100;
     data.time=3.0;
     foot.robot_side = side;
@@ -468,17 +474,19 @@ bool RobotWalker::placeLeg(armSide side, float offset)
     pt_in.point.y=current->location.y;
     pt_in.point.z=current->location.z;
     pt_in.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
-    try{
+    current_state_->transformPoint(pt_in,pt_out, rd_->getPelvisFrame());
 
-        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+//    try{
 
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
+//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+
+//    }
+//    catch (tf::TransformException ex){
+//        ROS_WARN("%s",ex.what());
+//        ros::spinOnce();
+//        return false;
+//    }
 
     // convert back to world frame
     if(side ==LEFT)
@@ -488,18 +496,19 @@ bool RobotWalker::placeLeg(armSide side, float offset)
     else pt_out.point.y-=0.20;
 
     pt_out.point.z+=offset;
+    current_state_->transformPoint(pt_out, pt_out);
 
-    try{
+//    try{
 
-        tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
-        tf_listener_.transformPoint(VAL_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
+//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(VAL_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
 
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
+//    }
+//    catch (tf::TransformException ex){
+//        ROS_WARN("%s",ex.what());
+//        ros::spinOnce();
+//        return false;
+//    }
 
 
     // add to data
@@ -540,8 +549,8 @@ bool RobotWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDat
     //    ihmc_msgs::FootstepDataRosMessage::Ptr startstep(new ihmc_msgs::FootstepDataRosMessage());
     //this->getCurrentStep(0,*startstep);
     geometry_msgs::Pose pelvisPose, leftFootPose, rightFootPose;
-    current_state_->getCurrentPose(VAL_COMMON_NAMES::L_FOOT_TF,leftFootPose);
-    current_state_->getCurrentPose(VAL_COMMON_NAMES::R_FOOT_TF, rightFootPose);
+    current_state_->getCurrentPose(rd_->getLeftFootFrameName(),leftFootPose);
+    current_state_->getCurrentPose(rd_->getRightFootFrameName(), rightFootPose);
 
     start.x = (leftFootPose.position.x + rightFootPose.position.x)/2.0f;
     start.y = (leftFootPose.position.y + rightFootPose.position.y)/2.0f; // This is required to offset the left foot to get senter of the
@@ -643,12 +652,12 @@ ihmc_msgs::FootstepDataRosMessage::Ptr RobotWalker::getOffsetStepWRTPelvis(int s
     currentWorldLocation.z=next->location.z;
 
     // transform the step to pelvis
-    current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+    current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
     // add the offsets wrt to pelvis
     currentPelvisLocation.x+=x;
     currentPelvisLocation.y+=y;
     // tranform back the point to plevis
-    current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF);
 
     // update the new location
     next->location.x=currentWorldLocation.x;
@@ -769,13 +778,13 @@ bool RobotWalker::turn(armSide side)
 
 
     for (int i = 0; i < pelvis_valuesL.size(); ++i) {
-        pelvis_valuesL[i].header.frame_id=VAL_COMMON_NAMES::PELVIS_TF;
-        pelvis_quatL[i].header.frame_id=VAL_COMMON_NAMES::PELVIS_TF;
+        pelvis_valuesL[i].header.frame_id=rd_->getPelvisFrame();
+        pelvis_quatL[i].header.frame_id=rd_->getPelvisFrame();
     }
 
     for (int i = 0; i < pelvis_valuesR.size(); ++i) {
-        pelvis_valuesR[i].header.frame_id=VAL_COMMON_NAMES::PELVIS_TF;
-        pelvis_quatR[i].header.frame_id=VAL_COMMON_NAMES::PELVIS_TF;
+        pelvis_valuesR[i].header.frame_id=rd_->getPelvisFrame();
+        pelvis_quatR[i].header.frame_id=rd_->getPelvisFrame();
     }
 
 
@@ -783,16 +792,18 @@ bool RobotWalker::turn(armSide side)
     {
         for (int i = 0; i < pelvis_valuesL.size(); ++i) {
 
-            try{
-                tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
-                tf_listener_.transformVector(VAL_COMMON_NAMES::WORLD_TF,pelvis_valuesL[i],world_values);
-                tf_listener_.transformQuaternion(VAL_COMMON_NAMES::WORLD_TF,pelvis_quatL[i],world_quat);
-            }
-            catch (tf::TransformException ex)
-            {
-                ROS_ERROR("%s",ex.what());
-                return false;
-            }
+            current_state_->transformVector(pelvis_valuesL[i], world_values);
+            current_state_->transformQuaternion(pelvis_quatL[i], world_quat);
+//            try{
+//                tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
+//                tf_listener_.transformVector(VAL_COMMON_NAMES::WORLD_TF,pelvis_valuesL[i],world_values);
+//                tf_listener_.transformQuaternion(VAL_COMMON_NAMES::WORLD_TF,pelvis_quatL[i],world_quat);
+//            }
+//            catch (tf::TransformException ex)
+//            {
+//                ROS_ERROR("%s",ex.what());
+//                return false;
+//            }
 
             step.robot_side=i%2 ? LEFT : RIGHT;
             step.location=world_values.vector;
@@ -806,16 +817,19 @@ bool RobotWalker::turn(armSide side)
     {
         for (int i = 0; i < pelvis_valuesR.size(); ++i) {
 
-            try{
-                tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
-                tf_listener_.transformVector(VAL_COMMON_NAMES::WORLD_TF,pelvis_valuesR[i],world_values);
-                tf_listener_.transformQuaternion(VAL_COMMON_NAMES::WORLD_TF,pelvis_quatR[i],world_quat);
-            }
-            catch (tf::TransformException ex)
-            {
-                ROS_ERROR("%s",ex.what());
-                return false;
-            }
+            current_state_->transformVector(pelvis_valuesR[i], world_values);
+            current_state_->transformQuaternion(pelvis_quatR[i], world_quat);
+
+//            try{
+//                tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
+//                tf_listener_.transformVector(VAL_COMMON_NAMES::WORLD_TF,pelvis_valuesR[i],world_values);
+//                tf_listener_.transformQuaternion(VAL_COMMON_NAMES::WORLD_TF,pelvis_quatR[i],world_quat);
+//            }
+//            catch (tf::TransformException ex)
+//            {
+//                ROS_ERROR("%s",ex.what());
+//                return false;
+//            }
 
             step.robot_side=i%2 ? LEFT : RIGHT;
             step.location=world_values.vector;
@@ -896,10 +910,10 @@ bool RobotWalker::climbStair(const std::vector<float> xOffset, const std::vector
         currentWorldLocation.y=current->location.y;
         currentWorldLocation.z=current->location.z;
 
-        current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+        current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
         currentPelvisLocation.x+=xOffset[m-1];
         currentPelvisLocation.z+=zOffset[m-1];
-        current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF);
+        current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF);
         newFootStep->location.x=currentWorldLocation.x;
         newFootStep->location.y=currentWorldLocation.y;
         newFootStep->location.z=currentWorldLocation.z;
@@ -913,10 +927,10 @@ bool RobotWalker::climbStair(const std::vector<float> xOffset, const std::vector
 
         if(m>2)
         {
-            current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
+            current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
             currentPelvisLocation.x+=(xOffset[m-2]-0.1);
             currentPelvisLocation.z+=zOffset[m-1]+offset;
-            current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF);
+            current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF);
 
             waypoint.x=currentWorldLocation.x;
             waypoint.y=currentWorldLocation.y;

@@ -5,6 +5,7 @@ DoorOpener::DoorOpener(ros::NodeHandle nh)
     :nh_(nh),armTraj_(nh_),gripper_(nh_), task3_(nh_), walker_(nh), control_common_(nh_){
 
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
 }
 
 DoorOpener::~DoorOpener(){
@@ -63,13 +64,13 @@ void DoorOpener::openDoor(geometry_msgs::Pose &valveCenterWorld){
 
     task3_.task3LogPub(" door_opener_node : Walking close to the door");
     robot_state_->transformPose(valveCenterWorld,valveCenter,
-                                VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF);
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+                                VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
 
     valveCenter.position.x  -= 0.35;
 
     //Converting back to world
-    robot_state_->transformPose(valveCenter, valveCenter, VAL_COMMON_NAMES::PELVIS_TF);
+    robot_state_->transformPose(valveCenter, valveCenter, rd_->getPelvisFrame());
 
     preDoorOpenGoal.x        = valveCenter.position.x;
     preDoorOpenGoal.y        = valveCenter.position.y;

@@ -107,7 +107,7 @@ public:
 PeriodicSnapshotter::PeriodicSnapshotter()
 {
     robot_state_  = RobotStateInformer::getRobotStateInformer(n_);
-
+    rd_ = RobotDescription::getRobotDescription(n_);
     snapshot_pub_              = n_.advertise<sensor_msgs::PointCloud2> ("snapshot_cloud2", 1);
     registered_pointcloud_pub_ = n_.advertise<sensor_msgs::PointCloud2>("assembled_cloud2",10);
     pointcloud_for_octomap_pub_= n_.advertise<sensor_msgs::PointCloud2>("assembled_octomap_cloud2",10, true);
@@ -295,7 +295,7 @@ void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8 &msg)
     convertROStoPCL(prev_msg_, pcl_prev_msg);
     geometry_msgs::Pose pelvisPose;
     pcl::PointCloud<pcl::PointXYZ>::Ptr tgt (new pcl::PointCloud<pcl::PointXYZ>);
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF, pelvisPose);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
     Eigen::Vector4f minPoint;
     Eigen::Vector4f maxPoint;
 

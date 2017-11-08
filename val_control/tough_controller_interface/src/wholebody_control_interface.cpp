@@ -7,26 +7,31 @@ wholebodyManipulation::wholebodyManipulation(ros::NodeHandle &nh):nh_(nh)
 
     m_wholebodyPub = nh_.advertise<ihmc_msgs::WholeBodyTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/whole_body_trajectory", 10, true);
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-    joint_limits_left_.resize(7);
-    joint_limits_right_.resize(7);
+    rd_ = RobotDescription::getRobotDescription(nh_);
 
-    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
-    joint_limits_left_[0]={-2.84,1.99};
-    joint_limits_left_[1]={-1.509,1.256};
-    joint_limits_left_[2]={-3.09,2.17};
-    joint_limits_left_[3]={-2.164,0.11};
-    joint_limits_left_[4]={-2.009,3.13};
-    joint_limits_left_[5]={-0.61,0.615};
-    joint_limits_left_[6]={-0.35,0.48};
+    rd_->getLeftArmJointLimits(joint_limits_left_);
+    rd_->getRightArmJointLimits(joint_limits_right_);
 
-    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
-    joint_limits_right_[0]={-2.84,1.99};
-    joint_limits_right_[1]={-1.256,1.509};
-    joint_limits_right_[2]={-3.09,2.17};
-    joint_limits_right_[3]={-0.11,2.164};
-    joint_limits_right_[4]={-2.009,3.13};
-    joint_limits_right_[5]={-0.615,0.61};
-    joint_limits_right_[6]={-0.47,0.35};
+//    joint_limits_left_.resize(7);
+//    joint_limits_right_.resize(7);
+
+//    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
+//    joint_limits_left_[0]={-2.84,1.99};
+//    joint_limits_left_[1]={-1.509,1.256};
+//    joint_limits_left_[2]={-3.09,2.17};
+//    joint_limits_left_[3]={-2.164,0.11};
+//    joint_limits_left_[4]={-2.009,3.13};
+//    joint_limits_left_[5]={-0.61,0.615};
+//    joint_limits_left_[6]={-0.35,0.48};
+
+//    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
+//    joint_limits_right_[0]={-2.84,1.99};
+//    joint_limits_right_[1]={-1.256,1.509};
+//    joint_limits_right_[2]={-3.09,2.17};
+//    joint_limits_right_[3]={-0.11,2.164};
+//    joint_limits_right_[4]={-2.009,3.13};
+//    joint_limits_right_[5]={-0.615,0.61};
+//    joint_limits_right_[6]={-0.47,0.35};
 }
 
 void wholebodyManipulation::compileMsg(const armSide side, const trajectory_msgs::JointTrajectory &traj)
@@ -150,7 +155,7 @@ void wholebodyManipulation::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage
 void wholebodyManipulation::chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj)
 {
     geometry_msgs::Pose pelvisPose;
-    robot_state_->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,pelvisPose);
+    robot_state_->getCurrentPose(rd_->getPelvisFrame(),pelvisPose);
     for (int i = 0; i < traj.points.size(); ++i) {
         float yaw   = traj.points[i].positions[0];
         float pitch = traj.points[i].positions[1];
@@ -159,7 +164,7 @@ void wholebodyManipulation::chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &m
         tf::Quaternion quatPelvis;
         quatPelvis.setRPY(roll, pitch, yaw);
         geometry_msgs::QuaternionStamped tempQuat;
-        tempQuat.header.frame_id = VAL_COMMON_NAMES::PELVIS_TF;
+        tempQuat.header.frame_id = rd_->getPelvisFrame();
         tf::quaternionTFToMsg(quatPelvis, tempQuat.quaternion);
 
         robot_state_->transformQuaternion(tempQuat, tempQuat);

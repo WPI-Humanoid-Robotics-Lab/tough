@@ -19,8 +19,9 @@ RobotStateInformer::RobotStateInformer(ros::NodeHandle nh):nh_(nh){
     closeRightGrasp={1.09,1.47,1.84,0.90,1.20,1.51,0.99,1.34,1.68,0.55,0.739,0.92,1.40};
     closeLeftGrasp={0.0,-1.47,-1.84,-0.90,-1.20,-1.51,-0.99,-1.34,-1.68,-0.55,-0.739,-0.92,1.40};
     openGrasp={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-
+    rd_ = RobotDescription::getRobotDescription(nh_);
     nh.getParam("ihmc_ros/robot_name", robotName_);
+
 }
 
 RobotStateInformer::~RobotStateInformer(){
@@ -196,7 +197,7 @@ bool RobotStateInformer::transformQuaternion(const geometry_msgs::QuaternionStam
 {
     try{
 
-        listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        listener_.waitForTransform(rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
         listener_.transformQuaternion(target_frame, qt_in, qt_out);
 
     }
@@ -208,11 +209,31 @@ bool RobotStateInformer::transformQuaternion(const geometry_msgs::QuaternionStam
     return true;
 }
 
+bool RobotStateInformer::transformQuaternion(const geometry_msgs::Quaternion &qt_in, geometry_msgs::Quaternion &qt_out,const std::string &from_frame, const std::string &to_frame)
+{
+    geometry_msgs::QuaternionStamped in, out;
+    in.quaternion = qt_in;
+    in.header.frame_id = from_frame;
+    try{
+
+        listener_.waitForTransform(rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        listener_.transformQuaternion(to_frame, in, out);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+    qt_out = out.quaternion;
+    return true;
+}
+
 bool RobotStateInformer::transformPoint(const geometry_msgs::PointStamped &pt_in, geometry_msgs::PointStamped &pt_out,const std::string target_frame)
 {
     try{
 
-        listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        listener_.waitForTransform(rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
         listener_.transformPoint(target_frame, pt_in, pt_out);
 
     }
@@ -232,7 +253,7 @@ bool RobotStateInformer::transformPose(const geometry_msgs::Pose &pose_in, geome
     in.pose = pose_in;
     try{
 
-        listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        listener_.waitForTransform(rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
         listener_.transformPose(to_frame, in, out);
     }
     catch (tf::TransformException ex){
@@ -257,7 +278,7 @@ bool RobotStateInformer::transformPose(const geometry_msgs::Pose2D &pose_in, geo
 
     try{
 
-        listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        listener_.waitForTransform(rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
         listener_.transformPose(to_frame, in, out);
     }
     catch (tf::TransformException ex){
@@ -281,7 +302,7 @@ bool RobotStateInformer::transformPoint(const geometry_msgs::Point &pt_in, geome
 
     try{
 
-        listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        listener_.waitForTransform(rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
         listener_.transformPoint(to_frame, stmp_pt_in, stmp_pt_out);
 
     }
@@ -294,6 +315,42 @@ bool RobotStateInformer::transformPoint(const geometry_msgs::Point &pt_in, geome
     return true;
 }
 
+bool RobotStateInformer::transformVector(const geometry_msgs::Vector3Stamped &vec_in, geometry_msgs::Vector3Stamped &vec_out,const std::string target_frame)
+{
+    try{
+
+        listener_.waitForTransform(rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        listener_.transformVector(target_frame, vec_in, vec_out);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+    return true;
+}
+
+
+bool RobotStateInformer::transformVector(const geometry_msgs::Vector3 &vec_in, geometry_msgs::Vector3 &vec_out,const std::string &from_frame, const std::string &to_frame)
+{
+    geometry_msgs::Vector3Stamped in, out;
+    in.vector = vec_in;
+    in.header.frame_id = from_frame;
+    try{
+
+        listener_.waitForTransform(rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+        listener_.transformVector(to_frame, in, out);
+
+    }
+    catch (tf::TransformException ex){
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+    vec_out = out.vector;
+    return true;
+}
 
 bool RobotStateInformer::isGraspped(armSide side)
 {

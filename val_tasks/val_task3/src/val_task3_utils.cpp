@@ -4,6 +4,7 @@
 task3Utils::task3Utils(ros::NodeHandle nh): nh_(nh),arm_controller_(nh_)
 {
     current_state_       = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
     pelvis_controller_   = new pelvisTrajectory(nh_);
     walk_                = new RobotWalker(nh_, 0.7, 0.7, 0, 0.18);
 
@@ -96,7 +97,7 @@ void task3Utils::blindNavigation(geometry_msgs::Pose2D & goal){
     // get current state
     RobotStateInformer *current_state = RobotStateInformer::getRobotStateInformer(nh_);
     geometry_msgs::Pose poseInPelvisFrame, tempPose;
-    current_state->getCurrentPose(VAL_COMMON_NAMES::PELVIS_TF,poseInPelvisFrame);
+    current_state->getCurrentPose(rd_->getPelvisFrame(),poseInPelvisFrame);
 
     tempPose = poseInPelvisFrame;
     float angle = 0.0;
@@ -129,7 +130,7 @@ void task3Utils::blindNavigation(geometry_msgs::Pose2D & goal){
 geometry_msgs::Pose task3Utils::grasping_hand(armSide &side, geometry_msgs::Pose handle_pose) {
     geometry_msgs::Pose poseInPelvisFrame;
     current_state_->transformPose(handle_pose, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF,
-                                  VAL_COMMON_NAMES::PELVIS_TF);
+                                  rd_->getPelvisFrame());
     float yaw = tf::getYaw(poseInPelvisFrame.orientation);
 
     if (yaw > M_PI_2 || yaw < -M_PI_2) {
@@ -142,7 +143,7 @@ geometry_msgs::Pose task3Utils::grasping_hand(armSide &side, geometry_msgs::Pose
         geometry_msgs::Quaternion quaternion = tf::createQuaternionMsgFromRollPitchYaw(r, p, y);
         handle_pose.orientation = quaternion;
         current_state_->transformPose(handle_pose, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF,
-                                      VAL_COMMON_NAMES::PELVIS_TF);
+                                      rd_->getPelvisFrame());
         yaw = tf::getYaw(poseInPelvisFrame.orientation);
     }
 
