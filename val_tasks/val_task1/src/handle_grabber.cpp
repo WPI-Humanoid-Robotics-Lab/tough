@@ -81,8 +81,8 @@ void handle_grabber::adjust_pose(const armSide side, const geometry_msgs::Point 
     pt.orientation = temp.quaternion;
 
     geometry_msgs::Pose pose;
-    std::string fingerFrame = side == LEFT ? "leftMiddleFingerPitch1Link" : "rightMiddleFingerPitch1Link";
-    std::string palmFrame = side == LEFT ? "leftPalm" : "rightPalm";
+    std::string fingerFrame = side == LEFT ? rd_->getLeftEEFrame() : rd_->getRightEEFrame();
+    std::string palmFrame = side == LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
 
     current_state_->getCurrentPose(fingerFrame, pose, palmFrame);
     if(side == armSide::LEFT){

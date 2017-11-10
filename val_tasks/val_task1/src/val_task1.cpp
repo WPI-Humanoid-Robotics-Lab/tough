@@ -769,7 +769,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         // generate the way points for the knob (current pose(6DOF) of arm is used to generate the way points)
         //current pose of the hand
         geometry_msgs::Pose current_hand_pose;
-        robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME, current_hand_pose);
+        robot_state_->getCurrentPose(rd_->getRightEEFrame(), current_hand_pose);
 
         std::vector<geometry_msgs::Pose> waypoints;
         task1_utils_->getCircle3D(handle_loc_[PITCH_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, CIRCLE_RADIUS, CIRCLE_RESOLUTION);
@@ -1086,7 +1086,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         // generate the way points for the knob (current pose(6DOF) of arm is used to generate the way points)
         //current pose of the hand
         geometry_msgs::Pose current_hand_pose;
-        robot_state_->getCurrentPose(VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME, current_hand_pose);
+        robot_state_->getCurrentPose(rd_->getLeftEEFrame(), current_hand_pose);
 
         std::vector<geometry_msgs::Pose> waypoints;
         task1_utils_->getCircle3D(handle_loc_[YAW_KNOB_CENTER], current_hand_pose.position, current_hand_pose.orientation, panel_coeff_, waypoints, rot_dir, CIRCLE_RADIUS, CIRCLE_RESOLUTION);

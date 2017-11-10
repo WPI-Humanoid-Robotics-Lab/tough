@@ -75,8 +75,8 @@ const int NUM_NECK_JOINTS = 1;
 const std::string R_PALM_TF = "/rightPalm";
 const std::string L_PALM_TF = "/leftPalm";
 
-const std::string R_END_EFFECTOR_FRAME = "/rightMiddleFingerPitch1Link";
-const std::string L_END_EFFECTOR_FRAME = "/leftMiddleFingerPitch1Link";
+//const std::string R_END_EFFECTOR_FRAME = "/rightMiddleFingerPitch1Link";
+//const std::string L_END_EFFECTOR_FRAME = "/leftMiddleFingerPitch1Link";
 
 /* valkyrie Torso*/
 //const std::string PELVIS_TF = "/pelvis";

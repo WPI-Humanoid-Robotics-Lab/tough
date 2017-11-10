@@ -68,14 +68,14 @@ bool ButtonPress::pressButton(const armSide side, geometry_msgs::Point &goal, fl
     // setting initial values
     geometry_msgs::QuaternionStamped* finalOrientationStamped;
     const std::vector<float>* armSeed, *initialSeed;
-    std::string palmFrame;
+    std::string endEffectorFrame;
     float xFingerOffset,yFingerOffset,zFingerOffset;
     geometry_msgs::Pose rightOffset,leftOffset;
     current_state_->getCurrentPose("/rightMiddleFingerPitch1Link",rightOffset,"/rightThumbRollLink");
     current_state_->getCurrentPose("/leftMiddleFingerPitch1Link",leftOffset,"/leftThumbRollLink");
     if(side == armSide::LEFT){
         armSeed = &leftShoulderSeed_;
-        palmFrame = VAL_COMMON_NAMES::LEFT_PALM_GROUP;
+        endEffectorFrame = VAL_COMMON_NAMES::LEFT_PALM_GROUP;
         xFingerOffset = leftOffset.position.x;
         yFingerOffset = leftOffset.position.y;// minor offsets to hit centeto hit center of buttonr of button
         zFingerOffset = leftOffset.position.z; // minor offsets to hit center of buttonto hit center of button
@@ -84,7 +84,7 @@ bool ButtonPress::pressButton(const armSide side, geometry_msgs::Point &goal, fl
     }
     else {
         armSeed = &rightShoulderSeed_;
-        palmFrame = VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
+        endEffectorFrame = rd_->getRightEEFrame();
         xFingerOffset = rightOffset.position.x;
         yFingerOffset = rightOffset.position.y;
         zFingerOffset = rightOffset.position.z;
@@ -118,14 +118,14 @@ bool ButtonPress::pressButton(const armSide side, geometry_msgs::Point &goal, fl
     //move arm to given point with known orientation and higher z
     geometry_msgs::Point finalGoal;
 
-    current_state_->transformPoint(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF,palmFrame);
+    current_state_->transformPoint(goal,finalGoal, VAL_COMMON_NAMES::WORLD_TF,endEffectorFrame);
     finalGoal.x+= xFingerOffset;
     finalGoal.y+= yFingerOffset;
     finalGoal.z+= zFingerOffset;
 
 
     //transform that point back to world frame
-    current_state_->transformPoint(finalGoal, finalGoal, palmFrame, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPoint(finalGoal, finalGoal, endEffectorFrame, VAL_COMMON_NAMES::WORLD_TF);
 
     ROS_INFO("Moving towards goal");
 

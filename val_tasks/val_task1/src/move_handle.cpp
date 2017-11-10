@@ -5,6 +5,7 @@ move_handle::move_handle(ros::NodeHandle n) : nh_(n) {
 
     array_pub = nh_.advertise<visualization_msgs::MarkerArray>( "handle_path", 10, true);
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
 
 }
 void move_handle::createCircle(geometry_msgs::Point center, int side, const std::vector<float> planeCoeffs, std::vector<geometry_msgs::Pose> &points, const float spin)
@@ -41,11 +42,11 @@ void move_handle::createCircle(geometry_msgs::Point center, int side, const std:
 
   // get the hand frame
   if (side){
-    robot_state_->getCurrentPose("/rightMiddleFingerPitch1Link",finger_pose);
+    robot_state_->getCurrentPose(rd_->getRightEEFrame(),finger_pose);
     input_side = armSide::RIGHT;
   }
   else{
-    robot_state_->getCurrentPose("/leftMiddleFingerPitch1Link",finger_pose);
+    robot_state_->getCurrentPose(rd_->getLeftEEFrame(),finger_pose);
     input_side = armSide::LEFT;
    }
 

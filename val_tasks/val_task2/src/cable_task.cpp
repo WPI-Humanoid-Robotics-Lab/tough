@@ -205,11 +205,11 @@ bool CableTask::grasp_cable(const geometry_msgs::Pose &goal, float executionTime
     current_state_->getCurrentPose("/rightMiddleFingerPitch1Link",rightOffset,"/rightThumbRollLink");
     geometry_msgs::Pose intermGoal;
     //    intermGoal=goal;
-    current_state_->transformPose(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME);
+    current_state_->transformPose(goal,intermGoal, VAL_COMMON_NAMES::WORLD_TF, rd_->getRightEEFrame());
     intermGoal.position.x+=rightOffset.position.x;
     intermGoal.position.y+=rightOffset.position.y;
     intermGoal.position.z+=rightOffset.position.z;
-    current_state_->transformPose(intermGoal,intermGoal, VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME, VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPose(intermGoal,intermGoal, rd_->getRightEEFrame(), VAL_COMMON_NAMES::WORLD_TF);
 
     taskCommonUtils::fixHandFramePalmDown(nh_, RIGHT, intermGoal);
 

@@ -22,6 +22,7 @@ class move_handle{
   ros::Publisher array_pub;
   ros::NodeHandle nh_;
   RobotStateInformer* robot_state_;
+  RobotDescription* rd_;
   armTrajectory *armTraj;
 
 

@@ -16,7 +16,7 @@ int main(int argc, char** argv){
     // get the way points
     task1Utils task1_utils(node_handle);
     RobotStateInformer* robot_state = RobotStateInformer::getRobotStateInformer(node_handle);
-
+    RobotDescription* rd_ = RobotDescription::getRobotDescription(node_handle);
     ros::Publisher display_publisher = node_handle.advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, true);
     moveit_msgs::DisplayTrajectory display_trajectory;
 
@@ -40,7 +40,7 @@ int main(int argc, char** argv){
   std::vector<float> panelCoeffs {-0.0053, -0.4647, 0.8840, -0.1993};
     //desired pose
     geometry_msgs::Pose grasp_pose;
-    robot_state->getCurrentPose(VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME,grasp_pose);
+    robot_state->getCurrentPose(rd_->getRightEEFrame(),grasp_pose);
     task1_utils.getCircle3D(centerPelvis, startPelvis, grasp_pose.orientation, panelCoeffs, points, handleDirection::ANTICLOCK_WISE, 0.125, 10);
 //    task1_utils.getCircle3D(centerWorld, startWorld, grasp_pose, panelCoeffs, points, 0.125, 10);
     task1_utils.visulatise6DPoints(points);

@@ -1,6 +1,6 @@
 <launch>
     <arg name="extra_gazebo_args" default="" />
-    <arg name="debug" default="true" />
+    <arg name="debug" default="false" />
     <arg name="grasping_init_wait_time" default="20" />
     <arg name="use_local_build" default="false" />
 

@@ -31,12 +31,12 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
 
     if(side == armSide::LEFT){
         seed = &leftShoulderSeed_;
-        endEffectorFrame = VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME;
+        endEffectorFrame = rd_->getLeftEEFrame();
         palmToFingerOffset = 0.07;
     }
     else {
         seed = &rightShoulderSeed_;
-        endEffectorFrame = VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
+        endEffectorFrame = rd_->getRightEEFrame();
         palmToFingerOffset = -0.07;
     }
     valControlCommon control_util(nh_);

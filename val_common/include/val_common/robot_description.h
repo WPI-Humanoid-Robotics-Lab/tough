@@ -23,6 +23,10 @@ public:
 
     std::string getRightPalmFrame() const;
 
+    std::string getRightEEFrame() const;
+
+    std::string getLeftEEFrame() const;
+
     void getLeftArmJointNames(std::vector<std::string> &left_arm_joint_names) const;
 
     void getRightArmJointNames(std::vector<std::string> &right_arm_joint_names) const;
@@ -74,8 +78,12 @@ private:
 
     std::string PELVIS_TF;
     std::string TORSO_TF;
+
     std::string R_PALM_TF;
     std::string L_PALM_TF;
+
+    std::string R_END_EFFECTOR_TF;
+    std::string L_END_EFFECTOR_TF;
 
     std::vector<std::string> left_arm_joint_names_;
     std::vector<std::string> right_arm_joint_names_;

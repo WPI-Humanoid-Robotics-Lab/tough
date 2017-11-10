@@ -20,6 +20,7 @@ int main(int argc, char** argv){
     int hand;
     RobotStateInformer* robot_state_;
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh);
+    RobotDescription* rd_ = RobotDescription::getRobotDescription(nh);
     armTrajectory armTraj(nh);
     vector<float> leftPosLowerLimits={-2.85,-1.519,-3,1,-2.174,-2.019,-0.62,-0.36};
     vector<float> leftPosUpperLimits={2.0,1.266,2.18,0.12,3.14,0.625,0.49};
@@ -180,8 +181,8 @@ int main(int argc, char** argv){
             cin>>hand;
             armSide side = hand ==0 ? LEFT : RIGHT;
 
-            sideName = hand == LEFT ? "/leftMiddleFingerPitch1Link" : "/rightMiddleFingerPitch1Link";
-            arm = hand == LEFT ? "left_arm" : "right_arm";
+            sideName = hand == LEFT ? rd_->getLeftEEFrame() : rd_->getRightEEFrame();
+            arm = hand == LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
             lowerLimits = hand == LEFT ? leftPosLowerLimits : rightPosLowerLimits;
             upperLimits = hand == LEFT ? leftPosUpperLimits : rightPosUpperLimits;
 
@@ -214,8 +215,8 @@ int main(int argc, char** argv){
             cin>>hand;
             armSide side = hand ==0 ? LEFT : RIGHT;
 
-            sideName = hand == LEFT ? "/leftMiddleFingerPitch1Link" : "/rightMiddleFingerPitch1Link";
-            arm = hand == LEFT ? "left_arm" : "right_arm";
+            sideName = hand == LEFT ? rd_->getLeftEEFrame() : rd_->getRightEEFrame();
+            arm = hand == LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
             lowerLimits = hand == LEFT ? leftPosLowerLimits : rightPosLowerLimits;
             upperLimits = hand == LEFT ? leftPosUpperLimits : rightPosUpperLimits;
 

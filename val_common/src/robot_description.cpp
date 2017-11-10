@@ -83,40 +83,59 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
         }
     }
 
-    ROS_INFO("LEFT ARM");
+//    ROS_INFO("LEFT ARM");
     for (auto joint_name : left_arm_joint_names_){
         float l_limit = model_.joints_[joint_name]->limits->lower;
         float u_limit = model_.joints_[joint_name]->limits->upper;
         left_arm_joint_limits_.push_back({l_limit, u_limit});
         left_arm_frame_names_.push_back(model_.joints_[joint_name]->child_link_name);
-        ROS_INFO("\nFrame : %s \nJoint : %s \nLimits : <%0.4f , %0.4f>\n-------------\n", (left_arm_frame_names_.end()-1)->c_str(), joint_name.c_str(), l_limit, u_limit);
+//        ROS_INFO("\nFrame : %s \nJoint : %s \nLimits : <%0.4f , %0.4f>\n-------------\n", (left_arm_frame_names_.end()-1)->c_str(), joint_name.c_str(), l_limit, u_limit);
     }
 
     L_PALM_TF = *(left_arm_frame_names_.end()-1);
     TORSO_TF = model_.joints_[left_arm_joint_names_[0]]->parent_link_name;
 
-    ROS_INFO("RIGHT ARM");
+//    ROS_INFO("RIGHT ARM");
     for (auto joint_name : right_arm_joint_names_){
         float l_limit = model_.joints_[joint_name]->limits->lower;
         float u_limit = model_.joints_[joint_name]->limits->upper;
         right_arm_joint_limits_.push_back({l_limit, u_limit});
         right_arm_frame_names_.push_back(model_.joints_[joint_name]->child_link_name);
-        ROS_INFO("\nFrame : %s \nJoint : %s \nLimits : <%0.4f , %0.4f>\n-------------\n", (right_arm_frame_names_.end()-1)->c_str(), joint_name.c_str(), l_limit, u_limit);
+//        ROS_INFO("\nFrame : %s \nJoint : %s \nLimits : <%0.4f , %0.4f>\n-------------\n", (right_arm_frame_names_.end()-1)->c_str(), joint_name.c_str(), l_limit, u_limit);
     }
 
     R_PALM_TF = *(right_arm_frame_names_.end()-1);
 
-    ROS_INFO("Left foot frame : %s",  left_foot_frame_name_.c_str());
-    ROS_INFO("Right foot frame : %s", right_foot_frame_name_.c_str());
-    ROS_INFO("Pelvis Frame : %s", PELVIS_TF.c_str());
-    ROS_INFO("Torso Frame : %s", TORSO_TF.c_str());
-    ROS_INFO("Right Palm Frame : %s", R_PALM_TF.c_str());
-    ROS_INFO("Left Palm Frame : %s", L_PALM_TF.c_str());
+//    ROS_INFO("Left foot frame : %s",  left_foot_frame_name_.c_str());
+//    ROS_INFO("Right foot frame : %s", right_foot_frame_name_.c_str());
+//    ROS_INFO("Pelvis Frame : %s", PELVIS_TF.c_str());
+//    ROS_INFO("Torso Frame : %s", TORSO_TF.c_str());
+//    ROS_INFO("Right Palm Frame : %s", R_PALM_TF.c_str());
+//    ROS_INFO("Left Palm Frame : %s", L_PALM_TF.c_str());
 
+    if(robot_name_ == "atlas"){
+        R_END_EFFECTOR_TF = "r_palm";
+        L_END_EFFECTOR_TF = "l_palm";
+    }
+    else if (robot_name_ == "valkyrie"){
+        R_END_EFFECTOR_TF = "rightMiddleFingerPitch1Link";
+        L_END_EFFECTOR_TF = "leftMiddleFingerPitch1Link";
+    }
 }
+
 std::string RobotDescription::getRightPalmFrame() const
 {
     return R_PALM_TF;
+}
+
+std::string RobotDescription::getRightEEFrame() const
+{
+    return R_END_EFFECTOR_TF;
+}
+
+std::string RobotDescription::getLeftEEFrame() const
+{
+    return L_END_EFFECTOR_TF;
 }
 
 void RobotDescription::setRightPalmFrame(const std::string &value)

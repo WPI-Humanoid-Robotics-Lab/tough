@@ -294,7 +294,7 @@ bool armTrajectory::nudgeArm(const armSide side, const direction drct, float nud
 
 //    world_pose.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
 
-    std::string target_frame = side == LEFT ? "/leftMiddleFingerPitch1Link" : "/rightMiddleFingerPitch1Link";
+    std::string target_frame = side == LEFT ? rd_->getLeftEEFrame() : rd_->getRightEEFrame();
 
     stateInformer_->getCurrentPose(target_frame, palm_pose, rd_->getPelvisFrame());
 
@@ -339,14 +339,14 @@ bool armTrajectory::nudgeArm(const armSide side, const direction drct, float nud
 
 bool armTrajectory::nudgeArmLocal(const armSide side, const direction drct, float nudgeStep){
 
-    std::string target_frame = side == LEFT ? "/leftPalm" : "/rightPalm";
+    std::string target_frame = side == LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
     int signInverter = side == LEFT ? 1 : -1;
 
     geometry_msgs::Pose value;
     stateInformer_->getCurrentPose(target_frame,value);
-    //    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+        std::cout<<"Before-> World Frame x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
     stateInformer_->transformPose(value, value,VAL_COMMON_NAMES::WORLD_TF,target_frame);
-    //    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+        std::cout<<"Before-> Local Frame x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
 
     if     (drct == direction::FRONT)     value.position.y += nudgeStep*signInverter;
     else if(drct == direction::BACK)      value.position.y -= nudgeStep*signInverter;
@@ -354,9 +354,9 @@ bool armTrajectory::nudgeArmLocal(const armSide side, const direction drct, floa
     else if(drct == direction::DOWN)      value.position.z -= nudgeStep;
     else if(drct == direction::LEFT)      value.position.x += nudgeStep*signInverter;
     else if(drct == direction::RIGHT)     value.position.x -= nudgeStep*signInverter;
-    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+    std::cout<<"After -> Local Frame x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
     stateInformer_->transformPose(value, value,target_frame,VAL_COMMON_NAMES::WORLD_TF);
-    std::cout<<"x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
+    std::cout<<"After -> World Frame x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
     moveArmInTaskSpace(side,value, 0.0f);
     return true;
 }
@@ -452,8 +452,8 @@ bool armTrajectory::nudgeArmLocal(const armSide side, float x, float y, float z,
 {
 
     std::cout<<"Nudge arm local called \n";
-    std::string target_frame = side == LEFT ? "/leftPalm" : "/rightPalm";
-    std::string target_EE_frame = side == LEFT ? VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME : VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
+    std::string target_frame = side == LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
+    std::string target_EE_frame = side == LEFT ? rd_->getLeftEEFrame() : rd_->getRightEEFrame();
     geometry_msgs::Pose value;
     geometry_msgs::Quaternion quat;
 
@@ -480,7 +480,7 @@ bool armTrajectory::nudgeArmPelvis(const armSide side, float x, float y, float z
 {
     std::cout<<"Nudge arm pelvis called \n";
     std::string target_frame = rd_->getPelvisFrame();
-    std::string target_EE_frame = side == LEFT ? VAL_COMMON_NAMES::L_END_EFFECTOR_FRAME : VAL_COMMON_NAMES::R_END_EFFECTOR_FRAME;
+    std::string target_EE_frame = side == LEFT ? rd_->getLeftEEFrame() : rd_->getRightEEFrame();
     geometry_msgs::Pose value;
     geometry_msgs::Quaternion quat;
 
