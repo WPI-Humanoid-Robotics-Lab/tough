@@ -35,7 +35,7 @@
         <joint name="torsoYaw" value="0" />
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="rightTorseEE" parent_link="rightWristRollLink" group="rightPalm" />
+    <end_effector name="rightTorsoEE" parent_link="rightWristRollLink" group="rightPalm" />
     <end_effector name="leftTorsoEE" parent_link="leftWristRollLink" group="leftPalm" />
     <end_effector name="rightArmEE" parent_link="rightWristRollLink" group="rightArm" />
     <end_effector name="leftArmEE" parent_link="leftWristRollLink" group="leftPalm" />
