@@ -19,18 +19,18 @@
    <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 2"/> 
 
    <!-- Start val_laser2point_cloud_node to publish pointcloud2 data -->
-   <include file="$(find val_perception_bringup)/launch/laser_assembler.launch"/>
+   <include file="$(find val_perception_bringup)/launch/field_laser_assembler.launch"/>
 
    <!-- Start stereo_image_proc to pusblish disparity image -->
-   <node ns="/multisense/camera" name="stereo_proc" pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" output="log">
+<!--   <node ns="/multisense/camera" name="stereo_proc" pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" output="log">
   	<param name="disparity_range" type="int" value="128"/>
-  	<param name="approximate_sync" type="bool" value="false"/> 
+        <param name="approximate_sync" type="bool" value="false"/> -->
    <!-- remap from="/multisense/camera/disparity" to="/multisense/left/disparity" / -->
-   <remap from="/multisense/camera/points2" to="/multisense/image_points2" />
-</node>
+<!--   <remap from="/multisense/camera/points2" to="/multisense/image_points2" />
+</node>-->
 
    <!-- Start button detector node -->
-   <node pkg="find_button" type="ButtonDetectorNode" name="button_detection"/>
+   <!--<node pkg="find_button" type="ButtonDetectorNode" name="button_detection"/>-->
 
    
 </launch>
