@@ -33,12 +33,12 @@ geometry_msgs::Pose leakDetectorGrabber::getGraspGoal(const armSide &side, const
     std::string palm_frame, end_effector_frame, thumb_frame;
     double pregrasp_angle;
     if(side == armSide::LEFT){
-        palm_frame = VAL_COMMON_NAMES::L_PALM_TF;
+        palm_frame = rd_->getLeftPalmFrame();
         end_effector_frame = rd_->getLeftEEFrame();
         thumb_frame = "/leftThumbRollLink";
         pregrasp_angle = -0.6977;
     } else {
-        palm_frame = VAL_COMMON_NAMES::R_PALM_TF;
+        palm_frame = rd_->getRightPalmFrame();
         end_effector_frame = rd_->getRightEEFrame();
         thumb_frame = "/rightThumbRollLink";
         pregrasp_angle = 0.6977;

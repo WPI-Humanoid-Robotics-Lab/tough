@@ -36,7 +36,7 @@
 #include <visualization_msgs/MarkerArray.h>
 
 #include <vector>
-#include "val_common/val_common_names.h"
+#include "tough_common/val_common_names.h"
 #include "tough_controller_interface/robot_state.h"
 
 

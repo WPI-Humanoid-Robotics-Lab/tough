@@ -1,5 +1,5 @@
 #include "val_task3/val_stairclimb.h"
-#include "val_common/val_common_defines.h"
+#include "tough_common/val_common_defines.h"
 #include "val_footstep/RobotWalker.h"
 #include "tough_controller_interface/arm_control_interface.h"
 

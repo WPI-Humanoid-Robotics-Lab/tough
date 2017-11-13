@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   tf
-  val_common
+  tough_common
   tough_controller_interface
   val_footstep
 )
@@ -106,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
   LIBRARIES val_qual2
-  CATKIN_DEPENDS roscpp std_msgs tf val_common tough_controller_interface val_footstep
+  CATKIN_DEPENDS roscpp std_msgs tf tough_common tough_controller_interface val_footstep
   DEPENDS system_lib
 )
 

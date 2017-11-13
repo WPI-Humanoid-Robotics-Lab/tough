@@ -3,7 +3,7 @@
 #include <ihmc_msgs/StopAllTrajectoryRosMessage.h>
 #include "tf/tf.h"
 #include <tf/transform_listener.h>
-#include "val_common/val_common_names.h"
+#include "tough_common/val_common_names.h"
 #include <tough_controller_interface/robot_state.h>
 #include <tough_controller_interface/arm_control_interface.h>
 using namespace std;

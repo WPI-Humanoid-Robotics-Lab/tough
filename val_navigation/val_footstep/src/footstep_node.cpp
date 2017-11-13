@@ -4,7 +4,7 @@
 #include <val_footstep/RobotWalker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <thread>
-#include "val_common/robot_description.h"
+#include "tough_common/robot_description.h"
 
 RobotWalker *walk;
 RobotStateInformer *current_state;

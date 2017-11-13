@@ -52,7 +52,8 @@
 #include <tough_controller_interface/head_control_interface.h>
 #include <val_footstep/RobotWalker.h>
 #include <tough_controller_interface/gripper_control_interface.h>
-
+#include "val_moveit_planners/val_cartesian_planner.h"
+#include <tough_controller_interface/wholebody_control_interface.h>
 // Constants
 #define TO_RADIANS 3.1415926535f / 180.0f
 #define TO_DEGREES 180.0f / 3.1415926535f
@@ -177,7 +178,8 @@ private Q_SLOTS:
     void resetChestOrientation();
     void resetArm();
     void resetRobot();
-
+    void createMoveitDisplay();
+    void deleteMoveitDisplay();
 
 private:
   rviz::VisualizationManager* manager_;
@@ -196,6 +198,7 @@ private:
   rviz::Display* mapDisplay_ ;
   rviz::Display* footstepMarkersDisplay_;
   rviz::Display* goalDisplay_;
+  rviz::Display* moveitDisplay_;
 
   rviz::ToolManager* toolManager_ ;
   rviz::ToolManager* mapToolManager_ ;
@@ -222,12 +225,15 @@ private:
   image_transport::ImageTransport it_;
   image_transport::Subscriber liveVideoSub;
 
-  chestTrajectory  *chestController_;
-  pelvisTrajectory *pelvisHeightController_;
-  armTrajectory    *armJointController_;
-  RobotWalker   *walkingController_;
-  HeadTrajectory   *headController_;
-  gripperControl   *gripperController_;
+  chestTrajectory       *chestController_;
+  pelvisTrajectory      *pelvisHeightController_;
+  armTrajectory         *armJointController_;
+  RobotWalker           *walkingController_;
+  HeadTrajectory        *headController_;
+  gripperControl        *gripperController_;
+  wholebodyManipulation *wholeBodyController_;
+  cartesianPlanner      *rightArmPlanner_;
+  cartesianPlanner      *leftArmPlanner_;
 
   RobotDescription *rd_;
   geometry_msgs::Pose   *clickedPoint_;

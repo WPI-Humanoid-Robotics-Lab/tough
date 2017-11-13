@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   pcl_ros
   perception_common
-  val_common
+  tough_common
   message_generation
   sensor_msgs
   std_msgs
@@ -120,7 +120,7 @@ add_definitions(${PCL_DEFINITIONS})
 catkin_package(
   INCLUDE_DIRS
   LIBRARIES led_detector
-  CATKIN_DEPENDS cv_bridge image_transport pcl_conversions pcl_ros roscpp sensor_msgs std_msgs val_common perception_common
+  CATKIN_DEPENDS cv_bridge image_transport pcl_conversions pcl_ros roscpp sensor_msgs std_msgs tough_common perception_common
   DEPENDS system_lib
 )
 
@@ -153,7 +153,7 @@ include_directories(
  add_dependencies(val_qual1 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(val_qual1  ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} perception_common val_common kdtree)
+ target_link_libraries(val_qual1  ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} perception_common tough_common kdtree)
 
 #############
 ## Install ##

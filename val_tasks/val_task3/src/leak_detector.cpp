@@ -13,6 +13,7 @@ leakDetector::leakDetector(ros::NodeHandle nh, armSide side, bool thumbwards):
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 10, true);
 
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
     pelvis_controller_  = new pelvisTrajectory(nh_);
     arm_controller_     = new armTrajectory(nh_);
 }
@@ -32,7 +33,7 @@ void leakDetector::leakMsgCB(const srcsim::Leak &leakmsg)
         leak_loc.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
         leak_loc.header.stamp = ros::Time::now();
 
-        std::string palm_frame = side_ == armSide::LEFT ? VAL_COMMON_NAMES::L_PALM_TF : VAL_COMMON_NAMES::R_PALM_TF;
+        std::string palm_frame = side_ == armSide::LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
         current_state_->getCurrentPose(palm_frame, leak_loc.pose, leak_loc.header.frame_id);
 
         leak_loc_pub_.publish(leak_loc);

@@ -7,7 +7,7 @@
 #include <ros/publisher.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
-#include <val_common/val_common_names.h>
+#include <tough_common/val_common_names.h>
 #include <tough_controller_interface/robot_state.h>
 #include <tough_controller_interface/arm_control_interface.h>
 #include <vector>

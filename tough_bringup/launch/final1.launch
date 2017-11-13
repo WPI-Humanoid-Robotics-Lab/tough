@@ -1,0 +1,47 @@
+<launch>
+    <arg name="extra_gazebo_args" default="" />
+    <arg name="debug" default="false" />
+    <arg name="grasping_init_wait_time" default="20" />
+    <arg name="use_local_build" default="false" />    
+    
+   <include file="$(find srcsim)/launch/unique_task1.launch">
+      <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)" />
+      <arg name="debug" value="$(arg debug)" />    
+      <arg name="use_local_build" value="$(arg use_local_build)" />
+      <arg name="grasping_init_wait_time" value="$(arg grasping_init_wait_time)" />
+   </include>
+
+   <node pkg="tough_bringup" type="init.py" name="initalize_robot"/>
+   <!-- Start spinning the lidar. Lidar speed is in rad/s. periodic snapshotter is set at 6s. To get a complete 360 pointcloud
+   we need pi/6 rad/s speed. it is set slightly higher than that to allow for little overlap-->
+   <!--   <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 0.55"/> -->
+
+   <!-- Start stereo_image_proc to pusblish disparity image -->
+<!--   <node ns="/multisense/camera" name="stereo_proc" pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" output="log">
+       <param name="prefilter_size" type="int" value="11"/>
+       <param name="prefilter_cap" type="int" value="40"/>
+       <param name="correlation_window_size" type="int" value="91"/>
+       <param name="min_disparity" type="int" value="0"/>
+       <param name="disparity_range" type="int" value="64"/>
+       <param name="uniqueness_ratio" type="double" value="4.0"/>
+       <param name="approximate_sync" type="bool" value="false"/>-->
+
+            <!--Stereo_algorithm StereoBM (0)
+            prefilter_size = 11
+            prefilter_cap = 40
+            correlation_window_size = 91
+            min_disparity = 0
+            disparity_range = 64
+            uniqueness_ratio = 4.0
+            texture_threshold = 1000
+            speckle_size = 200
+            speckle_ratio = 4
+
+            fullDP = false-->
+            <!-- remap from="/multisense/camera/disparity" to="/multisense/left/disparity" / -->
+<!--        <remap from="/multisense/camera/points2" to="/multisense/image_points2" />
+    </node>-->
+<!--    <include file="$(find val_perception_bringup)/launch/laser_assembler.launch"/>
+    <include file="$(find val_perception_bringup)/launch/octomap.launch"/>
+   <include file="$(find val_footstep)/launch/val_footstep.launch"/> -->
+</launch>

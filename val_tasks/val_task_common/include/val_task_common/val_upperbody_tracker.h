@@ -1,7 +1,7 @@
 # pragma once
 
 #include <navigation_common/frame_tracking.h>
-#include <val_common/val_common_defines.h>
+#include <tough_common/val_common_defines.h>
 
 #define DEBOUNCE_COUNT 10 // debounces the motion to stationary transition (its a up dopwn debounce logic)
 

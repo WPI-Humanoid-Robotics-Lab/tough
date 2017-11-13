@@ -6,7 +6,7 @@
 #include "rviz/properties/property_tree_model.h"
 #include "val_gui/configurationreader.h"
 #include "ros/package.h"
-#include "val_common/val_common_defines.h"
+#include "tough_common/val_common_defines.h"
 
 /**
  * This class creates the GUI using rviz APIs.
@@ -271,7 +271,24 @@ void ValkyrieGUI::initDisplayWidgets()
     QString imagePath = QString::fromStdString(ros::package::getPath("val_gui") + "/resources/coordinates.png");
     QImage qImage(imagePath);
     ui->lblAxes->setPixmap(QPixmap::fromImage(qImage));
+    moveitDisplay_ = nullptr;
 }
+
+// This doesn';t work as Moveit loads a panel which ends up with seg fault :(
+// I'll fix it some day. Until then we will try a different solution
+void ValkyrieGUI::createMoveitDisplay(){
+    moveitDisplay_ = manager_->createDisplay( "moveit_rviz_plugin/MotionPlanning", "MoveIt",false );
+    moveitDisplay_->subProp("Planning Request")->subProp("Planning Group")->setValue("leftMiddleFingerGroup");
+    moveitDisplay_->subProp("Planning Request")->subProp("Interactive Marker Size")->setValue("0.2");
+    moveitDisplay_->setEnabled(true);
+}
+
+void ValkyrieGUI::deleteMoveitDisplay(){
+    rviz::Display* tempDisplay =  moveitDisplay_;
+    moveitDisplay_ = nullptr;
+    delete tempDisplay;
+}
+
 
 void ValkyrieGUI::initTools(){
     /**
@@ -301,6 +318,11 @@ void ValkyrieGUI::initJointLimits() {
 
     rd_->getLeftArmJointLimits(left_arm_joint_limits);
     rd_->getRightArmJointLimits(right_arm_joint_limits);
+    // reduce the joint limits by 1cm to avoid excceeding limits at higher precision of float
+    for (size_t i = 0; i < left_arm_joint_limits.size(); i++ ){
+        left_arm_joint_limits[i] = {left_arm_joint_limits[i].first + 0.01, left_arm_joint_limits[i].second - 0.01};
+        right_arm_joint_limits[i] = {right_arm_joint_limits[i].first + 0.01, right_arm_joint_limits[i].second - 0.01};
+    }
 
     RIGHT_SHOULDER_PITCH_MAX= right_arm_joint_limits[0].second*TO_DEGREES;
     RIGHT_SHOULDER_PITCH_MIN= right_arm_joint_limits[0].first*TO_DEGREES;
@@ -348,8 +370,11 @@ void ValkyrieGUI::initJointLimits() {
 }
 
 void ValkyrieGUI::initDefaultValues() {
-    // 3D view. select none by default
+    // 3D view. select Pointcloud by default
     ui->radioBtnPointcloud->setEnabled(true);
+    ui->radioBtnPointcloud->setChecked(true);
+    octomapDisplay_->setEnabled(false);
+    cloudDisplay_->setEnabled(true);
 
     //Arms select left arm by default
     ui->radioArmSideLeft->setChecked(true);
@@ -408,6 +433,15 @@ void ValkyrieGUI::initValkyrieControllers() {
 
     //create a gripper controller object
     gripperController_ = new gripperControl(nh_);
+
+    // create a wholebody controller object
+    wholeBodyController_ = new wholebodyManipulation(nh_);
+
+    // right arm cartesian planner
+    rightArmPlanner_ = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+
+    // left arm cartesian planner
+    leftArmPlanner_ = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
 }
 
 void ValkyrieGUI::getArmState()
@@ -652,28 +686,58 @@ void ValkyrieGUI::nudgeArm(int btnID)
     //    left  -5
     //    right -6
     armSide side = ui->radioNudgeSideLeft->isChecked() ? LEFT : RIGHT;
+//    std::vector<geometry_msgs::Pose> waypoint;
+//    geometry_msgs::Pose pose;
+//    moveit_msgs::RobotTrajectory traj;
+
+//    float x=0.0f, y=0.0f, z=0.0f;
+
     switch (btnID) {
     case -2: //down
         armJointController_->nudgeArm(side, direction::DOWN);
+//        z -= 0.05;
         break;
     case -3: //up
         armJointController_->nudgeArm(side, direction::UP);
+//        z += 0.05;
         break;
     case -4: //back
         armJointController_->nudgeArm(side, direction::BACK);
+//        x -= 0.05;
         break;
     case -7: //front
         armJointController_->nudgeArm(side, direction::FRONT);
+//        x += 0.05;
         break;
     case -5: //left
         armJointController_->nudgeArm(side, direction::LEFT);
+//        y += 0.05;
         break;
     case -6: //right
         armJointController_->nudgeArm(side, direction::RIGHT);
+//        y -= 0.05;
         break;
     default:
         break;
     }
+
+//    armJointController_->nudgeArmLocal(side, x, y, z,pose);
+//    waypoint.clear();
+//    waypoint.push_back(pose);
+//    if(side ==armSide::RIGHT)
+//    {
+//        if(rightArmPlanner_->getTrajFromCartPoints(waypoint, traj, false, 0.2) > 0.1) {
+//            armJointController_->moveArmTrajectory(side, traj.joint_trajectory);
+//        }
+
+//    }
+//    else
+//    {
+//        if(leftArmPlanner_->getTrajFromCartPoints(waypoint, traj, false, 0.2) > 0.1){
+//            armJointController_->moveArmTrajectory(side, traj.joint_trajectory);
+//        }
+
+//    }
 
 }
 

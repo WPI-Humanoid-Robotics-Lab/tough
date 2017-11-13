@@ -1,5 +1,5 @@
 #include "val_task2/val_rover_detection.h"
-#include "val_common/val_common_names.h"
+#include "tough_common/val_common_names.h"
 
 #define lowerBox_pass_x_min  0.5
 #define lowerBox_pass_x_max  10.0

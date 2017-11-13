@@ -46,7 +46,7 @@ int main(int argc, char** argv){
      visualization_msgs::MarkerArray circle = visualization_msgs::MarkerArray();
      for (int i = 0; i < num_steps; i++) {
          visualization_msgs::Marker marker;
-         marker.header.frame_id = VAL_COMMON_NAMES::R_PALM_TF;
+         marker.header.frame_id = rd_->getRightPalmFrame();
          marker.header.stamp = ros::Time();
          marker.ns = "circle";
          marker.id = i;

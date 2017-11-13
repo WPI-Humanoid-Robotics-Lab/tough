@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "val_task_common/val_task_common_utils.h"
-#include "val_control_common/val_control_common.h"
+#include "tough_control_common/tough_control_common.h"
 
 solar_panel_handle_grabber::solar_panel_handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
 {

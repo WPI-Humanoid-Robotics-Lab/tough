@@ -1,5 +1,5 @@
 #include "navigation_common/map_generator.h"
-#include <val_common/val_common_names.h>
+#include <tough_common/val_common_names.h>
 
 size_t MapGenerator::getIndex(float x, float y){
 
@@ -62,9 +62,9 @@ MapGenerator::MapGenerator(ros::NodeHandle &n):nh_(n) {
 //        }
 //    }
 
-    pointcloudSub_       = nh_.subscribe("walkway", 10, &MapGenerator::convertToOccupancyGrid, this);
+    pointcloudSub_       = nh_.subscribe("walkway", 10, &MapGenerator::convertToOccupancyGrid, this);   // add free cells by publishing to this topic
     resetMapSub_         = nh_.subscribe("reset_map", 10, &MapGenerator::resetMap, this);
-    blockMapSub_         = nh_.subscribe("/block_map", 10, &MapGenerator::updatePointsToBlock, this);
+    blockMapSub_         = nh_.subscribe("/block_map", 10, &MapGenerator::updatePointsToBlock, this);   // add permanent obstacles by publishing to this topic
     clearCurrentPoseSub_ = nh_.subscribe("map/clear_current_pose", 10, &MapGenerator::clearCurrentPoseCB, this);
     mapPub_        = nh_.advertise<nav_msgs::OccupancyGrid>("/map", 10, true);
     visitedMapPub_ = nh_.advertise<nav_msgs::OccupancyGrid>("/visited_map", 10, true);

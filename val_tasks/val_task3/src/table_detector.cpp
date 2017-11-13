@@ -15,7 +15,7 @@
 // Local includes
 #include "val_task3/table_detector.h"
 #include <visualization_msgs/Marker.h>
-#include "val_common/val_common_names.h"
+#include "tough_common/val_common_names.h"
 
 #define DISABLE_DRAWINGS false
 //#define DISABLE_TRACKBAR true

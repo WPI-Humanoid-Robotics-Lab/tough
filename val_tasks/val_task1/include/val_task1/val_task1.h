@@ -34,7 +34,7 @@
 #include <val_moveit_planners/val_cartesian_planner.h>
 #include <tough_controller_interface/wholebody_control_interface.h>
 #include <val_task_common/val_upperbody_tracker.h>
-#include <val_control_common/val_control_common.h>
+#include <tough_control_common/tough_control_common.h>
 #include <val_task1/pcl_handle_detector.h>
 #include <chrono>
 #include <ctime>

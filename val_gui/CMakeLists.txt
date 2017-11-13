@@ -19,6 +19,8 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
   tough_controller_interface
+  val_moveit_planners
+  moveit_ros_visualization
   val_footstep
 )
 

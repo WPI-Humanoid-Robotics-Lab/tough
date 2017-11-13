@@ -1302,7 +1302,7 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
         }
         else {
             geometry_msgs::Pose currentPalmPose;
-            std::string palmFrame = panel_grasping_hand_ == armSide ::LEFT ? VAL_COMMON_NAMES::L_PALM_TF : VAL_COMMON_NAMES::R_PALM_TF;
+            std::string palmFrame = panel_grasping_hand_ == armSide ::LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
 
             robot_state_->getCurrentPose(palmFrame, currentPalmPose, rd_->getPelvisFrame());
             currentPalmPose.position.x -= 0.2;

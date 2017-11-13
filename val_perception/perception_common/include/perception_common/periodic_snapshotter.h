@@ -38,11 +38,11 @@
 #include <perception_common/MultisenseImage.h>
 #include <perception_common/MultisensePointCloud.h>
 #include <perception_common/PointCloudHelper.h>
-#include <val_common/val_common_names.h>
+#include <tough_common/val_common_names.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int8.h>
 #include <tough_controller_interface/robot_state.h>
-#include "val_common/robot_description.h"
+#include "tough_common/robot_description.h"
 
 namespace laser_assembler
 {
@@ -129,6 +129,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr laser_assembler::PeriodicSnapshotter::POINTC
 
 
 // This function should move out to perception common as a service.
+// Do not use this function.
 bool PeriodicSnapshotter::getNearestPoint(geometry_msgs::PointStamped &point, int K)
 {
     if (PeriodicSnapshotter::POINTCLOUD_STATIC_PTR->empty()){

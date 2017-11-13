@@ -1,11 +1,14 @@
 #include <val_circle.h>
+#include "tough_common/robot_description.h"
+
+RobotDescription* rd_;
 
 int main(int argc, char** argv)
 {
   // Initialize ROS
   ros::init(argc, argv, "val_circle");
   ros::NodeHandle nh;
-
+  rd_ = RobotDescription::getRobotDescription(nh);
   right_armTraj = new armTrajectory(nh);
   left_armTraj = new armTrajectory(nh);
   right_poses = new std::vector<geometry_msgs::PoseStamped*>;
@@ -69,14 +72,14 @@ void pose_callback(const geometry_msgs::PoseStamped& msg)
   geometry_msgs::PoseStamped* input_pose = new geometry_msgs::PoseStamped;
   input_pose->pose = msg.pose;
   input_pose->header = msg.header;
-  if(!msg.header.frame_id.compare(VAL_COMMON_NAMES::L_PALM_TF))
+  if(!msg.header.frame_id.compare(rd_->getLeftPalmFrame()))
   {
     ROS_INFO("Left pose received");
     left_poses->push_back(input_pose);
     left_pose_received = true;
     std::cout << "input_pose: " <<*input_pose<< '\n';
   }
-  if(!msg.header.frame_id.compare(VAL_COMMON_NAMES::R_PALM_TF)){
+  if(!msg.header.frame_id.compare(rd_->getRightPalmFrame())){
     ROS_INFO("Right pose received");
     right_poses->push_back(input_pose);
     right_pose_received = true;
@@ -146,7 +149,7 @@ void execute_callback(const std_msgs::Int16& msg)
       std::vector<armTrajectory::armTaskSpaceData>* arm_data_vector;
       //the pose has to be stamped with the side to this point.
       //ergo, latin, poses published to the val_circle have to be stamped with the arm_side to use.
-      if(center_pose.header.frame_id == VAL_COMMON_NAMES::R_PALM_TF)
+      if(center_pose.header.frame_id == rd_->getRightPalmFrame())
       {
         arm_data_vector = generate_task_space_data(circle_poses,armSide::RIGHT);
         right_armTraj->moveArmInTaskSpace(*arm_data_vector);
@@ -226,7 +229,7 @@ vector<geometry_msgs::PoseStamped*>* generate_circle_poses(geometry_msgs::PoseSt
     visualization_msgs::MarkerArray circle = visualization_msgs::MarkerArray();
     for (int i = 0; i < num_steps; i++) {
         visualization_msgs::Marker marker;
-        marker.header.frame_id = VAL_COMMON_NAMES::R_PALM_TF;
+        marker.header.frame_id = rd_->getRightPalmFrame();
         marker.header.stamp = ros::Time();
         marker.ns = "circle";
         marker.id = i;

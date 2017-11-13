@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   tf
-  val_common
+  tough_common
   tough_controller_interface
   )
 

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "val_common/val_common_defines.h"
+#include "tough_common/val_common_defines.h"
 #include <tough_controller_interface/arm_control_interface.h>
 #include <std_msgs/String.h>
 

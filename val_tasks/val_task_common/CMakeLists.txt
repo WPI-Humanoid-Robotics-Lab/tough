@@ -23,7 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   tough_controller_interface
   image_transport
   val_moveit_planners
-  val_control_common
+  tough_control_common
 )
 
 ## System dependencies are found with CMake's conventions
@@ -171,11 +171,11 @@ target_link_libraries(val_walk_tracker_node
    ${catkin_LIBRARIES} ${PROJECT_NAME}
  )
 
- add_executable(walkway_point_generator src/val_walkway_seed_point_generator.cpp)
- add_dependencies(walkway_point_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
- target_link_libraries(walkway_point_generator
-   ${catkin_LIBRARIES} ${PCL_LIBRARIES}
- )
+# add_executable(walkway_point_generator src/val_walkway_seed_point_generator.cpp)
+# add_dependencies(walkway_point_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(walkway_point_generator
+#   ${catkin_LIBRARIES} ${PCL_LIBRARIES}
+# )
 
  add_executable(FinishBoxDetector src/finish_box_detector_node.cpp)
  add_dependencies(FinishBoxDetector ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

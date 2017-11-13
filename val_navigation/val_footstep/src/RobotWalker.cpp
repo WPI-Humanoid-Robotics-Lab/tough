@@ -5,7 +5,7 @@
  * */
 
 #include "val_footstep/RobotWalker.h"
-#include "val_common/val_common_names.h"
+#include "tough_common/val_common_names.h"
 #include <iostream>
 #include <ros/ros.h>
 

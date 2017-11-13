@@ -706,7 +706,7 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
         // sleep before grasping (to account for sway coming with ches motion)
         ros::Duration(1).sleep();
         geometry_msgs::Pose pose;
-        robot_state_->getCurrentPose(VAL_COMMON_NAMES::R_PALM_TF, pose);
+        robot_state_->getCurrentPose(rd_->getRightPalmFrame(), pose);
         handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[PITCH_KNOB_HANDLE]);
         ros::Duration(0.2).sleep(); //wait till grasp is complete
         eventQueue.riseEvent("/GRASP_PITCH_HANDLE_EXECUTING");
@@ -1024,7 +1024,7 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
         // sleep before grasping (to account for sway coming with ches motion)
         ros::Duration(1).sleep();
         geometry_msgs::Pose pose;
-        robot_state_->getCurrentPose(VAL_COMMON_NAMES::L_PALM_TF, pose);
+        robot_state_->getCurrentPose(rd_->getLeftPalmFrame(), pose);
         handle_grabber_->grasp_handles(armSide::LEFT , handle_loc_[YAW_KNOB_HANDLE]);
         ros::Duration(0.2).sleep(); //wait till grasp is complete
         eventQueue.riseEvent("/GRASP_YAW_HANDLE_EXECUTING");

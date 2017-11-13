@@ -1,7 +1,7 @@
 #include "val_task2/val_solar_detection.h"
 #include "val_task2/val_rover_detection.h"
 
-#include "val_common/val_common_names.h"
+#include "tough_common/val_common_names.h"
 
 int main(int argc, char** argv){
     ros::init(argc, argv, "solar_array_detection");

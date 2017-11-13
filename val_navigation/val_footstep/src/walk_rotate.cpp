@@ -2,7 +2,7 @@
 #include<val_footstep/RobotWalker.h>
 #include<ihmc_msgs/FootstepDataListRosMessage.h>
 #include"geometry_msgs/Pose2D.h"
-#include "val_common/val_common_defines.h"
+#include "tough_common/val_common_defines.h"
 #include "tough_controller_interface/robot_state.h"
 
 

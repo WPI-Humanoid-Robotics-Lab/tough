@@ -15,7 +15,7 @@
                 <!-- filter the ground plane. \todo: tune these parameters -->
                 <param name="filter_ground" value="true" />
                 <param name="ground_filter/distance" value="1.0"/>
-<<<<<<< HEAD:val_bringup/launch/octomap.launch
+<<<<<<< HEAD:tough_bringup/launch/octomap.launch
 
                 <param name="ground_filter/plane_distance" value="0.1"/>
 =======

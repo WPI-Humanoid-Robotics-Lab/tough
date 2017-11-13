@@ -33,7 +33,7 @@ CableTask::CableTask(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
     right_arm_planner_cable = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
 
     left_arm_planner_choke = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
-    left_arm_planner_cable = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_PALM_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    left_arm_planner_cable = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
 
     wholebody_controller_ = new wholebodyManipulation(nh_);
     chest_controller_     = new chestTrajectory(nh_);

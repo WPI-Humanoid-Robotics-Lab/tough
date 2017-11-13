@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <val_common/val_common_names.h>
+#include <tough_common/val_common_names.h>
 #include <perception_common/MultisenseImage.h>
 #include <perception_common/MultisensePointCloud.h>
 #include <perception_common/PointCloudHelper.h>
@@ -17,7 +17,7 @@
 #include <cv_bridge/cv_bridge.h>
 
 #include <thread>
-#include "val_common/kdtree/alglibmisc.h"
+#include "tough_common/kdtree/alglibmisc.h"
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>

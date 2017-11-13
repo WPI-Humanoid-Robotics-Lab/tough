@@ -8,7 +8,7 @@
 #include <geometry_msgs/Pose2D.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <val_common/val_common_names.h>
+#include <tough_common/val_common_names.h>
 #include <tough_controller_interface/chest_control_interface.h>
 #include <tough_controller_interface/pelvis_control_interface.h>
 #include <tough_controller_interface/gripper_control_interface.h>

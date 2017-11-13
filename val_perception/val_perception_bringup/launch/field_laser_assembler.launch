@@ -27,9 +27,9 @@
     </node>
 
     <node type="periodic_snapshotter" pkg="perception_common" name="val_laser_assembler_node"  ns="field"/>
-    <node type="val_walkway_filter" pkg="val_filters" name="val_walkway_filter"  ns="field"/>
+    <!--<node type="val_walkway_filter" pkg="val_filters" name="val_walkway_filter"  ns="field"/>-->
 
-    <node type="walkway_point_generator" pkg="val_task_common" name="walkway_generator"  ns="field"/>
+    <node type="walkway_point_generator" pkg="perception_common" name="walkway_generator"  ns="field"/>
     <node type="map_generator" pkg="navigation_common" name="map_generator"  ns="field"/>
 
     <node type="left_image_inverter_node" pkg="val_perception_bringup" name="left_image_inverter"  ns="field"/>

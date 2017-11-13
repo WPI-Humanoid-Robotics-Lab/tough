@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   visualization_msgs
   ihmc_msgs
-  val_common
+  tough_common
   tough_controller_interface
   )
 #find_package(PkgConfig REQUIRED)
@@ -42,7 +42,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS message_runtime humanoid_nav_msgs val_common
+  CATKIN_DEPENDS message_runtime humanoid_nav_msgs tough_common
   )
 
 ###########

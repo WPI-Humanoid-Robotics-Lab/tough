@@ -12,7 +12,7 @@
 #include <tf/transform_datatypes.h>
 #include "val_footstep/RobotWalker.h"
 #include "val_task3_utils.h"
-#include "val_control_common/val_control_common.h"
+#include "tough_control_common/tough_control_common.h"
 
 class DoorOpener{
 

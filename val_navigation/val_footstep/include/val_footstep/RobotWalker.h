@@ -17,9 +17,9 @@
 #include "ros/time.h"
 #include "tf/tf.h"
 #include <tf/transform_listener.h>
-#include <val_common/val_common_defines.h>
+#include <tough_common/val_common_defines.h>
 #include <tough_controller_interface/robot_state.h>
-#include "val_common/robot_description.h"
+#include "tough_common/robot_description.h"
 
 
 /**

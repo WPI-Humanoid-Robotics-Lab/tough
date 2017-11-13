@@ -5,6 +5,7 @@
 #include <srcsim/Leak.h>
 #include <val_moveit_planners/val_cartesian_planner.h>
 #include <tough_controller_interface/wholebody_control_interface.h>
+#include "tough_common/robot_description.h"
 
 #define VERTICAL_WIDTH    0.25
 #define HORIZONTAL_WIDTH  0.25
@@ -19,6 +20,7 @@ private:
     task3Utils task3Utils_;
     pelvisTrajectory* pelvis_controller_;
     armTrajectory*  arm_controller_;
+    RobotDescription* rd_;
 
     armSide side_;
     bool thumbwards_;

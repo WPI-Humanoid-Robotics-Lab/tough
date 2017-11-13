@@ -7,7 +7,7 @@ project(val_laser2point_cloud)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   perception_common
-  val_common
+  tough_common
 )
 
 ## System dependencies are found with CMake's conventions
@@ -102,7 +102,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   # INCLUDE_DIRS include
   #LIBRARIES val_laser2point_cloud
-  CATKIN_DEPENDS roscpp val_common perception_common
+  CATKIN_DEPENDS roscpp tough_common perception_common
   DEPENDS system_lib
 )
 

@@ -11,9 +11,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "val_task_common/val_task_common_utils.h"
-#include "val_control_common/val_control_common.h"
+#include "tough_control_common/tough_control_common.h"
 #include "val_task2/val_task2_utils.h"
-#include "val_control_common/val_control_common.h"
+#include "tough_control_common/tough_control_common.h"
 
 #define Y_OFFSET 0.05
 

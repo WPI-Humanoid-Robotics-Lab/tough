@@ -15,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   pcl_ros
   perception_common
-  val_common
+  tough_common
   message_generation
   sensor_msgs
   std_msgs

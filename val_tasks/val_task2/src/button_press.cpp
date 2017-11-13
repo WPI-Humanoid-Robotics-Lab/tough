@@ -48,7 +48,7 @@ ButtonPress::ButtonPress(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(nh
     //    rightHandOrientation_.quaternion.w = 0.691;
 
     // Initializing planners
-    left_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_PALM_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    left_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     right_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     wholebody_controller_ = new wholebodyManipulation(nh_);
     chest_controller_ = new chestTrajectory(nh_);
@@ -75,7 +75,7 @@ bool ButtonPress::pressButton(const armSide side, geometry_msgs::Point &goal, fl
     current_state_->getCurrentPose("/leftMiddleFingerPitch1Link",leftOffset,"/leftThumbRollLink");
     if(side == armSide::LEFT){
         armSeed = &leftShoulderSeed_;
-        endEffectorFrame = VAL_COMMON_NAMES::LEFT_PALM_GROUP;
+        endEffectorFrame = VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP;
         xFingerOffset = leftOffset.position.x;
         yFingerOffset = leftOffset.position.y;// minor offsets to hit centeto hit center of buttonr of button
         zFingerOffset = leftOffset.position.z; // minor offsets to hit center of buttonto hit center of button
