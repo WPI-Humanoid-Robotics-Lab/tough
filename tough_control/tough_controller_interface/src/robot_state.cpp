@@ -352,7 +352,7 @@ bool RobotStateInformer::transformVector(const geometry_msgs::Vector3 &vec_in, g
     return true;
 }
 
-bool RobotStateInformer::isGraspped(armSide side)
+bool RobotStateInformer::isGraspped(RobotSide side)
 {
     std::vector<float> jointPos,closeGrasp;
     closeGrasp= side == LEFT ? closeLeftGrasp : closeRightGrasp;

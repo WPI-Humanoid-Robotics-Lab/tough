@@ -242,7 +242,7 @@ bool getPoseRGB(int index, geometry_msgs::Point &pixelCoordinates)
 {
     bool poseXYZDetected = false;
     tf::TransformListener listener;
-    src_perception::StereoPointCloudColor::Ptr organized_cloud(new src_perception::StereoPointCloudColor);
+    tough_perception::StereoPointCloudColor::Ptr organized_cloud(new tough_perception::StereoPointCloudColor);
     static tf::TransformBroadcaster br;
     tf::Transform transform;
     tf::Quaternion orientation;
@@ -262,7 +262,7 @@ bool getPoseRGB(int index, geometry_msgs::Point &pixelCoordinates)
     }
 
     // Obtaining a stereo point cloud for world coordinates and RGB values
-    src_perception::PointCloudHelper::generateOrganizedRGBDCloud(DISPARITY_IMAGE_VECT[index], COLOR_IMAGE_VECT[index], q_MATRIX, organized_cloud);
+    tough_perception::PointCloudHelper::generateOrganizedRGBDCloud(DISPARITY_IMAGE_VECT[index], COLOR_IMAGE_VECT[index], q_MATRIX, organized_cloud);
     pcl_point = organized_cloud->at(pixelCoordinates.x, pixelCoordinates.y);
 
     // store the in PointStamped to tranfor it from optical frame to head frame.

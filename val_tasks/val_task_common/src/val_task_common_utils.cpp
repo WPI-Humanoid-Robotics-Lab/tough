@@ -68,15 +68,15 @@ void taskCommonUtils::moveToWalkSafePose(ros::NodeHandle &nh)
     ros::Duration(1).sleep();
 
     gripperControl gripper_controller(nh);
-    gripper_controller.openGripper(armSide::RIGHT);
-    gripper_controller.openGripper(armSide::LEFT);
+    gripper_controller.openGripper(RobotSide::RIGHT);
+    gripper_controller.openGripper(RobotSide::LEFT);
     ros::Duration(0.2).sleep();
 
     armTrajectory arm_controller(nh);
     ROS_INFO("Moving Arms Now");
-    arm_controller.moveToDefaultPose(armSide::RIGHT);
+    arm_controller.moveToDefaultPose(RobotSide::RIGHT);
     ros::Duration(0.2).sleep();
-    arm_controller.moveToDefaultPose(armSide::LEFT);
+    arm_controller.moveToDefaultPose(RobotSide::LEFT);
     ros::Duration(0.2).sleep();
 }
 
@@ -105,7 +105,7 @@ void taskCommonUtils::moveToInitPose(ros::NodeHandle &nh)
     ros::Duration(0.5).sleep();
 }
 
-void taskCommonUtils::fixHandFramePalmDown(ros::NodeHandle nh, armSide side, geometry_msgs::Pose &poseInWorldFrame){
+void taskCommonUtils::fixHandFramePalmDown(ros::NodeHandle nh, RobotSide side, geometry_msgs::Pose &poseInWorldFrame){
 
     RobotStateInformer *current_state = RobotStateInformer::getRobotStateInformer(nh);
     RobotDescription *rd_ = RobotDescription::getRobotDescription(nh);
@@ -117,7 +117,7 @@ void taskCommonUtils::fixHandFramePalmDown(ros::NodeHandle nh, armSide side, geo
     double roll, pitch, yaw;
     tf::Matrix3x3(tfQuat).getRPY(roll, pitch, yaw);
 
-    if (side == armSide::LEFT){
+    if (side == RobotSide::LEFT){
         pitch += M_PI_2;
         yaw   -= M_PI_2;
     }
@@ -131,7 +131,7 @@ void taskCommonUtils::fixHandFramePalmDown(ros::NodeHandle nh, armSide side, geo
 
 }
 
-void taskCommonUtils::fixHandFramePalmUp(ros::NodeHandle nh, armSide side, geometry_msgs::Pose &poseInWorldFrame)
+void taskCommonUtils::fixHandFramePalmUp(ros::NodeHandle nh, RobotSide side, geometry_msgs::Pose &poseInWorldFrame)
 {
     RobotStateInformer *current_state = RobotStateInformer::getRobotStateInformer(nh);
     RobotDescription *rd_ = RobotDescription::getRobotDescription(nh);
@@ -143,7 +143,7 @@ void taskCommonUtils::fixHandFramePalmUp(ros::NodeHandle nh, armSide side, geome
     double roll, pitch, yaw;
     tf::Matrix3x3(tfQuat).getRPY(roll, pitch, yaw);
 
-    if (side == armSide::LEFT){
+    if (side == RobotSide::LEFT){
         roll  += M_PI / 6.0f;
         pitch -= 80.0*M_PI/180.0;
         yaw   -= M_PI * 4.0f/6.0f;
@@ -157,7 +157,7 @@ void taskCommonUtils::fixHandFramePalmUp(ros::NodeHandle nh, armSide side, geome
     tf::quaternionTFToMsg(tfQuatOut, poseInPelvisFrame.orientation);
     current_state->transformPose(poseInPelvisFrame, poseInWorldFrame, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
 }
-bool taskCommonUtils::slowGrip(ros::NodeHandle nh,armSide side, std::vector<double> initial, std::vector<double> final, int iterations, float executionTime)
+bool taskCommonUtils::slowGrip(ros::NodeHandle nh,RobotSide side, std::vector<double> initial, std::vector<double> final, int iterations, float executionTime)
 {
     std::vector<double> diff,step;
     for (size_t i = 0; i < initial.size(); ++i) {

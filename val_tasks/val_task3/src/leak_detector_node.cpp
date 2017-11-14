@@ -16,7 +16,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    armSide side = (std::strcmp(argv[1], "left") == 0) ? armSide::LEFT : armSide::RIGHT;
+    RobotSide side = (std::strcmp(argv[1], "left") == 0) ? RobotSide::LEFT : RobotSide::RIGHT;
     bool thumbwards = (std::strcmp(argv[2], "1") == 0);
 
     leakDetector leak_detector(nh_, side, thumbwards);

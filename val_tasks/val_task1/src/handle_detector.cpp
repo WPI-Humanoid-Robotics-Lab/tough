@@ -6,7 +6,7 @@
 
 #define DISABLE_DRAWINGS true
 
-HandleDetector::HandleDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor)
+HandleDetector::HandleDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new tough_perception::StereoPointCloudColor)
 {
     ms_sensor_.giveQMatrix(qMatrix_);
 
@@ -241,7 +241,7 @@ bool HandleDetector::findHandles(std::vector<geometry_msgs::Point>& handleLocs)
 
     //    Starting a thread with lambda as debugging normal thread call was taking longer. [&] is because we are calling a static function
     std::thread t1([&](){
-                src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud_);
+                tough_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud_);
             });
     t1.detach();
 

@@ -16,7 +16,7 @@
 #include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/OccupancyGrid.h>
 
-#include "val_footstep/RobotWalker.h"
+#include "tough_footstep/RobotWalker.h"
 #include "val_task_common/val_walk_tracker.h"
 #include "val_task_common/panel_detection.h"
 #include "tough_controller_interface/chest_control_interface.h"
@@ -31,7 +31,7 @@
 #include "val_task_common/val_task_common_utils.h"
 #include "val_task_common/finish_box_detector.h"
 #include <val_task1/val_task1_utils.h>
-#include <val_moveit_planners/val_cartesian_planner.h>
+#include <tough_moveit_planners/tough_cartesian_planner.h>
 #include <tough_controller_interface/wholebody_control_interface.h>
 #include <val_task_common/val_upperbody_tracker.h>
 #include <tough_control_common/tough_control_common.h>
@@ -89,8 +89,8 @@ class valTask1 {
     // task1 utils
     task1Utils* task1_utils_;
     // cartesian planner
-    cartesianPlanner* right_arm_planner_;
-    cartesianPlanner* left_arm_planner_;
+    CartesianPlanner* right_arm_planner_;
+    CartesianPlanner* left_arm_planner_;
     // grasp state variable
     prevGraspState prev_grasp_state_;
     // val control common api's

@@ -43,7 +43,7 @@
     </node>-
     <include file="$(find val_perception_bringup)/launch/laser_assembler.launch"/>
     <include file="$(find val_perception_bringup)/launch/octomap.launch"/>
-  <include file="$(find val_footstep)/launch/val_footstep.launch"/> -->
+  <include file="$(find tough_footstep)/launch/tough_footstep.launch"/> -->
 
   <!-- launch task2 -->
    <!-- include file="$(find val_task2)/launch/task2.launch"/ -->

@@ -1,6 +1,6 @@
 #include <tough_controller_interface/arm_control_interface.h>
 #include "tough_controller_interface/wholebody_control_interface.h"
-#include "val_moveit_planners/val_cartesian_planner.h"
+#include "tough_moveit_planners/tough_cartesian_planner.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <std_msgs/Empty.h>
@@ -32,17 +32,17 @@ int main(int argc, char **argv)
     log_msg("starting planners");
     armTrajectory armTraj(nh);
     wholebodyManipulation wholeBodyController(nh);
-    cartesianPlanner right_arm_planner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
-    cartesianPlanner left_arm_planner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    CartesianPlanner right_arm_planner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    CartesianPlanner left_arm_planner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     moveit_msgs::RobotTrajectory traj;
 
     ros::Duration(1).sleep();
-    armSide side;
+    RobotSide side;
     std::vector<geometry_msgs::Pose> waypoint;
     geometry_msgs::Pose pose;
     if(argc == 6){
-        side = std::atoi(argv[1]) == 0 ? armSide::LEFT : armSide::RIGHT;
-        std::string side_str = (side == armSide::LEFT ? "left" : "right");
+        side = std::atoi(argv[1]) == 0 ? RobotSide::LEFT : RobotSide::RIGHT;
+        std::string side_str = (side == RobotSide::LEFT ? "left" : "right");
         if(std::atoi(argv[2]) ==0) {
             log_msg("Nudging " + side_str + " arm by given amount using nudgeArmLocal");
             armTraj.nudgeArmLocal(side, std::atof(argv[3]),std::atof(argv[4]),std::atof(argv[5]),pose);
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 
         waypoint.clear();
         waypoint.push_back(pose);
-        if(side ==armSide::RIGHT)
+        if(side ==RobotSide::RIGHT)
         {
             if (right_arm_planner.getTrajFromCartPoints(waypoint, traj, false)> 0.98){
                 log_msg("right arm whole body msg executing");

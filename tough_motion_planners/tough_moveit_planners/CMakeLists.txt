@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(val_moveit_planners)
+project(tough_moveit_planners)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
@@ -124,7 +124,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES val_moveit_planners
+  LIBRARIES tough_moveit_planners
   #CATKIN_DEPENDS moveit_commander moveit_config_trac_ik moveit_core moveit_fake_controller_manager moveit_msgs moveit_planners_ompl moveit_ros_benchmarks moveit_ros_benchmarks_gui moveit_ros_control_interface moveit_ros_manipulation moveit_ros_move_group moveit_ros_perception moveit_ros_planning moveit_ros_planning_interface moveit_ros_robot_interaction moveit_ros_visualization moveit_ros_warehouse moveit_simple_controller_manager trac_ik_examples trac_ik_kinematics_plugin trac_ik_lib
   #DEPENDS system_lib
 )
@@ -142,7 +142,7 @@ include_directories(
 )
 ## Declare a C++ library
  add_library(${PROJECT_NAME}
-   src/val_cartesian_planner.cpp
+   src/tough_cartesian_planner.cpp
  )
 
 ## Add cmake target dependencies of the library

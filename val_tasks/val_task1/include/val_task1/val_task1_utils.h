@@ -18,7 +18,7 @@
 #include "navigation_common/map_generator.h"
 #include <std_msgs/String.h>
 #include <geometry_msgs/Pose2D.h>
-#include <val_footstep/RobotWalker.h>
+#include <tough_footstep/RobotWalker.h>
 #include <srcsim/Harness.h>
 
 // minimum moment to determine the rotation direction

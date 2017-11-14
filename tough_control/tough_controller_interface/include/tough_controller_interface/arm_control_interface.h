@@ -39,7 +39,7 @@ public:
      * and pose2 will have time=5. This means that executing trajectory to reach pose 2 will take 5-2=3 sec.
      */
     struct armJointData {
-        armSide side;
+        RobotSide side;
         std::vector<float> arm_pose;
         float time;
     };
@@ -49,7 +49,7 @@ public:
      * side can be either RIGHT or LEFT. pose is a Pose in task space (world frame) that the hand should move to. time is the total execution time of the trajectory.
      */
     struct armTaskSpaceData {
-      armSide side;
+      RobotSide side;
       geometry_msgs::Pose pose;
       float time;
     };
@@ -58,13 +58,13 @@ public:
      * @brief moveToDefaultPose Moves the robot arm to default position
      * @param side  Side of robot. It can be RIGHT or LEFT.
      */
-    void moveToDefaultPose(armSide side);
+    void moveToDefaultPose(RobotSide side);
 
     /**
      * @brief moveToZeroPose Moves the robot arm to zero position.
      * @param side  Side of the robot. It can be RIGHT or LEFT.
      */
-    void moveToZeroPose(armSide side);
+    void moveToZeroPose(RobotSide side);
 
     /**
      * @brief moveArmJoints Moves arm joints to given joint angles. All angles in radians.
@@ -72,7 +72,7 @@ public:
      * @param arm_pose      A vector that stores a vector with 7 values one for each joint. Number of values in the vector are the number of trajectory points.
      * @param time          Total time to execute the trajectory. each trajectory point is equally spaced in time.
      */
-    void moveArmJoints(const armSide side,const std::vector<std::vector<float> > &arm_pose,const float time);
+    void moveArmJoints(const RobotSide side,const std::vector<std::vector<float> > &arm_pose,const float time);
 
     /**
      * @brief moveArmJoints Moves arm joints to given joint angles. All angles in radians.
@@ -97,14 +97,14 @@ public:
      * @brief closeHand	Closed the hand on the give side of Valkyrie R5.
      * @param side	Side of the robot. It can be RIGHT or LEFT.
      */
-    void closeHand(const armSide side);
+    void closeHand(const RobotSide side);
 
     /**
      * @brief moveArmInTaskSpaceMessage Moves the arm to a given point in task space (world frame)
      * @parm side	Side of the robot. It can be RIGHT or LEFT.
      * @param point	The point in task space to move the arm to.
      */
-    void moveArmInTaskSpaceMessage(const armSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl=ihmc_msgs::HandTrajectoryRosMessage::CHEST);
+    void moveArmInTaskSpaceMessage(const RobotSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl=ihmc_msgs::HandTrajectoryRosMessage::CHEST);
 
     /**
      * @brief moveArmInTaskSpace  Moves the arm to a give pose in task space (world frame)
@@ -112,7 +112,7 @@ public:
      * @param pose  The pose in task space to move the arm to.
      * @param time  Total time to execute the trajectory.
      */
-    void moveArmInTaskSpace(const armSide side, const geometry_msgs::Pose &pose, const float time);
+    void moveArmInTaskSpace(const RobotSide side, const geometry_msgs::Pose &pose, const float time);
 
     /**
      * @brief moveArmInTaskSpace  Moves the arm(s) to the given position in task space (world frame).
@@ -125,7 +125,7 @@ public:
      * @param side              Side of the robot. It can be RIGHT or LEFT.
      * @param traj              Trajectory in the form of trajectory_msgs::JointTrajectory
      */
-    void moveArmTrajectory(const armSide side, const trajectory_msgs::JointTrajectory &traj);
+    void moveArmTrajectory(const RobotSide side, const trajectory_msgs::JointTrajectory &traj);
 
 
     /**
@@ -135,16 +135,16 @@ public:
      * @param nudgeStep The step length to nudge. Default is 5cm (~6/32")
      * @return
      */
-    bool nudgeArm(const armSide side, const direction drct, float nudgeStep = 0.05);
+    bool nudgeArm(const RobotSide side, const direction drct, float nudgeStep = 0.05);
 
-    bool nudgeArmLocal(const armSide side, const direction drct, float nudgeStep = 0.05);
+    bool nudgeArmLocal(const RobotSide side, const direction drct, float nudgeStep = 0.05);
 
-    bool generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const armSide input_side,const float desired_time, std::vector<armTrajectory::armTaskSpaceData> &arm_data_vector);
+    bool generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const RobotSide input_side,const float desired_time, std::vector<armTrajectory::armTaskSpaceData> &arm_data_vector);
 
-    bool moveArmJoint(const armSide side, int jointNumber, const float targetAngle);
+    bool moveArmJoint(const RobotSide side, int jointNumber, const float targetAngle);
 
-    bool nudgeArmLocal(const armSide side, float x, float y, float z,geometry_msgs::Pose &pose);
-    bool nudgeArmPelvis(const armSide side, float x, float y, float z,geometry_msgs::Pose &pose);
+    bool nudgeArmLocal(const RobotSide side, float x, float y, float z,geometry_msgs::Pose &pose);
+    bool nudgeArmPelvis(const RobotSide side, float x, float y, float z,geometry_msgs::Pose &pose);
 
 private:
 

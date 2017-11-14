@@ -26,7 +26,7 @@ class stair_detector_2
 
     tf::TransformListener tf_listener_;
 
-    src_perception::MultisensePointCloud point_cloud_listener_;
+    tough_perception::MultisensePointCloud point_cloud_listener_;
 
     std::vector<std::vector<geometry_msgs::Pose>> detections_;
 

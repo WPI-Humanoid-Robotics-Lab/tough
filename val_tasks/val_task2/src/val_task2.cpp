@@ -60,7 +60,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     finish_box_detector_        = nullptr;
 
     // use a single multisense object for all stereo detectors. It doesn't work otherwise :(
-    ms_sensor_ = new src_perception::MultisenseImage(nh_);
+    ms_sensor_ = new tough_perception::MultisenseImage(nh_);
     button_detector_            = new ButtonDetector(nh_, ms_sensor_);
     cable_detector_             = new CableDetector(nh_, ms_sensor_);
     socket_detector_            = new SocketDetector(nh_, ms_sensor_);
@@ -75,7 +75,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     // Variables
     map_update_count_ = 0;
     is_rotation_required_ = false;
-    panel_grasping_hand_ = armSide::RIGHT;
+    panel_grasping_hand_ = RobotSide::RIGHT;
     // Subscribers
     occupancy_grid_sub_ = nh_.subscribe("/map",10, &valTask2::occupancy_grid_cb, this);
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask2::visited_map_cb, this);
@@ -179,7 +179,7 @@ void valTask2::nudge_pose_cb(const std_msgs::Float64MultiArray msg)
     std::vector<geometry_msgs::Pose> waypoint;
     geometry_msgs::Pose pose;
 
-    armSide side = msg.data[0]== 0 ? armSide::LEFT : armSide::RIGHT;
+    RobotSide side = msg.data[0]== 0 ? RobotSide::LEFT : RobotSide::RIGHT;
     if(msg.data[1] ==0) arm_controller_->nudgeArmLocal(side, msg.data[2],msg.data[3],msg.data[4],pose);
     else arm_controller_->nudgeArmPelvis(side, msg.data[2],msg.data[3],msg.data[4],pose);
 
@@ -520,12 +520,12 @@ decision_making::TaskResult valTask2::detectPanelTask(string name, const FSMCall
         chest_controller_->controlChest(2, 2, 2);
 
         //move arms to default position
-        arm_controller_->moveToDefaultPose(armSide::RIGHT);
-        gripper_controller_->openGripper(armSide::RIGHT);
+        arm_controller_->moveToDefaultPose(RobotSide::RIGHT);
+        gripper_controller_->openGripper(RobotSide::RIGHT);
         ros::Duration(0.2).sleep();
 
-        arm_controller_->moveToDefaultPose(armSide::LEFT);
-        gripper_controller_->openGripper(armSide::LEFT);
+        arm_controller_->moveToDefaultPose(RobotSide::LEFT);
+        gripper_controller_->openGripper(RobotSide::LEFT);
         ros::Duration(0.2).sleep();
     }
 
@@ -612,7 +612,7 @@ decision_making::TaskResult valTask2::graspPanelTask(string name, const FSMCallC
      */
 
     static int retry_count = 0;
-    static armSide hand;
+    static RobotSide hand;
 
     if(retry_count == 10){
         // reducing the pelvis height for the next 10 trials
@@ -990,10 +990,10 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
             // moving hands to get in position to detect the cable
             ROS_INFO("valTask2::findCableIntermediateTask : Moving panel to see cable");
             task2_utils_->taskLogPub("valTask2::findCableIntermediateTask : Moving panel to see cable");
-            q3 = panel_grasping_hand_ == armSide::LEFT ? -0.5 : 0.5;
-            arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
+            q3 = panel_grasping_hand_ == RobotSide::LEFT ? -0.5 : 0.5;
+            arm_controller_->moveArmJoint((RobotSide)!panel_grasping_hand_, 3, q3);
             ros::Duration(0.5).sleep();
-            q1 = panel_grasping_hand_ == armSide::LEFT ? -0.36 : 0.36;
+            q1 = panel_grasping_hand_ == RobotSide::LEFT ? -0.36 : 0.36;
             arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
             ros::Duration(0.5).sleep();
         }
@@ -1060,12 +1060,12 @@ decision_making::TaskResult valTask2::findCableIntermediateTask(string name, con
         if(isPoseChangeReq)
         {
             // set the poses back
-            q3 = panel_grasping_hand_ == armSide::LEFT ? -1.85 : 1.85;
-            q1 = panel_grasping_hand_ == armSide::LEFT ? -1.04 : 1.04;
+            q3 = panel_grasping_hand_ == RobotSide::LEFT ? -1.85 : 1.85;
+            q1 = panel_grasping_hand_ == RobotSide::LEFT ? -1.04 : 1.04;
             float q0 = -1.85;
             arm_controller_->moveArmJoint(panel_grasping_hand_,1,q1);
             ros::Duration(0.2).sleep();
-            arm_controller_->moveArmJoint((armSide)!panel_grasping_hand_, 3, q3);
+            arm_controller_->moveArmJoint((RobotSide)!panel_grasping_hand_, 3, q3);
             ros::Duration(0.2).sleep();
             arm_controller_->moveArmJoint(panel_grasping_hand_,0,q0);
             ros::Duration(2).sleep();
@@ -1171,7 +1171,7 @@ decision_making::TaskResult valTask2::alignSolarArrayTask(string name, const FSM
         executeOnce = false;
         if(skip_4)
         {
-            arm_controller_->moveToZeroPose(armSide::LEFT); /// to account for panel being very close to body
+            arm_controller_->moveToZeroPose(RobotSide::LEFT); /// to account for panel being very close to body
             ros::Duration(1).sleep();
         }
     }
@@ -1302,7 +1302,7 @@ decision_making::TaskResult valTask2::placePanelTask(string name, const FSMCallC
         }
         else {
             geometry_msgs::Pose currentPalmPose;
-            std::string palmFrame = panel_grasping_hand_ == armSide ::LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
+            std::string palmFrame = panel_grasping_hand_ == RobotSide ::LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
 
             robot_state_->getCurrentPose(palmFrame, currentPalmPose, rd_->getPelvisFrame());
             currentPalmPose.position.x -= 0.2;
@@ -1447,7 +1447,7 @@ decision_making::TaskResult valTask2::deployPanelTask(string name, const FSMCall
         // go to next state of detecting cable
         ROS_INFO("valTask2::deployPanelTask: [SKIP] skipping deploying panel state");
         eventQueue.riseEvent("/DEPLOYED");
-        arm_controller_->moveToDefaultPose(armSide::LEFT);  /// to account for panel being very close to body
+        arm_controller_->moveToDefaultPose(RobotSide::LEFT);  /// to account for panel being very close to body
         ros::Duration(1).sleep();
 
         skip_4=false;
@@ -1727,7 +1727,7 @@ decision_making::TaskResult valTask2::pickCableTask(string name, const FSMCallCo
         ROS_INFO("valTask2::pickCableTask : Picking up the cable");
         task2_utils_->taskLogPub("valTask2::pickCableTask : Picking up the cable");
         ///@todo add yaw condition here. if yaw greater then certain angle, it should rotate first, then grasp
-        cable_task_->grasp_choke(armSide::RIGHT,cable_pose_);
+        cable_task_->grasp_choke(RobotSide::RIGHT,cable_pose_);
         ros::Duration(1).sleep();
     }
 
@@ -1876,7 +1876,7 @@ decision_making::TaskResult valTask2::plugCableTask(string name, const FSMCallCo
         task2_utils_->taskLogPub("valTask2::plugCableTask plugged the cable succesfully. going to next state");
         eventQueue.riseEvent("/CABLE_PLUGGED");
     }
-    else if(task2_utils_->isCableInHand(armSide::RIGHT) && retry <5)
+    else if(task2_utils_->isCableInHand(RobotSide::RIGHT) && retry <5)
     {
         ROS_INFO("valTask2::plugCableTask cable is in hand. attempting to retry plugging the cable");
         task2_utils_->taskLogPub("valTask2::plugCableTask cable is in hand. attempting to retry plugging the cable");
@@ -1980,17 +1980,17 @@ decision_making::TaskResult valTask2::walkToFinishTask(string name, const FSMCal
         task2_utils_->clearCurrentPoseMap();
         task2_utils_->taskLogPub("valTask2::walkToFinishTask : executing " + name);
         // set the robot to default state to walk
-        gripper_controller_->openGripper(armSide::RIGHT);
+        gripper_controller_->openGripper(RobotSide::RIGHT);
         ros::Duration(0.2).sleep();
-        gripper_controller_->openGripper(armSide::LEFT);
+        gripper_controller_->openGripper(RobotSide::LEFT);
         ros::Duration(1).sleep();
         pelvis_controller_->controlPelvisHeight(0.9);
         ros::Duration(0.2).sleep();
         chest_controller_->controlChest(2, 2, 2);
         ros::Duration(0.2).sleep();
-        arm_controller_->moveToDefaultPose(armSide::LEFT);
+        arm_controller_->moveToDefaultPose(RobotSide::LEFT);
         ros::Duration(0.2).sleep();
-        arm_controller_->moveToDefaultPose(armSide::RIGHT);
+        arm_controller_->moveToDefaultPose(RobotSide::RIGHT);
         ros::Duration(0.2).sleep();
         execute_once = false;
     }
@@ -2250,7 +2250,7 @@ void valTask2::setSolarArraySide(const bool isSolarArrayOnRight)
     is_array_on_right_ = isSolarArrayOnRight;
 }
 
-void valTask2::setPanelGraspingHand(armSide side)
+void valTask2::setPanelGraspingHand(RobotSide side)
 {
     panel_grasping_hand_ = side;
 }

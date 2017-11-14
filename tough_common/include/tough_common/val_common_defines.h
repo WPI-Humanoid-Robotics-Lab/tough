@@ -1,7 +1,7 @@
 # pragma once
 
 // defines for arms
-enum armSide
+enum RobotSide
 {
     LEFT = 0,
     RIGHT

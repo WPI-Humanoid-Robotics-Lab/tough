@@ -13,7 +13,7 @@
 #include <decision_making/FSM.h>
 #include <decision_making/ROSTask.h>
 #include <decision_making/DecisionMaking.h>
-#include <val_footstep/RobotWalker.h>
+#include <tough_footstep/RobotWalker.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <val_task3/val_task3_utils.h>
 

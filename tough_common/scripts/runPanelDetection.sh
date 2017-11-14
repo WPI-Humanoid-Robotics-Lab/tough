@@ -27,7 +27,7 @@ do
   roslaunch tough_bringup field_bringup.launch &
 
   sleep 350
-  roslaunch val_footstep val_footstep.launch --screen > $data_log &
+  roslaunch tough_footstep tough_footstep.launch --screen > $data_log &
   sleep 10
 
   echo -e "\e[32mINFO:\e[0m Start Gazebo Log"

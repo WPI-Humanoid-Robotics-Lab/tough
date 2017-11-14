@@ -15,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   decision_making_parser
   dynamic_reconfigure
   roscpp
-  val_footstep
+  tough_footstep
   tough_controller_interface
   perception_common
   pcl_conversions
@@ -27,7 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf_conversions
   val_task_common
-  val_moveit_planners
+  tough_moveit_planners
   tough_control_common
   )
 
@@ -47,7 +47,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES val_task2
- CATKIN_DEPENDS roscpp decision_making decision_making_parser dynamic_reconfigure val_footstep cv_bridge image_transport pcl_conversions pcl_ros sensor_msgs std_msgs tough_controller_interface
+ CATKIN_DEPENDS roscpp decision_making decision_making_parser dynamic_reconfigure tough_footstep cv_bridge image_transport pcl_conversions pcl_ros sensor_msgs std_msgs tough_controller_interface
  DEPENDS system_lib
  #DEPENDS system_lib
 )

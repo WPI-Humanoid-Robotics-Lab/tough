@@ -35,7 +35,7 @@ int main(int argc, char **argv)
       int   jointNumber= std::atof(argv[2]);
       float jointAngle =std::atof(argv[3]);
 
-      armSide side;
+      RobotSide side;
         std::string side_str;
       if(inputSide == 0){
           side = LEFT;

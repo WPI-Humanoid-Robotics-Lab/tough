@@ -36,8 +36,8 @@ handle_grabber::handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper
     rightHandOrientation_.quaternion.w = 0.332;
 
     // cartesian planners for the arm
-    left_arm_planner_ = new cartesianPlanner("leftPalm", VAL_COMMON_NAMES::WORLD_TF); //leftMiddleFingerGroup
-    right_arm_planner_ = new cartesianPlanner("rightPalm", VAL_COMMON_NAMES::WORLD_TF); //rightMiddleFingerGroup
+    left_arm_planner_ = new CartesianPlanner("leftPalm", VAL_COMMON_NAMES::WORLD_TF); //leftMiddleFingerGroup
+    right_arm_planner_ = new CartesianPlanner("rightPalm", VAL_COMMON_NAMES::WORLD_TF); //rightMiddleFingerGroup
     wholebody_controller_ = new wholebodyManipulation(nh_);
 }
 
@@ -69,13 +69,13 @@ void handle_grabber::setRightHandOrientation(const geometry_msgs::QuaternionStam
 }
 
 
-void handle_grabber::adjust_pose(const armSide side, const geometry_msgs::Point &goal, float executionTime){
+void handle_grabber::adjust_pose(const RobotSide side, const geometry_msgs::Point &goal, float executionTime){
 
     //move arm to given point with known orientation and higher z
     ROS_INFO("Moving at an intermidate point before goal");
     geometry_msgs::Pose pt;
     pt.position = goal;
-    geometry_msgs::QuaternionStamped temp  = side == armSide::LEFT ? leftHandOrientation_ : rightHandOrientation_;
+    geometry_msgs::QuaternionStamped temp  = side == RobotSide::LEFT ? leftHandOrientation_ : rightHandOrientation_;
     current_state_->transformQuaternion(temp, temp);
 
     pt.orientation = temp.quaternion;
@@ -85,7 +85,7 @@ void handle_grabber::adjust_pose(const armSide side, const geometry_msgs::Point 
     std::string palmFrame = side == LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
 
     current_state_->getCurrentPose(fingerFrame, pose, palmFrame);
-    if(side == armSide::LEFT){
+    if(side == RobotSide::LEFT){
         pt.position.x -= pose.position.x;
         pt.position.y -= pose.position.y;
         pt.position.z -= pose.position.z;
@@ -103,11 +103,11 @@ void handle_grabber::adjust_pose(const armSide side, const geometry_msgs::Point 
 
 }
 
-void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Point &goal, float executionTime)
+void handle_grabber::grasp_handles(const RobotSide side, const geometry_msgs::Point &goal, float executionTime)
 {
     const std::vector<float>* seed;
     geometry_msgs::QuaternionStamped* finalOrientationStamped;
-    if(side == armSide::LEFT){
+    if(side == RobotSide::LEFT){
         seed = &leftShoulderSeed_;
         finalOrientationStamped = &leftHandOrientation_;
     }
@@ -167,8 +167,8 @@ void handle_grabber::grasp_handles(const armSide side, const geometry_msgs::Poin
     waypoints.push_back(finalGoal);
 
     moveit_msgs::RobotTrajectory traj;
-    if (side == armSide::RIGHT) right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
-    if (side == armSide::LEFT)   left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+    if (side == RobotSide::RIGHT) right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
+    if (side == RobotSide::LEFT)   left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
 
     wholebody_controller_->compileMsg(side, traj.joint_trajectory);
 

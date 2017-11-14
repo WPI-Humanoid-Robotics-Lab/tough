@@ -1,6 +1,6 @@
 #include "val_task3/val_stairclimb.h"
 #include "tough_common/val_common_defines.h"
-#include "val_footstep/RobotWalker.h"
+#include "tough_footstep/RobotWalker.h"
 #include "tough_controller_interface/arm_control_interface.h"
 
 
@@ -77,6 +77,6 @@ int main(int argc, char** argv){
     chest_controller.controlChest(0,20.0,0);
     ros::Duration(1).sleep();
     ROS_INFO("Start Climbing");
-    walk.climbStair(mod_step_length,mod_step_height,armSide::RIGHT);
+    walk.climbStair(mod_step_length,mod_step_height,RobotSide::RIGHT);
     return 0;
 }

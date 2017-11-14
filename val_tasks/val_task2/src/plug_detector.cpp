@@ -7,7 +7,7 @@
 #define DISABLE_DRAWINGS true
 #define DISABLE_TRACKBAR true
 
-SocketDetector::SocketDetector(ros::NodeHandle nh, src_perception::MultisenseImage* ms_sensor) : nh_(nh), organizedCloud_(new src_perception::StereoPointCloudColor)
+SocketDetector::SocketDetector(ros::NodeHandle nh, tough_perception::MultisenseImage* ms_sensor) : nh_(nh), organizedCloud_(new tough_perception::StereoPointCloudColor)
 {
     ms_sensor_ = ms_sensor;
     ms_sensor_->giveQMatrix(qMatrix_);
@@ -65,8 +65,8 @@ size_t SocketDetector::findMaxContour(const std::vector<std::vector<cv::Point> >
 bool SocketDetector::getPlugLocation(geometry_msgs::Point& plugLoc)
 {
     bool foundPlug = false;
-    src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
-    src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
+    tough_perception::StereoPointCloudColor::Ptr organizedCloud(new tough_perception::StereoPointCloudColor);
+    tough_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
     tf::TransformListener listener;
     geometry_msgs::PointStamped geom_point;
     std::vector<std::vector<cv::Point> > contours;

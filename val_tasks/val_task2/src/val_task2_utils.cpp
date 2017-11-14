@@ -17,8 +17,8 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     cable_detector_      = nullptr;
 
     wholebody_controller_ = new wholebodyManipulation(nh_);
-    right_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
-    left_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    right_arm_planner_ = new CartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    left_arm_planner_ = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
 
 
     current_checkpoint_  = 0;
@@ -41,19 +41,19 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     reOrientPanelTrajLeft_.resize(2);
     reOrientPanelTrajLeft_[0].arm_pose = {-1.2, -1.04, 2.11, -0.85, -1.15, 0, 0.29};
     reOrientPanelTrajLeft_[0].time = 1;
-    reOrientPanelTrajLeft_[0].side = armSide::LEFT;
+    reOrientPanelTrajLeft_[0].side = RobotSide::LEFT;
     reOrientPanelTrajLeft_[1].arm_pose = {-1.2, -1.04, 2.11, -0.85, 1.21, 0, -0.29};
     reOrientPanelTrajLeft_[1].time = 2;
-    reOrientPanelTrajLeft_[1].side = armSide::LEFT;
+    reOrientPanelTrajLeft_[1].side = RobotSide::LEFT;
 
     // rotate panel trajectory for right hand
     reOrientPanelTrajRight_.resize(2);
     reOrientPanelTrajRight_[0].arm_pose = {-1.2, 1.04, 2.11, 0.85, -1.21, 0, -0.29};
     reOrientPanelTrajRight_[0].time = 1;
-    reOrientPanelTrajRight_[0].side = armSide::RIGHT;
+    reOrientPanelTrajRight_[0].side = RobotSide::RIGHT;
     reOrientPanelTrajRight_[1].arm_pose = {-1.2, 1.04, 2.11, 0.85, 1.15, 0, 0.29};
     reOrientPanelTrajRight_[1].time = 2;
-    reOrientPanelTrajRight_[1].side = armSide::RIGHT;
+    reOrientPanelTrajRight_[1].side = RobotSide::RIGHT;
 
     isHarnessDetached= false;
 
@@ -81,14 +81,14 @@ void task2Utils::isDetachedCB(const srcsim::Harness &harnessMsg)
     mtx_.unlock();
 }
 
-bool task2Utils::afterPanelGraspPose(const armSide side, bool isRotationRequired)
+bool task2Utils::afterPanelGraspPose(const RobotSide side, bool isRotationRequired)
 {
     // reorienting the chest would bring the panel above the rover
     //    chest_controller_->controlChest(0,0,0);
     //    ros::Duration(2).sleep();
 
     const std::vector<float> *seed1,*seed2;
-    if(side == armSide::LEFT){
+    if(side == RobotSide::LEFT){
         seed1 = isRotationRequired ? &leftNearChestPalmUp_ : &leftNearChestPalmDown_;
         seed2 = &rightSeedNonGraspingHand_;
     }
@@ -102,7 +102,7 @@ bool task2Utils::afterPanelGraspPose(const armSide side, bool isRotationRequired
 
     armData.clear();
     armData.push_back(*seed2);
-    arm_controller_->moveArmJoints((armSide)(!side), armData, 2.0f);
+    arm_controller_->moveArmJoints((RobotSide)(!side), armData, 2.0f);
     ros::Duration(0.5).sleep();
 
     armData.clear();
@@ -124,7 +124,7 @@ bool task2Utils::isPointOnWalkway(float x, float y)
     return map_.data.at(index) == CELL_STATUS::FREE;
 }
 
-void task2Utils::movePanelToWalkSafePose(const armSide side, bool isRotationRequired)
+void task2Utils::movePanelToWalkSafePose(const RobotSide side, bool isRotationRequired)
 {
     // reorient the chest
     chest_controller_->controlChest(0,0,0);
@@ -132,7 +132,7 @@ void task2Utils::movePanelToWalkSafePose(const armSide side, bool isRotationRequ
 
     const std::vector<float> *seed1;
     const std::vector<double> *grasp;
-    if(side == armSide::LEFT){
+    if(side == RobotSide::LEFT){
         //        when left hand is the provided side, we move right hand under the panel
         seed1 = &rightShoulderSeedPanelGraspWalk_;
         grasp = &leftHandGrasp_;
@@ -152,15 +152,15 @@ void task2Utils::movePanelToWalkSafePose(const armSide side, bool isRotationRequ
     armData.clear();
     armData.push_back(*seed1);
 
-    arm_controller_->moveArmJoints((armSide)!side, armData, 2.0f);
+    arm_controller_->moveArmJoints((RobotSide)!side, armData, 2.0f);
     ros::Duration(2).sleep();
 
 }
 
 #define EFFORT_THRESHOLD 50 //threshold is selected by experimentation
-bool task2Utils::isPanelPicked(const armSide side)
+bool task2Utils::isPanelPicked(const RobotSide side)
 {
-    std::string jointNames = side == armSide::LEFT ? "left_arm" : "right_arm";
+    std::string jointNames = side == RobotSide::LEFT ? "left_arm" : "right_arm";
     std::vector<float> jointEfforts;
     current_state_->getJointEfforts(jointNames,jointEfforts);
     float total_effort=0.0f;
@@ -179,16 +179,16 @@ bool task2Utils::isPanelPicked(const armSide side)
     return false;
 }
 
-void task2Utils::placePanel(const armSide graspingHand, bool isPanelRotated)
+void task2Utils::placePanel(const RobotSide graspingHand, bool isPanelRotated)
 {
     isPanelRotated = true; // this is to avoid rework. I'll fix it the right way when I have time
 
-    armSide nonGraspingHand = (armSide) !graspingHand;
+    RobotSide nonGraspingHand = (RobotSide) !graspingHand;
 
     const std::vector<float> *graspingHandPoseUp, *graspingHandPoseDown;
     const std::vector<float>  *nonGraspingHandPose2, *nonGraspingHandPose1;
 
-    if(graspingHand == armSide::LEFT){
+    if(graspingHand == RobotSide::LEFT){
         if (isPanelRotated){
             graspingHandPoseUp     = &leftPanelPlacementUpPose1_;
             graspingHandPoseDown   = &leftPanelPlacementDownPose1_;
@@ -266,9 +266,9 @@ void task2Utils::placePanel(const armSide graspingHand, bool isPanelRotated)
 
 }
 
-void task2Utils::rotatePanel(const armSide graspingHand)
+void task2Utils::rotatePanel(const RobotSide graspingHand)
 {
-    armSide nonGraspingHand = (armSide) !graspingHand;
+    RobotSide nonGraspingHand = (RobotSide) !graspingHand;
 
     /// @todo change the grip when rotation is perfect
     gripper_controller_->closeGripper(graspingHand);
@@ -276,7 +276,7 @@ void task2Utils::rotatePanel(const armSide graspingHand)
     const std::vector<float> *graspingHandPoseUp;
     std::vector<armTrajectory::armJointData>* reOrientPanelTraj;
     float tempOffset;
-    if(graspingHand == armSide::LEFT){
+    if(graspingHand == RobotSide::LEFT){
         //        graspingHandPoseUp = &leftNearChestPalmDown_;
         graspingHandPoseUp = &leftPanelPlacementUpPose1_;
         reOrientPanelTraj = &reOrientPanelTrajLeft_;
@@ -308,10 +308,10 @@ void task2Utils::rotatePanel(const armSide graspingHand)
 
 }
 
-void task2Utils::raisePanel(const armSide graspingHand)
+void task2Utils::raisePanel(const RobotSide graspingHand)
 {
     const std::vector<float> *graspingHandPoseUp;
-    if(graspingHand == armSide::LEFT){
+    if(graspingHand == RobotSide::LEFT){
         //        graspingHandPoseUp = &leftNearChestPalmDown_;
         graspingHandPoseUp = &leftPanelPlacementUpPose1_;
     }
@@ -333,7 +333,7 @@ void task2Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offs
 
 
     size_t nSteps;
-    armSide startStep;
+    RobotSide startStep;
     std::vector<float> y_offset;
     std::vector<float> x_offset;
 
@@ -435,7 +435,7 @@ bool task2Utils::isCableOnTable(geometry_msgs::Pose &cable_pose)
 
 
 
-bool task2Utils::isCableInHand(armSide side)
+bool task2Utils::isCableInHand(RobotSide side)
 {
     // this function rotates the hand slighly to detect the cable and brings it back to same position
     std::string arm = side == LEFT ? "left_arm" : "right_arm";
@@ -468,7 +468,7 @@ bool task2Utils::isCableTouchingSocket()
     return false;
 }
 
-geometry_msgs::Pose task2Utils::grasping_hand(armSide &side, geometry_msgs::Pose handle_pose)
+geometry_msgs::Pose task2Utils::grasping_hand(RobotSide &side, geometry_msgs::Pose handle_pose)
 {
     geometry_msgs::Pose poseInPelvisFrame;
     current_state_->transformPose(handle_pose, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
@@ -487,23 +487,23 @@ geometry_msgs::Pose task2Utils::grasping_hand(armSide &side, geometry_msgs::Pose
         yaw = tf::getYaw(poseInPelvisFrame.orientation);
     }
 
-    side = yaw < 0 ? armSide::LEFT : armSide::RIGHT;
+    side = yaw < 0 ? RobotSide::LEFT : RobotSide::RIGHT;
     return handle_pose;
 }
 
-bool task2Utils::isRotationReq(armSide side, geometry_msgs::Point handle_coordinates,geometry_msgs::Point button_coordinates)
+bool task2Utils::isRotationReq(RobotSide side, geometry_msgs::Point handle_coordinates,geometry_msgs::Point button_coordinates)
 {
     bool is_rotation_required_;
     if(button_coordinates.x == 0 && button_coordinates.y == 0){
         // button cannot be seen it is assumed to be on the other side
-        is_rotation_required_ = side == armSide::LEFT ? false : true;
+        is_rotation_required_ = side == RobotSide::LEFT ? false : true;
     }
     else{
         current_state_->transformPoint(handle_coordinates, handle_coordinates, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
         current_state_->transformPoint(button_coordinates, button_coordinates, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
 
         if( button_coordinates.x > handle_coordinates.x) {
-            is_rotation_required_ = side == armSide::LEFT ? false : true;
+            is_rotation_required_ = side == RobotSide::LEFT ? false : true;
         }
         else if (handle_coordinates.x == button_coordinates.x &&  button_coordinates.y > handle_coordinates.y ){
             is_rotation_required_ = false;
@@ -513,7 +513,7 @@ bool task2Utils::isRotationReq(armSide side, geometry_msgs::Point handle_coordin
         }
         else{
             // x is smaller
-            is_rotation_required_ = side == armSide::LEFT ? true : false;
+            is_rotation_required_ = side == RobotSide::LEFT ? true : false;
         }
     }
     return is_rotation_required_;
@@ -546,7 +546,7 @@ bool task2Utils::checkpoint_init()
 
 }
 
-bool task2Utils::shakeTest(const armSide graspingHand)
+bool task2Utils::shakeTest(const RobotSide graspingHand)
 {
     return true;
     ROS_INFO("task2Utils::shakeTest : Closing, opening and reclosing grippers to see if the panel falls off");
@@ -586,10 +586,10 @@ bool task2Utils::pushDeployedPanel()
 
     armData.clear();
     armData.push_back(leftHandData);
-    arm_controller_->moveArmJoints(armSide::LEFT, armData, 0.2f);
+    arm_controller_->moveArmJoints(RobotSide::LEFT, armData, 0.2f);
     armData.clear();
     armData.push_back(rightHandData);
-    arm_controller_->moveArmJoints(armSide::RIGHT, armData, 2.0f);
+    arm_controller_->moveArmJoints(RobotSide::RIGHT, armData, 2.0f);
 
     ros::Duration(2).sleep();
     walk_->walkLocalPreComputedSteps(x_offset,y_offset,LEFT);
@@ -689,10 +689,10 @@ void task2Utils::taskLogPub(std::string data){
     }
 }
 
-bool task2Utils::planWholeBodyMotion(armSide side, std::vector<geometry_msgs::Pose> waypoints)
+bool task2Utils::planWholeBodyMotion(RobotSide side, std::vector<geometry_msgs::Pose> waypoints)
 {
     moveit_msgs::RobotTrajectory traj;
-    if(side ==armSide::RIGHT)
+    if(side ==RobotSide::RIGHT)
     {
         if (right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false)> 0.98){
             ROS_INFO("right arm whole body msg executed");

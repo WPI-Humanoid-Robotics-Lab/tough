@@ -48,8 +48,8 @@ ButtonPress::ButtonPress(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(nh
     //    rightHandOrientation_.quaternion.w = 0.691;
 
     // Initializing planners
-    left_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
-    right_arm_planner_ = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    left_arm_planner_ = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    right_arm_planner_ = new CartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     wholebody_controller_ = new wholebodyManipulation(nh_);
     chest_controller_ = new chestTrajectory(nh_);
 
@@ -63,7 +63,7 @@ ButtonPress::~ButtonPress()
     delete chest_controller_;
 }
 
-bool ButtonPress::pressButton(const armSide side, geometry_msgs::Point &goal, float executionTime)
+bool ButtonPress::pressButton(const RobotSide side, geometry_msgs::Point &goal, float executionTime)
 {
     // setting initial values
     geometry_msgs::QuaternionStamped* finalOrientationStamped;
@@ -73,7 +73,7 @@ bool ButtonPress::pressButton(const armSide side, geometry_msgs::Point &goal, fl
     geometry_msgs::Pose rightOffset,leftOffset;
     current_state_->getCurrentPose("/rightMiddleFingerPitch1Link",rightOffset,"/rightThumbRollLink");
     current_state_->getCurrentPose("/leftMiddleFingerPitch1Link",leftOffset,"/leftThumbRollLink");
-    if(side == armSide::LEFT){
+    if(side == RobotSide::LEFT){
         armSeed = &leftShoulderSeed_;
         endEffectorFrame = VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP;
         xFingerOffset = leftOffset.position.x;
@@ -151,7 +151,7 @@ bool ButtonPress::pressButton(const armSide side, geometry_msgs::Point &goal, fl
     waypoints.push_back(final);
 
     moveit_msgs::RobotTrajectory traj;
-    if(side == armSide::LEFT)
+    if(side == RobotSide::LEFT)
     {
         left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
     }

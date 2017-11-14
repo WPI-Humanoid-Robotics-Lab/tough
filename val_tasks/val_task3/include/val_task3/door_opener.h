@@ -5,12 +5,12 @@
 #include <geometry_msgs/Pose.h>
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
-#include "val_moveit_planners/val_cartesian_planner.h"
+#include "tough_moveit_planners/tough_cartesian_planner.h"
 #include "tough_controller_interface/wholebody_control_interface.h"
 #include "tough_controller_interface/gripper_control_interface.h"
 #include <val_task_common/val_task_common_utils.h>
 #include <tf/transform_datatypes.h>
-#include "val_footstep/RobotWalker.h"
+#include "tough_footstep/RobotWalker.h"
 #include "val_task3_utils.h"
 #include "tough_control_common/tough_control_common.h"
 

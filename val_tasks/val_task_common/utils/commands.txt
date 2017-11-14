@@ -40,9 +40,9 @@ GOTO_STATE_ROTATE_PANEL
 +rosnode kill task1
 
 
-+rosrun val_footstep walk_steps 
++rosrun tough_footstep walk_steps 
 
-+rosrun val_footstep walk_rotate 
++rosrun tough_footstep walk_rotate 
 
 
 Helper Functions
@@ -57,6 +57,6 @@ Helper Functions
 
 +rosrun tough_controller_interface test_arm_navigation 0 0 0 0 0 0 0 0
 
-+rosrun val_footstep walk_rotate -1.57
++rosrun tough_footstep walk_rotate -1.57
 
 !/srcsim/finals/score

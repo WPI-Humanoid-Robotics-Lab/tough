@@ -7,9 +7,9 @@
 #include <tough_controller_interface/arm_control_interface.h>
 #include <tough_controller_interface/gripper_control_interface.h>
 #include <tough_controller_interface/robot_state.h>
-#include "val_moveit_planners/val_cartesian_planner.h"
+#include "tough_moveit_planners/tough_cartesian_planner.h"
 #include "tough_controller_interface/wholebody_control_interface.h"
-#include "val_footstep/RobotWalker.h"
+#include "tough_footstep/RobotWalker.h"
 #include "val_task3/val_task3_utils.h"
 
 class RotateValve
@@ -31,7 +31,7 @@ private:
     gripperControl gripper_;
     RobotStateInformer *current_state_;
     RobotDescription *rd_;
-    cartesianPlanner* left_arm_planner_;
+    CartesianPlanner* left_arm_planner_;
     wholebodyManipulation* wholebody_controller_;
     chestTrajectory* chest_controller_;
     RobotWalker walk_;

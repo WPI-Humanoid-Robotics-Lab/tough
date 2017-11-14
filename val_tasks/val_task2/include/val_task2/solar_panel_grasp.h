@@ -7,7 +7,7 @@
 #include <tough_controller_interface/arm_control_interface.h>
 #include <tough_controller_interface/gripper_control_interface.h>
 #include <tough_controller_interface/robot_state.h>
-#include "val_moveit_planners/val_cartesian_planner.h"
+#include "tough_moveit_planners/tough_cartesian_planner.h"
 #include "tough_controller_interface/wholebody_control_interface.h"
 
 #define Y_OFFSET 0.05
@@ -17,7 +17,7 @@ class solar_panel_handle_grabber{
 public:
     solar_panel_handle_grabber(ros::NodeHandle n);
     ~solar_panel_handle_grabber();
-   bool grasp_handles(armSide side, const geometry_msgs::Pose &goal, bool isRotationRequired, float executionTime=2.0f);
+   bool grasp_handles(RobotSide side, const geometry_msgs::Pose &goal, bool isRotationRequired, float executionTime=2.0f);
 
    geometry_msgs::QuaternionStamped leftHandOrientation() const;
    void setLeftHandOrientation(const geometry_msgs::QuaternionStamped &leftHandOrientation);
@@ -32,8 +32,8 @@ private:
    gripperControl gripper_;
    RobotStateInformer *current_state_;
    RobotDescription *rd_;
-   cartesianPlanner* right_arm_planner_;
-   cartesianPlanner* left_arm_planner_;
+   CartesianPlanner* right_arm_planner_;
+   CartesianPlanner* left_arm_planner_;
    wholebodyManipulation* wholebody_controller_;
    geometry_msgs::QuaternionStamped leftHandOrientationAngled_ ;
    geometry_msgs::QuaternionStamped rightHandOrientationAngled_;

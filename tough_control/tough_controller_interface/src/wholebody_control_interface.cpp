@@ -40,11 +40,11 @@ wholebodyManipulation::wholebodyManipulation(ros::NodeHandle &nh):nh_(nh)
 //    joint_limits_right_[6]={-0.47,0.35};
 }
 
-void wholebodyManipulation::compileMsg(const armSide side, const  moveit_msgs::RobotTrajectory &traj){
+void wholebodyManipulation::compileMsg(const RobotSide side, const  moveit_msgs::RobotTrajectory &traj){
     return compileMsg(side, traj.joint_trajectory);
  }
 
-void wholebodyManipulation::compileMsg(const armSide side, const trajectory_msgs::JointTrajectory &traj)
+void wholebodyManipulation::compileMsg(const RobotSide side, const trajectory_msgs::JointTrajectory &traj)
 {
 
     if(!validateTrajectory(traj)){

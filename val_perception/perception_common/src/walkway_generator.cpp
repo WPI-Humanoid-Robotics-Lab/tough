@@ -169,7 +169,7 @@ double WalkwayGenerator::getCurrentFootHeight(void)
 {
     double height_foot;
     tf::StampedTransform transformStamped;
-
+    /// \todo use RobotState instead of tf
     try{
         tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, rd_->getLeftFootFrameName(), ros::Time(0),ros::Duration(3.0));
         tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF, rd_->getLeftFootFrameName(), ros::Time(0),transformStamped);

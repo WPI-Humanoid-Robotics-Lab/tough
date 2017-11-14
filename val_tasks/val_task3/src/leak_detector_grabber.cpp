@@ -19,8 +19,8 @@ leakDetectorGrabber::leakDetectorGrabber(ros::NodeHandle nh):nh_(nh),
     armTraj_(nh_), gripper_(nh_), wholebody_controller_(nh_), task3_utils_(nh_)
 {
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array", 30, false);
-    right_arm_planner_ = new cartesianPlanner("rightPalm");
-    left_arm_planner_ = new cartesianPlanner("leftPalm");
+    right_arm_planner_ = new CartesianPlanner("rightPalm");
+    left_arm_planner_ = new CartesianPlanner("leftPalm");
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     rd_ = RobotDescription::getRobotDescription(nh_);
 }
@@ -29,10 +29,10 @@ leakDetectorGrabber::~leakDetectorGrabber(){
 
 }
 
-geometry_msgs::Pose leakDetectorGrabber::getGraspGoal(const armSide &side, const geometry_msgs::Pose &user_goal) const {
+geometry_msgs::Pose leakDetectorGrabber::getGraspGoal(const RobotSide &side, const geometry_msgs::Pose &user_goal) const {
     std::string palm_frame, end_effector_frame, thumb_frame;
     double pregrasp_angle;
-    if(side == armSide::LEFT){
+    if(side == RobotSide::LEFT){
         palm_frame = rd_->getLeftPalmFrame();
         end_effector_frame = rd_->getLeftEEFrame();
         thumb_frame = "/leftThumbRollLink";
@@ -66,7 +66,7 @@ geometry_msgs::Pose leakDetectorGrabber::getGraspGoal(const armSide &side, const
     return grasp_goal;
 }
 
-geometry_msgs::Pose leakDetectorGrabber::getReachGoal(const armSide &side, const geometry_msgs::Pose &grasp_goal) const {
+geometry_msgs::Pose leakDetectorGrabber::getReachGoal(const RobotSide &side, const geometry_msgs::Pose &grasp_goal) const {
     // Reach goal is the same pose as grasp goal except higher above the table
     geometry_msgs::Pose reach_goal;
 
@@ -79,8 +79,8 @@ geometry_msgs::Pose leakDetectorGrabber::getReachGoal(const armSide &side, const
     return reach_goal;
 }
 
-float leakDetectorGrabber::getStandingOffset(const armSide side, const geometry_msgs::Pose user_goal) const {
-    std::string shoulder_frame = (side == armSide::LEFT) ? "/leftShoulderRollLink" : "/rightShoulderRollLink";
+float leakDetectorGrabber::getStandingOffset(const RobotSide side, const geometry_msgs::Pose user_goal) const {
+    std::string shoulder_frame = (side == RobotSide::LEFT) ? "/leftShoulderRollLink" : "/rightShoulderRollLink";
 
     geometry_msgs::Pose goal_wrt_pelvis, shoulder_wrt_pelvis;
     current_state_->transformPose(user_goal, goal_wrt_pelvis, VAL_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
@@ -89,7 +89,7 @@ float leakDetectorGrabber::getStandingOffset(const armSide side, const geometry_
     double yaw = tf::getYaw(goal_wrt_pelvis.orientation);
 
     // 0.356 is the approximate length of the forearm
-    double delta_y = 0.356 * std::cos(yaw) * (side == armSide::LEFT ? 1 : -1);
+    double delta_y = 0.356 * std::cos(yaw) * (side == RobotSide::LEFT ? 1 : -1);
     double offset = goal_wrt_pelvis.position.y - shoulder_wrt_pelvis.position.y + delta_y;
 
     geometry_msgs::Pose standing_pose;
@@ -113,15 +113,15 @@ void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float exe
         ROS_DEBUG_STREAM("Goal pose z determined to be " << user_goal.position.z);
     }
 
-    armSide side;
+    RobotSide side;
     // this overwrites both side and user_goal
     user_goal = task3_utils_.grasping_hand(side, user_goal);
-    ROS_DEBUG_STREAM("Grasping with " << (side == armSide::LEFT ? "left" : "right") << " hand");
+    ROS_DEBUG_STREAM("Grasping with " << (side == RobotSide::LEFT ? "left" : "right") << " hand");
 
     ROS_INFO("Moving hand to pre-grasp");
     task3_utils_.task3LogPub("Moving hand to pre-grasp");
     ("Moving hand to pre-grasp");
-    if (side == armSide::LEFT) {
+    if (side == RobotSide::LEFT) {
         gripper_.controlGripper(side, PREGRASP_LEFT);
     } else {
         gripper_.controlGripper(side, PREGRASP_RIGHT);
@@ -158,7 +158,7 @@ void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float exe
 
     ROS_INFO("Calculating trajectory for grasp");
     task3_utils_.task3LogPub("Calculating trajectory for grasp");
-    if(side == armSide::LEFT) {
+    if(side == RobotSide::LEFT) {
         left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
     } else{
         right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
@@ -172,7 +172,7 @@ void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float exe
 
     ROS_INFO("Closing gripper");
     task3_utils_.task3LogPub("Closing gripper");
-    if (side == armSide::LEFT) {
+    if (side == RobotSide::LEFT) {
         taskCommonUtils::slowGrip(nh_, side, PREGRASP_LEFT, GRASP_LEFT);
     } else {
         taskCommonUtils::slowGrip(nh_, side, PREGRASP_RIGHT, GRASP_RIGHT);

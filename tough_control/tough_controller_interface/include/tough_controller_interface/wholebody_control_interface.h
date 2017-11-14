@@ -16,8 +16,8 @@ class wholebodyManipulation
 {
 public:
     wholebodyManipulation(ros::NodeHandle &nh);
-    void compileMsg(const armSide side, const trajectory_msgs::JointTrajectory &traj);
-    void compileMsg(const armSide side, const  moveit_msgs::RobotTrajectory &traj);
+    void compileMsg(const RobotSide side, const trajectory_msgs::JointTrajectory &traj);
+    void compileMsg(const RobotSide side, const  moveit_msgs::RobotTrajectory &traj);
 private :
     ros::NodeHandle nh_;
     ros::Publisher m_wholebodyPub;

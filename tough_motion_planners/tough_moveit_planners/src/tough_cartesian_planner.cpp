@@ -1,6 +1,6 @@
-#include <val_moveit_planners/val_cartesian_planner.h>
+#include <tough_moveit_planners/tough_cartesian_planner.h>
 
-cartesianPlanner::cartesianPlanner(std::string group_name, std::string reference_frame):
+CartesianPlanner::CartesianPlanner(std::string group_name, std::string reference_frame):
     group_name_(group_name), reference_frame_(reference_frame)
 
 {
@@ -14,14 +14,15 @@ cartesianPlanner::cartesianPlanner(std::string group_name, std::string reference
     group_ = new moveit::planning_interface::MoveGroup(group_name_);
 }
 
-cartesianPlanner::~cartesianPlanner(){
+
+CartesianPlanner::~CartesianPlanner(){
 
     // delete the pointer
     if(group_ != nullptr)    delete group_;
 }
 
 // cartesian planner
-double cartesianPlanner::getTrajFromCartPoints(std::vector<geometry_msgs::Pose> &points, moveit_msgs::RobotTrajectory &trajectory, bool avoid_collisions, float goal_tolerance)
+double CartesianPlanner::getTrajFromCartPoints(std::vector<geometry_msgs::Pose> &points, moveit_msgs::RobotTrajectory &trajectory, bool avoid_collisions, float goal_tolerance)
 {
     // set the start state to the current state of the robot
     group_->setStartStateToCurrentState();

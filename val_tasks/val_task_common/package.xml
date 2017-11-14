@@ -45,8 +45,8 @@
   <build_depend>tough_controller_interface</build_depend>
   <build_depend>navigation_common</build_depend>
 
-  <build_depend>val_moveit_planners</build_depend>
-  <run_depend>val_moveit_planners</run_depend>
+  <build_depend>tough_moveit_planners</build_depend>
+  <run_depend>tough_moveit_planners</run_depend>
 
   <build_depend>tough_control_common</build_depend>
   <run_depend>tough_control_common</run_depend>

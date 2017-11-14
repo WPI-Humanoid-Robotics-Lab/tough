@@ -8,7 +8,7 @@ int main(int argc, char** argv)
     bool foundPlug = false;
     geometry_msgs::Point PlugLoc;
 
-    src_perception::MultisenseImage* ms_sensor = new src_perception::MultisenseImage(nh);
+    tough_perception::MultisenseImage* ms_sensor = new tough_perception::MultisenseImage(nh);
     SocketDetector p1(nh,ms_sensor);
 
     //while(ros::ok())

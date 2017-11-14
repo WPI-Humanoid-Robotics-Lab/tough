@@ -19,12 +19,12 @@ int main(int argc, char **argv)
     }
 
     float yaw,roll,pitch;
-    armSide side;
+    RobotSide side;
     int retry = 0;
     if(argc =5){
-        side = std::atoi(argv[1]) == 0 ? armSide::LEFT : armSide::RIGHT;
+        side = std::atoi(argv[1]) == 0 ? RobotSide::LEFT : RobotSide::RIGHT;
 
-        if(side == armSide::LEFT){
+        if(side == RobotSide::LEFT){
             std::vector<float> positions;
             while(!obj->getJointPositions("left_arm", positions)){
                 ros::spinOnce();

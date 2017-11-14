@@ -117,7 +117,7 @@ void execute_callback(const std_msgs::Int16& msg)
     if(left_pose_received)
     {
       ROS_INFO("Received Left Execute Request");
-      std::vector<armTrajectory::armTaskSpaceData>* arm_data_vector = generate_task_space_data(left_poses,armSide::LEFT);
+      std::vector<armTrajectory::armTaskSpaceData>* arm_data_vector = generate_task_space_data(left_poses,RobotSide::LEFT);
       // moveArmInTaskSpace(std::vector &arm_data, int baseForControl) baseForControl defaults to chest
       left_armTraj->moveArmInTaskSpace(*arm_data_vector);
       left_poses->clear();
@@ -129,7 +129,7 @@ void execute_callback(const std_msgs::Int16& msg)
     if(right_pose_received)
     {
       ROS_INFO("Received Right Execute Request");
-      std::vector<armTrajectory::armTaskSpaceData>* arm_data_vector = generate_task_space_data(right_poses,armSide::RIGHT);
+      std::vector<armTrajectory::armTaskSpaceData>* arm_data_vector = generate_task_space_data(right_poses,RobotSide::RIGHT);
       // moveArmInTaskSpace(std::vector &arm_data, int baseForControl) baseForControl defaults to chest
       right_armTraj->moveArmInTaskSpace(*arm_data_vector);
       right_poses->clear();
@@ -151,12 +151,12 @@ void execute_callback(const std_msgs::Int16& msg)
       //ergo, latin, poses published to the val_circle have to be stamped with the arm_side to use.
       if(center_pose.header.frame_id == rd_->getRightPalmFrame())
       {
-        arm_data_vector = generate_task_space_data(circle_poses,armSide::RIGHT);
+        arm_data_vector = generate_task_space_data(circle_poses,RobotSide::RIGHT);
         right_armTraj->moveArmInTaskSpace(*arm_data_vector);
 
 
       }else{
-        arm_data_vector = generate_task_space_data(circle_poses,armSide::LEFT);
+        arm_data_vector = generate_task_space_data(circle_poses,RobotSide::LEFT);
         left_armTraj->moveArmInTaskSpace(*arm_data_vector); //poses are transformed here.
       }
 
@@ -258,7 +258,7 @@ vector<geometry_msgs::PoseStamped*>* generate_circle_poses(geometry_msgs::PoseSt
 //caution, allocates task_space_data that needs to be freed eventually!
 //armside is used to determine which side to use.
 //transforms the poses to the worldframe regardless.
-std::vector<armTrajectory::armTaskSpaceData>* generate_task_space_data(std::vector<geometry_msgs::PoseStamped*>* input_poses, armSide input_side, float desired_time)
+std::vector<armTrajectory::armTaskSpaceData>* generate_task_space_data(std::vector<geometry_msgs::PoseStamped*>* input_poses, RobotSide input_side, float desired_time)
 {
  std::vector<armTrajectory::armTaskSpaceData> *arm_data_vector = new std::vector<armTrajectory::armTaskSpaceData>();
   // for(auto input_pose : *input_poses)

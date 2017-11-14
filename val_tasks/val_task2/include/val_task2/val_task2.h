@@ -13,7 +13,7 @@
 #include <decision_making/FSM.h>
 #include <decision_making/ROSTask.h>
 #include <decision_making/DecisionMaking.h>
-#include <val_footstep/RobotWalker.h>
+#include <tough_footstep/RobotWalker.h>
 #include <nav_msgs/OccupancyGrid.h>
 
 #include "val_task_common/val_walk_tracker.h"
@@ -134,7 +134,7 @@ class valTask2 {
     geometry_msgs::Point cable_point_temp_; // used to array detection
     geometry_msgs::Pose cable_pose_;
 
-    armSide panel_grasping_hand_;
+    RobotSide panel_grasping_hand_;
 
     void initControllers();
     void initDetectors();
@@ -151,7 +151,7 @@ class valTask2 {
 
     geometry_msgs::Pose2D next_finishbox_center_;
 
-    src_perception::MultisenseImage* ms_sensor_;
+    tough_perception::MultisenseImage* ms_sensor_;
 
     // skip checkpoint global variables
     bool skip_3, skip_4, skip_6 ;
@@ -200,7 +200,7 @@ class valTask2 {
     void setSolarArrayWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal);
     void setSolarArrayFineWalkGoal(const geometry_msgs::Pose2D &panel_walk_goal);
     void setSolarArraySide(const bool isSolarArrayOnRight);
-    void setPanelGraspingHand(armSide side);
+    void setPanelGraspingHand(RobotSide side);
     void setIsRotationRequired(bool value);
     void setTempCablePoint(geometry_msgs::Point value);
 };

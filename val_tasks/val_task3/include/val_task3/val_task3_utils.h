@@ -15,7 +15,7 @@
 #include <tough_controller_interface/head_control_interface.h>
 #include <tough_controller_interface/arm_control_interface.h>
 #include <tough_controller_interface/robot_state.h>
-#include <val_footstep/RobotWalker.h>
+#include <tough_footstep/RobotWalker.h>
 #include "navigation_common/map_generator.h"
 #include <srcsim/Task.h>
 #include <mutex>
@@ -62,7 +62,7 @@ public:
     void beforDoorOpenPose();
     void doorWalkwayPose();
     void blindNavigation(geometry_msgs::Pose2D &goal);
-    geometry_msgs::Pose grasping_hand(armSide &side, geometry_msgs::Pose handle_pose);
+    geometry_msgs::Pose grasping_hand(RobotSide &side, geometry_msgs::Pose handle_pose);
 
     bool isClimbstairsFinished() const;
     void resetClimbstairsFlag(bool);

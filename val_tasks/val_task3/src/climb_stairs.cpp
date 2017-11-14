@@ -54,7 +54,7 @@ void climbStairs::approach_1 (void)
   ros::Duration(0.5).sleep();
   pelvis_->controlPelvisHeight(1.0);
   ros::Duration(0.5).sleep();
-  walker_->loadEEF(armSide::RIGHT, EE_LOADING::LOAD);
+  walker_->loadEEF(RobotSide::RIGHT, EE_LOADING::LOAD);
   walker_->walkNStepsWRTPelvis(1, FIRSTSTEP_OFFSET, 0.0, true, LEFT);
 
   // increase the swing height
@@ -66,12 +66,12 @@ void climbStairs::approach_1 (void)
     //ros::Duration(1.0).sleep();
     pelvis_->controlPelvisHeight(1.0);
     //ros::Duration(1.0).sleep();
-    walker_->loadEEF(armSide::LEFT, EE_LOADING::LOAD);
+    walker_->loadEEF(RobotSide::LEFT, EE_LOADING::LOAD);
     walker_->walkNStepsWRTPelvis(1, STEP_DEPTH, 0.0, true, RIGHT);
     // ros::Duration(1.0).sleep();
     pelvis_->controlPelvisHeight(1.0);
     //ros::Duration(1.0).sleep();
-    walker_->loadEEF(armSide::RIGHT, EE_LOADING::LOAD);
+    walker_->loadEEF(RobotSide::RIGHT, EE_LOADING::LOAD);
     walker_->walkNStepsWRTPelvis(1, STEP_DEPTH, 0.0, true, LEFT);
   }
 
@@ -109,7 +109,7 @@ void climbStairs::approach_2 (void)
   ros::Duration(1).sleep();
   pelvis_->controlPelvisHeight(1.0);
   ros::Duration(1).sleep();
-  walker_->loadEEF(armSide::RIGHT, EE_LOADING::LOAD);
+  walker_->loadEEF(RobotSide::RIGHT, EE_LOADING::LOAD);
   walker_->walkNStepsWRTPelvis(1, 0.3, 0.0, true, LEFT);
 
   // starting step to keep track of the x co-ordinate
@@ -148,7 +148,7 @@ void climbStairs::approach_2 (void)
     ros::Duration(1).sleep();
     pelvis_->controlPelvisHeight(1.0);
     ros::Duration(1).sleep();
-    walker_->loadEEF(armSide::LEFT, EE_LOADING::LOAD);
+    walker_->loadEEF(RobotSide::LEFT, EE_LOADING::LOAD);
     walker_->getCurrentStep(RIGHT, r_foot);
     currentWorldLocation.x = r_foot.location.x;
     currentWorldLocation.y = r_foot.location.y;
@@ -177,7 +177,7 @@ void climbStairs::approach_2 (void)
     ros::Duration(1).sleep();
     pelvis_->controlPelvisHeight(1.0);
     ros::Duration(1).sleep();
-    walker_->loadEEF(armSide::RIGHT, EE_LOADING::LOAD);
+    walker_->loadEEF(RobotSide::RIGHT, EE_LOADING::LOAD);
     walker_->getCurrentStep(LEFT, l_foot);
     currentWorldLocation.x = l_foot.location.x;
     currentWorldLocation.y = l_foot.location.y;

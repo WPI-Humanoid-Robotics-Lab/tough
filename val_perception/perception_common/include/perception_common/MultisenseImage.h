@@ -25,7 +25,7 @@
 #include <image_transport/subscriber_filter.h>
 #include <memory>
 
-namespace src_perception {
+namespace tough_perception {
 
 class MultisenseImage {
 

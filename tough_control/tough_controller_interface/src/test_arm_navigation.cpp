@@ -35,8 +35,8 @@ int main(int argc, char **argv)
     }
     std::vector< std::vector<float> > armData;
     armData.push_back(positions);
-    armSide side = argv[1][0] == '0' ? armSide::LEFT : armSide::RIGHT;
-    std::string side_str = (side == armSide::LEFT) ? "left" : "right";
+    RobotSide side = argv[1][0] == '0' ? RobotSide::LEFT : RobotSide::RIGHT;
+    std::string side_str = (side == RobotSide::LEFT) ? "left" : "right";
 
     log_msg("Moving " + side_str + " arm to given joint angles");
     armData.push_back(positions);

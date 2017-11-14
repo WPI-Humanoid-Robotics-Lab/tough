@@ -54,21 +54,21 @@ public:
      * @param side is either LEFT or RIGHT
      * @param gripperData is a vector of size 5.
      */
-    void controlGripper(const armSide side, const std::vector<double> gripperData);
+    void controlGripper(const RobotSide side, const std::vector<double> gripperData);
 
-    void controlGripper(const armSide side, GRIPPER_STATE state=GRIPPER_STATE::OPEN);
+    void controlGripper(const RobotSide side, GRIPPER_STATE state=GRIPPER_STATE::OPEN);
 
     /**
      * @brief closeGripper closes the gripper completely.
      * @param side is either LEFT or RIGHT
      */
-    void closeGripper(const armSide side);
+    void closeGripper(const RobotSide side);
 
     /**
      * @brief openGripper opens the gripper completely
      * @param side is either LEFT or RIGHT
      */
-    void openGripper(const armSide side);
+    void openGripper(const RobotSide side);
 };
 
 

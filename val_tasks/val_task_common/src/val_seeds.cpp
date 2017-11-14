@@ -28,7 +28,7 @@ int main(int argc, char **argv)
         ros::WallDuration(0.1).sleep();
     }
 
-    armSide side;
+    RobotSide side;
     std::vector< std::vector<float> > armData;
     // seed values
     const std::vector<float> leftShoulderSeed1_={0.2,-0.2,0.2,-0.2,0.2,-0.2,-0.2};
@@ -130,7 +130,7 @@ int main(int argc, char **argv)
     if(argc == 3)
     {
         armData.clear();
-        side = std::stoi(argv[1]) == 1? armSide::RIGHT :armSide::LEFT;
+        side = std::stoi(argv[1]) == 1? RobotSide::RIGHT :RobotSide::LEFT;
         if(std::stoi(argv[1]) == 0)
         {
             if(std::stoi(argv[2]) == 1) armData.push_back(leftShoulderSeed1_);

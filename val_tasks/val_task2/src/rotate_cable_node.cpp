@@ -17,7 +17,7 @@ int main(int argc, char **argv)
         pt.orientation.z = std::atof(argv[8]);
         pt.orientation.w = std::atof(argv[9]);
 
-        armSide side;
+        RobotSide side;
         if(std::atoi(argv[1]) == 0){
             side = LEFT;
         } else {

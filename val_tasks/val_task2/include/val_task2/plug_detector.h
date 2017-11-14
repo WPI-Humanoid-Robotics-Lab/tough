@@ -40,13 +40,13 @@ class SocketDetector
 
     ros::NodeHandle nh_;
     ros::Publisher marker_pub_;
-    src_perception::MultisenseImage* ms_sensor_;
-    src_perception::StereoPointCloudColor::Ptr organizedCloud_;
+    tough_perception::MultisenseImage* ms_sensor_;
+    tough_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
     void visualize_point(geometry_msgs::Point point);
 
 public:
-    SocketDetector(ros::NodeHandle nh, src_perception::MultisenseImage *ms_sensor);
+    SocketDetector(ros::NodeHandle nh, tough_perception::MultisenseImage *ms_sensor);
     void setTrackbar();
     void showImage(cv::Mat, std::string caption="Plug Detection");
     void colorSegment(cv::Mat &imgHSV, cv::Mat &outImg);

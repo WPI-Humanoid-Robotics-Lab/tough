@@ -7,7 +7,7 @@
 #include <tough_controller_interface/arm_control_interface.h>
 #include <tough_controller_interface/gripper_control_interface.h>
 #include <tough_controller_interface/robot_state.h>
-#include "val_moveit_planners/val_cartesian_planner.h"
+#include "tough_moveit_planners/tough_cartesian_planner.h"
 #include "tough_controller_interface/wholebody_control_interface.h"
 #include <val_task_common/val_task_common_utils.h>
 #include <tf/transform_datatypes.h>
@@ -28,8 +28,8 @@ private:
     gripperControl gripper_;
     RobotStateInformer *current_state_;
     RobotDescription *rd_;
-    cartesianPlanner *right_arm_planner_;
-    cartesianPlanner *left_arm_planner_;
+    CartesianPlanner *right_arm_planner_;
+    CartesianPlanner *left_arm_planner_;
     wholebodyManipulation wholebody_controller_;
     geometry_msgs::QuaternionStamped leftHandOrientation_ ;
     geometry_msgs::QuaternionStamped rightHandOrientation_;
@@ -51,10 +51,10 @@ private:
                       const float g,
                       const float b) const { pubPoseArrow(pose, ns, 0, r, g, b); }
 
-    geometry_msgs::Pose getGraspGoal(const armSide &side, const geometry_msgs::Pose &user_goal) const;
-    geometry_msgs::Pose getReachGoal(const armSide &side, const geometry_msgs::Pose &grasp_goal) const;
+    geometry_msgs::Pose getGraspGoal(const RobotSide &side, const geometry_msgs::Pose &user_goal) const;
+    geometry_msgs::Pose getReachGoal(const RobotSide &side, const geometry_msgs::Pose &grasp_goal) const;
 
-    float getStandingOffset(const armSide side, const geometry_msgs::Pose user_goal) const;
+    float getStandingOffset(const RobotSide side, const geometry_msgs::Pose user_goal) const;
 };
 
 #endif // LEAK_DETECTOR_GRASP_H

@@ -7,7 +7,7 @@
 #include <tough_controller_interface/arm_control_interface.h>
 #include <tough_controller_interface/gripper_control_interface.h>
 #include <tough_controller_interface/robot_state.h>
-#include "val_moveit_planners/val_cartesian_planner.h"
+#include "tough_moveit_planners/tough_cartesian_planner.h"
 #include "tough_controller_interface/wholebody_control_interface.h"
 
 #define Y_OFFSET 0.05
@@ -16,8 +16,8 @@ class handle_grabber{
 public:
     handle_grabber(ros::NodeHandle n);
     ~handle_grabber();
-   void grasp_handles(const armSide side, const geometry_msgs::Point &goal, float executionTime=1.5f);
-   void adjust_pose(const armSide side, const geometry_msgs::Point &goal, float executionTime=1.0f);
+   void grasp_handles(const RobotSide side, const geometry_msgs::Point &goal, float executionTime=1.5f);
+   void adjust_pose(const RobotSide side, const geometry_msgs::Point &goal, float executionTime=1.0f);
 
    geometry_msgs::QuaternionStamped leftHandOrientation() const;
    void setLeftHandOrientation(const geometry_msgs::QuaternionStamped &leftHandOrientation);
@@ -34,8 +34,8 @@ private:
    RobotDescription *rd_ ;
    geometry_msgs::QuaternionStamped leftHandOrientation_ ;
    geometry_msgs::QuaternionStamped rightHandOrientation_;
-   cartesianPlanner* right_arm_planner_;
-   cartesianPlanner* left_arm_planner_;
+   CartesianPlanner* right_arm_planner_;
+   CartesianPlanner* left_arm_planner_;
    wholebodyManipulation* wholebody_controller_;
    /*Top Grip*/
    const std::vector<float> leftShoulderSeed_ = {-0.23, -0.72, 0.65, -1.51, 2.77, 0.0, 0.0};

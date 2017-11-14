@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   tough_controller_interface
   image_transport
-  val_moveit_planners
+  tough_moveit_planners
   tough_control_common
 )
 

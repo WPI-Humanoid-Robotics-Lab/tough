@@ -5,7 +5,7 @@
 
 #define DISABLE_DRAWINGS true
 
-ButtonDetector::ButtonDetector(ros::NodeHandle nh, src_perception::MultisenseImage* ms_sensor): nh_(nh)
+ButtonDetector::ButtonDetector(ros::NodeHandle nh, tough_perception::MultisenseImage* ms_sensor): nh_(nh)
 {
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array",1);
     ms_sensor_ = ms_sensor;
@@ -59,8 +59,8 @@ bool ButtonDetector::getButtonLocation(geometry_msgs::Point& buttonLoc)
 {
 
     bool foundButton = false;
-    src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
-    src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
+    tough_perception::StereoPointCloudColor::Ptr organizedCloud(new tough_perception::StereoPointCloudColor);
+    tough_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
     tf::TransformListener listener;
     geometry_msgs::PointStamped geom_point;
     std::vector<std::vector<cv::Point> > contours;

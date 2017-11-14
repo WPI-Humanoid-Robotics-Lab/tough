@@ -7,7 +7,7 @@
 #define DISABLE_DRAWINGS true
 #define DISABLE_TRACKBAR true
 
-StairDetector::StairDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new src_perception::StereoPointCloudColor), coefficients_(4), endPoints_(2)
+StairDetector::StairDetector(ros::NodeHandle nh) : nh_(nh), ms_sensor_(nh_), organizedCloud_(new tough_perception::StereoPointCloudColor), coefficients_(4), endPoints_(2)
 {
     ms_sensor_.giveQMatrix(qMatrix_);
     marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("/visualization_marker_array",1);
@@ -76,8 +76,8 @@ void StairDetector::findMaxContour(const std::vector<std::vector<cv::Point> >& c
 bool StairDetector::getStairLocation(geometry_msgs::Point& stairLocation, uint& numSideBarsDetected )
 {
     bool foundStair = false;
-    src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
-    src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
+    tough_perception::StereoPointCloudColor::Ptr organizedCloud(new tough_perception::StereoPointCloudColor);
+    tough_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
     tf::TransformListener listener;
     geometry_msgs::PointStamped geom_point;
     std::vector<std::vector<cv::Point> > contours;

@@ -76,7 +76,7 @@ bool task1Utils::getNextPoseToWalk(geometry_msgs::Pose2D &pose2D, bool allowVisi
 void task1Utils::reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset){
 
     size_t nSteps;
-    armSide startStep;
+    RobotSide startStep;
     std::vector<float> y_offset;
     std::vector<float> x_offset;
 

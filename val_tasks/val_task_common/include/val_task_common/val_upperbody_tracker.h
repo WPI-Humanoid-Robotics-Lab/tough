@@ -32,6 +32,6 @@ public:
     ~upperBodyTracker();
 
     // determines if robot is waliking, returns True if walking
-    bool isArmMoving(armSide side, int dof);
+    bool isArmMoving(RobotSide side, int dof);
     bool isTorsoMoving(void);
 };

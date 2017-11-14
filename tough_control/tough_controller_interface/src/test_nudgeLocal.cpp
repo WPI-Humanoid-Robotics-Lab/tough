@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 
   if(argc == 3){
     std::string side_str;
-    armSide side;
+    RobotSide side;
     if(std::atoi(argv[1]) == 0){
       side = LEFT;
       side_str = "left";
@@ -44,7 +44,7 @@ int main(int argc, char **argv)
   }
   else if(argc == 4){
       std::string side_str;
-      armSide side;
+      RobotSide side;
       if(std::atoi(argv[1]) == 0){
         side = LEFT;
         side_str = "left";

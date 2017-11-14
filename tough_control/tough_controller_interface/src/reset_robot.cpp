@@ -16,9 +16,9 @@ int main(int argc, char **argv)
     if(argc ==2)
     {
 
-        armTraj.moveToZeroPose(armSide::LEFT);
+        armTraj.moveToZeroPose(RobotSide::LEFT);
         ros::Duration(0.3).sleep();
-        armTraj.moveToZeroPose(armSide::RIGHT);
+        armTraj.moveToZeroPose(RobotSide::RIGHT);
         ros::Duration(1).sleep();
 
     }
@@ -29,9 +29,9 @@ int main(int argc, char **argv)
     chestTraj.controlChest(2,2,2);
     ros::Duration(1).sleep();
 
-    armTraj.moveToDefaultPose(armSide::LEFT);
+    armTraj.moveToDefaultPose(RobotSide::LEFT);
     ros::Duration(0.3).sleep();
-    armTraj.moveToDefaultPose(armSide::RIGHT);
+    armTraj.moveToDefaultPose(RobotSide::RIGHT);
     ros::Duration(1).sleep();
 
 }

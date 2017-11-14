@@ -42,8 +42,8 @@ class CableDetector
 
     ros::NodeHandle nh_;
     ros::Publisher marker_pub_;
-    src_perception::MultisenseImage* ms_sensor_;
-    src_perception::StereoPointCloudColor::Ptr organizedCloud_;
+    tough_perception::MultisenseImage* ms_sensor_;
+    tough_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
     std::vector<cv::Point2d> eigenVecs_;
     std::vector<cv::Point> convexHulls_;
@@ -58,7 +58,7 @@ class CableDetector
     void visualize_pose(geometry_msgs::Pose pose);
 
 public:
-    CableDetector(ros::NodeHandle nh, src_perception::MultisenseImage* ms_sensor);
+    CableDetector(ros::NodeHandle nh, tough_perception::MultisenseImage* ms_sensor);
     ~CableDetector();
 
     void setTrackbar();

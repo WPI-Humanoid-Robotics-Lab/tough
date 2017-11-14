@@ -40,8 +40,8 @@ class HandleDetector
 
     ros::NodeHandle nh_;
     ros::Publisher marker_pub_;
-    src_perception::MultisenseImage ms_sensor_;
-    src_perception::StereoPointCloudColor::Ptr organizedCloud_;
+    tough_perception::MultisenseImage ms_sensor_;
+    tough_perception::StereoPointCloudColor::Ptr organizedCloud_;
     visualization_msgs::MarkerArray markers_;
     void visualize_point(geometry_msgs::Point point);
 public:

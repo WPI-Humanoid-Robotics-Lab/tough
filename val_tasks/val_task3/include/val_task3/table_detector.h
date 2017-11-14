@@ -24,7 +24,7 @@ class table_detector
     ros::Publisher blacklist_pub_;
     ros::Subscriber pcl_sub_;
 
-    src_perception::MultisensePointCloud point_cloud_listener_;
+    tough_perception::MultisensePointCloud point_cloud_listener_;
 
     std::vector<geometry_msgs::PoseStamped> vantage_poses_;
 

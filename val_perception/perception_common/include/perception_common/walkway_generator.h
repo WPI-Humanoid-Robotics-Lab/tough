@@ -1,5 +1,5 @@
-#ifndef VAL_WALKWAY_SEED_POINT_GENERATOR_H
-#define VAL_WALKWAY_SEED_POINT_GENERATOR_H
+#ifndef WALKWAY_GENERATOR_H
+#define WALKWAY_GENERATOR_H
 
 #include <ros/ros.h>
 #include <pcl/filters/extract_indices.h>
@@ -35,4 +35,4 @@ private:
 };
 
 
-#endif // VAL_WALKWAY_SEED_POINT_GENERATOR_H
+#endif // WALKWAY_GENERATOR_H

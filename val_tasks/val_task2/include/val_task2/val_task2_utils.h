@@ -13,10 +13,10 @@
 #include <tough_controller_interface/gripper_control_interface.h>
 #include <tough_controller_interface/head_control_interface.h>
 #include <tough_controller_interface/arm_control_interface.h>
-#include <val_footstep/RobotWalker.h>
+#include <tough_footstep/RobotWalker.h>
 #include <val_task2/cable_detector.h>
 #include "tough_controller_interface/wholebody_control_interface.h"
-#include "val_moveit_planners/val_cartesian_planner.h"
+#include "tough_moveit_planners/tough_cartesian_planner.h"
 #include "ros/package.h"
 #include <fstream>
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -55,8 +55,8 @@ private:
 
     ros::Subscriber task_status_sub_,detach_harness;
 
-    cartesianPlanner* left_arm_planner_;
-    cartesianPlanner* right_arm_planner_;
+    CartesianPlanner* left_arm_planner_;
+    CartesianPlanner* right_arm_planner_;
     wholebodyManipulation* wholebody_controller_;
 
     CableDetector* cable_detector_;
@@ -133,13 +133,13 @@ public:
 
     task2Utils(ros::NodeHandle nh);
     ~task2Utils();
-    bool afterPanelGraspPose(const armSide side, bool isRotationRequired);
+    bool afterPanelGraspPose(const RobotSide side, bool isRotationRequired);
     bool isPointOnWalkway(float x, float y);
-    void movePanelToWalkSafePose(const armSide side, bool isRotationRequired);
-    bool isPanelPicked(const armSide side);
-    void placePanel(const armSide graspingHand, bool isPanelRotated);
-    void rotatePanel(const armSide graspingHand);
-    void raisePanel(const armSide graspingHand);
+    void movePanelToWalkSafePose(const RobotSide side, bool isRotationRequired);
+    bool isPanelPicked(const RobotSide side);
+    void placePanel(const RobotSide graspingHand, bool isPanelRotated);
+    void rotatePanel(const RobotSide graspingHand);
+    void raisePanel(const RobotSide graspingHand);
     void clearPointCloud();
     void clearMap();
     void pausePointCloud();
@@ -149,18 +149,18 @@ public:
     void reOrientTowardsGoal(geometry_msgs::Point goal_point, float offset=0.0);
     void reOrientTowardsCable(geometry_msgs::Pose cablePose, geometry_msgs::Pose panelPose);
     int getCurrentCheckpoint() const;
-    bool shakeTest(const armSide graspingHand);
+    bool shakeTest(const RobotSide graspingHand);
     bool pushDeployedPanel();
 
     boost::posix_time::ptime timeNow;
     bool isCableOnTable(geometry_msgs::Pose &cable_pose);
-    bool isCableInHand(armSide side);
+    bool isCableInHand(RobotSide side);
     bool isCableTouchingSocket();
-    geometry_msgs::Pose grasping_hand(armSide &side, geometry_msgs::Pose handle_pose);
-    bool isRotationReq(armSide side, geometry_msgs::Point handle_coordinates,geometry_msgs::Point button_coordinates);
+    geometry_msgs::Pose grasping_hand(RobotSide &side, geometry_msgs::Pose handle_pose);
+    bool isRotationReq(RobotSide side, geometry_msgs::Point handle_coordinates,geometry_msgs::Point button_coordinates);
     bool checkpoint_init();
     void taskLogPub(std::string data);
-    bool planWholeBodyMotion(armSide side, std::vector<geometry_msgs::Pose> waypoints);
+    bool planWholeBodyMotion(RobotSide side, std::vector<geometry_msgs::Pose> waypoints);
 };
 
 

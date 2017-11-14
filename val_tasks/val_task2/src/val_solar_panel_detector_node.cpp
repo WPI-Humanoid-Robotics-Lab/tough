@@ -10,7 +10,7 @@ int main(int argc, char** argv){
   ros::NodeHandle nh;
 
 
-  src_perception::MultisenseImage* ms_sensor = new src_perception::MultisenseImage(nh);
+  tough_perception::MultisenseImage* ms_sensor = new tough_perception::MultisenseImage(nh);
     cv::Mat tmp;
     ms_sensor->giveImage(tmp);
     ms_sensor->giveDisparityImage(tmp);

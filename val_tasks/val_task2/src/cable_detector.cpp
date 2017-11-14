@@ -7,7 +7,7 @@
 #define DISABLE_DRAWINGS true
 #define DISABLE_TRACKBAR true
 
-CableDetector::CableDetector(ros::NodeHandle nh, src_perception::MultisenseImage *ms_sensor) : nh_(nh), organizedCloud_(new src_perception::StereoPointCloudColor)
+CableDetector::CableDetector(ros::NodeHandle nh, tough_perception::MultisenseImage *ms_sensor) : nh_(nh), organizedCloud_(new tough_perception::StereoPointCloudColor)
 {
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     rd_ = RobotDescription::getRobotDescription(nh_);
@@ -69,8 +69,8 @@ size_t CableDetector::findMaxContour(const std::vector<std::vector<cv::Point> >&
 bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
 {
     bool foundCable = false;
-    src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
-    src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
+    tough_perception::StereoPointCloudColor::Ptr organizedCloud(new tough_perception::StereoPointCloudColor);
+    tough_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
     tf::TransformListener listener;
     geometry_msgs::PointStamped geom_point;
     std::vector<std::vector<cv::Point> > contours;
@@ -144,8 +144,8 @@ bool CableDetector::getCableLocation(geometry_msgs::Point& cableLoc)
 bool CableDetector::getCablePose(geometry_msgs::Pose& cablePose)
 {
     bool foundCable = false;
-    src_perception::StereoPointCloudColor::Ptr organizedCloud(new src_perception::StereoPointCloudColor);
-    src_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
+    tough_perception::StereoPointCloudColor::Ptr organizedCloud(new tough_perception::StereoPointCloudColor);
+    tough_perception::PointCloudHelper::generateOrganizedRGBDCloud(current_disparity_, current_image_, qMatrix_, organizedCloud);
     tf::TransformListener listener;
     geometry_msgs::PointStamped geom_point0;
     geometry_msgs::PointStamped geom_point;

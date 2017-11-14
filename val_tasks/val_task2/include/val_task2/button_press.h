@@ -3,10 +3,10 @@
 #include <val_task2/button_detector.h>
 #include <tough_controller_interface/arm_control_interface.h>
 #include <tough_controller_interface/gripper_control_interface.h>
-#include <val_footstep/RobotWalker.h>
+#include <tough_footstep/RobotWalker.h>
 #include <tough_common/val_common_defines.h>
 #include <tough_common/val_common_names.h>
-#include "val_moveit_planners/val_cartesian_planner.h"
+#include "tough_moveit_planners/tough_cartesian_planner.h"
 #include "tough_controller_interface/wholebody_control_interface.h"
 #include "tough_controller_interface/chest_control_interface.h"
 
@@ -34,14 +34,14 @@ class ButtonPress
     //    // Not in use currently
     //    const std::vector<float> leftShoulderSeed_ = {-0.23 ,-1.16, -0.09, -1.39 ,1.09, 0.02, -0.06};
     //    const std::vector<float> rightShoulderSeed_ = {-0.28, 0.99, 0.12 , 1.49, 1.03, 0.0, 0.0};
-    cartesianPlanner* right_arm_planner_;
-    cartesianPlanner* left_arm_planner_;
+    CartesianPlanner* right_arm_planner_;
+    CartesianPlanner* left_arm_planner_;
     wholebodyManipulation* wholebody_controller_;
     chestTrajectory * chest_controller_;
 
 public:
 
-    bool pressButton(const armSide side, geometry_msgs::Point &goal, float executionTime=2.0f);
+    bool pressButton(const RobotSide side, geometry_msgs::Point &goal, float executionTime=2.0f);
     geometry_msgs::QuaternionStamped leftHandOrientation() const;
     geometry_msgs::QuaternionStamped rightHandOrientation() const;
     void getButtonPosition( geometry_msgs::Point &goal);

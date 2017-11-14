@@ -5,7 +5,7 @@
 // Sweep period: time for an entire up-and-down arm motion (think of it like the period of a sine wave)
 #define ARM_SWEEP_PERIOD 2.f
 
-leakDetector::leakDetector(ros::NodeHandle nh, armSide side, bool thumbwards):
+leakDetector::leakDetector(ros::NodeHandle nh, RobotSide side, bool thumbwards):
     nh_(nh), task3Utils_(nh), side_(side), thumbwards_(thumbwards), leak_found_(false)
 {
     leak_sb_ = nh_.subscribe("/task3/checkpoint5/leak", 10, &leakDetector::leakMsgCB, this);
@@ -33,7 +33,7 @@ void leakDetector::leakMsgCB(const srcsim::Leak &leakmsg)
         leak_loc.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
         leak_loc.header.stamp = ros::Time::now();
 
-        std::string palm_frame = side_ == armSide::LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
+        std::string palm_frame = side_ == RobotSide::LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
         current_state_->getCurrentPose(palm_frame, leak_loc.pose, leak_loc.header.frame_id);
 
         leak_loc_pub_.publish(leak_loc);
@@ -58,10 +58,10 @@ void leakDetector::findLeak() {
     // Joint order: leftShoulderPitch, leftShoulderRoll, leftShoulderYaw, leftElbowPitch, leftForearmYaw,
     // leftWristRoll, leftWristPitch
     std::vector<float> configuration;
-    if (side_ == armSide::LEFT && thumbwards_) {
+    if (side_ == RobotSide::LEFT && thumbwards_) {
         // Left arm, detector thumbwards
         configuration = {0.f, -1.f, 0.f, -0.68f, 1.45, -0.5f, 0.f};
-    } else if (side_ == armSide::LEFT) {
+    } else if (side_ == RobotSide::LEFT) {
         // Left arm, detector anti-thumbwards
         configuration = {0.f, -1.f, 0.f, -0.68f, -1.45f, 0.6f, 0.f};
     } else if (thumbwards_) {
@@ -76,7 +76,7 @@ void leakDetector::findLeak() {
 
     const std::size_t moving_joint = 1; // I think this is always the same?
     float min_moving_joint_angle = configuration[moving_joint];
-    float max_moving_joint_angle = (side_ == armSide::LEFT) ? 0.88f : -0.80f;
+    float max_moving_joint_angle = (side_ == RobotSide::LEFT) ? 0.88f : -0.80f;
 
     float center = (min_moving_joint_angle + max_moving_joint_angle) / 2;
     float amplitude = max_moving_joint_angle - center;

@@ -653,9 +653,9 @@ void valTask3::setFinishBoxPose(const geometry_msgs::Pose2D &finish_box_pose)
 void valTask3::resetRobotToDefaults(int arm_pose)
 {
     // open grippers
-    gripper_controller_->openGripper(armSide::RIGHT);
+    gripper_controller_->openGripper(RobotSide::RIGHT);
     ros::Duration(0.2).sleep();
-    gripper_controller_->openGripper(armSide::LEFT);
+    gripper_controller_->openGripper(RobotSide::LEFT);
     ros::Duration(0.2).sleep();
 
     // increse pelvis
@@ -669,16 +669,16 @@ void valTask3::resetRobotToDefaults(int arm_pose)
     // arms to default
     if (arm_pose == 0)
     {
-        arm_controller_->moveToZeroPose(armSide::LEFT);
+        arm_controller_->moveToZeroPose(RobotSide::LEFT);
         ros::Duration(0.2).sleep();
-        arm_controller_->moveToZeroPose(armSide::RIGHT);
+        arm_controller_->moveToZeroPose(RobotSide::RIGHT);
         ros::Duration(1).sleep();
     }
     else if (arm_pose == 1)
     {
-        arm_controller_->moveToDefaultPose(armSide::LEFT);
+        arm_controller_->moveToDefaultPose(RobotSide::LEFT);
         ros::Duration(0.2).sleep();
-        arm_controller_->moveToDefaultPose(armSide::RIGHT);
+        arm_controller_->moveToDefaultPose(RobotSide::RIGHT);
         ros::Duration(1).sleep();
     }
 

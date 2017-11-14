@@ -30,7 +30,7 @@ upperBodyTracker::~upperBodyTracker()
 
 }
 
-bool upperBodyTracker::isArmMoving(armSide side, int dof)
+bool upperBodyTracker::isArmMoving(RobotSide side, int dof)
 {
     bool ret = false;
     static int l7debounce_count  = 0;
@@ -43,7 +43,7 @@ bool upperBodyTracker::isArmMoving(armSide side, int dof)
     armMotionState arm_state;
 
     // left arm - 10DOF
-    if (side == armSide::LEFT && dof == 10 &&
+    if (side == RobotSide::LEFT && dof == 10 &&
             (track_torso_pitch_.isInMotion()     == frame_track_status::FRAME_IN_MOTION     ||
              track_torso_yaw_.isInMotion()       == frame_track_status::FRAME_IN_MOTION     ||
              track_torso_roll_.isInMotion()      == frame_track_status::FRAME_IN_MOTION     ||
@@ -60,7 +60,7 @@ bool upperBodyTracker::isArmMoving(armSide side, int dof)
     }
 
     // right arm - 10DOF
-    if (side == armSide::RIGHT && dof == 10 &&
+    if (side == RobotSide::RIGHT && dof == 10 &&
             (track_torso_pitch_.isInMotion()     == frame_track_status::FRAME_IN_MOTION     ||
              track_torso_yaw_.isInMotion()       == frame_track_status::FRAME_IN_MOTION     ||
              track_torso_roll_.isInMotion()      == frame_track_status::FRAME_IN_MOTION     ||
@@ -77,7 +77,7 @@ bool upperBodyTracker::isArmMoving(armSide side, int dof)
     }
 
     // left arm - 7DOF
-    if (side == armSide::LEFT && dof == 7 &&
+    if (side == RobotSide::LEFT && dof == 7 &&
             (track_lshoulder_pitch_.isInMotion() == frame_track_status::FRAME_IN_MOTION     ||
              track_lshoulder_roll_.isInMotion()  == frame_track_status::FRAME_IN_MOTION     ||
              track_lshoulder_yaw_.isInMotion()   == frame_track_status::FRAME_IN_MOTION     ||
@@ -91,7 +91,7 @@ bool upperBodyTracker::isArmMoving(armSide side, int dof)
     }
 
     // right arm - 7DOF
-    if (side == armSide::RIGHT && dof == 7 &&
+    if (side == RobotSide::RIGHT && dof == 7 &&
             (track_rshoulder_pitch_.isInMotion()   == frame_track_status::FRAME_IN_MOTION ||
              track_rshoulder_roll_.isInMotion()   == frame_track_status::FRAME_IN_MOTION  ||
              track_rshoulder_yaw_.isInMotion()   == frame_track_status::FRAME_IN_MOTION   ||

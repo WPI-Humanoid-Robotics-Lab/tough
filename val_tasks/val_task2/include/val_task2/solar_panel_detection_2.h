@@ -27,7 +27,7 @@ class solar_panel_detector_2
 
     tf::TransformListener tf_listener_;
 
-    src_perception::MultisensePointCloud point_cloud_listener_;
+    tough_perception::MultisensePointCloud point_cloud_listener_;
 
     geometry_msgs::PoseStamped rover_pose_;
 

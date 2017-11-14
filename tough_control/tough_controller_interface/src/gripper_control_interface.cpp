@@ -26,7 +26,7 @@ gripperControl::~gripperControl(){
 
 }
 
-void gripperControl::controlGripper(const armSide side, const std::vector<double> gripperData){
+void gripperControl::controlGripper(const RobotSide side, const std::vector<double> gripperData){
 
     std_msgs::Float64MultiArray msg;
     msg.data.clear();
@@ -46,7 +46,7 @@ void gripperControl::controlGripper(const armSide side, const std::vector<double
     }
 }
 
-void gripperControl::controlGripper(const armSide side, GRIPPER_STATE state)
+void gripperControl::controlGripper(const RobotSide side, GRIPPER_STATE state)
 {
     std_msgs::Float64MultiArray msg;
     msg.data.clear();
@@ -92,7 +92,7 @@ void gripperControl::controlGripper(const armSide side, GRIPPER_STATE state)
     }
 }
 
-void gripperControl::closeGripper(const armSide side)
+void gripperControl::closeGripper(const RobotSide side)
 {
     std_msgs::Float64MultiArray msg;
     msg.data.clear();
@@ -107,7 +107,7 @@ void gripperControl::closeGripper(const armSide side)
     }
 }
 
-void gripperControl::openGripper(const armSide side)
+void gripperControl::openGripper(const RobotSide side)
 {
     std_msgs::Float64MultiArray msg;
     msg.data.clear();

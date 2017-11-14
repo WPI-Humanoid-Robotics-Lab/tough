@@ -54,10 +54,10 @@ find_package(catkin REQUIRED COMPONENTS
 
   tough_controller_interface
   val_gui
-  val_footstep
+  tough_footstep
   val_task_common
   navigation_common
-  val_moveit_planners
+  tough_moveit_planners
   tough_control_common
 )
 
@@ -169,7 +169,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES val_task1
-  CATKIN_DEPENDS roscpp rospy perception_common dynamic_reconfigure val_footstep navigation_common
+  CATKIN_DEPENDS roscpp rospy perception_common dynamic_reconfigure tough_footstep navigation_common
   DEPENDS system_lib
 )
 

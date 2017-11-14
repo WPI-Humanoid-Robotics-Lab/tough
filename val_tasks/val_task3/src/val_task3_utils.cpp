@@ -127,7 +127,7 @@ void task3Utils::blindNavigation(geometry_msgs::Pose2D & goal){
 }
 
 // Copied from task2utils
-geometry_msgs::Pose task3Utils::grasping_hand(armSide &side, geometry_msgs::Pose handle_pose) {
+geometry_msgs::Pose task3Utils::grasping_hand(RobotSide &side, geometry_msgs::Pose handle_pose) {
     geometry_msgs::Pose poseInPelvisFrame;
     current_state_->transformPose(handle_pose, poseInPelvisFrame, VAL_COMMON_NAMES::WORLD_TF,
                                   rd_->getPelvisFrame());
@@ -147,7 +147,7 @@ geometry_msgs::Pose task3Utils::grasping_hand(armSide &side, geometry_msgs::Pose
         yaw = tf::getYaw(poseInPelvisFrame.orientation);
     }
 
-    side = yaw < 0 ? armSide::LEFT : armSide::RIGHT;
+    side = yaw < 0 ? RobotSide::LEFT : RobotSide::RIGHT;
     return handle_pose;
 }
 
@@ -173,7 +173,7 @@ void task3Utils::task3LogPub(std::string data){
 // Copied and modified from task2utils
 void task3Utils::walkSideways(float error) {
     std::size_t nSteps;
-    armSide startStep;
+    RobotSide startStep;
     std::vector<float> y_offset;
     std::vector<float> x_offset;
 

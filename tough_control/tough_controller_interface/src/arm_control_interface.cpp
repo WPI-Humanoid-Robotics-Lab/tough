@@ -84,7 +84,7 @@ void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &ms
     return;
 }
 
-void armTrajectory::moveToDefaultPose(armSide side)
+void armTrajectory::moveToDefaultPose(RobotSide side)
 {
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
@@ -102,7 +102,7 @@ void armTrajectory::moveToDefaultPose(armSide side)
 
 }
 
-void armTrajectory::moveToZeroPose(armSide side)
+void armTrajectory::moveToZeroPose(RobotSide side)
 {
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
@@ -112,7 +112,7 @@ void armTrajectory::moveToZeroPose(armSide side)
     armTrajectory::arm_id--;
     arm_traj.unique_id = armTrajectory::arm_id;
 
-    if(side == armSide::LEFT)
+    if(side == RobotSide::LEFT)
         appendTrajectoryPoint(arm_traj, 2, {0.1,-0.1,0.1,-0.1,0.1,-0.1,-0.1});
     else
         appendTrajectoryPoint(arm_traj, 2, {0.1,0.1,0.1,0.1,0.1,0.1,0.1});
@@ -121,7 +121,7 @@ void armTrajectory::moveToZeroPose(armSide side)
 
 }
 
-void armTrajectory::moveArmJoints(const armSide side, const std::vector<std::vector<float>> &arm_pose,const float time){
+void armTrajectory::moveArmJoints(const RobotSide side, const std::vector<std::vector<float>> &arm_pose,const float time){
 
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
@@ -192,7 +192,7 @@ int armTrajectory::getnumArmJoints() const
     return NUM_ARM_JOINTS;
 }
 
-void armTrajectory::closeHand(const armSide side)
+void armTrajectory::closeHand(const RobotSide side)
 {
     ihmc_msgs::HandDesiredConfigurationRosMessage msg;
     msg.robot_side = side;
@@ -202,7 +202,7 @@ void armTrajectory::closeHand(const armSide side)
     this->handTrajectoryPublisher.publish(msg);
 }
 
-void armTrajectory::moveArmInTaskSpaceMessage(const armSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl)
+void armTrajectory::moveArmInTaskSpaceMessage(const RobotSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl)
 {
     ihmc_msgs::HandTrajectoryRosMessage msg;
     msg.robot_side = side;
@@ -214,7 +214,7 @@ void armTrajectory::moveArmInTaskSpaceMessage(const armSide side, const ihmc_msg
     taskSpaceTrajectoryPublisher.publish(msg);
 }
 
-void armTrajectory::moveArmInTaskSpace(const armSide side, const geometry_msgs::Pose &pose, const float time)
+void armTrajectory::moveArmInTaskSpace(const RobotSide side, const geometry_msgs::Pose &pose, const float time)
 {
     ihmc_msgs::SE3TrajectoryPointRosMessage point;
     poseToSE3TrajectoryPoint(pose, point);
@@ -279,7 +279,7 @@ void armTrajectory::poseToSE3TrajectoryPoint(const geometry_msgs::Pose &pose, ih
     return;
 }
 
-void armTrajectory::moveArmTrajectory(const armSide side, const trajectory_msgs::JointTrajectory &traj){
+void armTrajectory::moveArmTrajectory(const RobotSide side, const trajectory_msgs::JointTrajectory &traj){
 
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
@@ -296,7 +296,7 @@ void armTrajectory::moveArmTrajectory(const armSide side, const trajectory_msgs:
     armTrajectoryPublisher.publish(arm_traj);
 }
 
-bool armTrajectory::nudgeArm(const armSide side, const direction drct, float nudgeStep){
+bool armTrajectory::nudgeArm(const RobotSide side, const direction drct, float nudgeStep){
 
     geometry_msgs::Pose      world_pose;
     geometry_msgs::Pose      palm_pose;
@@ -346,7 +346,7 @@ bool armTrajectory::nudgeArm(const armSide side, const direction drct, float nud
 }
 
 
-bool armTrajectory::nudgeArmLocal(const armSide side, const direction drct, float nudgeStep){
+bool armTrajectory::nudgeArmLocal(const RobotSide side, const direction drct, float nudgeStep){
 
     std::string target_frame = side == LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
     int signInverter = side == LEFT ? 1 : -1;
@@ -414,7 +414,7 @@ void armTrajectory::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &ms
 //transforms the poses to the worldframe regardless.
 //POSES MUST BE IN WORLD FRAME;
 //Add conversion of posestamped to world frame if it not already in world frame
-bool armTrajectory::generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const armSide input_side,const float desired_time, std::vector<armTrajectory::armTaskSpaceData> &arm_data_vector)
+bool armTrajectory::generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const RobotSide input_side,const float desired_time, std::vector<armTrajectory::armTaskSpaceData> &arm_data_vector)
 {
 
     float time_delta = desired_time == 0 ? 0 : desired_time/input_poses.size();
@@ -431,7 +431,7 @@ bool armTrajectory::generate_task_space_data(const std::vector<geometry_msgs::Po
     return true;
 }
 
-bool armTrajectory::moveArmJoint(const armSide side, int jointNumber, const float targetAngle) {
+bool armTrajectory::moveArmJoint(const RobotSide side, int jointNumber, const float targetAngle) {
 
     ros::spinOnce(); //ensure that the joints are updated
     std::string param = side == LEFT ? "left_arm" : "right_arm";
@@ -459,7 +459,7 @@ bool armTrajectory::moveArmJoint(const armSide side, int jointNumber, const floa
     return false;
 }
 
-bool armTrajectory::nudgeArmLocal(const armSide side, float x, float y, float z, geometry_msgs::Pose &pose)
+bool armTrajectory::nudgeArmLocal(const RobotSide side, float x, float y, float z, geometry_msgs::Pose &pose)
 {
 
     std::cout<<"Nudge arm local called \n";
@@ -487,7 +487,7 @@ bool armTrajectory::nudgeArmLocal(const armSide side, float x, float y, float z,
     return true;
 }
 
-bool armTrajectory::nudgeArmPelvis(const armSide side, float x, float y, float z, geometry_msgs::Pose &pose)
+bool armTrajectory::nudgeArmPelvis(const RobotSide side, float x, float y, float z, geometry_msgs::Pose &pose)
 {
     std::cout<<"Nudge arm pelvis called \n";
     std::string target_frame = rd_->getPelvisFrame();

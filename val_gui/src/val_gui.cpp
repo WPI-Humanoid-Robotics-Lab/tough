@@ -438,10 +438,10 @@ void ValkyrieGUI::initValkyrieControllers() {
     wholeBodyController_ = new wholebodyManipulation(nh_);
 
     // right arm cartesian planner
-    rightArmPlanner_ = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    rightArmPlanner_ = new CartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
 
     // left arm cartesian planner
-    leftArmPlanner_ = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    leftArmPlanner_ = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
 }
 
 void ValkyrieGUI::getArmState()
@@ -450,7 +450,7 @@ void ValkyrieGUI::getArmState()
         ROS_INFO("joint_states is not initialized yet. cannot update arm joints");
         return;
     }
-    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
     mtx_.lock();
 
     if(side == LEFT) {
@@ -573,7 +573,7 @@ void ValkyrieGUI::getClickedPoint(const geometry_msgs::PointStamped::Ptr msg)
     clickedPoint_->orientation.w = 1.0;
     clickedPoint_->position = msg->point;
 
-    armSide side = ui->radioNudgeSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioNudgeSideLeft->isChecked() ? LEFT : RIGHT;
     ROS_INFO("Moving arm");
     armJointController_->moveArmInTaskSpace(side, *clickedPoint_, 3.0f);
     moveArmCommand_ = false;
@@ -653,7 +653,7 @@ void ValkyrieGUI::resetChestOrientation()
 
 void ValkyrieGUI::resetArm()
 {
-    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
     armJointController_->moveToDefaultPose(side);
     getArmState();
 }
@@ -685,7 +685,7 @@ void ValkyrieGUI::nudgeArm(int btnID)
     //    front -7
     //    left  -5
     //    right -6
-    armSide side = ui->radioNudgeSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioNudgeSideLeft->isChecked() ? LEFT : RIGHT;
 //    std::vector<geometry_msgs::Pose> waypoint;
 //    geometry_msgs::Pose pose;
 //    moveit_msgs::RobotTrajectory traj;
@@ -848,7 +848,7 @@ void ValkyrieGUI::setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr, bool is_
 void ValkyrieGUI::closeGrippers()
 {
     //call close grppiers function here
-    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
     gripperController_->closeGripper(side);
 
 }
@@ -856,7 +856,7 @@ void ValkyrieGUI::closeGrippers()
 void ValkyrieGUI::openGrippers()
 {
     //call open grippers function here
-    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
     gripperController_->openGripper(side);
 }
 
@@ -941,7 +941,7 @@ void ValkyrieGUI::displayPointcloud(int btnID)
 void ValkyrieGUI::walkSteps()
 {
 
-    armSide side = ui->radioLeftFoot->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioLeftFoot->isChecked() ? LEFT : RIGHT;
     int numOfSteps = ui->lineEditNumSteps->text().toInt();
     float xOffset = ui->lineEditXOffset->text().toFloat();
     float yOffset = ui->lineEditYOffset->text().toFloat();
@@ -973,7 +973,7 @@ void ValkyrieGUI::moveArmJoints(){
 
     float elbowValue        ;
 
-    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
     if(side == LEFT)
     {
         shoulderRollValue  = ui->sliderShoulderRoll->value()*(LEFT_SHOULDER_ROLL_MAX-LEFT_SHOULDER_ROLL_MIN)/100+LEFT_SHOULDER_ROLL_MIN;

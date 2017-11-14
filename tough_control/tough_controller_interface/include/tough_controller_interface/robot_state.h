@@ -63,7 +63,7 @@ public:
     bool transformPose(const geometry_msgs::Pose2D &pose_in, geometry_msgs::Pose2D &pose_out,const std::string &from_frame, const std::string &to_frame=VAL_COMMON_NAMES::WORLD_TF);
     bool transformVector(const geometry_msgs::Vector3 &vec_in, geometry_msgs::Vector3 &vec_out,const std::string &from_frame, const std::string &to_frame=VAL_COMMON_NAMES::WORLD_TF);
     bool transformVector(const geometry_msgs::Vector3Stamped &vec_in, geometry_msgs::Vector3Stamped &vec_out,const std::string target_frame=VAL_COMMON_NAMES::WORLD_TF);
-    bool isGraspped(armSide side);
+    bool isGraspped(RobotSide side);
     std::vector<float> closeRightGrasp,closeLeftGrasp,openGrasp;
 
 

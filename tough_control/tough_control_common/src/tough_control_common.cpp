@@ -28,9 +28,9 @@ void valControlCommon::stopAllTrajectories(void)
 
 void valControlCommon::resetRobot()
 {
-    armTraj.moveToZeroPose(armSide::LEFT);
+    armTraj.moveToZeroPose(RobotSide::LEFT);
     ros::Duration(0.3).sleep();
-    armTraj.moveToZeroPose(armSide::RIGHT);
+    armTraj.moveToZeroPose(RobotSide::RIGHT);
     ros::Duration(1.5).sleep();
 
     pelvisTraj.controlPelvisHeight(0.9);
@@ -38,8 +38,8 @@ void valControlCommon::resetRobot()
     chestTraj.controlChest(2,2,2);
     ros::Duration(1).sleep();
 
-    armTraj.moveToDefaultPose(armSide::LEFT);
+    armTraj.moveToDefaultPose(RobotSide::LEFT);
     ros::Duration(0.3).sleep();
-    armTraj.moveToDefaultPose(armSide::RIGHT);
+    armTraj.moveToDefaultPose(RobotSide::RIGHT);
     ros::Duration(1.5).sleep();
 }

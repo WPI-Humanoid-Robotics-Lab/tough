@@ -1,6 +1,6 @@
 #include <tough_controller_interface/arm_control_interface.h>
 #include <ros/ros.h>
-#include <val_moveit_planners/val_cartesian_planner.h>
+#include <tough_moveit_planners/tough_cartesian_planner.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <val_task1/val_task1_utils.h>
 #include <tough_controller_interface/robot_state.h>
@@ -47,7 +47,7 @@ int main(int argc, char** argv){
     ROS_INFO("waypoints generated");
 
     ROS_INFO("Planning the trajectory");
-    cartesianPlanner rightArmPlanner("rightPalm", VAL_COMMON_NAMES::WORLD_TF);
+    CartesianPlanner rightArmPlanner("rightPalm", VAL_COMMON_NAMES::WORLD_TF);
     moveit_msgs::RobotTrajectory trajectory;
     rightArmPlanner.getTrajFromCartPoints(points, trajectory, false);
 

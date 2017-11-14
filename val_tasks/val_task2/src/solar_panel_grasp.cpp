@@ -9,8 +9,8 @@ solar_panel_handle_grabber::solar_panel_handle_grabber(ros::NodeHandle n):nh_(n)
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     rd_ = RobotDescription::getRobotDescription(nh_);
     // cartesian planners for the arm
-    left_arm_planner_ = new cartesianPlanner("leftMiddleFingerGroup", VAL_COMMON_NAMES::WORLD_TF);
-    right_arm_planner_ = new cartesianPlanner("rightMiddleFingerGroup", VAL_COMMON_NAMES::WORLD_TF);
+    left_arm_planner_ = new CartesianPlanner("leftMiddleFingerGroup", VAL_COMMON_NAMES::WORLD_TF);
+    right_arm_planner_ = new CartesianPlanner("rightMiddleFingerGroup", VAL_COMMON_NAMES::WORLD_TF);
     wholebody_controller_ = new wholebodyManipulation(nh_);
 }
 
@@ -22,14 +22,14 @@ solar_panel_handle_grabber::~solar_panel_handle_grabber()
 }
 
 
-bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs::Pose &goal, bool isRotationRequired, float executionTime)
+bool solar_panel_handle_grabber::grasp_handles(RobotSide side, const geometry_msgs::Pose &goal, bool isRotationRequired, float executionTime)
 {
 
     const std::vector<float>* seed;
     std::string endEffectorFrame;
     float palmToFingerOffset;
 
-    if(side == armSide::LEFT){
+    if(side == RobotSide::LEFT){
         seed = &leftShoulderSeed_;
         endEffectorFrame = rd_->getLeftEEFrame();
         palmToFingerOffset = 0.07;
@@ -134,7 +134,7 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     }
 
     moveit_msgs::RobotTrajectory traj;
-    if(side == armSide::LEFT)
+    if(side == RobotSide::LEFT)
     {
         if (left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false) < 0.98){
             ROS_INFO("solar_panel_handle_grabber::grasp_handles : Trajectory is not planned 100% - retrying");
@@ -166,7 +166,7 @@ bool solar_panel_handle_grabber::grasp_handles(armSide side, const geometry_msgs
     waypoints.push_back(finalGoal);
 
     moveit_msgs::RobotTrajectory traj2;
-    if(side == armSide::LEFT)
+    if(side == RobotSide::LEFT)
     {
         if (left_arm_planner_->getTrajFromCartPoints(waypoints, traj2, false) < 0.98){
             ROS_INFO("solar_panel_handle_grabber::grasp_handles : Trajectory is not planned 100% - retrying");

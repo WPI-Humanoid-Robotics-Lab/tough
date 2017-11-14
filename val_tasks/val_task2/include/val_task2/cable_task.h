@@ -6,7 +6,7 @@
 #include <tough_controller_interface/arm_control_interface.h>
 #include <tough_controller_interface/gripper_control_interface.h>
 #include <tough_controller_interface/robot_state.h>
-#include "val_moveit_planners/val_cartesian_planner.h"
+#include "tough_moveit_planners/tough_cartesian_planner.h"
 #include "tough_controller_interface/wholebody_control_interface.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -22,13 +22,13 @@ class CableTask{
 public:
     CableTask(ros::NodeHandle n);
     ~CableTask();
-   bool grasp_choke(armSide side, const geometry_msgs::Pose &goal, float executionTime=2.0f);
+   bool grasp_choke(RobotSide side, const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool grasp_cable(const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool insert_cable(const geometry_msgs::Point &goal, float executionTime=2.0f);
    bool rotate_cable1(const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool rotate_cable2(const geometry_msgs::Pose &goal, float executionTime=2.0f);
    bool rotate_cable3(const geometry_msgs::Pose &goal, float executionTime=2.0f);
-   bool drop_cable(armSide side);
+   bool drop_cable(RobotSide side);
    bool allign_socket_axis(const geometry_msgs::Point &goal, float offset=0.1, float executionTime=2.0f);
 private:
    ros::NodeHandle nh_;
@@ -37,10 +37,10 @@ private:
    gripperControl gripper_;
    RobotStateInformer *current_state_;
    RobotDescription *rd_;
-   cartesianPlanner* right_arm_planner_choke;
-   cartesianPlanner* right_arm_planner_cable;
-   cartesianPlanner* left_arm_planner_cable;
-   cartesianPlanner* left_arm_planner_choke;
+   CartesianPlanner* right_arm_planner_choke;
+   CartesianPlanner* right_arm_planner_cable;
+   CartesianPlanner* left_arm_planner_cable;
+   CartesianPlanner* left_arm_planner_choke;
    chestTrajectory* chest_controller_;
    wholebodyManipulation* wholebody_controller_;
    geometry_msgs::QuaternionStamped rightHandOrientationTop_ ;

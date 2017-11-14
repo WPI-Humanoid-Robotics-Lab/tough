@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tough_common
   tough_controller_interface
-  val_footstep
+  tough_footstep
 )
 
 ## System dependencies are found with CMake's conventions
@@ -106,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
   LIBRARIES val_qual2
-  CATKIN_DEPENDS roscpp std_msgs tf tough_common tough_controller_interface val_footstep
+  CATKIN_DEPENDS roscpp std_msgs tf tough_common tough_controller_interface tough_footstep
   DEPENDS system_lib
 )
 

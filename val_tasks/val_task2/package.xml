@@ -44,7 +44,7 @@
   <build_depend>decision_making_parser</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
-  <build_depend>val_footstep</build_depend>
+  <build_depend>tough_footstep</build_depend>
   <build_depend>tough_controller_interface</build_depend>
   <build_depend>libpcl-all-dev</build_depend>
   <build_depend>cv_bridge</build_depend>
@@ -59,7 +59,7 @@
   <run_depend>decision_making_parser</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>val_footstep</run_depend>
+  <run_depend>tough_footstep</run_depend>
   <run_depend>tough_controller_interface</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>image_transport</run_depend>

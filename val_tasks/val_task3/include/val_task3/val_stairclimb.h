@@ -3,7 +3,7 @@
 
 #include <geometry_msgs/Pose.h>
 #include <ros/ros.h>
-#include <val_footstep/RobotWalker.h>
+#include <tough_footstep/RobotWalker.h>
 #include "ihmc_msgs/FootstepDataRosMessage.h"
 #include "tough_controller_interface/robot_state.h"
 #include "tough_controller_interface/chest_control_interface.h"

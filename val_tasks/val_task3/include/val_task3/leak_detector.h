@@ -3,7 +3,7 @@
 #include <ros/ros.h>
 #include <val_task3/val_task3_utils.h>
 #include <srcsim/Leak.h>
-#include <val_moveit_planners/val_cartesian_planner.h>
+#include <tough_moveit_planners/tough_cartesian_planner.h>
 #include <tough_controller_interface/wholebody_control_interface.h>
 #include "tough_common/robot_description.h"
 
@@ -22,7 +22,7 @@ private:
     armTrajectory*  arm_controller_;
     RobotDescription* rd_;
 
-    armSide side_;
+    RobotSide side_;
     bool thumbwards_;
 
     bool leak_found_;
@@ -30,7 +30,7 @@ private:
     void visulatiseSearchPoints(std::vector<geometry_msgs::Pose> &poses, geometry_msgs::Point horz_left_top, geometry_msgs::Point horz_right_bottom);
 
 public:
-    leakDetector(ros::NodeHandle nh, armSide side, bool thumbwards);
+    leakDetector(ros::NodeHandle nh, RobotSide side, bool thumbwards);
     ~leakDetector();
 
 

@@ -179,7 +179,7 @@ int main(int argc, char** argv){
         {
             cout<<"Enter side (Left-0) (Right-1) \n";
             cin>>hand;
-            armSide side = hand ==0 ? LEFT : RIGHT;
+            RobotSide side = hand ==0 ? LEFT : RIGHT;
 
             sideName = hand == LEFT ? rd_->getLeftEEFrame() : rd_->getRightEEFrame();
             arm = hand == LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
@@ -213,7 +213,7 @@ int main(int argc, char** argv){
 
             cout<<"Enter side (Left-0) (Right-1) \n";
             cin>>hand;
-            armSide side = hand ==0 ? LEFT : RIGHT;
+            RobotSide side = hand ==0 ? LEFT : RIGHT;
 
             sideName = hand == LEFT ? rd_->getLeftEEFrame() : rd_->getRightEEFrame();
             arm = hand == LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();

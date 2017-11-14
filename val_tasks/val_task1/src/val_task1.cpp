@@ -68,8 +68,8 @@ valTask1::valTask1(ros::NodeHandle nh):
     visited_map_sub_    = nh_.subscribe("/visited_map",10, &valTask1::visited_map_cb, this);
 
     // cartesian planners for the arm
-    left_arm_planner_ = new cartesianPlanner("leftMiddleFingerGroup", "/world"); //leftPalm
-    right_arm_planner_ = new cartesianPlanner("rightMiddleFingerGroup", "/world"); //rightPalm
+    left_arm_planner_ = new CartesianPlanner("leftMiddleFingerGroup", "/world"); //leftPalm
+    right_arm_planner_ = new CartesianPlanner("rightMiddleFingerGroup", "/world"); //rightPalm
 
     // val control common api;s
     control_helper_ = new valControlCommon(nh_);
@@ -707,11 +707,11 @@ decision_making::TaskResult valTask1::graspPitchHandleTask(string name, const FS
         ros::Duration(1).sleep();
         geometry_msgs::Pose pose;
         robot_state_->getCurrentPose(rd_->getRightPalmFrame(), pose);
-        handle_grabber_->grasp_handles(armSide::RIGHT , handle_loc_[PITCH_KNOB_HANDLE]);
+        handle_grabber_->grasp_handles(RobotSide::RIGHT , handle_loc_[PITCH_KNOB_HANDLE]);
         ros::Duration(0.2).sleep(); //wait till grasp is complete
         eventQueue.riseEvent("/GRASP_PITCH_HANDLE_EXECUTING");
     }
-    else if (robot_state_->isGraspped(armSide::RIGHT)){
+    else if (robot_state_->isGraspped(RobotSide::RIGHT)){
         ROS_INFO("Grasp is successful");
         task1_utils_->taskLogPub("Grasp is successful");
         m_output_ss<<"GRASPED PITCH HANDLE\t"<<ros::Time::now().toSec()<<"\n";
@@ -797,7 +797,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
             ROS_INFO("sucessful trajectory generated");
             task1_utils_->taskLogPub("trajectory generated");
             // execute the trajectory
-            wholebody_controller_->compileMsg(armSide::RIGHT, traj.joint_trajectory);
+            wholebody_controller_->compileMsg(RobotSide::RIGHT, traj.joint_trajectory);
             ROS_INFO("trajectory sent to controllers");
             task1_utils_->taskLogPub("trajectory sent to controllers");
 
@@ -809,7 +809,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
     // checks to handle the behaviour, which will also trigger necessary transitions
 
     //close gripper
-    gripper_controller_->closeGripper(armSide::RIGHT);
+    gripper_controller_->closeGripper(RobotSide::RIGHT);
 
     // if the handle is moving in wrong direction, flip the points (assuming grasp is not lost)
     //    if(task1_utils_->getValueStatus(task1_utils_->getPitch(), controlSelection::CONTROL_PITCH) == valueDirection::VALUE_AWAY_TO_GOAL)
@@ -872,7 +872,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
         }
     }
     // if we lost the grasp while executing the trajectory
-    else if (!robot_state_->isGraspped(armSide::RIGHT))
+    else if (!robot_state_->isGraspped(RobotSide::RIGHT))
     {
         // stop all the trajectories
         control_helper_->stopAllTrajectories();
@@ -1025,11 +1025,11 @@ decision_making::TaskResult valTask1::graspYawHandleTask(string name, const FSMC
         ros::Duration(1).sleep();
         geometry_msgs::Pose pose;
         robot_state_->getCurrentPose(rd_->getLeftPalmFrame(), pose);
-        handle_grabber_->grasp_handles(armSide::LEFT , handle_loc_[YAW_KNOB_HANDLE]);
+        handle_grabber_->grasp_handles(RobotSide::LEFT , handle_loc_[YAW_KNOB_HANDLE]);
         ros::Duration(0.2).sleep(); //wait till grasp is complete
         eventQueue.riseEvent("/GRASP_YAW_HANDLE_EXECUTING");
     }
-    else if (robot_state_->isGraspped(armSide::LEFT)){
+    else if (robot_state_->isGraspped(RobotSide::LEFT)){
         ROS_INFO("Grasp is successful");
         task1_utils_->taskLogPub("Grasp is successful");
         m_output_ss<<"GRASPED YAW HANDLE\t"<<ros::Time::now().toSec()<<"\n";
@@ -1116,7 +1116,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
             task1_utils_->taskLogPub("trajectory generated");
 
             // execute the trajectory
-            wholebody_controller_->compileMsg(armSide::LEFT, traj.joint_trajectory);
+            wholebody_controller_->compileMsg(RobotSide::LEFT, traj.joint_trajectory);
             ROS_INFO("trajectory sent to controllers");
             task1_utils_->taskLogPub("trajectory sent to controllers");
 
@@ -1129,7 +1129,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
     // checks to handle the behaviour, which will also trigger necessary transitions
 
     //close gripper
-    gripper_controller_->closeGripper(armSide::LEFT);
+    gripper_controller_->closeGripper(RobotSide::LEFT);
 
     // if the handle is moving in wrong direction, flip the points (assuming grasp is not lost)
     //    if(task1_utils_->getValueStatus(task1_utils_->getYaw(), controlSelection::CONTROL_YAW) == valueDirection::VALUE_AWAY_TO_GOAL)
@@ -1232,7 +1232,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
         }
     }
     // if we lost the grasp while executing the trajectory
-    else if (!robot_state_->isGraspped(armSide::LEFT))
+    else if (!robot_state_->isGraspped(RobotSide::LEFT))
     {
         // redetect the handles (retry)
         eventQueue.riseEvent("/YAW_CORRECTION_RETRY");
@@ -1405,9 +1405,9 @@ decision_making::TaskResult valTask1::redetectHandleTask(string name, const FSMC
 
         pelvis_controller_->controlPelvisHeight(1.0);
         // get the arms to default pose
-        arm_controller_->moveToDefaultPose(armSide::LEFT);
+        arm_controller_->moveToDefaultPose(RobotSide::LEFT);
         ros::Duration(1).sleep();
-        arm_controller_->moveToDefaultPose(armSide::RIGHT);
+        arm_controller_->moveToDefaultPose(RobotSide::RIGHT);
         ros::Duration(1).sleep();
         pelvis_controller_->controlPelvisHeight(0.9);
 
@@ -1777,9 +1777,9 @@ void valTask1::setFinishboxGoal(const geometry_msgs::Pose2D &next_finishbox_cent
 void valTask1::resetRobotToDefaults(int arm_pose)
 {
     // open grippers
-    gripper_controller_->openGripper(armSide::RIGHT);
+    gripper_controller_->openGripper(RobotSide::RIGHT);
     ros::Duration(0.2).sleep();
-    gripper_controller_->openGripper(armSide::LEFT);
+    gripper_controller_->openGripper(RobotSide::LEFT);
     ros::Duration(0.2).sleep();
 
     // reset chest
@@ -1794,16 +1794,16 @@ void valTask1::resetRobotToDefaults(int arm_pose)
     // arms to default
     if (arm_pose == 0)
     {
-        arm_controller_->moveToZeroPose(armSide::LEFT);
+        arm_controller_->moveToZeroPose(RobotSide::LEFT);
         ros::Duration(0.2).sleep();
-        arm_controller_->moveToZeroPose(armSide::RIGHT);
+        arm_controller_->moveToZeroPose(RobotSide::RIGHT);
         ros::Duration(1).sleep();
     }
     else if (arm_pose == 1)
     {
-        arm_controller_->moveToDefaultPose(armSide::LEFT);
+        arm_controller_->moveToDefaultPose(RobotSide::LEFT);
         ros::Duration(0.2).sleep();
-        arm_controller_->moveToDefaultPose(armSide::RIGHT);
+        arm_controller_->moveToDefaultPose(RobotSide::RIGHT);
         ros::Duration(1).sleep();
     }
 

@@ -11,7 +11,7 @@ int main(int argc, char** argv)
 
     geometry_msgs::Point CableLoc;
     geometry_msgs::Pose StandLoc;
-    src_perception::MultisenseImage* ms_sensor = new src_perception::MultisenseImage(nh);
+    tough_perception::MultisenseImage* ms_sensor = new tough_perception::MultisenseImage(nh);
     CableDetector c1(nh, ms_sensor);
 
     while (!c1.findCable(CableLoc)){

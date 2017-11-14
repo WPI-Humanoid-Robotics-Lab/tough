@@ -18,7 +18,7 @@ int main(int argc, char** argv)
     bool foundStandPos = false;
     geometry_msgs::Point CableLoc;
     geometry_msgs::Pose CablePose;
-    src_perception::MultisenseImage* ms_sensor = new src_perception::MultisenseImage(nh);
+    tough_perception::MultisenseImage* ms_sensor = new tough_perception::MultisenseImage(nh);
     CableDetector c1(nh, ms_sensor);
     CableTask cable(nh);
     //    //c1.findCable(CableLoc);

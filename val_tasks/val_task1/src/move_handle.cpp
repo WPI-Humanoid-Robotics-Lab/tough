@@ -19,7 +19,7 @@ void move_handle::createCircle(geometry_msgs::Point center, int side, const std:
   float dist = 0;
   float hand_angle;
   std::vector<double> path;
-  armSide input_side;
+  RobotSide input_side;
 
 
   if (planeCoeffs.size() != 4){
@@ -43,11 +43,11 @@ void move_handle::createCircle(geometry_msgs::Point center, int side, const std:
   // get the hand frame
   if (side){
     robot_state_->getCurrentPose(rd_->getRightEEFrame(),finger_pose);
-    input_side = armSide::RIGHT;
+    input_side = RobotSide::RIGHT;
   }
   else{
     robot_state_->getCurrentPose(rd_->getLeftEEFrame(),finger_pose);
-    input_side = armSide::LEFT;
+    input_side = RobotSide::LEFT;
    }
 
   //starting angle
@@ -86,7 +86,7 @@ void move_handle::createCircle(geometry_msgs::Point center, int side, const std:
 
 }
 
-void move_handle::follow_path(std::vector<geometry_msgs::Pose>& points, armSide input_side, geometry_msgs::Pose hand,std::vector<double> path)
+void move_handle::follow_path(std::vector<geometry_msgs::Pose>& points, RobotSide input_side, geometry_msgs::Pose hand,std::vector<double> path)
 {
 
     std::vector<armTrajectory::armTaskSpaceData> *arm_data_vector = new std::vector<armTrajectory::armTaskSpaceData>();

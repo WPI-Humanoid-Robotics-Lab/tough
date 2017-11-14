@@ -17,7 +17,7 @@ def callback(data):
       pub.publish(0.8)
       subprocess.Popen(["roslaunch", "val_perception_bringup", "field_laser_assembler.launch"])
 #      subprocess.Popen(["roslaunch", "val_perception_bringup", "field_octomap.launch"])
-      subprocess.Popen(["roslaunch", "val_footstep", "val_footstep.launch"])
+      subprocess.Popen(["roslaunch", "tough_footstep", "tough_footstep.launch"])
       subprocess.Popen(["roslaunch", "val_moveit_config", "move_group.launch"])
       subprocess.Popen(["rosrun", "navigation_common", "fall_detector"])
       execute = False

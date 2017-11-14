@@ -1,6 +1,6 @@
 #include <tough_controller_interface/arm_control_interface.h>
 #include "tough_controller_interface/wholebody_control_interface.h"
-#include "val_moveit_planners/val_cartesian_planner.h"
+#include "tough_moveit_planners/tough_cartesian_planner.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -28,8 +28,8 @@ int main(int argc, char **argv)
 
     armTrajectory armTraj(nh);
     wholebodyManipulation wholeBodyController(nh);
-    cartesianPlanner right_arm_planner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
-    cartesianPlanner left_arm_planner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    CartesianPlanner right_arm_planner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    CartesianPlanner left_arm_planner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     moveit_msgs::RobotTrajectory traj;
 
     ros::Duration(1).sleep();

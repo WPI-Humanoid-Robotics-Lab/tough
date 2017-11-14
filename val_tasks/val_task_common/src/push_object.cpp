@@ -1,6 +1,6 @@
 #include <ros/ros.h>
 #include <tough_controller_interface/robot_state.h>
-#include "val_moveit_planners/val_cartesian_planner.h"
+#include "tough_moveit_planners/tough_cartesian_planner.h"
 #include "tough_controller_interface/wholebody_control_interface.h"
 #include "tough_control_common/tough_control_common.h"
 
@@ -24,8 +24,8 @@ int main(int argc, char **argv)
     rightHandOrientation_.quaternion.z = 0.560;
     rightHandOrientation_.quaternion.w = 0.188;
 
-    cartesianPlanner* right_arm_planner;
-    cartesianPlanner* left_arm_planner;
+    CartesianPlanner* right_arm_planner;
+    CartesianPlanner* left_arm_planner;
     armTrajectory *armTraj;
     chestTrajectory* chest_controller_;
     wholebodyManipulation* wholebody_controller_;
@@ -36,19 +36,19 @@ int main(int argc, char **argv)
     armTraj               = new armTrajectory(nh);
     chest_controller_     = new chestTrajectory(nh);
     control_common_       = new valControlCommon(nh);
-    right_arm_planner     = new cartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
-    left_arm_planner      = new cartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    right_arm_planner     = new CartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+    left_arm_planner      = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     current_state_ = RobotStateInformer::getRobotStateInformer(nh);
 
-    armSide side;
+    RobotSide side;
     std::vector<geometry_msgs::Pose> waypoints;
     geometry_msgs::Pose intermGoal1,intermGoal2;
     moveit_msgs::RobotTrajectory traj;
 
         if(argc == 8 )
         {
-        side = argv[1][0] == '1'? armSide::RIGHT :armSide::LEFT;
-        if(side == armSide::LEFT)
+        side = argv[1][0] == '1'? RobotSide::RIGHT :RobotSide::LEFT;
+        if(side == RobotSide::LEFT)
         {
             waypoints.clear();
 

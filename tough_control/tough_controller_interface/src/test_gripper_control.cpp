@@ -39,10 +39,10 @@ int main(int argc, char **argv){
 
     }
     else if(argc == 3){
-        armSide side = (armSide)std::atoi(argv[1]);
+        RobotSide side = (RobotSide)std::atoi(argv[1]);
         GRIPPER_STATE state = (GRIPPER_STATE)std::atoi(argv[2]);
 
-        std::string side_str = side == armSide::LEFT ? "left" : "right";
+        std::string side_str = side == RobotSide::LEFT ? "left" : "right";
         std::string state_str = ((const char*[]) {"OPEN", "OPEN_THUMB_IN", "OPEN_THUMB_IN_APPROACH", "C LOSE",
                                                   "HANDLE_HOLD", "TIGHT_HOLD", "CUP"})[(int) state];
 
