@@ -9,9 +9,9 @@
 
 #check if the workspace is already set
 # setup the workspace
-echo "$(tput setaf 1)Select JDK 8 in the following options$(tput sgr0)"
-sudo update-alternatives --config java
-sudo update-alternatives --config javac
+#echo "$(tput setaf 1)Select JDK 8 in the following options$(tput sgr0)"
+#sudo update-alternatives --config java
+#sudo update-alternatives --config javac
 
 echo "$(tput setaf 1)check the workspace$(tput sgr0)"
 if [ -d $"/home/$USER/catkin_ws" ]; then
@@ -47,13 +47,21 @@ cd ~ && git clone https://github.com/ihmcrobotics/ihmc-open-robotics-software.gi
 #update and source bashrc
 #Environment Variables
 echo "$(tput setaf 1)updating env variables for java$(tput sgr0)"
-echo 'export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64' >> ~/.bashrc
+
+#Oracle JDK path
+echo 'export JAVA_HOME=/usr/lib/jvm/java-8-oracle' >> ~/.bashrc
+
+#OpenJDK path
+#echo 'export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64' >> ~/.bashrc
+
 echo 'export IS_GAZEBO=true' >> ~/.bashrc
+echo 'export ROBOT_NAME=VALKYRIE' >> ~/.bashrc
+echo '#export ROBOT_NAME=ATLAS' >> ~/.bashrc
 echo "export IHMC_SOURCE_LOCATION=$HOME/ihmc-open-robotics-software" >> ~/.bashrc
 source $HOME/.bashrc
 
 #sourcing desn't set the env variables for unknown reason. This is a workaround
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export JAVA_HOME=/usr/lib/jvm/java-8-oracle
 export IHMC_SOURCE_LOCATION=$HOME/ihmc-open-robotics-software
 
 # ihmc-open-robotics-software
@@ -113,7 +121,7 @@ if [ -d $"/home/$USER/$WORKSPACE/src/space_robotics_challenge" ]; then
 #  catkin_make
 else
   echo "$(tput setaf 1)no src repo found, clonning it$(tput sgr0)"
-  git clone https://gitlab.com/whrl/space_robotics_challenge.git $HOME/$WORKSPACE/src/space_robotics_challenge
+  git clone https://github.com/WPI-Humanoid-Research-Lab/SpaceRoboticsChallenge.git $HOME/$WORKSPACE/src/space_robotics_challenge
   cd $HOME/$WORKSPACE/src/space_robotics_challenge
   git submodule update --init --recursive
   cd $HOME/$WORKSPACE
