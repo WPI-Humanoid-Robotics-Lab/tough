@@ -1,6 +1,6 @@
 <launch>
   <!-- Launch Rviz, MoveIt! and robot_state_publisher -->
-  <include file="$(find val_moveit_config)/launch/demo.launch"/>
+  <include file="$(find valkyrie_moveit_config)/launch/demo.launch"/>
   
    <!-- Launch node to raise arm -->
   <node name="raise_arm_move_group" pkg="val_moveit_tasks" type="raise_arm_move_group" respawn="false" output="screen">

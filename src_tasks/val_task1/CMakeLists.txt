@@ -1,23 +1,73 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(val_descartes_planner)
+project(val_task1)
 
-## Add support for C++11, supported in ROS Kinetic and newer
-# add_definitions(-std=c++11)
+SET(CMAKE_BUILD_TYPE RelWithDebInfo)
+
+set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
+
+add_definitions(-D$ENV{ROBOT_NAME})
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  descartes_core
-  descartes_moveit
-  descartes_trajectory
-  descartes_planner
-  trajectory_msgs
-  valkyrie_moveit_config
+  roscpp
+  rospy
+  decision_making
+  decision_making_parser
+  dynamic_reconfigure
+  geometry_msgs
+  sensor_msgs
+  std_msgs
+  moveit_msgs
+  cv_bridge
+  image_transport
+  pcl_conversions
+  pcl_ros
+  perception_common
+  tf
+  tf_conversions
+  moveit_commander
+  moveit_core
+  moveit_fake_controller_manager
+  moveit_planners_ompl
+  moveit_ros_benchmarks
+  moveit_ros_benchmarks_gui
+  moveit_ros_control_interface
+  moveit_ros_manipulation
+  moveit_ros_move_group
+  moveit_ros_perception
+  moveit_ros_planning
+  moveit_ros_planning_interface
+  moveit_ros_robot_interaction
+  moveit_ros_visualization
+  moveit_ros_warehouse
+  moveit_simple_controller_manager
+  trac_ik_examples
+  trac_ik_kinematics_plugin
+  trac_ik_lib
+
+  tough_controller_interface
+  val_gui
+  tough_footstep
+  val_task_common
+  navigation_common
+  tough_moveit_planners
+  tough_control_common
 )
 
+
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+
+find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
+find_package(Boost REQUIRED COMPONENTS system)
+find_package(PCL 1.7 REQUIRED)
+
+
+ include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+
+ link_directories(${PCL_LIBRARY_DIRS})
+ add_definitions(${PCL_DEFINITIONS})
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -96,6 +146,12 @@ find_package(catkin REQUIRED COMPONENTS
 #   cfg/DynReconf2.cfg
 # )
 
+## Generate dynamic reconfigure parameters in the 'cfg' folder
+generate_dynamic_reconfigure_options(
+  cfg/task1_parameters.cfg
+ )
+
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -107,8 +163,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES val_descartes_planner
-  CATKIN_DEPENDS descartes_moveit
+  LIBRARIES val_task1
+  CATKIN_DEPENDS roscpp rospy perception_common dynamic_reconfigure tough_footstep navigation_common
   DEPENDS system_lib
 )
 
@@ -118,26 +174,114 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(include)
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+  ${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake
+  include
+  cfg/cpp
+)
 
-## Declare a C++ library
+# Declare a C++ library
  add_library(${PROJECT_NAME}
-   src/val_descartes_planner.cpp
+         src/val_task1.cpp
+         src/val_task1SM.cpp
+         src/handle_detector.cpp
+         src/handle_grabber.cpp
+         src/move_handle.cpp
+         src/pcl_handle_detector.cpp
+         src/val_task1_utils.cpp
  )
 
-add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
-target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
+target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/val_descartes_planner_node.cpp)
+ add_executable(val_task1_node
+            src/val_task1_node.cpp
+)
 
+add_dependencies(val_task1_node
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS}_gencfg
+ ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link a library or executable target against
+ target_link_libraries(val_task1_node
+   ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES} ${PCL_LIBRARIES}
+   ${PROJECT_NAME}
+ )
+
+add_executable(handle_detector_node
+            src/handle_detector_node.cpp
+
+)
+
+
+
+add_dependencies(handle_detector_node
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS}_gencfg
+ ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link a library or executable target against
+ target_link_libraries(handle_detector_node
+   ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+   ${PROJECT_NAME}
+ )
+
+ add_executable(pcl_handle_detector_node
+            src/pcl_handle_detector_node.cpp
+)
+
+add_dependencies(pcl_handle_detector_node
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS}_gencfg
+ ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link a library or executable target against
+ target_link_libraries(pcl_handle_detector_node
+   ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
+   ${PROJECT_NAME}
+ )
+
+add_executable(val_circle src/val_circle.cpp)
+
+add_dependencies(val_circle
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(val_circle
+   ${catkin_LIBRARIES}
+   val_marker
+ )
+
+add_executable(test_next_goal src/test_nextgoal.cpp)
+
+add_dependencies(test_next_goal
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(test_next_goal
+   ${catkin_LIBRARIES}
+   ${PROJECT_NAME}
+ )
+
+add_executable(handle_grabber_node src/handle_grabber_node.cpp)
+add_dependencies(handle_grabber_node
+ ${${PROJECT_NAME}_EXPORTED_TARGETS}
+ ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(handle_grabber_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -146,15 +290,9 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} )
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
 
-add_executable(test_dplanner src/test_dplanner.cpp)
-target_link_libraries(test_dplanner ${catkin_LIBRARIES} ${PROJECT_NAME})
+decision_making_parsing(src/val_task1SM.cpp)
 
 #############
 ## Install ##
@@ -196,10 +334,20 @@ target_link_libraries(test_dplanner ${catkin_LIBRARIES} ${PROJECT_NAME})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_val_descartes_planner.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_val_task1.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+
+add_executable(test_handle src/test_handle.cpp)
+target_link_libraries(test_handle ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(test_move_handle src/test_move_handle.cpp)
+target_link_libraries(test_move_handle ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_executable(test_catesian_planner src/test_catesian_planner.cpp)
+target_link_libraries(test_catesian_planner ${catkin_LIBRARIES} ${PROJECT_NAME})

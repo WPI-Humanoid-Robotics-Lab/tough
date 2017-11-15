@@ -62,6 +62,7 @@
   <build_depend>trac_ik_kinematics_plugin</build_depend>
   <build_depend>trac_ik_lib</build_depend>
   <build_depend>tough_controller_interface</build_depend>
+  <build_depend>valkyrie_moveit_config</build_depend>
   <!--<build_depend>descartes_core</build_depend>
   <build_depend>descartes_moveit</build_depend>
   <build_depend>descartes_planner</build_depend>
@@ -90,6 +91,7 @@
   <run_depend>trac_ik_kinematics_plugin</run_depend>
   <run_depend>trac_ik_lib</run_depend>
   <run_depend>tough_controller_interface</run_depend>
+  <run_depend>valkyrie_moveit_config</run_depend>
   <!--<run_depend>descartes_core</run_depend>
   <run_depend>descartes_moveit</run_depend>
   <run_depend>descartes_planner</run_depend>

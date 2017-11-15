@@ -11,7 +11,7 @@ add_definitions(-D$ENV{ROBOT_NAME})
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  val_moveit_config
+  valkyrie_moveit_config
   moveit_commander
   moveit_core
   moveit_fake_controller_manager

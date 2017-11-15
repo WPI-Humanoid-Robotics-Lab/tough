@@ -385,7 +385,7 @@ void make6DofMarker(std::string name,void (*callback)(const visualization_msgs::
 //notes
 //Operation for normal posing using MoveIt!
 //run rosrun val_moveit_tasks val_pose
-//roslaunch val_moveit_config move_group.launch
+//roslaunch valkyrie_moveit_config move_group.launch
 //sub to /val_pose/update in rviz, on an interactive_marker
 //pose arm (left arm not supported by moveit at this time, val_pose does support)
 //in terminal, type the number relating to the planner desired.

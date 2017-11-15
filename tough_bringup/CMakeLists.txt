@@ -1,17 +1,18 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tough_bringup)
 
-find_package(srcsim REQUIRED)
-
 find_package(catkin REQUIRED COMPONENTS
   std_msgs
   roscpp
+  tough_common
+  tough_control_common
+  tough_controller_interface
 )
 
 catkin_package(
   INCLUDE_DIRS 
   LIBRARIES 
-  CATKIN_DEPENDS 
-  DEPENDS srcsim
+  CATKIN_DEPENDS tough_common tough_control_common tough_controller_interface
+  DEPENDS
 )
 
