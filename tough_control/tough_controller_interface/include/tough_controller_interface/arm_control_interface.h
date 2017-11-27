@@ -18,18 +18,18 @@
 #include "tough_common/robot_description.h"
 
 /**
- * @brief The armTrajectory class provides ability to move arms of valkyrie. Current implementation provides joint level without collision detection.
+ * @brief The ArmControlInterface class provides ability to move arms of valkyrie. Current implementation provides joint level without collision detection.
  * @todo  Add taskspace control. Add collision detection and avoidance while generating trajectories.
  */
-class armTrajectory {
+class ArmControlInterface {
 
 public:
     /**
-     * @brief armTrajectory class provides ability to move arms of valkyrie. Current implementation provides joint level without collision detection.
+     * @brief ArmControlInterface class provides ability to move arms of valkyrie. Current implementation provides joint level without collision detection.
      * @param nh   nodehandle to which subscribers and publishers are attached.
      */
-    armTrajectory(ros::NodeHandle nh);
-    ~armTrajectory();
+    ArmControlInterface(ros::NodeHandle nh);
+    ~ArmControlInterface();
 
     /**
      * @brief The armJointData struct is a structure that can store details required to generate a ros message for controlling arm. Side can be
@@ -139,7 +139,7 @@ public:
 
     bool nudgeArmLocal(const RobotSide side, const direction drct, float nudgeStep = 0.05);
 
-    bool generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const RobotSide input_side,const float desired_time, std::vector<armTrajectory::armTaskSpaceData> &arm_data_vector);
+    bool generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const RobotSide input_side,const float desired_time, std::vector<ArmControlInterface::armTaskSpaceData> &arm_data_vector);
 
     bool moveArmJoint(const RobotSide side, int jointNumber, const float targetAngle);
 

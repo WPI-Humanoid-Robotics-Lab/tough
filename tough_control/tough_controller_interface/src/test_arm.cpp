@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 
 
     ROS_INFO("Moving the arms");
-    armTrajectory armTraj(nh);
+    ArmControlInterface armTraj(nh);
     if(argc!=4)
     {
       log_msg("Expected 3 arguments, got " + std::to_string(argc - 1));

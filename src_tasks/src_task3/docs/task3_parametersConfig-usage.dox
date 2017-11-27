@@ -1,0 +1,30 @@
+\subsubsection usage Usage
+\verbatim
+<node name="dynamic_reconfigure_node" pkg="src_task3" type="dynamic_reconfigure_node">
+  <param name="x_sw" type="double" value="2.828" />
+  <param name="y_sw" type="double" value="0.292" />
+  <param name="theta_sw" type="double" value="0.82" />
+  <param name="x_hc" type="double" value="2.828" />
+  <param name="y_hc" type="double" value="0.292" />
+  <param name="z_hc" type="double" value="0.82" />
+  <param name="x_tw" type="double" value="2.828" />
+  <param name="y_tw" type="double" value="0.292" />
+  <param name="theta_tw" type="double" value="0.82" />
+  <param name="x_ld" type="double" value="2.828" />
+  <param name="y_ld" type="double" value="0.292" />
+  <param name="z_ld" type="double" value="0.82" />
+  <param name="x_lw" type="double" value="2.828" />
+  <param name="y_lw" type="double" value="0.292" />
+  <param name="theta_lw" type="double" value="0.82" />
+  <param name="x_l" type="double" value="2.828" />
+  <param name="y_l" type="double" value="0.292" />
+  <param name="z_l" type="double" value="0.82" />
+  <param name="x_rt" type="double" value="2.828" />
+  <param name="y_rt" type="double" value="0.292" />
+  <param name="z_rt" type="double" value="0.82" />
+  <param name="x_fb" type="double" value="2.828" />
+  <param name="y_fb" type="double" value="0.292" />
+  <param name="theta_fb" type="double" value="0.82" />
+</node>
+\endverbatim
+

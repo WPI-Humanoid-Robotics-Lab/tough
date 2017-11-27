@@ -5,14 +5,11 @@ import socket
 import select
 import os
 
-HOST = ""
+FIELD_IP = os.environ.get('FIELD_IP'):
 
-if os.environ.get('FIELD_IP'):
-  HOST = os.environ.get('FIELD_IP')
-  print "Field IP is :"+ HOST
-else:
-  HOST = "localhost"
-  print "Creating a local server"
+if !FIELD_IP:
+  FIELD_IP = "localhost"
+  print "Connecting to local server"
 
 
 SOCKET_LIST = []
@@ -23,7 +20,7 @@ PORT = 8080
 def braodcast_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind((HOST, PORT))
+    server_socket.bind((FIELD_IP, PORT))
     server_socket.listen(10)
 
     # add server socket object to the list of readable connections

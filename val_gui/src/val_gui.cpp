@@ -426,7 +426,7 @@ void ValkyrieGUI::initValkyrieControllers() {
     walkingController_ = new RobotWalker(nh_, 1.0, 1.0, 0, 0.18);
 
     //create arm joint controller object
-    armJointController_ = new armTrajectory(nh_);
+    armJointController_ = new ArmControlInterface(nh_);
 
     //create a chest trajectory controller object
     headController_ = new HeadTrajectory(nh_);
@@ -1000,8 +1000,8 @@ void ValkyrieGUI::moveArmJoints(){
     }
 
 
-    std::vector<armTrajectory::armJointData> data;
-    armTrajectory::armJointData msg;
+    std::vector<ArmControlInterface::armJointData> data;
+    ArmControlInterface::armJointData msg;
     //sequence of joints for sending arm data
     std::vector<std::string> joints = {"leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch"};
     msg.arm_pose = {shoulderPitchValue * TO_RADIANS, shoulderRollValue* TO_RADIANS, shoulderYawValue* TO_RADIANS,

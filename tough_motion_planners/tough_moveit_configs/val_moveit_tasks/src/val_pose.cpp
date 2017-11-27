@@ -22,7 +22,7 @@ ros::NodeHandle* nh_port;
 ros::Publisher* pose_pub,*execute_pub;
 RobotDescription* rd_;
 interactive_markers::InteractiveMarkerServer* server_port;
-armTrajectory *right_armTraj_port,*left_armTraj_port;
+ArmControlInterface *right_armTraj_port,*left_armTraj_port;
 interactive_markers::MenuHandler menu_handler;
 tf::TransformListener* listener_port;
 geometry_msgs::PoseStamped right_pose,left_pose;
@@ -424,9 +424,9 @@ int main(int argc, char** argv){
 
     interactive_markers::InteractiveMarkerServer server("val_pose");
     server_port = &server;
-    armTrajectory left_armTraj(*nh_port);
+    ArmControlInterface left_armTraj(*nh_port);
     left_armTraj_port = &left_armTraj;
-    armTrajectory right_armTraj(*nh_port);
+    ArmControlInterface right_armTraj(*nh_port);
     right_armTraj_port = &right_armTraj;
     // right_pose = (geometry_msgs::PoseStamped*)malloc(sizeof(geometry_msgs::PoseStamped));
     left_plan = new moveit::planning_interface::MoveGroup::Plan();

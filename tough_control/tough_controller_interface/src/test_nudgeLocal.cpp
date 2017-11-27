@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     }
 
 
-  armTrajectory armTraj(nh);
+  ArmControlInterface armTraj(nh);
   ros::Duration(1).sleep();
 
   if(argc == 3){

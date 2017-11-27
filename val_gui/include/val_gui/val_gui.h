@@ -227,7 +227,7 @@ private:
 
   chestTrajectory       *chestController_;
   pelvisTrajectory      *pelvisHeightController_;
-  armTrajectory         *armJointController_;
+  ArmControlInterface   *armJointController_;
   RobotWalker           *walkingController_;
   HeadTrajectory        *headController_;
   gripperControl        *gripperController_;
@@ -235,7 +235,7 @@ private:
   CartesianPlanner      *rightArmPlanner_;
   CartesianPlanner      *leftArmPlanner_;
 
-  RobotDescription *rd_;
+  RobotDescription      *rd_;
   geometry_msgs::Pose   *clickedPoint_;
   bool                  moveArmCommand_;
 

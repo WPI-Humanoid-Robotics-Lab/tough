@@ -9,7 +9,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
 
     // initializing objects
-    armTrajectory armTraj(nh);
+    ArmControlInterface armTraj(nh);
     chestTrajectory chestTraj(nh);
     pelvisTrajectory pelvisTraj(nh);
 

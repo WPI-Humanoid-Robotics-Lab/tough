@@ -6,7 +6,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "test_wrist");
     ros::NodeHandle nh;
-    armTrajectory arm_controller(nh);
+    ArmControlInterface arm_controller(nh);
     ROS_INFO("Moving the wrist");
 
     RobotStateInformer* obj = RobotStateInformer::getRobotStateInformer(nh);

@@ -28,7 +28,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    armTrajectory armTraj(nh);
+    ArmControlInterface armTraj(nh);
     std::vector<float> positions;
     for (int i = 0; i < 7; i ++){
         positions.push_back(std::stof(argv[i+2]));

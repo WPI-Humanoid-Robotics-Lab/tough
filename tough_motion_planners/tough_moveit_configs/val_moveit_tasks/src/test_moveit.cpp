@@ -67,7 +67,7 @@ int main(int argc, char** argv){
         sleep(2.0);
 
         ROS_INFO("executing on robot\n");
-        armTrajectory armTraj(node_handle);
+        ArmControlInterface armTraj(node_handle);
         armTraj.moveArmTrajectory(RIGHT, my_plan.trajectory_.joint_trajectory);
 
         ros::spin();
