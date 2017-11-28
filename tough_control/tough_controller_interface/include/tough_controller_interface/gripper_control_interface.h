@@ -15,7 +15,7 @@ enum class GRIPPER_STATE{
     CUP
 };
 
-class gripperControl {
+class GripperControlInterface {
 
 private:
 
@@ -46,8 +46,8 @@ public:
      * @brief gripperControl class provides ability to control the grippers.
      * @param nh nodehandle to which subscribers and publishers are attached.
      */
-    gripperControl(ros::NodeHandle nh);
-    ~gripperControl();
+    GripperControlInterface(ros::NodeHandle nh);
+    ~GripperControlInterface();
 
     /**
      * @brief controlGripper provides the ability to move the grippers to a desired position.

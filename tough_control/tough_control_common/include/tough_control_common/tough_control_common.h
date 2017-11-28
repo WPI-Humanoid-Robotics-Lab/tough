@@ -12,8 +12,8 @@ private:
 
     ros::Publisher stop_traj_pub_;
     ArmControlInterface armTraj;
-    chestTrajectory chestTraj;
-    pelvisTrajectory pelvisTraj;
+    ChestControlInterface chestTraj;
+    PelvisControlInterface pelvisTraj;
 
 public:
     valControlCommon(ros::NodeHandle nh);

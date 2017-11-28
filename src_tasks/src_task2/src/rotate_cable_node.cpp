@@ -6,7 +6,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     CableTask cg(nh);
     ROS_INFO("Starting rotate cable node");
-    gripperControl gc(nh);
+    GripperControlInterface gc(nh);
     geometry_msgs::Pose pt;
     if(argc == 10){
         pt.position.x = std::atof(argv[3]);

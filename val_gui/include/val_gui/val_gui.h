@@ -225,12 +225,12 @@ private:
   image_transport::ImageTransport it_;
   image_transport::Subscriber liveVideoSub;
 
-  chestTrajectory       *chestController_;
-  pelvisTrajectory      *pelvisHeightController_;
+  ChestControlInterface       *chestController_;
+  PelvisControlInterface      *pelvisHeightController_;
   ArmControlInterface   *armJointController_;
   RobotWalker           *walkingController_;
-  HeadTrajectory        *headController_;
-  gripperControl        *gripperController_;
+  HeadControlInterface        *headController_;
+  GripperControlInterface        *gripperController_;
   wholebodyManipulation *wholeBodyController_;
   CartesianPlanner      *rightArmPlanner_;
   CartesianPlanner      *leftArmPlanner_;

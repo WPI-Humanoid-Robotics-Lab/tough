@@ -15,7 +15,7 @@ int main(int argc, char **argv)
     size_t retry_count = 0;
 
     RotateValve rotate(nh);
-    gripperControl gc(nh);
+    GripperControlInterface gc(nh);
     DoorOpener doorOpen(nh);
 
 

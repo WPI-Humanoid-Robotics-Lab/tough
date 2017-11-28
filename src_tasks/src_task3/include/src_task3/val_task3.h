@@ -44,25 +44,25 @@ class valTask3{
     ros::NodeHandle nh_;
     valTask3(ros::NodeHandle nh);
 
-    RobotWalker*     walker_;
-    walkTracking*       walk_track_;
-    chestTrajectory*    chest_controller_;
-    pelvisTrajectory*   pelvis_controller_;
-    HeadTrajectory*     head_controller_;
-    gripperControl*     gripper_controller_;
+    RobotWalker*                walker_;
+    walkTracking*               walk_track_;
+    ChestControlInterface*      chest_controller_;
+    PelvisControlInterface*     pelvis_controller_;
+    HeadControlInterface*       head_controller_;
+    GripperControlInterface*    gripper_controller_;
     // arm
-    ArmControlInterface*      arm_controller_;
-    wholebodyManipulation* wholebody_controller_;
-    RobotStateInformer* robot_state_;
-    RobotDescription *rd_;
-    task3Utils*         task3_utils_;
+    ArmControlInterface*        arm_controller_;
+    wholebodyManipulation*      wholebody_controller_;
+    RobotStateInformer*         robot_state_;
+    RobotDescription*           rd_;
+    task3Utils*                 task3_utils_;
 
     //detectors
-    stair_detector_2*   stair_detector_;
-    DoorValvedetector*  door_valve_detcetor_;
+    stair_detector_2*           stair_detector_;
+    DoorValvedetector*          door_valve_detcetor_;
 
-    climbStairs*        climb_stairs_;
-    DoorOpener*         door_opener_;
+    climbStairs*                climb_stairs_;
+    DoorOpener*                 door_opener_;
 
     //map and occupancy grid
     ros::Subscriber occupancy_grid_sub_;

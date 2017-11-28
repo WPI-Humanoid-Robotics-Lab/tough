@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     ros::WallDuration(0.1).sleep();
   }
 
-  chestTrajectory chestTraj(nh);
+  ChestControlInterface chestTraj(nh);
 
   if(argc != 4) {
     chestTraj.controlChest(10, 0, 0);

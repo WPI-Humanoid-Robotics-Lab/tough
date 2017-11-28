@@ -25,7 +25,7 @@ public:
 private:
     ros::NodeHandle nh_;
     ArmControlInterface armTraj_;
-    gripperControl gripper_;
+    GripperControlInterface gripper_;
     task3Utils task3_;
     RobotWalker walker_;
     RobotStateInformer *robot_state_;

@@ -4,7 +4,7 @@
 
 #define TO_RADIANS M_PI / 180.0 //goes probably in utils which stores similar math operation parameters
 
-chestTrajectory::chestTrajectory(ros::NodeHandle nh):nh_(nh)
+ChestControlInterface::ChestControlInterface(ros::NodeHandle nh):nh_(nh)
 {
     std::string robot_name;
     nh.getParam("ihmc_ros/robot_name", robot_name);
@@ -15,11 +15,11 @@ chestTrajectory::chestTrajectory(ros::NodeHandle nh):nh_(nh)
     rd_ = RobotDescription::getRobotDescription(nh_);
 }
 
-chestTrajectory::~chestTrajectory()
+ChestControlInterface::~ChestControlInterface()
 {
 }
 
-void chestTrajectory::controlChest(float roll , float pitch , float yaw, float time)
+void ChestControlInterface::controlChest(float roll , float pitch , float yaw, float time)
 {
     ihmc_msgs::ChestTrajectoryRosMessage msg;
     ihmc_msgs::SO3TrajectoryPointRosMessage data;

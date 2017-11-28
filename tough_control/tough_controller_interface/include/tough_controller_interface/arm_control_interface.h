@@ -18,25 +18,24 @@
 #include "tough_common/robot_description.h"
 
 /**
- * @brief The ArmControlInterface class provides ability to move arms of valkyrie. Current implementation provides joint level without collision detection.
- * @todo  Add taskspace control. Add collision detection and avoidance while generating trajectories.
+ * @brief The ArmControlInterface class provides ability to move arms of humanoid robots supported by open-humanoids-software.
  */
 class ArmControlInterface {
 
 public:
     /**
-     * @brief ArmControlInterface class provides ability to move arms of valkyrie. Current implementation provides joint level without collision detection.
+     * @brief ArmControlInterface class provides ability to move arms of humanoid robots supported by open-humanoids-software.
      * @param nh   nodehandle to which subscribers and publishers are attached.
      */
     ArmControlInterface(ros::NodeHandle nh);
     ~ArmControlInterface();
 
     /**
-     * @brief The armJointData struct is a structure that can store details required to generate a ros message for controlling arm. Side can be
-     * either RIGHT or LEFT. arm_pose is a vector of float of size 7 that stores joint angels of all 7 joints in the arm. time is the relative
+     * @brief The armJointData struct is a structure that can store details required to generate a ros message for controlling arm. RobotSide can be
+     * either RIGHT or LEFT. arm_pose is a vector of float of size 7 that stores joint angels of all 7 joints in the arm. Time is the relative
      * time for executing the trajectory but it increments for every additional trajectory point. For example: if a trajectory needs to be in
      * pose 1 at 2sec, pose 2 at 5sec, then create 2 objects of this struct one for pose 1 and other for pose 2. pose1 object will have time=2
-     * and pose2 will have time=5. This means that executing trajectory to reach pose 2 will take 5-2=3 sec.
+     * and pose2 will have time=5.
      */
     struct armJointData {
         RobotSide side;
@@ -56,7 +55,7 @@ public:
 
     /**
      * @brief moveToDefaultPose Moves the robot arm to default position
-     * @param side  Side of robot. It can be RIGHT or LEFT.
+     * @param side  Side of the robot. It can be RIGHT or LEFT.
      */
     void moveToDefaultPose(RobotSide side);
 

@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 
 
     ArmControlInterface armtraj(nh);
-    pelvisTrajectory pelvisTraj(nh);
+    PelvisControlInterface pelvisTraj(nh);
 
     float transferTime=0.4, swingTime=0.6, swingHeight=0.13, pelvisHeight=1.07;
     if ( argc != 5 ) // 5 arguments required

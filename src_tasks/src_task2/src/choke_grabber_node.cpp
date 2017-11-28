@@ -6,7 +6,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     CableTask cg(nh);
     ROS_INFO("Starting cable grabber");
-    gripperControl gc(nh);
+    GripperControlInterface gc(nh);
 
     if(argc == 9){
         geometry_msgs::Pose pt;

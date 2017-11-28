@@ -2,7 +2,7 @@
 #include <tf/transform_listener.h>
 #include <tough_common/val_common_names.h>
 
-gripperControl::gripperControl(ros::NodeHandle nh) : nh_(nh){
+GripperControlInterface::GripperControlInterface(ros::NodeHandle nh) : nh_(nh){
 
     std::string robot_name;
     nh.getParam("ihmc_ros/robot_name", robot_name);
@@ -22,11 +22,11 @@ gripperControl::gripperControl(ros::NodeHandle nh) : nh_(nh){
     }
 }
 
-gripperControl::~gripperControl(){
+GripperControlInterface::~GripperControlInterface(){
 
 }
 
-void gripperControl::controlGripper(const RobotSide side, const std::vector<double> gripperData){
+void GripperControlInterface::controlGripper(const RobotSide side, const std::vector<double> gripperData){
 
     std_msgs::Float64MultiArray msg;
     msg.data.clear();
@@ -46,7 +46,7 @@ void gripperControl::controlGripper(const RobotSide side, const std::vector<doub
     }
 }
 
-void gripperControl::controlGripper(const RobotSide side, GRIPPER_STATE state)
+void GripperControlInterface::controlGripper(const RobotSide side, GRIPPER_STATE state)
 {
     std_msgs::Float64MultiArray msg;
     msg.data.clear();
@@ -92,7 +92,7 @@ void gripperControl::controlGripper(const RobotSide side, GRIPPER_STATE state)
     }
 }
 
-void gripperControl::closeGripper(const RobotSide side)
+void GripperControlInterface::closeGripper(const RobotSide side)
 {
     std_msgs::Float64MultiArray msg;
     msg.data.clear();
@@ -107,7 +107,7 @@ void gripperControl::closeGripper(const RobotSide side)
     }
 }
 
-void gripperControl::openGripper(const RobotSide side)
+void GripperControlInterface::openGripper(const RobotSide side)
 {
     std_msgs::Float64MultiArray msg;
     msg.data.clear();

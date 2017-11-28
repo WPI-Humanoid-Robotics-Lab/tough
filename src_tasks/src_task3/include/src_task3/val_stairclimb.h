@@ -16,7 +16,7 @@ public:
     bool walkToSetPosition(geometry_msgs::Pose2D goal);
     RobotWalker* walker_;
     RobotStateInformer* robot_state_;
-    chestTrajectory* chest_controller_;
+    ChestControlInterface* chest_controller_;
 };
 
 #endif // VAL_STAIRCLIMB_H

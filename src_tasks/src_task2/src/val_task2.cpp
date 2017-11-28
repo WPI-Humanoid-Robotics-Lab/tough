@@ -40,12 +40,12 @@ valTask2::valTask2(ros::NodeHandle nh):
 
     // object for the valkyrie walker
     walker_             = new RobotWalker(nh_, 0.7, 0.7, 0, 0.18);
-    pelvis_controller_  = new pelvisTrajectory(nh_);
+    pelvis_controller_  = new PelvisControlInterface(nh_);
     walk_track_         = new walkTracking(nh_);
-    chest_controller_   = new chestTrajectory(nh_);
+    chest_controller_   = new ChestControlInterface(nh_);
     arm_controller_     = new ArmControlInterface(nh_);
-    head_controller_    = new HeadTrajectory(nh_);
-    gripper_controller_ = new gripperControl(nh_);
+    head_controller_    = new HeadControlInterface(nh_);
+    gripper_controller_ = new GripperControlInterface(nh_);
 
     //initialize all detection pointers
     rover_detector_             = nullptr;

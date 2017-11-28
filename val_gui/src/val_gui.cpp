@@ -417,10 +417,10 @@ void ValkyrieGUI::initDefaultValues() {
 void ValkyrieGUI::initValkyrieControllers() {
 
     //create a chest trajectory controller object
-    chestController_ = new chestTrajectory(nh_);
+    chestController_ = new ChestControlInterface(nh_);
 
     //create pelvis height controller object
-    pelvisHeightController_ = new pelvisTrajectory(nh_);
+    pelvisHeightController_ = new PelvisControlInterface(nh_);
 
     //create walking controller object
     walkingController_ = new RobotWalker(nh_, 1.0, 1.0, 0, 0.18);
@@ -429,10 +429,10 @@ void ValkyrieGUI::initValkyrieControllers() {
     armJointController_ = new ArmControlInterface(nh_);
 
     //create a chest trajectory controller object
-    headController_ = new HeadTrajectory(nh_);
+    headController_ = new HeadControlInterface(nh_);
 
     //create a gripper controller object
-    gripperController_ = new gripperControl(nh_);
+    gripperController_ = new GripperControlInterface(nh_);
 
     // create a wholebody controller object
     wholeBodyController_ = new wholebodyManipulation(nh_);

@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 
 
     RotateValve rotate(nh);
-    gripperControl gc(nh);
+    GripperControlInterface gc(nh);
 
 
     geometry_msgs::Point valveCentre;

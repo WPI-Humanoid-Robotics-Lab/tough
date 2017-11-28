@@ -28,12 +28,12 @@ public:
 private:
     ros::NodeHandle nh_;
     ArmControlInterface armTraj_;
-    gripperControl gripper_;
+    GripperControlInterface gripper_;
     RobotStateInformer *current_state_;
     RobotDescription *rd_;
     CartesianPlanner* left_arm_planner_;
     wholebodyManipulation* wholebody_controller_;
-    chestTrajectory* chest_controller_;
+    ChestControlInterface* chest_controller_;
     RobotWalker walk_;
     task3Utils t3Utils;
     const std::vector<float> LEFT_SHOULDER_SEED_INITIAL = {-0.81,0.0,0.65,-1.51,1.26,0.0,0.0};

@@ -55,19 +55,19 @@ bool taskCommonUtils::isGoalReached(geometry_msgs::Pose pose_old, geometry_msgs:
 void taskCommonUtils::moveToWalkSafePose(ros::NodeHandle &nh)
 {
     ROS_INFO("Moving to walk safe pose");
-    chestTrajectory chest_controller(nh);
+    ChestControlInterface chest_controller(nh);
     chest_controller.controlChest(0.0f, 0.0f, 0.0f);
     ros::Duration(0.5).sleep();
 
-    pelvisTrajectory pelvis_controller(nh);
+    PelvisControlInterface pelvis_controller(nh);
     pelvis_controller.controlPelvisHeight(0.9f);
     ros::Duration(0.5).sleep();
 
-    HeadTrajectory  head_controller(nh);
+    HeadControlInterface head_controller(nh);
     head_controller.moveHead(0.0f, 0.0f, 0.0f);
     ros::Duration(1).sleep();
 
-    gripperControl gripper_controller(nh);
+    GripperControlInterface gripper_controller(nh);
     gripper_controller.openGripper(RobotSide::RIGHT);
     gripper_controller.openGripper(RobotSide::LEFT);
     ros::Duration(0.2).sleep();
@@ -163,7 +163,7 @@ bool taskCommonUtils::slowGrip(ros::NodeHandle nh,RobotSide side, std::vector<do
     for (size_t i = 0; i < initial.size(); ++i) {
         diff.push_back((final[i]-initial[i])/iterations);
     }
-    gripperControl gripper_controller(nh);
+    GripperControlInterface gripper_controller(nh);
     for (size_t i = 1; i <= initial.size(); ++i) {
         step.clear();
         step.push_back(initial[0]+i*diff[0]);

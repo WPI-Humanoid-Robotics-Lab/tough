@@ -3,11 +3,11 @@
 #include <tough_common/val_common_names.h>
 #include <tough_controller_interface/robot_state.h>
 
-int HeadTrajectory::head_id = -1;
+int HeadControlInterface::head_id = -1;
 
 const double degToRad = M_PI / 180;
 
-HeadTrajectory::HeadTrajectory(ros::NodeHandle nh):nh_(nh)
+HeadControlInterface::HeadControlInterface(ros::NodeHandle nh):nh_(nh)
 {
     std::string robot_name;
     nh.getParam("ihmc_ros/robot_name", robot_name);
@@ -21,11 +21,11 @@ HeadTrajectory::HeadTrajectory(ros::NodeHandle nh):nh_(nh)
   NUM_NECK_JOINTS = rd_->getNumberOfNeckJoints();
 }
 
-HeadTrajectory::~HeadTrajectory()
+HeadControlInterface::~HeadControlInterface()
 {
 }
 
-void HeadTrajectory::appendNeckTrajectoryPoint(ihmc_msgs::NeckTrajectoryRosMessage &msg, float time, std::vector<float> pos)
+void HeadControlInterface::appendNeckTrajectoryPoint(ihmc_msgs::NeckTrajectoryRosMessage &msg, float time, std::vector<float> pos)
 {
   for (int i = 0; i < NUM_NECK_JOINTS; i++)
   {
@@ -36,15 +36,15 @@ void HeadTrajectory::appendNeckTrajectoryPoint(ihmc_msgs::NeckTrajectoryRosMessa
       p.time = time;
       p.position = pos[i];
       p.velocity = 0;
-      p.unique_id = HeadTrajectory::head_id;
+      p.unique_id = HeadControlInterface::head_id;
       t.trajectory_points.push_back(p);
-      t.unique_id = HeadTrajectory::head_id;
+      t.unique_id = HeadControlInterface::head_id;
       msg.joint_trajectory_messages.push_back(t);
   }
 }
 
 
-void HeadTrajectory::moveHead(float roll, float pitch, float yaw, const float time)
+void HeadControlInterface::moveHead(float roll, float pitch, float yaw, const float time)
 {
   roll = degToRad * roll;
   pitch = degToRad * pitch;
@@ -57,7 +57,7 @@ void HeadTrajectory::moveHead(float roll, float pitch, float yaw, const float ti
   moveHead(quaternion, time);
 }
 
-void HeadTrajectory::moveHead(const geometry_msgs::Quaternion &quaternion, const float time)
+void HeadControlInterface::moveHead(const geometry_msgs::Quaternion &quaternion, const float time)
 {
   ihmc_msgs::HeadTrajectoryRosMessage msg;
   ihmc_msgs::SO3TrajectoryPointRosMessage data;
@@ -81,8 +81,8 @@ void HeadTrajectory::moveHead(const geometry_msgs::Quaternion &quaternion, const
   v.z = 0.0;
   data.angular_velocity = v;
 
-  HeadTrajectory::head_id--;
-  msg.unique_id = HeadTrajectory::head_id;
+  HeadControlInterface::head_id--;
+  msg.unique_id = HeadControlInterface::head_id;
   msg.execution_mode = msg.OVERRIDE;
 
   msg.taskspace_trajectory_points.clear();
@@ -94,12 +94,12 @@ void HeadTrajectory::moveHead(const geometry_msgs::Quaternion &quaternion, const
 }
 
 
-void HeadTrajectory::moveHead(const std::vector<std::vector<float> > &trajectory_points, const float time)
+void HeadControlInterface::moveHead(const std::vector<std::vector<float> > &trajectory_points, const float time)
 {
   ihmc_msgs::HeadTrajectoryRosMessage msg;
 
-  HeadTrajectory::head_id--;
-  msg.unique_id = HeadTrajectory::head_id;
+  HeadControlInterface::head_id--;
+  msg.unique_id = HeadControlInterface::head_id;
   msg.execution_mode = msg.OVERRIDE;
 
   msg.taskspace_trajectory_points.clear();
@@ -141,12 +141,12 @@ void HeadTrajectory::moveHead(const std::vector<std::vector<float> > &trajectory
   headTrajPublisher.publish(msg);
 }
 
-void HeadTrajectory::moveNeckJoints(const std::vector<std::vector<float> > &neck_pose, const float time)
+void HeadControlInterface::moveNeckJoints(const std::vector<std::vector<float> > &neck_pose, const float time)
 {
   ihmc_msgs::NeckTrajectoryRosMessage msg;
 
-  HeadTrajectory::head_id--;
-  msg.unique_id = HeadTrajectory::head_id;
+  HeadControlInterface::head_id--;
+  msg.unique_id = HeadControlInterface::head_id;
 
   // Add all neck trajectory points to the trajectory message
   for(int i = 0; i < neck_pose.size(); i++){
@@ -158,7 +158,7 @@ void HeadTrajectory::moveNeckJoints(const std::vector<std::vector<float> > &neck
   neckTrajPublisher.publish(msg);
 }
 
-int HeadTrajectory::getNumNeckJoints() const
+int HeadControlInterface::getNumNeckJoints() const
 {
     return NUM_NECK_JOINTS;
 }

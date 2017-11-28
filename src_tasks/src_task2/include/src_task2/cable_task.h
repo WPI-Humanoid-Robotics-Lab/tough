@@ -34,14 +34,14 @@ private:
    ros::NodeHandle nh_;
    tf::TransformListener listener_;
    ArmControlInterface armTraj_;
-   gripperControl gripper_;
+   GripperControlInterface gripper_;
    RobotStateInformer *current_state_;
    RobotDescription *rd_;
    CartesianPlanner* right_arm_planner_choke;
    CartesianPlanner* right_arm_planner_cable;
    CartesianPlanner* left_arm_planner_cable;
    CartesianPlanner* left_arm_planner_choke;
-   chestTrajectory* chest_controller_;
+   ChestControlInterface* chest_controller_;
    wholebodyManipulation* wholebody_controller_;
    geometry_msgs::QuaternionStamped rightHandOrientationTop_ ;
    geometry_msgs::QuaternionStamped rightHandOrientationAngle_ ;

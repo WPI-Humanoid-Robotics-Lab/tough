@@ -18,7 +18,7 @@ private:
     ros::Publisher  marker_pub_;
     RobotStateInformer *current_state_;
     task3Utils task3Utils_;
-    pelvisTrajectory* pelvis_controller_;
+    PelvisControlInterface* pelvis_controller_;
     ArmControlInterface*  arm_controller_;
     RobotDescription* rd_;
 

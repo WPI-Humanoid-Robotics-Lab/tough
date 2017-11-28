@@ -13,7 +13,7 @@
 #define MAX_ANGLE 5
 
 
-std::unique_ptr<HeadTrajectory> headTraj;
+std::unique_ptr<HeadControlInterface> headTraj;
 RobotStateInformer *current_state;
 RobotDescription *rd_ ;
 std::function<void(const std::string &)> log_msg;
@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
         ros::WallDuration(0.1).sleep();
     }
 
-    headTraj.reset(new HeadTrajectory(nh));
+    headTraj.reset(new HeadControlInterface(nh));
     current_state = RobotStateInformer::getRobotStateInformer(nh);
 
     ros::Subscriber clicked_point_subs = nh.subscribe("clicked_point", 1, &clickedPointCB);

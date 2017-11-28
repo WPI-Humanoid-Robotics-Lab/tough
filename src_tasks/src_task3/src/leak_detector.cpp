@@ -14,7 +14,7 @@ leakDetector::leakDetector(ros::NodeHandle nh, RobotSide side, bool thumbwards):
 
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     rd_ = RobotDescription::getRobotDescription(nh_);
-    pelvis_controller_  = new pelvisTrajectory(nh_);
+    pelvis_controller_  = new PelvisControlInterface(nh_);
     arm_controller_     = new ArmControlInterface(nh_);
 }
 

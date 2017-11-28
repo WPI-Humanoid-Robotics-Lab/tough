@@ -1,5 +1,5 @@
-#ifndef VAL_CHEST_NAVIGATION_H
-#define VAL_CHEST_NAVIGATION_H
+#ifndef CHEST_CONTROL_INTERFACE_H
+#define CHEST_CONTROL_INTERFACE_H
 
 #include <ros/ros.h>
 #include <ihmc_msgs/ChestTrajectoryRosMessage.h>
@@ -11,7 +11,7 @@
 #include "tough_controller_interface/robot_state.h"
 #include "tough_common/robot_description.h"
 
-class chestTrajectory {
+class ChestControlInterface {
 
 private:
 
@@ -21,9 +21,9 @@ private:
     RobotDescription * rd_;
 public:
 
-    chestTrajectory(ros::NodeHandle nh);
-    ~chestTrajectory();
+    ChestControlInterface(ros::NodeHandle nh);
+    ~ChestControlInterface();
     void controlChest(float roll , float pitch , float yaw, float time = 1.0f);
 };
 
-#endif // VAL_CHEST_NAVIGATION_H
+#endif // CHEST_CONTROL_INTERFACE_H

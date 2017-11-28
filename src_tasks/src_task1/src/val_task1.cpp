@@ -53,10 +53,10 @@ valTask1::valTask1(ros::NodeHandle nh):
     move_handle_        = new move_handle(nh_);
 
     // controllers
-    chest_controller_    = new chestTrajectory(nh_);
-    pelvis_controller_   = new pelvisTrajectory(nh_);
-    head_controller_     = new HeadTrajectory(nh_);
-    gripper_controller_  = new gripperControl(nh_);
+    chest_controller_    = new ChestControlInterface(nh_);
+    pelvis_controller_   = new PelvisControlInterface(nh_);
+    head_controller_     = new HeadControlInterface(nh_);
+    gripper_controller_  = new GripperControlInterface(nh_);
     arm_controller_      = new ArmControlInterface(nh_);
     wholebody_controller_= new wholebodyManipulation(nh_);
 

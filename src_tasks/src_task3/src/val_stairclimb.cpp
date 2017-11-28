@@ -8,7 +8,7 @@ StairClimb::StairClimb(ros::NodeHandle n)
 {
     walker_ = new RobotWalker(n, 0.7, 0.7, 0, 0.18);
     robot_state_=RobotStateInformer::getRobotStateInformer(n);
-    chest_controller_ = new chestTrajectory(n);
+    chest_controller_ = new ChestControlInterface(n);
 
 }
 
@@ -26,7 +26,7 @@ int main(int argc, char** argv){
 
     RobotWalker walk(nh, 1.0,1.0,0);
     StairClimb stair(nh);
-    chestTrajectory chest_controller(nh);
+    ChestControlInterface chest_controller(nh);
     ArmControlInterface arm_controller(nh);
 
     stair_detector_2 detector(nh);

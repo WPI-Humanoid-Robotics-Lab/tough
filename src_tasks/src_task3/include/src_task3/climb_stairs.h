@@ -19,8 +19,8 @@ class climbStairs {
 private:
     ros::NodeHandle nh_;
     RobotWalker *walker_;
-    chestTrajectory *chest_;
-    pelvisTrajectory *pelvis_;
+    ChestControlInterface *chest_;
+    PelvisControlInterface *pelvis_;
     ArmControlInterface *arm_;
     RobotStateInformer *current_state_;
     RobotDescription *rd_;

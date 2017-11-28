@@ -18,7 +18,7 @@
 /**
  * @brief The HeadTrajectory class provides ability to move the head of valkyrie. Current implementation provides the ability to move the head to a set roll, pitch, and yaw.
  */
-class HeadTrajectory {
+class HeadControlInterface {
 
 private:
     static int head_id;
@@ -34,8 +34,8 @@ public:
   /**
    * @brief The HeadTrajectory class provides ability to move the head of valkyrie. Current implementation provides the ability to move the head to a set roll, pitch, and yaw.
    */
-    HeadTrajectory(ros::NodeHandle nh);
-    ~HeadTrajectory();
+    HeadControlInterface(ros::NodeHandle nh);
+    ~HeadControlInterface();
 
     /**
      * @brief moveHead Moves the robot head to the given roll, pitch, and yaw. All orientations are expressed in pelvis frame.

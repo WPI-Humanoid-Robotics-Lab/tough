@@ -36,7 +36,7 @@ CableTask::CableTask(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
     left_arm_planner_cable = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
 
     wholebody_controller_ = new wholebodyManipulation(nh_);
-    chest_controller_     = new chestTrajectory(nh_);
+    chest_controller_     = new ChestControlInterface(nh_);
 
     task2_utils_    = new task2Utils(nh_);
     control_common_ = new valControlCommon(nh_);

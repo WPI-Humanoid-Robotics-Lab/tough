@@ -6,10 +6,10 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     nh_(nh)
 {
     // controllers
-    chest_controller_    = new chestTrajectory(nh_);
-    pelvis_controller_   = new pelvisTrajectory(nh_);
-    head_controller_     = new HeadTrajectory(nh_);
-    gripper_controller_  = new gripperControl(nh_);
+    chest_controller_    = new ChestControlInterface(nh_);
+    pelvis_controller_   = new PelvisControlInterface(nh_);
+    head_controller_     = new HeadControlInterface(nh_);
+    gripper_controller_  = new GripperControlInterface(nh_);
     arm_controller_      = new ArmControlInterface(nh_);
     walk_                = new RobotWalker(nh_, 0.7, 0.7, 0, 0.18);
     current_state_       = RobotStateInformer::getRobotStateInformer(nh_);

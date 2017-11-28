@@ -3,8 +3,8 @@
 climbStairs::climbStairs(ros::NodeHandle nh): nh_(nh)
 {
   walker_         = new RobotWalker(nh_, 0.9f, 0.9f, 0, DEFAULT_SWINGHEIGHT);
-  chest_          = new chestTrajectory(nh_);
-  pelvis_         = new pelvisTrajectory(nh_);
+  chest_          = new ChestControlInterface(nh_);
+  pelvis_         = new PelvisControlInterface(nh_);
   arm_            = new ArmControlInterface(nh_);
   current_state_  = RobotStateInformer::getRobotStateInformer(nh_);
   rd_ = RobotDescription::getRobotDescription(nh_);

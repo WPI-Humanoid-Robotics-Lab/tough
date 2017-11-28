@@ -6,7 +6,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     handle_grabber hg(nh);
     ROS_INFO("Starting handle grabber");
-    gripperControl gc(nh);
+    GripperControlInterface gc(nh);
 
     if(argc == 5){
         geometry_msgs::Point pt;

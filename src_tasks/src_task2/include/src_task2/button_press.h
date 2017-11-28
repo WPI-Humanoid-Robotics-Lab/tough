@@ -16,7 +16,7 @@ class ButtonPress
     ArmControlInterface armTraj_;
     ros::NodeHandle nh_;
 //    ButtonDetector bd_;
-    gripperControl gripper_;
+    GripperControlInterface gripper_;
     RobotStateInformer *current_state_;
     RobotDescription *rd_;
     geometry_msgs::QuaternionStamped leftHandOrientation_ ;
@@ -37,7 +37,7 @@ class ButtonPress
     CartesianPlanner* right_arm_planner_;
     CartesianPlanner* left_arm_planner_;
     wholebodyManipulation* wholebody_controller_;
-    chestTrajectory * chest_controller_;
+    ChestControlInterface * chest_controller_;
 
 public:
 

@@ -51,7 +51,7 @@ ButtonPress::ButtonPress(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(nh
     left_arm_planner_ = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     right_arm_planner_ = new CartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     wholebody_controller_ = new wholebodyManipulation(nh_);
-    chest_controller_ = new chestTrajectory(nh_);
+    chest_controller_ = new ChestControlInterface(nh_);
 
 }
 

@@ -71,13 +71,13 @@ class valTask1 {
     FinishBoxDetector* finish_box_detector_;
 
     // chest controller
-    chestTrajectory* chest_controller_;
+    ChestControlInterface* chest_controller_;
     //pelvis controller
-    pelvisTrajectory* pelvis_controller_;
+    PelvisControlInterface* pelvis_controller_;
     //head controller
-    HeadTrajectory* head_controller_;
+    HeadControlInterface* head_controller_;
     //grippers
-    gripperControl* gripper_controller_;
+    GripperControlInterface* gripper_controller_;
     // arm
     ArmControlInterface* arm_controller_;
     // whole body controller

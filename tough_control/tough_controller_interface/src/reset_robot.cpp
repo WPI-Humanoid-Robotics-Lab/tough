@@ -10,8 +10,8 @@ int main(int argc, char **argv)
 
     // initializing objects
     ArmControlInterface armTraj(nh);
-    chestTrajectory chestTraj(nh);
-    pelvisTrajectory pelvisTraj(nh);
+    ChestControlInterface chestTraj(nh);
+    PelvisControlInterface pelvisTraj(nh);
 
     if(argc ==2)
     {

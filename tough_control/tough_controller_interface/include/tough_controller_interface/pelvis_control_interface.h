@@ -7,7 +7,7 @@
 #include "tough_controller_interface/robot_state.h"
 #include "tough_common/robot_description.h"
 
-class pelvisTrajectory {
+class PelvisControlInterface {
 
 private:
 
@@ -19,8 +19,8 @@ private:
 
 public:
 
-    pelvisTrajectory(ros::NodeHandle nh);
-    ~pelvisTrajectory();
+    PelvisControlInterface(ros::NodeHandle nh);
+    ~PelvisControlInterface();
     void controlPelvisHeight(float height);
     bool controlPelvisMessage(ihmc_msgs::PelvisHeightTrajectoryRosMessage msg);
 };

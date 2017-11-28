@@ -34,7 +34,7 @@ RotateValve::RotateValve(ros::NodeHandle n):nh_(n), armTraj_(nh_),
     // cartesian planners for the arm
     left_arm_planner_       = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     wholebody_controller_   = new wholebodyManipulation(nh_);
-    chest_controller_       = new chestTrajectory(nh_);
+    chest_controller_       = new ChestControlInterface(nh_);
 
     marker_pub               = nh_.advertise<visualization_msgs::MarkerArray>( "valve_path", 10, true);
 }

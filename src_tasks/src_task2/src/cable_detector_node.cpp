@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
     ros::Publisher pub;
     ArmControlInterface armTraj_(nh);
-    chestTrajectory chest_controller_(nh);
+    ChestControlInterface chest_controller_(nh);
     ros::Rate loop(15);
     pub = nh.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
     int numIterations = 0;

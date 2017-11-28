@@ -4,7 +4,7 @@
 #include <std_msgs/String.h>
 #include <tough_common/val_common_names.h>
 
-HeadTrajectory* headTraj;
+HeadControlInterface* headTraj;
 
 void headCallBack(std_msgs::Float32MultiArray msg){
     if(msg.data.size() != 3){
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
     ros::WallDuration(0.1).sleep();
   }
 
-  headTraj = new HeadTrajectory(nh);
+  headTraj = new HeadControlInterface(nh);
   ros::Subscriber sub = nh.subscribe("/head_control",10, headCallBack);
 
   if(argc != 4){

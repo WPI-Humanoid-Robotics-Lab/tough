@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     ros::WallDuration(0.1).sleep();
   }
 
-  pelvisTrajectory pelvisTraj(nh);
+  PelvisControlInterface pelvisTraj(nh);
 
   if(argc != 2) {
     log_msg("making pelvis do a dance");

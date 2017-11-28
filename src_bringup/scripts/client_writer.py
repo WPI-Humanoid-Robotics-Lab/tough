@@ -5,9 +5,9 @@ import socket
 import select
 import os
 
-FIELD_IP = os.environ.get('FIELD_IP'):
+FIELD_IP = os.environ.get('FIELD_IP')
 
-if !FIELD_IP:
+if not FIELD_IP:
   FIELD_IP = "localhost"
   print "Connecting to local server"
 

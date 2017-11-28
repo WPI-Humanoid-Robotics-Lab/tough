@@ -7,7 +7,7 @@ int main(int argc, char **argv){
 
     ros::init(argc, argv, "test_gripper_control");
     ros::NodeHandle nh;
-    gripperControl gripcont(nh);
+    GripperControlInterface gripcont(nh);
 
     ros::Publisher log_pub = nh.advertise<std_msgs::String>(VAL_COMMON_NAMES::LOG_TOPIC, 10);
     const auto log_msg = [&log_pub](const std::string &str) {

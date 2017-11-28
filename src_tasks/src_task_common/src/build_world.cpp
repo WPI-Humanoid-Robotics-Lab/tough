@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 
     /*
     RobotWalker walk(nh, 1.0,1.0,0);
-    HeadTrajectory head_controller(nh);
+    HeadControlInterfaceerface head_controller(nh);
     task2Utils utils; // only req to print logs
 
     walk.walk_rotate(1.57);

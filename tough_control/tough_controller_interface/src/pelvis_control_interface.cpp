@@ -1,9 +1,9 @@
 #include <tough_controller_interface/pelvis_control_interface.h>
 #include <tough_common/val_common_names.h>
 
-int pelvisTrajectory::pelvis_id_ = -1;
+int PelvisControlInterface::pelvis_id_ = -1;
 
-pelvisTrajectory::pelvisTrajectory(ros::NodeHandle nh):nh_(nh)
+PelvisControlInterface::PelvisControlInterface(ros::NodeHandle nh):nh_(nh)
 {
     std::string robot_name;
     nh.getParam("ihmc_ros/robot_name", robot_name);
@@ -13,12 +13,12 @@ pelvisTrajectory::pelvisTrajectory(ros::NodeHandle nh):nh_(nh)
     rd_ = RobotDescription::getRobotDescription(nh_);
 }
 
-pelvisTrajectory::~pelvisTrajectory()
+PelvisControlInterface::~PelvisControlInterface()
 {
 
 }
 
-void pelvisTrajectory::controlPelvisHeight(float height)
+void PelvisControlInterface::controlPelvisHeight(float height)
 {
 
     ihmc_msgs::PelvisHeightTrajectoryRosMessage msg;
@@ -48,16 +48,16 @@ void pelvisTrajectory::controlPelvisHeight(float height)
 
     msg.trajectory_points.clear();
     msg.trajectory_points.push_back(p);
-    pelvisTrajectory::pelvis_id_--;
-    msg.unique_id = pelvisTrajectory::pelvis_id_;
+    PelvisControlInterface::pelvis_id_--;
+    msg.unique_id = PelvisControlInterface::pelvis_id_;
 
     // publish the message
     pelvisHeightPublisher_.publish(msg);
 }
 
-bool pelvisTrajectory::controlPelvisMessage(ihmc_msgs::PelvisHeightTrajectoryRosMessage msg){
+bool PelvisControlInterface::controlPelvisMessage(ihmc_msgs::PelvisHeightTrajectoryRosMessage msg){
 
     this->pelvisHeightPublisher_.publish(msg);
-    pelvisTrajectory::pelvis_id_--;
-    msg.unique_id = pelvisTrajectory::pelvis_id_;
+    PelvisControlInterface::pelvis_id_--;
+    msg.unique_id = PelvisControlInterface::pelvis_id_;
 }
