@@ -11,7 +11,7 @@
 /*** INCLUDE FILES ***/
 #include <perception_common/global.h>
 
-namespace src_perception {
+namespace tough_perception {
 
 class ImageHelper {
 public:

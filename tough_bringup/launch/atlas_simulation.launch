@@ -1,0 +1,41 @@
+<launch>
+ 
+  <arg name="use_local_build" default="false" />
+  <arg name="ihmc_network_file" default="$(find ihmc_atlas_ros)/configurations/IHMCNetworkParametersSim.ini" />
+  <!--<arg name="description_model" default="$(find ihmc_atlas_ros)/urdf/atlas_unplugged_v5_no_hands.urdf" />-->
+  <arg name="description_model" default="$(find ihmc_atlas_ros)/urdf/atlas_unplugged_v5_dual_robotiq_with_head.urdf" />
+  <!--  <arg name="description_model" default="$(find atlas_description)/urdf/atlas_v5_raw.urdf" />-->
+  <!--<arg name="ihmc_model" default="ATLAS_UNPLUGGED_V5_NO_HANDS" />-->
+  <arg name="ihmc_model" default="ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ" />
+  <arg name="starting_location" default="DEFAULT" />
+  <arg name="tf_prefix" default="NONE" />
+  <arg name="scs_args" default="" />
+
+
+   <include file="$(find ihmc_atlas_ros)/launch/ihmc_atlas_scs_demo01.launch">
+      <arg name="use_local_build" value="$(arg use_local_build)" />
+      <arg name="ihmc_network_file" value="$(arg ihmc_network_file)" />
+      <arg name="description_model" value="$(arg description_model)" />
+      <arg name="ihmc_model" value="$(arg ihmc_model)" />
+      <arg name="starting_location" value="$(arg starting_location)" />
+      <arg name="tf_prefix" value="$(arg tf_prefix)" />
+      <arg name="scs_args" value="$(arg scs_args)" />
+   </include>
+   
+   
+   <include file="$(find val_perception_bringup)/launch/field_laser_assembler.launch" />
+   <!-- <include file="$(find val_perception_bringup)/launch/field_octomap.launch"/> -->
+   <include file="$(find tough_footstep)/launch/tough_footstep.launch">
+     <arg name="robot_name" value="atlas" />
+   </include>
+   
+   <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 0.8"/>
+
+  <!-- launch the move group -->
+  <include file="$(find atlas_moveit_config)/launch/move_group.launch" />
+
+  <!-- start the robot fall detector -->
+  <node pkg="navigation_common" type="fall_detector" name="fall_detector" />
+  
+   
+</launch>

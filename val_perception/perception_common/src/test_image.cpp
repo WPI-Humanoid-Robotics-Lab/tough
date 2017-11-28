@@ -17,7 +17,7 @@ using namespace std;
 void testretriveImageWithoutSpin()
 {
     ros::NodeHandle nh;
-    src_perception::MultisenseImage image_assistance(nh);
+    tough_perception::MultisenseImage image_assistance(nh);
 
     cv::Mat disp;
     image_assistance.giveImage(disp);
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     else if (std::string(argv[1]) == "disparity")
     {
         ros::NodeHandle nh;
-        src_perception::MultisenseImage image_assistance(nh);
+        tough_perception::MultisenseImage image_assistance(nh);
         cv::Mat color_image;
         cv::Mat_<float> disp;
         cv::namedWindow("Color Image");
@@ -100,7 +100,7 @@ int main(int argc, char** argv)
 //            }
             if(image_assistance.giveDisparityImage(disp))
             {
-                src_perception::ImageHelper::colorDisparity(disp,disp_img);
+                tough_perception::ImageHelper::colorDisparity(disp,disp_img);
                 cv::imshow("Disparity Image",*disp_img);
                 image_assistance.giveTime(time);
                 assert(ptime<time);

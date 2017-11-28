@@ -13,7 +13,7 @@
 #include <pcl/common/transforms.h>
 
 
-namespace src_perception {
+namespace tough_perception {
 
 bool MultisensePointCloud::laser_wrt_l_foot_callback_active_ = false;
 bool MultisensePointCloud::laser_callback_active_=false;
@@ -96,7 +96,7 @@ void MultisensePointCloud::saveToLaserCloud(const sensor_msgs::PointCloud2ConstP
 //			if((T.x*T.x+T.y*T.y+T.z*T.z)<0.30*0.30)
 //				T.x=T.y=T.z=T.intensity=-1;
 			// fix: if the first line doesn't work, then use the second line
-			memcpy (&laser_cloud_->points[bin*msg->width + i], &T, sizeof(src_perception::LaserPoint));
+            memcpy (&laser_cloud_->points[bin*msg->width + i], &T, sizeof(tough_perception::LaserPoint));
 		}
 	}
 }
@@ -147,7 +147,7 @@ void MultisensePointCloud::saveToLaserCloudWrtLFoot(const sensor_msgs::PointClou
 //			if((T.x*T.x+T.y*T.y+T.z*T.z)<0.30*0.30)
 //				T.x=T.y=T.z=T.intensity=-1;
             // fix: if the first line doesn't work, then use the second line
-            memcpy (&laser_cloud_wrt_l_foot_->points[bin*msg->width + i], &T, sizeof(src_perception::LaserPoint));
+            memcpy (&laser_cloud_wrt_l_foot_->points[bin*msg->width + i], &T, sizeof(tough_perception::LaserPoint));
         }
     }
 }

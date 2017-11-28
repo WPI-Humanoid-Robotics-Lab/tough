@@ -6,7 +6,7 @@
 #include "rviz/properties/property_tree_model.h"
 #include "val_gui/configurationreader.h"
 #include "ros/package.h"
-#include "val_common/val_common_defines.h"
+#include "tough_common/val_common_defines.h"
 
 /**
  * This class creates the GUI using rviz APIs.
@@ -29,11 +29,13 @@ ValkyrieGUI::ValkyrieGUI(QWidget *parent) :
     walkingController_      = nullptr;
     headController_         = nullptr;
     gripperController_      = nullptr;
+    rd_ = RobotDescription::getRobotDescription(nh_);
 
     //clickedpoint is used for moving arm in taskspace
     clickedPoint_           = nullptr;
 
     //initialize everything
+    initJointLimits();
     initVariables();
     initDisplayWidgets();
     initTools();
@@ -269,7 +271,24 @@ void ValkyrieGUI::initDisplayWidgets()
     QString imagePath = QString::fromStdString(ros::package::getPath("val_gui") + "/resources/coordinates.png");
     QImage qImage(imagePath);
     ui->lblAxes->setPixmap(QPixmap::fromImage(qImage));
+    moveitDisplay_ = nullptr;
 }
+
+// This doesn';t work as Moveit loads a panel which ends up with seg fault :(
+// I'll fix it some day. Until then we will try a different solution
+void ValkyrieGUI::createMoveitDisplay(){
+    moveitDisplay_ = manager_->createDisplay( "moveit_rviz_plugin/MotionPlanning", "MoveIt",false );
+    moveitDisplay_->subProp("Planning Request")->subProp("Planning Group")->setValue("leftMiddleFingerGroup");
+    moveitDisplay_->subProp("Planning Request")->subProp("Interactive Marker Size")->setValue("0.2");
+    moveitDisplay_->setEnabled(true);
+}
+
+void ValkyrieGUI::deleteMoveitDisplay(){
+    rviz::Display* tempDisplay =  moveitDisplay_;
+    moveitDisplay_ = nullptr;
+    delete tempDisplay;
+}
+
 
 void ValkyrieGUI::initTools(){
     /**
@@ -293,9 +312,69 @@ void ValkyrieGUI::initTools(){
 
 }
 
+void ValkyrieGUI::initJointLimits() {
+    std::vector<std::pair<float, float> > left_arm_joint_limits;
+    std::vector<std::pair<float, float> > right_arm_joint_limits;
+
+    rd_->getLeftArmJointLimits(left_arm_joint_limits);
+    rd_->getRightArmJointLimits(right_arm_joint_limits);
+    // reduce the joint limits by 1cm to avoid excceeding limits at higher precision of float
+    for (size_t i = 0; i < left_arm_joint_limits.size(); i++ ){
+        left_arm_joint_limits[i] = {left_arm_joint_limits[i].first + 0.01, left_arm_joint_limits[i].second - 0.01};
+        right_arm_joint_limits[i] = {right_arm_joint_limits[i].first + 0.01, right_arm_joint_limits[i].second - 0.01};
+    }
+
+    RIGHT_SHOULDER_PITCH_MAX= right_arm_joint_limits[0].second*TO_DEGREES;
+    RIGHT_SHOULDER_PITCH_MIN= right_arm_joint_limits[0].first*TO_DEGREES;
+
+    RIGHT_SHOULDER_ROLL_MAX = right_arm_joint_limits[1].second*TO_DEGREES;
+    RIGHT_SHOULDER_ROLL_MIN = right_arm_joint_limits[1].first*TO_DEGREES;
+
+    RIGHT_SHOULDER_YAW_MAX  = right_arm_joint_limits[2].second*TO_DEGREES;
+    RIGHT_SHOULDER_YAW_MIN  = right_arm_joint_limits[2].first*TO_DEGREES;
+
+    RIGHT_ELBOW_MAX         = right_arm_joint_limits[3].second*TO_DEGREES;
+    RIGHT_ELBOW_MIN         = right_arm_joint_limits[3].first*TO_DEGREES;
+
+    RIGHT_WRIST_YAW_MAX     = right_arm_joint_limits[4].second*TO_DEGREES;
+    RIGHT_WRIST_YAW_MIN     = right_arm_joint_limits[4].first*TO_DEGREES;
+
+    RIGHT_WRIST_ROLL_MAX    = right_arm_joint_limits[5].second*TO_DEGREES;
+    RIGHT_WRIST_ROLL_MIN    = right_arm_joint_limits[5].first*TO_DEGREES;
+
+    RIGHT_WRIST_PITCH_MAX   = right_arm_joint_limits[6].second*TO_DEGREES;
+    RIGHT_WRIST_PITCH_MIN   = right_arm_joint_limits[6].first*TO_DEGREES;
+
+
+    LEFT_SHOULDER_PITCH_MAX = left_arm_joint_limits[0].second*TO_DEGREES;
+    LEFT_SHOULDER_PITCH_MIN = left_arm_joint_limits[0].first*TO_DEGREES;
+
+    LEFT_SHOULDER_ROLL_MAX  = left_arm_joint_limits[1].second*TO_DEGREES;
+    LEFT_SHOULDER_ROLL_MIN  = left_arm_joint_limits[1].first*TO_DEGREES;
+
+    LEFT_SHOULDER_YAW_MAX   = left_arm_joint_limits[2].second*TO_DEGREES;
+    LEFT_SHOULDER_YAW_MIN   = left_arm_joint_limits[2].first*TO_DEGREES;
+
+    LEFT_ELBOW_MAX          = left_arm_joint_limits[3].second*TO_DEGREES;
+    LEFT_ELBOW_MIN          = left_arm_joint_limits[3].first*TO_DEGREES;
+
+    LEFT_WRIST_YAW_MAX      = left_arm_joint_limits[4].second*TO_DEGREES;
+    LEFT_WRIST_YAW_MIN      = left_arm_joint_limits[4].first*TO_DEGREES;
+
+    LEFT_WRIST_ROLL_MAX     = left_arm_joint_limits[5].second*TO_DEGREES;
+    LEFT_WRIST_ROLL_MIN     = left_arm_joint_limits[5].first*TO_DEGREES;
+
+    LEFT_WRIST_PITCH_MAX    = left_arm_joint_limits[6].second*TO_DEGREES;
+    LEFT_WRIST_PITCH_MIN    = left_arm_joint_limits[6].first*TO_DEGREES;
+
+}
+
 void ValkyrieGUI::initDefaultValues() {
-    // 3D view. select none by default
+    // 3D view. select Pointcloud by default
     ui->radioBtnPointcloud->setEnabled(true);
+    ui->radioBtnPointcloud->setChecked(true);
+    octomapDisplay_->setEnabled(false);
+    cloudDisplay_->setEnabled(true);
 
     //Arms select left arm by default
     ui->radioArmSideLeft->setChecked(true);
@@ -338,22 +417,31 @@ void ValkyrieGUI::initDefaultValues() {
 void ValkyrieGUI::initValkyrieControllers() {
 
     //create a chest trajectory controller object
-    chestController_ = new chestTrajectory(nh_);
+    chestController_ = new ChestControlInterface(nh_);
 
     //create pelvis height controller object
-    pelvisHeightController_ = new pelvisTrajectory(nh_);
+    pelvisHeightController_ = new PelvisControlInterface(nh_);
 
     //create walking controller object
     walkingController_ = new RobotWalker(nh_, 1.0, 1.0, 0, 0.18);
 
     //create arm joint controller object
-    armJointController_ = new armTrajectory(nh_);
+    armJointController_ = new ArmControlInterface(nh_);
 
     //create a chest trajectory controller object
-    headController_ = new HeadTrajectory(nh_);
+    headController_ = new HeadControlInterface(nh_);
 
     //create a gripper controller object
-    gripperController_ = new gripperControl(nh_);
+    gripperController_ = new GripperControlInterface(nh_);
+
+    // create a wholebody controller object
+    wholeBodyController_ = new wholebodyManipulation(nh_);
+
+    // right arm cartesian planner
+    rightArmPlanner_ = new CartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
+
+    // left arm cartesian planner
+    leftArmPlanner_ = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
 }
 
 void ValkyrieGUI::getArmState()
@@ -362,7 +450,7 @@ void ValkyrieGUI::getArmState()
         ROS_INFO("joint_states is not initialized yet. cannot update arm joints");
         return;
     }
-    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
     mtx_.lock();
 
     if(side == LEFT) {
@@ -485,7 +573,7 @@ void ValkyrieGUI::getClickedPoint(const geometry_msgs::PointStamped::Ptr msg)
     clickedPoint_->orientation.w = 1.0;
     clickedPoint_->position = msg->point;
 
-    armSide side = ui->radioNudgeSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioNudgeSideLeft->isChecked() ? LEFT : RIGHT;
     ROS_INFO("Moving arm");
     armJointController_->moveArmInTaskSpace(side, *clickedPoint_, 3.0f);
     moveArmCommand_ = false;
@@ -565,7 +653,7 @@ void ValkyrieGUI::resetChestOrientation()
 
 void ValkyrieGUI::resetArm()
 {
-    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
     armJointController_->moveToDefaultPose(side);
     getArmState();
 }
@@ -597,29 +685,59 @@ void ValkyrieGUI::nudgeArm(int btnID)
     //    front -7
     //    left  -5
     //    right -6
-    armSide side = ui->radioNudgeSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioNudgeSideLeft->isChecked() ? LEFT : RIGHT;
+//    std::vector<geometry_msgs::Pose> waypoint;
+//    geometry_msgs::Pose pose;
+//    moveit_msgs::RobotTrajectory traj;
+
+//    float x=0.0f, y=0.0f, z=0.0f;
+
     switch (btnID) {
     case -2: //down
         armJointController_->nudgeArm(side, direction::DOWN);
+//        z -= 0.05;
         break;
     case -3: //up
         armJointController_->nudgeArm(side, direction::UP);
+//        z += 0.05;
         break;
     case -4: //back
         armJointController_->nudgeArm(side, direction::BACK);
+//        x -= 0.05;
         break;
     case -7: //front
         armJointController_->nudgeArm(side, direction::FRONT);
+//        x += 0.05;
         break;
     case -5: //left
         armJointController_->nudgeArm(side, direction::LEFT);
+//        y += 0.05;
         break;
     case -6: //right
         armJointController_->nudgeArm(side, direction::RIGHT);
+//        y -= 0.05;
         break;
     default:
         break;
     }
+
+//    armJointController_->nudgeArmLocal(side, x, y, z,pose);
+//    waypoint.clear();
+//    waypoint.push_back(pose);
+//    if(side ==armSide::RIGHT)
+//    {
+//        if(rightArmPlanner_->getTrajFromCartPoints(waypoint, traj, false, 0.2) > 0.1) {
+//            armJointController_->moveArmTrajectory(side, traj.joint_trajectory);
+//        }
+
+//    }
+//    else
+//    {
+//        if(leftArmPlanner_->getTrajFromCartPoints(waypoint, traj, false, 0.2) > 0.1){
+//            armJointController_->moveArmTrajectory(side, traj.joint_trajectory);
+//        }
+
+//    }
 
 }
 
@@ -730,7 +848,7 @@ void ValkyrieGUI::setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr, bool is_
 void ValkyrieGUI::closeGrippers()
 {
     //call close grppiers function here
-    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
     gripperController_->closeGripper(side);
 
 }
@@ -738,7 +856,7 @@ void ValkyrieGUI::closeGrippers()
 void ValkyrieGUI::openGrippers()
 {
     //call open grippers function here
-    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
     gripperController_->openGripper(side);
 }
 
@@ -823,7 +941,7 @@ void ValkyrieGUI::displayPointcloud(int btnID)
 void ValkyrieGUI::walkSteps()
 {
 
-    armSide side = ui->radioLeftFoot->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioLeftFoot->isChecked() ? LEFT : RIGHT;
     int numOfSteps = ui->lineEditNumSteps->text().toInt();
     float xOffset = ui->lineEditXOffset->text().toFloat();
     float yOffset = ui->lineEditYOffset->text().toFloat();
@@ -855,7 +973,7 @@ void ValkyrieGUI::moveArmJoints(){
 
     float elbowValue        ;
 
-    armSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    RobotSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
     if(side == LEFT)
     {
         shoulderRollValue  = ui->sliderShoulderRoll->value()*(LEFT_SHOULDER_ROLL_MAX-LEFT_SHOULDER_ROLL_MIN)/100+LEFT_SHOULDER_ROLL_MIN;
@@ -882,8 +1000,8 @@ void ValkyrieGUI::moveArmJoints(){
     }
 
 
-    std::vector<armTrajectory::armJointData> data;
-    armTrajectory::armJointData msg;
+    std::vector<ArmControlInterface::armJointData> data;
+    ArmControlInterface::armJointData msg;
     //sequence of joints for sending arm data
     std::vector<std::string> joints = {"leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch"};
     msg.arm_pose = {shoulderPitchValue * TO_RADIANS, shoulderRollValue* TO_RADIANS, shoulderYawValue* TO_RADIANS,

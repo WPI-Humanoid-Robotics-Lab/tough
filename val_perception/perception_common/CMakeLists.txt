@@ -24,7 +24,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp
                                         geometry_msgs
                                         sensor_msgs
                                         std_msgs
-                                        val_common
+                                        tough_common
                                         tough_controller_interface
 )
 
@@ -37,7 +37,7 @@ add_definitions(${PCL_DEFINITIONS})
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}
-   CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros laser_assembler val_common tough_controller_interface
+   CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros laser_assembler tough_common tough_controller_interface
    DEPENDS opencv pcl
 )
 
@@ -67,6 +67,12 @@ target_link_libraries(test_organizedRGBD  ${PROJECT_NAME})
 
 add_executable(periodic_snapshotter  src/periodic_snapshotter.cpp)
 target_link_libraries(periodic_snapshotter  ${catkin_LIBRARIES}    ${PROJECT_NAME} ${PCL_LIBRARY_DIRS})
+
+add_executable(walkway_point_generator src/walkway_generator.cpp)
+add_dependencies(walkway_point_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(walkway_point_generator
+   ${catkin_LIBRARIES} ${PCL_LIBRARIES}
+ )
 
 ## Mark executables and/or libraries for installation
 #install(TARGETS ${PROJECT_NAME} multisense_backend

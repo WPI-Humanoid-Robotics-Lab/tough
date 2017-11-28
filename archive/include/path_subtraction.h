@@ -10,7 +10,7 @@
 #include <iostream>
 #include <ros/ros.h>
 #include <nav_msgs/OccupancyGrid.h>
-#include <val_common/val_common_names.h>
+#include <tough_common/val_common_names.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 

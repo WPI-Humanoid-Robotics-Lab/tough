@@ -16,7 +16,7 @@
 #include <sensor_msgs/image_encodings.h>
 
 
-namespace src_perception {
+namespace tough_perception {
 
 using namespace std;
 
