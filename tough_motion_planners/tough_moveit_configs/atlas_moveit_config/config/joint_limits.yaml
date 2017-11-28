@@ -1,0 +1,89 @@
+# joint_limits.yaml allows the dynamics properties specified in the URDF to be overwritten or augmented as needed
+# Specific joint properties can be changed with the keys [max_position, min_position, max_velocity, max_acceleration]
+# Joint limits can be turned off with [has_velocity_limits, has_acceleration_limits]
+joint_limits:
+  back_bkx:
+    has_velocity_limits: true
+    max_velocity: 12
+    has_acceleration_limits: false
+    max_acceleration: 0
+  back_bky:
+    has_velocity_limits: true
+    max_velocity: 9
+    has_acceleration_limits: false
+    max_acceleration: 0
+  back_bkz:
+    has_velocity_limits: true
+    max_velocity: 12
+    has_acceleration_limits: false
+    max_acceleration: 0
+  l_arm_elx:
+    has_velocity_limits: true
+    max_velocity: 12
+    has_acceleration_limits: false
+    max_acceleration: 0
+  l_arm_ely:
+    has_velocity_limits: true
+    max_velocity: 12
+    has_acceleration_limits: false
+    max_acceleration: 0
+  l_arm_shx:
+    has_velocity_limits: true
+    max_velocity: 12
+    has_acceleration_limits: false
+    max_acceleration: 0
+  l_arm_shz:
+    has_velocity_limits: true
+    max_velocity: 12
+    has_acceleration_limits: false
+    max_acceleration: 0
+  l_arm_wrx:
+    has_velocity_limits: true
+    max_velocity: 10
+    has_acceleration_limits: false
+    max_acceleration: 0
+  l_arm_wry:
+    has_velocity_limits: true
+    max_velocity: 10
+    has_acceleration_limits: false
+    max_acceleration: 0
+  l_arm_wry2:
+    has_velocity_limits: true
+    max_velocity: 10
+    has_acceleration_limits: false
+    max_acceleration: 0
+  r_arm_elx:
+    has_velocity_limits: true
+    max_velocity: 12
+    has_acceleration_limits: false
+    max_acceleration: 0
+  r_arm_ely:
+    has_velocity_limits: true
+    max_velocity: 12
+    has_acceleration_limits: false
+    max_acceleration: 0
+  r_arm_shx:
+    has_velocity_limits: true
+    max_velocity: 12
+    has_acceleration_limits: false
+    max_acceleration: 0
+  r_arm_shz:
+    has_velocity_limits: true
+    max_velocity: 12
+    has_acceleration_limits: false
+    max_acceleration: 0
+  r_arm_wrx:
+    has_velocity_limits: true
+    max_velocity: 10
+    has_acceleration_limits: false
+    max_acceleration: 0
+  r_arm_wry:
+    has_velocity_limits: true
+    max_velocity: 10
+    has_acceleration_limits: false
+    max_acceleration: 0
+  r_arm_wry2:
+    has_velocity_limits: true
+    max_velocity: 10
+    has_acceleration_limits: false
+    max_acceleration: 0

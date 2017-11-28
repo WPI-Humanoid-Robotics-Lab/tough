@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   robot_self_filter
   roscpp
   tf
-  val_common
+  tough_common
   perception_common
 )
 
@@ -154,13 +154,13 @@ include_directories(
 ## Specify libraries to link a library or executable target against
  target_link_libraries(val_self_filter
    ${catkin_LIBRARIES}
-   val_common
+   tough_common
    perception_common
  )
 
  target_link_libraries(val_walkway_filter
    ${catkin_LIBRARIES}
-   val_common
+   tough_common
    perception_common
  )
 

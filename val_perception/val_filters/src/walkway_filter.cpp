@@ -1,15 +1,8 @@
-/*
- * Author : Vinayak Jagtap (vvjagtap@wpi.edu)
- *
- * This node is a manual bug fix for a bug in octomap server.
- * The orientation of 2D map provided by octomap server returns nan for yaw of origin.
- * This node publishes 0 yaw for origin and publishes the new map on /map topic
- *
- */
+
 #include <nav_msgs/OccupancyGrid.h>
 #include <ros/ros.h>
 #include <pcl/range_image/range_image_planar.h>
-#include <val_common/val_common_names.h>
+#include <tough_common/val_common_names.h>
 #include <val_filters/walkway_filter.h>
 #include <perception_common/perception_common_names.h>
 
@@ -17,6 +10,7 @@ WalkwayFilter::WalkwayFilter(ros::NodeHandle &n):nh_(n)
 {
     pointcloudPub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ> >("walkway_filtered_points2",1);
     pointcloudSub_ = nh_.subscribe(PERCEPTION_COMMON_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC_FOR_OCTOMAP, 1,  &WalkwayFilter::generateMap, this);
+    rd_ = RobotDescription::getRobotDescription(nh_);
 }
 
 WalkwayFilter::~WalkwayFilter()
@@ -51,10 +45,10 @@ double WalkwayFilter::getCurrentFootHeight(void)
     double height_foot;
 
     tf::StampedTransform transformStamped;
-    tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::L_FOOT_TF, ros::Time(0),transformStamped);
+    tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF, rd_->getLeftFootFrameName(), ros::Time(0),transformStamped);
     height_foot = transformStamped.getOrigin().getZ();
 
-    tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::R_FOOT_TF, ros::Time(0),transformStamped);
+    tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF, rd_->getRightFootFrameName(), ros::Time(0),transformStamped);
 
     height_foot = height_foot > transformStamped.getOrigin().getZ() ? transformStamped.getOrigin().getZ() : height_foot;
 

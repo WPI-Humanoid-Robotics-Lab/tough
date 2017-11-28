@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: val_description
+    relative_path: model/urdf/valkyrie_sim.urdf
+  SRDF:
+    relative_path: config/valkyrie.srdf
+  CONFIG:
+    author_name: Vinayak Jagtap
+    author_email: vvjagtap@wpi.edu
+    generated_timestamp: 1510329180

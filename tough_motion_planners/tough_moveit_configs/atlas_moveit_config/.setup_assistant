@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: ihmc_atlas_ros
+    relative_path: urdf/atlas_unplugged_v5_dual_robotiq_with_head.urdf
+  SRDF:
+    relative_path: config/atlas.srdf
+  CONFIG:
+    author_name: Vinayak Jagtap
+    author_email: vvjagtap@wpi.edu
+    generated_timestamp: 1510250320

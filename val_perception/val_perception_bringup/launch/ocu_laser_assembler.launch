@@ -27,8 +27,9 @@
     </node>
 
     <node type="periodic_snapshotter" pkg="perception_common" name="val_laser_assembler_node"  ns="ocu"/>
-    <node type="val_walkway_filter" pkg="val_filters" name="val_walkway_filter"  ns="ocu">
+    <!--<node type="val_walkway_filter" pkg="val_filters" name="val_walkway_filter"  ns="ocu">
       <remap from="filtered_cloud2" to="/field/filtered_cloud2"/>
-    </node>
+    </node>-->
+    <node type="walkway_point_generator" pkg="perception_common" name="walkway_generator"  ns="field"/
   
 </launch>

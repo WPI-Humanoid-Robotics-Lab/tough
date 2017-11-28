@@ -19,7 +19,9 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
   tough_controller_interface
-  val_footstep
+  tough_moveit_planners
+  moveit_ros_visualization
+  tough_footstep
 )
 
 ## Here we specify which header files need to be run through "moc",
@@ -63,7 +65,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES val_marker
-  CATKIN_DEPENDS roscpp rviz sensor_msgs std_msgs tough_controller_interface val_footstep
+  CATKIN_DEPENDS roscpp rviz sensor_msgs std_msgs tough_controller_interface tough_footstep
   DEPENDS system_lib
 )
 

@@ -14,6 +14,7 @@
 #include <tf/transform_listener.h>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/segmentation/sac_segmentation.h>
+#include "tough_common/robot_description.h"
 
 class WalkwayFilter{
 public:
@@ -28,7 +29,7 @@ private:
     ros::Subscriber pointcloudSub_;
     ros::NodeHandle nh_;
     tf::TransformListener       tf_listener_;
-
+    RobotDescription* rd_;
     double getCurrentFootHeight(void);
 };
 

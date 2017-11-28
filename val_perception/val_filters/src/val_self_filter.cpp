@@ -34,7 +34,7 @@
 
 /** \author Ioan Sucan*/
 
-/**  Modified code written by Ioan Sucan to use for valkyrie*/
+/**  Modified code written by Ioan Sucan to use for SRC*/
 
 #include <cstdio>
 
@@ -45,7 +45,7 @@
 #include <pcl/filters/extract_indices.h>
 
 #include "robot_self_filter/self_mask.h"
-#include "val_common/val_common_names.h"
+#include "tough_common/val_common_names.h"
 #include "perception_common/perception_common_names.h"
 
 class val_self_filter
