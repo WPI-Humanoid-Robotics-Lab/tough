@@ -38,7 +38,7 @@ handle_grabber::handle_grabber(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper
     // cartesian planners for the arm
     left_arm_planner_ = new CartesianPlanner("leftPalm", VAL_COMMON_NAMES::WORLD_TF); //leftMiddleFingerGroup
     right_arm_planner_ = new CartesianPlanner("rightPalm", VAL_COMMON_NAMES::WORLD_TF); //rightMiddleFingerGroup
-    wholebody_controller_ = new wholebodyManipulation(nh_);
+    wholebody_controller_ = new WholebodyControlInterface(nh_);
 }
 
 handle_grabber::~handle_grabber()
@@ -170,7 +170,7 @@ void handle_grabber::grasp_handles(const RobotSide side, const geometry_msgs::Po
     if (side == RobotSide::RIGHT) right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
     if (side == RobotSide::LEFT)   left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false);
 
-    wholebody_controller_->compileMsg(side, traj.joint_trajectory);
+    wholebody_controller_->executeTrajectory(side, traj.joint_trajectory);
 
     ros::Duration(executionTime).sleep();
     ROS_INFO("Closing grippers");

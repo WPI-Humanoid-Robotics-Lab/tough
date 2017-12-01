@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     std_msgs::String publishData;
     log_msg("starting planners");
     ArmControlInterface armTraj(nh);
-    wholebodyManipulation wholeBodyController(nh);
+    WholebodyControlInterface wholeBodyController(nh);
     CartesianPlanner right_arm_planner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     CartesianPlanner left_arm_planner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     moveit_msgs::RobotTrajectory traj;
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
         {
             if (right_arm_planner.getTrajFromCartPoints(waypoint, traj, false)> 0.98){
                 log_msg("right arm whole body msg executing");
-                wholeBodyController.compileMsg(side, traj.joint_trajectory);
+                wholeBodyController.executeTrajectory(side, traj.joint_trajectory);
             } else {
                 log_msg("right arm whole body msg planning was unsuccessful");
             }
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
         {
             if (left_arm_planner.getTrajFromCartPoints(waypoint, traj, false)> 0.98){
                 log_msg("left arm whole body msg executing");
-                wholeBodyController.compileMsg(side, traj.joint_trajectory);
+                wholeBodyController.executeTrajectory(side, traj.joint_trajectory);
             } else {
                 log_msg("left arm whole body msg planning was unsuccessful");
             }

@@ -1,7 +1,7 @@
 #include "tough_controller_interface/wholebody_control_interface.h"
 
 
-wholebodyManipulation::wholebodyManipulation(ros::NodeHandle &nh):nh_(nh)
+WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle &nh):nh_(nh)
 {
     std::string robot_name;
     nh.getParam("ihmc_ros/robot_name", robot_name);
@@ -40,11 +40,11 @@ wholebodyManipulation::wholebodyManipulation(ros::NodeHandle &nh):nh_(nh)
 //    joint_limits_right_[6]={-0.47,0.35};
 }
 
-void wholebodyManipulation::compileMsg(const RobotSide side, const  moveit_msgs::RobotTrajectory &traj){
-    return compileMsg(side, traj.joint_trajectory);
+void WholebodyControlInterface::executeTrajectory(const RobotSide side, const  moveit_msgs::RobotTrajectory &traj){
+    return executeTrajectory(side, traj.joint_trajectory);
  }
 
-void wholebodyManipulation::compileMsg(const RobotSide side, const trajectory_msgs::JointTrajectory &traj)
+void WholebodyControlInterface::executeTrajectory(const RobotSide side, const trajectory_msgs::JointTrajectory &traj)
 {
 
     if(!validateTrajectory(traj)){
@@ -106,7 +106,7 @@ void wholebodyManipulation::compileMsg(const RobotSide side, const trajectory_ms
     ros::Duration(1).sleep();
 }
 
-void wholebodyManipulation::leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_)
+void WholebodyControlInterface::leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_)
 {
     msg.left_arm_trajectory_message.joint_trajectory_messages.resize(7);
     for(int trajPointNumber = 0; trajPointNumber < traj.points.size(); trajPointNumber++){
@@ -134,7 +134,7 @@ void wholebodyManipulation::leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage 
     }
 }
 
-void wholebodyManipulation::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_)
+void WholebodyControlInterface::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_)
 {
     msg.right_arm_trajectory_message.joint_trajectory_messages.resize(7);
     for(int trajPointNumber = 0; trajPointNumber < traj.points.size(); trajPointNumber++){
@@ -162,7 +162,7 @@ void wholebodyManipulation::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage
     }
 }
 
-void wholebodyManipulation::chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj)
+void WholebodyControlInterface::chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj)
 {
     geometry_msgs::Pose pelvisPose;
     robot_state_->getCurrentPose(rd_->getPelvisFrame(),pelvisPose);
@@ -187,7 +187,7 @@ void wholebodyManipulation::chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &m
 
 }
 
-bool wholebodyManipulation::validateTrajectory(const trajectory_msgs::JointTrajectory &traj)
+bool WholebodyControlInterface::validateTrajectory(const trajectory_msgs::JointTrajectory &traj)
 {
     for (trajectory_msgs::JointTrajectoryPoint point : traj.points){
         if (point.positions.size() != 10 && point.positions.size() != 11){

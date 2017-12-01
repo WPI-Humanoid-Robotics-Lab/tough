@@ -18,7 +18,7 @@ class WalkwayGenerator{
 public:
     WalkwayGenerator(ros::NodeHandle &n);
     ~WalkwayGenerator();
-    void generateSeedPoints(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+    void generateWalkwayPoints(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 
 private:
     ros::Publisher pointcloudPub_;

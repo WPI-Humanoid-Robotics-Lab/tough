@@ -435,7 +435,7 @@ void ValkyrieGUI::initValkyrieControllers() {
     gripperController_ = new GripperControlInterface(nh_);
 
     // create a wholebody controller object
-    wholeBodyController_ = new wholebodyManipulation(nh_);
+    wholeBodyController_ = new WholebodyControlInterface(nh_);
 
     // right arm cartesian planner
     rightArmPlanner_ = new CartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);

@@ -36,7 +36,7 @@ private:
    geometry_msgs::QuaternionStamped rightHandOrientation_;
    CartesianPlanner* right_arm_planner_;
    CartesianPlanner* left_arm_planner_;
-   wholebodyManipulation* wholebody_controller_;
+   WholebodyControlInterface* wholebody_controller_;
    /*Top Grip*/
    const std::vector<float> leftShoulderSeed_ = {-0.23, -0.72, 0.65, -1.51, 2.77, 0.0, 0.0};
    /*Side Grip*/

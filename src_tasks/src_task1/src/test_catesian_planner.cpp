@@ -72,7 +72,7 @@ int main(int argc, char** argv){
 //            ArmControlInterface armTraj(node_handle);
 //            armTraj.moveArmTrajectory(RIGHT, trajectory.joint_trajectory);
 
-    wholebodyManipulation msg(node_handle);
-    msg.compileMsg(RIGHT,trajectory.joint_trajectory);
+    WholebodyControlInterface msg(node_handle);
+    msg.executeTrajectory(RIGHT,trajectory.joint_trajectory);
 
 }

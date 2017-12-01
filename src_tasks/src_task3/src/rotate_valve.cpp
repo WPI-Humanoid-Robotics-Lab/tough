@@ -33,7 +33,7 @@ RotateValve::RotateValve(ros::NodeHandle n):nh_(n), armTraj_(nh_),
 
     // cartesian planners for the arm
     left_arm_planner_       = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
-    wholebody_controller_   = new wholebodyManipulation(nh_);
+    wholebody_controller_   = new WholebodyControlInterface(nh_);
     chest_controller_       = new ChestControlInterface(nh_);
 
     marker_pub               = nh_.advertise<visualization_msgs::MarkerArray>( "valve_path", 10, true);
@@ -106,7 +106,7 @@ bool RotateValve::grab_valve(const geometry_msgs::Point &goal, float executionTi
 
     // Planning whole body motion
     t3Utils.task3LogPub("grab_valve_node: Initial trajectory");
-    wholebody_controller_->compileMsg(LEFT,traj.joint_trajectory);
+    wholebody_controller_->executeTrajectory(LEFT,traj.joint_trajectory);
     ros::Duration(executionTime*1.5).sleep();
 
     // Grasping the cable
@@ -213,7 +213,7 @@ bool RotateValve::move_valve(std::vector<geometry_msgs::Pose> poses, float execu
 
 
         // Planning whole body motion
-        wholebody_controller_->compileMsg(LEFT,traj.joint_trajectory);
+        wholebody_controller_->executeTrajectory(LEFT,traj.joint_trajectory);
         ros::Duration(executionTime*4.0).sleep();
 
         ROS_INFO("rotateValve: Done executing motion !!!");

@@ -32,7 +32,7 @@ private:
     RobotStateInformer *current_state_;
     RobotDescription *rd_;
     CartesianPlanner* left_arm_planner_;
-    wholebodyManipulation* wholebody_controller_;
+    WholebodyControlInterface* wholebody_controller_;
     ChestControlInterface* chest_controller_;
     RobotWalker walk_;
     task3Utils t3Utils;

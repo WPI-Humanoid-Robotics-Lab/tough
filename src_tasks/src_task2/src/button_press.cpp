@@ -50,7 +50,7 @@ ButtonPress::ButtonPress(ros::NodeHandle& nh):nh_(nh), armTraj_(nh), gripper_(nh
     // Initializing planners
     left_arm_planner_ = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     right_arm_planner_ = new CartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
-    wholebody_controller_ = new wholebodyManipulation(nh_);
+    wholebody_controller_ = new WholebodyControlInterface(nh_);
     chest_controller_ = new ChestControlInterface(nh_);
 
 }
@@ -161,7 +161,7 @@ bool ButtonPress::pressButton(const RobotSide side, geometry_msgs::Point &goal, 
     }
 
     ROS_INFO("Calculated Traj");
-    wholebody_controller_->compileMsg(side, traj.joint_trajectory);
+    wholebody_controller_->executeTrajectory(side, traj.joint_trajectory);
 
     ros::Duration(executionTime).sleep();
 

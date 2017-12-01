@@ -34,7 +34,7 @@ private:
    RobotDescription *rd_;
    CartesianPlanner* right_arm_planner_;
    CartesianPlanner* left_arm_planner_;
-   wholebodyManipulation* wholebody_controller_;
+   WholebodyControlInterface* wholebody_controller_;
    geometry_msgs::QuaternionStamped leftHandOrientationAngled_ ;
    geometry_msgs::QuaternionStamped rightHandOrientationAngled_;
    geometry_msgs::QuaternionStamped leftHandOrientationPerpen_ ;

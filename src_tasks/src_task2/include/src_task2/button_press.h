@@ -36,7 +36,7 @@ class ButtonPress
     //    const std::vector<float> rightShoulderSeed_ = {-0.28, 0.99, 0.12 , 1.49, 1.03, 0.0, 0.0};
     CartesianPlanner* right_arm_planner_;
     CartesianPlanner* left_arm_planner_;
-    wholebodyManipulation* wholebody_controller_;
+    WholebodyControlInterface* wholebody_controller_;
     ChestControlInterface * chest_controller_;
 
 public:

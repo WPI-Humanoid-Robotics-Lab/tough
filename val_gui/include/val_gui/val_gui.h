@@ -231,7 +231,7 @@ private:
   RobotWalker           *walkingController_;
   HeadControlInterface        *headController_;
   GripperControlInterface        *gripperController_;
-  wholebodyManipulation *wholeBodyController_;
+  WholebodyControlInterface *wholeBodyController_;
   CartesianPlanner      *rightArmPlanner_;
   CartesianPlanner      *leftArmPlanner_;
 

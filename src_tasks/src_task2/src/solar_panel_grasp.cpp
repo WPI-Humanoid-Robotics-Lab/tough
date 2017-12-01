@@ -11,7 +11,7 @@ solar_panel_handle_grabber::solar_panel_handle_grabber(ros::NodeHandle n):nh_(n)
     // cartesian planners for the arm
     left_arm_planner_ = new CartesianPlanner("leftMiddleFingerGroup", VAL_COMMON_NAMES::WORLD_TF);
     right_arm_planner_ = new CartesianPlanner("rightMiddleFingerGroup", VAL_COMMON_NAMES::WORLD_TF);
-    wholebody_controller_ = new wholebodyManipulation(nh_);
+    wholebody_controller_ = new WholebodyControlInterface(nh_);
 }
 
 solar_panel_handle_grabber::~solar_panel_handle_grabber()
@@ -149,7 +149,7 @@ bool solar_panel_handle_grabber::grasp_handles(RobotSide side, const geometry_ms
         }
     }
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : Calculated Traj");
-    wholebody_controller_->compileMsg(side, traj.joint_trajectory);
+    wholebody_controller_->executeTrajectory(side, traj.joint_trajectory);
     ros::Duration(executionTime*2).sleep();
 
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : Closing grippers");
@@ -181,7 +181,7 @@ bool solar_panel_handle_grabber::grasp_handles(RobotSide side, const geometry_ms
         }
     }
 
-    wholebody_controller_->compileMsg(side, traj2.joint_trajectory);
+    wholebody_controller_->executeTrajectory(side, traj2.joint_trajectory);
     ros::Duration(executionTime*2).sleep();
 
     geometry_msgs::Pose finalFramePose;

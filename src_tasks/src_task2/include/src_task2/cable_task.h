@@ -42,7 +42,7 @@ private:
    CartesianPlanner* left_arm_planner_cable;
    CartesianPlanner* left_arm_planner_choke;
    ChestControlInterface* chest_controller_;
-   wholebodyManipulation* wholebody_controller_;
+   WholebodyControlInterface* wholebody_controller_;
    geometry_msgs::QuaternionStamped rightHandOrientationTop_ ;
    geometry_msgs::QuaternionStamped rightHandOrientationAngle_ ;
    geometry_msgs::QuaternionStamped quat; // populate this value by experimentation

@@ -18,7 +18,7 @@ static const float FOOT_GROUND_THRESHOLD = 0.05f;
 WalkwayGenerator::WalkwayGenerator(ros::NodeHandle &n){
     pointcloudPub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ> >("walkway",1);
     ROS_INFO("Subscribing to %s", PERCEPTION_COMMON_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC.c_str());
-    pointcloudSub_ = nh_.subscribe(PERCEPTION_COMMON_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC, 1,  &WalkwayGenerator::generateSeedPoints, this);
+    pointcloudSub_ = nh_.subscribe(PERCEPTION_COMMON_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC, 1,  &WalkwayGenerator::generateWalkwayPoints, this);
 
     rd_ = RobotDescription::getRobotDescription(n);
 }
@@ -28,7 +28,7 @@ WalkwayGenerator::~WalkwayGenerator(){
     pointcloudSub_.shutdown();
 }
 
-void WalkwayGenerator::generateSeedPoints(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
+void WalkwayGenerator::generateWalkwayPoints(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
 
     if(cloud->empty())
         return;

@@ -35,7 +35,7 @@ CableTask::CableTask(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
     left_arm_planner_choke = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     left_arm_planner_cable = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
 
-    wholebody_controller_ = new wholebodyManipulation(nh_);
+    wholebody_controller_ = new WholebodyControlInterface(nh_);
     chest_controller_     = new ChestControlInterface(nh_);
 
     task2_utils_    = new task2Utils(nh_);
@@ -142,7 +142,7 @@ bool CableTask::grasp_choke(RobotSide side, const geometry_msgs::Pose &goal, flo
 
 
     ROS_INFO("CableTask::grasp_choke: Calculated Traj");
-    wholebody_controller_->compileMsg(side, traj.joint_trajectory);
+    wholebody_controller_->executeTrajectory(side, traj.joint_trajectory);
     ros::Duration(executionTime*2).sleep();
 
     //    geometry_msgs::Pose finalFramePose;
@@ -245,7 +245,7 @@ bool CableTask::grasp_cable(const geometry_msgs::Pose &goal, float executionTime
 
 
     // Planning whole body motion
-    wholebody_controller_->compileMsg(RIGHT,traj.joint_trajectory);
+    wholebody_controller_->executeTrajectory(RIGHT,traj.joint_trajectory);
     ros::Duration(executionTime).sleep();
 
     //    ROS_INFO("Grip Sequence 1");
@@ -317,7 +317,7 @@ bool CableTask::insert_cable(const geometry_msgs::Point &goal, float executionTi
         return false;
     }
 
-    wholebody_controller_->compileMsg(RIGHT,traj.joint_trajectory);
+    wholebody_controller_->executeTrajectory(RIGHT,traj.joint_trajectory);
 
     ros::Time startTime= ros::Time::now();
     ros::Time endTime;
@@ -404,7 +404,7 @@ bool CableTask::rotate_cable1(const geometry_msgs::Pose &goal, float executionTi
 
 
     ROS_INFO("CableTask::grasp_choke: Calculated Traj");
-    wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
+    wholebody_controller_->executeTrajectory(RIGHT, traj.joint_trajectory);
     ros::Duration(executionTime*2).sleep();
 
     std::vector<double> closeGrip={1.3999, 0.55, 1.1, 0.9, 1.0};
@@ -485,7 +485,7 @@ bool CableTask::rotate_cable2(const geometry_msgs::Pose &goal, float executionTi
     }
 
     ROS_INFO("CableTask::grasp_choke: Calculated Traj");
-    wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
+    wholebody_controller_->executeTrajectory(RIGHT, traj.joint_trajectory);
     ros::Duration(executionTime*2).sleep();
 
 
@@ -582,7 +582,7 @@ bool CableTask::rotate_cable3(const geometry_msgs::Pose &goal, float executionTi
 
 
     ROS_INFO("CableTask::grasp_choke: Calculated Traj");
-    wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
+    wholebody_controller_->executeTrajectory(RIGHT, traj.joint_trajectory);
     ros::Duration(executionTime*2).sleep();
 
     std::vector<double> closeGrip={1.2, 0.4, 0.4, 0.4 ,0.4 };
@@ -605,7 +605,7 @@ bool CableTask::rotate_cable3(const geometry_msgs::Pose &goal, float executionTi
 
 
     ROS_INFO("CableTask::grasp_choke: Calculated Traj");
-    wholebody_controller_->compileMsg(RIGHT, traj.joint_trajectory);
+    wholebody_controller_->executeTrajectory(RIGHT, traj.joint_trajectory);
     ros::Duration(executionTime*2).sleep();
 
 
@@ -674,7 +674,7 @@ bool CableTask::allign_socket_axis(const geometry_msgs::Point &goal, float offse
         return false;
     }
 
-    wholebody_controller_->compileMsg(RIGHT,traj.joint_trajectory);
+    wholebody_controller_->executeTrajectory(RIGHT,traj.joint_trajectory);
 
     ros::Duration(1).sleep();
 }

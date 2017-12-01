@@ -52,7 +52,7 @@ class valTask3{
     GripperControlInterface*    gripper_controller_;
     // arm
     ArmControlInterface*        arm_controller_;
-    wholebodyManipulation*      wholebody_controller_;
+    WholebodyControlInterface*      wholebody_controller_;
     RobotStateInformer*         robot_state_;
     RobotDescription*           rd_;
     task3Utils*                 task3_utils_;

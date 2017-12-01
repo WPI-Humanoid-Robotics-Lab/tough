@@ -166,7 +166,7 @@ void leakDetectorGrabber::graspDetector(geometry_msgs::Pose user_goal, float exe
 
     ROS_INFO("Executing grasp trajectory");
     task3_utils_.task3LogPub("Executing grasp trajectory");
-    wholebody_controller_.compileMsg(side, traj.joint_trajectory);
+    wholebody_controller_.executeTrajectory(side, traj.joint_trajectory);
 
     ros::Duration(executionTime + 0.5).sleep();
 

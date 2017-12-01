@@ -16,7 +16,7 @@ task2Utils::task2Utils(ros::NodeHandle nh):
     rd_ = RobotDescription::getRobotDescription(nh_);
     cable_detector_      = nullptr;
 
-    wholebody_controller_ = new wholebodyManipulation(nh_);
+    wholebody_controller_ = new WholebodyControlInterface(nh_);
     right_arm_planner_ = new CartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     left_arm_planner_ = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
 
@@ -696,14 +696,14 @@ bool task2Utils::planWholeBodyMotion(RobotSide side, std::vector<geometry_msgs::
     {
         if (right_arm_planner_->getTrajFromCartPoints(waypoints, traj, false)> 0.98){
             ROS_INFO("right arm whole body msg executed");
-            wholebody_controller_->compileMsg(side, traj.joint_trajectory);
+            wholebody_controller_->executeTrajectory(side, traj.joint_trajectory);
         }
     }
     else
     {
         if (left_arm_planner_->getTrajFromCartPoints(waypoints, traj, false)> 0.98){
             ROS_INFO("left arm whole body msg executed");
-            wholebody_controller_->compileMsg(side, traj.joint_trajectory);
+            wholebody_controller_->executeTrajectory(side, traj.joint_trajectory);
         }
 
     }

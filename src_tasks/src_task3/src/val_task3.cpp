@@ -44,7 +44,7 @@ valTask3::valTask3(ros::NodeHandle nh):nh_(nh){
     head_controller_     = new HeadControlInterface(nh_);
     gripper_controller_  = new GripperControlInterface(nh_);
     arm_controller_      = new ArmControlInterface(nh_);
-    wholebody_controller_= new wholebodyManipulation(nh_);
+    wholebody_controller_= new WholebodyControlInterface(nh_);
 
     // detectors
     stair_detector_      = nullptr;

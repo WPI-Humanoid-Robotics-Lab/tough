@@ -57,7 +57,7 @@ private:
 
     CartesianPlanner* left_arm_planner_;
     CartesianPlanner* right_arm_planner_;
-    wholebodyManipulation* wholebody_controller_;
+    WholebodyControlInterface* wholebody_controller_;
 
     CableDetector* cable_detector_;
     srcsim::Task taskMsg;

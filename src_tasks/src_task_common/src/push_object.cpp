@@ -28,11 +28,11 @@ int main(int argc, char **argv)
     CartesianPlanner* left_arm_planner;
     ArmControlInterface *armTraj;
     ChestControlInterface* chest_controller_;
-    wholebodyManipulation* wholebody_controller_;
+    WholebodyControlInterface* wholebody_controller_;
     valControlCommon* control_common_;
     RobotStateInformer *current_state_;
 
-    wholebody_controller_ = new wholebodyManipulation(nh);
+    wholebody_controller_ = new WholebodyControlInterface(nh);
     armTraj               = new ArmControlInterface(nh);
     chest_controller_     = new ChestControlInterface(nh);
     control_common_       = new valControlCommon(nh);
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
         }
 
         // Planning whole body motion
-        wholebody_controller_->compileMsg(side,traj.joint_trajectory);
+        wholebody_controller_->executeTrajectory(side,traj.joint_trajectory);
         ros::Duration(2).sleep();
     }
     else std::cout<<"invalid input \n";

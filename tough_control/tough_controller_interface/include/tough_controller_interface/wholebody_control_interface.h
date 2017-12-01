@@ -12,12 +12,12 @@
 #include <ihmc_msgs/SO3TrajectoryPointRosMessage.h>
 #include "moveit_msgs/RobotTrajectory.h"
 
-class wholebodyManipulation
+class WholebodyControlInterface
 {
 public:
-    wholebodyManipulation(ros::NodeHandle &nh);
-    void compileMsg(const RobotSide side, const trajectory_msgs::JointTrajectory &traj);
-    void compileMsg(const RobotSide side, const  moveit_msgs::RobotTrajectory &traj);
+    WholebodyControlInterface(ros::NodeHandle &nh);
+    void executeTrajectory(const RobotSide side, const trajectory_msgs::JointTrajectory &traj);
+    void executeTrajectory(const RobotSide side, const  moveit_msgs::RobotTrajectory &traj);
 private :
     ros::NodeHandle nh_;
     ros::Publisher m_wholebodyPub;

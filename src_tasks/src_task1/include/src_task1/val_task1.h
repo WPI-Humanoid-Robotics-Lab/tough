@@ -81,7 +81,7 @@ class valTask1 {
     // arm
     ArmControlInterface* arm_controller_;
     // whole body controller
-    wholebodyManipulation* wholebody_controller_;
+    WholebodyControlInterface* wholebody_controller_;
     //robot state informer
     RobotStateInformer* robot_state_;
     // robot descriptor

@@ -58,7 +58,7 @@ valTask1::valTask1(ros::NodeHandle nh):
     head_controller_     = new HeadControlInterface(nh_);
     gripper_controller_  = new GripperControlInterface(nh_);
     arm_controller_      = new ArmControlInterface(nh_);
-    wholebody_controller_= new wholebodyManipulation(nh_);
+    wholebody_controller_= new WholebodyControlInterface(nh_);
 
     //state informer
     robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
@@ -797,7 +797,7 @@ decision_making::TaskResult valTask1::controlPitchTask(string name, const FSMCal
             ROS_INFO("sucessful trajectory generated");
             task1_utils_->taskLogPub("trajectory generated");
             // execute the trajectory
-            wholebody_controller_->compileMsg(RobotSide::RIGHT, traj.joint_trajectory);
+            wholebody_controller_->executeTrajectory(RobotSide::RIGHT, traj.joint_trajectory);
             ROS_INFO("trajectory sent to controllers");
             task1_utils_->taskLogPub("trajectory sent to controllers");
 
@@ -1116,7 +1116,7 @@ decision_making::TaskResult valTask1::controlYawTask(string name, const FSMCallC
             task1_utils_->taskLogPub("trajectory generated");
 
             // execute the trajectory
-            wholebody_controller_->compileMsg(RobotSide::LEFT, traj.joint_trajectory);
+            wholebody_controller_->executeTrajectory(RobotSide::LEFT, traj.joint_trajectory);
             ROS_INFO("trajectory sent to controllers");
             task1_utils_->taskLogPub("trajectory sent to controllers");
 
