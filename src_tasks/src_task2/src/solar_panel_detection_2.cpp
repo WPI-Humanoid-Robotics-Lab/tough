@@ -15,7 +15,7 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/common/pca.h>
 #include <pcl/segmentation/extract_clusters.h>
-#include <perception_common/perception_common_names.h>
+#include <tough_perception_common/perception_common_names.h>
 
 // Trailer bounds relative to rover_pose, expressed as anything that can be passed to pcl::CropBox::setMin/setMax
 #define TRAILER_BOUNDS_MAX {2.5f,  0.75f, 1.1f, 1}

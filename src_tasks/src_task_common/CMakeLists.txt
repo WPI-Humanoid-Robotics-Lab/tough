@@ -18,7 +18,7 @@ add_definitions(${PCL_DEFINITIONS})
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   navigation_common
-  perception_common
+  tough_perception_common
   roscpp
   tough_controller_interface
   image_transport
@@ -118,7 +118,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES val_task_common
-  CATKIN_DEPENDS perception_common roscpp tough_controller_interface navigation_common
+  CATKIN_DEPENDS tough_perception_common roscpp tough_controller_interface navigation_common
 #  DEPENDS system_lib
 )
 

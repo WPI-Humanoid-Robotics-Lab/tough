@@ -1,0 +1,35 @@
+
+<launch>
+
+    <!-- Start laser2point_cloud_node to publish pointcloud2 data -->
+    <!-- node pkg="val_laser2point_cloud" type="laser2point_cloud_node" name="laser2point_cloud_node" ns="ocu" />
+
+    <node pkg="tough_filters" type="robot_filter" name="robot_self_filter"  ns="ocu">
+        <rosparam param="self_see_links">[leftForearmLink, leftWristRollLink, leftPalm, leftThumbRollLink, leftThumbPitch1Link,
+                                          leftThumbPitch2Link, leftThumbPitch3Link,leftShoulderPitchLink, leftShoulderRollLink, leftShoulderYawLink,
+                                          leftElbowPitchLink, leftIndexFingerPitch1Link, leftMiddleFingerPitch1Link,leftPinkyPitch1Link,
+                                          leftHipPitchLink, leftKneePitchLink,
+                                          upperNeckPitchLink, torso,
+                                          rightForearmLink, rightWristRollLink, rightPalm, rightThumbRollLink, rightThumbPitch1Link,
+                                          rightThumbPitch2Link, rightThumbPitch3Link,rightShoulderPitchLink, rightShoulderRollLink, rightShoulderYawLink,
+                                          rightElbowPitchLink, rightIndexFingerPitch1Link, rightMiddleFingerPitch1Link,rightPinkyPitch1Link,
+                                          rightHipPitchLink, rightKneePitchLink]
+        </rosparam>
+        <remap from="robot_description" to="/robot_description"/>
+    </node -->
+
+    <node type="point_cloud_assembler" pkg="laser_assembler"
+            name="laser_assembler_svc" output="screen"  ns="ocu">
+        <remap from="cloud" to="/field/filtered_cloud"/>
+        <param name="max_clouds" type="int" value="400" />
+        <param name="fixed_frame" type="string" value="world" />
+        <param name="laser_snapshot_timeout" type="double" value="4.0"/>
+    </node>
+
+    <node type="periodic_snapshotter" pkg="tough_perception_common" name="val_laser_assembler_node"  ns="ocu"/>
+    <!--<node type="walkway_filter" pkg="tough_filters" name="walkway_filter"  ns="ocu">
+      <remap from="filtered_cloud2" to="/field/filtered_cloud2"/>
+    </node>-->
+    <node type="walkway_point_generator" pkg="tough_perception_common" name="walkway_generator"  ns="field"/
+  
+</launch>

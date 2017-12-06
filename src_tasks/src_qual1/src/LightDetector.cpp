@@ -1,9 +1,9 @@
 #include <ros/ros.h>
 #include <tough_common/val_common_names.h>
-#include <perception_common/MultisenseImage.h>
-#include <perception_common/MultisensePointCloud.h>
-#include <perception_common/PointCloudHelper.h>
-#include <perception_common/periodic_snapshotter.h>
+#include <tough_perception_common/MultisenseImage.h>
+#include <tough_perception_common/MultisensePointCloud.h>
+#include <tough_perception_common/PointCloudHelper.h>
+#include <tough_perception_common/periodic_snapshotter.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 

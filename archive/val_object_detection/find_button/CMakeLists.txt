@@ -15,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
-  perception_common
+  tough_perception_common
 )
 
 ## System dependencies are found with CMake's conventions
@@ -42,7 +42,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(include)
-include_directories(perception_common
+include_directories(tough_perception_common
   ${catkin_INCLUDE_DIRS}
 )
 
