@@ -17,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   tough_footstep
   tough_controller_interface
-  perception_common
+  tough_perception_common
   pcl_conversions
   pcl_ros
   cv_bridge

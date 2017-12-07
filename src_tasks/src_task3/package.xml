@@ -53,7 +53,7 @@
   <build_depend>pcl_ros</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>perception_common</build_depend>
+  <build_depend>tough_perception_common</build_depend>
   <build_depend>val_task_common</build_depend>
   <run_depend>decision_making</run_depend>
   <run_depend>decision_making_parser</run_depend>
@@ -68,7 +68,7 @@
   <run_depend>sensor_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>libpcl-all</run_depend>
-  <run_depend>perception_common</run_depend>
+  <run_depend>tough_perception_common</run_depend>
   <run_depend>val_task_common</run_depend>
   <run_depend>tough_footstep</run_depend>
 

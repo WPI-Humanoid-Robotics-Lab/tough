@@ -14,7 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   pcl_conversions
   pcl_ros
-  perception_common
+  tough_perception_common
   tough_common
   message_generation
   sensor_msgs
@@ -42,7 +42,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES led_detector
-  CATKIN_DEPENDS cv_bridge image_transport pcl_conversions pcl_ros roscpp sensor_msgs std_msgs perception_common message_runtime
+  CATKIN_DEPENDS cv_bridge image_transport pcl_conversions pcl_ros roscpp sensor_msgs std_msgs tough_perception_common message_runtime
   DEPENDS system_lib
   # INCLUDE_DIRS include
   # LIBRARIES cv_image_warp cv_line_tools cv_pca #?
@@ -58,7 +58,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(include)
-include_directories(perception_common
+include_directories(tough_perception_common
    ${OpenCV_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )
@@ -85,5 +85,5 @@ add_executable(led_detector src/LedDetector.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(led_detector
   ${catkin_LIBRARIES}
-  ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} perception_common
+  ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} tough_perception_common
 )

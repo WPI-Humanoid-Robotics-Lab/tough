@@ -25,7 +25,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   pcl_conversions
   pcl_ros
-  perception_common
+  tough_perception_common
   tf
   tf_conversions
   moveit_commander
@@ -165,7 +165,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES src_task1
-  CATKIN_DEPENDS roscpp rospy perception_common dynamic_reconfigure tough_footstep navigation_common
+  CATKIN_DEPENDS roscpp rospy tough_perception_common dynamic_reconfigure tough_footstep navigation_common
   DEPENDS system_lib
 )
 
