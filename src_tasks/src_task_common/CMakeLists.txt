@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(val_task_common)
 
-add_definitions(-D$ENV{ROBOT_NAME})
+ 
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)

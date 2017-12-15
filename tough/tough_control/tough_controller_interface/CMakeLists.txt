@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tough_controller_interface)
 
-add_definitions(-D$ENV{ROBOT_NAME})
+ 
 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs

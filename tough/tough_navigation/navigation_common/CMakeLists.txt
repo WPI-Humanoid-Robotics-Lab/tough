@@ -4,7 +4,7 @@ project(navigation_common)
 ## Add support for C++11, supported in ROS Kinetic and newer
 add_definitions(-std=c++11)
 
-add_definitions(-D$ENV{ROBOT_NAME})
+ 
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)

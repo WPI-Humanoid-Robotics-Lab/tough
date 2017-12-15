@@ -6,7 +6,7 @@ SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 #set(CMAKE_CXX_FLAGS "-std=c++11x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
 add_definitions(-std=c++11)
 
-#add_definitions(-D$ENV{ROBOT_NAME})
+# 
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
