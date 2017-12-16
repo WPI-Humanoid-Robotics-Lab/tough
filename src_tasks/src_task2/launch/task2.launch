@@ -4,7 +4,7 @@
     <arg name="reconf_gui" default="false" />
 
     <!-- task2 node -->
-    <node name="task2" pkg="src_task2" type="val_task2_node" output="screen"/>
+    <node name="task2" pkg="src_task2" type="src_task2_node" output="screen"/>
 
     <!-- state transition visualisation on rviz -->
     <node
