@@ -47,7 +47,6 @@ find_package(catkin REQUIRED COMPONENTS
   trac_ik_examples
   trac_ik_kinematics_plugin
   trac_ik_lib
-
   tough_controller_interface
   val_gui
   tough_footstep

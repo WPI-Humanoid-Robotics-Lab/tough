@@ -27,7 +27,6 @@ RobotStateInformer::RobotStateInformer(ros::NodeHandle nh):nh_(nh){
 
 RobotStateInformer::~RobotStateInformer(){
     jointStateSub_.shutdown();
-    delete currentObject_;
 }
 
 void RobotStateInformer::jointStateCB(const sensor_msgs::JointStatePtr msg){

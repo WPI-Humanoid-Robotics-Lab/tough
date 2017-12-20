@@ -13,6 +13,7 @@ public:
     static RobotDescription* getRobotDescription(ros::NodeHandle nh, std::string urdf_param="/robot_description");
 
     //disable assign and copy
+
     RobotDescription(RobotDescription const&)   = delete;
     void operator=(RobotDescription const&)     = delete;
 
@@ -45,6 +46,7 @@ public:
     void getRightArmJointLimits(std::vector<std::pair<float, float> > &right_arm_joint_limits) const;
 
     int getNumberOfNeckJoints() const;
+
 
 protected:
     void setPelvisFrame(const std::string &value);

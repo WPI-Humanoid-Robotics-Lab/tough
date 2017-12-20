@@ -1,6 +1,14 @@
 #include "navigation_common/map_generator.h"
 #include <tough_common/val_common_names.h>
 
+
+const float MapGenerator::MAP_RESOLUTION = 0.05f;
+const float MapGenerator::MAP_HEIGHT = 100/MapGenerator::MAP_RESOLUTION;
+const float MapGenerator::MAP_WIDTH = 100/MapGenerator::MAP_RESOLUTION;
+const float MapGenerator::MAP_X_OFFSET = -50.0f;
+const float MapGenerator::MAP_Y_OFFSET = -50.0f;
+
+
 size_t MapGenerator::getIndex(float x, float y){
 
     trimTo2DecimalPlaces(x, y);

@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     stopMsg.unique_id=45;
 
     char input;
-    int hand;
+    int robot_side;
     float stepHeight;
     float stepLength=0.0;
     float curl;
@@ -62,12 +62,12 @@ int main(int argc, char **argv)
         else if(input=='u')
         {
             cout<<"enter side \n";
-            cin>>hand;
+            cin>>robot_side;
             cout<<"enter step height \n";
             cin>>stepHeight;
             //            cout<<"enter step length \n";
             //            cin>>stepLength;
-            if(hand==0)
+            if(robot_side==0)
                 walk.raiseLeg(LEFT,stepHeight,stepLength);
             else
                 walk.raiseLeg(RIGHT,stepHeight,stepLength);
@@ -76,8 +76,8 @@ int main(int argc, char **argv)
         {
 
             cout<<"enter side \n";
-            cin>>hand;
-            if(hand==0){
+            cin>>robot_side;
+            if(robot_side==0){
                 walk.loadEEF(LEFT,EE_LOADING::LOAD);
             }
             else  walk.loadEEF(RIGHT,EE_LOADING::LOAD);
@@ -86,10 +86,10 @@ int main(int argc, char **argv)
         {
 
             cout<<"enter side \n";
-            cin>>hand;
+            cin>>robot_side;
             cout<<"enter curl radius \n";
             cin>>curl;
-            if(hand==0){
+            if(robot_side==0){
                 walk.curlLeg(LEFT,curl);
             }
             else  walk.curlLeg(RIGHT,curl);
@@ -97,10 +97,10 @@ int main(int argc, char **argv)
         else if(input=='p')
         {
             cout<<"enter side \n";
-            cin>>hand;
+            cin>>robot_side;
             cout<<"enter offset \n";
             cin>>offset;
-            if(hand==0){
+            if(robot_side==0){
                 walk.placeLeg(LEFT,offset);
             }
             else  walk.placeLeg(RIGHT,offset);
@@ -109,10 +109,10 @@ int main(int argc, char **argv)
         {
 
             cout<<"enter side \n";
-            cin>>hand;
+            cin>>robot_side;
             cout<<"enter forward distance \n";
             cin>>nudgeDistance;
-            if(hand==0){
+            if(robot_side==0){
                 walk.nudgeFoot(LEFT,nudgeDistance);
             }
             else  walk.nudgeFoot(RIGHT,nudgeDistance);

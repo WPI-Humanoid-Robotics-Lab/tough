@@ -5,10 +5,6 @@
 #include <thread>
 #include <mutex>
 
-// threshodl for determining the motion
-#define POSITION_THRESHOLD     0.01        //0.1cm
-#define ORIENTATION_THRESHOLD  0.0174533   // 1deg
-
 enum class frame_track_status
 {
     NOT_TRACKED,
@@ -27,6 +23,9 @@ private:
 
     void trackFrame(void);
     bool isTranformChanging (tf::StampedTransform transform_curr, tf::StampedTransform transform_prev);
+    // threshodl for determining the motion
+    const float POSITION_THRESHOLD= 0.01f;        //0.1cm
+    const float ORIENTATION_THRESHOLD=0.0174533f;   // 1deg
 
 public:
     frameTracking(ros::NodeHandle nh, std::string frame, std::string base_frame);
