@@ -13,6 +13,7 @@ public:
     static RobotDescription* getRobotDescription(ros::NodeHandle nh, std::string urdf_param="/robot_description");
 
     //disable assign and copy
+
     RobotDescription(RobotDescription const&)   = delete;
     void operator=(RobotDescription const&)     = delete;
 
@@ -46,6 +47,8 @@ public:
 
     int getNumberOfNeckJoints() const;
 
+    ~RobotDescription();
+
 protected:
     void setPelvisFrame(const std::string &value);
 
@@ -75,7 +78,6 @@ protected:
 
 private:
     RobotDescription(ros::NodeHandle nh, std::string urdf_param="/robot_description");
-    ~RobotDescription();
     static RobotDescription* object;
     urdf::Model model_;
     std::vector<urdf::JointSharedPtr> joints_;

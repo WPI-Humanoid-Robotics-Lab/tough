@@ -1,5 +1,5 @@
-#ifndef ROBOTARMMANIPULATION_H
-#define ROBOTARMMANIPULATION_H
+#ifndef ARM_CONTROL_INTERFACE_H
+#define ARM_CONTROL_INTERFACE_H
 
 #include <ros/ros.h>
 #include <ihmc_msgs/ArmTrajectoryRosMessage.h>
@@ -169,4 +169,4 @@ private:
 
 };
 
-#endif // ROBOTARMMANIPULATION_H
+#endif // ARM_CONTROL_INTERFACE_H

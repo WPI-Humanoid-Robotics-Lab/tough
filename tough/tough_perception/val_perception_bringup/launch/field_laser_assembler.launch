@@ -2,7 +2,7 @@
 <launch>
 
     <!-- Start laser2point_cloud_node to publish pointcloud2 data -->
-    <node pkg="val_laser2point_cloud" type="laser2point_cloud_node" name="laser2point_cloud_node" ns="field" />
+    <node pkg="tough_perception_common" type="laser2point_cloud_node" name="laser2point_cloud_node" ns="field" />
 
     <node pkg="tough_filters" type="robot_filter" name="robot_self_filter"  ns="field">
         <rosparam param="self_see_links">[leftForearmLink, leftWristRollLink, leftPalm, leftThumbRollLink, leftThumbPitch1Link,

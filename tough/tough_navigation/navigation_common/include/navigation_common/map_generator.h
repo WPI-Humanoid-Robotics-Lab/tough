@@ -1,12 +1,6 @@
 #ifndef MAP_GENERATOR_H
 #define MAP_GENERATOR_H
 
-#define MAP_RESOLUTION 0.05
-#define MAP_HEIGHT     100/MAP_RESOLUTION
-#define MAP_WIDTH      100/MAP_RESOLUTION
-#define MAP_X_OFFSET   -50.0
-#define MAP_Y_OFFSET   -50.0
-
 #include <ros/ros.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -33,6 +27,13 @@ public:
     static size_t getIndex(float x, float y);
 
 private:
+
+    static const float MAP_RESOLUTION;
+    static const float MAP_HEIGHT;
+    static const float MAP_WIDTH;
+    static const float MAP_X_OFFSET;
+    static const float MAP_Y_OFFSET;
+
     std::mutex mtx;
 
     void resetMap(const std_msgs::Empty &msg);
