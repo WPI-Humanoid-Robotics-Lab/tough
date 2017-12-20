@@ -82,14 +82,9 @@ echo "$(tput setaf 1)cloning the required ihmc repos$(tput sgr0)"
 git clone https://github.com/ihmcrobotics/ihmc-ros-control.git
 git clone https://github.com/ihmcrobotics/ihmc_ros_core.git
 cd ihmc_ros_core
-git checkout 0.9.0
-
-echo "$(tput setaf 1)checking and installing and missing ros dependecies$(tput sgr0)"
-# TODO:this shoould be done with rosdep
-sudo apt-get install -y ruby ros-indigo-pcl-ros ros-indigo-pcl-conversions ros-indigo-moveit ros-indigo-trac-ik \
-     ros-indigo-footstep-planner ros-indigo-humanoid-localization ros-indigo-multisense-ros  ros-indigo-laser-assembler \
-     ros-indigo-robot-self-filter ros-indigo-tf2-geometry-msgs ros-indigo-joint-state-publisher ros-indigo-octomap-server \
-     ros-indigo-octomap ros-indigo-octomap-server ros-indigo-joint-trajectory-controller ros-indigo-joint-state-controller ros-indigo-position-controllers
+git checkout 0.9.2
+mkdir -p ${HOME}/.ihmc
+cp ihmc_ros_common/configurations/IHMCNetworkParametersTemplate.ini ${HOME}/.ihmc/IHMCNetworkParameters.ini
 
 #TODO: this to account for the fix in humanoid navigation package
 #so, we clone the fixed repo
@@ -129,9 +124,9 @@ else
 fi
 
 # modify the build.gradle and common.launch
-echo "$(tput setaf 1)patch the build.gradle and common.launch$(tput sgr0)"
-cd ~/$WORKSPACE/src/ihmc_repos/ihmc_ros_core/
-git apply ~/$WORKSPACE/src/space_robotics_challenge/tough_common/patches/ihmc_ros_core.patch
+# echo "$(tput setaf 1)patch the build.gradle and common.launch$(tput sgr0)"
+# cd ~/$WORKSPACE/src/ihmc_repos/ihmc_ros_core/
+# git apply ~/$WORKSPACE/src/space_robotics_challenge/tough_common/patches/ihmc_ros_core.patch
 
 #echo "$(tput setaf 1)compiling the catkin_workspace$(tput sgr0)"
 #cd ~/$WORKSPACE
