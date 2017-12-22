@@ -41,7 +41,6 @@ rm /tmp/default.tar.gz
 #roslaunch ihmc_valkyrie_ros valkyrie_warmup_gradle_cache.launch
 
 echo "$(tput setaf 1)clone the whole ihmc repo$(tput sgr0)"
-sudo apt-get install -y git
 cd ~ && git clone https://github.com/ihmcrobotics/ihmc-open-robotics-software.git
 
 #update and source bashrc
@@ -69,7 +68,7 @@ echo "$(tput setaf 1)compile the ihmc repo$(tput sgr0)"
 cd ihmc-open-robotics-software
 git stash
 git pull
-git checkout origin/0.9-support
+git checkout 0.8.1
 ./gradlew
 ./gradlew deployLocal
 
@@ -139,5 +138,8 @@ cd $HOME/$WORKSPACE
 rm -rf devel/ build/
 catkin_make
 source devel/setup.bash
-echo "$(tput setaf 1)everything is setup sucessfully, launching final1.launch$(tput sgr0)"
-roslaunch tough_bringup final1.launch init:='false'
+echo "$(tput setaf 1)Downloading dependencies for controllers$(tput sgr0)"
+roslaunch ihmc_valkyrie_ros valkyrie_warmup_gradle_cache.launch
+
+echo "$(tput setaf 1)Everything is setup, launching final1.launch$(tput sgr0)"
+roslaunch src_bringup final1.launch init:='false'
