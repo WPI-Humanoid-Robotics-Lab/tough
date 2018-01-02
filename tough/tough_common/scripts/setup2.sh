@@ -41,7 +41,6 @@ rm /tmp/default.tar.gz
 #roslaunch ihmc_valkyrie_ros valkyrie_warmup_gradle_cache.launch
 
 echo "$(tput setaf 1)clone the whole ihmc repo$(tput sgr0)"
-sudo apt-get install -y git
 cd ~ && git clone https://github.com/ihmcrobotics/ihmc-open-robotics-software.git
 
 #update and source bashrc
@@ -139,5 +138,14 @@ cd $HOME/$WORKSPACE
 rm -rf devel/ build/
 catkin_make
 source devel/setup.bash
+
+#use valkyrie_controller provided by srcsim instead of compiling it from source. 
+wget -P /tmp/ http://gazebosim.org/distributions/srcsim/valkyrie_controller.tar.gz
+tar -xvf /tmp/valkyrie_controller.tar.gz -C $HOME
+rm /tmp/valkyrie_controller.tar.gz
+
+# download the dependencies using gradle
+roslaunch ihmc_valkyrie_ros valkyrie_warmup_gradle_cache.launch
+
 echo "$(tput setaf 1)everything is setup sucessfully, launching final1.launch$(tput sgr0)"
-roslaunch tough_bringup final1.launch init:='false'
+roslaunch src_bringup final1.launch

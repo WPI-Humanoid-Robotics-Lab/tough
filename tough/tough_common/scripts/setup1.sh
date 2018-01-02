@@ -44,14 +44,15 @@ wget -O - http://srcsim.gazebosim.org/src/src.key | sudo apt-key add -
 wget -O - https://bintray.com/user/downloadSubjectPublicKey?username=bintray | sudo apt-key add -
 echo "$(tput setaf 1)installing srcsim$(tput sgr0)"
 sudo apt-get update
-sudo apt-get install -y srcsim
+sudo apt-get install -y srcsim git
 
 echo "$(tput setaf 1)checking and installing and missing ros dependecies$(tput sgr0)"
 # TODO:this shoould be done with rosdep
 sudo apt-get install -y ruby ros-indigo-pcl-ros ros-indigo-pcl-conversions ros-indigo-moveit ros-indigo-trac-ik \
      ros-indigo-footstep-planner ros-indigo-humanoid-localization ros-indigo-multisense-ros  ros-indigo-laser-assembler \
      ros-indigo-robot-self-filter ros-indigo-tf2-geometry-msgs ros-indigo-joint-state-publisher ros-indigo-octomap-server \
-     ros-indigo-octomap ros-indigo-octomap-server ros-indigo-joint-trajectory-controller ros-indigo-joint-state-controller ros-indigo-position-controllers
+     ros-indigo-octomap ros-indigo-octomap-server ros-indigo-joint-trajectory-controller ros-indigo-joint-state-controller \
+     ros-indigo-position-controllers ros-indigo-image-transport-plugins
 
 #jdk 8
 echo "$(tput setaf 1)Installing jdk 8$(tput sgr0)"
