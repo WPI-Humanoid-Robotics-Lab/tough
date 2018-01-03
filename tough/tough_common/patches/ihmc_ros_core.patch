@@ -18,27 +18,3 @@ index d619cc3..420ef6c 100644
      <remap from="robot_description" to="/$(arg robot_name)/robot_description" />
    </node>
  </launch>
-diff --git a/ihmc_ros_java_adapter/build.gradle b/ihmc_ros_java_adapter/build.gradle
-index 5311d46..fd4a586 100644
---- a/ihmc_ros_java_adapter/build.gradle
-+++ b/ihmc_ros_java_adapter/build.gradle
-@@ -35,6 +35,9 @@ repositories {
-         url 'http://updates.jmonkeyengine.org/maven'
-     }
- 
-+    maven{
-+	url 'https://artifactory.ihmc.us/artifactory/releases'
-+    }
-     mavenLocal()
- 
-     jcenter()
-@@ -117,6 +120,9 @@ task runJavaDelegate(type: JavaExec, dependsOn: parseYaml) {
-     if(!project.hasProperty("yaml")) {
-         return
-     }
-+    configurations {
-+      all*.exclude group: 'org.bytedeco', module: 'javacpp-presets'
-+    }
-     ignoreExitValue = true
-     classpath = configurations.ros
-     workingDir = project.projectDir
