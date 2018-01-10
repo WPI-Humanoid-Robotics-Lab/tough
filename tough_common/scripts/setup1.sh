@@ -33,6 +33,7 @@ else
   catkin_make
 fi
 
+
 #Gazebo 7 and SRCSim Installation
 echo "$(tput setaf 1)Removing existing Gazebo and installing gazebo7$(tput sgr0)"
 sudo rm /etc/apt/sources.list.d/gazebo*
@@ -43,7 +44,15 @@ wget -O - http://srcsim.gazebosim.org/src/src.key | sudo apt-key add -
 wget -O - https://bintray.com/user/downloadSubjectPublicKey?username=bintray | sudo apt-key add -
 echo "$(tput setaf 1)installing srcsim$(tput sgr0)"
 sudo apt-get update
-sudo apt-get install -y srcsim
+sudo apt-get install -y srcsim git
+
+echo "$(tput setaf 1)checking and installing and missing ros dependecies$(tput sgr0)"
+# TODO:this shoould be done with rosdep
+sudo apt-get install -y ruby ros-indigo-pcl-ros ros-indigo-pcl-conversions ros-indigo-moveit ros-indigo-trac-ik \
+     ros-indigo-footstep-planner ros-indigo-humanoid-localization ros-indigo-multisense-ros  ros-indigo-laser-assembler \
+     ros-indigo-robot-self-filter ros-indigo-tf2-geometry-msgs ros-indigo-joint-state-publisher ros-indigo-octomap-server \
+     ros-indigo-octomap ros-indigo-octomap-server ros-indigo-joint-trajectory-controller ros-indigo-joint-state-controller \
+     ros-indigo-position-controllers ros-indigo-image-transport-plugins
 
 #jdk 8
 echo "$(tput setaf 1)Installing jdk 8$(tput sgr0)"
@@ -60,8 +69,8 @@ sudo apt-get install -y oracle-java8-installer
 echo "$(tput setaf 1)change owner ship of ihmc_ros_java_adapter$(tput sgr0)"
 sudo chmod -R 777 /opt/ros/indigo/share/ihmc_ros_java_adapter
 
-echo "$(tput setaf 1)copy ihmc ini file$(tput sgr0)"
-mkdir -p ${HOME}/.ihmc; curl https://raw.githubusercontent.com/ihmcrobotics/ihmc_ros_core/0.8.0/ihmc_ros_common/configurations/IHMCNetworkParametersTemplate.ini > ${HOME}/.ihmc/IHMCNetworkParameters.ini
+#echo "$(tput setaf 1)copy ihmc ini file$(tput sgr0)"
+#mkdir -p ${HOME}/.ihmc; curl https://raw.githubusercontent.com/ihmcrobotics/ihmc_ros_core/0.8.0/ihmc_ros_common/configurations/IHMCNetworkParametersTemplate.ini > ${HOME}/.ihmc/IHMCNetworkParameters.ini
 
 echo "$(tput setaf 1)set real time prio for ihmc controller$(tput sgr0)"
 sudo bash -c 'echo "@ros - rtprio 99" > /etc/security/limits.d/ros-rtprio.conf'
