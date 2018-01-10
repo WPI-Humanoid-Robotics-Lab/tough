@@ -1,9 +1,0 @@
-\subsubsection usage Usage
-\verbatim
-<node name="dynamic_reconfigure_node" pkg="src_task2" type="dynamic_reconfigure_node">
-  <param name="x" type="double" value="3.619" />
-  <param name="y" type="double" value="-0.014" />
-  <param name="theta" type="double" value="-1.559" />
-</node>
-\endverbatim
-
