@@ -1,0 +1,25 @@
+<launch>
+  
+<!--   <include file="$(find src_bringup)/launch/joint_state.launch" />-->
+   <include file="$(find tough_perception_bringup)/launch/field_laser_assembler.launch" />
+   <!-- <include file="$(find tough_perception_bringup)/launch/field_octomap.launch"/> -->
+   <include file="$(find tough_footstep)/launch/tough_footstep.launch"/>
+   <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 0.8"/>
+
+    <!-- launch the move group -->
+    <include file="$(find valkyrie_moveit_config)/launch/move_group.launch" />
+
+    <!-- start the robot fall detector -->
+    <node pkg="navigation_common" type="fall_detector" name="fall_detector" />
+
+    <!-- start the gaze controller detector -->
+    <node pkg="val_controllers" type="test_head" name="test_head" />
+
+   <!--IS_FIELD variable is set true on field docker container-->
+   <group if="$(optenv IS_FIELD false)">
+       <node pkg="src_bringup" type="broadcast_server.py" name="broadcast_server" respawn="true" />
+       <node pkg="src_bringup" type="message_parser.py"   name="message_parser"   respawn="true"/>
+   </group>
+   
+   
+</launch>

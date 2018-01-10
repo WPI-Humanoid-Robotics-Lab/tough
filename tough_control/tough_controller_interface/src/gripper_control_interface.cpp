@@ -1,0 +1,122 @@
+#include <tough_controller_interface/gripper_control_interface.h>
+#include <tf/transform_listener.h>
+#include <tough_common/val_common_names.h>
+
+GripperControlInterface::GripperControlInterface(ros::NodeHandle nh) : nh_(nh){
+
+    std::string robot_name;
+    nh.getParam("ihmc_ros/robot_name", robot_name);
+
+    if(robot_name == VAL_COMMON_NAMES::atlas){
+        ///@todo: atlas grippers are different. this needs a major rehaul.
+        leftGripperContPublisher =
+                nh_.advertise<std_msgs::Float64MultiArray>("/left_hand_position_controller/command",1,true);
+        rightGripperContPublisher =
+                nh_.advertise<std_msgs::Float64MultiArray>("/right_hand_position_controller/command",1,true);
+    }
+    else if(robot_name == VAL_COMMON_NAMES::valkyrie){
+        leftGripperContPublisher =
+                nh_.advertise<std_msgs::Float64MultiArray>("/left_hand_position_controller/command",1,true);
+        rightGripperContPublisher =
+                nh_.advertise<std_msgs::Float64MultiArray>("/right_hand_position_controller/command",1,true);
+    }
+}
+
+GripperControlInterface::~GripperControlInterface(){
+
+}
+
+void GripperControlInterface::controlGripper(const RobotSide side, const std::vector<double> gripperData){
+
+    std_msgs::Float64MultiArray msg;
+    msg.data.clear();
+
+    if (gripperData.size() != 5){
+        ROS_ERROR("Please check the size of the vector");
+    }
+
+    msg.data = gripperData;
+
+    if (side == LEFT){
+        leftGripperContPublisher.publish(msg);
+    }
+
+    else {
+        rightGripperContPublisher.publish(msg);
+    }
+}
+
+void GripperControlInterface::controlGripper(const RobotSide side, GRIPPER_STATE state)
+{
+    std_msgs::Float64MultiArray msg;
+    msg.data.clear();
+
+    switch (state) {
+    case GRIPPER_STATE::OPEN:
+        msg.data.resize(5);
+        msg.data.assign(5,0.0);
+        break;
+
+    case GRIPPER_STATE::OPEN_THUMB_IN:
+        msg.data.resize(5);
+        msg.data.assign(5,0.0);
+        msg.data[0] = 1.4;
+        break;
+
+    case GRIPPER_STATE::OPEN_THUMB_IN_APPROACH:
+        msg.data = side == LEFT? OPEN_THUMB_APPROACH_IN_LEFT_GRIPPER : OPEN_THUMB_APPROACH_IN_RIGHT_GRIPPER;
+        break;
+
+    case GRIPPER_STATE::CLOSE:
+        msg.data = side == LEFT? CLOSE_LEFT_GRIPPER : CLOSE_RIGHT_GRIPPER;
+        break;
+
+    case GRIPPER_STATE::CUP:
+        msg.data = side == LEFT? CUP_LEFT_GRIPPER : CUP_RIGHT_GRIPPER;
+        break;
+    case GRIPPER_STATE::HANDLE_HOLD:
+        msg.data = side == LEFT? HANDLE_HOLD_LEFT_GRIPPER : HANDLE_HOLD_RIGHT_GRIPPER;
+        break;
+    case GRIPPER_STATE::TIGHT_HOLD:
+        msg.data = side == LEFT? TIGHT_HOLD_LEFT_GRIPPER : TIGHT_HOLD_RIGHT_GRIPPER;
+        break;
+    default:
+        break;
+    }
+
+    if (side == LEFT){
+        leftGripperContPublisher.publish(msg);
+    }
+    else {
+        rightGripperContPublisher.publish(msg);
+    }
+}
+
+void GripperControlInterface::closeGripper(const RobotSide side)
+{
+    std_msgs::Float64MultiArray msg;
+    msg.data.clear();
+
+    if (side == LEFT){
+        msg.data = CLOSE_LEFT_GRIPPER;
+        leftGripperContPublisher.publish(msg);
+    }
+    else {
+        msg.data = CLOSE_RIGHT_GRIPPER;
+        rightGripperContPublisher.publish(msg);
+    }
+}
+
+void GripperControlInterface::openGripper(const RobotSide side)
+{
+    std_msgs::Float64MultiArray msg;
+    msg.data.clear();
+    msg.data.resize(5);
+    if (side == LEFT){
+        leftGripperContPublisher.publish(msg);
+    }
+    else {
+        rightGripperContPublisher.publish(msg);
+    }
+
+}

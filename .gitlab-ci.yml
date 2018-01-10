@@ -1,0 +1,93 @@
+variables:
+  ROS_DISTRO: "indigo"
+  CI_SOURCE_PATH: "$CI_PROJECT_DIR"
+  ROS_PARALLEL_JOBS: "-j8 -l6"
+
+before_script:
+  # ALL THIS SHOULD BE ON THE .sh FILE
+  # - source /opt/ros/indigo/setup.bash
+  # - ROS_CI_DESKTOP=$(lsb_release -cs)
+  # - ROSINSTALL_FILE=$CI_SOURCE_PATH"/dependencies.rosinstall"
+  # - CATKIN_OPTIONS=$CI_SOURCE_PATH"/catkin.options"
+  # - echo $CI_PROJECT_DIR
+  # - echo $CATKIN_OPTIONS
+  # - echo $ROS_CI_DESKTOP
+  # - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
+  # - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+  # - sudo apt-get update -qq
+  # - sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin
+  # - source /opt/ros/$ROS_DISTRO/setup.bash
+  # #- sudo rosdep init# add to sh betterrr
+  # - if [[ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]] ; then sudo rosdep init ; else echo "default sources list file already exists"; fi
+  # - rosdep update
+# before install
+  - mkdir -p ~/catkin_ws/src
+  - pwd
+  - cd ~/catkin_ws/src
+  - if [ ! -f CMakeLists.txt ]; then catkin_init_workspace; else echo "CMakeList file already there";fi
+  # - catkin_init_workspace
+  # - ls -a
+  # - cd ~/catkin_ws
+#   - ls -a
+#   - cd src/
+#   - ls -a
+  # - catkin_make
+  # - source devel/setup.bash
+  # - cd ~/catkin_ws/src
+  - ls -a
+#   - cd src/
+#   - ls -a
+  - echo $CI_SOURCE_PATH
+  - pwd
+#   - tempor=$(pwd)
+#   - echo $tempor
+#   - echo $CI_SOURCE_PATH
+  - if [ ! -f .rosinstall ]; then wstool init; else echo "rosinstall file already there";fi
+  - if [ -f $CI_PROJECT_NAME ]; then rm $CI_PROJECT_NAME; else echo "no past symlink";fi
+  # - ln -s $CI_SOURCE_PATH .
+# install
+  - cd ~/catkin_ws/src
+  - if [ ! -f .rosinstall ]; then wstool init; else echo "rosinstall file already there";fi
+  - if [[ -f $ROSINSTALL_FILE ]] ; then wstool merge $ROSINSTALL_FILE ; fi
+  - wstool up
+  - cd ~/catkin_ws/src/space_robotics_challenge
+  - git submodule update --init --recursive
+  - ls -a
+  # - rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+  
+indigo-master:
+  stage: build
+  script:
+#    - sudo chmod +x ~/catkin_ws/src/space_robotics_challenge/val_common/setuptemp.sh
+#    - sudo ~/catkin_ws/src/space_robotics_challenge/val_common/setuptemp.sh
+    - source /opt/ros/$ROS_DISTRO/setup.bash
+    - cd ~/catkin_ws
+    - rm -rf devel/ build/
+    - catkin_make $( [ -f $CATKIN_OPTIONS ] && cat $CATKIN_OPTIONS )
+    - source devel/setup.bash
+    # - catkin_make run_tests && catkin_make test
+    - catkin_make
+    # Documentation
+    #- cd ~/catkin_ws/src/space_robotics_challenge/docs
+    #- doxygen
+    #- mv html/ public/
+  artifacts:
+    paths:
+    - public
+  only:
+    - master
+  tags:
+    - ros
+
+
+# pages:
+#   script:
+#   - cd ~/catkin_ws/src/space_robotics_challenge/docs
+#   - doxygen
+#   - ls -a
+#   - mv html/ public/
+#   artifacts:
+#     paths:
+#     - public
+#   only:
+#   - master

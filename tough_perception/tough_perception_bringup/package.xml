@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<package>
+  <name>tough_perception_bringup</name>
+
+  <description>The tough_perception_bringup package</description>
+  <version>1.0.0</version>
+  <maintainer email="vvjagtap@wpi.edu">vvjagtap</maintainer>
+  <license>BSD</license>
+
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>pcl_conversions</build_depend>
+  <build_depend>opencv2</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>message_filters</build_depend>
+  <build_depend>multisense_ros</build_depend>
+  <build_depend>gtest</build_depend>
+  <build_depend>tf_conversions</build_depend>
+  <build_depend>laser_geometry</build_depend>
+  <build_depend>laser_assembler</build_depend>
+  <build_depend>tough_common</build_depend>
+  <build_depend>tough_controller_interface</build_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>opencv2</run_depend>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>pcl_conversions</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>message_filters</run_depend>
+  <run_depend>multisense_ros</run_depend>
+  <run_depend>gtest</run_depend>
+  <run_depend>tf_conversions</run_depend>
+  <run_depend>laser_geometry</run_depend>
+  <run_depend>laser_assembler</run_depend>
+  <run_depend>tough_common</run_depend>
+  <run_depend>tough_controller_interface</run_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+
+
+
+</package>

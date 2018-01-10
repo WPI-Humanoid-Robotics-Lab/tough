@@ -1,0 +1,8 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~x" : \b [double] x of goal location min: 0.0, default: 3.619, max: 10.0
+- \b "~y" : \b [double] y of goal location min: -1.0, default: -0.014, max: 1.0
+- \b "~theta" : \b [double] theta of goal location min: -1.57, default: -1.559, max: 1.57
+
