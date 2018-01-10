@@ -1,5 +1,0 @@
-<launch>
-    <include file="$(find val_perception_bringup)/launch/ocu_laser_assembler.launch"/>
-    <include file="$(find val_perception_bringup)/launch/ocu_octomap.launch"/>
-    <node name="val_gui" pkg="val_gui" type="val_gui"/>
-</launch>
