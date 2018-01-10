@@ -29,13 +29,13 @@ int main(int argc, char **argv)
     ArmControlInterface *armTraj;
     ChestControlInterface* chest_controller_;
     WholebodyControlInterface* wholebody_controller_;
-    valControlCommon* control_common_;
+    ToughControlCommon* control_common_;
     RobotStateInformer *current_state_;
 
     wholebody_controller_ = new WholebodyControlInterface(nh);
     armTraj               = new ArmControlInterface(nh);
     chest_controller_     = new ChestControlInterface(nh);
-    control_common_       = new valControlCommon(nh);
+    control_common_       = new ToughControlCommon(nh);
     right_arm_planner     = new CartesianPlanner(VAL_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     left_arm_planner      = new CartesianPlanner(VAL_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, VAL_COMMON_NAMES::WORLD_TF);
     current_state_ = RobotStateInformer::getRobotStateInformer(nh);

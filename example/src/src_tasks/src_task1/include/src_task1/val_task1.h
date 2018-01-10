@@ -94,7 +94,7 @@ class valTask1 {
     // grasp state variable
     prevGraspState prev_grasp_state_;
     // val control common api's
-    valControlCommon* control_helper_;
+    ToughControlCommon* control_helper_;
     // pcl handle detector for redetcting
     pcl_handle_detector* pcl_handle_detector_;
 

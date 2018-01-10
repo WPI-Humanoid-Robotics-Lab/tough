@@ -39,7 +39,7 @@ bool solar_panel_handle_grabber::grasp_handles(RobotSide side, const geometry_ms
         endEffectorFrame = rd_->getRightEEFrame();
         palmToFingerOffset = -0.07;
     }
-    valControlCommon control_util(nh_);
+    ToughControlCommon control_util(nh_);
 
     ROS_INFO("solar_panel_handle_grabber::grasp_handles : opening grippers");
     if (side == RIGHT)

@@ -70,7 +70,7 @@ valTask2::valTask2(ros::NodeHandle nh):
     task2_utils_->taskLogPub(task2_utils_->TEXT_GREEN + "Starting task 2"+ task2_utils_->TEXT_NC);
     robot_state_    = RobotStateInformer::getRobotStateInformer(nh_);
     rd_ = RobotDescription::getRobotDescription(nh_);
-    control_common_ = new valControlCommon(nh_);
+    control_common_ = new ToughControlCommon(nh_);
 
     // Variables
     map_update_count_ = 0;

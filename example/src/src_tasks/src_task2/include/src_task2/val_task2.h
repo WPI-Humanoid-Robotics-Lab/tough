@@ -102,7 +102,7 @@ class valTask2 {
     RobotStateInformer* robot_state_;
 
     RobotDescription *rd_;
-    valControlCommon* control_common_;
+    ToughControlCommon* control_common_;
 
     ros::Subscriber occupancy_grid_sub_;
     ros::Subscriber nudge_sub_;

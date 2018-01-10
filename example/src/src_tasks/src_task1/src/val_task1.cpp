@@ -72,7 +72,7 @@ valTask1::valTask1(ros::NodeHandle nh):
     right_arm_planner_ = new CartesianPlanner("rightMiddleFingerGroup", "/world"); //rightPalm
 
     // val control common api;s
-    control_helper_ = new valControlCommon(nh_);
+    control_helper_ = new ToughControlCommon(nh_);
 
     // grasp state initialised
     prev_grasp_state_ = prevGraspState::NOT_INITIALISED;
