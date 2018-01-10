@@ -6,7 +6,7 @@
 #include <tough_controller_interface/chest_control_interface.h>
 #include <tough_controller_interface/pelvis_control_interface.h>
 
-class valControlCommon {
+class ToughControlCommon {
 private:
     ros::NodeHandle nh_;
 
@@ -16,8 +16,8 @@ private:
     PelvisControlInterface pelvisTraj;
 
 public:
-    valControlCommon(ros::NodeHandle nh);
-    ~valControlCommon();
+    ToughControlCommon(ros::NodeHandle nh);
+    ~ToughControlCommon();
 
     void stopAllTrajectories(void);
     void resetRobot();

@@ -1,7 +1,7 @@
 <launch>
 
   <!--  <node name="map_server" pkg="map_server" type="map_server" args="$(find tough_footstep)/maps/qual2.yaml" />-->
-<!--   <include file="$(find val_perception_bringup)/launch/octomap.launch" />-->
+<!--   <include file="$(find tough_perception_bringup)/launch/octomap.launch" />-->
    
     <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find tough_footstep)/config/rviz_footstep_planning.rviz" /> -->
   <arg name="robot_name" default="valkyrie" />

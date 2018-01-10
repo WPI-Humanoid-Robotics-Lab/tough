@@ -19,7 +19,7 @@
    <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 2"/> 
 
    <!-- Start val_laser2point_cloud_node to publish pointcloud2 data -->
-   <include file="$(find val_perception_bringup)/launch/field_laser_assembler.launch"/>
+   <include file="$(find tough_perception_bringup)/launch/field_laser_assembler.launch"/>
 
    <!-- Start stereo_image_proc to pusblish disparity image -->
 <!--   <node ns="/multisense/camera" name="stereo_proc" pkg="stereo_image_proc" type="stereo_image_proc" respawn="false" output="log">

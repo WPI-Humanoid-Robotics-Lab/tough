@@ -4,7 +4,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 
-namespace tough_perception_common{
+
 class LeftImageInverter{
 public:
   image_transport::ImageTransport it;
@@ -16,4 +16,3 @@ public:
   virtual ~LeftImageInverter();
 //  void publishLeftImage(const sensor_msgs::ImageConstPtr& msg);
 };
-}

@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <package>
-  <name>val_perception_bringup</name>
+  <name>tough_perception_bringup</name>
 
-  <description>The val_perception_bringup package</description>
+  <description>The tough_perception_bringup package</description>
   <version>1.0.0</version>
-  <maintainer email="src@wpi.edu">bpwiselybabu</maintainer>
+  <maintainer email="vvjagtap@wpi.edu">vvjagtap</maintainer>
   <license>BSD</license>
 
 

@@ -39,7 +39,7 @@ CableTask::CableTask(ros::NodeHandle n):nh_(n), armTraj_(nh_), gripper_(nh_)
     chest_controller_     = new ChestControlInterface(nh_);
 
     task2_utils_    = new task2Utils(nh_);
-    control_common_ = new valControlCommon(nh_);
+    control_common_ = new ToughControlCommon(nh_);
 
 }
 
@@ -57,7 +57,7 @@ CableTask::~CableTask()
 bool CableTask::grasp_choke(RobotSide side, const geometry_msgs::Pose &goal, float executionTime)
 {
 
-    valControlCommon control_util(nh_);
+    ToughControlCommon control_util(nh_);
 
     // Setting gripper positions
     ROS_INFO("CableTask::grasp_choke : opening grippers");
@@ -341,7 +341,7 @@ bool CableTask::rotate_cable1(const geometry_msgs::Pose &goal, float executionTi
 {
     // *************************goal point oriented approach
 
-    valControlCommon control_util(nh_);
+    ToughControlCommon control_util(nh_);
 
     // setting initial poses
     ROS_INFO("grasp_cable: Initial Pose");
@@ -432,7 +432,7 @@ bool CableTask::rotate_cable2(const geometry_msgs::Pose &goal, float executionTi
 {
     // ************* open hand rotate approach
 
-    valControlCommon control_util(nh_);
+    ToughControlCommon control_util(nh_);
 
     // Setting gripper positions
     ROS_INFO("CableTask::grasp_choke : opening grippers");
@@ -513,7 +513,7 @@ bool CableTask::rotate_cable2(const geometry_msgs::Pose &goal, float executionTi
 
 bool CableTask::rotate_cable3(const geometry_msgs::Pose &goal, float executionTime)
 {
-    valControlCommon control_util(nh_);
+    ToughControlCommon control_util(nh_);
 
     // setting initial poses
     ROS_INFO("grasp_cable: Initial Pose");

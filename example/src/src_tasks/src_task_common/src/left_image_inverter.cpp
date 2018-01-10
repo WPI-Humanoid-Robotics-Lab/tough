@@ -1,9 +1,8 @@
-#include "val_perception_bringup/left_image_inverter.h"
+#include "src_task_common/left_image_inverter.h"
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 using namespace cv;
-namespace tough_perception_common{
 
 LeftImageInverter::LeftImageInverter(ros::NodeHandle& nh):it(nh){
   pub = it.advertise("/image",1);
@@ -39,5 +38,4 @@ void LeftImageInverter::getLeftImageCB(const sensor_msgs::ImageConstPtr& msg){
   }
   }
 LeftImageInverter::~LeftImageInverter(){
-}
 }

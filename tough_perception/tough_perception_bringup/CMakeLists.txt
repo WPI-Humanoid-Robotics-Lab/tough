@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(val_perception_bringup)
+project(tough_perception_bringup)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
@@ -32,8 +32,8 @@ find_package(catkin REQUIRED COMPONENTS roscpp
 ###################################
 
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES val_perception_bringup
+#  INCLUDE_DIRS include
+  LIBRARIES tough_perception_bringup
   CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros laser_assembler tough_common tough_controller_interface
   DEPENDS opencv pcl
 )
@@ -41,37 +41,26 @@ catkin_package(
 ###########
 ## Build ##
 ###########
-include_directories(include)
-include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+#include_directories(include)
+#include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
-link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
+#link_directories(${PCL_LIBRARY_DIRS})
+#add_definitions(${PCL_DEFINITIONS})
 
-add_library(${PROJECT_NAME}  src/left_image_inverter.cpp)
-add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
-target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
-set_property(
-                TARGET ${PROJECT_NAME}
-   		PROPERTY COMPILE_DEFINITIONS GAZEBO_SIMULATION)
+#add_library(${PROJECT_NAME}  src/left_image_inverter.cpp)
+#add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
+#target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
+#set_property(
+#                TARGET ${PROJECT_NAME}
+#   		PROPERTY COMPILE_DEFINITIONS GAZEBO_SIMULATION)
 
 ## Declare a C++ executable
 
- add_executable(left_image_inverter_node src/left_image_inverter_node.cpp)
-
-## Rename C++ executable without prefix
-## The above recommended prefix causes long target names, the following renames the
-## target back to the shorter version for ease of user use
-## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
-## set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
-
-## Add cmake target dependencies of the executable
-## same as for the library above
- add_dependencies(left_image_inverter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries to link a library or executable target against
- target_link_libraries(left_image_inverter_node
-   ${catkin_LIBRARIES} ${PROJECT_NAME}
- )
+# add_executable(left_image_inverter_node src/left_image_inverter_node.cpp)
+# add_dependencies(left_image_inverter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(left_image_inverter_node
+#   ${catkin_LIBRARIES} ${PROJECT_NAME}
+# )
 
 #############
 ## Install ##

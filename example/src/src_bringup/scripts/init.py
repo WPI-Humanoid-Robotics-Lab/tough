@@ -15,11 +15,12 @@ def callback(data):
       pub = rospy.Publisher('/multisense/set_spindle_speed', Float64, queue_size=10)
       time.sleep(1)
       pub.publish(0.8)
-      subprocess.Popen(["roslaunch", "val_perception_bringup", "field_laser_assembler.launch"])
-#      subprocess.Popen(["roslaunch", "val_perception_bringup", "field_octomap.launch"])
+      subprocess.Popen(["roslaunch", "tough_perception_bringup", "field_laser_assembler.launch"])
+#      subprocess.Popen(["roslaunch", "tough_perception_bringup", "field_octomap.launch"])
       subprocess.Popen(["roslaunch", "tough_footstep", "tough_footstep.launch"])
       subprocess.Popen(["roslaunch", "valkyrie_moveit_config", "move_group.launch"])
       subprocess.Popen(["rosrun", "navigation_common", "fall_detector"])
+      subprocess.Popen(["rosrun", "src_task_common", "left_image_inverter"])
       execute = False
 
 def WaitForRobot():

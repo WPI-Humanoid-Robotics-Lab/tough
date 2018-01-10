@@ -32,6 +32,6 @@
     <node type="walkway_point_generator" pkg="tough_perception_common" name="walkway_generator"  ns="field"/>
     <node type="map_generator" pkg="navigation_common" name="map_generator"  ns="field"/>
 
-    <node type="left_image_inverter_node" pkg="val_perception_bringup" name="left_image_inverter"  ns="field"/>
+    <!--<node type="left_image_inverter_node" pkg="tough_perception_bringup" name="left_image_inverter"  ns="field"/>-->
 
 </launch>

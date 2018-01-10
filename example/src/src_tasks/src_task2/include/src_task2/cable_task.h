@@ -47,7 +47,7 @@ private:
    geometry_msgs::QuaternionStamped rightHandOrientationAngle_ ;
    geometry_msgs::QuaternionStamped quat; // populate this value by experimentation
    task2Utils* task2_utils_;
-   valControlCommon* control_common_;
+   ToughControlCommon* control_common_;
 
    /*Top Grip*/
 //   const std::vector<float> leftShoulderSeed_ = {-0.23, -0.07, 0.75, -1.53, 1.21, -0.40, 0.0};

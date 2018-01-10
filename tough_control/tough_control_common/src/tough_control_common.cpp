@@ -1,6 +1,6 @@
 #include <tough_control_common/tough_control_common.h>
 
-valControlCommon::valControlCommon(ros::NodeHandle nh): nh_(nh), armTraj(nh), chestTraj(nh), pelvisTraj(nh)
+ToughControlCommon::ToughControlCommon(ros::NodeHandle nh): nh_(nh), armTraj(nh), chestTraj(nh), pelvisTraj(nh)
 
 {
     std::string robot_name;
@@ -10,12 +10,12 @@ valControlCommon::valControlCommon(ros::NodeHandle nh): nh_(nh), armTraj(nh), ch
     stop_traj_pub_ = nh_.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/stop_all_trajectories",1,true);
 }
 
-valControlCommon::~valControlCommon()
+ToughControlCommon::~ToughControlCommon()
 {
 
 }
 
-void valControlCommon::stopAllTrajectories(void)
+void ToughControlCommon::stopAllTrajectories(void)
 {
     ihmc_msgs::StopAllTrajectoryRosMessage stop_msg;
     stop_msg.unique_id = -1;
@@ -26,7 +26,7 @@ void valControlCommon::stopAllTrajectories(void)
     ros::Duration(1).sleep();
 }
 
-void valControlCommon::resetRobot()
+void ToughControlCommon::resetRobot()
 {
     armTraj.moveToZeroPose(RobotSide::LEFT);
     ros::Duration(0.3).sleep();

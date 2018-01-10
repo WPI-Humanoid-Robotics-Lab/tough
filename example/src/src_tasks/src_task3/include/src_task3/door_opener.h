@@ -30,7 +30,7 @@ private:
     RobotWalker walker_;
     RobotStateInformer *robot_state_;
     RobotDescription *rd_;
-    valControlCommon control_common_;
+    ToughControlCommon control_common_;
 };
 
 

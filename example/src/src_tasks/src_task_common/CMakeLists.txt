@@ -128,10 +128,7 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(include)
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Declare a C++ library
  add_library(${PROJECT_NAME}
@@ -140,6 +137,7 @@ include_directories(
    src/val_task_common_utils.cpp
    src/finish_box_detector.cpp
    src/val_upperbody_tracker.cpp
+   src/left_image_inverter.cpp
  )
 
 ## Add cmake target dependencies of the library
@@ -221,6 +219,13 @@ add_executable(val_gaze_controller src/val_gaze_controller.cpp)
 
 add_dependencies(val_gaze_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(val_gaze_controller  ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+ add_executable(left_image_inverter_node src/left_image_inverter_node.cpp)
+ add_dependencies(left_image_inverter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ target_link_libraries(left_image_inverter_node
+   ${catkin_LIBRARIES} ${PROJECT_NAME}
+ )
+
 #############
 ## Install ##
 #############

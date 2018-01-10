@@ -8,9 +8,9 @@
     <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 0.8"/>
 
    <!--   <include file="$(find tough_bringup)/launch/joint_state.launch" />-->
-   <include file="$(find val_perception_bringup)/launch/field_laser_assembler.launch" />
+   <include file="$(find tough_perception_bringup)/launch/field_laser_assembler.launch" />
 
-   <!-- <include file="$(find val_perception_bringup)/launch/field_octomap.launch"/> -->
+   <!-- <include file="$(find tough_perception_bringup)/launch/field_octomap.launch"/> -->
    <include file="$(find tough_footstep)/launch/tough_footstep.launch">
       <arg name="robot_name" value="$(arg robot_name)" />  
    </include>

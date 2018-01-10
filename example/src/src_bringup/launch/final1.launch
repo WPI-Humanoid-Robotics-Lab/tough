@@ -41,7 +41,7 @@
             <!-- remap from="/multisense/camera/disparity" to="/multisense/left/disparity" / -->
 <!--        <remap from="/multisense/camera/points2" to="/multisense/image_points2" />
     </node>-->
-<!--    <include file="$(find val_perception_bringup)/launch/laser_assembler.launch"/>
-    <include file="$(find val_perception_bringup)/launch/octomap.launch"/>
+<!--    <include file="$(find tough_perception_bringup)/launch/laser_assembler.launch"/>
+    <include file="$(find tough_perception_bringup)/launch/octomap.launch"/>
    <include file="$(find tough_footstep)/launch/tough_footstep.launch"/> -->
 </launch>
