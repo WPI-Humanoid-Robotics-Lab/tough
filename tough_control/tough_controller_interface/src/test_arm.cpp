@@ -7,8 +7,8 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "test_arm");
     ros::NodeHandle nh;
-
-    ros::Publisher log_pub = nh.advertise<std_msgs::String>(VAL_COMMON_NAMES::LOG_TOPIC, 10);
+    std::string LOG_TOPIC = "/field/log";
+    ros::Publisher log_pub = nh.advertise<std_msgs::String>(LOG_TOPIC, 10);
     const auto log_msg = [&log_pub](const std::string &str) {
         std_msgs::String msg;
         msg.data = ros::this_node::getName() + ": " + str;

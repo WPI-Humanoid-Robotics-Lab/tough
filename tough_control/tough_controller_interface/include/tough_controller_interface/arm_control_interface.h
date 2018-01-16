@@ -6,14 +6,12 @@
 #include <ihmc_msgs/OneDoFJointTrajectoryRosMessage.h>
 #include <ihmc_msgs/TrajectoryPoint1DRosMessage.h>
 #include <ihmc_msgs/HandDesiredConfigurationRosMessage.h>
-#include <tough_common/val_common_defines.h>
 #include <ihmc_msgs/HandTrajectoryRosMessage.h>
 #include <ihmc_msgs/SE3TrajectoryPointRosMessage.h>
 #include <geometry_msgs/Pose.h>
 #include <trajectory_msgs/JointTrajectory.h>
 #include <tf/transform_listener.h>
 #include <tf/tf.h>
-#include <tough_common/val_common_names.h>
 #include "tough_controller_interface/robot_state.h"
 #include "tough_common/robot_description.h"
 

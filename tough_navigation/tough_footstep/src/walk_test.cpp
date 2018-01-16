@@ -2,7 +2,6 @@
 #include<tough_footstep/RobotWalker.h>
 #include<ihmc_msgs/FootstepDataListRosMessage.h>
 #include"geometry_msgs/Pose2D.h"
-#include "tough_common/val_common_defines.h"
 #include <ihmc_msgs/StopAllTrajectoryRosMessage.h>
 
 using namespace std;

@@ -1,6 +1,5 @@
 #include <tough_controller_interface/chest_control_interface.h>
 #include <tf/transform_listener.h>
-#include <tough_common/val_common_names.h>
 
 #define TO_RADIANS M_PI / 180.0 //goes probably in utils which stores similar math operation parameters
 
@@ -38,14 +37,14 @@ void ChestControlInterface::controlChest(float roll , float pitch , float yaw, f
 //    tf::TransformListener listener;
 
 //    geometry_msgs::QuaternionStamped quatInWorldFrame;
-//    quatInWorldFrame.header.frame_id= VAL_COMMON_NAMES::PELVIS_TF;
+//    quatInWorldFrame.header.frame_id= TOUGH_COMMON_NAMES::PELVIS_TF;
 //    quatInWorldFrame.header.stamp = ros::Time(0);
 //    tf::quaternionTFToMsg(quatInPelvisFrame, quatInWorldFrame.quaternion);
 
 //    try
 //    {
-//        listener.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
-//        listener.transformQuaternion(VAL_COMMON_NAMES::WORLD_TF, quatInWorldFrame, quatInWorldFrame);
+//        listener.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF, TOUGH_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
+//        listener.transformQuaternion(TOUGH_COMMON_NAMES::WORLD_TF, quatInWorldFrame, quatInWorldFrame);
 
 //    }
 //    catch (tf::TransformException ex)

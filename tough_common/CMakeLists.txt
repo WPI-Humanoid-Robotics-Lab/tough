@@ -14,8 +14,6 @@ find_package(catkin REQUIRED COMPONENTS roscpp urdf)
 set(KDSourcesList src/kdtree/alglibinternal.cpp src/kdtree/ap.cpp src/kdtree/alglibmisc.cpp)
 
 set(HEADERS
-    include/${PROJECT_NAME}/val_common_names.h
-    include/${PROJECT_NAME}/val_common_defines.h
     include/${PROJECT_NAME}/robot_description.h)
 
 

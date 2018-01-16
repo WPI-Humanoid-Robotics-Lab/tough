@@ -5,6 +5,30 @@
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <urdf/model.h>
+#include "tough_common/tough_common_names.h"
+
+// defines for arms
+enum RobotSide
+{
+    LEFT = 0,
+    RIGHT
+};
+
+enum class direction{
+    LEFT = 0,  //Positive Y 0
+    RIGHT,     //Negative Y 1
+    UP,        //Positive Z 2
+    DOWN,      //Negative Z 3
+    FRONT,     //Positive X 4
+    BACK       //Negative X 5
+};
+
+enum class EE_LOADING{
+    LOAD=0,
+    UNLOAD
+};
+
+
 
 class RobotDescription
 {
@@ -18,6 +42,8 @@ public:
     void operator=(RobotDescription const&)     = delete;
 
     std::string getPelvisFrame() const;
+
+    std::string getWorldFrame() const;
 
     std::string getTorsoFrame() const;
 

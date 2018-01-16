@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/String.h>
-#include <tough_common/val_common_names.h>
+#include <tough_common/tough_common_names.h>
 
 HeadControlInterface* headTraj;
 
@@ -23,7 +23,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "test_head_navigation", ros::init_options::AnonymousName);
   ros::NodeHandle nh;
 
-  ros::Publisher log_pub = nh.advertise<std_msgs::String>(VAL_COMMON_NAMES::LOG_TOPIC, 10);
+  ros::Publisher log_pub = nh.advertise<std_msgs::String>(TOUGH_COMMON_NAMES::LOG_TOPIC, 10);
   const auto log_msg = [&log_pub](const std::string &str) {
       std_msgs::String msg;
       msg.data = ros::this_node::getName() + ": " + str;

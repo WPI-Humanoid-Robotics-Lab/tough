@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace VAL_COMMON_NAMES
+namespace TOUGH_COMMON_NAMES
 {
 /********* Supported Robots *********/
 const std::string atlas = "atlas";

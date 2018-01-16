@@ -8,7 +8,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "test_nudgeLocal");
   ros::NodeHandle nh;
 
-    ros::Publisher log_pub = nh.advertise<std_msgs::String>(VAL_COMMON_NAMES::LOG_TOPIC, 10);
+    ros::Publisher log_pub = nh.advertise<std_msgs::String>(TOUGH_COMMON_NAMES::LOG_TOPIC, 10);
     const auto log_msg = [&log_pub](const std::string &str) {
         std_msgs::String msg;
         msg.data = ros::this_node::getName() + ": " + str;

@@ -5,7 +5,7 @@
  * */
 
 #include "tough_footstep/RobotWalker.h"
-#include "tough_common/val_common_names.h"
+#include "tough_common/tough_common_names.h"
 #include <iostream>
 #include <ros/ros.h>
 
@@ -208,11 +208,11 @@ bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float> xOffset, co
         currentWorldLocation.x=current->location.x;
         currentWorldLocation.y=current->location.y;
         currentWorldLocation.z=current->location.z;
-        current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
+        current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,TOUGH_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
 
         currentPelvisLocation.x+=xOffset[m-1];
         currentPelvisLocation.y+=yOffset[m-1];
-        current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF);
+        current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),TOUGH_COMMON_NAMES::WORLD_TF);
         newFootStep->location.x=currentWorldLocation.x;
         newFootStep->location.y=currentWorldLocation.y;
         newFootStep->location.z=current->location.z;
@@ -266,12 +266,12 @@ bool RobotWalker::raiseLeg(RobotSide side, float height,float stepLength)
     pt_in.point.x=current->location.x;
     pt_in.point.y=current->location.y;
     pt_in.point.z=current->location.z;
-    pt_in.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
+    pt_in.header.frame_id=TOUGH_COMMON_NAMES::WORLD_TF;
     current_state_->transformPoint(pt_in,pt_out, rd_->getPelvisFrame());
 //    try{
 
-//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::PELVIS_TF,TOUGH_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(TOUGH_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
 
 //    }
 //    catch (tf::TransformException ex){
@@ -288,8 +288,8 @@ bool RobotWalker::raiseLeg(RobotSide side, float height,float stepLength)
 
 //    try{
 
-//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPoint(VAL_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
+//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF,TOUGH_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(TOUGH_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
 
 //    }
 //    catch (tf::TransformException ex){
@@ -332,12 +332,12 @@ bool RobotWalker::nudgeFoot(RobotSide side, float distance)
     pt_in.point.x=current->location.x;
     pt_in.point.y=current->location.y;
     pt_in.point.z=current->location.z;
-    pt_in.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
+    pt_in.header.frame_id=TOUGH_COMMON_NAMES::WORLD_TF;
     current_state_->transformPoint(pt_in,pt_out, rd_->getPelvisFrame());
 //    try{
 
-//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::PELVIS_TF,TOUGH_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(TOUGH_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
 
 //    }
 //    catch (tf::TransformException ex){
@@ -351,8 +351,8 @@ bool RobotWalker::nudgeFoot(RobotSide side, float distance)
     current_state_->transformPoint(pt_out, pt_out);
 //    try{
 
-//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPoint(VAL_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
+//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF,TOUGH_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(TOUGH_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
 
 //    }
 //    catch (tf::TransformException ex){
@@ -402,13 +402,13 @@ bool RobotWalker::curlLeg(RobotSide side, float radius)
     pt_in.point.x=current->location.x;
     pt_in.point.y=current->location.y;
     pt_in.point.z=current->location.z;
-    pt_in.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
+    pt_in.header.frame_id=TOUGH_COMMON_NAMES::WORLD_TF;
     current_state_->transformPoint(pt_in,pt_out, rd_->getPelvisFrame());
 
 //    try{
 
-//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::PELVIS_TF,TOUGH_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(TOUGH_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
 
 //    }
 //    catch (tf::TransformException ex){
@@ -431,8 +431,8 @@ bool RobotWalker::curlLeg(RobotSide side, float radius)
     current_state_->transformPose(final,final,rd_->getPelvisFrame());
 //    try{
 
-//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPose(VAL_COMMON_NAMES::WORLD_TF, final, final);
+//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::PELVIS_TF,TOUGH_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPose(TOUGH_COMMON_NAMES::WORLD_TF, final, final);
 
 //    }
 //    catch (tf::TransformException ex){
@@ -470,13 +470,13 @@ bool RobotWalker::placeLeg(RobotSide side, float offset)
     pt_in.point.x=current->location.x;
     pt_in.point.y=current->location.y;
     pt_in.point.z=current->location.z;
-    pt_in.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
+    pt_in.header.frame_id=TOUGH_COMMON_NAMES::WORLD_TF;
     current_state_->transformPoint(pt_in,pt_out, rd_->getPelvisFrame());
 
 //    try{
 
-//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPoint(VAL_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
+//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::PELVIS_TF,TOUGH_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(TOUGH_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
 
 //    }
 //    catch (tf::TransformException ex){
@@ -497,8 +497,8 @@ bool RobotWalker::placeLeg(RobotSide side, float offset)
 
 //    try{
 
-//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF,VAL_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPoint(VAL_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
+//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF,TOUGH_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPoint(TOUGH_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
 
 //    }
 //    catch (tf::TransformException ex){
@@ -609,8 +609,8 @@ void RobotWalker::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage & 
 
     /// \todo Use a try catch block here. It needs modification of function
     /// signature to return bool and all functions in the heirarchy would be changed accordingly.
-    //    tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, foot_frame,ros::Time(0), ros::Duration(2.0));
-    tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF,foot_frame.data,ros::Time(0),transformStamped);
+    //    tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF, foot_frame,ros::Time(0), ros::Duration(2.0));
+    tf_listener_.lookupTransform( TOUGH_COMMON_NAMES::WORLD_TF,foot_frame.data,ros::Time(0),transformStamped);
 
     tf::quaternionTFToMsg(transformStamped.getRotation(),foot.orientation);
     foot.location.x = transformStamped.getOrigin().getX();
@@ -649,12 +649,12 @@ ihmc_msgs::FootstepDataRosMessage::Ptr RobotWalker::getOffsetStepWRTPelvis(int s
     currentWorldLocation.z=next->location.z;
 
     // transform the step to pelvis
-    current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
+    current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,TOUGH_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
     // add the offsets wrt to pelvis
     currentPelvisLocation.x+=x;
     currentPelvisLocation.y+=y;
     // tranform back the point to plevis
-    current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF);
+    current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),TOUGH_COMMON_NAMES::WORLD_TF);
 
     // update the new location
     next->location.x=currentWorldLocation.x;
@@ -792,9 +792,9 @@ bool RobotWalker::turn(RobotSide side)
             current_state_->transformVector(pelvis_valuesL[i], world_values);
             current_state_->transformQuaternion(pelvis_quatL[i], world_quat);
 //            try{
-//                tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
-//                tf_listener_.transformVector(VAL_COMMON_NAMES::WORLD_TF,pelvis_valuesL[i],world_values);
-//                tf_listener_.transformQuaternion(VAL_COMMON_NAMES::WORLD_TF,pelvis_quatL[i],world_quat);
+//                tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF, TOUGH_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
+//                tf_listener_.transformVector(TOUGH_COMMON_NAMES::WORLD_TF,pelvis_valuesL[i],world_values);
+//                tf_listener_.transformQuaternion(TOUGH_COMMON_NAMES::WORLD_TF,pelvis_quatL[i],world_quat);
 //            }
 //            catch (tf::TransformException ex)
 //            {
@@ -818,9 +818,9 @@ bool RobotWalker::turn(RobotSide side)
             current_state_->transformQuaternion(pelvis_quatR[i], world_quat);
 
 //            try{
-//                tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
-//                tf_listener_.transformVector(VAL_COMMON_NAMES::WORLD_TF,pelvis_valuesR[i],world_values);
-//                tf_listener_.transformQuaternion(VAL_COMMON_NAMES::WORLD_TF,pelvis_quatR[i],world_quat);
+//                tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF, TOUGH_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
+//                tf_listener_.transformVector(TOUGH_COMMON_NAMES::WORLD_TF,pelvis_valuesR[i],world_values);
+//                tf_listener_.transformQuaternion(TOUGH_COMMON_NAMES::WORLD_TF,pelvis_quatR[i],world_quat);
 //            }
 //            catch (tf::TransformException ex)
 //            {
@@ -907,10 +907,10 @@ bool RobotWalker::climbStair(const std::vector<float> xOffset, const std::vector
         currentWorldLocation.y=current->location.y;
         currentWorldLocation.z=current->location.z;
 
-        current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
+        current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,TOUGH_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
         currentPelvisLocation.x+=xOffset[m-1];
         currentPelvisLocation.z+=zOffset[m-1];
-        current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF);
+        current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),TOUGH_COMMON_NAMES::WORLD_TF);
         newFootStep->location.x=currentWorldLocation.x;
         newFootStep->location.y=currentWorldLocation.y;
         newFootStep->location.z=currentWorldLocation.z;
@@ -924,10 +924,10 @@ bool RobotWalker::climbStair(const std::vector<float> xOffset, const std::vector
 
         if(m>2)
         {
-            current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,VAL_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
+            current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,TOUGH_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
             currentPelvisLocation.x+=(xOffset[m-2]-0.1);
             currentPelvisLocation.z+=zOffset[m-1]+offset;
-            current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),VAL_COMMON_NAMES::WORLD_TF);
+            current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),TOUGH_COMMON_NAMES::WORLD_TF);
 
             waypoint.x=currentWorldLocation.x;
             waypoint.y=currentWorldLocation.y;

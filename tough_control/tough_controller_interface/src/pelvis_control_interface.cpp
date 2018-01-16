@@ -1,5 +1,4 @@
 #include <tough_controller_interface/pelvis_control_interface.h>
-#include <tough_common/val_common_names.h>
 
 int PelvisControlInterface::pelvis_id_ = -1;
 
@@ -32,8 +31,8 @@ void PelvisControlInterface::controlPelvisHeight(float height)
 //    try
 //    {
 //        ros::Time zero = ros::Time(0);
-//        listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::PELVIS_TF, zero, ros::Duration(10.0));
-//        listener_.lookupTransform(VAL_COMMON_NAMES::WORLD_TF, VAL_COMMON_NAMES::L_FOOT_TF, zero, transform);
+//        listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF, TOUGH_COMMON_NAMES::PELVIS_TF, zero, ros::Duration(10.0));
+//        listener_.lookupTransform(TOUGH_COMMON_NAMES::WORLD_TF, TOUGH_COMMON_NAMES::L_FOOT_TF, zero, transform);
 
 //    }
 //    catch (tf::TransformException ex)
