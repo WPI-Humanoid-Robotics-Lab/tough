@@ -2,7 +2,7 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <ros/ros.h>
 #include <pcl/range_image/range_image_planar.h>
-#include <tough_common/val_common_names.h>
+#include <tough_common/tough_common_names.h>
 #include <tough_filters/walkway_filter.h>
 #include <tough_perception_common/perception_common_names.h>
 
@@ -45,10 +45,10 @@ double WalkwayFilter::getCurrentFootHeight(void)
     double height_foot;
 
     tf::StampedTransform transformStamped;
-    tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF, rd_->getLeftFootFrameName(), ros::Time(0),transformStamped);
+    tf_listener_.lookupTransform( TOUGH_COMMON_NAMES::WORLD_TF, rd_->getLeftFootFrameName(), ros::Time(0),transformStamped);
     height_foot = transformStamped.getOrigin().getZ();
 
-    tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF, rd_->getRightFootFrameName(), ros::Time(0),transformStamped);
+    tf_listener_.lookupTransform( TOUGH_COMMON_NAMES::WORLD_TF, rd_->getRightFootFrameName(), ros::Time(0),transformStamped);
 
     height_foot = height_foot > transformStamped.getOrigin().getZ() ? transformStamped.getOrigin().getZ() : height_foot;
 

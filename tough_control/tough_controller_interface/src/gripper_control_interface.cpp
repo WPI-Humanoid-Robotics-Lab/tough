@@ -1,20 +1,19 @@
 #include <tough_controller_interface/gripper_control_interface.h>
 #include <tf/transform_listener.h>
-#include <tough_common/val_common_names.h>
 
 GripperControlInterface::GripperControlInterface(ros::NodeHandle nh) : nh_(nh){
 
     std::string robot_name;
     nh.getParam("ihmc_ros/robot_name", robot_name);
 
-    if(robot_name == VAL_COMMON_NAMES::atlas){
+    if(robot_name == "atlas"){
         ///@todo: atlas grippers are different. this needs a major rehaul.
         leftGripperContPublisher =
                 nh_.advertise<std_msgs::Float64MultiArray>("/left_hand_position_controller/command",1,true);
         rightGripperContPublisher =
                 nh_.advertise<std_msgs::Float64MultiArray>("/right_hand_position_controller/command",1,true);
     }
-    else if(robot_name == VAL_COMMON_NAMES::valkyrie){
+    else if(robot_name == "valkyrie"){
         leftGripperContPublisher =
                 nh_.advertise<std_msgs::Float64MultiArray>("/left_hand_position_controller/command",1,true);
         rightGripperContPublisher =

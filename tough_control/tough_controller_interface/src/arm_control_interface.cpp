@@ -301,7 +301,7 @@ bool ArmControlInterface::nudgeArm(const RobotSide side, const direction drct, f
     geometry_msgs::Pose      world_pose;
     geometry_msgs::Pose      palm_pose;
 
-//    world_pose.header.frame_id=VAL_COMMON_NAMES::WORLD_TF;
+//    world_pose.header.frame_id="/world";
 
     std::string target_frame = side == LEFT ? rd_->getLeftEEFrame() : rd_->getRightEEFrame();
 
@@ -309,12 +309,12 @@ bool ArmControlInterface::nudgeArm(const RobotSide side, const direction drct, f
 
 //    try{
 //        tf::StampedTransform            tf_palm_values;
-//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,target_frame, ros::Time(0),ros::Duration(2));
-//        tf_listener_.lookupTransform(VAL_COMMON_NAMES::PELVIS_TF, target_frame, ros::Time(0),tf_palm_values);
+//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::PELVIS_TF,target_frame, ros::Time(0),ros::Duration(2));
+//        tf_listener_.lookupTransform(TOUGH_COMMON_NAMES::PELVIS_TF, target_frame, ros::Time(0),tf_palm_values);
 
 //        tf::pointTFToMsg(tf_palm_values.getOrigin(), palm_values.pose.position);
 //        tf::quaternionTFToMsg(tf_palm_values.getRotation(), palm_values.pose.orientation);
-//        palm_values.header.frame_id=VAL_COMMON_NAMES::PELVIS_TF;
+//        palm_values.header.frame_id=TOUGH_COMMON_NAMES::PELVIS_TF;
 
 //    }
 //    catch (tf::TransformException ex){
@@ -330,10 +330,10 @@ bool ArmControlInterface::nudgeArm(const RobotSide side, const direction drct, f
     else if(drct == direction::FRONT)    palm_pose.position.x += nudgeStep;
     else if(drct == direction::BACK)     palm_pose.position.x -= nudgeStep;
 
-    stateInformer_->transformPose(palm_pose, world_pose, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
+    stateInformer_->transformPose(palm_pose, world_pose, rd_->getPelvisFrame(), "/world");
 //    try{
-//        tf_listener_.waitForTransform(VAL_COMMON_NAMES::PELVIS_TF,VAL_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPose(VAL_COMMON_NAMES::WORLD_TF,palm_values,world_pose);
+//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::PELVIS_TF,"/world", ros::Time(0),ros::Duration(2));
+//        tf_listener_.transformPose("/world",palm_values,world_pose);
 //    }
 //    catch (tf::TransformException ex) {
 //        ROS_WARN("%s",ex.what());
@@ -354,7 +354,7 @@ bool ArmControlInterface::nudgeArmLocal(const RobotSide side, const direction dr
     geometry_msgs::Pose value;
     stateInformer_->getCurrentPose(target_frame,value);
         std::cout<<"Before-> World Frame x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
-    stateInformer_->transformPose(value, value,VAL_COMMON_NAMES::WORLD_TF,target_frame);
+    stateInformer_->transformPose(value, value,"/world",target_frame);
         std::cout<<"Before-> Local Frame x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
 
     if     (drct == direction::FRONT)     value.position.y += nudgeStep*signInverter;
@@ -364,7 +364,7 @@ bool ArmControlInterface::nudgeArmLocal(const RobotSide side, const direction dr
     else if(drct == direction::LEFT)      value.position.x += nudgeStep*signInverter;
     else if(drct == direction::RIGHT)     value.position.x -= nudgeStep*signInverter;
     std::cout<<"After -> Local Frame x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
-    stateInformer_->transformPose(value, value,target_frame,VAL_COMMON_NAMES::WORLD_TF);
+    stateInformer_->transformPose(value, value,target_frame,"/world");
     std::cout<<"After -> World Frame x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
     moveArmInTaskSpace(side,value, 0.0f);
     return true;
@@ -479,7 +479,7 @@ bool ArmControlInterface::nudgeArmLocal(const RobotSide side, float x, float y, 
     value.position.y+=y;
     value.position.z+=z;
 
-    stateInformer_->transformPose(value, value,target_frame,VAL_COMMON_NAMES::WORLD_TF);
+    stateInformer_->transformPose(value, value,target_frame,"/world");
     value.orientation = quat;
 //    std::cout<<"w :"<<value.orientation.w<<" x :"<<value.orientation.x<<" y :"<<value.orientation.y<<" z :"<<value.orientation.z<<"\n";
 //    moveArmInTaskSpace(side,value, 0.0f);
@@ -505,7 +505,7 @@ bool ArmControlInterface::nudgeArmPelvis(const RobotSide side, float x, float y,
     value.position.y+=y;
     value.position.z+=z;
 
-    stateInformer_->transformPose(value, value,target_frame,VAL_COMMON_NAMES::WORLD_TF);
+    stateInformer_->transformPose(value, value,target_frame,"/world");
     value.orientation = quat;
 //    moveArmInTaskSpace(side,value, 0.0f);
     pose = value;

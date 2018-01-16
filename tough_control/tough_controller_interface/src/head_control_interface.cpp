@@ -1,6 +1,5 @@
 #include <tough_controller_interface/head_control_interface.h>
 #include <tf/transform_listener.h>
-#include <tough_common/val_common_names.h>
 #include <tough_controller_interface/robot_state.h>
 
 int HeadControlInterface::head_id = -1;

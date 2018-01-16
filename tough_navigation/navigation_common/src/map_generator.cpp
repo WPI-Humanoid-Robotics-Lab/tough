@@ -1,5 +1,5 @@
 #include "navigation_common/map_generator.h"
-#include <tough_common/val_common_names.h>
+#include <tough_common/tough_common_names.h>
 
 
 const float MapGenerator::MAP_RESOLUTION = 0.05f;
@@ -36,7 +36,7 @@ void MapGenerator::trimTo2DecimalPlaces(float &x, float &y) {
 
 
 MapGenerator::MapGenerator(ros::NodeHandle &n):nh_(n) {
-    occGrid_.header.frame_id = VAL_COMMON_NAMES::WORLD_TF;
+    occGrid_.header.frame_id = TOUGH_COMMON_NAMES::WORLD_TF;
     occGrid_.info.resolution = MAP_RESOLUTION;
     occGrid_.info.height     = MAP_HEIGHT;
     occGrid_.info.width      = MAP_WIDTH;
@@ -99,7 +99,7 @@ void MapGenerator::resetMap(const std_msgs::Empty &msg) {
             pelvisPose.position.x = x;
             pelvisPose.position.y = y;
             pelvisPose.orientation.w = 1.0f;
-            currentState_->transformPose(pelvisPose, pelvisPose, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
+            currentState_->transformPose(pelvisPose, pelvisPose, rd_->getPelvisFrame(), TOUGH_COMMON_NAMES::WORLD_TF);
             occGrid_.data.at(getIndex(pelvisPose.position.x, pelvisPose.position.y)) =  FREE;
             visitedOccGrid_.data.at(getIndex(pelvisPose.position.x, pelvisPose.position.y)) =  FREE;
         }
@@ -119,7 +119,7 @@ void MapGenerator::clearCurrentPoseCB(const std_msgs::Empty &msg)
             pelvisPose.position.x = x;
             pelvisPose.position.y = y;
             pelvisPose.orientation.w = 1.0f;
-            currentState_->transformPose(pelvisPose, pelvisPose, rd_->getPelvisFrame(), VAL_COMMON_NAMES::WORLD_TF);
+            currentState_->transformPose(pelvisPose, pelvisPose, rd_->getPelvisFrame(), TOUGH_COMMON_NAMES::WORLD_TF);
             occGrid_.data.at(getIndex(pelvisPose.position.x + x, pelvisPose.position.y +y)) =  FREE;
         }
     }

@@ -45,7 +45,7 @@
 #include <pcl/filters/extract_indices.h>
 
 #include "robot_self_filter/self_mask.h"
-#include "tough_common/val_common_names.h"
+#include "tough_common/tough_common_names.h"
 #include "tough_perception_common/perception_common_names.h"
 
 class robot_filter

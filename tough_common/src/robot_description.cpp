@@ -30,7 +30,7 @@ RobotDescription* RobotDescription::getRobotDescription(ros::NodeHandle nh, std:
 
 RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
 {
-    ///@TODO: these strings should go in val_common_names.h
+    ///@TODO: these strings should go in tough_common_names.h
     param_left_arm_joint_names_  =  "left_arm_joint_names" ;
     param_right_arm_joint_names_ =  "right_arm_joint_names";
     param_left_foot_frame_name_  =  "left_foot_frame_name" ;
@@ -271,6 +271,11 @@ void RobotDescription::setTorsoFrame(const std::string &value)
 std::string RobotDescription::getPelvisFrame() const
 {
     return PELVIS_TF;
+}
+
+std::string RobotDescription::getWorldFrame() const
+{
+    return "world";
 }
 
 void RobotDescription::setPelvisFrame(const std::string &value)

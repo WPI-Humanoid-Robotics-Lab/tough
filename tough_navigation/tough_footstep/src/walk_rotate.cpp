@@ -2,7 +2,6 @@
 #include<tough_footstep/RobotWalker.h>
 #include<ihmc_msgs/FootstepDataListRosMessage.h>
 #include"geometry_msgs/Pose2D.h"
-#include "tough_common/val_common_defines.h"
 #include "tough_controller_interface/robot_state.h"
 
 
@@ -13,7 +12,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "walk_rotate");
     ros::NodeHandle nh;
 
-    ros::Publisher log_pub = nh.advertise<std_msgs::String>(VAL_COMMON_NAMES::LOG_TOPIC, 10);
+    ros::Publisher log_pub = nh.advertise<std_msgs::String>(TOUGH_COMMON_NAMES::LOG_TOPIC, 10);
     const auto log_msg = [&log_pub](const std::string &str) {
         std_msgs::String msg;
         msg.data = ros::this_node::getName() + ": " + str;

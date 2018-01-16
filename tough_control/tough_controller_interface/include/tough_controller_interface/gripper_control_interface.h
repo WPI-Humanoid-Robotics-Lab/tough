@@ -3,7 +3,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/Float64MultiArray.h>
-#include <tough_common/val_common_defines.h>
+#include <tough_common/robot_description.h>
 
 enum class GRIPPER_STATE{
     OPEN=0,

@@ -1,5 +1,5 @@
 #include <tough_perception_common/walkway_generator.h>
-#include <tough_common/val_common_names.h>
+#include <tough_common/tough_common_names.h>
 #include <tough_perception_common/perception_common_names.h>
 #include <pcl/filters/conditional_removal.h>
 #include <pcl/filters/filter.h>
@@ -171,10 +171,10 @@ double WalkwayGenerator::getCurrentFootHeight(void)
     tf::StampedTransform transformStamped;
     /// \todo use RobotState instead of tf
     try{
-        tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, rd_->getLeftFootFrameName(), ros::Time(0),ros::Duration(3.0));
-        tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF, rd_->getLeftFootFrameName(), ros::Time(0),transformStamped);
+        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF, rd_->getLeftFootFrameName(), ros::Time(0),ros::Duration(3.0));
+        tf_listener_.lookupTransform( TOUGH_COMMON_NAMES::WORLD_TF, rd_->getLeftFootFrameName(), ros::Time(0),transformStamped);
         height_foot = transformStamped.getOrigin().getZ();
-        tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF, rd_->getRightFootFrameName(), ros::Time(0),transformStamped);
+        tf_listener_.lookupTransform( TOUGH_COMMON_NAMES::WORLD_TF, rd_->getRightFootFrameName(), ros::Time(0),transformStamped);
     }
     catch (tf::TransformException ex){
         ROS_WARN("%s",ex.what());

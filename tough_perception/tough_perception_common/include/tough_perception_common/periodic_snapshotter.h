@@ -38,7 +38,7 @@
 #include <tough_perception_common/MultisenseImage.h>
 #include <tough_perception_common/MultisensePointCloud.h>
 #include <tough_perception_common/PointCloudHelper.h>
-#include <tough_common/val_common_names.h>
+#include <tough_common/tough_common_names.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int8.h>
 #include <tough_controller_interface/robot_state.h>
@@ -142,10 +142,10 @@ bool PeriodicSnapshotter::getNearestPoint(geometry_msgs::PointStamped &point, in
     tf::TransformListener listener;
 
     //     transform the point to world frame
-    if (originalFrame != VAL_COMMON_NAMES::WORLD_TF){
+    if (originalFrame != TOUGH_COMMON_NAMES::WORLD_TF){
         try{
-            listener.waitForTransform(VAL_COMMON_NAMES::ROBOT_HEAD_FRAME_TF, VAL_COMMON_NAMES::WORLD_TF, ros::Time(0), ros::Duration(3));
-            listener.transformPoint(VAL_COMMON_NAMES::WORLD_TF,point, point);
+            listener.waitForTransform(TOUGH_COMMON_NAMES::ROBOT_HEAD_FRAME_TF, TOUGH_COMMON_NAMES::WORLD_TF, ros::Time(0), ros::Duration(3));
+            listener.transformPoint(TOUGH_COMMON_NAMES::WORLD_TF,point, point);
         }
         catch(tf::TransformException ex){
             ROS_WARN("%s",ex.what());
@@ -199,7 +199,7 @@ bool PeriodicSnapshotter::getNearestPoint(geometry_msgs::PointStamped &point, in
     point.header.stamp = ros::Time(0);
 
     //transform the point back to its original frame, if required
-    if (originalFrame != VAL_COMMON_NAMES::WORLD_TF){
+    if (originalFrame != TOUGH_COMMON_NAMES::WORLD_TF){
         try{
             listener.transformPoint(originalFrame, point, point);
         }
