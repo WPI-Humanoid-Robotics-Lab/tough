@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tough_filters)
 
-# add_definitions(-std=c++11)
+add_definitions(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   robot_self_filter
   roscpp
