@@ -64,8 +64,8 @@ void RobotWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage &ms
 bool RobotWalker::walkToGoal( geometry_msgs::Pose2D &goal, bool waitForSteps)
 {    
     ihmc_msgs::FootstepDataListRosMessage list ;
-    list.default_transfer_time = transfer_time_;
-    list.default_swing_time= swing_time_;
+    list.default_transfer_duration = transfer_time_;
+    list.default_swing_duration    = swing_time_;
     list.execution_mode = execution_mode_;
     list.unique_id = RobotWalker::id;
 
@@ -88,8 +88,8 @@ bool RobotWalker::walkToGoal( geometry_msgs::Pose2D &goal, bool waitForSteps)
 bool RobotWalker::walkNSteps(int numSteps, float xOffset, float yOffset, bool continous, RobotSide startLeg, bool waitForSteps)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
-    list.default_transfer_time = transfer_time_;
-    list.default_swing_time = swing_time_;
+    list.default_transfer_duration = transfer_time_;
+    list.default_swing_duration = swing_time_;
     list.execution_mode = execution_mode_;
 
     list.unique_id = RobotWalker::id ;
@@ -120,8 +120,8 @@ bool RobotWalker::walkNSteps(int numSteps, float xOffset, float yOffset, bool co
 bool RobotWalker::walkNStepsWRTPelvis(int numSteps, float xOffset, float yOffset, bool continous, RobotSide startLeg, bool waitForSteps)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
-    list.default_transfer_time = transfer_time_;
-    list.default_swing_time = swing_time_;
+    list.default_transfer_duration = transfer_time_;
+    list.default_swing_duration = swing_time_;
     list.execution_mode = execution_mode_;
 
     list.unique_id = RobotWalker::id ;
@@ -152,8 +152,8 @@ bool RobotWalker::walkNStepsWRTPelvis(int numSteps, float xOffset, float yOffset
 bool RobotWalker::walkPreComputedSteps(const std::vector<float> xOffset, const std::vector<float> yOffset, RobotSide startLeg){
 
     ihmc_msgs::FootstepDataListRosMessage list;
-    list.default_transfer_time= transfer_time_;
-    list.default_swing_time = swing_time_;
+    list.default_transfer_duration = transfer_time_;
+    list.default_swing_duration = swing_time_;
     list.execution_mode = execution_mode_;
     list.unique_id = RobotWalker::id;
 
@@ -180,8 +180,8 @@ bool RobotWalker::walkPreComputedSteps(const std::vector<float> xOffset, const s
 bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float> xOffset, const std::vector<float> yOffset, RobotSide startLeg){
 
     ihmc_msgs::FootstepDataListRosMessage list;
-    list.default_transfer_time= transfer_time_;
-    list.default_swing_time = swing_time_;
+    list.default_transfer_duration = transfer_time_;
+    list.default_swing_duration = swing_time_;
     list.execution_mode = execution_mode_;
     list.unique_id = RobotWalker::id;
 
@@ -669,19 +669,19 @@ ihmc_msgs::FootstepDataRosMessage::Ptr RobotWalker::getOffsetStepWRTPelvis(int s
 bool RobotWalker::turn(RobotSide side)
 {
     ihmc_msgs::FootstepDataListRosMessage list ;
-    list.default_transfer_time = transfer_time_;
-    list.default_swing_time    = swing_time_;
+    list.default_transfer_duration = transfer_time_;
+    list.default_swing_duration    = swing_time_;
     list.execution_mode        = execution_mode_;
     list.unique_id             = RobotWalker::id;
 
     ihmc_msgs::FootstepDataRosMessage step;
 
-    geometry_msgs::Vector3Stamped world_values;
+    geometry_msgs::PointStamped world_values;
     geometry_msgs::QuaternionStamped world_quat;
 
-    std::vector<geometry_msgs::Vector3Stamped>    pelvis_valuesL;
+    std::vector<geometry_msgs::PointStamped>    pelvis_valuesL;
     std::vector<geometry_msgs::QuaternionStamped> pelvis_quatL;
-    std::vector<geometry_msgs::Vector3Stamped>    pelvis_valuesR;
+    std::vector<geometry_msgs::PointStamped>    pelvis_valuesR;
     std::vector<geometry_msgs::QuaternionStamped> pelvis_quatR;
 
     // resizing vector based on number of footsteps
@@ -691,41 +691,41 @@ bool RobotWalker::turn(RobotSide side)
     pelvis_quatR.resize(5);
 
     // Left
-    pelvis_valuesL[0].vector.x= 0.135900;
-    pelvis_valuesL[0].vector.y= -0.154233;
-    pelvis_valuesL[0].vector.z= 0.086523;
+    pelvis_valuesL[0].point.x= 0.135900;
+    pelvis_valuesL[0].point.y= -0.154233;
+    pelvis_valuesL[0].point.z= 0.086523;
     pelvis_quatL[0].quaternion.w= 0.980231;
     pelvis_quatL[0].quaternion.x= 0.000016;
     pelvis_quatL[0].quaternion.y= 0.000160;
     pelvis_quatL[0].quaternion.z= 0.197856;
 
-    pelvis_valuesL[1].vector.x= -0.055072;
-    pelvis_valuesL[1].vector.y= 0.034846;
-    pelvis_valuesL[1].vector.z= 0.086575;
+    pelvis_valuesL[1].point.x= -0.055072;
+    pelvis_valuesL[1].point.y= 0.034846;
+    pelvis_valuesL[1].point.z= 0.086575;
     pelvis_quatL[1].quaternion.w= 0.941065;
     pelvis_quatL[1].quaternion.x= 0.000039;
     pelvis_quatL[1].quaternion.y= 0.000155;
     pelvis_quatL[1].quaternion.z= 0.338227;
 
-    pelvis_valuesL[2].vector.x= 0.105901;
-    pelvis_valuesL[2].vector.y= -0.154402;
-    pelvis_valuesL[2].vector.z= 0.086533;
+    pelvis_valuesL[2].point.x= 0.105901;
+    pelvis_valuesL[2].point.y= -0.154402;
+    pelvis_valuesL[2].point.z= 0.086533;
     pelvis_quatL[2].quaternion.w= 0.902780;
     pelvis_quatL[2].quaternion.x= 0.000055;
     pelvis_quatL[2].quaternion.y= 0.000151;
     pelvis_quatL[2].quaternion.z= 0.430103;
 
-    pelvis_valuesL[3].vector.x= -0.084986;
-    pelvis_valuesL[3].vector.y= 0.004761;
-    pelvis_valuesL[3].vector.z= 0.086586;
+    pelvis_valuesL[3].point.x= -0.084986;
+    pelvis_valuesL[3].point.y= 0.004761;
+    pelvis_valuesL[3].point.z= 0.086586;
     pelvis_quatL[3].quaternion.w= 0.706102;
     pelvis_quatL[3].quaternion.x= 0.000101;
     pelvis_quatL[3].quaternion.y= 0.000123;
     pelvis_quatL[3].quaternion.z= 0.708111;
 
-    pelvis_valuesL[4].vector.x= 0.090027;
-    pelvis_valuesL[4].vector.y= 0.000439;
-    pelvis_valuesL[4].vector.z= 0.086533;
+    pelvis_valuesL[4].point.x= 0.090027;
+    pelvis_valuesL[4].point.y= 0.000439;
+    pelvis_valuesL[4].point.z= 0.086533;
     pelvis_quatL[4].quaternion.w= 0.705392;
     pelvis_quatL[4].quaternion.x= 0.000102;
     pelvis_quatL[4].quaternion.y= 0.000124;
@@ -733,41 +733,41 @@ bool RobotWalker::turn(RobotSide side)
 
     // Right
 
-    pelvis_valuesR[0].vector.x= -0.064089;
-    pelvis_valuesR[0].vector.y= -0.145396;
-    pelvis_valuesR[0].vector.z= 0.078471;
+    pelvis_valuesR[0].point.x= -0.064089;
+    pelvis_valuesR[0].point.y= -0.145396;
+    pelvis_valuesR[0].point.z= 0.078471;
     pelvis_quatR[0].quaternion.w= 0.981378;
     pelvis_quatR[0].quaternion.x= -0.000023;
     pelvis_quatR[0].quaternion.y= 0.000136;
     pelvis_quatR[0].quaternion.z= -0.192087;
 
-    pelvis_valuesR[1].vector.x= 0.034601;
-    pelvis_valuesR[1].vector.y= 0.085171;
-    pelvis_valuesR[1].vector.z= 0.078451;
+    pelvis_valuesR[1].point.x= 0.034601;
+    pelvis_valuesR[1].point.y= 0.085171;
+    pelvis_valuesR[1].point.z= 0.078451;
     pelvis_quatR[1].quaternion.w= 0.924822;
     pelvis_quatR[1].quaternion.x= -0.000049;
     pelvis_quatR[1].quaternion.y= 0.000129;
     pelvis_quatR[1].quaternion.z= -0.380401;
 
-    pelvis_valuesR[2].vector.x= -0.144394;
-    pelvis_valuesR[2].vector.y= -0.095886;
-    pelvis_valuesR[2].vector.z= 0.078494;
+    pelvis_valuesR[2].point.x= -0.144394;
+    pelvis_valuesR[2].point.y= -0.095886;
+    pelvis_valuesR[2].point.z= 0.078494;
     pelvis_quatR[2].quaternion.w= 0.833166;
     pelvis_quatR[2].quaternion.x= -0.000074;
     pelvis_quatR[2].quaternion.y= 0.000117;
     pelvis_quatR[2].quaternion.z= -0.553023;
 
-    pelvis_valuesR[3].vector.x= 0.084996;
-    pelvis_valuesR[3].vector.y= 0.005419;
-    pelvis_valuesR[3].vector.z= 0.078437;
+    pelvis_valuesR[3].point.x= 0.084996;
+    pelvis_valuesR[3].point.y= 0.005419;
+    pelvis_valuesR[3].point.z= 0.078437;
     pelvis_quatR[3].quaternion.w= 0.708850;
     pelvis_quatR[3].quaternion.x= -0.000094;
     pelvis_quatR[3].quaternion.y= 0.000100;
     pelvis_quatR[3].quaternion.z= -0.705359;
 
-    pelvis_valuesR[4].vector.x= -0.089976;
-    pelvis_valuesR[4].vector.y= -0.000623;
-    pelvis_valuesR[4].vector.z= 0.078479;
+    pelvis_valuesR[4].point.x= -0.089976;
+    pelvis_valuesR[4].point.y= -0.000623;
+    pelvis_valuesR[4].point.z= 0.078479;
     pelvis_quatR[4].quaternion.w= 0.709548;
     pelvis_quatR[4].quaternion.x= -0.000095;
     pelvis_quatR[4].quaternion.y= 0.000100;
@@ -789,21 +789,11 @@ bool RobotWalker::turn(RobotSide side)
     {
         for (int i = 0; i < pelvis_valuesL.size(); ++i) {
 
-            current_state_->transformVector(pelvis_valuesL[i], world_values);
+            current_state_->transformPoint(pelvis_valuesL[i], world_values);
             current_state_->transformQuaternion(pelvis_quatL[i], world_quat);
-//            try{
-//                tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF, TOUGH_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
-//                tf_listener_.transformVector(TOUGH_COMMON_NAMES::WORLD_TF,pelvis_valuesL[i],world_values);
-//                tf_listener_.transformQuaternion(TOUGH_COMMON_NAMES::WORLD_TF,pelvis_quatL[i],world_quat);
-//            }
-//            catch (tf::TransformException ex)
-//            {
-//                ROS_ERROR("%s",ex.what());
-//                return false;
-//            }
 
             step.robot_side=i%2 ? LEFT : RIGHT;
-            step.location=world_values.vector;
+            step.location=world_values.point;
             step.orientation=world_quat.quaternion;
 
             list.footstep_data_list.push_back(step);
@@ -814,22 +804,11 @@ bool RobotWalker::turn(RobotSide side)
     {
         for (int i = 0; i < pelvis_valuesR.size(); ++i) {
 
-            current_state_->transformVector(pelvis_valuesR[i], world_values);
+            current_state_->transformPoint(pelvis_valuesR[i], world_values);
             current_state_->transformQuaternion(pelvis_quatR[i], world_quat);
 
-//            try{
-//                tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF, TOUGH_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
-//                tf_listener_.transformVector(TOUGH_COMMON_NAMES::WORLD_TF,pelvis_valuesR[i],world_values);
-//                tf_listener_.transformQuaternion(TOUGH_COMMON_NAMES::WORLD_TF,pelvis_quatR[i],world_quat);
-//            }
-//            catch (tf::TransformException ex)
-//            {
-//                ROS_ERROR("%s",ex.what());
-//                return false;
-//            }
-
             step.robot_side=i%2 ? LEFT : RIGHT;
-            step.location=world_values.vector;
+            step.location=world_values.point;
             step.orientation=world_quat.quaternion;
 
             list.footstep_data_list.push_back(step);
@@ -875,12 +854,12 @@ bool RobotWalker::walkRotate(float angle)
 bool RobotWalker::climbStair(const std::vector<float> xOffset, const std::vector<float> zOffset, RobotSide startLeg)
 {
     ihmc_msgs::FootstepDataListRosMessage list;
-    list.default_transfer_time= transfer_time_;
-    list.default_swing_time = swing_time_;
+    list.default_transfer_duration= transfer_time_;
+    list.default_swing_duration = swing_time_;
     list.execution_mode = execution_mode_;
     list.unique_id = RobotWalker::id;
 
-    geometry_msgs::Vector3 waypoint;
+    geometry_msgs::Point waypoint;
     float offset =0.1;
 
     if (xOffset.size() != zOffset.size())
@@ -903,9 +882,7 @@ bool RobotWalker::climbStair(const std::vector<float> xOffset, const std::vector
             getCurrentStep((startLeg+1)%2, *current);
         }
 
-        currentWorldLocation.x=current->location.x;
-        currentWorldLocation.y=current->location.y;
-        currentWorldLocation.z=current->location.z;
+        currentWorldLocation =current->location;
 
         current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,TOUGH_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
         currentPelvisLocation.x+=xOffset[m-1];
@@ -929,16 +906,12 @@ bool RobotWalker::climbStair(const std::vector<float> xOffset, const std::vector
             currentPelvisLocation.z+=zOffset[m-1]+offset;
             current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),TOUGH_COMMON_NAMES::WORLD_TF);
 
-            waypoint.x=currentWorldLocation.x;
-            waypoint.y=currentWorldLocation.y;
-            waypoint.z=currentWorldLocation.z;
-
-            newFootStep->trajectory_waypoints.push_back(waypoint);
+            newFootStep->position_waypoints.push_back(currentWorldLocation);
             newFootStep->trajectory_type=2; // 0 - DEFAULT, 1 - OBSTACLE CLEARANCE, 2- CUSTOM
         }
 
 
-        newFootStep->trajectory_waypoints.push_back(waypoint);
+        newFootStep->position_waypoints.push_back(waypoint);
         list.footstep_data_list.push_back(*newFootStep);
     }
 

@@ -205,8 +205,11 @@ void ArmControlInterface::closeHand(const RobotSide side)
 void ArmControlInterface::moveArmInTaskSpaceMessage(const RobotSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl)
 {
     ihmc_msgs::HandTrajectoryRosMessage msg;
+    ihmc_msgs::FrameInformationRosMessage reference_frame;
+    reference_frame.data_reference_frame_id = baseForControl;
+
     msg.robot_side = side;
-    msg.base_for_control = baseForControl;
+    msg.frame_information = reference_frame;
     msg.taskspace_trajectory_points.push_back(point);
     msg.execution_mode = msg.OVERRIDE;
     ArmControlInterface::arm_id--;
@@ -227,15 +230,18 @@ void ArmControlInterface::moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_
     ihmc_msgs::HandTrajectoryRosMessage msg_l;
     ihmc_msgs::HandTrajectoryRosMessage msg_r;
 
+    ihmc_msgs::FrameInformationRosMessage reference_frame;
+    reference_frame.data_reference_frame_id = baseForControl;
+
     msg_l.taskspace_trajectory_points.clear();
     msg_r.taskspace_trajectory_points.clear();
     ArmControlInterface::arm_id--;
     msg_l.unique_id = ArmControlInterface::arm_id;
-    msg_l.base_for_control = baseForControl;
+    msg_l.frame_information = reference_frame;
     msg_l.execution_mode = msg_l.OVERRIDE;
     ArmControlInterface::arm_id--;
     msg_r.unique_id = ArmControlInterface::arm_id;
-    msg_r.base_for_control = baseForControl;
+    msg_r.frame_information = reference_frame;
     msg_r.execution_mode = msg_r.OVERRIDE;
 
 

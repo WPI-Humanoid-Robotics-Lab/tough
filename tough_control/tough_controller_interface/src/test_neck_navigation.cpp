@@ -28,7 +28,7 @@ int main(int argc, char **argv)
   HeadControlInterface headTraj(nh);
 
   log_msg("Moving neck joints to 0, 0, 0");
-  headTraj.moveNeckJoints({{ 0.0f, 0.0f, 0.0f }}, 2.0f);
+  headTraj.moveNeckJoints({{ 1.57f, 0.0f, 0.0f }}, 2.0f);
 
   ros::spinOnce();
   ros::Duration(2).sleep();

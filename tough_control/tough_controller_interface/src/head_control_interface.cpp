@@ -60,19 +60,14 @@ void HeadControlInterface::moveHead(const geometry_msgs::Quaternion &quaternion,
 {
   ihmc_msgs::HeadTrajectoryRosMessage msg;
   ihmc_msgs::SO3TrajectoryPointRosMessage data;
+  ihmc_msgs::FrameInformationRosMessage reference_frame;
 
+  reference_frame.trajectory_reference_frame_id = -102;   //Pelvis frame
+  reference_frame.data_reference_frame_id = -102;//Pelvis frame
+  msg.frame_information = reference_frame;
 
-  // transorm point from pelvis to world frame
-  tf::TransformListener listener;
+  data.orientation = quaternion;
 
-  geometry_msgs::QuaternionStamped quatInWorldFrame;
-  quatInWorldFrame.header.frame_id = rd_->getPelvisFrame();
-  quatInWorldFrame.header.stamp = ros::Time(0);
-  quatInWorldFrame.quaternion = quaternion;
-
-  currentState_->transformQuaternion(quatInWorldFrame,quatInWorldFrame);
-
-  data.orientation = quatInWorldFrame.quaternion;
 
   geometry_msgs::Vector3 v;
   v.x = 0.0;
@@ -96,6 +91,12 @@ void HeadControlInterface::moveHead(const geometry_msgs::Quaternion &quaternion,
 void HeadControlInterface::moveHead(const std::vector<std::vector<float> > &trajectory_points, const float time)
 {
   ihmc_msgs::HeadTrajectoryRosMessage msg;
+  ihmc_msgs::FrameInformationRosMessage reference_frame;
+
+  reference_frame.trajectory_reference_frame_id = -102;   //Pelvis frame
+  reference_frame.data_reference_frame_id = -102;//Pelvis frame
+  msg.frame_information = reference_frame;
+
 
   HeadControlInterface::head_id--;
   msg.unique_id = HeadControlInterface::head_id;
@@ -114,25 +115,9 @@ void HeadControlInterface::moveHead(const std::vector<std::vector<float> > &traj
     data.time = time;
     tf::Quaternion q;
     q.setRPY(roll, pitch, yaw);
-
-    //transorm point from pelvis to world frame
-    tf::TransformListener listener;
-
-    geometry_msgs::QuaternionStamped quatInWorldFrame;
-    quatInWorldFrame.header.frame_id = rd_->getPelvisFrame();
-    quatInWorldFrame.header.stamp = ros::Time(0);
-
-    tf::quaternionTFToMsg(q, quatInWorldFrame.quaternion);
-
-    currentState_->transformQuaternion(quatInWorldFrame,quatInWorldFrame);
-
-    data.orientation = quatInWorldFrame.quaternion;
-
-    geometry_msgs::Vector3 v;
-    v.x = 0.0;
-    v.y = 0.0;
-    v.z = 0.0;
-    data.angular_velocity = v;
+    geometry_msgs::Quaternion quat;
+    tf::quaternionTFToMsg(q, quat);
+    data.orientation = quat;
 
     msg.taskspace_trajectory_points.push_back(data);
   }

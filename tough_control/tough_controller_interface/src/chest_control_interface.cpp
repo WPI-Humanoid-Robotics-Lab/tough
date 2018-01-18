@@ -29,39 +29,16 @@ void ChestControlInterface::controlChest(float roll , float pitch , float yaw, f
     data.time = time;
     tf::Quaternion quatInPelvisFrame;
     quatInPelvisFrame.setRPY(roll,pitch,yaw);
-    geometry_msgs::Quaternion quatInWorldFrame;
-    tf::quaternionTFToMsg(quatInPelvisFrame, quatInWorldFrame);
-    state_informer_->transformQuaternion(quatInWorldFrame, quatInWorldFrame, rd_->getPelvisFrame());
+    geometry_msgs::Quaternion quat;
+    tf::quaternionTFToMsg(quatInPelvisFrame, quat);
 
-//    //transorm point from pelvis to world frame
-//    tf::TransformListener listener;
-
-//    geometry_msgs::QuaternionStamped quatInWorldFrame;
-//    quatInWorldFrame.header.frame_id= TOUGH_COMMON_NAMES::PELVIS_TF;
-//    quatInWorldFrame.header.stamp = ros::Time(0);
-//    tf::quaternionTFToMsg(quatInPelvisFrame, quatInWorldFrame.quaternion);
-
-//    try
-//    {
-//        listener.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF, TOUGH_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
-//        listener.transformQuaternion(TOUGH_COMMON_NAMES::WORLD_TF, quatInWorldFrame, quatInWorldFrame);
-
-//    }
-//    catch (tf::TransformException ex)
-//    {
-//        ROS_WARN("%s",ex.what());
-//        return;
-//    }
-    data.orientation = quatInWorldFrame;
-
-    geometry_msgs::Vector3 v;
-    v.x = 0.3;
-    v.y = 0.3;
-    v.z = 0.3;
-    data.angular_velocity = v;
-
+    data.orientation = quat;
     msg.unique_id =13;
     msg.execution_mode = 0;
+    ihmc_msgs::FrameInformationRosMessage reference_frame;
+    reference_frame.trajectory_reference_frame_id = -102;   //Pelvis frame
+    reference_frame.data_reference_frame_id = -102;//Pelvis frame
+    msg.frame_information = reference_frame;
 
 
     msg.taskspace_trajectory_points.push_back(data);

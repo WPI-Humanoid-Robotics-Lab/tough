@@ -16,8 +16,8 @@ geometry_msgs::Pose pelvisPose;
 void WalkToGoal(geometry_msgs::Pose2D goal) {
     current_state->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
     list.footstep_data_list.clear();
-    list.default_transfer_time = 1.0;
-    list.default_swing_time = 1.0;
+    list.default_transfer_duration = 1.0;
+    list.default_swing_duration = 1.0;
     list.execution_mode = 0;
     list.unique_id = RobotWalker::id;
 
