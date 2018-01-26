@@ -22,6 +22,7 @@ catkin_package(
 include_directories(${catkin_INCLUDE_DIRS} include)
 
  add_library(tough_controller_interface
+   src/tough_controller_interface.cpp
    src/arm_control_interface.cpp
    src/pelvis_control_interface.cpp
    src/chest_control_interface.cpp
