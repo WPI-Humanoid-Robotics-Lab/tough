@@ -9,7 +9,6 @@ ArmControlInterface::ArmControlInterface(ros::NodeHandle nh):ToughControllerInte
     DEFAULT_LEFT_POSE{-0.2f, -1.2f, 0.7222f, -1.5101f, 0.0f, 0.0f, 0.0f}
     {
     id_++;
-    armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>(control_topic_prefix_+"/arm_trajectory", 1,true);
     handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>(control_topic_prefix_+"/hand_desired_configuration", 1,true);
     taskSpaceTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandTrajectoryRosMessage>(control_topic_prefix_+"/hand_trajectory", 1, true);
     markerPub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
@@ -170,6 +169,7 @@ void ArmControlInterface::moveArmInTaskSpaceMessage(const RobotSide side, const 
     ihmc_msgs::HandTrajectoryRosMessage msg;
     ihmc_msgs::FrameInformationRosMessage reference_frame;
     reference_frame.data_reference_frame_id = baseForControl;
+    reference_frame.trajectory_reference_frame_id = baseForControl;
 
     msg.robot_side = side;
     msg.frame_information = reference_frame;
@@ -194,6 +194,7 @@ void ArmControlInterface::moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_
 
     ihmc_msgs::FrameInformationRosMessage reference_frame;
     reference_frame.data_reference_frame_id = baseForControl;
+    reference_frame.trajectory_reference_frame_id = baseForControl;
 
     msg_l.taskspace_trajectory_points.clear();
     msg_r.taskspace_trajectory_points.clear();

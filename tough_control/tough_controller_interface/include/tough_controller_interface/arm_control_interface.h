@@ -103,7 +103,7 @@ public:
      * @param point	The point in task space to move the arm to.
      */
 //    void moveArmInTaskSpaceMessage(const RobotSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl=ihmc_msgs::FrameInformationRosMessage::CHEST_FRAME);
-    void moveArmInTaskSpaceMessage(const RobotSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl=-103);
+    void moveArmInTaskSpaceMessage(const RobotSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl=-102);
 
     /**
      * @brief moveArmInTaskSpace  Moves the arm to a give pose in task space (world frame)
@@ -118,7 +118,7 @@ public:
      * @param arm_data A vector of armTaskSpaceData struct.
      */
 //    void moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data, int baseForControl=ihmc_msgs::FrameInformationRosMessage::CHEST_FRAME);
-    void moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data, int baseForControl=-103);
+    void moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data, int baseForControl=-102);
 
     /**
      * @brief moveArmTrajectory Moves the arm to follow a particular trajectory plan
