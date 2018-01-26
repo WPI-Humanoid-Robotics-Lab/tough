@@ -14,21 +14,27 @@
 #include <geometry_msgs/Vector3.h>
 #include <tough_controller_interface/robot_state.h>
 #include "tough_common/robot_description.h"
+#include "tough_controller_interface/tough_controller_interface.h"
 
 /**
  * @brief The HeadTrajectory class provides ability to move the head of valkyrie. Current implementation provides the ability to move the head to a set roll, pitch, and yaw.
  */
-class HeadControlInterface {
+class HeadControlInterface: public ToughControllerInterface {
 
 private:
-    static int head_id;
     int NUM_NECK_JOINTS;
-    ros::NodeHandle nh_;
+
     ros::Publisher headTrajPublisher;
     ros::Publisher neckTrajPublisher;
     void appendNeckTrajectoryPoint(ihmc_msgs::NeckTrajectoryRosMessage &msg, float time, std::vector<float> pos);
-    RobotStateInformer *currentState_;
-    RobotDescription *rd_;
+
+//protected:
+//    ros::NodeHandle nh_;
+//    static int id_;
+//    RobotStateInformer *state_informer_;
+//    RobotDescription *rd_;
+
+
 public:
 
   /**
