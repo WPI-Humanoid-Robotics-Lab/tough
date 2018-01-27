@@ -12,6 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
   tough_common
 )
 
+# Added for unit testing
+find_package(GTest REQUIRED)
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES tough_controller_interface
@@ -20,6 +23,15 @@ catkin_package(
 )
 
 include_directories(${catkin_INCLUDE_DIRS} include)
+
+# Added for unit testing
+include_directories(${GTEST_INCLUDE_DIRS})
+
+#include_directories(
+#  include /${PROJECT_NAME}
+#  ${catkin_INCLUDE_DIRS} include
+#  ${GTEST_INCLUDE_DIRS}
+#)
 
  add_library(tough_controller_interface
    src/tough_controller_interface.cpp
@@ -94,4 +106,25 @@ install(TARGETS ${PROJECT_NAME} test_chest test_nudgeLocal test_arm
  )
 
 
+
+
+
+
+# Added for unit testing
+
+#############
+## Testing ##
+#############
+
+## Add gtest based cpp test target and link libraries
+#catkin_add_gtest(${PROJECT_NAME}-test test/ros_gtest-test.cpp)
+catkin_add_gtest(test_pelvis_height test/pelvis_control_interface_test.cpp)
+
+# if(TARGET ${PROJECT_NAME}-test)
+#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
+# endif()
+
+target_link_libraries(test_pelvis_height ${catkin_LIBRARIES})
+## Add folders to be run by python nosetests
+# catkin_add_nosetests(test)
 
