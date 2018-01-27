@@ -11,7 +11,6 @@ ArmControlInterface::ArmControlInterface(ros::NodeHandle nh):nh_(nh),
     DEFAULT_LEFT_POSE{-0.2f, -1.2f, 0.7222f, -1.5101f, 0.0f, 0.0f, 0.0f}
     {
 
-    //tf_listener_ = new tf2_ros::TransformListener(this->tf_buffer_);
     std::string robot_name;
     nh.getParam("ihmc_ros/robot_name", robot_name);
 
@@ -33,30 +32,6 @@ ArmControlInterface::ArmControlInterface(ros::NodeHandle nh):nh_(nh),
     }
 
     NUM_ARM_JOINTS = joint_limits_left_.size();
-
-//    //this->armTrajectorySunscriber = nh_.subscribe("/ihmc_ros/"+ robot_name +"/output/ha", 20,&ValkyrieWalker::footstepStatusCB, this);
-//    joint_limits_left_.resize(NUM_ARM_JOINTS);
-//    joint_limits_right_.resize(NUM_ARM_JOINTS);
-
-//    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
-//    joint_limits_left_[0]={-2.84,1.99};
-//    joint_limits_left_[1]={-1.509,1.256};
-//    joint_limits_left_[2]={-3.09,2.17};
-//    joint_limits_left_[3]={-2.164,0.11};
-//    joint_limits_left_[4]={-2.009,3.13};
-//    joint_limits_left_[5]={-0.61,0.615};
-//    joint_limits_left_[6]={-0.35,0.48};
-
-//    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
-//    joint_limits_right_[0]={-2.84,1.99};
-//    joint_limits_right_[1]={-1.256,1.509};
-//    joint_limits_right_[2]={-3.09,2.17};
-//    joint_limits_right_[3]={-0.11,2.164};
-//    joint_limits_right_[4]={-2.009,3.13};
-//    joint_limits_right_[5]={-0.615,0.61};
-//    joint_limits_right_[6]={-0.47,0.35};
-
-
 }
 
 ArmControlInterface::~ArmControlInterface(){
@@ -207,6 +182,7 @@ void ArmControlInterface::moveArmInTaskSpaceMessage(const RobotSide side, const 
     ihmc_msgs::HandTrajectoryRosMessage msg;
     ihmc_msgs::FrameInformationRosMessage reference_frame;
     reference_frame.data_reference_frame_id = baseForControl;
+    reference_frame.trajectory_reference_frame_id = baseForControl;
 
     msg.robot_side = side;
     msg.frame_information = reference_frame;
@@ -232,6 +208,7 @@ void ArmControlInterface::moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_
 
     ihmc_msgs::FrameInformationRosMessage reference_frame;
     reference_frame.data_reference_frame_id = baseForControl;
+    reference_frame.trajectory_reference_frame_id = baseForControl;
 
     msg_l.taskspace_trajectory_points.clear();
     msg_r.taskspace_trajectory_points.clear();
@@ -313,22 +290,6 @@ bool ArmControlInterface::nudgeArm(const RobotSide side, const direction drct, f
 
     stateInformer_->getCurrentPose(target_frame, palm_pose, rd_->getPelvisFrame());
 
-//    try{
-//        tf::StampedTransform            tf_palm_values;
-//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::PELVIS_TF,target_frame, ros::Time(0),ros::Duration(2));
-//        tf_listener_.lookupTransform(TOUGH_COMMON_NAMES::PELVIS_TF, target_frame, ros::Time(0),tf_palm_values);
-
-//        tf::pointTFToMsg(tf_palm_values.getOrigin(), palm_values.pose.position);
-//        tf::quaternionTFToMsg(tf_palm_values.getRotation(), palm_values.pose.orientation);
-//        palm_values.header.frame_id=TOUGH_COMMON_NAMES::PELVIS_TF;
-
-//    }
-//    catch (tf::TransformException ex){
-//        ROS_WARN("%s",ex.what());
-//        ros::spinOnce();
-//        return false;
-//    }
-
     if     (drct == direction::LEFT)     palm_pose.position.y += nudgeStep;
     else if(drct == direction::RIGHT)    palm_pose.position.y -= nudgeStep;
     else if(drct == direction::UP)       palm_pose.position.z += nudgeStep;
@@ -337,16 +298,6 @@ bool ArmControlInterface::nudgeArm(const RobotSide side, const direction drct, f
     else if(drct == direction::BACK)     palm_pose.position.x -= nudgeStep;
 
     stateInformer_->transformPose(palm_pose, world_pose, rd_->getPelvisFrame(), "/world");
-//    try{
-//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::PELVIS_TF,"/world", ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPose("/world",palm_values,world_pose);
-//    }
-//    catch (tf::TransformException ex) {
-//        ROS_WARN("%s",ex.what());
-//        ros::spinOnce();
-//        return false;
-//    }
-
     moveArmInTaskSpace(side,world_pose, 0.0f);
     return true;
 }
