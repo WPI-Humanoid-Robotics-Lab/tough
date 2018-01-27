@@ -18,9 +18,12 @@ PelvisControlInterface::~PelvisControlInterface()
 
 }
 
+/**
+ * @brief PelvisControlInterface::controlPelvisHeight controls the height of the pelvis with respect to the ground
+ * @param height is the height in meters
+ */
 void PelvisControlInterface::controlPelvisHeight(float height)
 {
-
     ihmc_msgs::PelvisHeightTrajectoryRosMessage msg;
     ihmc_msgs::EuclideanTrajectoryPointRosMessage p;
 
@@ -42,7 +45,6 @@ void PelvisControlInterface::controlPelvisHeight(float height)
 
     PelvisControlInterface::pelvis_id_--;
     msg.unique_id = PelvisControlInterface::pelvis_id_;
-
 
     // publish the message
     pelvisHeightPublisher_.publish(msg);
