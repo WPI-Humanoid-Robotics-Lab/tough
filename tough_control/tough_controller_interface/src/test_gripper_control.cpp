@@ -40,48 +40,18 @@ int main(int argc, char **argv){
     }
     else if(argc == 3){
         RobotSide side = (RobotSide)std::atoi(argv[1]);
-        GRIPPER_STATE state = (GRIPPER_STATE)std::atoi(argv[2]);
+        int state = std::atoi(argv[2]);
 
         std::string side_str = side == RobotSide::LEFT ? "left" : "right";
-        std::string state_str = ((const char*[]) {"OPEN", "OPEN_THUMB_IN", "OPEN_THUMB_IN_APPROACH", "C LOSE",
-                                                  "HANDLE_HOLD", "TIGHT_HOLD", "CUP"})[(int) state];
 
-        log_msg("moving " + side_str + " gripper to " + state_str);
+        log_msg("moving " + side_str + " gripper to " + argv[2]);
         gripcont.controlGripper(side, state);
-    }
-    else if(argc == 7)
-    {
-        if (argv[1][0] == '1'){
-            // Right Selected
-            rightGrip.clear();
-            rightGrip.push_back(std::atof(argv[2]));
-            rightGrip.push_back(std::atof(argv[3]));
-            rightGrip.push_back(std::atof(argv[4]));
-            rightGrip.push_back(std::atof(argv[5]));
-            rightGrip.push_back(std::atof(argv[6]));
-            log_msg("moving right gripper to given grip");
-            gripcont.controlGripper(RIGHT,rightGrip);
-        }
-        else
-        {
-            // Left Selected
-            leftGrip.clear();
-            leftGrip.push_back(std::atof(argv[2]));
-            leftGrip.push_back(std::atof(argv[3]));
-            leftGrip.push_back(std::atof(argv[4]));
-            leftGrip.push_back(std::atof(argv[5]));
-            leftGrip.push_back(std::atof(argv[6]));
-            log_msg("moving left gripper to given grip");
-            gripcont.controlGripper(LEFT,leftGrip);
-        }
     }
     else {
         log_msg("Usage: rosrun <node_name> 1 \n to open grippers \n running demo");
-        std::vector<double> leftgripClose = {1.4, -0.55, 0.0, -0.9, -1.0};
-        std::vector<double> rightgripClose = {1.4, 0.55, 0.0, 0.9, 1.0};
 
-        gripcont.controlGripper(LEFT,leftgripClose);
-        gripcont.controlGripper(RIGHT,rightgripClose);
+        gripcont.controlGripper(LEFT,ihmc_msgs::HandDesiredConfigurationRosMessage::CLOSE);
+        gripcont.controlGripper(RIGHT,ihmc_msgs::HandDesiredConfigurationRosMessage::CLOSE);
     }
     ros::spinOnce();
     ros::Duration(2).sleep();

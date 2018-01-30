@@ -18,7 +18,7 @@ protected:
     RobotDescription *rd_;
     std::string control_topic_prefix_;
     std::string output_topic_prefix_;
-
+    std::string robot_name_;
 public:
 
     ToughControllerInterface(ros::NodeHandle nh);

@@ -3,69 +3,47 @@
 
 #define TO_RADIANS M_PI / 180.0 //goes probably in utils which stores similar math operation parameters
 
-ChestControlInterface::ChestControlInterface(ros::NodeHandle nh):nh_(nh)
+ChestControlInterface::ChestControlInterface(ros::NodeHandle nh):ToughControllerInterface(nh)
 {
-    std::string robot_name;
-    nh.getParam("ihmc_ros/robot_name", robot_name);
 
     chestTrajPublisher_ =
-            nh_.advertise<ihmc_msgs::ChestTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/chest_trajectory",1,true);
-    state_informer_ = RobotStateInformer::getRobotStateInformer(nh_);
-    rd_ = RobotDescription::getRobotDescription(nh_);
+            nh_.advertise<ihmc_msgs::ChestTrajectoryRosMessage>(control_topic_prefix_ +"/chest_trajectory",1,true);
 }
 
 ChestControlInterface::~ChestControlInterface()
 {
 }
 
-void ChestControlInterface::controlChest(float roll , float pitch , float yaw, float time)
+void ChestControlInterface::controlChest(float roll , float pitch , float yaw, float time, int execution_mode)
 {
-    ihmc_msgs::ChestTrajectoryRosMessage msg;
-    ihmc_msgs::SO3TrajectoryPointRosMessage data;
+
     roll  =  roll*TO_RADIANS;
     pitch = pitch*TO_RADIANS;
     yaw   =   yaw*TO_RADIANS;
 
-    data.time = time;
     tf::Quaternion quatInPelvisFrame;
     quatInPelvisFrame.setRPY(roll,pitch,yaw);
-    geometry_msgs::Quaternion quatInWorldFrame;
-    tf::quaternionTFToMsg(quatInPelvisFrame, quatInWorldFrame);
-    state_informer_->transformQuaternion(quatInWorldFrame, quatInWorldFrame, rd_->getPelvisFrame());
+    geometry_msgs::Quaternion quat;
+    tf::quaternionTFToMsg(quatInPelvisFrame, quat);
 
-//    //transorm point from pelvis to world frame
-//    tf::TransformListener listener;
+    controlChest(quat, time, execution_mode);
+}
 
-//    geometry_msgs::QuaternionStamped quatInWorldFrame;
-//    quatInWorldFrame.header.frame_id= TOUGH_COMMON_NAMES::PELVIS_TF;
-//    quatInWorldFrame.header.stamp = ros::Time(0);
-//    tf::quaternionTFToMsg(quatInPelvisFrame, quatInWorldFrame.quaternion);
+void ChestControlInterface::controlChest(geometry_msgs::Quaternion quat, float time, int execution_mode)
+{
+    ihmc_msgs::ChestTrajectoryRosMessage msg;
+    ihmc_msgs::SO3TrajectoryPointRosMessage data;
 
-//    try
-//    {
-//        listener.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF, TOUGH_COMMON_NAMES::PELVIS_TF, ros::Time(0), ros::Duration(3.0));
-//        listener.transformQuaternion(TOUGH_COMMON_NAMES::WORLD_TF, quatInWorldFrame, quatInWorldFrame);
+    data.time = time;
 
-//    }
-//    catch (tf::TransformException ex)
-//    {
-//        ROS_WARN("%s",ex.what());
-//        return;
-//    }
-    data.orientation = quatInWorldFrame;
-
-    geometry_msgs::Vector3 v;
-    v.x = 0.3;
-    v.y = 0.3;
-    v.z = 0.3;
-    data.angular_velocity = v;
-
-    msg.unique_id =13;
-    msg.execution_mode = 0;
+    data.orientation = quat;
+    msg.unique_id = ChestControlInterface::id_++;
+    msg.execution_mode = execution_mode;
 
 
     msg.taskspace_trajectory_points.push_back(data);
 
     // publish the message
     chestTrajPublisher_.publish(msg);
+
 }
