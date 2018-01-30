@@ -10,6 +10,7 @@
 #include <geometry_msgs/Vector3.h>
 #include "tough_controller_interface/robot_state.h"
 #include "tough_common/robot_description.h"
+#include "tough_controller_interface/tough_controller_interface.h"
 
 class ChestControlInterface {
 
@@ -24,6 +25,7 @@ public:
     ChestControlInterface(ros::NodeHandle nh);
     ~ChestControlInterface();
     void controlChest(float roll , float pitch , float yaw, float time = 1.0f);
+    void controlChest(geometry_msgs::Quaternion quat, float time = 1.0f);
 };
 
 #endif // CHEST_CONTROL_INTERFACE_H

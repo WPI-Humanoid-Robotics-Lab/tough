@@ -20,24 +20,32 @@ ChestControlInterface::~ChestControlInterface()
 
 void ChestControlInterface::controlChest(float roll , float pitch , float yaw, float time)
 {
-    ihmc_msgs::ChestTrajectoryRosMessage msg;
-    ihmc_msgs::SO3TrajectoryPointRosMessage data;
+
     roll  =  roll*TO_RADIANS;
     pitch = pitch*TO_RADIANS;
     yaw   =   yaw*TO_RADIANS;
 
-    data.time = time;
     tf::Quaternion quatInPelvisFrame;
     quatInPelvisFrame.setRPY(roll,pitch,yaw);
     geometry_msgs::Quaternion quat;
     tf::quaternionTFToMsg(quatInPelvisFrame, quat);
 
+    controlChest(quat, time);
+}
+
+void ChestControlInterface::controlChest(geometry_msgs::Quaternion quat, float time)
+{
+    ihmc_msgs::ChestTrajectoryRosMessage msg;
+    ihmc_msgs::SO3TrajectoryPointRosMessage data;
+
+    data.time = time;
+
     data.orientation = quat;
     msg.unique_id =13;
     msg.execution_mode = 0;
     ihmc_msgs::FrameInformationRosMessage reference_frame;
-    reference_frame.trajectory_reference_frame_id = -102;   //Pelvis frame
-    reference_frame.data_reference_frame_id = -102;//Pelvis frame
+    reference_frame.trajectory_reference_frame_id = rd_->getPelvisFrameHash();   //Pelvis frame
+    reference_frame.data_reference_frame_id = rd_->getPelvisFrameHash();//Pelvis frame
     msg.frame_information = reference_frame;
 
 
@@ -45,4 +53,5 @@ void ChestControlInterface::controlChest(float roll , float pitch , float yaw, f
 
     // publish the message
     chestTrajPublisher_.publish(msg);
+
 }

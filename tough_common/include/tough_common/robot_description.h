@@ -74,6 +74,20 @@ public:
     int getNumberOfNeckJoints() const;
 
 
+    int getMidFeetZUPFrameHash() const;
+
+    int getPelvisZUPFrameHash() const;
+
+    int getPelvisFrameHash() const;
+
+    int getChestFrameHash() const;
+
+    int getCenterOfMassFrameHash() const;
+
+    int getLeftSoleFrameHash() const;
+
+    int getRightSoleFrameHash() const;
+
 protected:
     void setPelvisFrame(const std::string &value);
 
@@ -100,6 +114,8 @@ protected:
     void setRightPalmFrame(const std::string &value);
 
     void setNumberOfNeckJoints(int numberOfNeckJoints);
+
+    bool updateFrameHash();
 
 private:
     RobotDescription(ros::NodeHandle nh, std::string urdf_param="/robot_description");
@@ -136,6 +152,29 @@ private:
     std::vector<std::pair<float, float> > right_arm_joint_limits_;
 
     int number_of_neck_joints_;
+
+    /* Frame hash - these are defined in us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds
+     * Currently there is no way of querying hashID of a frame. Once it is available, it will be implemented in teh constructor of this class
+     *    MIDFEET_ZUP_FRAME(-100), PELVIS_ZUP_FRAME(-101),
+     *    PELVIS_FRAME(-102), CHEST_FRAME(-103),
+     *    CENTER_OF_MASS_FRAME(-104), LEFT_SOLE_FRAME(-105),
+     *    RIGHT_SOLE_FRAME(-106);
+     */
+
+    int MIDFEET_ZUP_FRAME_HASH_;
+
+    int PELVIS_ZUP_FRAME_HASH_;
+
+    int PELVIS_FRAME_HASH_;
+
+    int CHEST_FRAME_HASH_;
+
+    int CENTER_OF_MASS_FRAME_HASH_;
+
+    int LEFT_SOLE_FRAME_HASH_;
+
+    int RIGHT_SOLE_FRAME_HASH_;
+
 };
 
 #endif // ROBOT_DESCRIPTION_H
