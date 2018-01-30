@@ -136,11 +136,47 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
         L_END_EFFECTOR_TF = "leftMiddleFingerPitch1Link";
         number_of_neck_joints_ = 3;
     }
+
+    updateFrameHash();
 }
 
 RobotDescription::~RobotDescription()
 {
 
+}
+int RobotDescription::getRightSoleFrameHash() const
+{
+    return RIGHT_SOLE_FRAME_HASH_;
+}
+
+int RobotDescription::getLeftSoleFrameHash() const
+{
+    return LEFT_SOLE_FRAME_HASH_;
+}
+
+int RobotDescription::getCenterOfMassFrameHash() const
+{
+    return CENTER_OF_MASS_FRAME_HASH_;
+}
+
+int RobotDescription::getChestFrameHash() const
+{
+    return CHEST_FRAME_HASH_;
+}
+
+int RobotDescription::getPelvisFrameHash() const
+{
+    return PELVIS_FRAME_HASH_;
+}
+
+int RobotDescription::getPelvisZUPFrameHash() const
+{
+    return PELVIS_ZUP_FRAME_HASH_;
+}
+
+int RobotDescription::getMidFeetZUPFrameHash() const
+{
+    return MIDFEET_ZUP_FRAME_HASH_;
 }
 
 int RobotDescription::getNumberOfNeckJoints() const
@@ -151,6 +187,17 @@ int RobotDescription::getNumberOfNeckJoints() const
 void RobotDescription::setNumberOfNeckJoints(int numberOfNeckJoints)
 {
     number_of_neck_joints_ = numberOfNeckJoints;
+}
+
+bool RobotDescription::updateFrameHash()
+{
+    MIDFEET_ZUP_FRAME_HASH_ = -100;
+    PELVIS_ZUP_FRAME_HASH_  = -101;
+    PELVIS_FRAME_HASH_      = -102;
+    CHEST_FRAME_HASH_       = -103;
+    CENTER_OF_MASS_FRAME_HASH_ = -104;
+    LEFT_SOLE_FRAME_HASH_   = -105;
+    RIGHT_SOLE_FRAME_HASH_  = -106;
 }
 
 

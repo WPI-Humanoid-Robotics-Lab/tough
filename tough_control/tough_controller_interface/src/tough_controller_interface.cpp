@@ -1,6 +1,6 @@
 #include "tough_controller_interface/tough_controller_interface.h"
 
-long ToughControllerInterface::id_ = -1;
+long ToughControllerInterface::id_ = 1;
 
 ToughControllerInterface::ToughControllerInterface(ros::NodeHandle nh){
 

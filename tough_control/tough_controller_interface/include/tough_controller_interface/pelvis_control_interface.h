@@ -11,14 +11,13 @@
 class PelvisControlInterface : public ToughControllerInterface{
 
 private:
-
     ros::Publisher pelvisHeightPublisher_;
 
 public:
 
     PelvisControlInterface(ros::NodeHandle nh);
     ~PelvisControlInterface();
-    void controlPelvisHeight(float height);
+    void controlPelvisHeight(float height, float duration=2.0f);
     void publishPelvisMessage(const ihmc_msgs::PelvisHeightTrajectoryRosMessage &msg) const ;
 };
 

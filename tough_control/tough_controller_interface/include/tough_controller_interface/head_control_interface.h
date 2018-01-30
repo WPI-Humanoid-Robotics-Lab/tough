@@ -48,23 +48,23 @@ public:
      * @param roll The roll in degrees.
      * @param pitch The pitch in degrees.
      * @param yaw The yaw in degrees.
-     * @param time The time it takes to move to the given orientation. Default is 1.0
+     * @param time The time it takes to move to the given orientation. Default is 4.0
      */
-    void moveHead(float roll, float pitch, float yaw, const float time = 1.0f);
+    void moveHead(float roll, float pitch, float yaw, const float time = 4.0f);
 
     /**
      * @brief moveHead Moves the robot head by the given quaternion. All orientations are expressed in pelvis frame.
      * @param quaternion The quaternion representing the rotation of the head.
-     * @param time The time it takes to move to the given orientation. Default is 1.0
+     * @param time The time it takes to move to the given orientation. Default is 4.0
      */
-    void moveHead(const geometry_msgs::Quaternion &quaternion, const float time = 1.0f);
+    void moveHead(const geometry_msgs::Quaternion &quaternion, const float time = 4.0f);
 
     /**
      * @brief moveHead          Moves the robot head through a series of trajectory roll, pitch, and yaw angles. All orientations are expressed in pelvis frame.
      * @param trajectory_points The RPY angles for the head to move through in its trajectory.
-     * @param time              The time it takes to move to the given orientation. Default is 1.0
+     * @param time              The time it takes to move to the given orientation. Default is 4.0
      */
-    void moveHead(const std::vector<std::vector<float> > &trajectory_points, const float time = 1.0f);
+    void moveHead(const std::vector<std::vector<float> > &trajectory_points, const float time = 4.0f);
 
     /**
      * @brief getNumNeckJoints Gives back the number of neck joints for Valkyrie R5

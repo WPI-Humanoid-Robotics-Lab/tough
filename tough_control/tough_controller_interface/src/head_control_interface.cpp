@@ -54,20 +54,13 @@ void HeadControlInterface::moveHead(const geometry_msgs::Quaternion &quaternion,
   ihmc_msgs::SO3TrajectoryPointRosMessage data;
   ihmc_msgs::FrameInformationRosMessage reference_frame;
 
-  reference_frame.trajectory_reference_frame_id = -102;   //Pelvis frame
-  reference_frame.data_reference_frame_id = -102;//Pelvis frame
+  reference_frame.trajectory_reference_frame_id = rd_->getPelvisFrameHash();   //Pelvis frame
+  reference_frame.data_reference_frame_id = rd_->getPelvisFrameHash();//Pelvis frame
   msg.frame_information = reference_frame;
 
   data.orientation = quaternion;
 
-
-  geometry_msgs::Vector3 v;
-  v.x = 0.0;
-  v.y = 0.0;
-  v.z = 0.0;
-  data.angular_velocity = v;
-
-  HeadControlInterface::id_--;
+  HeadControlInterface::id_++;
   msg.unique_id = HeadControlInterface::id_;
   msg.execution_mode = msg.OVERRIDE;
 
@@ -85,12 +78,12 @@ void HeadControlInterface::moveHead(const std::vector<std::vector<float> > &traj
   ihmc_msgs::HeadTrajectoryRosMessage msg;
   ihmc_msgs::FrameInformationRosMessage reference_frame;
 
-  reference_frame.trajectory_reference_frame_id = -102;   //Pelvis frame
-  reference_frame.data_reference_frame_id = -102;//Pelvis frame
+  reference_frame.trajectory_reference_frame_id = rd_->getPelvisFrameHash();   //Pelvis frame
+  reference_frame.data_reference_frame_id = rd_->getPelvisFrameHash();//Pelvis frame
   msg.frame_information = reference_frame;
 
 
-  HeadControlInterface::id_--;
+  HeadControlInterface::id_++;
   msg.unique_id = HeadControlInterface::id_;
   msg.execution_mode = msg.OVERRIDE;
 
@@ -121,7 +114,7 @@ void HeadControlInterface::moveNeckJoints(const std::vector<std::vector<float> >
 {
   ihmc_msgs::NeckTrajectoryRosMessage msg;
 
-  HeadControlInterface::id_--;
+  HeadControlInterface::id_++;
   msg.unique_id = HeadControlInterface::id_;
 
   // Add all neck trajectory points to the trajectory message
