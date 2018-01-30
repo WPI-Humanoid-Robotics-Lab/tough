@@ -26,10 +26,10 @@ void ChestControlInterface::controlChest(float roll , float pitch , float yaw, f
     geometry_msgs::Quaternion quat;
     tf::quaternionTFToMsg(quatInPelvisFrame, quat);
 
-    controlChest(quat, time);
+    controlChest(quat, time, execution_mode);
 }
 
-void ChestControlInterface::controlChest(geometry_msgs::Quaternion quat, float time)
+void ChestControlInterface::controlChest(geometry_msgs::Quaternion quat, float time, int execution_mode)
 {
     ihmc_msgs::ChestTrajectoryRosMessage msg;
     ihmc_msgs::SO3TrajectoryPointRosMessage data;
