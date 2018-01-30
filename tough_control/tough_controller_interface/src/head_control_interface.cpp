@@ -27,7 +27,6 @@ void HeadControlInterface::appendNeckTrajectoryPoint(ihmc_msgs::NeckTrajectoryRo
 
       p.time = time;
       p.position = pos[i];
-      p.velocity = 0;
       p.unique_id = HeadControlInterface::id_;
       t.trajectory_points.push_back(p);
       t.unique_id = HeadControlInterface::id_;

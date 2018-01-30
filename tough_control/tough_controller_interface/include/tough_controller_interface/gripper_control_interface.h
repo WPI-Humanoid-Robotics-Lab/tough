@@ -3,43 +3,16 @@
 
 #include <ros/ros.h>
 #include <std_msgs/Float64MultiArray.h>
+#include "ihmc_msgs/HandDesiredConfigurationRosMessage.h"
 #include <tough_common/robot_description.h>
+#include "tough_controller_interface/tough_controller_interface.h"
 
-enum class GRIPPER_STATE{
-    OPEN=0,
-    OPEN_THUMB_IN,
-    OPEN_THUMB_IN_APPROACH,
-    CLOSE,
-    HANDLE_HOLD,
-    TIGHT_HOLD,
-    CUP
-};
 
-class GripperControlInterface {
+class GripperControlInterface: public ToughControllerInterface {
 
 private:
 
-    ros::NodeHandle nh_;
-    ros::Publisher leftGripperContPublisher;
-    ros::Publisher rightGripperContPublisher;
-    //GRIPPER_STATE::OPEN_THUMB_IN
-    const std::vector<double> OPEN_THUMB_IN_LEFT_GRIPPER  = {1.3999, 0.2, 0.0, 0.0, 0.0};
-    const std::vector<double> OPEN_THUMB_IN_RIGHT_GRIPPER = {1.3999, 0.2, 0.0, 0.0, 0.0};
-    //GRIPPER_STATE::OPEN_THUMB_APPROACH
-    const std::vector<double> OPEN_THUMB_APPROACH_IN_LEFT_GRIPPER  = {1.3999, -0.3, 0.0, 0.0, 0.0};
-    const std::vector<double> OPEN_THUMB_APPROACH_IN_RIGHT_GRIPPER = {1.3999, 0.3, 0.0, 0.0, 0.0};
-    //GRIPPER_STATE::CLOSE
-    const std::vector<double> CLOSE_LEFT_GRIPPER  = {1.3999, -0.55, -1.1, -0.9, -1.0};
-    const std::vector<double> CLOSE_RIGHT_GRIPPER = {1.3999, 0.55, 1.1, 0.9, 1.0};
-    //GRIPPER_STATE::CUP
-    const std::vector<double> CUP_LEFT_GRIPPER  = {1.3999, -0.2, -0.55, -0.55, -0.55};
-    const std::vector<double> CUP_RIGHT_GRIPPER = {1.3999, 0.2, 0.55, 0.55, 0.55};
-    //GRIPPER_STATE::HANDLE_HOLD
-    const std::vector<double> HANDLE_HOLD_LEFT_GRIPPER  = {2.3, -0.55, -1.1, -0.9, -1.0};
-    const std::vector<double> HANDLE_HOLD_RIGHT_GRIPPER = {2.3, 0.55, 1.1, 0.9, 1.0};
-    //GRIPPER_STATE::TIGHT_HOLD
-    const std::vector<double> TIGHT_HOLD_LEFT_GRIPPER  = {1.6, -1.8, -1.5, -1.6, -1.5};
-    const std::vector<double> TIGHT_HOLD_RIGHT_GRIPPER = {1.6, 1.8, 1.5, 1.6, 1.5};
+    ros::Publisher gripperPublisher_;
 
 public:
     /**
@@ -52,11 +25,9 @@ public:
     /**
      * @brief controlGripper provides the ability to move the grippers to a desired position.
      * @param side is either LEFT or RIGHT
-     * @param gripperData is a vector of size 5.
+     * @param configuration is an enum value from ihmc_msgs::HandDesiredConfigurationRosMessage.
      */
-    void controlGripper(const RobotSide side, const std::vector<double> gripperData);
-
-    void controlGripper(const RobotSide side, GRIPPER_STATE state=GRIPPER_STATE::OPEN);
+    void controlGripper(const RobotSide side, int configuration=ihmc_msgs::HandDesiredConfigurationRosMessage::BASIC_GRIP);
 
     /**
      * @brief closeGripper closes the gripper completely.
