@@ -127,6 +127,8 @@ public:
      */
     void moveArmTrajectory(const RobotSide side, const trajectory_msgs::JointTrajectory &traj);
 
+    void testPrint();
+
 
     /**
      * @brief nudgeArm Nudges the Arm in the desired direction by a given nudge step
