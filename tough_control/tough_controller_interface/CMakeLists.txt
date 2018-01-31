@@ -115,12 +115,14 @@ set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FL
 ## Add gtest based cpp test target and link libraries
 #catkin_add_gtest(${PROJECT_NAME}-test test/ros_gtest-test.cpp)
 catkin_add_gtest(test_pelvis_height test/pelvis_control_interface_test.cpp)
+catkin_add_gtest(test_arm_unit_test test/arm_control_interface_test.cpp)
 
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
-target_link_libraries(test_pelvis_height ${catkin_LIBRARIES})
+target_link_libraries(test_pelvis_height ${catkin_LIBRARIES} ${PROJECT_NAME})
+target_link_libraries(test_arm_unit_test ${catkin_LIBRARIES} ${PROJECT_NAME})
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
