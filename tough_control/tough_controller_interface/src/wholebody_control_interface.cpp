@@ -1,14 +1,10 @@
 #include "tough_controller_interface/wholebody_control_interface.h"
 
 
-WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle &nh):nh_(nh)
+WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle &nh):ToughControllerInterface(nh)
 {
-    std::string robot_name;
-    nh.getParam("ihmc_ros/robot_name", robot_name);
 
-    m_wholebodyPub = nh_.advertise<ihmc_msgs::WholeBodyTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/whole_body_trajectory", 10, true);
-    robot_state_ = RobotStateInformer::getRobotStateInformer(nh_);
-    rd_ = RobotDescription::getRobotDescription(nh_);
+    m_wholebodyPub = nh_.advertise<ihmc_msgs::WholeBodyTrajectoryRosMessage>(control_topic_prefix_ + "/whole_body_trajectory", 10, true);
 
     rd_->getLeftArmJointLimits(joint_limits_left_);
     rd_->getRightArmJointLimits(joint_limits_right_);
@@ -18,26 +14,7 @@ WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle &nh):nh_(nh
         joint_limits_left_[i] = {joint_limits_left_[i].first - 0.01, joint_limits_left_[i].second - 0.01};
         joint_limits_right_[i] = {joint_limits_right_[i].first - 0.01, joint_limits_right_[i].second - 0.01};
     }
-//    joint_limits_left_.resize(7);
-//    joint_limits_right_.resize(7);
 
-//    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
-//    joint_limits_left_[0]={-2.84,1.99};
-//    joint_limits_left_[1]={-1.509,1.256};
-//    joint_limits_left_[2]={-3.09,2.17};
-//    joint_limits_left_[3]={-2.164,0.11};
-//    joint_limits_left_[4]={-2.009,3.13};
-//    joint_limits_left_[5]={-0.61,0.615};
-//    joint_limits_left_[6]={-0.35,0.48};
-
-//    // All the joint limits are reduced by 0.01 to ensure we never exceed the limits
-//    joint_limits_right_[0]={-2.84,1.99};
-//    joint_limits_right_[1]={-1.256,1.509};
-//    joint_limits_right_[2]={-3.09,2.17};
-//    joint_limits_right_[3]={-0.11,2.164};
-//    joint_limits_right_[4]={-2.009,3.13};
-//    joint_limits_right_[5]={-0.615,0.61};
-//    joint_limits_right_[6]={-0.47,0.35};
 }
 
 void WholebodyControlInterface::executeTrajectory(const RobotSide side, const  moveit_msgs::RobotTrajectory &traj){
@@ -53,23 +30,23 @@ void WholebodyControlInterface::executeTrajectory(const RobotSide side, const tr
     ihmc_msgs::WholeBodyTrajectoryRosMessage wholeBodyMsg;
 
     //Solving for side conflicts
-    wholeBodyMsg.left_arm_trajectory_message.robot_side=0;
-    wholeBodyMsg.right_arm_trajectory_message.robot_side=1;
+    wholeBodyMsg.left_arm_trajectory_message.robot_side = LEFT;
+    wholeBodyMsg.right_arm_trajectory_message.robot_side= RIGHT;
 
-    wholeBodyMsg.left_foot_trajectory_message.robot_side=0;
-    wholeBodyMsg.right_foot_trajectory_message.robot_side=1;
+    wholeBodyMsg.left_foot_trajectory_message.robot_side = LEFT;
+    wholeBodyMsg.right_foot_trajectory_message.robot_side= RIGHT;
 
-    wholeBodyMsg.left_hand_trajectory_message.robot_side=0;
-    wholeBodyMsg.right_hand_trajectory_message.robot_side=1;
+    wholeBodyMsg.left_hand_trajectory_message.robot_side = LEFT;
+    wholeBodyMsg.right_hand_trajectory_message.robot_side= RIGHT;
 
     // Clearing trajectory points
     wholeBodyMsg.left_arm_trajectory_message.joint_trajectory_messages.clear();
     wholeBodyMsg.right_arm_trajectory_message.joint_trajectory_messages.clear();
 
     // Specifying execution modes
-    wholeBodyMsg.chest_trajectory_message.execution_mode=wholeBodyMsg.chest_trajectory_message.OVERRIDE;
-    wholeBodyMsg.right_arm_trajectory_message.execution_mode=wholeBodyMsg.right_arm_trajectory_message.OVERRIDE;
-    wholeBodyMsg.left_arm_trajectory_message.execution_mode=wholeBodyMsg.left_arm_trajectory_message.OVERRIDE;
+    wholeBodyMsg.chest_trajectory_message.execution_mode   = ihmc_msgs::ChestTrajectoryRosMessage::OVERRIDE;
+    wholeBodyMsg.right_arm_trajectory_message.execution_mode = ihmc_msgs::ArmTrajectoryRosMessage::OVERRIDE;
+    wholeBodyMsg.left_arm_trajectory_message.execution_mode  = ihmc_msgs::ArmTrajectoryRosMessage::OVERRIDE;
 
     // Setting unique id non zero for messages to be used
     wholeBodyMsg.unique_id=ros::Time::now().toSec();
@@ -165,7 +142,7 @@ void WholebodyControlInterface::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMes
 void WholebodyControlInterface::chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj)
 {
     geometry_msgs::Pose pelvisPose;
-    robot_state_->getCurrentPose(rd_->getPelvisFrame(),pelvisPose);
+    state_informer_->getCurrentPose(rd_->getPelvisFrame(),pelvisPose);
     for (int i = 0; i < traj.points.size(); ++i) {
         float yaw   = traj.points[i].positions[0];
         float pitch = traj.points[i].positions[1];
@@ -177,7 +154,7 @@ void WholebodyControlInterface::chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessag
         tempQuat.header.frame_id = rd_->getPelvisFrame();
         tf::quaternionTFToMsg(quatPelvis, tempQuat.quaternion);
 
-        robot_state_->transformQuaternion(tempQuat, tempQuat);
+        state_informer_->transformQuaternion(tempQuat, tempQuat);
 
         ihmc_msgs::SO3TrajectoryPointRosMessage data;
         data.orientation = tempQuat.quaternion;

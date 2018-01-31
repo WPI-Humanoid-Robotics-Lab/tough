@@ -3,22 +3,18 @@
 
 #define TO_RADIANS M_PI / 180.0 //goes probably in utils which stores similar math operation parameters
 
-ChestControlInterface::ChestControlInterface(ros::NodeHandle nh):nh_(nh)
+ChestControlInterface::ChestControlInterface(ros::NodeHandle nh):ToughControllerInterface(nh)
 {
-    std::string robot_name;
-    nh.getParam("ihmc_ros/robot_name", robot_name);
 
     chestTrajPublisher_ =
-            nh_.advertise<ihmc_msgs::ChestTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/chest_trajectory",1,true);
-    state_informer_ = RobotStateInformer::getRobotStateInformer(nh_);
-    rd_ = RobotDescription::getRobotDescription(nh_);
+            nh_.advertise<ihmc_msgs::ChestTrajectoryRosMessage>(control_topic_prefix_ +"/chest_trajectory",1,true);
 }
 
 ChestControlInterface::~ChestControlInterface()
 {
 }
 
-void ChestControlInterface::controlChest(float roll , float pitch , float yaw, float time)
+void ChestControlInterface::controlChest(float roll , float pitch , float yaw, float time, int execution_mode)
 {
 
     roll  =  roll*TO_RADIANS;
@@ -30,10 +26,10 @@ void ChestControlInterface::controlChest(float roll , float pitch , float yaw, f
     geometry_msgs::Quaternion quat;
     tf::quaternionTFToMsg(quatInPelvisFrame, quat);
 
-    controlChest(quat, time);
+    controlChest(quat, time, execution_mode);
 }
 
-void ChestControlInterface::controlChest(geometry_msgs::Quaternion quat, float time)
+void ChestControlInterface::controlChest(geometry_msgs::Quaternion quat, float time, int execution_mode)
 {
     ihmc_msgs::ChestTrajectoryRosMessage msg;
     ihmc_msgs::SO3TrajectoryPointRosMessage data;
@@ -41,8 +37,8 @@ void ChestControlInterface::controlChest(geometry_msgs::Quaternion quat, float t
     data.time = time;
 
     data.orientation = quat;
-    msg.unique_id =13;
-    msg.execution_mode = 0;
+    msg.unique_id = ChestControlInterface::id_++;
+    msg.execution_mode = execution_mode;
     ihmc_msgs::FrameInformationRosMessage reference_frame;
     reference_frame.trajectory_reference_frame_id = rd_->getPelvisFrameHash();   //Pelvis frame
     reference_frame.data_reference_frame_id = rd_->getPelvisFrameHash();//Pelvis frame
