@@ -57,14 +57,10 @@ ArmControlInterface::~ArmControlInterface(){
  * @param time is the time between last and current joint trajectory waypoint
  * @param pos is the joint position vector (size would be 7 if there are 7 joints in the arm)
  */
-void ArmControlInterface::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos)
+void ArmControlInterface::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &armMsg, float time, std::vector<float> pos)
 {
-
     std::vector<std::pair<float, float> > *joint_limits_;
-    joint_limits_= msg.robot_side == LEFT ? &joint_limits_left_ : &joint_limits_right_;
-
-    ihmc_msgs::OneDoFJointTrajectoryRosMessage trajectory_point;
-    trajectory_point.unique_id = ArmControlInterface::arm_id;
+    joint_limits_= armMsg.robot_side == LEFT ? &joint_limits_left_ : &joint_limits_right_;
 
     // checking if all the joints are within joint limits
     for (int i=0;i<NUM_ARM_JOINTS;i++)
@@ -79,10 +75,12 @@ void ArmControlInterface::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessa
         p.position = pos[i];
         p.velocity = 0;
         p.unique_id = ArmControlInterface::arm_id;
-        trajectory_point.trajectory_points.push_back(p);
+
+        armMsg.joint_trajectory_messages[i].trajectory_points.push_back(p);
+        armMsg.joint_trajectory_messages[i].unique_id = ArmControlInterface::arm_id;
     }
 
-    msg.joint_trajectory_messages.push_back(trajectory_point);
+
     return;
 }
 
@@ -95,20 +93,15 @@ void ArmControlInterface::moveToDefaultPose(RobotSide side)
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
 
-
-    // i think this should be resized to 1 because there is one waypoint
-    arm_traj.joint_trajectory_messages.resize(1);
-    arm_traj.joint_trajectory_messages[0].trajectory_points.resize(NUM_ARM_JOINTS);
-    //old:  arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
-
+    arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
 
     arm_traj.robot_side = side;
     ArmControlInterface::arm_id--;
     arm_traj.unique_id = ArmControlInterface::arm_id;
-    if(side == RIGHT)
-        appendTrajectoryPoint(arm_traj, 1, DEFAULT_RIGHT_POSE);
+    if(side == RobotSide::LEFT)
+        appendTrajectoryPoint(arm_traj, 2, {0.1,-0.1,0.1,-0.1,0.1,-0.1,-0.1});
     else
-        appendTrajectoryPoint(arm_traj, 1, DEFAULT_LEFT_POSE);
+        appendTrajectoryPoint(arm_traj, 2, {-0.23, 0.07, 0.75, 1.53, 1.21, 0.40, 0.0});
 
     armTrajectoryPublisher.publish(arm_traj);
 
@@ -122,25 +115,18 @@ void ArmControlInterface::moveToZeroPose(RobotSide side)
 {
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
-    std::cout<<"1 \n";
 
-    ///TODO resolve size issue
-//    arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS); old
-//    arm_traj.joint_trajectory_messages.resize(1);
+    arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
     arm_traj.robot_side = side;
     ArmControlInterface::arm_id--;
     arm_traj.unique_id = ArmControlInterface::arm_id;
 
-    std::cout<<"2 \n";
     if(side == RobotSide::LEFT)
         appendTrajectoryPoint(arm_traj, 2, {0.1,-0.1,0.1,-0.1,0.1,-0.1,-0.1});
     else
-        appendTrajectoryPoint(arm_traj, 2, {0.1,0.1,0.1,0.1,0.1,0.1,0.1});
+        appendTrajectoryPoint(arm_traj, 2, {0.3,0.3,0.3,0.3,0.3,0.3,0.3});
 
-    std::cout<<"3 \n";
     armTrajectoryPublisher.publish(arm_traj);
-
-    std::cout<<"4 \n";
 }
 
 void ArmControlInterface::testPrint()
@@ -159,16 +145,13 @@ void ArmControlInterface::moveArmJoints(const RobotSide side, const std::vector<
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
 
-    ///TODO: resolve size issue. I think it should be :: arm_traj.joint_trajectory_messages.resize(arm_pose.size());
-
-    arm_traj.joint_trajectory_messages.resize(arm_pose.size());
-//    arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS); old
+    arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
     arm_traj.robot_side = side;
     ArmControlInterface::arm_id--;
     arm_traj.unique_id = ArmControlInterface::arm_id;
     for(auto i=arm_pose.begin(); i != arm_pose.end(); i++){
         if(i->size() != NUM_ARM_JOINTS)
-            ROS_WARN("Check number of trajectory points"); /// check size issue
+            ROS_WARN("Check number of trajectory points");
         appendTrajectoryPoint(arm_traj, time/arm_pose.size(), *i);
     }
 

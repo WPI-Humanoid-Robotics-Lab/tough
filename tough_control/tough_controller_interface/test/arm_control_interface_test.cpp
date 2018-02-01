@@ -16,7 +16,7 @@ bool initialize()
     if(nh !=nullptr){
         ArmControlInterface armTraj(*nh);
         std::cout<<"code is working \n";
-        armTraj.moveToZeroPose(RobotSide::LEFT);
+        armTraj.moveToDefaultPose(RobotSide::RIGHT);
 //        armTraj.testPrint();
         return true;
     }
