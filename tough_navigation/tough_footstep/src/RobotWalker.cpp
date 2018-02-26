@@ -226,6 +226,136 @@ bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float> xOffset, co
     return true;
 }
 
+bool RobotWalker::walkLocalPreComputedSteps_waypoints(const std::vector<float> xOffset, const std::vector<float> yOffset, RobotSide startLeg){
+
+    ihmc_msgs::FootstepDataListRosMessage list;
+    list.default_transfer_duration= transfer_time_;
+    list.default_swing_duration = swing_time_;
+    list.execution_mode = execution_mode_;
+    list.unique_id = RobotWalker::id;
+
+    if (xOffset.size() != yOffset.size())
+        ROS_ERROR("X Offset and Y Offset have different size");
+
+    ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
+    ihmc_msgs::FootstepDataRosMessage::Ptr newFootStep(new ihmc_msgs::FootstepDataRosMessage());
+    ihmc_msgs::FootstepDataRosMessage newFootStep1;
+
+    geometry_msgs::Point currentWorldLocation,currentPelvisLocation;
+
+    size_t numberOfSteps = xOffset.size();
+    std::cout<<numberOfSteps<<std::endl;
+
+    newFootStep->swing_trajectory.clear();
+    newFootStep->unique_id = 678;
+
+    newFootStep1.swing_trajectory.clear();
+    newFootStep1.unique_id=10;
+
+    ihmc_msgs::SE3TrajectoryPointRosMessage start, end; //,foot_trajectory2,foot_trajectory3;
+    ihmc_msgs::SE3TrajectoryPointRosMessage::Ptr foot_trajectory1(new ihmc_msgs::SE3TrajectoryPointRosMessage());
+
+    for (int m = 1; m <= numberOfSteps; ++m) {
+        if(m%2 == 1)
+        {
+            getCurrentStep_waypoints(startLeg, *current);
+        }
+        else
+        {
+            getCurrentStep_waypoints((startLeg+1)%2, *current);
+        }
+
+        currentWorldLocation.x=current->location.x;
+        currentWorldLocation.y=current->location.y;
+        currentWorldLocation.z=current->location.z;
+
+//        std::vector<ihmc_msgs::SE3TrajectoryPointRosMessage> foot_trajectories;
+
+        start.position.x=currentWorldLocation.x;
+        start.position.y=currentWorldLocation.y;
+        start.position.z=currentWorldLocation.z;
+
+        current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,TOUGH_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
+
+        currentPelvisLocation.x+=xOffset[m-1];
+        currentPelvisLocation.y+=yOffset[m-1];
+
+        current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),TOUGH_COMMON_NAMES::WORLD_TF);
+
+        end.position.x=currentWorldLocation.x;
+        end.position.y=currentWorldLocation.y;
+
+        foot_trajectory1->position.x=0.25*(end.position.x-start.position.x)+start.position.x;
+        foot_trajectory1->position.y=0.25*(end.position.y-start.position.y)+start.position.y;
+        foot_trajectory1->position.z=start.position.z+0.10f;
+        foot_trajectory1->orientation.x=0.0f;
+        foot_trajectory1->orientation.y=-0.383f;
+        foot_trajectory1->orientation.z=0.0f;
+        foot_trajectory1->orientation.w=0.924f;
+        //foot_trajectory1->time=0.25f;
+        foot_trajectory1->linear_velocity.x=0.1f;
+        foot_trajectory1->linear_velocity.y=0.001f;
+        foot_trajectory1->linear_velocity.z=0.1f;
+        foot_trajectory1->angular_velocity.x=0.001f;
+        foot_trajectory1->angular_velocity.y=0.1f;
+        foot_trajectory1->angular_velocity.z=0.0f;
+        foot_trajectory1->unique_id=1653;
+
+//        foot_trajectory2.position.x=0.50*(end.position.x-start.position.x)+start.position.x;
+//        foot_trajectory2.position.y=0.50*(end.position.y-start.position.y)+start.position.y;
+//        foot_trajectory2.position.z=start.position.z+0.15;
+//        foot_trajectory2.orientation.x=0.0;
+//        foot_trajectory2.orientation.y=-0.383;
+//        foot_trajectory2.orientation.z=0.0;
+//        foot_trajectory2.orientation.w=0.924;
+//        foot_trajectory2.time=0.50f;
+//        foot_trajectory2.linear_velocity.x=0.1;
+//        foot_trajectory2.linear_velocity.y=0.0;
+//        foot_trajectory2.linear_velocity.z=0.1;
+//        foot_trajectory2.angular_velocity.x=0.0;
+//        foot_trajectory2.angular_velocity.y=0.1;
+//        foot_trajectory2.angular_velocity.z=0;
+//        foot_trajectory2.unique_id=16523;
+
+//        foot_trajectory3.position.x=0.75*(end.position.x-start.position.x)+start.position.x;
+//        foot_trajectory3.position.y=0.75*(end.position.y-start.position.y)+start.position.y;
+//        foot_trajectory3.position.z=start.position.z+0.10;
+//        foot_trajectory3.orientation.x=0.0;
+//        foot_trajectory3.orientation.y=-0.383;
+//        foot_trajectory3.orientation.z=0.0;
+//        foot_trajectory3.orientation.w=0.924;
+//        foot_trajectory3.time=0.75f;
+//        foot_trajectory3.linear_velocity.x=0.1;
+//        foot_trajectory3.linear_velocity.y=0.0;
+//        foot_trajectory3.linear_velocity.z=0.1;
+//        foot_trajectory3.angular_velocity.x=0.0;
+//        foot_trajectory3.angular_velocity.y=0.1;
+//        foot_trajectory3.angular_velocity.z=0;
+//        foot_trajectory3.unique_id=1523;
+
+        newFootStep1.location.x=currentWorldLocation.x;
+        newFootStep1.location.y=currentWorldLocation.y;
+        newFootStep1.location.z=current->location.z;
+        newFootStep1.orientation=current->orientation;
+        newFootStep1.robot_side=current->robot_side;
+        newFootStep1.trajectory_type=current->trajectory_type;
+
+        newFootStep1.swing_trajectory.push_back(*foot_trajectory1);
+//        newFootStep->swing_trajectory.push_back(foot_trajectory2);
+//        newFootStep->swing_trajectory.push_back(foot_trajectory3);
+
+
+        std::cout<<newFootStep1.swing_trajectory.size()<<std::endl;
+        //newFootStep->swing_trajectory_blend_duration=0.1;
+        newFootStep1.unique_id++;
+        list.footstep_data_list.push_back(newFootStep1);
+        std::cout<<list.footstep_data_list.size()<<std::endl;
+    }
+
+    this->walkGivenSteps(list);
+    return true;
+}
+
 bool RobotWalker::walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list , bool waitForSteps)
 {
     this->footsteps_pub_.publish(list);
@@ -479,7 +609,26 @@ bool RobotWalker::placeLeg(RobotSide side, float offset)
 //        tf_listener_.transformPoint(TOUGH_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
 
 //    }
-//    catch (tf::TransformException ex){
+//   //void RobotWalker::getCurrentStep_waypoints(int side , ihmc_msgs::FootstepDataRosMessage & foot)
+//{
+
+//    std_msgs::String foot_frame =  side == LEFT ? left_foot_frame_ : right_foot_frame_;
+
+//    tf::StampedTransform transformStamped;
+
+//    /// \todo Use a try catch block here. It needs modification of function
+//    /// signature to return bool and all functions in the heirarchy would be changed accordingly.
+//    //    tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, foot_frame,ros::Time(0), ros::Duration(2.0));
+//    tf_listener_.lookupTransform( VAL_COMMON_NAMES::WORLD_TF,foot_frame.data,ros::Time(0),transformStamped);
+
+//    tf::quaternionTFToMsg(transformStamped.getRotation(),foot.orientation);
+//    foot.location.x = transformStamped.getOrigin().getX();
+//    foot.location.y = transformStamped.getOrigin().getY();
+//    foot.location.z = transformStamped.getOrigin().getZ();
+//    foot.robot_side = side;
+//    foot.trajectory_type = ihmc_msgs::FootstepDataRosMessage::WAYPOINTS;
+//    return;
+//} catch (tf::TransformException ex){
 //        ROS_WARN("%s",ex.what());
 //        ros::spinOnce();
 //        return false;
@@ -618,6 +767,27 @@ void RobotWalker::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage & 
     foot.location.z = transformStamped.getOrigin().getZ();
     foot.robot_side = side;
     foot.trajectory_type = ihmc_msgs::FootstepDataRosMessage::DEFAULT;
+    return;
+}
+
+void RobotWalker::getCurrentStep_waypoints(int side , ihmc_msgs::FootstepDataRosMessage & foot)
+{
+
+    std_msgs::String foot_frame =  side == LEFT ? left_foot_frame_ : right_foot_frame_;
+
+    tf::StampedTransform transformStamped;
+
+    /// \todo Use a try catch block here. It needs modification of function
+    /// signature to return bool and all functions in the heirarchy would be changed accordingly.
+    //    tf_listener_.waitForTransform(VAL_COMMON_NAMES::WORLD_TF, foot_frame,ros::Time(0), ros::Duration(2.0));
+    tf_listener_.lookupTransform( TOUGH_COMMON_NAMES::WORLD_TF,foot_frame.data,ros::Time(0),transformStamped);
+
+    tf::quaternionTFToMsg(transformStamped.getRotation(),foot.orientation);
+    foot.location.x = transformStamped.getOrigin().getX();
+    foot.location.y = transformStamped.getOrigin().getY();
+    foot.location.z = transformStamped.getOrigin().getZ();
+    foot.robot_side = side;
+    foot.trajectory_type = ihmc_msgs::FootstepDataRosMessage::WAYPOINTS;
     return;
 }
 

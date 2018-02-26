@@ -77,7 +77,7 @@ public:
      * @return
      */
     bool walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list , bool waitForSteps=true);
-
+	
     /**
      * @brief setWalkParms      Set the values of walking parameters
      * @param InTransferTime    transfer_time is the time required for the robot to switch its weight from one to other while walking.
@@ -125,7 +125,7 @@ public:
      * @return
      */
     bool walkLocalPreComputedSteps(const std::vector<float> xOffset, const std::vector<float> yOffset, RobotSide startLeg);
-
+	bool walkLocalPreComputedSteps_waypoints(const std::vector<float> xOffset, const std::vector<float> yOffset, RobotSide startLeg);
     /**
      * @brief curlLeg would curl the leg behind with a defined radius. it is similar to the flamingo position.
      * @param side LEFT/RIGHT
@@ -157,7 +157,7 @@ public:
      * @param foot is the foot msg which stores the location of the foot in world frame.
      */
     void getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage& foot);
-
+	void getCurrentStep_waypoints(int side , ihmc_msgs::FootstepDataRosMessage& foot);
     /**
      * @brief raiseLeg raises the leg forward at a desired height.
      * @param side  LEFT/RIGHT
