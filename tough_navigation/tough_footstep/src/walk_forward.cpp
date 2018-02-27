@@ -36,7 +36,9 @@ int main(int argc, char **argv)
 
         log_msg("Walking forward " + std::to_string(x_offset.front()) + " in a single step");
         //walk.walkLocalPreComputedSteps(x_offset,y_offset,RIGHT);
-        walk.walkLocalPreComputedSteps_waypoints(x_offset,y_offset,RIGHT);
+        //walk.walkLocalPreComputedStepsWaypoints(x_offset,y_offset,RIGHT);
+        //walk.walkLocalPreComputedStepsCustom(x_offset,y_offset,RIGHT);
+        walk.curlLeg(RIGHT,0.5);
     }
     else {
         log_msg("Expected 1 argument, got " + std::to_string(argc - 1) + ". Exiting.");

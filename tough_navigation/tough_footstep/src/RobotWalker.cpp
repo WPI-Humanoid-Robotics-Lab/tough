@@ -226,7 +226,78 @@ bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float> xOffset, co
     return true;
 }
 
-bool RobotWalker::walkLocalPreComputedSteps_waypoints(const std::vector<float> xOffset, const std::vector<float> yOffset, RobotSide startLeg){
+bool RobotWalker::walkLocalPreComputedStepsCustom(const std::vector<float> xOffset, const std::vector<float> yOffset, RobotSide startLeg){
+
+    ihmc_msgs::FootstepDataListRosMessage list;
+    list.default_transfer_duration = transfer_time_;
+    list.default_swing_duration = swing_time_;
+    list.execution_mode = execution_mode_;
+    list.unique_id = RobotWalker::id;
+
+    if (xOffset.size() != yOffset.size())
+        ROS_ERROR("X Offset and Y Offset have different size");
+
+    ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
+    ihmc_msgs::FootstepDataRosMessage::Ptr newFootStep(new ihmc_msgs::FootstepDataRosMessage());
+
+    geometry_msgs::Point currentWorldLocation,currentPelvisLocation,point1,point2;
+    ihmc_msgs::SE3TrajectoryPointRosMessage start, end;
+
+    size_t numberOfSteps = xOffset.size();
+
+    for (int m = 1; m <= numberOfSteps; ++m) {
+        if(m%2 == 1)
+        {
+            getCurrentStepCustom(startLeg, *current);
+        }
+        else
+        {
+            getCurrentStepCustom((startLeg+1)%2, *current);
+        }
+
+        currentWorldLocation.x=current->location.x;
+        currentWorldLocation.y=current->location.y;
+        currentWorldLocation.z=current->location.z;
+
+        start.position.x=currentWorldLocation.x;
+        start.position.y=currentWorldLocation.y;
+        start.position.z=currentWorldLocation.z;
+
+        current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,TOUGH_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
+
+        currentPelvisLocation.x+=xOffset[m-1];
+        currentPelvisLocation.y+=yOffset[m-1];
+        current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),TOUGH_COMMON_NAMES::WORLD_TF);
+
+        end.position.x=currentWorldLocation.x;
+        end.position.y=currentWorldLocation.y;
+        end.position.z=currentWorldLocation.z;
+
+        point1.x=0.25*(end.position.x-start.position.x)+start.position.x;
+        point1.y=0.25*(end.position.y-start.position.y)+start.position.y;
+        point1.z=start.position.z+0.10f;
+
+        point2.x=1.2*(end.position.x-start.position.x)+start.position.x;
+        point2.y=1.2*(end.position.y-start.position.y)+start.position.y;
+        point2.z=start.position.z+0.10f;
+
+        newFootStep->location.x=currentWorldLocation.x;
+        newFootStep->location.y=currentWorldLocation.y;
+        newFootStep->location.z=current->location.z;
+        newFootStep->orientation=current->orientation;
+        newFootStep->robot_side=current->robot_side;
+        newFootStep->trajectory_type=current->trajectory_type;
+        newFootStep->position_waypoints.push_back(point1);
+        newFootStep->position_waypoints.push_back(point2);
+        list.footstep_data_list.push_back(*newFootStep);
+    }
+
+    this->walkGivenSteps(list);
+    return true;
+}
+
+
+bool RobotWalker::walkLocalPreComputedStepsWaypoints(const std::vector<float> xOffset, const std::vector<float> yOffset, RobotSide startLeg){
 
     ihmc_msgs::FootstepDataListRosMessage list;
     list.default_transfer_duration= transfer_time_;
@@ -258,11 +329,11 @@ bool RobotWalker::walkLocalPreComputedSteps_waypoints(const std::vector<float> x
     for (int m = 1; m <= numberOfSteps; ++m) {
         if(m%2 == 1)
         {
-            getCurrentStep_waypoints(startLeg, *current);
+            getCurrentStepWaypoints(startLeg, *current);
         }
         else
         {
-            getCurrentStep_waypoints((startLeg+1)%2, *current);
+            getCurrentStepWaypoints((startLeg+1)%2, *current);
         }
 
         currentWorldLocation.x=current->location.x;
@@ -520,7 +591,7 @@ bool RobotWalker::nudgeFoot(RobotSide side, float distance)
 
 bool RobotWalker::curlLeg(RobotSide side, float radius)
 {
-    ihmc_msgs::FootTrajectoryRosMessage foot;
+    ihmc_msgs::FootTrajectoryRosMessage foot;nudgeFoot(RIGHT,1.0);
     ihmc_msgs::SE3TrajectoryPointRosMessage data;
 
     ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
@@ -770,7 +841,28 @@ void RobotWalker::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage & 
     return;
 }
 
-void RobotWalker::getCurrentStep_waypoints(int side , ihmc_msgs::FootstepDataRosMessage & foot)
+void RobotWalker::getCurrentStepCustom(int side , ihmc_msgs::FootstepDataRosMessage & foot)
+{
+
+    std_msgs::String foot_frame =  side == LEFT ? left_foot_frame_ : right_foot_frame_;
+
+    tf::StampedTransform transformStamped;
+
+    /// \todo Use a try catch block here. It needs modification of function
+    /// signature to return bool and all functions in the heirarchy would be changed accordingly.
+    //    tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF, foot_frame,ros::Time(0), ros::Duration(2.0));
+    tf_listener_.lookupTransform( TOUGH_COMMON_NAMES::WORLD_TF,foot_frame.data,ros::Time(0),transformStamped);
+
+    tf::quaternionTFToMsg(transformStamped.getRotation(),foot.orientation);
+    foot.location.x = transformStamped.getOrigin().getX();
+    foot.location.y = transformStamped.getOrigin().getY();
+    foot.location.z = transformStamped.getOrigin().getZ();
+    foot.robot_side = side;
+    foot.trajectory_type = ihmc_msgs::FootstepDataRosMessage::CUSTOM;
+    return;
+}
+
+void RobotWalker::getCurrentStepWaypoints(int side , ihmc_msgs::FootstepDataRosMessage & foot)
 {
 
     std_msgs::String foot_frame =  side == LEFT ? left_foot_frame_ : right_foot_frame_;

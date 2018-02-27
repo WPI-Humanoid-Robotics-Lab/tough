@@ -125,7 +125,8 @@ public:
      * @return
      */
     bool walkLocalPreComputedSteps(const std::vector<float> xOffset, const std::vector<float> yOffset, RobotSide startLeg);
-	bool walkLocalPreComputedSteps_waypoints(const std::vector<float> xOffset, const std::vector<float> yOffset, RobotSide startLeg);
+    bool walkLocalPreComputedStepsCustom(const std::vector<float> xOffset, const std::vector<float> yOffset, RobotSide startLeg);
+    bool walkLocalPreComputedStepsWaypoints(const std::vector<float> xOffset, const std::vector<float> yOffset, RobotSide startLeg);
     /**
      * @brief curlLeg would curl the leg behind with a defined radius. it is similar to the flamingo position.
      * @param side LEFT/RIGHT
@@ -157,7 +158,8 @@ public:
      * @param foot is the foot msg which stores the location of the foot in world frame.
      */
     void getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage& foot);
-	void getCurrentStep_waypoints(int side , ihmc_msgs::FootstepDataRosMessage& foot);
+    void getCurrentStepCustom(int side , ihmc_msgs::FootstepDataRosMessage& foot);
+    void getCurrentStepWaypoints(int side , ihmc_msgs::FootstepDataRosMessage& foot);
     /**
      * @brief raiseLeg raises the leg forward at a desired height.
      * @param side  LEFT/RIGHT
