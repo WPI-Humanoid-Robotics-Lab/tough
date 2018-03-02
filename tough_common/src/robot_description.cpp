@@ -44,7 +44,14 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
 
     std::string robot_xml;
 
-    if(!nh.getParam("/"+robot_name_+urdf_param, robot_xml) || !model_.initString(robot_xml)){
+    if(!nh.getParam("ihmc_ros/robot_name", robot_name_)){
+        ROS_ERROR("Could not read the robot_name parameter.");
+    }
+    else {
+        urdf_param = "/"+robot_name_+urdf_param;
+    }
+
+    if(!nh.getParam(urdf_param, robot_xml) || !model_.initString(robot_xml)){
         ROS_ERROR("Could not read the robot_description");
         return;
     }
@@ -52,6 +59,9 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
         robot_name_.assign(model_.getName());
     }
 
+//    robot_name_ = model_.getName();
+    ROS_INFO("Robot Name : %s", robot_name_.c_str());
+    std::string prefix = "/ihmc_ros/" + robot_name_ + "/";
 
     param_left_arm_joint_names_.insert(0, prefix);
     param_right_arm_joint_names_.insert(0, prefix);
