@@ -36,7 +36,7 @@ public:
      * pose 1 at 2sec, pose 2 at 5sec, then create 2 objects of this struct one for pose 1 and other for pose 2. pose1 object will have time=2
      * and pose2 will have time=5.
      */
-    struct armJointData {
+    struct ArmJointData {
         RobotSide side;
         std::vector<float> arm_pose;
         float time;
@@ -46,7 +46,7 @@ public:
      * @brief The armTaskSpaceData struct is a structure that can store details required to generate a ros message for controlling the hand trajectory in task space.
      * side can be either RIGHT or LEFT. pose is a Pose in task space (world frame) that the hand should move to. time is the total execution time of the trajectory.
      */
-    struct armTaskSpaceData {
+    struct ArmTaskSpaceData {
       RobotSide side;
       geometry_msgs::Pose pose;
       float time;
@@ -77,7 +77,7 @@ public:
      * @param arm_data      A vector of armJointData struct. This allows customization of individual trajectory points. For example,
      * each point can have different execution times.
      */
-    bool moveArmJoints(std::vector<armJointData> &arm_data);
+    bool moveArmJoints(std::vector<ArmJointData> &arm_data);
 
     /**
      * @brief moveArmMessage    Publishes a given ros message of ihmc_msgs::ArmTrajectoryRosMessage format to the robot.
@@ -103,7 +103,7 @@ public:
      * @param point	The point in task space to move the arm to.
      */
 //    void moveArmInTaskSpaceMessage(const RobotSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl=ihmc_msgs::FrameInformationRosMessage::CHEST_FRAME);
-    void moveArmInTaskSpaceMessage(const RobotSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl=-102);
+    void moveArmInTaskSpaceMessage(const RobotSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl=0);
 
     /**
      * @brief moveArmInTaskSpace  Moves the arm to a give pose in task space (world frame)
@@ -118,7 +118,7 @@ public:
      * @param arm_data A vector of armTaskSpaceData struct.
      */
 //    void moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data, int baseForControl=ihmc_msgs::FrameInformationRosMessage::CHEST_FRAME);
-    void moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data, int baseForControl=-102);
+    void moveArmInTaskSpace(std::vector<ArmTaskSpaceData> &arm_data, int baseForControl=-102);
 
     /**
      * @brief moveArmTrajectory Moves the arm to follow a particular trajectory plan
@@ -141,7 +141,7 @@ public:
 
     bool nudgeArmLocal(const RobotSide side, const direction drct, float nudgeStep = 0.05);
 
-    bool generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const RobotSide input_side,const float desired_time, std::vector<ArmControlInterface::armTaskSpaceData> &arm_data_vector);
+    bool generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const RobotSide input_side,const float desired_time, std::vector<ArmControlInterface::ArmTaskSpaceData> &arm_data_vector);
 
     bool moveArmJoint(const RobotSide side, int jointNumber, const float targetAngle, float time=2.0f);
 

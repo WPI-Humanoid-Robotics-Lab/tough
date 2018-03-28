@@ -52,6 +52,10 @@ add_executable(test_arm_navigation src/test_arm_navigation.cpp)
 add_dependencies(test_arm_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_arm_navigation  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
+add_executable(interactive_arm_test src/interactive_arm_test.cpp)
+add_dependencies(interactive_arm_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(interactive_arm_test  ${catkin_LIBRARIES} tough_controller_interface)
+
 add_executable(test_arm src/test_arm.cpp)
 add_dependencies(test_arm ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_arm  ${catkin_LIBRARIES} ${PROJECT_NAME})
