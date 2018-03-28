@@ -28,30 +28,31 @@ int main(int argc, char **argv)
     ArmControlInterface armTraj(nh);
     if(argc!=4)
     {
-      log_msg("Expected 3 arguments, got " + std::to_string(argc - 1));
+        log_msg("Expected 3 arguments, got " + std::to_string(argc - 1));
     }
     else{
-      int inputSide = std::atof(argv[1]);
-      int   jointNumber= std::atof(argv[2]);
-      float jointAngle =std::atof(argv[3]);
+        int inputSide = std::atof(argv[1]);
+        int   jointNumber= std::atof(argv[2]);
+        float jointAngle =std::atof(argv[3]);
 
-      RobotSide side;
+        RobotSide side;
         std::string side_str;
-      if(inputSide == 0){
-          side = LEFT;
-          side_str = "left";
-      } else {
-          side = RIGHT;
-          side_str = "right";
-      }
+        if(inputSide == 0){
+            side = LEFT;
+            side_str = "left";
+        } else {
+            side = RIGHT;
+            side_str = "right";
+        }
 
         log_msg("Moving " + side_str + " joint " + std::to_string(jointNumber) + " to " + std::to_string(jointAngle));
-      armTraj.moveArmJoint(side, jointNumber,jointAngle);
-
+        armTraj.moveArmJoint(side, jointNumber,jointAngle);
+        ros::spinOnce();
+        ros::Duration(2).sleep();
+        log_msg("Motion complete");
     }
-    ros::spinOnce();
-    ros::Duration(2).sleep();
 
-    log_msg("Motion complete");
+
+
     return 0;
 }

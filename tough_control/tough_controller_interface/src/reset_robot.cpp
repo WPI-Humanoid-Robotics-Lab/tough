@@ -20,7 +20,6 @@ int main(int argc, char **argv)
         ros::Duration(0.3).sleep();
         armTraj.moveToZeroPose(RobotSide::RIGHT);
         ros::Duration(1).sleep();
-
     }
 
 

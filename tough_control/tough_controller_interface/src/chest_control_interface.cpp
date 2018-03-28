@@ -35,16 +35,16 @@ void ChestControlInterface::controlChest(geometry_msgs::Quaternion quat, float t
     ihmc_msgs::SO3TrajectoryPointRosMessage data;
 
     data.time = time;
-
     data.orientation = quat;
+
     msg.unique_id = ChestControlInterface::id_++;
     msg.execution_mode = execution_mode;
+
     ihmc_msgs::FrameInformationRosMessage reference_frame;
     reference_frame.trajectory_reference_frame_id = rd_->getPelvisFrameHash();   //Pelvis frame
     reference_frame.data_reference_frame_id = rd_->getPelvisFrameHash();//Pelvis frame
+
     msg.frame_information = reference_frame;
-
-
     msg.taskspace_trajectory_points.push_back(data);
 
     // publish the message

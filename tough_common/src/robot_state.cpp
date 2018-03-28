@@ -8,9 +8,9 @@ RobotStateInformer* RobotStateInformer::getRobotStateInformer(ros::NodeHandle nh
     // check if an object of this class already exists, if not create one
     if(RobotStateInformer::currentObject_ == nullptr){
         static RobotStateInformer obj(nh);
-        RobotStateInformer::currentObject_ = &obj;
+        currentObject_ = &obj;
     }
-    return RobotStateInformer::currentObject_;
+    return currentObject_;
 }
 
 RobotStateInformer::RobotStateInformer(ros::NodeHandle nh):nh_(nh){

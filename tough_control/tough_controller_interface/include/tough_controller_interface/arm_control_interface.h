@@ -19,7 +19,7 @@
 /**
  * @brief The ArmControlInterface class provides ability to move arms of humanoid robots supported by open-humanoids-software.
  */
-class ArmControlInterface : public ToughControllerInterface{
+class ArmControlInterface: public ToughControllerInterface {
 
 public:
     /**
@@ -56,13 +56,13 @@ public:
      * @brief moveToDefaultPose Moves the robot arm to default position
      * @param side  Side of the robot. It can be RIGHT or LEFT.
      */
-    void moveToDefaultPose(RobotSide side);
+    void moveToDefaultPose(RobotSide side, float time=2.0f);
 
     /**
      * @brief moveToZeroPose Moves the robot arm to zero position.
      * @param side  Side of the robot. It can be RIGHT or LEFT.
      */
-    void moveToZeroPose(RobotSide side);
+    void moveToZeroPose(RobotSide side, float time=2.0f);
 
     /**
      * @brief moveArmJoints Moves arm joints to given joint angles. All angles in radians.
@@ -70,14 +70,14 @@ public:
      * @param arm_pose      A vector that stores a vector with 7 values one for each joint. Number of values in the vector are the number of trajectory points.
      * @param time          Total time to execute the trajectory. each trajectory point is equally spaced in time.
      */
-    void moveArmJoints(const RobotSide side,const std::vector<std::vector<float> > &arm_pose,const float time);
+    bool moveArmJoints(const RobotSide side,const std::vector<std::vector<float> > &arm_pose,const float time);
 
     /**
      * @brief moveArmJoints Moves arm joints to given joint angles. All angles in radians.
      * @param arm_data      A vector of armJointData struct. This allows customization of individual trajectory points. For example,
      * each point can have different execution times.
      */
-    void moveArmJoints(std::vector<armJointData> &arm_data);
+    bool moveArmJoints(std::vector<armJointData> &arm_data);
 
     /**
      * @brief moveArmMessage    Publishes a given ros message of ihmc_msgs::ArmTrajectoryRosMessage format to the robot.
@@ -143,12 +143,13 @@ public:
 
     bool generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const RobotSide input_side,const float desired_time, std::vector<ArmControlInterface::armTaskSpaceData> &arm_data_vector);
 
-    bool moveArmJoint(const RobotSide side, int jointNumber, const float targetAngle);
+    bool moveArmJoint(const RobotSide side, int jointNumber, const float targetAngle, float time=2.0f);
 
     bool nudgeArmLocal(const RobotSide side, float x, float y, float z,geometry_msgs::Pose &pose);
     bool nudgeArmPelvis(const RobotSide side, float x, float y, float z,geometry_msgs::Pose &pose);
 
 private:
+
 
     const std::vector<float> ZERO_POSE;
     const std::vector<float> DEFAULT_RIGHT_POSE;
@@ -156,12 +157,13 @@ private:
     int NUM_ARM_JOINTS;
     std::vector<std::pair<float, float> > joint_limits_left_;
     std::vector<std::pair<float, float> > joint_limits_right_;
+
     ros::Publisher  armTrajectoryPublisher;
     ros::Publisher  handTrajectoryPublisher;
     ros::Publisher  taskSpaceTrajectoryPublisher;
     ros::Publisher  markerPub_;
-    ros::Subscriber armTrajectorySunscriber;
-    tf::TransformListener tf_listener_;
+    ros::Subscriber armTrajectorySubscriber;
+
     void poseToSE3TrajectoryPoint(const geometry_msgs::Pose &pose, ihmc_msgs::SE3TrajectoryPointRosMessage &point);
     void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos);
     void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point);

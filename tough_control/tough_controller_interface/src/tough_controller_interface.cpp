@@ -12,7 +12,7 @@ ToughControllerInterface::ToughControllerInterface(ros::NodeHandle nh){
     control_topic_prefix_ = "ihmc_ros/"+robot_name_+"/control";
     output_topic_prefix_ = "ihmc_ros/"+robot_name_+"/output";
 
-    state_informer_ = RobotStateInformer::getRobotStateInformer(nh);
+    state_informer_ = RobotStateInformer::getRobotStateInformer(nh_);
     rd_ = RobotDescription::getRobotDescription(nh_);
 
 }

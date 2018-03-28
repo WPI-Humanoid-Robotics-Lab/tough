@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     std::string side_str = (side == RobotSide::LEFT) ? "left" : "right";
 
     log_msg("Moving " + side_str + " arm to given joint angles");
-    armData.push_back(positions);
+//    armData.push_back(positions);
     armTraj.moveArmJoints(side, armData, 2.0f);
 
     ros::Duration(1).sleep();
