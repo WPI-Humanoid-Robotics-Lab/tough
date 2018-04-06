@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tough_common
 )
+find_package(GTest REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
@@ -20,6 +21,7 @@ catkin_package(
 )
 
 include_directories(${catkin_INCLUDE_DIRS} include)
+include_directories(${GTEST_INCLUDE_DIRS})
 
  add_library(tough_controller_interface
    src/tough_controller_interface.cpp
@@ -92,6 +94,19 @@ install(TARGETS ${PROJECT_NAME} test_chest test_nudgeLocal test_arm
    FILES_MATCHING PATTERN "*.h"
    PATTERN ".svn" EXCLUDE
  )
+
+add_executable(Test_Arms_And_Pelvis src/Examples/Test_Arms_And_Pelvis.cpp)
+add_dependencies(Test_Arms_And_Pelvis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Test_Arms_And_Pelvis  ${catkin_LIBRARIES} tough_controller_interface)
+
+catkin_add_gtest(test_pelvis_height src/test/pelvis_control_interface_test.cpp)
+target_link_libraries(test_pelvis_height ${catkin_LIBRARIES} tough_controller_interface)
+
+catkin_add_gtest(test_chest_trajectory src/test/chest_control_interface_test.cpp)
+target_link_libraries(test_chest_trajectory ${catkin_LIBRARIES} tough_controller_interface)
+
+catkin_add_gtest(test_arms src/test/arms_control_interface_test.cpp)
+target_link_libraries(test_arms ${catkin_LIBRARIES} tough_controller_interface)
 
 
 

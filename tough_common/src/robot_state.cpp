@@ -67,8 +67,11 @@ bool RobotStateInformer::getJointPositions(const std::string &paramName, std::ve
     }
 
     std::lock_guard<std::mutex> guard(currentStateMutex_);
+    //Is this if statement returning true and working?
     if (nh_.getParam(parameter, jointNames)){
+        std::cout << "in if-statement of getJointPosition()" << std::endl;
         for (auto joint : jointNames){
+            std::cout << "Position: " << currentState_[joint].position << std::endl;
             positions.push_back((currentState_[joint]).position);
         }
         return true;

@@ -60,3 +60,11 @@ bool PelvisControlInterface::controlPelvisMessage(ihmc_msgs::PelvisHeightTraject
     PelvisControlInterface::pelvis_id_--;
     msg.unique_id = PelvisControlInterface::pelvis_id_;
 }
+
+float PelvisControlInterface::getPelvisHeight()
+{
+	geometry_msgs::Pose pelvis_pose;
+	state_informer_->getCurrentPose(rd_->getPelvisFrame(), pelvis_pose, rd_->getLeftFootFrameName());
+	
+	return pelvis_pose.position.z;
+}

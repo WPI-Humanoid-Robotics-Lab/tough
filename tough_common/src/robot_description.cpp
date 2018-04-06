@@ -94,6 +94,9 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
            && (link->name.length() < PELVIS_TF.length() || PELVIS_TF.empty())){
             PELVIS_TF = link->name;
         }
+        if(findSubStringIC(link->name, "head") && (link->name.length() < HEAD_TF.length() || HEAD_TF.empty())){
+                   HEAD_TF = link->name;
+        }
     }
 
 //    ROS_INFO("LEFT ARM");
@@ -295,4 +298,14 @@ int main(int argc, char *argv[]) {
     ros::NodeHandle nh;
     RobotDescription* robot = RobotDescription::getRobotDescription(nh);
     return 0;
+}
+
+std::string RobotDescription::getHeadFrame() const
+{
+   return HEAD_TF;
+}
+
+void RobotDescription::setHeadFrame(const std::string &value)
+{
+   HEAD_TF = value;
 }

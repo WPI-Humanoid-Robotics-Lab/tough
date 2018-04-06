@@ -18,6 +18,13 @@
 /**
  * @brief The ArmControlInterface class provides ability to move arms of humanoid robots supported by open-humanoids-software.
  */
+
+struct armJointData {
+        RobotSide side;
+        std::vector<float> arm_pose;
+        float time;
+    };
+
 class ArmControlInterface {
 
 public:
@@ -35,12 +42,7 @@ public:
      * pose 1 at 2sec, pose 2 at 5sec, then create 2 objects of this struct one for pose 1 and other for pose 2. pose1 object will have time=2
      * and pose2 will have time=5.
      */
-    struct armJointData {
-        RobotSide side;
-        std::vector<float> arm_pose;
-        float time;
-    };
-
+    //This is where armJointData was, moved for use purposes!
     /**
      * @brief The armTaskSpaceData struct is a structure that can store details required to generate a ros message for controlling the hand trajectory in task space.
      * side can be either RIGHT or LEFT. pose is a Pose in task space (world frame) that the hand should move to. time is the total execution time of the trajectory.
@@ -142,6 +144,10 @@ public:
 
     bool nudgeArmLocal(const RobotSide side, float x, float y, float z,geometry_msgs::Pose &pose);
     bool nudgeArmPelvis(const RobotSide side, float x, float y, float z,geometry_msgs::Pose &pose);
+    float getArmJoint(std::string param, int jointNum);
+    void getArmJoints(std::string param, std::vector<float> armJointData);
+    bool compareJointAngles(std::string param, std::vector<float> expectedPos);
+    void getJointAngles(const RobotSide side, std::vector<float> &positions);
 
 private:
 

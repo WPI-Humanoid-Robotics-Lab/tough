@@ -59,6 +59,8 @@ public:
 
     std::string getLeftEEFrame() const;
 
+    std::string getHeadFrame() const;
+
     void getLeftArmJointNames(std::vector<std::string> &left_arm_joint_names) const;
 
     void getRightArmJointNames(std::vector<std::string> &right_arm_joint_names) const;
@@ -101,6 +103,8 @@ protected:
 
     void setNumberOfNeckJoints(int numberOfNeckJoints);
 
+    void setHeadFrame(const std::string &value);
+
 private:
     RobotDescription(ros::NodeHandle nh, std::string urdf_param="/robot_description");
     ~RobotDescription();
@@ -134,6 +138,8 @@ private:
 
     std::vector<std::pair<float, float> > left_arm_joint_limits_;
     std::vector<std::pair<float, float> > right_arm_joint_limits_;
+
+    std::string HEAD_TF;
 
     int number_of_neck_joints_;
 };

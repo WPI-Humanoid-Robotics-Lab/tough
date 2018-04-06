@@ -47,3 +47,12 @@ void ChestControlInterface::controlChest(geometry_msgs::Quaternion quat, float t
     chestTrajPublisher_.publish(msg);
 
 }
+
+geometry_msgs::Quaternion ChestControlInterface::getChestOrientation()
+{
+        geometry_msgs::Pose chest_pose;
+        state_informer_->getCurrentPose(rd_->getTorsoFrame(), chest_pose, rd_->getWorldFrame());
+
+        return chest_pose.orientation;
+}
+                      
