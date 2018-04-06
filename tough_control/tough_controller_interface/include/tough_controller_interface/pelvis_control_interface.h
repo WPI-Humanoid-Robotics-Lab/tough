@@ -23,6 +23,7 @@ public:
     ~PelvisControlInterface();
     void controlPelvisHeight(float height);
     bool controlPelvisMessage(ihmc_msgs::PelvisHeightTrajectoryRosMessage msg);
+    float getPelvisHeight();
 };
 
 #endif

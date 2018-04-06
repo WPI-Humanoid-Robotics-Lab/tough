@@ -24,6 +24,7 @@ public:
     ChestControlInterface(ros::NodeHandle nh);
     ~ChestControlInterface();
     void controlChest(float roll , float pitch , float yaw, float time = 1.0f);
+    geometry_msgs::Quaternion getChestOrientation();
 };
 
 #endif // CHEST_CONTROL_INTERFACE_H

@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tough_common
 )
+find_package(GTest REQUIRED)
 
 #   std_msgs
 
@@ -22,6 +23,7 @@ catkin_package(
 )
 
 include_directories(${catkin_INCLUDE_DIRS} include)
+include_directories(${GTEST_INCLUDE_DIRS})
 
  add_library(tough_controller_interface
    src/arm_control_interface.cpp
@@ -83,6 +85,35 @@ target_link_libraries(test_gripper  ${catkin_LIBRARIES} tough_controller_interfa
 add_executable(reset_robot src/reset_robot.cpp)
 add_dependencies(reset_robot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(reset_robot  ${catkin_LIBRARIES} tough_controller_interface)
+
+add_executable(Test_Chest_Trajectory src/Examples/Test_Chest_Trajectory.cpp)
+add_dependencies(Test_Chest_Trajectory ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Test_Chest_Trajectory  ${catkin_LIBRARIES} tough_controller_interface)
+
+add_executable(Test_Pelvis src/Examples/Test_Pelvis.cpp)
+add_dependencies(Test_Pelvis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Test_Pelvis  ${catkin_LIBRARIES} tough_controller_interface)
+
+add_executable(Test_Arms src/Examples/Test_Arms.cpp)
+add_dependencies(Test_Arms ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Test_Arms  ${catkin_LIBRARIES} tough_controller_interface)
+
+add_executable(Test_Arms_2 src/Examples/Test_Arms_2.cpp)
+add_dependencies(Test_Arms_2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Test_Arms_2  ${catkin_LIBRARIES} tough_controller_interface)
+
+add_executable(Test_Arms_And_Pelvis src/Examples/Test_Arms_And_Pelvis.cpp)
+add_dependencies(Test_Arms_And_Pelvis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Test_Arms_And_Pelvis  ${catkin_LIBRARIES} tough_controller_interface)
+
+catkin_add_gtest(test_pelvis_height src/test/pelvis_control_interface_test.cpp)
+target_link_libraries(test_pelvis_height ${catkin_LIBRARIES} tough_controller_interface)
+
+catkin_add_gtest(test_chest_trajectory src/test/chest_control_interface_test.cpp)
+target_link_libraries(test_chest_trajectory ${catkin_LIBRARIES} tough_controller_interface)
+
+catkin_add_gtest(test_arms src/test/arms_control_interface_test.cpp)
+target_link_libraries(test_arms ${catkin_LIBRARIES} tough_controller_interface)
 
 add_dependencies(tough_controller_interface ${catkin_EXPORTED_TARGETS})
 install(TARGETS tough_controller_interface ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
