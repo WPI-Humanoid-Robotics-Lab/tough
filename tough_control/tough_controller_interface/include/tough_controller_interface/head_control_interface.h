@@ -78,6 +78,8 @@ public:
      * @param time            The total time of the trajectories (each trajectory is spaced equally in time).
      */
     void moveNeckJoints(const std::vector<std::vector<float> > &neck_pose, const float time);
+
+    geometry_msgs::Quaternion getHeadOrientation();
 };
 
 #endif // VAL_HEAD_NAVIGATION_H

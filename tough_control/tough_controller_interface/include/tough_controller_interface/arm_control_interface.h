@@ -147,7 +147,7 @@ public:
     float getArmJoint(std::string param, int jointNum);
     void getArmJoints(std::string param, std::vector<float> armJointData);
     bool compareJointAngles(std::string param, std::vector<float> expectedPos);
-    void getJointAngles(const RobotSide side, std::vector<float> &positions);
+    bool getJointAngles(const RobotSide side, std::vector<float> &positions);
 
 private:
 

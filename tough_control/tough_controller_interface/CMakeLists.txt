@@ -99,6 +99,14 @@ add_executable(Test_Arms_And_Pelvis src/Examples/Test_Arms_And_Pelvis.cpp)
 add_dependencies(Test_Arms_And_Pelvis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(Test_Arms_And_Pelvis  ${catkin_LIBRARIES} tough_controller_interface)
 
+add_executable(Test_Head src/Examples/Test_Head.cpp)
+add_dependencies(Test_Head ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Test_Head  ${catkin_LIBRARIES} tough_controller_interface)
+
+add_executable(Test_Gripper src/Examples/Test_Gripper.cpp)
+add_dependencies(Test_Gripper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Test_Gripper  ${catkin_LIBRARIES} tough_controller_interface)
+
 catkin_add_gtest(test_pelvis_height src/test/pelvis_control_interface_test.cpp)
 target_link_libraries(test_pelvis_height ${catkin_LIBRARIES} tough_controller_interface)
 
@@ -107,6 +115,9 @@ target_link_libraries(test_chest_trajectory ${catkin_LIBRARIES} tough_controller
 
 catkin_add_gtest(test_arms src/test/arms_control_interface_test.cpp)
 target_link_libraries(test_arms ${catkin_LIBRARIES} tough_controller_interface)
+
+catkin_add_gtest(test_head_case src/test/head_control_interface_test.cpp)
+target_link_libraries(test_head_case ${catkin_LIBRARIES} tough_controller_interface)
 
 
 
