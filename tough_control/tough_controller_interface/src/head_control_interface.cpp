@@ -161,3 +161,11 @@ int HeadControlInterface::getNumNeckJoints() const
 {
     return NUM_NECK_JOINTS;
 }
+
+geometry_msgs::Quaternion HeadControlInterface::getHeadOrientation()
+{
+        geometry_msgs::Pose head_pose;
+        currentState_->getCurrentPose(rd_->getHeadFrame(), head_pose, rd_->getWorldFrame());
+
+        return head_pose.orientation;
+}

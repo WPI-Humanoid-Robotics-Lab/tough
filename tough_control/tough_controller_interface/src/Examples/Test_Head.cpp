@@ -13,8 +13,8 @@ int main(int argc, char **argv)
     float yaw = 10;
     float time = 3;
     
-    h.moveHead(roll, pitch, yaw, time);
-    
+    h.moveHead(30.0, 15.0, 10.0);
+
     ros::Duration(2).sleep(); 
     ROS_INFO("Motion finished");
 

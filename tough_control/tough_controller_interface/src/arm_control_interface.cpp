@@ -511,9 +511,10 @@ bool ArmControlInterface::nudgeArmPelvis(const RobotSide side, float x, float y,
     pose = value;
     return true;
 }
-void ArmControlInterface::getJointAngles(const RobotSide side, std::vector<float> &positions){
-   std::string param = side == RobotSide::LEFT ? "left_arm" : "right_arm";
-   stateInformer_->getJointPositions(param, positions);
+
+bool ArmControlInterface::getJointAngles(const RobotSide side, std::vector<float> &positions){
+        std::string param = side == RobotSide::LEFT ? "left_arm" : "right_arm";
+       return stateInformer_->getJointPositions(param, positions);
 }
 
 bool ArmControlInterface::compareJointAngles(std::string param, std::vector<float> expectedPos){
