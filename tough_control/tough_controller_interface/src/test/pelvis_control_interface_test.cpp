@@ -8,18 +8,19 @@ class pelvisTestFixture: public testing::Test {
 public:
     ros::NodeHandle nh;
     PelvisControlInterface p;
+    float current_height;
     pelvisTestFixture():p(nh)
     {
-        std::cout << "hello" << std::endl;
+        current_height = p.getPelvisHeight();
+
     }
     virtual void SetUp()
     {
-
     }
 
     virtual void TearDown()
     {
-        p.controlPelvisHeight(0.75);
+        p.controlPelvisHeight(current_height);
         ros::Duration(2).sleep();
         ROS_INFO("Motion Finished");
     }
@@ -27,12 +28,19 @@ public:
 
 TEST_F(pelvisTestFixture, controlPelvisHeight)
 {
-    ASSERT_LT(std::abs(p.getPelvisHeight() - 1.0), 0.05);
+    float height = 1.0;
+    p.controlPelvisHeight(height);
+    ros::Duration(2).sleep();
+    ASSERT_LT(std::abs(p.getPelvisHeight() - height), 0.05);
 }
 
 TEST_F(pelvisTestFixture, controlPelvisHeight2)
 {
-    ASSERT_LT(std::abs(p.getPelvisHeight() - 0.75), 0.05);
+    float height = 0.75;
+    p.controlPelvisHeight(height);
+    ros::Duration(2).sleep();
+    ASSERT_LT(std::abs(p.getPelvisHeight() - height), 0.05);
+
 }
 
 int main(int argc, char **argv)
@@ -41,12 +49,12 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "test_pelvis");
     ros::NodeHandle nh_;
 
-    PelvisControlInterface pelvInterface(nh_);
+//    PelvisControlInterface pelvInterface(nh_);
 
-    pelvInterface.controlPelvisHeight(1.0);
+//    pelvInterface.controlPelvisHeight(1.0);
 
-    ros::Duration(2).sleep();
+//    ros::Duration(2).sleep();
 
-    ROS_INFO("Motion finished!");
+//    ROS_INFO("Motion finished!");
 	return RUN_ALL_TESTS();
 }

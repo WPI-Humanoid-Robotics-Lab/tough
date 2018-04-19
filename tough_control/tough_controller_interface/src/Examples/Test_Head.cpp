@@ -6,15 +6,19 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "test_node");
     ros::NodeHandle nh;
 
+    //Declaring Head Control Interface object
     HeadControlInterface h(nh);
 
+    //Setting roll, pitch, and yaw
     float roll = 30;
     float pitch = 15;
     float yaw = 10;
     float time = 3;
     
-    h.moveHead(30.0, 15.0, 10.0);
+    //Moves head
+    h.moveHead(roll, pitch, yaw);
 
+    //Sleeps, waiting for motion to complete
     ros::Duration(2).sleep(); 
     ROS_INFO("Motion finished");
 

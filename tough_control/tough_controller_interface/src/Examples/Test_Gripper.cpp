@@ -6,9 +6,10 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "test_node");
     ros::NodeHandle nh;
 
-    GripperControlInterface g(nh);
+    GripperControlInterface gripperControl(nh);
+    GRIPPER_STATE gripPos = GRIPPER_STATE::CLOSE;
 
-    g.controlGripper(LEFT, GRIPPER_STATE::CLOSE);
+    gripperControl.controlGripper(LEFT, gripPos);
 
     ros::Duration(2).sleep();
 
