@@ -8,7 +8,7 @@ int main(int argc, char **argv)
 
     // Create an object of PelvisControlInterface - used for actually altering the height of the robot
     PelvisControlInterface pelvisInt(nh);
-    std::cout << pelvisInt.getPelvisHeight() << std::endl;
+    //std::cout << pelvisInt.getPelvisHeight() << std::endl;
     float height = 1.05;
 
     // change the pelvis height. This is a non-blocking call.
@@ -17,5 +17,6 @@ int main(int argc, char **argv)
     // wait for the robot to move
     ros::Duration(2).sleep();
     ROS_INFO("Motion finished");
+
     return 0;
 }

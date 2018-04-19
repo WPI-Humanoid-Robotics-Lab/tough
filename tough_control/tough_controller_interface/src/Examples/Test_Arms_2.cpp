@@ -13,39 +13,36 @@ int main(int argc, char **argv)
 
     //Declaring armJointData objects, as you need a vector of these for the arm to move through a certain path
     armJointData a;
-    armJointData b;
-    armJointData c; 
-    armJointData d;
-    armJointData e;
-
-    //we are moving the left arm (no reason why, it just didn’t matter which one we chose)
     a.side = LEFT;
-    b.side = LEFT;
-    c.side = LEFT;
-    d.side = LEFT;
-    e.side = LEFT;
-    
-    //vectors of angles of joints at each position
     std::vector<float> vect1 {0, 0, 0, 0, 0, 0, 0};
-    std::vector<float> vect2 {0.174, 0.15, 0.1, 0, 0.2, 0.10, 0.15};
-    std::vector<float> vect3 {0.174, 0.30, 0.2, 0, 0.3, 0.20, 0.25};
-    std::vector<float> vect4 {0.174, 0.35, 0.3, 0, 0.40, 0.28, 0.30};
-    std::vector<float> vect5 {0.174, 0.35, 0.4, 0, 0.5, 0.28, 0.34};
-
-    //assigning each “ArmJointData” arm_pose to a position (that is described by a vector of angles for each joint)
     a.arm_pose =  vect1;
-    b.arm_pose = vect2;
-    c.arm_pose = vect3;
-    d.arm_pose = vect4;
-    e.arm_pose = vect5;
-
-    //this is the time taken for each position to be reached
     a.time = 2;
+
+    armJointData b;
+    b.side = LEFT;
+    std::vector<float> vect2 {0.174, 0.15, 0.1, 0, 0.2, 0.10, 0.15};
+    b.arm_pose = vect2;
     b.time = 4;
+
+    armJointData c; 
+    c.side = LEFT;
+    std::vector<float> vect3 {0.174, 0.30, 0.2, 0, 0.3, 0.20, 0.25};
+    c.arm_pose = vect3;
     c.time = 6;
+
+    armJointData d;
+    d.side = LEFT;
+    std::vector<float> vect4 {0.174, 0.35, 0.3, 0, 0.40, 0.28, 0.30};
+    d.arm_pose = vect4;
     d.time = 8;
+
+    armJointData e;
+    e.side = LEFT;
+    std::vector<float> vect5 {0.174, 0.35, 0.4, 0, 0.5, 0.28, 0.34};
+    e.arm_pose = vect5;
     e.time = 10;
 
+    //armJointData vector that defines path that arm will travel through to get to final position
     std::vector <armJointData> data {a, b, c, d, e};
      
     //Move the left arm through the defined path by us in the vectors above!
