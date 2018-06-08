@@ -1,6 +1,6 @@
 #include <tough_controller_interface/head_control_interface.h>
 #include <tf/transform_listener.h>
-#include <tough_controller_interface/robot_state.h>
+#include <tough_common/robot_state.h>
 
 const double degToRad = M_PI / 180;
 
@@ -62,7 +62,7 @@ void HeadControlInterface::moveHead(const geometry_msgs::Quaternion &quaternion,
   quatInWorldFrame.header.stamp = ros::Time(0);
   quatInWorldFrame.quaternion = quaternion;
 
-  currentState_->transformQuaternion(quatInWorldFrame,quatInWorldFrame);
+  state_informer_->transformQuaternion(quatInWorldFrame,quatInWorldFrame);
 
   data.orientation = quatInWorldFrame.quaternion;
 
@@ -116,7 +116,7 @@ void HeadControlInterface::moveHead(const std::vector<std::vector<float> > &traj
 
     tf::quaternionTFToMsg(q, quatInWorldFrame.quaternion);
 
-    currentState_->transformQuaternion(quatInWorldFrame,quatInWorldFrame);
+    state_informer_->transformQuaternion(quatInWorldFrame,quatInWorldFrame);
 
     data.orientation = quatInWorldFrame.quaternion;
 

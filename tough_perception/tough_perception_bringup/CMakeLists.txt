@@ -18,15 +18,14 @@ find_package(catkin REQUIRED COMPONENTS roscpp
                                         sensor_msgs
                                         std_msgs
                                         tough_common
-                                        tough_controller_interface
-)
+                                        )
 
 
 catkin_package(
 #  INCLUDE_DIRS include
   LIBRARIES tough_perception_bringup
   CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros laser_assembler tough_common tough_controller_interface
-  DEPENDS opencv pcl
+#  DEPENDS opencv pcl
 )
 
 #############

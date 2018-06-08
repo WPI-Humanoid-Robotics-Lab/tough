@@ -180,7 +180,6 @@ void ArmControlInterface::closeHand(const RobotSide side)
 void ArmControlInterface::moveArmInTaskSpaceMessage(const RobotSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl)
 {
     ihmc_msgs::HandTrajectoryRosMessage msg;
-    reference_frame.trajectory_reference_frame_id = baseForControl;
     msg.robot_side = side;
     msg.base_for_control = baseForControl;
     msg.taskspace_trajectory_points.push_back(point);
@@ -203,7 +202,6 @@ void ArmControlInterface::moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_
     ihmc_msgs::HandTrajectoryRosMessage msg_l;
     ihmc_msgs::HandTrajectoryRosMessage msg_r;
 
-    reference_frame.trajectory_reference_frame_id = baseForControl;
     msg_l.taskspace_trajectory_points.clear();
     msg_r.taskspace_trajectory_points.clear();
     ArmControlInterface::arm_id--;

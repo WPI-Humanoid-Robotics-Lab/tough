@@ -41,7 +41,7 @@
 #include <tough_common/tough_common_names.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int8.h>
-#include <tough_controller_interface/robot_state.h>
+#include <tough_common/robot_state.h>
 #include "tough_common/robot_description.h"
 
 namespace laser_assembler

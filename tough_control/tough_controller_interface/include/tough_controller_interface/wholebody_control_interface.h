@@ -3,7 +3,7 @@
 
 #include <ros/ros.h>
 #include "tough_common/robot_description.h"
-#include "tough_controller_interface/robot_state.h"
+#include "tough_common/robot_state.h"
 #include <trajectory_msgs/JointTrajectory.h>
 #include <tough_controller_interface/arm_control_interface.h>
 #include <tough_controller_interface/chest_control_interface.h>

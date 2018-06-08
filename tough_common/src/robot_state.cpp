@@ -1,4 +1,4 @@
-#include "tough_controller_interface/robot_state.h"
+#include "tough_common/robot_state.h"
 
 RobotStateInformer* RobotStateInformer::currentObject_ = nullptr;
 
@@ -15,13 +15,13 @@ RobotStateInformer* RobotStateInformer::getRobotStateInformer(ros::NodeHandle nh
 
 RobotStateInformer::RobotStateInformer(ros::NodeHandle nh):nh_(nh){
 //    ROS_INFO("Object Created");
-    jointStateSub_ = nh_.subscribe("/joint_states", 1, &RobotStateInformer::jointStateCB, this);
+    jointStateSub_ = nh_.subscribe(TOUGH_COMMON_NAMES::JOINT_STATES_TOPIC, 1, &RobotStateInformer::jointStateCB, this);
     ros::Duration(0.2).sleep();
     closeRightGrasp={1.09,1.47,1.84,0.90,1.20,1.51,0.99,1.34,1.68,0.55,0.739,0.92,1.40};
     closeLeftGrasp={0.0,-1.47,-1.84,-0.90,-1.20,-1.51,-0.99,-1.34,-1.68,-0.55,-0.739,-0.92,1.40};
     openGrasp={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
     rd_ = RobotDescription::getRobotDescription(nh_);
-    nh.getParam("ihmc_ros/robot_name", robotName_);
+    nh.getParam(TOUGH_COMMON_NAMES::ROBOT_NAME_PARAM, robotName_);
 
 }
 

@@ -3,7 +3,7 @@ project(tough_common)
 
 add_definitions(-std=c++11)
 
-find_package(catkin REQUIRED COMPONENTS roscpp urdf)
+find_package(catkin REQUIRED COMPONENTS roscpp urdf tf)
 
 #kdtree is not required here. This should be removed.
 set(KDSourcesList src/kdtree/alglibinternal.cpp src/kdtree/ap.cpp src/kdtree/alglibmisc.cpp)
@@ -12,12 +12,14 @@ set(HEADERS
     include/${PROJECT_NAME}/robot_description.h)
 
 set(SOURCES
-    src/robot_description.cpp)
+    src/robot_description.cpp
+    src/robot_state.cpp
+    )
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES tough_common
-#  CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS roscpp urdf tf
 #  DEPENDS system_lib
 )
 
@@ -29,10 +31,10 @@ add_library(kdtree
    ${KDSourcesList}
  )
 
-add_library(tough_common ${HEADERS} ${SOURCES})
-set_target_properties(tough_common PROPERTIES LINKER_LANGUAGE CXX)
-add_dependencies(tough_common ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(tough_common ${catkin_LIBRARIES})
+add_library(${PROJECT_NAME} ${SOURCES})
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 
 ## Declare a C++ executable
@@ -40,13 +42,16 @@ add_executable(robot_description src/robot_description.cpp)
 add_dependencies(robot_description ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(robot_description   ${catkin_LIBRARIES})
 
+add_executable(test_jointState src/test_robot_state.cpp)
+add_dependencies(test_jointState  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_jointState ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 #############
 ## Install ##
 #############
 
 ## Mark executables and/or libraries for installation
- install(TARGETS kdtree tough_common robot_description
+ install(TARGETS kdtree ${PROJECT_NAME} robot_description test_jointState
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

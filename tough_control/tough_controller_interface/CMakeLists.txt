@@ -28,65 +28,59 @@ include_directories(${catkin_INCLUDE_DIRS} include)
    src/chest_control_interface.cpp
    src/head_control_interface.cpp
    src/gripper_control_interface.cpp
-   src/robot_state.cpp
    src/wholebody_control_interface.cpp
 )
 
- target_link_libraries(tough_controller_interface
+ target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
 )
 
 
-add_executable(test_jointState src/test_robot_state.cpp)
-add_dependencies(test_jointState  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_jointState   ${catkin_LIBRARIES} tough_controller_interface)
-
-
 add_executable(test_arm_navigation src/test_arm_navigation.cpp)
 add_dependencies(test_arm_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_arm_navigation  ${catkin_LIBRARIES} tough_controller_interface)
+target_link_libraries(test_arm_navigation  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(test_arm src/test_arm.cpp)
 add_dependencies(test_arm ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_arm  ${catkin_LIBRARIES} tough_controller_interface)
+target_link_libraries(test_arm  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 
 add_executable(test_nudgeLocal src/test_nudgeLocal.cpp)
 add_dependencies(test_nudgeLocal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_nudgeLocal  ${catkin_LIBRARIES} tough_controller_interface)
+target_link_libraries(test_nudgeLocal  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(test_chest src/test_chest_navigation.cpp)
 add_dependencies(test_chest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_chest  ${catkin_LIBRARIES} tough_controller_interface)
+target_link_libraries(test_chest  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(test_pelvis src/test_pelvis_navigation.cpp)
 add_dependencies(test_pelvis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_pelvis  ${catkin_LIBRARIES} tough_controller_interface)
+target_link_libraries(test_pelvis  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(test_head src/test_head_navigation.cpp)
 add_dependencies(test_head ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_head  ${catkin_LIBRARIES} tough_controller_interface)
+target_link_libraries(test_head  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(test_neck src/test_neck_navigation.cpp)
 add_dependencies(test_neck ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_neck  ${catkin_LIBRARIES} tough_controller_interface)
+target_link_libraries(test_neck  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(test_wrist src/test_wrist.cpp)
 add_dependencies(test_wrist ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_wrist ${catkin_LIBRARIES} tough_controller_interface)
+target_link_libraries(test_wrist ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(test_gripper src/test_gripper_control.cpp)
 add_dependencies(test_gripper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_gripper  ${catkin_LIBRARIES} tough_controller_interface)
+target_link_libraries(test_gripper  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(reset_robot src/reset_robot.cpp)
 add_dependencies(reset_robot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(reset_robot  ${catkin_LIBRARIES} tough_controller_interface)
+target_link_libraries(reset_robot  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-add_dependencies(tough_controller_interface ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
-install(TARGETS tough_controller_interface test_chest test_nudgeLocal test_arm
-                test_arm_navigation test_jointState test_neck test_head test_pelvis
+install(TARGETS ${PROJECT_NAME} test_chest test_nudgeLocal test_arm
+                test_arm_navigation test_neck test_head test_pelvis
                 test_chest test_nudgeLocal test_arm test_arm_navigation test_wrist
                 test_gripper reset_robot
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

@@ -4,7 +4,7 @@
 #include <ihmc_msgs/PelvisHeightTrajectoryRosMessage.h>
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
-#include "tough_controller_interface/robot_state.h"
+#include "tough_common/robot_state.h"
 #include "tough_common/robot_description.h"
 
 class PelvisControlInterface {

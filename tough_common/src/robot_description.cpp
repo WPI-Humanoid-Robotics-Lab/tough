@@ -30,13 +30,12 @@ RobotDescription* RobotDescription::getRobotDescription(ros::NodeHandle nh, std:
 
 RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
 {
-    ///@TODO: these strings should go in tough_common_names.h
-    param_left_arm_joint_names_  =  "left_arm_joint_names" ;
-    param_right_arm_joint_names_ =  "right_arm_joint_names";
-    param_left_foot_frame_name_  =  "left_foot_frame_name" ;
-    param_right_foot_frame_name_ =  "right_foot_frame_name";
+    param_left_arm_joint_names_  =  TOUGH_COMMON_NAMES::LEFT_ARM_JOINT_NAMES_PARAM ;
+    param_right_arm_joint_names_ =  TOUGH_COMMON_NAMES::RIGHT_ARM_JOINT_NAMES_PARAM;
+    param_left_foot_frame_name_  =  TOUGH_COMMON_NAMES::LEFT_FOOT_FRAME_NAME_PARAM ;
+    param_right_foot_frame_name_ =  TOUGH_COMMON_NAMES::RIGHT_FOOT_FRAME_NAME_PARAM;
 
-    if(!nh.getParam("/ihmc_ros/robot_name", robot_name_)){
+    if(!nh.getParam(TOUGH_COMMON_NAMES::ROBOT_NAME_PARAM, robot_name_)){
         ROS_ERROR("Could not read robot_name");
     }
 
