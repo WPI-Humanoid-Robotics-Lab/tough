@@ -16,7 +16,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES tough_controller_interface
   CATKIN_DEPENDS geometry_msgs ihmc_msgs roscpp std_msgs tf tough_common
-  DEPENDS system_lib tough_common tough_footstep
+  DEPENDS
 )
 
 include_directories(${catkin_INCLUDE_DIRS} include)

@@ -18,7 +18,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES tough_common
 #  CATKIN_DEPENDS other_catkin_pkg
-  DEPENDS system_lib
+#  DEPENDS system_lib
 )
 
 

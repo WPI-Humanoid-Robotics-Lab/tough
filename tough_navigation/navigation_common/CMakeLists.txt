@@ -18,7 +18,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES navigation_common
   CATKIN_DEPENDS nav_msgs roscpp std_msgs sensor_msgs tf tough_common tough_controller_interface
-  DEPENDS system_lib
+#  DEPENDS system_lib
 )
 
 include_directories(
