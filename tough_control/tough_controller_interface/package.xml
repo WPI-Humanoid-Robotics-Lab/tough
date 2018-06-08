@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
 <name>tough_controller_interface</name>
-<version>0.0.0</version>
+<version>0.1.0</version>
 <description>The tough_controller_interface package</description>
 
   <maintainer email="sumanth@todo.todo">sumanth</maintainer>

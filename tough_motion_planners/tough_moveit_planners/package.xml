@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>tough_moveit_planners</name>
-  <version>0.0.0</version>
+  <version>0.1.0</version>
   <description>The tough_moveit_planners package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 

@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tough_footstep)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
- 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -37,8 +36,6 @@ find_package(catkin REQUIRED COMPONENTS
    humanoid_nav_msgs
  )
 
-
-
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
@@ -48,32 +45,17 @@ catkin_package(
 ###########
 ## Build ##
 ###########
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
+include_directories( ${catkin_INCLUDE_DIRS} include)
 
-include_directories( include
-  ${catkin_INCLUDE_DIRS}
-)
-
-## Declare a C++ library
- add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME}
    src/RobotWalker.cpp
  )
 
-## Add cmake target dependencies of the library
-## as an example, code may need to be generated before libraries
-## either from message generation or dynamic reconfigure
-# add_dependencies(tough_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 
-## Declare a C++ executable
-# add_executable(val_footstep_node src/val_footstep_node.cpp)
 add_executable(footstep_node src/footstep_node.cpp)
 target_link_libraries(footstep_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
-
-#add_executable(RobotWalker src/RobotWalker.cpp)
-#add_dependencies(RobotWalker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(test_footstep src/test_footstep.cpp)
 add_dependencies(test_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -99,30 +81,12 @@ add_executable(walk_rotate src/walk_rotate.cpp )
 add_dependencies(walk_rotate ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(walk_rotate  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-# Add cmake target dependencies of the executable
-## same as for the library above
-
-## Specify libraries to link a library or executable target against
-# target_link_libraries(val_footstep_node
-#   ${catkin_LIBRARIES}
-# )
-
 #############
 ## Install ##
 #############
 
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
-
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
 ## Mark executables and/or libraries for installation
- install(TARGETS ${PROJECT_NAME}
+ install(TARGETS ${PROJECT_NAME} walk_rotate walk_forward walk_goal walk_steps walk_test test_footstep footstep_node
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -135,12 +99,9 @@ target_link_libraries(walk_rotate  ${catkin_LIBRARIES} ${PROJECT_NAME})
    PATTERN ".svn" EXCLUDE
  )
 
-## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+  PATTERN ".svn" EXCLUDE)
 
 #############
 ## Testing ##

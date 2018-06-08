@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tough_controller_interface)
 
- 
+set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
@@ -11,8 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tough_common
 )
-
-#   std_msgs
 
 catkin_package(
   INCLUDE_DIRS include
@@ -85,8 +83,20 @@ add_dependencies(reset_robot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORT
 target_link_libraries(reset_robot  ${catkin_LIBRARIES} tough_controller_interface)
 
 add_dependencies(tough_controller_interface ${catkin_EXPORTED_TARGETS})
-install(TARGETS tough_controller_interface ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
+install(TARGETS tough_controller_interface test_chest test_nudgeLocal test_arm
+                test_arm_navigation test_jointState test_neck test_head test_pelvis
+                test_chest test_nudgeLocal test_arm test_arm_navigation test_wrist
+                test_gripper reset_robot
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+ install(DIRECTORY include/${PROJECT_NAME}/
+   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+   FILES_MATCHING PATTERN "*.h"
+   PATTERN ".svn" EXCLUDE
+ )
 
 
-set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
+

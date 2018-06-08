@@ -26,8 +26,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp
                                         tough_controller_interface
 )
 
-include_directories(include)
-include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} include)
 
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
@@ -46,13 +45,10 @@ add_library(${PROJECT_NAME}  src/MultisensePointCloud.cpp
                              src/laser2point_cloud.cpp
 )
 									
-# TODO
-set_property(
-                TARGET ${PROJECT_NAME}
-   		PROPERTY COMPILE_DEFINITIONS GAZEBO_SIMULATION)
+set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_DEFINITIONS GAZEBO_SIMULATION)
 
-target_link_libraries(${PROJECT_NAME}  ${PCL_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(${PROJECT_NAME}  ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME} ${PCL_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
 add_executable(test_lasercloud  src/test_laser.cpp)
 target_link_libraries(test_lasercloud  ${PROJECT_NAME})
@@ -64,26 +60,16 @@ add_executable(test_organizedRGBD  src/test_organizedRGBD.cpp)
 target_link_libraries(test_organizedRGBD  ${PROJECT_NAME})
 
 add_executable(periodic_snapshotter  src/periodic_snapshotter.cpp)
-target_link_libraries(periodic_snapshotter  ${catkin_LIBRARIES}    ${PROJECT_NAME} ${PCL_LIBRARY_DIRS})
+target_link_libraries(periodic_snapshotter  ${catkin_LIBRARIES} ${PROJECT_NAME} ${PCL_LIBRARY_DIRS})
 
 add_executable(walkway_point_generator src/walkway_generator.cpp)
 add_dependencies(walkway_point_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(walkway_point_generator
-   ${catkin_LIBRARIES} ${PCL_LIBRARIES}
- )
+target_link_libraries(walkway_point_generator ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
  add_executable(laser2point_cloud_node src/laser2point_cloud_node.cpp)
  add_dependencies(laser2point_cloud_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
- target_link_libraries(laser2point_cloud_node
-   ${catkin_LIBRARIES} ${PROJECT_NAME}
- )
+ target_link_libraries(laser2point_cloud_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
 
-## Mark executables and/or libraries for installation
-#install(TARGETS ${PROJECT_NAME} multisense_backend
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#)
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/

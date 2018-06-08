@@ -4,12 +4,6 @@ project(navigation_common)
 ## Add support for C++11, supported in ROS Kinetic and newer
 add_definitions(-std=c++11)
 
- 
-
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-
 find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   roscpp
@@ -23,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES navigation_common
-  CATKIN_DEPENDS nav_msgs roscpp std_msgs
+  CATKIN_DEPENDS nav_msgs roscpp std_msgs sensor_msgs tf tough_common tough_controller_interface
   DEPENDS system_lib
 )
 
@@ -33,7 +27,7 @@ include_directories(
 )
 
 ## Declare a C++ library
- add_library(navigation_common
+ add_library(${PROJECT_NAME}
    src/frame_tracking.cpp
    src/fall_detector.cpp
    src/map_generator.cpp
@@ -41,9 +35,6 @@ include_directories(
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
-
-## Declare a C++ executable
-# add_executable(navigation_common_node src/navigation_common_node.cpp)
 
 add_executable(publish_corrected_map  src/publish_corrected_map.cpp)
 target_link_libraries(publish_corrected_map  ${catkin_LIBRARIES})
@@ -56,4 +47,19 @@ target_link_libraries(map_generator  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(fall_detector src/fall_detector_node.cpp)
 target_link_libraries(fall_detector  ${PROJECT_NAME} ${catkin_LIBRARIES})
+
+## Mark executables and/or libraries for installation
+ install(TARGETS ${PROJECT_NAME} publish_corrected_map MapTransform map_generator fall_detector
+   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ )
+
+## Mark cpp header files for installation
+ install(DIRECTORY include/${PROJECT_NAME}/
+   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+   FILES_MATCHING PATTERN "*.h"
+   PATTERN ".svn" EXCLUDE
+ )
+
 
