@@ -8,7 +8,7 @@
 #include <time.h>
 #include <geometry_msgs/Quaternion.h>
 #include <geometry_msgs/Vector3.h>
-#include "tough_controller_interface/robot_state.h"
+#include "tough_common/robot_state.h"
 #include "tough_common/robot_description.h"
 #include "tough_controller_interface/tough_controller_interface.h"
 

@@ -2,7 +2,7 @@
 #include<tough_footstep/RobotWalker.h>
 #include<ihmc_msgs/FootstepDataListRosMessage.h>
 #include"geometry_msgs/Pose2D.h"
-#include "tough_controller_interface/robot_state.h"
+#include "tough_common/robot_state.h"
 
 
 using namespace std;

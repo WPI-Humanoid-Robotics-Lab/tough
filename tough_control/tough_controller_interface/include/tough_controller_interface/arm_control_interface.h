@@ -12,7 +12,7 @@
 #include <trajectory_msgs/JointTrajectory.h>
 #include <tf/transform_listener.h>
 #include <tf/tf.h>
-#include "tough_controller_interface/robot_state.h"
+#include "tough_common/robot_state.h"
 #include "tough_common/robot_description.h"
 
 /**

@@ -27,8 +27,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp
                                         sensor_msgs
                                         std_msgs
                                         tough_common
-                                        tough_controller_interface
-)
+                                        )
 
 include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} include)
 

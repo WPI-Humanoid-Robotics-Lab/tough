@@ -9,10 +9,19 @@ namespace TOUGH_COMMON_NAMES
 const std::string atlas = "atlas";
 const std::string valkyrie = "valkyrie";
 
+/********* Parameters *********/
+const std::string ROBOT_NAME_PARAM = "/ihmc_ros/robot_name";
+const std::string LEFT_ARM_JOINT_NAMES_PARAM  = "left_arm_joint_names" ;
+const std::string RIGHT_ARM_JOINT_NAMES_PARAM = "right_arm_joint_names";
+const std::string LEFT_FOOT_FRAME_NAME_PARAM  = "left_foot_frame_name" ;
+const std::string RIGHT_FOOT_FRAME_NAME_PARAM = "right_foot_frame_name";
+
 /********* Topic Names *********/
 const std::string LOG_TOPIC = "/field/log";
 const std::string MARKER_TOPIC = "/visualization_marker";
 const std::string MARKER_ARRAY_TOPIC = "/visualization_marker_array";
+const std::string JOINT_STATES_TOPIC = "/joint_states";
+const std::string RECTIFIED_IMAGE_TOPIC = "/multisense/camera/left/image_rect_color";
 
 /********* TF Frames *********/
 
@@ -25,8 +34,6 @@ const std::string ROBOT_HEAD_FRAME_TF = "/head";
 /* world frame*/
 const std::string WORLD_TF = "/world";
 
-/* Topics*/
-const std::string RECTIFIED_IMAGE_TOPIC = "/multisense/camera/left/image_rect_color";
 
 /* Moveit Groups */
 // leftArm -- > leftShoulderPitchLink to leftPalm

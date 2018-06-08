@@ -5,7 +5,7 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
-#include "tough_controller_interface/robot_state.h"
+#include "tough_common/robot_state.h"
 #include "tough_common/robot_description.h"
 #include <mutex>
 
