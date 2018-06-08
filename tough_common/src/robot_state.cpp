@@ -15,13 +15,14 @@ RobotStateInformer* RobotStateInformer::getRobotStateInformer(ros::NodeHandle nh
 
 RobotStateInformer::RobotStateInformer(ros::NodeHandle nh):nh_(nh){
 //    ROS_INFO("Object Created");
-    jointStateSub_ = nh_.subscribe(TOUGH_COMMON_NAMES::JOINT_STATES_TOPIC, 1, &RobotStateInformer::jointStateCB, this);
+    nh.getParam(TOUGH_COMMON_NAMES::ROBOT_NAME_PARAM, robotName_);
+    jointStateSub_ = nh_.subscribe("/ihmc_ros/"+robotName_+"/output"+TOUGH_COMMON_NAMES::JOINT_STATES_TOPIC, 1, &RobotStateInformer::jointStateCB, this);
     ros::Duration(0.2).sleep();
     closeRightGrasp={1.09,1.47,1.84,0.90,1.20,1.51,0.99,1.34,1.68,0.55,0.739,0.92,1.40};
     closeLeftGrasp={0.0,-1.47,-1.84,-0.90,-1.20,-1.51,-0.99,-1.34,-1.68,-0.55,-0.739,-0.92,1.40};
     openGrasp={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
     rd_ = RobotDescription::getRobotDescription(nh_);
-    nh.getParam(TOUGH_COMMON_NAMES::ROBOT_NAME_PARAM, robotName_);
+
 
 }
 
@@ -30,7 +31,6 @@ RobotStateInformer::~RobotStateInformer(){
 }
 
 void RobotStateInformer::jointStateCB(const sensor_msgs::JointStatePtr msg){
-
     std::lock_guard<std::mutex> guard(currentStateMutex_);
     for(size_t i = 0; i < msg->name.size(); ++i){
         RobotState state;
