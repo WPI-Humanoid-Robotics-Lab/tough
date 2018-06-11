@@ -6,23 +6,20 @@
 #include <tf/transform_listener.h>
 #include "tough_common/robot_state.h"
 #include "tough_common/robot_description.h"
+#include "tough_controller_interface/tough_controller_interface.h"
 
-class PelvisControlInterface {
+class PelvisControlInterface : public ToughControllerInterface{
 
 private:
 
-    ros::NodeHandle nh_;
     ros::Publisher pelvisHeightPublisher_;
-    static int pelvis_id_;
-    RobotStateInformer *state_informer_;
-    RobotDescription *rd_;
 
 public:
 
     PelvisControlInterface(ros::NodeHandle nh);
     ~PelvisControlInterface();
     void controlPelvisHeight(float height);
-    bool controlPelvisMessage(ihmc_msgs::PelvisHeightTrajectoryRosMessage msg);
+    void publishPelvisMessage(const ihmc_msgs::PelvisHeightTrajectoryRosMessage &msg) const ;
 };
 
 #endif

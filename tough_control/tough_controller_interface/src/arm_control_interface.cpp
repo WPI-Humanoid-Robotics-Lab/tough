@@ -2,26 +2,18 @@
 #include<stdlib.h>
 #include<visualization_msgs/Marker.h>
 
-int ArmControlInterface::arm_id = -1;
-
 //add default pose for both arms. the values of joints are different.
-ArmControlInterface::ArmControlInterface(ros::NodeHandle nh):nh_(nh),
+ArmControlInterface::ArmControlInterface(ros::NodeHandle nh):ToughControllerInterface(nh),
     ZERO_POSE{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
     DEFAULT_RIGHT_POSE{-0.2f, 1.2f, 0.7222f, 1.5101f, 0.0f, 0.0f, 0.0f},
     DEFAULT_LEFT_POSE{-0.2f, -1.2f, 0.7222f, -1.5101f, 0.0f, 0.0f, 0.0f}
     {
 
-    std::string robot_name;
-    nh.getParam("ihmc_ros/robot_name", robot_name);
-
-    armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/arm_trajectory", 1,true);
-    handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>("/ihmc_ros/"+ robot_name +"/control/hand_desired_configuration", 1,true);
-    taskSpaceTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandTrajectoryRosMessage>("/ihmc_ros/"+ robot_name +"/control/hand_trajectory", 1, true);
+    armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>(control_topic_prefix_+"/arm_trajectory", 1,true);
+    handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>(control_topic_prefix_+"/hand_desired_configuration", 1,true);
+    taskSpaceTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandTrajectoryRosMessage>(control_topic_prefix_+"/hand_trajectory", 1, true);
     markerPub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
 
-    stateInformer_ = RobotStateInformer::getRobotStateInformer(nh_);
-
-    rd_ = RobotDescription::getRobotDescription(nh_);
     rd_->getLeftArmJointLimits(joint_limits_left_);
     rd_->getRightArmJointLimits(joint_limits_right_);
 
@@ -52,7 +44,7 @@ void ArmControlInterface::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessa
         p.time = time;
         p.position = pos[i];
         p.velocity = 0;
-        p.unique_id = ArmControlInterface::arm_id;
+        p.unique_id = id_++;
         msg.joint_trajectory_messages[i].trajectory_points.push_back(p);
     }
 
@@ -66,8 +58,7 @@ void ArmControlInterface::moveToDefaultPose(RobotSide side)
 
     arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
     arm_traj.robot_side = side;
-    ArmControlInterface::arm_id--;
-    arm_traj.unique_id = ArmControlInterface::arm_id;
+    arm_traj.unique_id = id_++;
     if(side == RIGHT)
         appendTrajectoryPoint(arm_traj, 1, DEFAULT_RIGHT_POSE);
     else
@@ -84,8 +75,7 @@ void ArmControlInterface::moveToZeroPose(RobotSide side)
 
     arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
     arm_traj.robot_side = side;
-    ArmControlInterface::arm_id--;
-    arm_traj.unique_id = ArmControlInterface::arm_id;
+    arm_traj.unique_id = id_++;
 
     if(side == RobotSide::LEFT)
         appendTrajectoryPoint(arm_traj, 2, {0.1,-0.1,0.1,-0.1,0.1,-0.1,-0.1});
@@ -104,8 +94,7 @@ void ArmControlInterface::moveArmJoints(const RobotSide side, const std::vector<
 
     arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
     arm_traj.robot_side = side;
-    ArmControlInterface::arm_id--;
-    arm_traj.unique_id = ArmControlInterface::arm_id;
+    arm_traj.unique_id = id_++;
     for(auto i=arm_pose.begin(); i != arm_pose.end(); i++){
         if(i->size() != NUM_ARM_JOINTS)
             ROS_WARN("Check number of trajectory points");
@@ -125,12 +114,10 @@ void ArmControlInterface::moveArmJoints(std::vector<armJointData> &arm_data){
     arm_traj_r.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
 
 
-    ArmControlInterface::arm_id--;
-    arm_traj_r.unique_id = ArmControlInterface::arm_id;
-    ArmControlInterface::arm_id--;
+    arm_traj_r.unique_id = id_++;
     arm_traj_l.joint_trajectory_messages.clear();
     arm_traj_l.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
-    arm_traj_l.unique_id = ArmControlInterface::arm_id;
+    arm_traj_l.unique_id = id_++;
 
     for(std::vector<armJointData>::iterator i=arm_data.begin(); i != arm_data.end(); i++){
 
@@ -159,9 +146,8 @@ void ArmControlInterface::moveArmJoints(std::vector<armJointData> &arm_data){
 
 void ArmControlInterface::moveArmMessage(const ihmc_msgs::ArmTrajectoryRosMessage &msg){
     this->armTrajectoryPublisher.publish(msg);
-    ArmControlInterface::arm_id--;
-
 }
+
 int ArmControlInterface::getnumArmJoints() const
 {
     return NUM_ARM_JOINTS;
@@ -172,8 +158,7 @@ void ArmControlInterface::closeHand(const RobotSide side)
     ihmc_msgs::HandDesiredConfigurationRosMessage msg;
     msg.robot_side = side;
     msg.hand_desired_configuration = msg.CLOSE;
-    ArmControlInterface::arm_id--;
-    msg.unique_id = ArmControlInterface::arm_id;
+    msg.unique_id = id_++;
     this->handTrajectoryPublisher.publish(msg);
 }
 
@@ -184,8 +169,7 @@ void ArmControlInterface::moveArmInTaskSpaceMessage(const RobotSide side, const 
     msg.base_for_control = baseForControl;
     msg.taskspace_trajectory_points.push_back(point);
     msg.execution_mode = msg.OVERRIDE;
-    ArmControlInterface::arm_id--;
-    msg.unique_id = ArmControlInterface::arm_id;
+    msg.unique_id = id_++;
     taskSpaceTrajectoryPublisher.publish(msg);
 }
 
@@ -204,12 +188,10 @@ void ArmControlInterface::moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_
 
     msg_l.taskspace_trajectory_points.clear();
     msg_r.taskspace_trajectory_points.clear();
-    ArmControlInterface::arm_id--;
-    msg_l.unique_id = ArmControlInterface::arm_id;
+    msg_l.unique_id = id_++;
     msg_l.base_for_control = baseForControl;
     msg_l.execution_mode = msg_l.OVERRIDE;
-    ArmControlInterface::arm_id--;
-    msg_r.unique_id = ArmControlInterface::arm_id;
+    msg_r.unique_id = id_++;
     msg_r.base_for_control = baseForControl;
     msg_r.execution_mode = msg_r.OVERRIDE;
 
@@ -249,8 +231,7 @@ void ArmControlInterface::poseToSE3TrajectoryPoint(const geometry_msgs::Pose &po
     point.orientation.y = pose.orientation.y;
     point.orientation.z = pose.orientation.z;
     point.orientation.w = pose.orientation.w;
-    ArmControlInterface::arm_id--;
-    point.unique_id = ArmControlInterface::arm_id;
+    point.unique_id = id_++;
     return;
 }
 
@@ -261,8 +242,7 @@ void ArmControlInterface::moveArmTrajectory(const RobotSide side, const trajecto
 
     arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
     arm_traj.robot_side = side;
-    ArmControlInterface::arm_id--;
-    arm_traj.unique_id = ArmControlInterface::arm_id;
+    arm_traj.unique_id = id_++;
 
     for(auto i=traj.points.begin(); i < traj.points.end(); i++){
         appendTrajectoryPoint(arm_traj, *i);
@@ -280,7 +260,7 @@ bool ArmControlInterface::nudgeArm(const RobotSide side, const direction drct, f
 
     std::string target_frame = side == LEFT ? rd_->getLeftEEFrame() : rd_->getRightEEFrame();
 
-    stateInformer_->getCurrentPose(target_frame, palm_pose, rd_->getPelvisFrame());
+    state_informer_->getCurrentPose(target_frame, palm_pose, rd_->getPelvisFrame());
 
     if     (drct == direction::LEFT)     palm_pose.position.y += nudgeStep;
     else if(drct == direction::RIGHT)    palm_pose.position.y -= nudgeStep;
@@ -289,7 +269,7 @@ bool ArmControlInterface::nudgeArm(const RobotSide side, const direction drct, f
     else if(drct == direction::FRONT)    palm_pose.position.x += nudgeStep;
     else if(drct == direction::BACK)     palm_pose.position.x -= nudgeStep;
 
-    stateInformer_->transformPose(palm_pose, world_pose, rd_->getPelvisFrame(), "/world");
+    state_informer_->transformPose(palm_pose, world_pose, rd_->getPelvisFrame(), "/world");
     moveArmInTaskSpace(side,world_pose, 0.0f);
     return true;
 }
@@ -301,9 +281,9 @@ bool ArmControlInterface::nudgeArmLocal(const RobotSide side, const direction dr
     int signInverter = side == LEFT ? 1 : -1;
 
     geometry_msgs::Pose value;
-    stateInformer_->getCurrentPose(target_frame,value);
+    state_informer_->getCurrentPose(target_frame,value);
         std::cout<<"Before-> World Frame x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
-    stateInformer_->transformPose(value, value,"/world",target_frame);
+    state_informer_->transformPose(value, value,"/world",target_frame);
         std::cout<<"Before-> Local Frame x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
 
     if     (drct == direction::FRONT)     value.position.y += nudgeStep*signInverter;
@@ -313,7 +293,7 @@ bool ArmControlInterface::nudgeArmLocal(const RobotSide side, const direction dr
     else if(drct == direction::LEFT)      value.position.x += nudgeStep*signInverter;
     else if(drct == direction::RIGHT)     value.position.x -= nudgeStep*signInverter;
     std::cout<<"After -> Local Frame x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
-    stateInformer_->transformPose(value, value,target_frame,"/world");
+    state_informer_->transformPose(value, value,target_frame,"/world");
     std::cout<<"After -> World Frame x: "<<value.position.x<<" y: "<<value.position.y<<" z: "<<value.position.z<<"\n";
     moveArmInTaskSpace(side,value, 0.0f);
     return true;
@@ -351,7 +331,7 @@ void ArmControlInterface::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessa
         p.time = point.time_from_start.toSec();
         p.position = point.positions[i];
         p.velocity = point.velocities[i];
-        p.unique_id = ArmControlInterface::arm_id;
+        p.unique_id = id_++;
         msg.joint_trajectory_messages[i].trajectory_points.push_back(p);
     }
 
@@ -386,7 +366,7 @@ bool ArmControlInterface::moveArmJoint(const RobotSide side, int jointNumber, co
     std::string param = side == LEFT ? "left_arm" : "right_arm";
 
     std::vector<float> positions;
-    if (stateInformer_->getJointPositions(param, positions)){
+    if (state_informer_->getJointPositions(param, positions)){
 
         for (auto i : positions){
             std::cout<<i<<" ";
@@ -418,17 +398,17 @@ bool ArmControlInterface::nudgeArmLocal(const RobotSide side, float x, float y, 
     geometry_msgs::Quaternion quat;
 
     // to save the orientation
-    stateInformer_->getCurrentPose(target_EE_frame,value);
+    state_informer_->getCurrentPose(target_EE_frame,value);
     quat = value.orientation;
 //    std::cout<<"w :"<<quat.w<<" x :"<<quat.x<<" y :"<<quat.y<<" z :"<<quat.z<<"\n";
 
-    stateInformer_->getCurrentPose(target_EE_frame,value,target_frame);
+    state_informer_->getCurrentPose(target_EE_frame,value,target_frame);
 
     value.position.x+=x;
     value.position.y+=y;
     value.position.z+=z;
 
-    stateInformer_->transformPose(value, value,target_frame,"/world");
+    state_informer_->transformPose(value, value,target_frame,"/world");
     value.orientation = quat;
 //    std::cout<<"w :"<<value.orientation.w<<" x :"<<value.orientation.x<<" y :"<<value.orientation.y<<" z :"<<value.orientation.z<<"\n";
 //    moveArmInTaskSpace(side,value, 0.0f);
@@ -445,16 +425,16 @@ bool ArmControlInterface::nudgeArmPelvis(const RobotSide side, float x, float y,
     geometry_msgs::Quaternion quat;
 
     // to save the orientation
-    stateInformer_->getCurrentPose(target_EE_frame,value);
+    state_informer_->getCurrentPose(target_EE_frame,value);
     quat = value.orientation;
 
-    stateInformer_->getCurrentPose(target_EE_frame,value,target_frame);
+    state_informer_->getCurrentPose(target_EE_frame,value,target_frame);
 
     value.position.x+=x;
     value.position.y+=y;
     value.position.z+=z;
 
-    stateInformer_->transformPose(value, value,target_frame,"/world");
+    state_informer_->transformPose(value, value,target_frame,"/world");
     value.orientation = quat;
 //    moveArmInTaskSpace(side,value, 0.0f);
     pose = value;

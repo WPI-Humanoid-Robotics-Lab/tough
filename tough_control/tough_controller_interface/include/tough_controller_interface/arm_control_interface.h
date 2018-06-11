@@ -14,11 +14,12 @@
 #include <tf/tf.h>
 #include "tough_common/robot_state.h"
 #include "tough_common/robot_description.h"
+#include "tough_controller_interface/tough_controller_interface.h"
 
 /**
  * @brief The ArmControlInterface class provides ability to move arms of humanoid robots supported by open-humanoids-software.
  */
-class ArmControlInterface {
+class ArmControlInterface : public ToughControllerInterface{
 
 public:
     /**
@@ -145,14 +146,12 @@ public:
 
 private:
 
-    static int arm_id;
     const std::vector<float> ZERO_POSE;
     const std::vector<float> DEFAULT_RIGHT_POSE;
     const std::vector<float> DEFAULT_LEFT_POSE;
     int NUM_ARM_JOINTS;
     std::vector<std::pair<float, float> > joint_limits_left_;
     std::vector<std::pair<float, float> > joint_limits_right_;
-    ros::NodeHandle nh_;
     ros::Publisher  armTrajectoryPublisher;
     ros::Publisher  handTrajectoryPublisher;
     ros::Publisher  taskSpaceTrajectoryPublisher;
@@ -162,8 +161,6 @@ private:
     void poseToSE3TrajectoryPoint(const geometry_msgs::Pose &pose, ihmc_msgs::SE3TrajectoryPointRosMessage &point);
     void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos);
     void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point);
-    RobotStateInformer *stateInformer_;
-    RobotDescription *rd_;
 
 };
 
