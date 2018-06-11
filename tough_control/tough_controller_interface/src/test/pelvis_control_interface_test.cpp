@@ -1,3 +1,7 @@
+//Author: Syon Khosla
+//Date (of last edit): April 20, 2018
+//COMPLETED
+
 #include <gtest/gtest.h>
 #include <math.h>
 #include <climits>
@@ -11,6 +15,7 @@ public:
     float current_height;
     pelvisTestFixture():p(nh)
     {
+        std::cout << "Constructor being called" << std::endl;
         current_height = p.getPelvisHeight();
 
     }
@@ -28,33 +33,27 @@ public:
 
 TEST_F(pelvisTestFixture, controlPelvisHeight)
 {
+    //Towards the top of Pelvis range test
     float height = 1.0;
     p.controlPelvisHeight(height);
-    ros::Duration(2).sleep();
-    ASSERT_LT(std::abs(p.getPelvisHeight() - height), 0.05);
-}
-
-TEST_F(pelvisTestFixture, controlPelvisHeight2)
-{
-    float height = 0.75;
-    p.controlPelvisHeight(height);
-    ros::Duration(2).sleep();
+    ros::Duration(3).sleep();
+    std::cout << "Height = " << p.getPelvisHeight() << std::endl;
     ASSERT_LT(std::abs(p.getPelvisHeight() - height), 0.05);
 
+    //Towards the bottom of pelvis range test
+    float height2 = 0.75;
+    p.controlPelvisHeight(height2);
+    ros::Duration(2).sleep();
+    std::cout << "Height = " << p.getPelvisHeight() << std::endl;
+    ASSERT_LT(std::abs(p.getPelvisHeight() - height2), 0.05);
 }
+
+
 
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
 	ros::init(argc, argv, "test_pelvis");
-    ros::NodeHandle nh_;
 
-//    PelvisControlInterface pelvInterface(nh_);
-
-//    pelvInterface.controlPelvisHeight(1.0);
-
-//    ros::Duration(2).sleep();
-
-//    ROS_INFO("Motion finished!");
 	return RUN_ALL_TESTS();
 }

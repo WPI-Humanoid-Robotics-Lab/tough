@@ -1,3 +1,7 @@
+//Author: Syon Khosla
+//Date (of last edit): April 14th, 2018
+//COMPLETED
+
 #include <tough_controller_interface/head_control_interface.h>
 
 int main(int argc, char **argv)

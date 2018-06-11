@@ -1,3 +1,7 @@
+//Author: Syon Khosla
+//Date (of last edit): March 23rd, 2018
+//COMPLETED
+
 #include <tough_controller_interface/pelvis_control_interface.h>
 
 int main(int argc, char **argv)

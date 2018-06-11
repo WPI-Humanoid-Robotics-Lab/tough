@@ -23,7 +23,13 @@ struct armJointData {
         RobotSide side;
         std::vector<float> arm_pose;
         float time;
-    };
+};
+
+struct armTaskSpaceData {
+  RobotSide side;
+  geometry_msgs::Pose pose;
+  float time;
+};
 
 class ArmControlInterface {
 
@@ -47,11 +53,7 @@ public:
      * @brief The armTaskSpaceData struct is a structure that can store details required to generate a ros message for controlling the hand trajectory in task space.
      * side can be either RIGHT or LEFT. pose is a Pose in task space (world frame) that the hand should move to. time is the total execution time of the trajectory.
      */
-    struct armTaskSpaceData {
-      RobotSide side;
-      geometry_msgs::Pose pose;
-      float time;
-    };
+
 
     /**
      * @brief moveToDefaultPose Moves the robot arm to default position
@@ -138,7 +140,7 @@ public:
 
     bool nudgeArmLocal(const RobotSide side, const direction drct, float nudgeStep = 0.05);
 
-    bool generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const RobotSide input_side,const float desired_time, std::vector<ArmControlInterface::armTaskSpaceData> &arm_data_vector);
+    bool generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const RobotSide input_side,const float desired_time, std::vector<armTaskSpaceData> &arm_data_vector);
 
     bool moveArmJoint(const RobotSide side, int jointNumber, const float targetAngle);
 
