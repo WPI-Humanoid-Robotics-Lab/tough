@@ -32,3 +32,5 @@ void GripperControlInterface::openGripper(const RobotSide side)
 {
     controlGripper(side, ihmc_msgs::HandDesiredConfigurationRosMessage::OPEN);
 }
+
+
