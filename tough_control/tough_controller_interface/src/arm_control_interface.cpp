@@ -126,7 +126,6 @@ void ArmControlInterface::moveArmJoints(const RobotSide side, const std::vector<
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
     arm_traj.joint_trajectory_messages.clear();
 
-
     arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
     arm_traj.robot_side = side;
     ArmControlInterface::arm_id--;
@@ -414,14 +413,14 @@ void ArmControlInterface::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessa
 //transforms the poses to the worldframe regardless.
 //POSES MUST BE IN WORLD FRAME;
 //Add conversion of posestamped to world frame if it not already in world frame
-bool ArmControlInterface::generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const RobotSide input_side,const float desired_time, std::vector<ArmControlInterface::armTaskSpaceData> &arm_data_vector)
+bool ArmControlInterface::generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses,const RobotSide input_side, const float desired_time, std::vector<armTaskSpaceData> &arm_data_vector)
 {
 
     float time_delta = desired_time == 0 ? 0 : desired_time/input_poses.size();
     for(int i=0 ; i < input_poses.size(); i++)
     {
         geometry_msgs::PoseStamped input_pose=input_poses.at(i);
-        ArmControlInterface::armTaskSpaceData task_space_data;
+        armTaskSpaceData task_space_data;
         task_space_data.side = input_side;
         task_space_data.pose = input_pose.pose;
         task_space_data.time = time_delta;

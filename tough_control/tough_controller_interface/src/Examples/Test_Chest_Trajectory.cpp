@@ -1,3 +1,7 @@
+//Author: Syon Khosla
+//Last edited: April 26th, 2018
+//COMPLETED
+
 #include <tough_controller_interface/chest_control_interface.h>
 
 int main(int argc, char **argv)

@@ -1,7 +1,9 @@
+//Author: Syon Khosla
+//Date (of last edit): April 24, 2018
 //Change to task area thing
 
 #include <tough_controller_interface/arm_control_interface.h>
-
+#include <tough_controller_interface/gripper_control_interface.h>
 int main(int argc, char **argv)
 {
     // Initialize a ros node
@@ -11,28 +13,41 @@ int main(int argc, char **argv)
     // Create an object of ArmControlInterface - used for actually altering the different aspects of the arms of the robot
     ArmControlInterface armInt(nh);
 
+    RobotSide side = RobotSide::LEFT;
+    RobotStateInformer *current_state_ = RobotStateInformer::getRobotStateInformer(nh);
+
     // change the Right arm position to ZeroPose. This is a non-blocking call.
-    armInt.moveToZeroPose(RIGHT);
+    RobotDescription *rd_ = RobotDescription::getRobotDescription(nh);
+    geometry_msgs::QuaternionStamped leftHandOrientation_;
+    leftHandOrientation_.header.frame_id = rd_->getPelvisFrame();
 
-    // wait for the robot to move
-    ros::Duration(2).sleep();
-	
-    //Moving Left arm to ZeroPose.
-    armInt.moveToZeroPose(LEFT);
+    leftHandOrientation_.quaternion.x = 0.604;
+    leftHandOrientation_.quaternion.y = 0.434;
+    leftHandOrientation_.quaternion.z = -0.583;
+    leftHandOrientation_.quaternion.w = 0.326;
 
-    //Waiting for movement to finish
-    ros::Duration(2).sleep();
+    GripperControlInterface gripper_(nh);
+    ROS_INFO("Opening Grippers");
+    gripper_.controlGripper(side, GRIPPER_STATE::OPEN);
 
-    //Closes the hand of the left arm
-    armInt.closeHand(LEFT);
-    ros::Duration(2).sleep();
+    geometry_msgs::Pose finalGoal;
+    geometry_msgs::Point finalPoint;
 
-    //Closes right arm's hand
-    armInt.closeHand(RIGHT);
-    ros::Duration(2).sleep();
+    finalPoint.x = 0.7;
+    finalPoint.y = 0.7;
+    finalPoint.z = 0.7;
 
-    //Publish brief message
-    ROS_INFO("Motion finished");
+    finalGoal.orientation = leftHandOrientation_;
+    finalGoal.position = finalPoint;
+
+    current_state_->transformQuaternion(leftHandOrientation_);
+
+    current_state_->transformPoint(finalPoint, finalPoint, TOUGH_COMMON_NAMES::WORLD_TF, rd_->getPelvisFrame());
+    finalPoint.x -= 0.05;
+
+    current_state_->transformPoint(finalPoint, finalPoint, rd_->getPelvisFrame(), TOUGH_COMMON_NAMES::WORLD_TF);
+
+    armInt.moveArmInTaskSpace(side, finalGoal, 3.0);
 
     return 0;
 }

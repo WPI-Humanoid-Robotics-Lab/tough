@@ -1,9 +1,14 @@
+//Author: Syon Khosla
+//Date (of last edit): April 18th, 2018
+//NOT COMPLETED
+
 //Arm aspect of code isn't working well, still need to fix!
 
 //Vinayak will be sending example of how he wants this one done, it is slightly different
 
 #include <tough_controller_interface/arm_control_interface.h>
 #include <tough_controller_interface/pelvis_control_interface.h>
+#include <tough_controller_interface/wholebody_control_interface.h>
 
 int main(int argc, char **argv)
 {
@@ -12,7 +17,8 @@ int main(int argc, char **argv)
 
     ArmControlInterface armInt(nh);
     PelvisControlInterface pelvInt(nh);
-    
+    WholebodyControlInterface whole(nh);
+
     float height = 1.05;
 
     // create armJointData structure

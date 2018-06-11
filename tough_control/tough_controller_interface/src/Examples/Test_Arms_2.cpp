@@ -1,4 +1,6 @@
-//Not exactly working, still needs work!
+//Author: Syon Khosla
+//Date (of last edit): April 18th, 2018
+//COMPLETED
 
 #include <tough_controller_interface/arm_control_interface.h>
 

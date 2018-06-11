@@ -73,8 +73,9 @@ void ChestControlInterface::controlChest(float roll , float pitch , float yaw, f
 geometry_msgs::Quaternion ChestControlInterface::getChestOrientation()
 {
         geometry_msgs::Pose chest_pose;
+//        std::cout<<"Torso Frame : "<<rd_->getTorsoFrame()<<std::endl;
         state_informer_->getCurrentPose(rd_->getTorsoFrame(), chest_pose, rd_->getWorldFrame());
-
+        ROS_INFO("%f %f %f %f", chest_pose.orientation.x, chest_pose.orientation.y, chest_pose.orientation.z, chest_pose.orientation.w);
         return chest_pose.orientation;
 }
                       

@@ -44,6 +44,9 @@ add_executable(test_jointState src/test_robot_state.cpp)
 add_dependencies(test_jointState  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_jointState   ${catkin_LIBRARIES} tough_controller_interface)
 
+#add_executable(rotate_wheel src/Examples/rotate_wheel.cpp)
+#add_dependencies(rotate_wheel  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(rotate_wheel   ${catkin_LIBRARIES} tough_controller_interface)
 
 add_executable(test_arm_navigation src/test_arm_navigation.cpp)
 add_dependencies(test_arm_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -94,13 +97,17 @@ add_executable(Test_Pelvis src/Examples/Test_Pelvis.cpp)
 add_dependencies(Test_Pelvis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(Test_Pelvis  ${catkin_LIBRARIES} tough_controller_interface)
 
-add_executable(Test_Arms src/Examples/Test_Arms.cpp)
-add_dependencies(Test_Arms ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(Test_Arms  ${catkin_LIBRARIES} tough_controller_interface)
+#add_executable(Test_Arms src/Examples/Test_Arms.cpp)
+#add_dependencies(Test_Arms ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(Test_Arms  ${catkin_LIBRARIES} tough_controller_interface)
 
 add_executable(Test_Arms_2 src/Examples/Test_Arms_2.cpp)
 add_dependencies(Test_Arms_2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(Test_Arms_2  ${catkin_LIBRARIES} tough_controller_interface)
+
+add_executable(Marker src/Examples/Marker.cpp)
+add_dependencies(Marker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Marker  ${catkin_LIBRARIES} tough_controller_interface)
 
 add_executable(Test_Arms_And_Pelvis src/Examples/Test_Arms_And_Pelvis.cpp)
 add_dependencies(Test_Arms_And_Pelvis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -110,9 +117,17 @@ add_executable(Test_Head src/Examples/Test_Head.cpp)
 add_dependencies(Test_Head ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(Test_Head  ${catkin_LIBRARIES} tough_controller_interface)
 
+add_executable(Marker_Array src/Examples/MarkerArray.cpp)
+add_dependencies(Marker_Array ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Marker_Array  ${catkin_LIBRARIES} tough_controller_interface)
+
 add_executable(Test_Gripper src/Examples/Test_Gripper.cpp)
 add_dependencies(Test_Gripper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(Test_Gripper  ${catkin_LIBRARIES} tough_controller_interface)
+
+add_executable(Curvy_Path src/Examples/CurvyPath.cpp)
+add_dependencies(Curvy_Path ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Curvy_Path  ${catkin_LIBRARIES} tough_controller_interface)
 
 catkin_add_gtest(test_pelvis_height src/test/pelvis_control_interface_test.cpp)
 target_link_libraries(test_pelvis_height ${catkin_LIBRARIES} tough_controller_interface)

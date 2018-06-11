@@ -2,6 +2,7 @@
 #include <tough_controller_interface/arm_control_interface.h>
 #include <tough_controller_interface/chest_control_interface.h>
 #include <tough_controller_interface/pelvis_control_interface.h>
+#include <tough_controller_interface/head_control_interface.h>
 
 int main(int argc, char **argv)
 {
@@ -12,6 +13,7 @@ int main(int argc, char **argv)
     ArmControlInterface armTraj(nh);
     ChestControlInterface chestTraj(nh);
     PelvisControlInterface pelvisTraj(nh);
+    HeadControlInterface head(nh);
 
     if(argc ==2)
     {
@@ -33,6 +35,11 @@ int main(int argc, char **argv)
     ros::Duration(0.3).sleep();
     armTraj.moveToDefaultPose(RobotSide::RIGHT);
     ros::Duration(1).sleep();
+
+    head.moveHead(0, 0, 0, 2);
+    ros::Duration(2).sleep();
+
+    ROS_INFO("Robot has been reset");
 
 }
 
