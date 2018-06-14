@@ -154,19 +154,24 @@ void RobotDescription::setNumberOfNeckJoints(int numberOfNeckJoints)
 }
 
 
-std::string RobotDescription::getRightPalmFrame() const
+const std::string RobotDescription::getRightPalmFrame() const
 {
     return R_PALM_TF;
 }
 
-std::string RobotDescription::getRightEEFrame() const
+const std::string RobotDescription::getRightEEFrame() const
 {
     return R_END_EFFECTOR_TF;
 }
 
-std::string RobotDescription::getLeftEEFrame() const
+const std::string RobotDescription::getLeftEEFrame() const
 {
     return L_END_EFFECTOR_TF;
+}
+
+const std::__cxx11::string RobotDescription::getRobotName() const
+{
+    return robot_name_;
 }
 
 void RobotDescription::setRightPalmFrame(const std::string &value)
@@ -174,7 +179,7 @@ void RobotDescription::setRightPalmFrame(const std::string &value)
     R_PALM_TF = value;
 }
 
-std::string RobotDescription::getLeftPalmFrame() const
+const std::string RobotDescription::getLeftPalmFrame() const
 {
     return L_PALM_TF;
 }
@@ -204,7 +209,7 @@ void RobotDescription::setLeftArmJointLimits(const std::vector<std::pair<float, 
     left_arm_joint_limits_ = left_arm_joint_limits;
 }
 
-std::string RobotDescription::getRightFootFrameName() const
+const std::string RobotDescription::getRightFootFrameName() const
 {
     return right_foot_frame_name_;
 }
@@ -214,7 +219,7 @@ void RobotDescription::setRightFootFrameName(const std::string &right_foot_frame
     right_foot_frame_name_ = right_foot_frame_name;
 }
 
-std::string RobotDescription::getLeftFootFrameName() const
+const std::string RobotDescription::getLeftFootFrameName() const
 {
     return left_foot_frame_name_;
 }
@@ -264,7 +269,7 @@ void RobotDescription::setLeftArmJointNames(const std::vector<std::string> &left
     left_arm_joint_names_ = left_arm_joint_names;
 }
 
-std::string RobotDescription::getTorsoFrame() const
+const std::string RobotDescription::getTorsoFrame() const
 {
     return TORSO_TF;
 }
@@ -274,12 +279,12 @@ void RobotDescription::setTorsoFrame(const std::string &value)
     TORSO_TF = value;
 }
 
-std::string RobotDescription::getPelvisFrame() const
+const std::string RobotDescription::getPelvisFrame() const
 {
     return PELVIS_TF;
 }
 
-std::string RobotDescription::getWorldFrame() const
+const std::string RobotDescription::getWorldFrame() const
 {
     return "world";
 }

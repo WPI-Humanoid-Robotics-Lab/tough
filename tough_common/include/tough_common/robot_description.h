@@ -41,23 +41,25 @@ public:
     RobotDescription(RobotDescription const&)   = delete;
     void operator=(RobotDescription const&)     = delete;
 
-    std::string getPelvisFrame() const;
+    const std::string getPelvisFrame() const;
 
-    std::string getWorldFrame() const;
+    const std::string getWorldFrame() const;
 
-    std::string getTorsoFrame() const;
+    const std::string getTorsoFrame() const;
 
-    std::string getLeftFootFrameName() const;
+    const std::string getLeftFootFrameName() const;
 
-    std::string getRightFootFrameName() const;
+    const std::string getRightFootFrameName() const;
 
-    std::string getLeftPalmFrame() const;
+    const std::string getLeftPalmFrame() const;
 
-    std::string getRightPalmFrame() const;
+    const std::string getRightPalmFrame() const;
 
-    std::string getRightEEFrame() const;
+    const std::string getRightEEFrame() const;
 
-    std::string getLeftEEFrame() const;
+    const std::string getLeftEEFrame() const;
+
+    const std::string getRobotName() const;
 
     void getLeftArmJointNames(std::vector<std::string> &left_arm_joint_names) const;
 
