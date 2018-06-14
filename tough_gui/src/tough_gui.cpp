@@ -94,11 +94,21 @@ void ToughGUI::initVariables()
     clickedPointSub_= nh_.subscribe("clicked_point",1, &ToughGUI::getClickedPoint, this);
 
     //initialize a onetime map to lookup for joint values
-    std::vector<std::string> joints = {"leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch",
-                                       "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll", "rightWristPitch",
-                                       "torsoYaw", "torsoPitch", "torsoRoll","lowerNeckPitch", "neckYaw", "upperNeckPitch"};
+    std::vector<std::string> joints, left_joints, right_joints;
+    rd_->getLeftArmJointNames(left_joints);
+    rd_->getRightArmJointNames(right_joints);
+
+    std::vector<std::string> chest_neck_joints = {"torsoYaw", "torsoPitch", "torsoRoll","lowerNeckPitch", "neckYaw", "upperNeckPitch",
+                                       "back_bkz", "back_bky", "back_bkx","neckry", "neckYaw2", "upperNeckPitch2"};
+
+    joints.clear();
+
+    joints.insert(joints.end(), left_joints.begin(), left_joints.end());
+    joints.insert(joints.end(), right_joints.begin(), right_joints.end());
+    joints.insert(joints.end(), chest_neck_joints.begin(), chest_neck_joints.end());
     std::vector<QLabel *> jointLabels = {ui->lblLeftShoulderPitch, ui->lblLeftShoulderRoll, ui->lblLeftShoulderYaw, ui->lblLeftElbowPitch, ui->lblLeftForearmYaw, ui->lblLeftWristRoll, ui->lblLeftWristPitch,
                                          ui->lblRightShoulderPitch, ui->lblRightShoulderRoll, ui->lblRightShoulderYaw, ui->lblRightElbowPitch, ui->lblRightForearmYaw, ui->lblRightWristRoll, ui->lblRightWristPitch,
+                                         ui->lblChestYaw, ui->lblChestPitch, ui->lblChestRoll, ui->lblLowerNeckPitch, ui->lblNeckYaw, ui->lblNeckUpperPitch,
                                          ui->lblChestYaw, ui->lblChestPitch, ui->lblChestRoll, ui->lblLowerNeckPitch, ui->lblNeckYaw, ui->lblNeckUpperPitch};
 
     assert(joints.size() == jointLabels.size() && "joints and jointlabels must be of same size");

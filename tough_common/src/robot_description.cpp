@@ -169,7 +169,7 @@ const std::string RobotDescription::getLeftEEFrame() const
     return L_END_EFFECTOR_TF;
 }
 
-const std::__cxx11::string RobotDescription::getRobotName() const
+const std::string RobotDescription::getRobotName() const
 {
     return robot_name_;
 }
