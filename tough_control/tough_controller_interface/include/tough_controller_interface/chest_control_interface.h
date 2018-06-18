@@ -24,6 +24,8 @@ public:
     ~ChestControlInterface();
     void controlChest(float roll , float pitch , float yaw, float time = 1.0f, int execution_mode=ihmc_msgs::ChestTrajectoryRosMessage::OVERRIDE);
     void controlChest(geometry_msgs::Quaternion quat, float time = 1.0f, int execution_mode=ihmc_msgs::ChestTrajectoryRosMessage::OVERRIDE);
+    void getChestOrientation(geometry_msgs::Quaternion &orientation);
+    
 };
 
 #endif // CHEST_CONTROL_INTERFACE_H

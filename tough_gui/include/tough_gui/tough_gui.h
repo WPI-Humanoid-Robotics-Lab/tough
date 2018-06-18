@@ -195,6 +195,8 @@ private:
   std::mutex                      mtx_;
   std::map<std::string, QLabel*>  jointLabelMap_;
   std::map<std::string, double>    jointStateMap_;
+  std::vector<std::string> leftArmJointNames_;
+  std::vector<std::string> rightArmJointNames_;
 
   void distanceSubCallback(const std_msgs::Float32::ConstPtr& msg);
   void liveVideoCallback(const sensor_msgs::ImageConstPtr &msg);

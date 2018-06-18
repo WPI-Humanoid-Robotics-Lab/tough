@@ -8,7 +8,7 @@ ArmControlInterface::ArmControlInterface(ros::NodeHandle nh):ToughControllerInte
     DEFAULT_RIGHT_POSE{-0.2f, 1.2f, 0.7222f, 1.5101f, 0.0f, 0.0f, 0.0f},
     DEFAULT_LEFT_POSE{-0.2f, -1.2f, 0.7222f, -1.5101f, 0.0f, 0.0f, 0.0f}
     {
-
+    id_++;
     armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>(control_topic_prefix_+"/arm_trajectory", 1,true);
     handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>(control_topic_prefix_+"/hand_desired_configuration", 1,true);
     taskSpaceTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandTrajectoryRosMessage>(control_topic_prefix_+"/hand_trajectory", 1, true);
@@ -109,6 +109,7 @@ void ArmControlInterface::moveArmJoints(std::vector<armJointData> &arm_data){
 
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj_r;
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj_l;
+    bool right = false, left = false;
 
     arm_traj_r.joint_trajectory_messages.clear();
     arm_traj_r.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
@@ -127,20 +128,22 @@ void ArmControlInterface::moveArmJoints(std::vector<armJointData> &arm_data){
         }
 
         if(i->side == RIGHT){
+            right = true;
             arm_traj_r.robot_side = i->side;
             appendTrajectoryPoint(arm_traj_r, i->time, i->arm_pose);
         }
 
         else {
+            left = true;
             arm_traj_l.robot_side = i->side;
             appendTrajectoryPoint(arm_traj_l, i->time, i->arm_pose);
         }
 
     }
 
-    armTrajectoryPublisher.publish(arm_traj_r);
+    if(right) armTrajectoryPublisher.publish(arm_traj_r);
     ros::Duration(0.02).sleep();
-    armTrajectoryPublisher.publish(arm_traj_l);
+    if(left) armTrajectoryPublisher.publish(arm_traj_l);
 }
 
 

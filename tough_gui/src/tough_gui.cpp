@@ -6,7 +6,7 @@
 #include "rviz/properties/property_tree_model.h"
 #include "tough_gui/configurationreader.h"
 #include "ros/package.h"
- 
+
 
 /**
  * This class creates the GUI using rviz APIs.
@@ -91,23 +91,23 @@ void ToughGUI::initVariables()
 
     //subscribers
     liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ToughGUI::liveVideoCallback,this,image_transport::TransportHints("compressed"));
-//    jointStateSub_  = nh_.subscribe(jointStatesTopic_.toStdString(),1, &ValkyrieGUI::jointStateCallBack, this);
+    //    jointStateSub_  = nh_.subscribe(jointStatesTopic_.toStdString(),1, &ValkyrieGUI::jointStateCallBack, this);
     jointStatesUpdater_ = nh_.createTimer(ros::Duration(0.5), &ToughGUI::jointStateCallBack, this);
     //    @todo: add timer based callback here to call jointStateCallBack method
     clickedPointSub_= nh_.subscribe("clicked_point",1, &ToughGUI::getClickedPoint, this);
 
     //initialize a onetime map to lookup for joint values
-    std::vector<std::string> joints, left_joints, right_joints;
-    rd_->getLeftArmJointNames(left_joints);
-    rd_->getRightArmJointNames(right_joints);
+    std::vector<std::string> joints;
+    rd_->getLeftArmJointNames(leftArmJointNames_);
+    rd_->getRightArmJointNames(rightArmJointNames_);
 
     std::vector<std::string> chest_neck_joints = {"torsoYaw", "torsoPitch", "torsoRoll","lowerNeckPitch", "neckYaw", "upperNeckPitch",
-                                       "back_bkz", "back_bky", "back_bkx","neckry", "neckYaw2", "upperNeckPitch2"};
+                                                  "back_bkz", "back_bky", "back_bkx","neckry", "neckYaw2", "upperNeckPitch2"};
 
     joints.clear();
 
-    joints.insert(joints.end(), left_joints.begin(), left_joints.end());
-    joints.insert(joints.end(), right_joints.begin(), right_joints.end());
+    joints.insert(joints.end(), leftArmJointNames_.begin(), leftArmJointNames_.end());
+    joints.insert(joints.end(), rightArmJointNames_.begin(), rightArmJointNames_.end());
     joints.insert(joints.end(), chest_neck_joints.begin(), chest_neck_joints.end());
     std::vector<QLabel *> jointLabels = {ui->lblLeftShoulderPitch, ui->lblLeftShoulderRoll, ui->lblLeftShoulderYaw, ui->lblLeftElbowPitch, ui->lblLeftForearmYaw, ui->lblLeftWristRoll, ui->lblLeftWristPitch,
                                          ui->lblRightShoulderPitch, ui->lblRightShoulderRoll, ui->lblRightShoulderYaw, ui->lblRightElbowPitch, ui->lblRightForearmYaw, ui->lblRightWristRoll, ui->lblRightWristPitch,
@@ -286,15 +286,15 @@ void ToughGUI::initDisplayWidgets()
 
     //    footstepMarkersDisplay_->subProp("Marker Topic")->setValue("/footstep_planner/footsteps_array");
 
-//    footstepMarkersDisplay_->subProp("Namespaces")->setValue("valkyrie");
-//    footstepMarkersDisplay_ = manager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
-//    ROS_ASSERT(footstepMarkersDisplay_ != NULL);
+    //    footstepMarkersDisplay_->subProp("Namespaces")->setValue("valkyrie");
+    //    footstepMarkersDisplay_ = manager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
+    //    ROS_ASSERT(footstepMarkersDisplay_ != NULL);
 
-//    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
-//    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
-//    footstepMarkersDisplay_->subProp("Namespaces")->setValue("valkyrie");
+    //    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
+    //    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
+    //    footstepMarkersDisplay_->subProp("Namespaces")->setValue("valkyrie");
 
-//    ui->sliderLowerNeckPitch->setEnabled(false);
+    //    ui->sliderLowerNeckPitch->setEnabled(false);
 
     QString imagePath = QString::fromStdString(ros::package::getPath("tough_gui") + "/resources/coordinates.png");
     QImage qImage(imagePath);
@@ -466,77 +466,77 @@ void ToughGUI::initValkyrieControllers() {
     wholeBodyController_ = new WholebodyControlInterface(nh_);
 
     // right arm cartesian planner
-//    rightArmPlanner_ = new CartesianPlanner(TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, TOUGH_COMMON_NAMES::WORLD_TF);
+    //    rightArmPlanner_ = new CartesianPlanner(TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_GROUP, TOUGH_COMMON_NAMES::WORLD_TF);
 
     // left arm cartesian planner
-//    leftArmPlanner_ = new CartesianPlanner(TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, TOUGH_COMMON_NAMES::WORLD_TF);
+    //    leftArmPlanner_ = new CartesianPlanner(TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, TOUGH_COMMON_NAMES::WORLD_TF);
 }
 
 void ToughGUI::getArmState()
 {
     if(jointStateMap_.empty()){
-        ROS_INFO("joint_states is not initialized yet. cannot update arm joints");
-        return;
+        ros::TimerEvent e;
+        this->jointStateCallBack(e);
     }
     RobotSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
     mtx_.lock();
 
     if(side == LEFT) {
-        double leftShoulderPitchJointVal = jointStateMap_["leftShoulderPitch"] * TO_DEGREES;
+        double leftShoulderPitchJointVal = jointStateMap_[leftArmJointNames_.at(0)] * TO_DEGREES;
         leftShoulderPitchJointVal = ((leftShoulderPitchJointVal - LEFT_SHOULDER_PITCH_MIN )* 100)/(LEFT_SHOULDER_PITCH_MAX-LEFT_SHOULDER_PITCH_MIN);
         ui->sliderShoulderPitch->setValue(leftShoulderPitchJointVal);
 
-        double leftShoulderRollJointVal = jointStateMap_["leftShoulderRoll"] * TO_DEGREES;
+        double leftShoulderRollJointVal = jointStateMap_[leftArmJointNames_.at(1)] * TO_DEGREES;
         leftShoulderRollJointVal = ((leftShoulderRollJointVal - LEFT_SHOULDER_ROLL_MIN )* 100)/(LEFT_SHOULDER_ROLL_MAX-LEFT_SHOULDER_ROLL_MIN);
         ui->sliderShoulderRoll->setValue(leftShoulderRollJointVal);
 
-        double leftShoulderYawJointVal = jointStateMap_["leftShoulderYaw"] * TO_DEGREES;
+        double leftShoulderYawJointVal = jointStateMap_[leftArmJointNames_.at(2)] * TO_DEGREES;
         leftShoulderYawJointVal = ((leftShoulderYawJointVal - LEFT_SHOULDER_YAW_MIN )* 100)/(LEFT_SHOULDER_YAW_MAX-LEFT_SHOULDER_YAW_MIN);
         ui->sliderShoulderYaw->setValue(leftShoulderYawJointVal);
 
-        double leftElbowPitchJointVal = jointStateMap_["leftElbowPitch"] * TO_DEGREES;
+        double leftElbowPitchJointVal = jointStateMap_[leftArmJointNames_.at(3)] * TO_DEGREES;
         leftElbowPitchJointVal = ((leftElbowPitchJointVal - LEFT_ELBOW_MIN )* 100)/(LEFT_ELBOW_MAX-LEFT_ELBOW_MIN);
         ui->sliderElbow->setValue(leftElbowPitchJointVal);
 
-        double leftForearmYawJointVal = jointStateMap_["leftForearmYaw"] * TO_DEGREES;
+        double leftForearmYawJointVal = jointStateMap_[leftArmJointNames_.at(4)] * TO_DEGREES;
         leftForearmYawJointVal = ((leftForearmYawJointVal - LEFT_WRIST_YAW_MIN )* 100)/(LEFT_WRIST_YAW_MAX-LEFT_WRIST_YAW_MIN);
         ui->sliderWristYaw->setValue(leftForearmYawJointVal);
 
-        double leftWristRollJointVal = jointStateMap_["leftWristRoll"] * TO_DEGREES;
+        double leftWristRollJointVal = jointStateMap_[leftArmJointNames_.at(5)] * TO_DEGREES;
         leftWristRollJointVal = ((leftWristRollJointVal - LEFT_WRIST_ROLL_MIN )* 100)/(LEFT_WRIST_ROLL_MAX-LEFT_WRIST_ROLL_MIN);
         ui->sliderWristRoll->setValue(leftWristRollJointVal);
 
-        double leftWristPitchJointVal = jointStateMap_["leftWristPitch"] * TO_DEGREES;
+        double leftWristPitchJointVal = jointStateMap_[leftArmJointNames_.at(6)] * TO_DEGREES;
         leftWristPitchJointVal = ((leftWristPitchJointVal - LEFT_WRIST_PITCH_MIN )* 100)/(LEFT_WRIST_PITCH_MAX-LEFT_WRIST_PITCH_MIN);
         ui->sliderWristPitch->setValue(leftWristPitchJointVal);
     }
     else{
 
-        double rightShoulderPitchJointVal = jointStateMap_["rightShoulderPitch"] * TO_DEGREES;
+        double rightShoulderPitchJointVal = jointStateMap_[rightArmJointNames_.at(0)] * TO_DEGREES;
         rightShoulderPitchJointVal = ((rightShoulderPitchJointVal - RIGHT_SHOULDER_PITCH_MIN )* 100)/(RIGHT_SHOULDER_PITCH_MAX-RIGHT_SHOULDER_PITCH_MIN);
         ui->sliderShoulderPitch->setValue(rightShoulderPitchJointVal);
 
-        double rightShoulderRollJointVal = jointStateMap_["rightShoulderRoll"] * TO_DEGREES;
+        double rightShoulderRollJointVal = jointStateMap_[rightArmJointNames_.at(1)] * TO_DEGREES;
         rightShoulderRollJointVal = ((rightShoulderRollJointVal - RIGHT_SHOULDER_ROLL_MIN )* 100)/(RIGHT_SHOULDER_ROLL_MAX-RIGHT_SHOULDER_ROLL_MIN);
         ui->sliderShoulderRoll->setValue(rightShoulderRollJointVal);
 
-        double rightShoulderYawJointVal = jointStateMap_["rightShoulderYaw"] * TO_DEGREES;
+        double rightShoulderYawJointVal = jointStateMap_[rightArmJointNames_.at(2)] * TO_DEGREES;
         rightShoulderYawJointVal = ((rightShoulderYawJointVal - RIGHT_SHOULDER_YAW_MIN )* 100)/(RIGHT_SHOULDER_YAW_MAX-RIGHT_SHOULDER_YAW_MIN);
         ui->sliderShoulderYaw->setValue(rightShoulderYawJointVal);
 
-        double rightElbowPitchJointVal = jointStateMap_["rightElbowPitch"] * TO_DEGREES;
+        double rightElbowPitchJointVal = jointStateMap_[rightArmJointNames_.at(3)] * TO_DEGREES;
         rightElbowPitchJointVal = ((rightElbowPitchJointVal - RIGHT_ELBOW_MIN )* 100)/(RIGHT_ELBOW_MAX-RIGHT_ELBOW_MIN);
         ui->sliderElbow->setValue(rightElbowPitchJointVal);
 
-        double rightForearmYawJointVal = jointStateMap_["rightForearmYaw"] * TO_DEGREES;
+        double rightForearmYawJointVal = jointStateMap_[rightArmJointNames_.at(4)] * TO_DEGREES;
         rightForearmYawJointVal = ((rightForearmYawJointVal - RIGHT_WRIST_YAW_MIN )* 100)/(RIGHT_WRIST_YAW_MAX-RIGHT_WRIST_YAW_MIN);
         ui->sliderWristYaw->setValue(rightForearmYawJointVal);
 
-        double rightWristRollJointVal = jointStateMap_["rightWristRoll"] * TO_DEGREES;
+        double rightWristRollJointVal = jointStateMap_[rightArmJointNames_.at(5)] * TO_DEGREES;
         rightWristRollJointVal = ((rightWristRollJointVal - RIGHT_WRIST_ROLL_MIN )* 100)/(RIGHT_WRIST_ROLL_MAX-RIGHT_WRIST_ROLL_MIN);
         ui->sliderWristRoll->setValue(rightWristRollJointVal);
 
-        double rightWristPitchJointVal = jointStateMap_["rightWristPitch"] * TO_DEGREES;
+        double rightWristPitchJointVal = jointStateMap_[rightArmJointNames_.at(6)] * TO_DEGREES;
         rightWristPitchJointVal = ((rightWristPitchJointVal - RIGHT_WRIST_PITCH_MIN )* 100)/(RIGHT_WRIST_PITCH_MAX-RIGHT_WRIST_PITCH_MIN);
         ui->sliderWristPitch->setValue(rightWristPitchJointVal);
 
@@ -548,30 +548,21 @@ void ToughGUI::getArmState()
 
 void ToughGUI::getChestState()
 {
+    geometry_msgs::Quaternion orientation;
+    chestController_->getChestOrientation(orientation);
+    tf::Quaternion q( orientation.x, orientation.y, orientation.z, orientation.w);
+    tf::Matrix3x3 m(q);
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
+
+    yaw   = ((yaw - CHEST_YAW_MIN )* 100)/(CHEST_YAW_MAX-CHEST_YAW_MIN);
+    roll  = ((roll - CHEST_ROLL_MIN )* 100)/(CHEST_ROLL_MAX-CHEST_ROLL_MIN);
+    pitch = ((pitch - CHEST_PITCH_MIN )* 100)/(CHEST_PITCH_MAX-CHEST_PITCH_MIN);
+
+    ui->sliderChestYaw->setValue(yaw);
+    ui->sliderChestRoll->setValue(roll);
+    ui->sliderChestPitch->setValue(pitch);
     return;
-    // No point updating the chest state as it will always updtae wrt to world
-
-    if(jointStateMap_.empty()){
-        ROS_INFO("joint_states is not initialized yet. cannot update chest joints");
-        return;
-    }
-
-    mtx_.lock();
-
-    double torsoYawJointVal = jointStateMap_["torsoYaw"] * TO_DEGREES;
-    torsoYawJointVal = ((torsoYawJointVal - CHEST_YAW_MIN )* 100)/(CHEST_YAW_MAX-CHEST_YAW_MIN);
-    ui->sliderWristYaw->setValue(torsoYawJointVal);
-
-    double torsoPitchJointVal = jointStateMap_["torsoPitch"] * TO_DEGREES;
-    torsoPitchJointVal = ((torsoPitchJointVal - CHEST_PITCH_MIN )* 100)/(CHEST_PITCH_MAX-CHEST_PITCH_MIN);
-    ui->sliderWristRoll->setValue(torsoPitchJointVal);
-
-    double torsoRollJointVal = jointStateMap_["torsoRoll"] * TO_DEGREES;
-    torsoRollJointVal = ((torsoRollJointVal - CHEST_ROLL_MIN )* 100)/(CHEST_ROLL_MAX-CHEST_ROLL_MIN);
-    ui->sliderWristPitch->setValue(torsoRollJointVal);
-
-    mtx_.unlock();
-
 }
 
 void ToughGUI::getPelvisState()
@@ -618,14 +609,14 @@ void ToughGUI::jointStateCallBack(const ros::TimerEvent& e)
     }
     currentState_->getJointPositions(jointValues);
 
-        for(size_t i=0; i < jointNames.size(); i++){
-            jointStateMap_[jointNames.at(i)] = jointValues.at(i);
-            if(jointLabelMap_.find(jointNames.at(i)) != jointLabelMap_.end()){
-                QLabel *label = jointLabelMap_[jointNames.at(i)];
-                QString text;
-                label->setText(text.sprintf("%.2f",jointValues.at(i)));
-            }
+    for(size_t i=0; i < jointNames.size(); i++){
+        jointStateMap_[jointNames.at(i)] = jointValues.at(i);
+        if(jointLabelMap_.find(jointNames.at(i)) != jointLabelMap_.end()){
+            QLabel *label = jointLabelMap_[jointNames.at(i)];
+            QString text;
+            label->setText(text.sprintf("%.2f",jointValues.at(i)));
         }
+    }
 }
 
 void ToughGUI::updateJointStateSub(int tabID){
@@ -671,6 +662,7 @@ void ToughGUI::updateArmSide(int btnID)
 void ToughGUI::resetChestOrientation()
 {
     chestController_->controlChest(0.0f, 0.0f, 0.0f);
+    getChestState();
 }
 
 void ToughGUI::resetArm()
@@ -708,58 +700,58 @@ void ToughGUI::nudgeArm(int btnID)
     //    left  -5
     //    right -6
     RobotSide side = ui->radioNudgeSideLeft->isChecked() ? LEFT : RIGHT;
-//    std::vector<geometry_msgs::Pose> waypoint;
-//    geometry_msgs::Pose pose;
-//    moveit_msgs::RobotTrajectory traj;
+    //    std::vector<geometry_msgs::Pose> waypoint;
+    //    geometry_msgs::Pose pose;
+    //    moveit_msgs::RobotTrajectory traj;
 
-//    float x=0.0f, y=0.0f, z=0.0f;
+    //    float x=0.0f, y=0.0f, z=0.0f;
 
     switch (btnID) {
     case -2: //down
         armJointController_->nudgeArm(side, direction::DOWN);
-//        z -= 0.05;
+        //        z -= 0.05;
         break;
     case -3: //up
         armJointController_->nudgeArm(side, direction::UP);
-//        z += 0.05;
+        //        z += 0.05;
         break;
     case -4: //back
         armJointController_->nudgeArm(side, direction::BACK);
-//        x -= 0.05;
+        //        x -= 0.05;
         break;
     case -7: //front
         armJointController_->nudgeArm(side, direction::FRONT);
-//        x += 0.05;
+        //        x += 0.05;
         break;
     case -5: //left
         armJointController_->nudgeArm(side, direction::LEFT);
-//        y += 0.05;
+        //        y += 0.05;
         break;
     case -6: //right
         armJointController_->nudgeArm(side, direction::RIGHT);
-//        y -= 0.05;
+        //        y -= 0.05;
         break;
     default:
         break;
     }
 
-//    armJointController_->nudgeArmLocal(side, x, y, z,pose);
-//    waypoint.clear();
-//    waypoint.push_back(pose);
-//    if(side ==armSide::RIGHT)
-//    {
-//        if(rightArmPlanner_->getTrajFromCartPoints(waypoint, traj, false, 0.2) > 0.1) {
-//            armJointController_->moveArmTrajectory(side, traj.joint_trajectory);
-//        }
+    //    armJointController_->nudgeArmLocal(side, x, y, z,pose);
+    //    waypoint.clear();
+    //    waypoint.push_back(pose);
+    //    if(side ==armSide::RIGHT)
+    //    {
+    //        if(rightArmPlanner_->getTrajFromCartPoints(waypoint, traj, false, 0.2) > 0.1) {
+    //            armJointController_->moveArmTrajectory(side, traj.joint_trajectory);
+    //        }
 
-//    }
-//    else
-//    {
-//        if(leftArmPlanner_->getTrajFromCartPoints(waypoint, traj, false, 0.2) > 0.1){
-//            armJointController_->moveArmTrajectory(side, traj.joint_trajectory);
-//        }
+    //    }
+    //    else
+    //    {
+    //        if(leftArmPlanner_->getTrajFromCartPoints(waypoint, traj, false, 0.2) > 0.1){
+    //            armJointController_->moveArmTrajectory(side, traj.joint_trajectory);
+    //        }
 
-//    }
+    //    }
 
 }
 
@@ -1024,8 +1016,10 @@ void ToughGUI::moveArmJoints(){
 
     std::vector<ArmControlInterface::armJointData> data;
     ArmControlInterface::armJointData msg;
+
     //sequence of joints for sending arm data
-    std::vector<std::string> joints = {"leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch"};
+    //        std::vector<std::string> joints = {"leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch"};
+
     msg.arm_pose = {shoulderPitchValue * TO_RADIANS, shoulderRollValue* TO_RADIANS, shoulderYawValue* TO_RADIANS,
                     elbowValue* TO_RADIANS, wristYawValue* TO_RADIANS, wristRollValue* TO_RADIANS, wristPitchValue* TO_RADIANS};
     msg.side = side;
@@ -1035,7 +1029,7 @@ void ToughGUI::moveArmJoints(){
     //    }
     data.push_back(msg);
 
-    //thi sis a non-blocking call
+    //this is a non-blocking call
     armJointController_->moveArmJoints(data);
 }
 
