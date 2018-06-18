@@ -147,6 +147,7 @@ private:
   rviz::Display* octomapDisplay_;
   rviz::Display* mapDisplay_ ;
   rviz::Display* footstepMarkersDisplay_;
+  rviz::Display* footstepMarkersMainDisplay_;
   rviz::Display* goalDisplay_;
   rviz::Display* moveitDisplay_;
 

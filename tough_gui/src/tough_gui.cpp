@@ -71,12 +71,15 @@ void ToughGUI::initVariables()
     ROS_INFO("config file : %s", configFile.c_str());
     ConfigurationReader configfile(configFile.c_str());
 
+    std::string robot_name;
+    nh_.getParam("/ihmc_ros/robot_name", robot_name);
+
     //Assign topic names to corresponding variables
     fixedFrame_       = QString::fromStdString(configfile.currentTopics["fixedFrame"]);
     mapTopic_         = QString::fromStdString(configfile.currentTopics["mapTopic"]);
     imageTopic_       = QString::fromStdString(configfile.currentTopics["imageTopic"]);
-    pointCloudTopic_  = QString::fromStdString(configfile.currentTopics["pointCloudTopic"]);
-    octomapTopic_     = QString::fromStdString(configfile.currentTopics["octomapTopic"]);
+    pointCloudTopic_  = QString::fromStdString(robot_name + "/" + configfile.currentTopics["pointCloudTopic"]);
+    octomapTopic_     = QString::fromStdString(robot_name + "/" + configfile.currentTopics["octomapTopic"]);
     baseSensorTopic_  = QString::fromStdString(configfile.currentTopics["baseSensorTopic"]);
     velocityTopic_    = QString::fromStdString(configfile.currentTopics["velocityTopic"]);
     pathTopic_        = QString::fromStdString(configfile.currentTopics["pathTopic"]);
@@ -271,9 +274,18 @@ void ToughGUI::initDisplayWidgets()
     viewController_->subProp("Target Frame")->setValue(targetFrame_);
     manager_->createDisplay("rviz/Path","Global path",true)->subProp( "Topic" )->setValue(pathTopic_);
 
-//    footstepMarkersDisplay_ = mapManager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
-//    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
-//    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
+    ROS_INFO("Footstep Topic : %s", footstepTopic_.toStdString().c_str());
+    footstepMarkersDisplay_ = mapManager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
+    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
+    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
+
+    footstepMarkersMainDisplay_ = manager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
+    footstepMarkersMainDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
+    footstepMarkersMainDisplay_->subProp("Queue Size")->setValue("100");
+
+
+    //    footstepMarkersDisplay_->subProp("Marker Topic")->setValue("/footstep_planner/footsteps_array");
+
 //    footstepMarkersDisplay_->subProp("Namespaces")->setValue("valkyrie");
 //    footstepMarkersDisplay_ = manager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
 //    ROS_ASSERT(footstepMarkersDisplay_ != NULL);
