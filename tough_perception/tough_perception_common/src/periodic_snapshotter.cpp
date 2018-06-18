@@ -108,8 +108,8 @@ PeriodicSnapshotter::PeriodicSnapshotter()
 {
     robot_state_  = RobotStateInformer::getRobotStateInformer(n_);
     rd_ = RobotDescription::getRobotDescription(n_);
-    snapshot_pub_              = n_.advertise<sensor_msgs::PointCloud2> ("snapshot_cloud2", 1);
-    registered_pointcloud_pub_ = n_.advertise<sensor_msgs::PointCloud2>("assembled_cloud2",10);
+    snapshot_pub_              = n_.advertise<sensor_msgs::PointCloud2>("snapshot_cloud2", 1, true);
+    registered_pointcloud_pub_ = n_.advertise<sensor_msgs::PointCloud2>("assembled_cloud2", 1, true);
     pointcloud_for_octomap_pub_= n_.advertise<sensor_msgs::PointCloud2>("assembled_octomap_cloud2",10, true);
     resetPointcloudSub_        = n_.subscribe("reset_pointcloud", 10, &PeriodicSnapshotter::resetPointcloudCB, this);
     pausePointcloudSub_        = n_.subscribe("pause_pointcloud", 10, &PeriodicSnapshotter::pausePointcloudCB, this);
@@ -120,7 +120,7 @@ PeriodicSnapshotter::PeriodicSnapshotter()
 
     // Start the timer that will trigger the processing loop (timerCallback)
     float timeout;
-    n_.param<float>("val_laser_assembler_svc/laser_snapshot_timeout", timeout, 5.0);
+    n_.param<float>("laser_assembler_svc/laser_snapshot_timeout", timeout, 5.0);
     ROS_INFO("PeriodicSnapshotter::PeriodicSnapshotter : Snapshot timeout : %.2f seconds", timeout);
     timer_ = n_.createTimer(ros::Duration(timeout,0), &PeriodicSnapshotter::timerCallback, this);
 
@@ -156,10 +156,6 @@ void PeriodicSnapshotter::timerCallback(const ros::TimerEvent& e)
     {
         ROS_INFO("PeriodicSnapshotter::timerCallback : Published Cloud with %u points", (uint32_t)(srv.response.cloud.data.size())) ;
         snapshot_pub_.publish(srv.response.cloud);
-        pcl::PCLPointCloud2 pcl_pc2;
-        pcl_conversions::toPCL(srv.response.cloud,pcl_pc2);
-        pcl::fromPCLPointCloud2(pcl_pc2,*laser_assembler::PeriodicSnapshotter::POINTCLOUD_STATIC_PTR);
-        ROS_INFO("PeriodicSnapshotter::timerCallback : Size of pointcloud is %d", laser_assembler::PeriodicSnapshotter::POINTCLOUD_STATIC_PTR->size());
     }
     else
     {
@@ -429,7 +425,7 @@ int main(int argc, char **argv)
     PeriodicSnapshotter snapshotter;
 
     float timeout;
-    n.param<float>("val_laser_assembler_svc/laser_snapshot_timeout", timeout, 5.0);
+    n.param<float>("laser_assembler_svc/laser_snapshot_timeout", timeout, 5.0);
 
     ros::Rate looprate(timeout);
     while(ros::ok())

@@ -6,7 +6,7 @@ add_definitions(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS roscpp urdf tf)
 
 #kdtree is not required here. This should be removed.
-set(KDSourcesList src/kdtree/alglibinternal.cpp src/kdtree/ap.cpp src/kdtree/alglibmisc.cpp)
+#set(KDSourcesList src/kdtree/alglibinternal.cpp src/kdtree/ap.cpp src/kdtree/alglibmisc.cpp)
 
 set(HEADERS
     include/${PROJECT_NAME}/robot_description.h)
@@ -27,9 +27,9 @@ catkin_package(
 include_directories(${catkin_INCLUDE_DIRS} include)
 
 ## Declare a C++ library
-add_library(kdtree
-   ${KDSourcesList}
- )
+#add_library(kdtree
+#   ${KDSourcesList}
+# )
 
 add_library(${PROJECT_NAME} ${SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
@@ -51,7 +51,7 @@ target_link_libraries(test_jointState ${catkin_LIBRARIES} ${PROJECT_NAME})
 #############
 
 ## Mark executables and/or libraries for installation
- install(TARGETS kdtree ${PROJECT_NAME} robot_description test_jointState
+ install(TARGETS ${PROJECT_NAME} robot_description test_jointState
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

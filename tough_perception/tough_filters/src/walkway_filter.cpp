@@ -8,7 +8,7 @@
 
 WalkwayFilter::WalkwayFilter(ros::NodeHandle &n):nh_(n)
 {
-    pointcloudPub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ> >("walkway_filtered_points2",1);
+    pointcloudPub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ> >("walkway_filtered_points2",1, true);
     pointcloudSub_ = nh_.subscribe(PERCEPTION_COMMON_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC_FOR_OCTOMAP, 1,  &WalkwayFilter::generateMap, this);
     rd_ = RobotDescription::getRobotDescription(nh_);
 }

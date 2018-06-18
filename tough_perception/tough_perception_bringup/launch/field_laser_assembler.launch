@@ -1,10 +1,12 @@
 
 <launch>
 
-    <!-- Start laser2point_cloud_node to publish pointcloud2 data -->
-    <node pkg="tough_perception_common" type="laser2point_cloud_node" name="laser2point_cloud_node" ns="field" />
+    <arg name="robot_name" default="valkyrie" />
 
-    <node pkg="tough_filters" type="robot_filter" name="robot_self_filter"  ns="field">
+    <!-- Start laser2point_cloud_node to publish pointcloud2 data -->
+    <node pkg="tough_perception_common" type="laser2point_cloud_node" name="laser2point_cloud_node" ns="$(arg robot_name)" />
+
+    <node pkg="tough_filters" type="robot_filter" name="robot_self_filter"  ns="$(arg robot_name)">
         <rosparam param="self_see_links">[leftForearmLink, leftWristRollLink, leftPalm, leftThumbRollLink, leftThumbPitch1Link,
                                           leftThumbPitch2Link, leftThumbPitch3Link,leftShoulderPitchLink, leftShoulderRollLink, leftShoulderYawLink,
                                           leftElbowPitchLink, leftIndexFingerPitch1Link, leftMiddleFingerPitch1Link,leftPinkyPitch1Link,
@@ -13,25 +15,28 @@
                                           rightForearmLink, rightWristRollLink, rightPalm, rightThumbRollLink, rightThumbPitch1Link,
                                           rightThumbPitch2Link, rightThumbPitch3Link,rightShoulderPitchLink, rightShoulderRollLink, rightShoulderYawLink,
                                           rightElbowPitchLink, rightIndexFingerPitch1Link, rightMiddleFingerPitch1Link,rightPinkyPitch1Link,
-                                          rightHipPitchLink, rightKneePitchLink]
+                                          rightHipPitchLink, rightKneePitchLink,
+                                          head, utorso, r_uleg,
+                                          l_clav, l_foot, l_arm, l_lfarm, l_lleg, l_scap, l_uarm, l_ufarm, l_uleg,
+                                          r_clav, r_foot, r_arm, r_lfarm, r_lleg, r_scap, r_uarm, r_ufarm, r_uleg]
         </rosparam>
-        <remap from="robot_description" to="/robot_description"/>
+        <!-- <remap from="robot_description" to="/robot_description"/> -->
     </node>
 
-    <node type="point_cloud_assembler" pkg="laser_assembler"
-            name="val_laser_assembler_svc" output="screen"  ns="field">
+   <node type="point_cloud_assembler" pkg="laser_assembler"
+            name="laser_assembler_svc" output="screen"  ns="$(arg robot_name)">
         <remap from="cloud" to="filtered_cloud"/>
         <param name="max_clouds" type="int" value="400" />
         <param name="fixed_frame" type="string" value="world" />
         <param name="laser_snapshot_timeout" type="double" value="4.0"/>
     </node>
 
-    <node type="periodic_snapshotter" pkg="tough_perception_common" name="laser_assembler_node"  ns="field"/>
-    <!--<node type="walkway_filter" pkg="tough_filters" name="walkway_filter"  ns="field"/>-->
+    <node type="periodic_snapshotter" pkg="tough_perception_common" name="laser_assembler_node"  ns="$(arg robot_name)"/>
+    <!-- <node type="walkway_filter" pkg="tough_filters" name="walkway_filter"  ns="field"/>  -->
 
-    <node type="walkway_point_generator" pkg="tough_perception_common" name="walkway_generator"  ns="field"/>
-    <node type="map_generator" pkg="navigation_common" name="map_generator"  ns="field"/>
+    <node type="walkway_point_generator" pkg="tough_perception_common" name="walkway_generator"  ns="$(arg robot_name)"/>
+    <node type="map_generator" pkg="navigation_common" name="map_generator"  ns="$(arg robot_name)"/>
 
-    <!--<node type="left_image_inverter_node" pkg="tough_perception_bringup" name="left_image_inverter"  ns="field"/>-->
+    <!-- <node type="left_image_inverter_node" pkg="tough_perception_bringup" name="left_image_inverter"  ns="$(arg robot_name)"/>-->
 
 </launch>

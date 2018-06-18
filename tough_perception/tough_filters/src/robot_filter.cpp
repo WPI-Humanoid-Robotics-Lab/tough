@@ -65,12 +65,20 @@ public:
         //namespace has 2 forward slashes in front of it, I'll look into it if I have enough time
         ns = ns.substr(1, ns.length()-1);
 
+        // padding for valkyrie is 0.05 and that for atlas is 0.1
+        ROS_INFO("Filtering model of %s", ns.c_str());
+        float padding = 0.05f;
+        if (ns == "/atlas"){
+            padding = 0.1f;
+        }
+
         if (!nodeHandle_.hasParam(ns+"/robot_self_filter/self_see_links")){
             robot_self_filter::LinkInfo li;
             li.name="base_link";
             li.padding = .05f;
             li.scale = 1.0f;
             links.push_back(li);
+            ROS_WARN("Cannot read link names");
         }
         else {
             //get the links to filter out
@@ -83,7 +91,13 @@ public:
             for(int i = 0; i < ssl_vals.size(); i++) {
                 robot_self_filter::LinkInfo li;
                 li.name = ssl_vals.at(i);
-                li.padding = 0.05f;
+                if (li.name == "utorso") {
+                    // torso on atlas needs more clearance for filtering points
+                    li.padding = 0.24f;
+                }
+                else {
+                    li.padding = padding;
+                }
                 li.scale = 1.0f;
                 links.push_back(li);
             }
@@ -145,7 +159,7 @@ public:
             sensor_msgs::PointCloud  cloud;
             sensor_msgs::convertPointCloud2ToPointCloud(cloud2,cloud);
             cloud.header = msg_in->header;
-//            ROS_INFO("Took %0.4f seconds for filtering",(ros::WallTime::now() - start).toSec());
+            //            ROS_INFO("Took %0.4f seconds for filtering",(ros::WallTime::now() - start).toSec());
             vmOutputPub_.publish(cloud);
 
             isFiltering = false;

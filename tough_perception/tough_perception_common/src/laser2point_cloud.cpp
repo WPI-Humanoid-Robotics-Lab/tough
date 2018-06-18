@@ -8,8 +8,8 @@ Laser2PointCloud::Laser2PointCloud(ros::NodeHandle n,
                                    const std::string pointCloudTopic,
                                    const std::string pointCloud2Topic):m_laserScanSubscriber(n.subscribe(laserScanTopic,100, &Laser2PointCloud::scanCallBack, this)) {
 
-    m_pointCloud2Publisher = n.advertise<sensor_msgs::PointCloud2>(pointCloud2Topic, 30);
-    m_pointCloudPublisher = n.advertise<sensor_msgs::PointCloud>(pointCloudTopic, 30);
+    m_pointCloud2Publisher = n.advertise<sensor_msgs::PointCloud2>(pointCloud2Topic, 30,true);
+    m_pointCloudPublisher = n.advertise<sensor_msgs::PointCloud>(pointCloudTopic, 30, true);
     m_baseFrame.assign(baseFrame);
 }
 
