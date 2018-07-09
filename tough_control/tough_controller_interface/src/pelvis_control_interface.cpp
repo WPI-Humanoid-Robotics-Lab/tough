@@ -34,8 +34,7 @@ void PelvisControlInterface::controlPelvisHeight(float height, float duration)
     msg.taskspace_trajectory_points.push_back(p);
     msg.use_custom_control_frame = false;
 
-    PelvisControlInterface::id_++;
-    msg.unique_id = PelvisControlInterface::id_;
+    msg.unique_id = id_++;
 
     // publish the message
     publishPelvisMessage(msg);
@@ -43,6 +42,4 @@ void PelvisControlInterface::controlPelvisHeight(float height, float duration)
 
 void PelvisControlInterface::publishPelvisMessage(const ihmc_msgs::PelvisHeightTrajectoryRosMessage &msg) const{
     this->pelvisHeightPublisher_.publish(msg);
-    PelvisControlInterface::id_++;
-    msg.unique_id = PelvisControlInterface::id_;
 }

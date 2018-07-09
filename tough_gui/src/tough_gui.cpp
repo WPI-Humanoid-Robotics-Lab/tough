@@ -1014,8 +1014,8 @@ void ToughGUI::moveArmJoints(){
     }
 
 
-    std::vector<ArmControlInterface::armJointData> data;
-    ArmControlInterface::armJointData msg;
+    std::vector<ArmControlInterface::ArmJointData> data;
+    ArmControlInterface::ArmJointData msg;
 
     //sequence of joints for sending arm data
     //        std::vector<std::string> joints = {"leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch"};

@@ -59,10 +59,6 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
         robot_name_.assign(model_.getName());
     }
 
-//    robot_name_ = model_.getName();
-    ROS_INFO("Robot Name : %s", robot_name_.c_str());
-    std::string prefix = "/ihmc_ros/" + robot_name_ + "/";
-
     param_left_arm_joint_names_.insert(0, prefix);
     param_right_arm_joint_names_.insert(0, prefix);
     param_left_foot_frame_name_.insert(0, prefix);
