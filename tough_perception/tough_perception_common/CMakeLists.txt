@@ -63,7 +63,7 @@ add_executable(test_organizedRGBD  src/test_organizedRGBD.cpp)
 target_link_libraries(test_organizedRGBD  ${PROJECT_NAME})
 
 add_executable(periodic_snapshotter  src/periodic_snapshotter.cpp)
-target_link_libraries(periodic_snapshotter  ${catkin_LIBRARIES} ${PROJECT_NAME} ${PCL_LIBRARY_DIRS})
+target_link_libraries(periodic_snapshotter  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(walkway_point_generator src/walkway_generator.cpp)
 add_dependencies(walkway_point_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
