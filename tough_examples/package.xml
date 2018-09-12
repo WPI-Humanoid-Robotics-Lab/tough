@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>tough_examples</name>
+  <version>0.1.0</version>
+  <description>The tough_examples package</description>
+
+  <maintainer email="ameya@todo.todo">ameya</maintainer>
+
+  <license>TODO</license>
+  <!-- <url type="website">http://wiki.ros.org/tough_controller_interface</url> -->
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>tough_controller_interface</build_depend>
+
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <build_export_depend>tough_controller_interface</build_export_depend>
+
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>tough_controller_interface</exec_depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>

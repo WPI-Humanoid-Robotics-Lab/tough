@@ -56,9 +56,9 @@ add_executable(interactive_arm_test src/interactive_arm_test.cpp)
 add_dependencies(interactive_arm_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(interactive_arm_test  ${catkin_LIBRARIES} tough_controller_interface)
 
-add_executable(test_arm src/test_arm.cpp)
-add_dependencies(test_arm ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_arm  ${catkin_LIBRARIES} ${PROJECT_NAME})
+#add_executable(test_arm src/test_arm.cpp)
+#add_dependencies(test_arm ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(test_arm  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 
 add_executable(test_nudgeLocal src/test_nudgeLocal.cpp)
@@ -73,9 +73,9 @@ add_executable(test_pelvis src/test_pelvis_navigation.cpp)
 add_dependencies(test_pelvis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_pelvis  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-add_executable(test_head src/test_head_navigation.cpp)
-add_dependencies(test_head ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_head  ${catkin_LIBRARIES} ${PROJECT_NAME})
+#add_executable(test_head src/test_head_navigation.cpp)
+#add_dependencies(test_head ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(test_head  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(test_neck src/test_neck_navigation.cpp)
 add_dependencies(test_neck ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -89,16 +89,26 @@ add_executable(test_gripper src/test_gripper_control.cpp)
 add_dependencies(test_gripper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_gripper  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-add_executable(reset_robot src/reset_robot.cpp)
-add_dependencies(reset_robot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(reset_robot  ${catkin_LIBRARIES} ${PROJECT_NAME})
+#add_executable(reset_robot src/reset_robot.cpp)
+#add_dependencies(reset_robot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(reset_robot  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
-install(TARGETS ${PROJECT_NAME} test_chest test_nudgeLocal test_arm
-                test_arm_navigation test_neck test_head test_pelvis
-                test_chest test_nudgeLocal test_arm test_arm_navigation test_wrist
-                test_gripper reset_robot
+install(TARGETS ${PROJECT_NAME}
+                test_chest
+                test_nudgeLocal
+#                test_arm
+                test_arm_navigation
+                test_neck
+#                test_head
+                test_pelvis
+                test_chest
+                test_nudgeLocal
+                test_arm_navigation
+                test_wrist
+                test_gripper
+#                reset_robot
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
