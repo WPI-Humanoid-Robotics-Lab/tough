@@ -48,3 +48,46 @@ add_executable( test_head_navigation src/test_head_navigation.cpp)
 add_dependencies(test_head_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_head_navigation ${catkin_LIBRARIES})
 
+## Test arm navigation
+add_executable(test_arm_navigation src/test_arm_navigation.cpp)
+add_dependencies(test_arm_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_arm_navigation  ${catkin_LIBRARIES})
+
+## Test chest
+add_executable(test_chest src/test_chest_navigation.cpp)
+add_dependencies(test_chest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_chest  ${catkin_LIBRARIES})
+
+
+## Test nudgeLocal
+add_executable(test_nudgeLocal src/test_nudgeLocal.cpp)
+add_dependencies(test_nudgeLocal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_nudgeLocal  ${catkin_LIBRARIES})
+
+
+## Test pelvis
+add_executable(test_pelvis src/test_pelvis_navigation.cpp)
+add_dependencies(test_pelvis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_pelvis  ${catkin_LIBRARIES})
+
+
+## Test neck
+add_executable(test_neck src/test_neck_navigation.cpp)
+add_dependencies(test_neck ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_neck  ${catkin_LIBRARIES})
+
+## Test wrist
+add_executable(test_wrist src/test_wrist.cpp)
+add_dependencies(test_wrist ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_wrist ${catkin_LIBRARIES})
+
+## Test gripper
+add_executable(test_gripper src/test_gripper_control.cpp)
+add_dependencies(test_gripper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_gripper  ${catkin_LIBRARIES})
+
+
+## interactive test
+add_executable(interactive_arm_test src/interactive_arm_test.cpp)
+add_dependencies(interactive_arm_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(interactive_arm_test  ${catkin_LIBRARIES})
