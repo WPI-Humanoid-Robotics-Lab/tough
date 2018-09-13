@@ -1,7 +1,7 @@
 
 <launch>
 
-    <arg name="robot_name" default="valkyrie" />
+    <arg name="robot_name" default="atlas" />
 
     <!-- Start laser2point_cloud_node to publish pointcloud2 data -->
     <node pkg="tough_perception_common" type="laser2point_cloud_node" name="laser2point_cloud_node" ns="$(arg robot_name)" />
