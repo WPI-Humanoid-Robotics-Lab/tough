@@ -90,6 +90,8 @@ public:
 
     int getRightSoleFrameHash() const;
 
+    double getFootFrameOffset() const;
+
 protected:
     void setPelvisFrame(const std::string &value);
 
@@ -154,6 +156,8 @@ private:
     std::vector<std::pair<float, float> > right_arm_joint_limits_;
 
     int number_of_neck_joints_;
+
+    double foot_frame_offset_;
 
     /* Frame hash - these are defined in us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds
      * Currently there is no way of querying hashID of a frame. Once it is available, it will be implemented in teh constructor of this class

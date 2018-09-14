@@ -11,18 +11,17 @@
 
 int RobotWalker::id = -1;
 
-// constructor
 RobotWalker::RobotWalker(ros::NodeHandle nh,double InTransferTime ,double InSwingTime, int InMode, double swingHeight):nh_(nh)
 {
-    std::string robot_name;
-    nh_.getParam("/ihmc_ros/robot_name",robot_name);
 
-    this->footsteps_pub_   = nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/"+robot_name+"/control/footstep_list",1,true);
-    this->footstep_status_ = nh_.subscribe("/ihmc_ros/"+robot_name+"/output/footstep_status", 20,&RobotWalker::footstepStatusCB, this);
     current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
     rd_ = RobotDescription::getRobotDescription(nh_);
+    const std::string robot_name = rd_->getRobotName();
+
+    this->footsteps_pub_   = nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/"+robot_name+"/control/footstep_list",1,true);
     this->nudgestep_pub_   = nh_.advertise<ihmc_msgs::FootTrajectoryRosMessage>("/ihmc_ros/"+robot_name+"/control/foot_trajectory",1,true);
     this->loadeff_pub      = nh_.advertise<ihmc_msgs::EndEffectorLoadBearingRosMessage>("/ihmc_ros/"+robot_name+"/control/end_effector_load_bearing",1,true);
+    this->footstep_status_ = nh_.subscribe("/ihmc_ros/"+robot_name+"/output/footstep_status", 20,&RobotWalker::footstepStatusCB, this);
 
     transfer_time_  = InTransferTime;
     swing_time_     = InSwingTime;
@@ -35,23 +34,30 @@ RobotWalker::RobotWalker(ros::NodeHandle nh,double InTransferTime ,double InSwin
     right_foot_frame_.data = rd_->getRightFootFrameName();
     left_foot_frame_.data  = rd_->getLeftFootFrameName();
 
-    //start timer
+    /* To confirm that the robot is walking, the following timer is set. At every step, the timer resets.
+     * If the timer exceeds a preset threshold, the robot is probably not walking.
+     * This is hack used for SRC. It is replaced by falldetector.
+     */
     cbTime_=ros::Time::now();
 
 }
 
-// Destructor
+/**
+ * @brief RobotWalker::~RobotWalker
+ */
 RobotWalker::~RobotWalker(){
 }
 
 
-// CallBack function for walking status
+/**
+ * @brief RobotWalker::footstepStatusCB is a callback function that updates footstep status
+ * @param msg
+ */
 void RobotWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage &msg)
 {
-    if(msg.status == 1)
+    if(msg.status == ihmc_msgs::FootstepStatusRosMessage::COMPLETED)
     {
         step_counter_++;
-        //ROS_INFO("step counter : %d",step_counter);
     }
 
     // reset the timer
@@ -605,19 +611,13 @@ void RobotWalker::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage & 
 
     std_msgs::String foot_frame =  side == LEFT ? left_foot_frame_ : right_foot_frame_;
 
-    tf::StampedTransform transformStamped;
-
-    /// \todo Use a try catch block here. It needs modification of function
-    /// signature to return bool and all functions in the heirarchy would be changed accordingly.
-    //    tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF, foot_frame,ros::Time(0), ros::Duration(2.0));
-    tf_listener_.lookupTransform( TOUGH_COMMON_NAMES::WORLD_TF,foot_frame.data,ros::Time(0),transformStamped);
-
-    tf::quaternionTFToMsg(transformStamped.getRotation(),foot.orientation);
-    foot.location.x = transformStamped.getOrigin().getX();
-    foot.location.y = transformStamped.getOrigin().getY();
-    foot.location.z = transformStamped.getOrigin().getZ();
+    geometry_msgs::Pose footPose;
+    current_state_->getCurrentPose(foot_frame.data, footPose, rd_->getWorldFrame());
+    foot.location = footPose.position;
+    foot.location.z -= rd_->getFootFrameOffset();
     foot.robot_side = side;
     foot.trajectory_type = ihmc_msgs::FootstepDataRosMessage::DEFAULT;
+
     return;
 }
 
@@ -829,7 +829,7 @@ void RobotWalker::loadEEF(RobotSide side, EE_LOADING load)
     ihmc_msgs::EndEffectorLoadBearingRosMessage msg;
     msg.unique_id=1;
     msg.robot_side=side;
-    msg.end_effector=0;  // 0- foot 1 -hand
+    msg.end_effector=ihmc_msgs::EndEffectorLoadBearingRosMessage::FOOT;  // 0- foot 1 -hand
     msg.request=(int)load;  // 0 -load 1 -unload
     loadeff_pub.publish(msg);
 
@@ -920,7 +920,7 @@ bool RobotWalker::climbStair(const std::vector<float> xOffset, const std::vector
 }
 
 // wait till all the steps are taken
-void RobotWalker::waitForSteps(int numSteps)
+void RobotWalker::waitForSteps(const int numSteps)
 {
     while (step_counter_ < numSteps && ros::ok())
     {

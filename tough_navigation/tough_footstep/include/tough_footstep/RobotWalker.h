@@ -22,23 +22,21 @@
 
 
 /**
- * @brief The ValkyrieWalker class This class provides access to the footsteps of valkyrie. It can be used
- * to get current position of the steps or to make Valkyrie walk given number of steps.
+ * @brief The RobotWalker class This class handles all the locomotion commands to the robot.
  */
 class RobotWalker
 {
 
 public:
     static int id ;
+
     /**
-     * @brief ValkyrieWalker This class provides access to the footsteps of valkyrie. It can be used
-     * to get current position of the steps or to make Valkyrie walk given number of steps.
-     * @param nh    ros Nodehandle to which the publishers and subscribers will be attached
-     * @param InTransferTime    transfer time in seconds for every step
-     * @param InSwingTime   swing time in seconds for every step
-     * @param InMode    execution mode of the steps. this can be 0 = OVERRIDE or 1 = QUEUE.
-     * @param swingHeight   swing height to be used for every step
-     * @todo Implement singleton pattern. There should be only one object of this class available of this class.
+     * @brief RobotWalker::RobotWalker This class handles all the locomotion commands.
+     * @param nh    ros nodehandle
+     * @param InTransferTime    Time the controllers should take to transfer weight of the robot from one leg to another
+     * @param InSwingTime       Time the controllers should take to swing a leg while walking
+     * @param InMode            ExecutionMode can be set to OVERRIDE or QUEUE
+     * @param swingHeight       Height to which a swing foot should be raised while walking
      */
     RobotWalker(ros::NodeHandle nh, double inTransferTime = 1.5,double inSwingTime =1.5 , int inMode = 0, double swing_height_ = 0.2);
     ~RobotWalker();
@@ -211,11 +209,10 @@ private:
     ros::Publisher              footsteps_pub_ ,nudgestep_pub_,loadeff_pub;
     ros::Subscriber             footstep_status_ ;
     ros::ServiceClient          footstep_client_ ;
-    tf::TransformListener       tf_listener_;
     std_msgs::String            right_foot_frame_,left_foot_frame_;
 
     void footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage & msg);
-    void waitForSteps( int numSteps);
+    void waitForSteps(const int numSteps);
     ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStep(int side, float x, float y);
     ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStepWRTPelvis(int side , float x, float y);
 

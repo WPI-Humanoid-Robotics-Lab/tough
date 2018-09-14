@@ -125,15 +125,21 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
 //    ROS_INFO("Right Palm Frame : %s", R_PALM_TF.c_str());
 //    ROS_INFO("Left Palm Frame : %s", L_PALM_TF.c_str());
 
+    /* With 0.11 version of open-robotics-software, the foot offset is not handled on JAVA side
+     * This causes footsteps to be at a height from ground. should this be fixed on JAVA side?
+     */
+
     if(robot_name_ == "atlas"){
         R_END_EFFECTOR_TF = "r_palm";
         L_END_EFFECTOR_TF = "l_palm";
         number_of_neck_joints_ = 1;
+        foot_frame_offset_ = 0.085;
     }
     else if (robot_name_ == "valkyrie"){
         R_END_EFFECTOR_TF = "rightMiddleFingerPitch1Link";
         L_END_EFFECTOR_TF = "leftMiddleFingerPitch1Link";
         number_of_neck_joints_ = 3;
+        foot_frame_offset_ = 0.102;
     }
 
     updateFrameHash();
@@ -143,6 +149,12 @@ RobotDescription::~RobotDescription()
 {
 
 }
+
+double RobotDescription::getFootFrameOffset() const
+{
+    return foot_frame_offset_;
+}
+
 int RobotDescription::getRightSoleFrameHash() const
 {
     return RIGHT_SOLE_FRAME_HASH_;
