@@ -9,7 +9,7 @@
 #include <iostream>
 #include <ros/ros.h>
 
-int RobotWalker::id = -1;
+int RobotWalker::id = 1;
 
 RobotWalker::RobotWalker(ros::NodeHandle nh,double InTransferTime ,double InSwingTime, int InMode, double swingHeight):nh_(nh)
 {
@@ -78,7 +78,7 @@ bool RobotWalker::walkToGoal( geometry_msgs::Pose2D &goal, bool waitForSteps)
     if(this->getFootstep(goal,list))
     {
         this->footsteps_pub_.publish(list);
-        RobotWalker::id--;
+        RobotWalker::id++;
 
         if (waitForSteps)
         {
@@ -98,7 +98,7 @@ bool RobotWalker::walkNSteps(int numSteps, float xOffset, float yOffset, bool co
     list.default_swing_duration = swing_time_;
     list.execution_mode = execution_mode_;
 
-    list.unique_id = RobotWalker::id ;
+    list.unique_id = RobotWalker::id;
 
     for (int m =1; m <= numSteps ; m++) {
         if(m%2 == 1) {
@@ -235,7 +235,7 @@ bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float> xOffset, co
 bool RobotWalker::walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list , bool waitForSteps)
 {
     this->footsteps_pub_.publish(list);
-    RobotWalker::id--;
+    RobotWalker::id++;
     if (waitForSteps){
         cbTime_=ros::Time::now();
         this->waitForSteps(list.footstep_data_list.size());
@@ -819,7 +819,7 @@ bool RobotWalker::turn(RobotSide side)
     // publish footsteps
 
     this->footsteps_pub_.publish(list);
-    RobotWalker::id--;
+    RobotWalker::id++;
     this->waitForSteps(list.footstep_data_list.size());
 
 }

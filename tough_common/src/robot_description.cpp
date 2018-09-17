@@ -4,7 +4,7 @@
 #include <string>
 #include <cctype>
 
-//The following function to find substring is copied from stack overflow
+// The following function to find substring is copied from stack overflow
 // Try to find in the Haystack the Needle - ignore case
 bool findSubStringIC(const std::string & strHaystack, const std::string & strNeedle)
 {
@@ -107,7 +107,7 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
     L_PALM_TF = *(left_arm_frame_names_.end()-1);
     TORSO_TF = model_.joints_[left_arm_joint_names_[0]]->parent_link_name;
 
-//    ROS_INFO("RIGHT ARM");
+    //    ROS_INFO("RIGHT ARM");
     for (auto joint_name : right_arm_joint_names_){
         float l_limit = model_.joints_[joint_name]->limits->lower;
         float u_limit = model_.joints_[joint_name]->limits->upper;
@@ -118,12 +118,6 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
 
     R_PALM_TF = *(right_arm_frame_names_.end()-1);
 
-//    ROS_INFO("Left foot frame : %s",  left_foot_frame_name_.c_str());
-//    ROS_INFO("Right foot frame : %s", right_foot_frame_name_.c_str());
-//    ROS_INFO("Pelvis Frame : %s", PELVIS_TF.c_str());
-//    ROS_INFO("Torso Frame : %s", TORSO_TF.c_str());
-//    ROS_INFO("Right Palm Frame : %s", R_PALM_TF.c_str());
-//    ROS_INFO("Left Palm Frame : %s", L_PALM_TF.c_str());
 
     /* With 0.11 version of open-robotics-software, the foot offset is not handled on JAVA side
      * This causes footsteps to be at a height from ground. should this be fixed on JAVA side?
@@ -143,6 +137,13 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
     }
 
     updateFrameHash();
+
+    ROS_INFO("Left foot frame : %s",  left_foot_frame_name_.c_str());
+    ROS_INFO("Right foot frame : %s", right_foot_frame_name_.c_str());
+    ROS_INFO("Pelvis Frame : %s", PELVIS_TF.c_str());
+    ROS_INFO("Torso Frame : %s", TORSO_TF.c_str());
+    ROS_INFO("Right Palm Frame : %s", R_PALM_TF.c_str());
+    ROS_INFO("Left Palm Frame : %s", L_PALM_TF.c_str());
 }
 
 RobotDescription::~RobotDescription()
@@ -247,22 +248,22 @@ void RobotDescription::setLeftPalmFrame(const std::string &value)
     L_PALM_TF = value;
 }
 
-void RobotDescription::getRightArmJointLimits(std::vector<std::pair<float, float> > &right_arm_joint_limits) const
+void RobotDescription::getRightArmJointLimits(std::vector<std::pair<double, double> > &right_arm_joint_limits) const
 {
     right_arm_joint_limits = right_arm_joint_limits_;
 }
 
-void RobotDescription::setRightArmJointLimits(const std::vector<std::pair<float, float> > &right_arm_joint_limits)
+void RobotDescription::setRightArmJointLimits(const std::vector<std::pair<double, double> > &right_arm_joint_limits)
 {
     right_arm_joint_limits_ = right_arm_joint_limits;
 }
 
-void RobotDescription::getLeftArmJointLimits(std::vector<std::pair<float, float> > &left_arm_joint_limits) const
+void RobotDescription::getLeftArmJointLimits(std::vector<std::pair<double, double> > &left_arm_joint_limits) const
 {
     left_arm_joint_limits = left_arm_joint_limits_;
 }
 
-void RobotDescription::setLeftArmJointLimits(const std::vector<std::pair<float, float> > &left_arm_joint_limits)
+void RobotDescription::setLeftArmJointLimits(const std::vector<std::pair<double, double> > &left_arm_joint_limits)
 {
     left_arm_joint_limits_ = left_arm_joint_limits;
 }

@@ -40,6 +40,10 @@ public:
      * @param side is either LEFT or RIGHT
      */
     void openGripper(const RobotSide side);
+
+    virtual bool getJointSpaceState(std::vector<double> &joints, RobotSide side) override;
+
+    virtual bool getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame=TOUGH_COMMON_NAMES::WORLD_TF) override;
 };
 
 

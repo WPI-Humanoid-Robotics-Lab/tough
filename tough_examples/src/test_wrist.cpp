@@ -25,7 +25,7 @@ int main(int argc, char **argv)
         side = std::atoi(argv[1]) == 0 ? RobotSide::LEFT : RobotSide::RIGHT;
 
         if(side == RobotSide::LEFT){
-            std::vector<float> positions;
+            std::vector<double> positions;
             while(!obj->getJointPositions("left_arm", positions)){
                 ros::spinOnce();
                 ros::Duration(0.2).sleep();
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
         }
         else
         {
-            std::vector<float> positions;
+            std::vector<double> positions;
             while(!obj->getJointPositions("right_arm", positions)){
                 ros::spinOnce();
                 ros::Duration(0.2).sleep();

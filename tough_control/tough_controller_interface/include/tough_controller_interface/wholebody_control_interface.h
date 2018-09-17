@@ -18,13 +18,17 @@ public:
     WholebodyControlInterface(ros::NodeHandle &nh);
     void executeTrajectory(const RobotSide side, const trajectory_msgs::JointTrajectory &traj);
     void executeTrajectory(const RobotSide side, const  moveit_msgs::RobotTrajectory &traj);
+
+    virtual bool getJointSpaceState(std::vector<double> &joints, RobotSide side) override;
+
+    virtual bool getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame=TOUGH_COMMON_NAMES::WORLD_TF) override;
 private :
     ros::Publisher m_wholebodyPub;
-    void rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_);
-    void leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_);
+    void rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<double, double> > joint_limits_);
+    void leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj, std::vector<std::pair<double, double> > joint_limits_);
     void chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj);
-    std::vector<std::pair<float, float> > joint_limits_left_;
-    std::vector<std::pair<float, float> > joint_limits_right_;
+    std::vector<std::pair<double, double> > joint_limits_left_;
+    std::vector<std::pair<double, double> > joint_limits_right_;
     bool validateTrajectory(const trajectory_msgs::JointTrajectory &traj);
 };
 

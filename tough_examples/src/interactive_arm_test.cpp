@@ -70,7 +70,7 @@ int main(int argc, char **argv)
             std::cout << "Enter <side> <q0> <q1> <q2> <q3> <q4> <q5> <q6>:";
             float q0, q1, q2,q3, q4, q5, q6;
             std::cin>>inputSide>> q0 >> q1 >> q2 >> q3 >> q4 >> q5 >> q6;
-            std::vector< std::vector<float> > armData;
+            std::vector< std::vector<double> > armData;
 
             RobotSide side = inputSide == 0 ? RobotSide::LEFT : RobotSide::RIGHT;
 

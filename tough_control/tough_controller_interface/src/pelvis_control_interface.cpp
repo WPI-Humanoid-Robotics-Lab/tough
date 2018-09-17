@@ -43,3 +43,13 @@ void PelvisControlInterface::controlPelvisHeight(float height, float duration)
 void PelvisControlInterface::publishPelvisMessage(const ihmc_msgs::PelvisHeightTrajectoryRosMessage &msg) const{
     this->pelvisHeightPublisher_.publish(msg);
 }
+
+bool PelvisControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)
+{
+    return false;
+}
+
+bool PelvisControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
+{
+    return state_informer_->getCurrentPose(rd_->getPelvisFrame(), pose, fixedFrame);
+}

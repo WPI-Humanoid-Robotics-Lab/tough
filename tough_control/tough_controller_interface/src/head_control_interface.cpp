@@ -127,6 +127,16 @@ void HeadControlInterface::moveNeckJoints(const std::vector<std::vector<float> >
   neckTrajPublisher.publish(msg);
 }
 
+bool HeadControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)
+{
+    return false;
+}
+
+bool HeadControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
+{
+
+}
+
 int HeadControlInterface::getNumNeckJoints() const
 {
     return NUM_NECK_JOINTS;

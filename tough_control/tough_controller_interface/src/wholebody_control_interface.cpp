@@ -19,7 +19,18 @@ WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle &nh):ToughC
 
 void WholebodyControlInterface::executeTrajectory(const RobotSide side, const  moveit_msgs::RobotTrajectory &traj){
     return executeTrajectory(side, traj.joint_trajectory);
- }
+}
+
+bool WholebodyControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)
+{
+    state_informer_->getJointPositions(joints);
+    return true;
+}
+
+bool WholebodyControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
+{
+    return state_informer_->getCurrentPose(rd_->getPelvisFrame(), pose,fixedFrame);
+}
 
 void WholebodyControlInterface::executeTrajectory(const RobotSide side, const trajectory_msgs::JointTrajectory &traj)
 {
@@ -83,7 +94,7 @@ void WholebodyControlInterface::executeTrajectory(const RobotSide side, const tr
     ros::Duration(1).sleep();
 }
 
-void WholebodyControlInterface::leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_)
+void WholebodyControlInterface::leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<double, double> > joint_limits_)
 {
     msg.left_arm_trajectory_message.joint_trajectory_messages.resize(7);
     for(int trajPointNumber = 0; trajPointNumber < traj.points.size(); trajPointNumber++){
@@ -111,7 +122,7 @@ void WholebodyControlInterface::leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMess
     }
 }
 
-void WholebodyControlInterface::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<float, float> > joint_limits_)
+void WholebodyControlInterface::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj, std::vector<std::pair<double, double> > joint_limits_)
 {
     msg.right_arm_trajectory_message.joint_trajectory_messages.resize(7);
     for(int trajPointNumber = 0; trajPointNumber < traj.points.size(); trajPointNumber++){

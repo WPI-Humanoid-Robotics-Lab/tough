@@ -32,3 +32,18 @@ void GripperControlInterface::openGripper(const RobotSide side)
 {
     controlGripper(side, ihmc_msgs::HandDesiredConfigurationRosMessage::OPEN);
 }
+
+bool GripperControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
+{
+    return state_informer_->getCurrentPose(side == RobotSide::LEFT ? rd_->getLeftEEFrame(): rd_->getRightEEFrame(),
+                                           pose,
+                                           fixedFrame);
+}
+
+bool GripperControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)
+{
+    joints.clear();
+    double jointPosition = state_informer_->getJointPosition(side == RobotSide::LEFT ? rd_->getLeftEEFrame() : rd_->getRightEEFrame());
+    joints.push_back(jointPosition);
+    return true;
+}

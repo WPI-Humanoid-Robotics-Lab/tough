@@ -38,7 +38,7 @@ public:
      */
     struct ArmJointData {
         RobotSide side;
-        std::vector<float> arm_pose;
+        std::vector<double> arm_pose;
         float time;
     };
 
@@ -70,7 +70,7 @@ public:
      * @param arm_pose      A vector that stores a vector with 7 values one for each joint. Number of values in the vector are the number of trajectory points.
      * @param time          Total time to execute the trajectory. each trajectory point is equally spaced in time.
      */
-    bool moveArmJoints(const RobotSide side,const std::vector<std::vector<float> > &arm_pose,const float time);
+    bool moveArmJoints(const RobotSide side, const std::vector<std::vector<double> > &arm_pose, const float time);
 
     /**
      * @brief moveArmJoints Moves arm joints to given joint angles. All angles in radians.
@@ -148,15 +148,19 @@ public:
     bool nudgeArmLocal(const RobotSide side, float x, float y, float z,geometry_msgs::Pose &pose);
     bool nudgeArmPelvis(const RobotSide side, float x, float y, float z,geometry_msgs::Pose &pose);
 
+    virtual bool getJointSpaceState(std::vector<double> &joints, RobotSide side) override;
+
+    virtual bool getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame = TOUGH_COMMON_NAMES::WORLD_TF) override;
+
 private:
 
 
-    const std::vector<float> ZERO_POSE;
-    const std::vector<float> DEFAULT_RIGHT_POSE;
-    const std::vector<float> DEFAULT_LEFT_POSE;
+    const std::vector<double> ZERO_POSE;
+    const std::vector<double> DEFAULT_RIGHT_POSE;
+    const std::vector<double> DEFAULT_LEFT_POSE;
     int NUM_ARM_JOINTS;
-    std::vector<std::pair<float, float> > joint_limits_left_;
-    std::vector<std::pair<float, float> > joint_limits_right_;
+    std::vector<std::pair<double, double> > joint_limits_left_;
+    std::vector<std::pair<double, double> > joint_limits_right_;
 
     ros::Publisher  armTrajectoryPublisher;
     ros::Publisher  handTrajectoryPublisher;
@@ -165,7 +169,7 @@ private:
     ros::Subscriber armTrajectorySubscriber;
 
     void poseToSE3TrajectoryPoint(const geometry_msgs::Pose &pose, ihmc_msgs::SE3TrajectoryPointRosMessage &point);
-    void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<float> pos);
+    void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, float time, std::vector<double> pos);
     void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage &msg, trajectory_msgs::JointTrajectoryPoint point);
 
 };

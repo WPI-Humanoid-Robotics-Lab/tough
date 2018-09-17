@@ -19,6 +19,10 @@ public:
     ~PelvisControlInterface();
     void controlPelvisHeight(float height, float duration=2.0f);
     void publishPelvisMessage(const ihmc_msgs::PelvisHeightTrajectoryRosMessage &msg) const ;
+
+    virtual bool getJointSpaceState(std::vector<double> &joints, RobotSide side) override;
+
+    virtual bool getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame=TOUGH_COMMON_NAMES::WORLD_TF) override;
 };
 
 #endif

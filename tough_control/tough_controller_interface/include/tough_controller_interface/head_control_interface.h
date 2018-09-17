@@ -78,6 +78,10 @@ public:
      * @param time            The total time of the trajectories (each trajectory is spaced equally in time).
      */
     void moveNeckJoints(const std::vector<std::vector<float> > &neck_pose, const float time);
+
+    virtual bool getJointSpaceState(std::vector<double> &joints, RobotSide side) override;
+
+    virtual bool getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame = TOUGH_COMMON_NAMES::WORLD_TF) override;
 };
 
 #endif // VAL_HEAD_NAVIGATION_H

@@ -58,3 +58,13 @@ void ChestControlInterface::getChestOrientation(geometry_msgs::Quaternion &orien
         state_informer_->getCurrentPose(rd_->getTorsoFrame(), chest_pose, rd_->getPelvisFrame());
         orientation = chest_pose.orientation;
 }
+
+bool ChestControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)
+{
+    return false;
+}
+
+bool ChestControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
+{
+    return state_informer_->getCurrentPose(rd_->getTorsoFrame(), pose, fixedFrame);
+}

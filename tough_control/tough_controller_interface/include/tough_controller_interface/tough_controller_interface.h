@@ -24,6 +24,9 @@ public:
     ToughControllerInterface(ros::NodeHandle nh);
     virtual ~ToughControllerInterface()=0;
 
+    virtual bool getJointSpaceState(std::vector<double> &joints, RobotSide side)=0;
+    virtual bool getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)=0;
+
 };
 
 #endif // TOUGHCONTROLLERINTERFACE_H

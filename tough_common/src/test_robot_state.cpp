@@ -9,7 +9,7 @@ int main(int argc, char** argv)
     ros::AsyncSpinner spinner(1);
     spinner.start();
 
-    std::vector<float> positions;
+    std::vector<double> positions;
 
     std::cout << "Efforts of left arm: ";
     obj->getJointEfforts("left_arm", positions);

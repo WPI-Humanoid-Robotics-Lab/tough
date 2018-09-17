@@ -5,6 +5,7 @@
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <urdf/model.h>
+#include <urdf_model/types.h>
 #include "tough_common/tough_common_names.h"
 
 // defines for arms
@@ -69,9 +70,9 @@ public:
 
     void getRightArmFrameNames(std::vector<std::string>  &right_arm_frame_names) const;
 
-    void getLeftArmJointLimits(std::vector<std::pair<float, float> > &left_arm_joint_limits) const;
+    void getLeftArmJointLimits(std::vector<std::pair<double, double> > &left_arm_joint_limits) const;
 
-    void getRightArmJointLimits(std::vector<std::pair<float, float> > &right_arm_joint_limits) const;
+    void getRightArmJointLimits(std::vector<std::pair<double, double> > &right_arm_joint_limits) const;
 
     int getNumberOfNeckJoints() const;
 
@@ -109,9 +110,9 @@ protected:
 
     void setRightFootFrameName(const std::string &getRightFootFrameName);
 
-    void setLeftArmJointLimits(const std::vector<std::pair<float, float> > &left_arm_joint_limits);
+    void setLeftArmJointLimits(const std::vector<std::pair<double, double> > &left_arm_joint_limits);
 
-    void setRightArmJointLimits(const std::vector<std::pair<float, float> > &right_arm_joint_limits);
+    void setRightArmJointLimits(const std::vector<std::pair<double, double> > &right_arm_joint_limits);
 
     void setLeftPalmFrame(const std::string &value);
 
@@ -152,8 +153,8 @@ private:
     std::string left_foot_frame_name_;
     std::string right_foot_frame_name_;
 
-    std::vector<std::pair<float, float> > left_arm_joint_limits_;
-    std::vector<std::pair<float, float> > right_arm_joint_limits_;
+    std::vector<std::pair<double, double> > left_arm_joint_limits_;
+    std::vector<std::pair<double, double> > right_arm_joint_limits_;
 
     int number_of_neck_joints_;
 

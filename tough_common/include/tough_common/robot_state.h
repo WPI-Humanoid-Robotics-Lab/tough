@@ -39,14 +39,14 @@ public:
     RobotStateInformer(RobotStateInformer const&)   = delete;
     void operator=(RobotStateInformer const&)       = delete;
 
-    void getJointPositions(std::vector<float> &positions);
-    bool getJointPositions(const std::string &paramName, std::vector<float> &positions);
+    void getJointPositions(std::vector<double> &positions);
+    bool getJointPositions(const std::string &paramName, std::vector<double> &positions);
 
-    void getJointVelocities(std::vector<float> &velocities);
-    bool getJointVelocities(const std::string &paramName, std::vector<float> &velocities);
+    void getJointVelocities(std::vector<double> &velocities);
+    bool getJointVelocities(const std::string &paramName, std::vector<double> &velocities);
 
-    void getJointEfforts(std::vector<float> &efforts);
-    bool getJointEfforts(const std::string &paramName, std::vector<float> &efforts);
+    void getJointEfforts(std::vector<double> &efforts);
+    bool getJointEfforts(const std::string &paramName, std::vector<double> &efforts);
 
     double getJointPosition(const std::string &jointName);
     double getJointVelocity(const std::string &jointName);

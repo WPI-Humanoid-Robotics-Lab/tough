@@ -29,11 +29,11 @@ int main(int argc, char **argv)
     }
 
     ArmControlInterface armTraj(nh);
-    std::vector<float> positions;
+    std::vector<double> positions;
     for (int i = 0; i < 7; i ++){
         positions.push_back(std::stof(argv[i+2]));
     }
-    std::vector< std::vector<float> > armData;
+    std::vector< std::vector<double> > armData;
     armData.push_back(positions);
     RobotSide side = argv[1][0] == '0' ? RobotSide::LEFT : RobotSide::RIGHT;
     std::string side_str = (side == RobotSide::LEFT) ? "left" : "right";

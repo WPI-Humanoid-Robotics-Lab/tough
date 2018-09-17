@@ -43,7 +43,7 @@ void RobotStateInformer::jointStateCB(const sensor_msgs::JointStatePtr msg){
 
 }
 
-void RobotStateInformer::getJointPositions(std::vector<float> &positions){
+void RobotStateInformer::getJointPositions(std::vector<double> &positions){
     positions.clear();
     std::lock_guard<std::mutex> guard(currentStateMutex_);
 
@@ -52,7 +52,7 @@ void RobotStateInformer::getJointPositions(std::vector<float> &positions){
     }
 }
 
-bool RobotStateInformer::getJointPositions(const std::string &paramName, std::vector<float> &positions){
+bool RobotStateInformer::getJointPositions(const std::string &paramName, std::vector<double> &positions){
     positions.clear();
     std::vector<std::string> jointNames;
     std::string parameter;
@@ -76,7 +76,7 @@ bool RobotStateInformer::getJointPositions(const std::string &paramName, std::ve
     return false;
 }
 
-void RobotStateInformer::getJointVelocities(std::vector<float> &velocities){
+void RobotStateInformer::getJointVelocities(std::vector<double> &velocities){
     velocities.clear();
     std::lock_guard<std::mutex> guard(currentStateMutex_);
 
@@ -85,7 +85,7 @@ void RobotStateInformer::getJointVelocities(std::vector<float> &velocities){
     }
 }
 
-bool RobotStateInformer::getJointVelocities(const std::string &paramName, std::vector<float> &velocities){
+bool RobotStateInformer::getJointVelocities(const std::string &paramName, std::vector<double> &velocities){
     velocities.clear();
     std::vector<std::string> jointNames;
     std::string parameter;
@@ -110,7 +110,7 @@ bool RobotStateInformer::getJointVelocities(const std::string &paramName, std::v
 }
 
 
-void RobotStateInformer::getJointEfforts(std::vector<float> &efforts){
+void RobotStateInformer::getJointEfforts(std::vector<double> &efforts){
     efforts.clear();
     std::lock_guard<std::mutex> guard(currentStateMutex_);
 
@@ -119,7 +119,7 @@ void RobotStateInformer::getJointEfforts(std::vector<float> &efforts){
     }
 }
 
-bool RobotStateInformer::getJointEfforts(const std::string &paramName, std::vector<float> &efforts){
+bool RobotStateInformer::getJointEfforts(const std::string &paramName, std::vector<double> &efforts){
     efforts.clear();
     std::vector<std::string> jointNames;
     std::string parameter;

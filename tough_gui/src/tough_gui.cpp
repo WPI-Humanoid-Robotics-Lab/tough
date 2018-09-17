@@ -341,8 +341,8 @@ void ToughGUI::initTools(){
 }
 
 void ToughGUI::initJointLimits() {
-    std::vector<std::pair<float, float> > left_arm_joint_limits;
-    std::vector<std::pair<float, float> > right_arm_joint_limits;
+    std::vector<std::pair<double, double> > left_arm_joint_limits;
+    std::vector<std::pair<double, double> > right_arm_joint_limits;
 
     rd_->getLeftArmJointLimits(left_arm_joint_limits);
     rd_->getRightArmJointLimits(right_arm_joint_limits);
@@ -602,7 +602,7 @@ void ToughGUI::jointStateCallBack(const ros::TimerEvent& e)
 {
 
     static std::vector<std::string>        jointNames;
-    static std::vector<float>              jointValues;
+    static std::vector<double>              jointValues;
 
     if(jointNames.empty()){
         currentState_->getJointNames(jointNames);
