@@ -1,6 +1,7 @@
 #include<tough_controller_interface/arm_control_interface.h>
 #include<stdlib.h>
 #include<visualization_msgs/Marker.h>
+#include <tf/tf.h>
 
 //add default pose for both arms. the values of joints are different.
 ArmControlInterface::ArmControlInterface(ros::NodeHandle nh):ToughControllerInterface(nh),
@@ -377,16 +378,15 @@ void ArmControlInterface::poseToSE3TrajectoryPoint(const geometry_msgs::Pose &po
 
 bool ArmControlInterface::nudgeArm(const RobotSide side, const direction drct, float nudgeStep){
 
-    geometry_msgs::Pose      world_pose;
     geometry_msgs::Pose      palm_pose;
 
-    //    world_pose.header.frame_id="/world";
-
-    std::string target_frame = side == LEFT ? rd_->getLeftEEFrame() : rd_->getRightEEFrame();
+    std::string target_frame = side == LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
 
     if(!state_informer_->getCurrentPose(target_frame, palm_pose, rd_->getPelvisFrame())){
         return false;
     }
+    ROS_INFO("Palm pose in pelvis frame: x=%.2f y=%.2f z=%.2f", palm_pose.position.x, palm_pose.position.y, palm_pose.position.z);
+
 
     if     (drct == direction::LEFT)     palm_pose.position.y += nudgeStep;
     else if(drct == direction::RIGHT)    palm_pose.position.y -= nudgeStep;
@@ -395,11 +395,24 @@ bool ArmControlInterface::nudgeArm(const RobotSide side, const direction drct, f
     else if(drct == direction::FRONT)    palm_pose.position.x += nudgeStep;
     else if(drct == direction::BACK)     palm_pose.position.x -= nudgeStep;
 
-    if(!state_informer_->transformPose(palm_pose, world_pose, rd_->getPelvisFrame(), rd_->getWorldFrame())){
-        return false;
-    }
+    //Translation
+    palm_pose.position.x += 0.1;
+    palm_pose.position.z -= 0.01;
 
-    moveArmInTaskSpace(side,world_pose, 0.0f);
+    //Rotation
+    tf::Quaternion q_orig, q_rot, q_new;
+    double roll=0, pitch=0, yaw=M_PI_2;
+    q_rot = tf::createQuaternionFromRPY(roll, pitch, yaw);
+
+    tf::quaternionMsgToTF(palm_pose.orientation , q_orig);  // Get the original orientation of 'commanded_pose'
+
+    q_new = q_rot*q_orig;  // Calculate the new orientation
+    q_new.normalize();
+    tf::quaternionTFToMsg(q_new, palm_pose.orientation);  // Stuff the new rotation back into the pose. This requires conversion into a msg type
+
+    ROS_INFO("Palm pose in world frame: x=%.2f y=%.2f z=%.2f", palm_pose.position.x, palm_pose.position.y, palm_pose.position.z);
+
+    moveArmInTaskSpace(side,palm_pose, 0.0f);
 
     return true;
 }
@@ -539,7 +552,7 @@ void ArmControlInterface::moveArmInTaskSpace(const RobotSide side, const geometr
 void ArmControlInterface::moveArmInTaskSpaceMessage(const RobotSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int baseForControl)
 {
     if(baseForControl == 0){
-        baseForControl = rd_->getPelvisFrameHash();
+        baseForControl = rd_->getPelvisZUPFrameHash();
     }
 
     ihmc_msgs::HandTrajectoryRosMessage msg;

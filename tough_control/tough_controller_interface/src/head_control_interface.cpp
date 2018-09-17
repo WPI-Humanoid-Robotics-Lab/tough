@@ -54,8 +54,8 @@ void HeadControlInterface::moveHead(const geometry_msgs::Quaternion &quaternion,
   ihmc_msgs::SO3TrajectoryPointRosMessage data;
   ihmc_msgs::FrameInformationRosMessage reference_frame;
 
-  reference_frame.trajectory_reference_frame_id = rd_->getPelvisFrameHash();   //Pelvis frame
-  reference_frame.data_reference_frame_id = rd_->getPelvisFrameHash();//Pelvis frame
+  reference_frame.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash();   //Pelvis frame
+  reference_frame.data_reference_frame_id = rd_->getPelvisZUPFrameHash();//Pelvis frame
   msg.frame_information = reference_frame;
 
   data.orientation = quaternion;
@@ -78,8 +78,8 @@ void HeadControlInterface::moveHead(const std::vector<std::vector<float> > &traj
   ihmc_msgs::HeadTrajectoryRosMessage msg;
   ihmc_msgs::FrameInformationRosMessage reference_frame;
 
-  reference_frame.trajectory_reference_frame_id = rd_->getPelvisFrameHash();   //Pelvis frame
-  reference_frame.data_reference_frame_id = rd_->getPelvisFrameHash();//Pelvis frame
+  reference_frame.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash();   //Pelvis frame
+  reference_frame.data_reference_frame_id = rd_->getPelvisZUPFrameHash();//Pelvis frame
   msg.frame_information = reference_frame;
 
 
