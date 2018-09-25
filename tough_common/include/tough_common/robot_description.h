@@ -74,8 +74,9 @@ public:
 
     void getRightArmJointLimits(std::vector<std::pair<double, double> > &right_arm_joint_limits) const;
 
-    int getNumberOfNeckJoints() const;
+    void getEndeffectorFrames();
 
+    int getNumberOfNeckJoints() const;
 
     int getMidFeetZUPFrameHash() const;
 
@@ -121,6 +122,18 @@ protected:
     void setNumberOfNeckJoints(int numberOfNeckJoints);
 
     bool updateFrameHash();
+
+    bool l_palm_exists_ = false;
+
+    bool l_middle_finger_pitch_link_exists_ = false;
+
+    bool l_hand_exists_ = false;
+
+    bool r_palm_exists_ = false;
+
+    bool r_middle_finger_pitch_link_exists_ = false;
+
+    bool r_hand_exists_ = false;
 
 private:
     RobotDescription(ros::NodeHandle nh, std::string urdf_param="/robot_description");

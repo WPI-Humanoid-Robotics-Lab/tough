@@ -42,6 +42,12 @@ const std::string LEFT_ARM_GROUP = "leftArm";
 // rightArm -- > rightShoulderPitchLink to rightPalm
 const std::string RIGHT_ARM_GROUP = "rightArm";
 
+// leftArm -- > leftEndEffectorFrame wrt leftHand/leftPalm
+const std::string LEFT_ENDEFFECTOR_FRAME = "left_endeffector_frame";
+
+// rightArm -- > rightEndEffectorFrame wrt rightHand/rightPalm
+const std::string RIGHT_ENDEFFECTOR_FRAME = "right_endeffector_frame";
+
 //// leftPalm -- > pelvis to leftPalm
 //const std::string LEFT_PALM_GROUP = "leftPalm";
 

@@ -1,5 +1,9 @@
 #include "tough_common/robot_description.h"
 
+#include <ros/ros.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2/LinearMath/Quaternion.h>
+
 #include <algorithm>
 #include <string>
 #include <cctype>
@@ -93,6 +97,24 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
            && (link->name.length() < PELVIS_TF.length() || PELVIS_TF.empty())){
             PELVIS_TF = link->name;
         }
+        else if(findSubStringIC(link->name, "l_palm")){
+            l_palm_exists_ = true;
+        }
+        else if(findSubStringIC(link->name, "leftMiddleFingerPitch1Link")){
+            l_middle_finger_pitch_link_exists_ = true;
+        }
+        else if(findSubStringIC(link->name, "l_hand")){
+            l_hand_exists_ = true;
+        }
+        else if(findSubStringIC(link->name, "r_palm")){
+            r_palm_exists_ = true;
+        }
+        else if(findSubStringIC(link->name, "rightMiddleFingerPitch1Link")){
+            r_middle_finger_pitch_link_exists_ = true;
+        }
+        else if(findSubStringIC(link->name, "r_hand")){
+            r_hand_exists_ = true;
+        }
     }
 
 //    ROS_INFO("LEFT ARM");
@@ -123,15 +145,18 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
      * This causes footsteps to be at a height from ground. should this be fixed on JAVA side?
      */
 
+    L_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_FRAME;
+    R_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_FRAME;
+
     if(robot_name_ == "atlas"){
-        R_END_EFFECTOR_TF = "r_palm";
-        L_END_EFFECTOR_TF = "l_palm";
+//        R_END_EFFECTOR_TF = "r_palm";
+//        L_END_EFFECTOR_TF = "l_palm";
         number_of_neck_joints_ = 1;
         foot_frame_offset_ = 0.085;
     }
     else if (robot_name_ == "valkyrie"){
-        R_END_EFFECTOR_TF = "rightMiddleFingerPitch1Link";
-        L_END_EFFECTOR_TF = "leftMiddleFingerPitch1Link";
+//        R_END_EFFECTOR_TF = "rightMiddleFingerPitch1Link";
+//        L_END_EFFECTOR_TF = "leftMiddleFingerPitch1Link";
         number_of_neck_joints_ = 3;
         foot_frame_offset_ = 0.102;
     }
@@ -150,6 +175,133 @@ RobotDescription::~RobotDescription()
 {
 
 }
+
+void RobotDescription::getEndeffectorFrames()
+{
+    ROS_INFO("in getEndeffectorFrames with l_palm_ = %d and r_palm- = %d", l_palm_exists_, r_palm_exists_);
+
+    tf2_ros::TransformBroadcaster tfb;
+    geometry_msgs::TransformStamped leftTransformStamped;
+    geometry_msgs::TransformStamped rightTransformStamped;
+
+    if(l_palm_exists_)
+    {
+        ROS_INFO("in Left Palm Mode");
+       leftTransformStamped.header.frame_id = "l_palm";
+       leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_FRAME;
+       leftTransformStamped.transform.translation.x = 0.0;
+       leftTransformStamped.transform.translation.y = -0.1;
+       leftTransformStamped.transform.translation.z = 0.0;
+       tf2::Quaternion q;
+             q.setRPY(0, -40, 90);
+       leftTransformStamped.transform.rotation.x = q.x();
+       leftTransformStamped.transform.rotation.y = q.y();
+       leftTransformStamped.transform.rotation.z = q.z();
+       leftTransformStamped.transform.rotation.w = q.w();
+    }
+
+    else if(l_middle_finger_pitch_link_exists_)
+    {
+        ROS_INFO("in Left MiddleFinger Mode");
+       leftTransformStamped.header.frame_id = "l_hand";
+       leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_FRAME;
+       leftTransformStamped.transform.translation.x = 0.0;
+       leftTransformStamped.transform.translation.y = 0.1;
+       leftTransformStamped.transform.translation.z = -0.01;
+       tf2::Quaternion q;
+             q.setRPY(0, 0, M_PI_2);
+       leftTransformStamped.transform.rotation.x = q.x();
+       leftTransformStamped.transform.rotation.y = q.y();
+       leftTransformStamped.transform.rotation.z = q.z();
+       leftTransformStamped.transform.rotation.w = q.w();
+    }
+
+    else if(l_hand_exists_ && !l_palm_exists_ && !l_middle_finger_pitch_link_exists_)
+    {
+        ROS_INFO("in Left Hand Mode");
+       leftTransformStamped.header.frame_id = "l_hand";
+       leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_FRAME;
+       leftTransformStamped.transform.translation.x = 0.0;
+       leftTransformStamped.transform.translation.y = 0.1;
+       leftTransformStamped.transform.translation.z = 0.01;
+       tf2::Quaternion q;
+             q.setRPY(0, 0, M_PI_2);
+       leftTransformStamped.transform.rotation.x = q.x();
+       leftTransformStamped.transform.rotation.y = q.y();
+       leftTransformStamped.transform.rotation.z = q.z();
+       leftTransformStamped.transform.rotation.w = q.w();
+    }
+
+    else
+    {
+        ROS_INFO("Some Problem Occured, No Left Hand Frame Found!");
+    }
+
+    if(r_palm_exists_)
+{
+        ROS_INFO("in Right Palm Mode");
+       rightTransformStamped.header.frame_id = "r_palm";
+       rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_FRAME;
+       rightTransformStamped.transform.translation.x =  0;
+       rightTransformStamped.transform.translation.y =  0.1;
+       rightTransformStamped.transform.translation.z =  0;
+       tf2::Quaternion q;
+             q.setRPY(M_PI, 0, M_PI_2);
+       rightTransformStamped.transform.rotation.x = q.x();
+       rightTransformStamped.transform.rotation.y = q.y();
+       rightTransformStamped.transform.rotation.z = q.z();
+       rightTransformStamped.transform.rotation.w = q.w();
+}
+
+    else if(r_middle_finger_pitch_link_exists_)
+{
+        ROS_INFO("in Right MiddleFinger Mode");
+       rightTransformStamped.header.frame_id = "r_hand";
+       rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_FRAME;
+       rightTransformStamped.transform.translation.x = 0.0;
+       rightTransformStamped.transform.translation.y = -0.1;
+       rightTransformStamped.transform.translation.z = -0.01;
+       tf2::Quaternion q;
+             q.setRPY(0, 0, -M_PI_2);
+       rightTransformStamped.transform.rotation.x = q.x();
+       rightTransformStamped.transform.rotation.y = q.y();
+       rightTransformStamped.transform.rotation.z = q.z();
+       rightTransformStamped.transform.rotation.w = q.w();
+}
+
+    else if(r_hand_exists_ && !r_palm_exists_ && !r_middle_finger_pitch_link_exists_)
+{
+        ROS_INFO("in Right Hand Mode");
+       rightTransformStamped.header.frame_id = "r_hand";
+       rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_FRAME;
+       rightTransformStamped.transform.translation.x = 0.0;
+       rightTransformStamped.transform.translation.y = -0.1;
+       rightTransformStamped.transform.translation.z = 0.01;
+       tf2::Quaternion q;
+             q.setRPY(0, 0, -M_PI_2);
+       rightTransformStamped.transform.rotation.x = q.x();
+       rightTransformStamped.transform.rotation.y = q.y();
+       rightTransformStamped.transform.rotation.z = q.z();
+       rightTransformStamped.transform.rotation.w = q.w();
+}
+    else
+    {
+        ROS_INFO("Some Problem Occured, No Right Hand Found!");
+    }
+
+int i=0;
+   ros::Rate rate(1000);
+   while (ros::ok()){
+       leftTransformStamped.header.stamp = ros::Time::now();
+       tfb.sendTransform(leftTransformStamped);
+       rightTransformStamped.header.stamp = ros::Time::now();
+       tfb.sendTransform(rightTransformStamped);
+     rate.sleep();
+     //printf("sending %d\n", i++);
+   }
+
+}
+
 
 double RobotDescription::getFootFrameOffset() const
 {
@@ -358,5 +510,6 @@ int main(int argc, char *argv[]) {
     ros::init(argc, argv, "test_urdf");
     ros::NodeHandle nh;
     RobotDescription* robot = RobotDescription::getRobotDescription(nh);
+    robot->getEndeffectorFrames();
     return 0;
 }
