@@ -615,6 +615,7 @@ void RobotWalker::getCurrentStep(int side , ihmc_msgs::FootstepDataRosMessage & 
     current_state_->getCurrentPose(foot_frame.data, footPose, rd_->getWorldFrame());
     foot.location = footPose.position;
     foot.location.z -= rd_->getFootFrameOffset();
+    foot.orientation = footPose.orientation;
     foot.robot_side = side;
     foot.trajectory_type = ihmc_msgs::FootstepDataRosMessage::DEFAULT;
 
