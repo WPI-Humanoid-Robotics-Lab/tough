@@ -380,7 +380,7 @@ bool ArmControlInterface::nudgeArm(const RobotSide side, const direction drct, f
 
     geometry_msgs::Pose      palm_pose;
 
-    std::string target_frame = side == LEFT ? rd_->getLeftPalmFrame() : rd_->getRightPalmFrame();
+    std::string target_frame = side == LEFT ? rd_->getLeftEEFrame() : rd_->getRightEEFrame();
 
     if(!state_informer_->getCurrentPose(target_frame, palm_pose, rd_->getPelvisFrame())){
         return false;
@@ -395,22 +395,22 @@ bool ArmControlInterface::nudgeArm(const RobotSide side, const direction drct, f
     else if(drct == direction::FRONT)    palm_pose.position.x += nudgeStep;
     else if(drct == direction::BACK)     palm_pose.position.x -= nudgeStep;
 
-    //Translation
-    palm_pose.position.x += 0.1;
-    palm_pose.position.z -= 0.01;
+//    //Translation
+//    palm_pose.position.x += 0.1;
+//    palm_pose.position.z -= 0.01;
 
-    //Rotation
-    tf::Quaternion q_orig, q_rot, q_new;
-    double roll=0, pitch=0, yaw=M_PI_2;
-    q_rot = tf::createQuaternionFromRPY(roll, pitch, yaw);
+//    //Rotation
+//    tf::Quaternion q_orig, q_rot, q_new;
+//    double roll=0, pitch=0, yaw=M_PI_2;
+//    q_rot = tf::createQuaternionFromRPY(roll, pitch, yaw);
 
-    tf::quaternionMsgToTF(palm_pose.orientation , q_orig);  // Get the original orientation of 'commanded_pose'
+//    tf::quaternionMsgToTF(palm_pose.orientation , q_orig);  // Get the original orientation of 'commanded_pose'
 
-    q_new = q_rot*q_orig;  // Calculate the new orientation
-    q_new.normalize();
-    tf::quaternionTFToMsg(q_new, palm_pose.orientation);  // Stuff the new rotation back into the pose. This requires conversion into a msg type
+//    q_new = q_rot*q_orig;  // Calculate the new orientation
+//    q_new.normalize();
+//    tf::quaternionTFToMsg(q_new, palm_pose.orientation);  // Stuff the new rotation back into the pose. This requires conversion into a msg type
 
-    ROS_INFO("Palm pose in world frame: x=%.2f y=%.2f z=%.2f", palm_pose.position.x, palm_pose.position.y, palm_pose.position.z);
+//    ROS_INFO("Palm pose in world frame: x=%.2f y=%.2f z=%.2f", palm_pose.position.x, palm_pose.position.y, palm_pose.position.z);
 
     moveArmInTaskSpace(side,palm_pose, 0.0f);
 

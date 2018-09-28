@@ -12,12 +12,12 @@
 // Try to find in the Haystack the Needle - ignore case
 bool findSubStringIC(const std::string & strHaystack, const std::string & strNeedle)
 {
-  auto it = std::search(
-    strHaystack.begin(), strHaystack.end(),
-    strNeedle.begin(),   strNeedle.end(),
-    [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
-  );
-  return (it != strHaystack.end() );
+    auto it = std::search(
+                strHaystack.begin(), strHaystack.end(),
+                strNeedle.begin(),   strNeedle.end(),
+                [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
+    );
+    return (it != strHaystack.end() );
 }
 
 // define static variables
@@ -75,6 +75,23 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
     // get a vector of all links
     model_.getLinks(links_);
 
+    // set joint limits for arms
+    for (auto joint_name : left_arm_joint_names_){
+        float l_limit = model_.joints_[joint_name]->limits->lower;
+        float u_limit = model_.joints_[joint_name]->limits->upper;
+        left_arm_joint_limits_.push_back({l_limit, u_limit});
+        left_arm_frame_names_.push_back(model_.joints_[joint_name]->child_link_name);
+        //        ROS_INFO("\nFrame : %s \nJoint : %s \nLimits : <%0.4f , %0.4f>\n-------------\n", (left_arm_frame_names_.end()-1)->c_str(), joint_name.c_str(), l_limit, u_limit);
+    }
+
+
+    for (auto joint_name : right_arm_joint_names_){
+        float l_limit = model_.joints_[joint_name]->limits->lower;
+        float u_limit = model_.joints_[joint_name]->limits->upper;
+        right_arm_joint_limits_.push_back({l_limit, u_limit});
+        right_arm_frame_names_.push_back(model_.joints_[joint_name]->child_link_name);
+        //        ROS_INFO("\nFrame : %s \nJoint : %s \nLimits : <%0.4f , %0.4f>\n-------------\n", (right_arm_frame_names_.end()-1)->c_str(), joint_name.c_str(), l_limit, u_limit);
+    }
     /*  There's a better way of doing this as param server already has the joint names
          // get a vector of all joints
         for (std::map<std::string,boost::shared_ptr<urdf::Joint> >::const_iterator joint = model_.joints_.begin();joint!= model_.joints_.end(); joint++)
@@ -90,11 +107,12 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
     */
 
 
+    // set variables that store TF
     // set all the required frame names -- inefficient but works for now. important frame names should be on parameter server
     for( auto link : links_) {
         // assuming that pelvis frame will be the one with least length
         if(findSubStringIC(link->name, "pelvis")
-           && (link->name.length() < PELVIS_TF.length() || PELVIS_TF.empty())){
+                && (link->name.length() < PELVIS_TF.length() || PELVIS_TF.empty())){
             PELVIS_TF = link->name;
         }
         else if(findSubStringIC(link->name, "l_palm")){
@@ -117,46 +135,27 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
         }
     }
 
-//    ROS_INFO("LEFT ARM");
-    for (auto joint_name : left_arm_joint_names_){
-        float l_limit = model_.joints_[joint_name]->limits->lower;
-        float u_limit = model_.joints_[joint_name]->limits->upper;
-        left_arm_joint_limits_.push_back({l_limit, u_limit});
-        left_arm_frame_names_.push_back(model_.joints_[joint_name]->child_link_name);
-//        ROS_INFO("\nFrame : %s \nJoint : %s \nLimits : <%0.4f , %0.4f>\n-------------\n", (left_arm_frame_names_.end()-1)->c_str(), joint_name.c_str(), l_limit, u_limit);
-    }
-
     L_PALM_TF = *(left_arm_frame_names_.end()-1);
-    TORSO_TF = model_.joints_[left_arm_joint_names_[0]]->parent_link_name;
-
-    //    ROS_INFO("RIGHT ARM");
-    for (auto joint_name : right_arm_joint_names_){
-        float l_limit = model_.joints_[joint_name]->limits->lower;
-        float u_limit = model_.joints_[joint_name]->limits->upper;
-        right_arm_joint_limits_.push_back({l_limit, u_limit});
-        right_arm_frame_names_.push_back(model_.joints_[joint_name]->child_link_name);
-//        ROS_INFO("\nFrame : %s \nJoint : %s \nLimits : <%0.4f , %0.4f>\n-------------\n", (right_arm_frame_names_.end()-1)->c_str(), joint_name.c_str(), l_limit, u_limit);
-    }
-
     R_PALM_TF = *(right_arm_frame_names_.end()-1);
-
+    TORSO_TF = model_.joints_[left_arm_joint_names_[0]]->parent_link_name;
 
     /* With 0.11 version of open-robotics-software, the foot offset is not handled on JAVA side
      * This causes footsteps to be at a height from ground. should this be fixed on JAVA side?
      */
 
-    L_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_FRAME;
-    R_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_FRAME;
+    L_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME;
+    R_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME;
+
+
+
+
+
 
     if(robot_name_ == "atlas"){
-//        R_END_EFFECTOR_TF = "r_palm";
-//        L_END_EFFECTOR_TF = "l_palm";
         number_of_neck_joints_ = 1;
         foot_frame_offset_ = 0.085;
     }
     else if (robot_name_ == "valkyrie"){
-//        R_END_EFFECTOR_TF = "rightMiddleFingerPitch1Link";
-//        L_END_EFFECTOR_TF = "leftMiddleFingerPitch1Link";
         number_of_neck_joints_ = 3;
         foot_frame_offset_ = 0.102;
     }
@@ -176,10 +175,8 @@ RobotDescription::~RobotDescription()
 
 }
 
-void RobotDescription::getEndeffectorFrames()
+void RobotDescription::publishEndEffectorFrames()
 {
-    ROS_INFO("in getEndeffectorFrames with l_palm_ = %d and r_palm- = %d", l_palm_exists_, r_palm_exists_);
-
     tf2_ros::TransformBroadcaster tfb;
     geometry_msgs::TransformStamped leftTransformStamped;
     geometry_msgs::TransformStamped rightTransformStamped;
@@ -187,118 +184,99 @@ void RobotDescription::getEndeffectorFrames()
     if(l_palm_exists_)
     {
         ROS_INFO("in Left Palm Mode");
-       leftTransformStamped.header.frame_id = "l_palm";
-       leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_FRAME;
-       leftTransformStamped.transform.translation.x = 0.0;
-       leftTransformStamped.transform.translation.y = -0.1;
-       leftTransformStamped.transform.translation.z = 0.0;
-       tf2::Quaternion q;
-             q.setRPY(0, -40, 90);
-       leftTransformStamped.transform.rotation.x = q.x();
-       leftTransformStamped.transform.rotation.y = q.y();
-       leftTransformStamped.transform.rotation.z = q.z();
-       leftTransformStamped.transform.rotation.w = q.w();
+        leftTransformStamped.header.frame_id = "l_palm";
+        leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME;
+        leftTransformStamped.transform.translation.x = -0.0;
+        leftTransformStamped.transform.translation.y = 0.1;
+        leftTransformStamped.transform.translation.z = 0.01;
+        tf2::Quaternion q;
+        q.setRPY(0, 0, M_PI_2);
+        leftTransformStamped.transform.rotation.x = q.x();
+        leftTransformStamped.transform.rotation.y = q.y();
+        leftTransformStamped.transform.rotation.z = q.z();
+        leftTransformStamped.transform.rotation.w = q.w();
     }
 
     else if(l_middle_finger_pitch_link_exists_)
     {
         ROS_INFO("in Left MiddleFinger Mode");
-       leftTransformStamped.header.frame_id = "l_hand";
-       leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_FRAME;
-       leftTransformStamped.transform.translation.x = 0.0;
-       leftTransformStamped.transform.translation.y = 0.1;
-       leftTransformStamped.transform.translation.z = -0.01;
-       tf2::Quaternion q;
-             q.setRPY(0, 0, M_PI_2);
-       leftTransformStamped.transform.rotation.x = q.x();
-       leftTransformStamped.transform.rotation.y = q.y();
-       leftTransformStamped.transform.rotation.z = q.z();
-       leftTransformStamped.transform.rotation.w = q.w();
+        leftTransformStamped.header.frame_id = "leftMiddleFingerPitch1Link";
+        leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME;
     }
 
     else if(l_hand_exists_ && !l_palm_exists_ && !l_middle_finger_pitch_link_exists_)
     {
         ROS_INFO("in Left Hand Mode");
-       leftTransformStamped.header.frame_id = "l_hand";
-       leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_FRAME;
-       leftTransformStamped.transform.translation.x = 0.0;
-       leftTransformStamped.transform.translation.y = 0.1;
-       leftTransformStamped.transform.translation.z = 0.01;
-       tf2::Quaternion q;
-             q.setRPY(0, 0, M_PI_2);
-       leftTransformStamped.transform.rotation.x = q.x();
-       leftTransformStamped.transform.rotation.y = q.y();
-       leftTransformStamped.transform.rotation.z = q.z();
-       leftTransformStamped.transform.rotation.w = q.w();
+        leftTransformStamped.header.frame_id = "l_hand";
+        leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME;
+        leftTransformStamped.transform.translation.x = 0.0;
+        leftTransformStamped.transform.translation.y = 0.1;
+        leftTransformStamped.transform.translation.z = 0.01;
+        tf2::Quaternion q;
+        q.setRPY(0, 0, M_PI_2);
+        leftTransformStamped.transform.rotation.x = q.x();
+        leftTransformStamped.transform.rotation.y = q.y();
+        leftTransformStamped.transform.rotation.z = q.z();
+        leftTransformStamped.transform.rotation.w = q.w();
     }
 
     else
     {
-        ROS_INFO("Some Problem Occured, No Left Hand Frame Found!");
+        ROS_ERROR("End effector frames for left hand could not be configured");
     }
 
     if(r_palm_exists_)
-{
-        ROS_INFO("in Right Palm Mode");
-       rightTransformStamped.header.frame_id = "r_palm";
-       rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_FRAME;
-       rightTransformStamped.transform.translation.x =  0;
-       rightTransformStamped.transform.translation.y =  0.1;
-       rightTransformStamped.transform.translation.z =  0;
-       tf2::Quaternion q;
-             q.setRPY(M_PI, 0, M_PI_2);
-       rightTransformStamped.transform.rotation.x = q.x();
-       rightTransformStamped.transform.rotation.y = q.y();
-       rightTransformStamped.transform.rotation.z = q.z();
-       rightTransformStamped.transform.rotation.w = q.w();
-}
-
-    else if(r_middle_finger_pitch_link_exists_)
-{
-        ROS_INFO("in Right MiddleFinger Mode");
-       rightTransformStamped.header.frame_id = "r_hand";
-       rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_FRAME;
-       rightTransformStamped.transform.translation.x = 0.0;
-       rightTransformStamped.transform.translation.y = -0.1;
-       rightTransformStamped.transform.translation.z = -0.01;
-       tf2::Quaternion q;
-             q.setRPY(0, 0, -M_PI_2);
-       rightTransformStamped.transform.rotation.x = q.x();
-       rightTransformStamped.transform.rotation.y = q.y();
-       rightTransformStamped.transform.rotation.z = q.z();
-       rightTransformStamped.transform.rotation.w = q.w();
-}
-
-    else if(r_hand_exists_ && !r_palm_exists_ && !r_middle_finger_pitch_link_exists_)
-{
-        ROS_INFO("in Right Hand Mode");
-       rightTransformStamped.header.frame_id = "r_hand";
-       rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_FRAME;
-       rightTransformStamped.transform.translation.x = 0.0;
-       rightTransformStamped.transform.translation.y = -0.1;
-       rightTransformStamped.transform.translation.z = 0.01;
-       tf2::Quaternion q;
-             q.setRPY(0, 0, -M_PI_2);
-       rightTransformStamped.transform.rotation.x = q.x();
-       rightTransformStamped.transform.rotation.y = q.y();
-       rightTransformStamped.transform.rotation.z = q.z();
-       rightTransformStamped.transform.rotation.w = q.w();
-}
-    else
     {
-        ROS_INFO("Some Problem Occured, No Right Hand Found!");
+        ROS_INFO("in Right Palm Mode");
+        rightTransformStamped.header.frame_id = "r_palm";
+        rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME;
+        rightTransformStamped.transform.translation.x =  0;
+        rightTransformStamped.transform.translation.y =  0.1;
+        rightTransformStamped.transform.translation.z =  0;
+        tf2::Quaternion q;
+        q.setRPY(M_PI, 0, M_PI_2);
+        rightTransformStamped.transform.rotation.x = q.x();
+        rightTransformStamped.transform.rotation.y = q.y();
+        rightTransformStamped.transform.rotation.z = q.z();
+        rightTransformStamped.transform.rotation.w = q.w();
     }
 
-int i=0;
-   ros::Rate rate(1000);
-   while (ros::ok()){
-       leftTransformStamped.header.stamp = ros::Time::now();
-       tfb.sendTransform(leftTransformStamped);
-       rightTransformStamped.header.stamp = ros::Time::now();
-       tfb.sendTransform(rightTransformStamped);
-     rate.sleep();
-     //printf("sending %d\n", i++);
-   }
+    else if(r_middle_finger_pitch_link_exists_)
+    {
+        ROS_INFO("in Right MiddleFinger Mode");
+        rightTransformStamped.header.frame_id = "rightMiddleFingerPitch1Link";
+        rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME;
+    }
+
+    else if(r_hand_exists_ && !r_palm_exists_ && !r_middle_finger_pitch_link_exists_)
+    {
+        ROS_INFO("in Right Hand Mode");
+        rightTransformStamped.header.frame_id = "r_hand";
+        rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME;
+        rightTransformStamped.transform.translation.x = 0.0;
+        rightTransformStamped.transform.translation.y = -0.1;
+        rightTransformStamped.transform.translation.z = 0.01;
+        tf2::Quaternion q;
+        q.setRPY(0, 0, -M_PI_2);
+        rightTransformStamped.transform.rotation.x = q.x();
+        rightTransformStamped.transform.rotation.y = q.y();
+        rightTransformStamped.transform.rotation.z = q.z();
+        rightTransformStamped.transform.rotation.w = q.w();
+    }
+    else
+    {
+        ROS_ERROR("End effector frames for right hand could not be configured");
+    }
+
+    ros::Rate rate(1000);
+    while (ros::ok()){
+        leftTransformStamped.header.stamp = ros::Time::now();
+        tfb.sendTransform(leftTransformStamped);
+        rightTransformStamped.header.stamp = ros::Time::now();
+        tfb.sendTransform(rightTransformStamped);
+        ros::spinOnce();
+        rate.sleep();
+    }
 
 }
 
@@ -312,6 +290,12 @@ int RobotDescription::getRightSoleFrameHash() const
 {
     return RIGHT_SOLE_FRAME_HASH_;
 }
+
+int RobotDescription::getWorldFrameHash() const
+{
+    return WORLD_FRAME_HASH_;
+}
+
 
 int RobotDescription::getLeftSoleFrameHash() const
 {
@@ -362,6 +346,7 @@ bool RobotDescription::updateFrameHash()
     CENTER_OF_MASS_FRAME_HASH_ = -104;
     LEFT_SOLE_FRAME_HASH_   = -105;
     RIGHT_SOLE_FRAME_HASH_  = -106;
+    WORLD_FRAME_HASH_       = -107;
 }
 
 
@@ -506,10 +491,10 @@ void RobotDescription::setPelvisFrame(const std::string &value)
 }
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
     ros::init(argc, argv, "test_urdf");
     ros::NodeHandle nh;
     RobotDescription* robot = RobotDescription::getRobotDescription(nh);
-    robot->getEndeffectorFrames();
+    robot->publishEndEffectorFrames();
     return 0;
 }

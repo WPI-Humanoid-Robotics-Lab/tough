@@ -74,7 +74,7 @@ public:
 
     void getRightArmJointLimits(std::vector<std::pair<double, double> > &right_arm_joint_limits) const;
 
-    void getEndeffectorFrames();
+    void publishEndEffectorFrames();
 
     int getNumberOfNeckJoints() const;
 
@@ -91,6 +91,8 @@ public:
     int getLeftSoleFrameHash() const;
 
     int getRightSoleFrameHash() const;
+
+    int getWorldFrameHash() const;
 
     double getFootFrameOffset() const;
 
@@ -194,6 +196,8 @@ private:
     int LEFT_SOLE_FRAME_HASH_;
 
     int RIGHT_SOLE_FRAME_HASH_;
+
+    int WORLD_FRAME_HASH_;
 
 };
 

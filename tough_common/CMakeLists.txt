@@ -40,7 +40,7 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 ## Declare a C++ executable
 add_executable(robot_description src/robot_description.cpp)
 add_dependencies(robot_description ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(robot_description   ${catkin_LIBRARIES})
+target_link_libraries(robot_description   ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 add_executable(test_jointState src/test_robot_state.cpp)
 add_dependencies(test_jointState  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
