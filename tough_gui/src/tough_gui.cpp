@@ -960,7 +960,7 @@ void ToughGUI::walkSteps()
     float xOffset = ui->lineEditXOffset->text().toFloat();
     float yOffset = ui->lineEditYOffset->text().toFloat();
     if(walkingController_ != nullptr){
-        walkingController_->walkNSteps(numOfSteps, xOffset, yOffset, false, side, false);
+        walkingController_->walkNStepsWRTPelvis(numOfSteps, xOffset, yOffset, false, side, false);
     }
 }
 
