@@ -192,6 +192,20 @@ bool RobotStateInformer::getCurrentPose(const std::string &frameName, geometry_m
     return true;
 }
 
+bool RobotStateInformer::getTransform(const std::string &frameName, tf::StampedTransform &transform, const std::string &baseFrame)
+{
+    try {
+
+        listener_.waitForTransform(baseFrame, frameName, ros::Time(0), ros::Duration(2));
+        listener_.lookupTransform(baseFrame, frameName, ros::Time(0),transform);
+    }
+    catch (tf::TransformException ex) {
+        ROS_WARN("%s",ex.what());
+        ros::spinOnce();
+        return false;
+    }
+    return true;
+}
 
 bool RobotStateInformer::transformQuaternion(const geometry_msgs::QuaternionStamped &qt_in, geometry_msgs::QuaternionStamped &qt_out,const std::string target_frame)
 {

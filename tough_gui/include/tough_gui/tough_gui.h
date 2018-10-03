@@ -113,6 +113,7 @@ private Q_SLOTS:
 
     void changePelvisHeight();
     void walkSteps();
+    void approveSteps();
     void moveChestJoints();
     void moveHeadJoints();
     void moveArmJoints();
@@ -165,7 +166,7 @@ private:
 
 private:
   ros::NodeHandle nh_;
-//  ros::Publisher moveBaseCmdPub;
+  ros::Publisher approveStepsPub_;
 //  ros::Subscriber centerDistSub;
 //  ros::Subscriber baseSensorStatus;
   ros::Subscriber rviz2DNavGoalSub;
@@ -217,6 +218,7 @@ private:
   QString goalTopic_;
   QString footstepTopic_;
   QString jointStatesTopic_;
+  QString approveStepsTopic_;
   QLabel* status_label_;
 
   // joint limits

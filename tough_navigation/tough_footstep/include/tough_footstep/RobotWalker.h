@@ -196,7 +196,7 @@ public:
      * @param Is a list of footstep list
      * @return
      */
-    bool getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list);
+    bool getFootstep(const geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list);
 
 private:
     RobotStateInformer *current_state_;

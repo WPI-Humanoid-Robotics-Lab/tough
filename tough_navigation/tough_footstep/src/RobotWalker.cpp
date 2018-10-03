@@ -540,7 +540,7 @@ bool RobotWalker::placeLeg(RobotSide side, float offset)
 }
 
 //Calls the footstep planner service to get footsteps to reach goal
-bool RobotWalker::getFootstep(geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list)
+bool RobotWalker::getFootstep(const geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list)
 {
     /// \todo fix the robot pose, if the legs are not together before walking.
 

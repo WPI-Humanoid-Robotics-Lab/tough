@@ -11,9 +11,8 @@ RobotStateInformer *current_state;
 RobotDescription *rd_;
 ihmc_msgs::FootstepDataListRosMessage list;
 geometry_msgs::Pose pelvisPose;
-//ros::Publisher *footstep_marker_pub;
 
-void WalkToGoal(geometry_msgs::Pose2D goal) {
+void WalkToGoal(const geometry_msgs::Pose2D goal) {
     current_state->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
     list.footstep_data_list.clear();
     list.default_transfer_duration = 1.0;
@@ -36,8 +35,8 @@ void publish_footsteps_cb(const std_msgs::Empty msg){
     geometry_msgs::Pose currPelvisPose;
     current_state->getCurrentPose(rd_->getPelvisFrame(), currPelvisPose);
 
-//    if(distanceBetweenPoints(currPelvisPose.position, pelvisPose.position) > 0.05)
-//        return;
+    if(distanceBetweenPoints(currPelvisPose.position, pelvisPose.position) > 0.05)
+        return;
 
     walk->walkGivenSteps(list, false);
     list.footstep_data_list.clear();
@@ -54,28 +53,19 @@ void nav_goal_cb(const geometry_msgs::PoseStamped::Ptr &goal_3d)
     t1.detach();
 }
 
-//void republish_footsteps(const visualization_msgs::MarkerArray::Ptr inMsg){
-
-//    visualization_msgs::MarkerArray msg = *inMsg;
-//    for(size_t i = 0; i<msg.markers.size(); i++) {
-//        msg.markers[i].ns = "valkyrie";
-//    }
-//    footstep_marker_pub->publish(msg);
-//}
-
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "footstep_node");
     ros::NodeHandle nh;
-    //    ros::Publisher temp = nh_.advertise<visualization_msgs::MarkerArray>("/valkyrie/footstep_markers",10);
-    //    footstep_marker_pub = &temp;
-    walk = new RobotWalker(nh, 0.8f, 0.8f, 0, 0.18);
+
     current_state = RobotStateInformer::getRobotStateInformer(nh);
     rd_ = RobotDescription::getRobotDescription(nh);
+    walk = new RobotWalker(nh, 0.8f, 0.8f, 0, 0.18);
+
     ros::Subscriber nav_goal_sub    = nh.subscribe("/goal", 1, &nav_goal_cb);
     ros::Subscriber nav_goal_sub2    = nh.subscribe("/move_base_simple/goal", 1, &nav_goal_cb);
-    ros::Subscriber publishFootsteps_sub  = nh.subscribe("/approve_footsteps", 1, &publish_footsteps_cb);
-    //    ros::Subscriber footstep_points = nh_.subscribe("/footstep_planner/footsteps_array", 1,&republish_footsteps);
+    ros::Subscriber publish_footsteps_sub  = nh.subscribe("/approve_footsteps", 1, &publish_footsteps_cb);
+
     footstep_planner::FootstepPlannerNode planner;
     ros::spin();
     delete walk;

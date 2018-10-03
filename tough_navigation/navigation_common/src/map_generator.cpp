@@ -36,7 +36,11 @@ void MapGenerator::trimTo2DecimalPlaces(float &x, float &y) {
 
 
 MapGenerator::MapGenerator(ros::NodeHandle &n):nh_(n) {
-    occGrid_.header.frame_id = TOUGH_COMMON_NAMES::WORLD_TF;
+
+    currentState_  = RobotStateInformer::getRobotStateInformer(nh_);
+    rd_ = RobotDescription::getRobotDescription(nh_);
+
+    occGrid_.header.frame_id = rd_->getWorldFrame();
     occGrid_.info.resolution = MAP_RESOLUTION;
     occGrid_.info.height     = MAP_HEIGHT;
     occGrid_.info.width      = MAP_WIDTH;
@@ -51,11 +55,10 @@ MapGenerator::MapGenerator(ros::NodeHandle &n):nh_(n) {
     visitedOccGrid_ = occGrid_;
 
     geometry_msgs::Pose pelvisPose;
-    currentState_  = RobotStateInformer::getRobotStateInformer(nh_);
-    rd_ = RobotDescription::getRobotDescription(nh_);
     currentState_->getCurrentPose(rd_->getPelvisFrame(),pelvisPose);
     ros::Duration(0.2).sleep();
 
+    // Assuming robot always starts in a clear space of 1m X 1m
     for (float x = -0.5f; x < 0.5f; x += MAP_RESOLUTION/10){
         for (float y = -0.5f; y < 0.5f; y += MAP_RESOLUTION/10){
             occGrid_.data.at(getIndex(pelvisPose.position.x + x, pelvisPose.position.y +y)) =  FREE;
@@ -63,19 +66,15 @@ MapGenerator::MapGenerator(ros::NodeHandle &n):nh_(n) {
         }
     }
 
-//    for(float x = -0.5f; x < 1.5f; x += MAP_RESOLUTION/10 ){
-//        for(float y = -0.5f; y < 0.5f; y += MAP_RESOLUTION/10 ){
-//            occGrid_.data.at(getIndex(x, y)) = 0;
-//            visitedOccGrid_.data.at(getIndex(x, y)) = 0;
-//        }
-//    }
 
     pointcloudSub_       = nh_.subscribe("walkway", 10, &MapGenerator::convertToOccupancyGrid, this);   // add free cells by publishing to this topic
     resetMapSub_         = nh_.subscribe("reset_map", 10, &MapGenerator::resetMap, this);
     blockMapSub_         = nh_.subscribe("/block_map", 10, &MapGenerator::updatePointsToBlock, this);   // add permanent obstacles by publishing to this topic
     clearCurrentPoseSub_ = nh_.subscribe("map/clear_current_pose", 10, &MapGenerator::clearCurrentPoseCB, this);
+
     mapPub_        = nh_.advertise<nav_msgs::OccupancyGrid>("/map", 10, true);
     visitedMapPub_ = nh_.advertise<nav_msgs::OccupancyGrid>("/visited_map", 10, true);
+
     timer_         = nh_.createTimer(ros::Duration(2), &MapGenerator::timerCallback, this);
 
 }
@@ -90,7 +89,6 @@ MapGenerator::~MapGenerator() {
 void MapGenerator::resetMap(const std_msgs::Empty &msg) {
     std::fill(occGrid_.data.begin(), occGrid_.data.end(),  OCCUPIED);
     visitedOccGrid_ = occGrid_;
-
 
     mtx.lock();
     for (float x = -0.5f; x < 0.5f; x += MAP_RESOLUTION/10){

@@ -54,7 +54,9 @@ public:
 
     void getJointNames(std::vector<std::string> &jointNames);
 
-    bool getCurrentPose(const std::string &frameName, geometry_msgs::Pose &pose, const std::string &baseFrame="/world");
+    bool getCurrentPose(const std::string &frameName, geometry_msgs::Pose &pose, const std::string &baseFrame=TOUGH_COMMON_NAMES::WORLD_TF);
+
+    bool getTransform(const std::string &frameName, tf::StampedTransform &transform, const std::string &baseFrame=TOUGH_COMMON_NAMES::WORLD_TF);
 
     bool transformQuaternion(const geometry_msgs::QuaternionStamped &qt_in, geometry_msgs::QuaternionStamped &qt_out,const std::string target_frame="/world");
     bool transformQuaternion(const geometry_msgs::Quaternion &qt_in, geometry_msgs::Quaternion &qt_out,const std::string &from_frame, const std::string &to_frame="/world");

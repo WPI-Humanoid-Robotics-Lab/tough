@@ -10,8 +10,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ros::Publisher logPub;
     logPub = nh.advertise<std_msgs::String>("/field/log", 10);
-    FallDetector fall_detector(nh, "leftFoot", "pelvis", "world");
-
+    FallDetector fall_detector(nh);
 
     ros::Rate rate(10.0);
 

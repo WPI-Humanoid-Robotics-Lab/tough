@@ -16,7 +16,7 @@ static const float GROUND_THRESHOLD      = 0.07f;
 static const float FOOT_GROUND_THRESHOLD = 0.05f;
 
 WalkwayGenerator::WalkwayGenerator(ros::NodeHandle &n){
-    pointcloudPub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ> >("walkway",1);
+    pointcloudPub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ> >("walkway",1, true);
     ROS_INFO("Subscribing to %s", PERCEPTION_COMMON_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC.c_str());
     pointcloudSub_ = nh_.subscribe(PERCEPTION_COMMON_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC, 1,  &WalkwayGenerator::generateWalkwayPoints, this);
 

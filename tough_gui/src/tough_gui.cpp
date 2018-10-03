@@ -88,14 +88,15 @@ void ToughGUI::initVariables()
     goalTopic_        = QString::fromStdString(configfile.currentTopics["goalTopic"]);
     footstepTopic_    = QString::fromStdString(configfile.currentTopics["footstepTopic"]);
     jointStatesTopic_ = QString::fromStdString(configfile.currentTopics["jointStatesTopic"]);
+    approveStepsTopic_= QString::fromStdString(configfile.currentTopics["approveStepsTopic"]);
 
     //subscribers
     liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ToughGUI::liveVideoCallback,this,image_transport::TransportHints("compressed"));
-    //    jointStateSub_  = nh_.subscribe(jointStatesTopic_.toStdString(),1, &ValkyrieGUI::jointStateCallBack, this);
     jointStatesUpdater_ = nh_.createTimer(ros::Duration(0.5), &ToughGUI::jointStateCallBack, this);
     //    @todo: add timer based callback here to call jointStateCallBack method
     clickedPointSub_= nh_.subscribe("clicked_point",1, &ToughGUI::getClickedPoint, this);
 
+    approveStepsPub_ = nh_.advertise<std_msgs::Empty>(approveStepsTopic_.toStdString(), 1, true);
     //initialize a onetime map to lookup for joint values
     std::vector<std::string> joints;
     rd_->getLeftArmJointNames(leftArmJointNames_);
@@ -174,9 +175,10 @@ void ToughGUI::initActionsConnections()
     //walk
     connect(ui->btnWalk,                 SIGNAL(clicked()),            this, SLOT(walkSteps()));
     connect(ui->sliderPelvisHeight,      SIGNAL(sliderReleased()),     this, SLOT(changePelvisHeight()));
+    connect(ui->btnApproveSteps,         SIGNAL(clicked()),            this, SLOT(approveSteps()));
 
     //reset robot
-    connect(ui->btnResetRobot,           SIGNAL(clicked()),            this,SLOT(resetRobot()));
+    connect(ui->btnResetRobot,           SIGNAL(clicked()),            this, SLOT(resetRobot()));
 
 }
 
@@ -964,6 +966,10 @@ void ToughGUI::walkSteps()
     }
 }
 
+void ToughGUI::approveSteps(){
+    std_msgs::Empty msg;
+    approveStepsPub_.publish(msg);
+}
 void ToughGUI::changePelvisHeight(){
 
     float height = ui->sliderPelvisHeight->value()*(PELVIS_HEIGHT_MAX-PELVIS_HEIGHT_MIN)/100+PELVIS_HEIGHT_MIN;
