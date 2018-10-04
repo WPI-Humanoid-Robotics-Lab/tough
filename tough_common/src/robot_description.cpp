@@ -223,7 +223,7 @@ void RobotDescription::getEndeffectorFrames()
        leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_FRAME;
        leftTransformStamped.transform.translation.x = 0.0;
        leftTransformStamped.transform.translation.y = 0.1;
-       leftTransformStamped.transform.translation.z = 0.01;
+       leftTransformStamped.transform.translation.z = 0.0;
        tf2::Quaternion q;
              q.setRPY(0, 0, M_PI_2);
        leftTransformStamped.transform.rotation.x = q.x();
@@ -274,11 +274,11 @@ void RobotDescription::getEndeffectorFrames()
         ROS_INFO("in Right Hand Mode");
        rightTransformStamped.header.frame_id = "r_hand";
        rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_FRAME;
-       rightTransformStamped.transform.translation.x = 0.0;
-       rightTransformStamped.transform.translation.y = -0.1;
-       rightTransformStamped.transform.translation.z = 0.01;
+       rightTransformStamped.transform.translation.x = 0.0096;
+       rightTransformStamped.transform.translation.y = -0.1000;
+       rightTransformStamped.transform.translation.z = -0.0001;
        tf2::Quaternion q;
-             q.setRPY(0, 0, -M_PI_2);
+             q.setRPY(0.0042, -0.0014, -1.5708);
        rightTransformStamped.transform.rotation.x = q.x();
        rightTransformStamped.transform.rotation.y = q.y();
        rightTransformStamped.transform.rotation.z = q.z();
