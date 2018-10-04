@@ -145,8 +145,8 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
      * This causes footsteps to be at a height from ground. should this be fixed on JAVA side?
      */
 
-    L_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_FRAME;
-    R_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_FRAME;
+    L_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME;
+    R_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME;
 
     if(robot_name_ == "atlas"){
 //        R_END_EFFECTOR_TF = "r_palm";
@@ -176,9 +176,9 @@ RobotDescription::~RobotDescription()
 
 }
 
-void RobotDescription::getEndeffectorFrames()
+void RobotDescription::publishEndEffectorFrames()
 {
-    ROS_INFO("in getEndeffectorFrames with l_palm_ = %d and r_palm- = %d", l_palm_exists_, r_palm_exists_);
+    ROS_INFO("in publishEndEffectorFrames with l_palm_ = %d and r_palm- = %d", l_palm_exists_, r_palm_exists_);
 
     tf2_ros::TransformBroadcaster tfb;
     geometry_msgs::TransformStamped leftTransformStamped;
@@ -188,12 +188,13 @@ void RobotDescription::getEndeffectorFrames()
     {
         ROS_INFO("in Left Palm Mode");
        leftTransformStamped.header.frame_id = "l_palm";
-       leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_FRAME;
+       leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME;
        leftTransformStamped.transform.translation.x = 0.0;
-       leftTransformStamped.transform.translation.y = -0.1;
+       leftTransformStamped.transform.translation.y = 0.1;
        leftTransformStamped.transform.translation.z = 0.0;
        tf2::Quaternion q;
-             q.setRPY(0, -40, 90);
+               // roll - 135deg
+             q.setRPY( 1.116-2.26893, -3.140, -1.572);
        leftTransformStamped.transform.rotation.x = q.x();
        leftTransformStamped.transform.rotation.y = q.y();
        leftTransformStamped.transform.rotation.z = q.z();
@@ -204,7 +205,7 @@ void RobotDescription::getEndeffectorFrames()
     {
         ROS_INFO("in Left MiddleFinger Mode");
        leftTransformStamped.header.frame_id = "l_hand";
-       leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_FRAME;
+       leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME;
        leftTransformStamped.transform.translation.x = 0.0;
        leftTransformStamped.transform.translation.y = 0.1;
        leftTransformStamped.transform.translation.z = -0.01;
@@ -220,7 +221,7 @@ void RobotDescription::getEndeffectorFrames()
     {
         ROS_INFO("in Left Hand Mode");
        leftTransformStamped.header.frame_id = "l_hand";
-       leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_FRAME;
+       leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME;
        leftTransformStamped.transform.translation.x = 0.0;
        leftTransformStamped.transform.translation.y = 0.1;
        leftTransformStamped.transform.translation.z = 0.0;
@@ -241,7 +242,7 @@ void RobotDescription::getEndeffectorFrames()
 {
         ROS_INFO("in Right Palm Mode");
        rightTransformStamped.header.frame_id = "r_palm";
-       rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_FRAME;
+       rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME;
        rightTransformStamped.transform.translation.x =  0;
        rightTransformStamped.transform.translation.y =  0.1;
        rightTransformStamped.transform.translation.z =  0;
@@ -257,7 +258,7 @@ void RobotDescription::getEndeffectorFrames()
 {
         ROS_INFO("in Right MiddleFinger Mode");
        rightTransformStamped.header.frame_id = "r_hand";
-       rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_FRAME;
+       rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME;
        rightTransformStamped.transform.translation.x = 0.0;
        rightTransformStamped.transform.translation.y = -0.1;
        rightTransformStamped.transform.translation.z = -0.01;
@@ -273,7 +274,7 @@ void RobotDescription::getEndeffectorFrames()
 {
         ROS_INFO("in Right Hand Mode");
        rightTransformStamped.header.frame_id = "r_hand";
-       rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_ENDEFFECTOR_FRAME;
+       rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME;
        rightTransformStamped.transform.translation.x = 0.0096;
        rightTransformStamped.transform.translation.y = -0.1000;
        rightTransformStamped.transform.translation.z = -0.0001;
@@ -510,6 +511,6 @@ int main(int argc, char *argv[]) {
     ros::init(argc, argv, "test_urdf");
     ros::NodeHandle nh;
     RobotDescription* robot = RobotDescription::getRobotDescription(nh);
-    robot->getEndeffectorFrames();
+    robot->publishEndEffectorFrames();
     return 0;
 }

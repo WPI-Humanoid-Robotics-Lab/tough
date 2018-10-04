@@ -74,7 +74,7 @@ public:
 
     void getRightArmJointLimits(std::vector<std::pair<double, double> > &right_arm_joint_limits) const;
 
-    void getEndeffectorFrames();
+    void publishEndEffectorFrames();
 
     int getNumberOfNeckJoints() const;
 
