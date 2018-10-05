@@ -7,6 +7,7 @@
 #include <urdf/model.h>
 #include <urdf_model/types.h>
 #include "tough_common/tough_common_names.h"
+#include <geometry_msgs/TransformStamped.h>
 
 // defines for arms
 enum RobotSide
@@ -28,7 +29,6 @@ enum class EE_LOADING{
     LOAD=0,
     UNLOAD
 };
-
 
 
 class RobotDescription
@@ -194,6 +194,13 @@ private:
     int LEFT_SOLE_FRAME_HASH_;
 
     int RIGHT_SOLE_FRAME_HASH_;
+
+    void setEndEffTransformation(double x, double y, double z,
+                                 double roll, double pitch, double yaw,
+                                 std::string frame_id,
+                                 std::string child_id,
+                                 geometry_msgs::TransformStamped &handTransform);
+
 
 };
 
