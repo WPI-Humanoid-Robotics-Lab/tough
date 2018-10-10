@@ -179,8 +179,8 @@ RobotDescription::~RobotDescription()
 void RobotDescription::publishEndEffectorFrames()
 {
 
-    ROS_INF0("l_palm = %s",l_palm_exists_ ? "true" : "false");
-    ROS_INF0("r_palm = %s",r_palm_exists_ ? "true" : "false");
+    ROS_INFO("l_palm = %s",l_palm_exists_ ? "true" : "false");
+    ROS_INFO("r_palm = %s",r_palm_exists_ ? "true" : "false");
 
     tf2_ros::TransformBroadcaster tfb;
     geometry_msgs::TransformStamped leftTransformStamped;
