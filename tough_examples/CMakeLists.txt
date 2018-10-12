@@ -2,20 +2,24 @@ cmake_minimum_required(VERSION 2.8.3)
 project(tough_examples)
 
 add_definitions(-std=c++11)
-set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
   tough_controller_interface
+  tough_common
+  tough_footstep
 )
 
 
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES tough_examples
-  CATKIN_DEPENDS roscpp rospy std_msgs tough_controller_interface
+  CATKIN_DEPENDS 	roscpp rospy std_msgs 
+  					tough_controller_interface
+  					tough_common
+  					tough_footstep
 #  DEPENDS system_lib
 )
 
@@ -101,3 +105,28 @@ target_link_libraries(interactive_arm_example  ${catkin_LIBRARIES})
 # add_executable(nudge_offset_example src/control_examples/nudge_offset_example.cpp)
 # add_dependencies(nudge_offset_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 # target_link_libraries(nudge_offset_example  ${catkin_LIBRARIES})
+
+
+#########################
+## Navigation examples ##
+#########################
+
+add_executable(walk_forward_example src/navigation_examples/walk_forward_example.cpp )
+add_dependencies(walk_forward_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(walk_forward_example  ${catkin_LIBRARIES})
+
+add_executable(walk_goal_example src/navigation_examples/walk_goal_example.cpp )
+add_dependencies(walk_goal_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(walk_goal_example  ${catkin_LIBRARIES})
+
+add_executable(walk_example src/navigation_examples/walk_example.cpp )
+add_dependencies(walk_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(walk_example  ${catkin_LIBRARIES})
+
+add_executable(walk_rotate_example src/navigation_examples/walk_rotate_example.cpp )
+add_dependencies(walk_rotate_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(walk_rotate_example  ${catkin_LIBRARIES})
+
+add_executable(walk_steps_example src/navigation_examples/walk_steps_example.cpp )
+add_dependencies(walk_steps_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(walk_steps_example  ${catkin_LIBRARIES})

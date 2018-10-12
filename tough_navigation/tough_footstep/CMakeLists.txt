@@ -62,32 +62,16 @@ add_executable(test_footstep src/test_footstep.cpp)
 add_dependencies(test_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_footstep  ${catkin_LIBRARIES})
 
-add_executable(walk_test src/walk_test.cpp )
-add_dependencies(walk_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(walk_test  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-add_executable(walk_steps src/walk_steps.cpp )
-add_dependencies(walk_steps ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(walk_steps  ${catkin_LIBRARIES} ${PROJECT_NAME})
-
-add_executable(walk_goal src/walk_goal.cpp )
-add_dependencies(walk_goal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(walk_goal  ${catkin_LIBRARIES} ${PROJECT_NAME})
-
-add_executable(walk_forward src/walk_forward.cpp )
-add_dependencies(walk_forward ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(walk_forward  ${catkin_LIBRARIES} ${PROJECT_NAME})
-
-add_executable(walk_rotate src/walk_rotate.cpp )
-add_dependencies(walk_rotate ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(walk_rotate  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 #############
 ## Install ##
 #############
 
 ## Mark executables and/or libraries for installation
- install(TARGETS ${PROJECT_NAME} walk_rotate walk_forward walk_goal walk_steps walk_test test_footstep footstep_node
+ install(TARGETS ${PROJECT_NAME} 
+    test_footstep 
+    footstep_node
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
