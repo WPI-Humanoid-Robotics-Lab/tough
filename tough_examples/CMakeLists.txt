@@ -31,63 +31,73 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+######################
+## Control examples ##
+######################
+
+
 ## Reset Robot
-add_executable( reset_robot src/reset_robot.cpp)
+add_executable( reset_robot src/control_examples/reset_robot.cpp)
 add_dependencies(reset_robot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(reset_robot ${catkin_LIBRARIES})
 
 
 ## Test ARM
-add_executable( test_arm src/test_arm.cpp)
-add_dependencies(test_arm ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_arm ${catkin_LIBRARIES})
+add_executable( arm_example src/control_examples/arm_example.cpp)
+add_dependencies(arm_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(arm_example ${catkin_LIBRARIES})
 
 
 ## Test head navigation
-add_executable( test_head_navigation src/test_head_navigation.cpp)
-add_dependencies(test_head_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_head_navigation ${catkin_LIBRARIES})
+add_executable( head_navigation_example src/control_examples/head_navigation_example.cpp)
+add_dependencies(head_navigation_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(head_navigation_example ${catkin_LIBRARIES})
 
 ## Test arm navigation
-add_executable(test_arm_navigation src/test_arm_navigation.cpp)
-add_dependencies(test_arm_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_arm_navigation  ${catkin_LIBRARIES})
+add_executable(arm_navigation_example src/control_examples/arm_navigation_example.cpp)
+add_dependencies(arm_navigation_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(arm_navigation_example  ${catkin_LIBRARIES})
 
 ## Test chest
-add_executable(test_chest src/test_chest_navigation.cpp)
-add_dependencies(test_chest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_chest  ${catkin_LIBRARIES})
+add_executable(chest_navigation_example src/control_examples/chest_navigation_example.cpp)
+add_dependencies(chest_navigation_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(chest_navigation_example  ${catkin_LIBRARIES})
 
 
 ## Test nudgeLocal
-add_executable(test_nudgeLocal src/test_nudgeLocal.cpp)
-add_dependencies(test_nudgeLocal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_nudgeLocal  ${catkin_LIBRARIES})
+add_executable(nudge_local_example src/control_examples/nudge_local_example.cpp)
+add_dependencies(nudge_local_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(nudge_local_example  ${catkin_LIBRARIES})
 
 
 ## Test pelvis
-add_executable(test_pelvis src/test_pelvis_navigation.cpp)
-add_dependencies(test_pelvis ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_pelvis  ${catkin_LIBRARIES})
+add_executable(pelvis_navigation_example src/control_examples/pelvis_navigation_example.cpp)
+add_dependencies(pelvis_navigation_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pelvis_navigation_example  ${catkin_LIBRARIES})
 
 
 ## Test neck
-add_executable(test_neck src/test_neck_navigation.cpp)
-add_dependencies(test_neck ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_neck  ${catkin_LIBRARIES})
+add_executable(neck_navigation_example src/control_examples/neck_navigation_example.cpp)
+add_dependencies(neck_navigation_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(neck_navigation_example  ${catkin_LIBRARIES})
 
 ## Test wrist
-add_executable(test_wrist src/test_wrist.cpp)
-add_dependencies(test_wrist ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_wrist ${catkin_LIBRARIES})
+add_executable(wrist_example src/control_examples/wrist_example.cpp)
+add_dependencies(wrist_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(wrist_example ${catkin_LIBRARIES})
 
 ## Test gripper
-add_executable(test_gripper src/test_gripper_control.cpp)
-add_dependencies(test_gripper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_gripper  ${catkin_LIBRARIES})
+add_executable(gripper_control_example src/control_examples/gripper_control_example.cpp)
+add_dependencies(gripper_control_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(gripper_control_example  ${catkin_LIBRARIES})
 
 
 ## interactive test
-add_executable(interactive_arm_test src/interactive_arm_test.cpp)
-add_dependencies(interactive_arm_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(interactive_arm_test  ${catkin_LIBRARIES})
+add_executable(interactive_arm_example src/control_examples/interactive_arm_example.cpp)
+add_dependencies(interactive_arm_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(interactive_arm_example  ${catkin_LIBRARIES})
+
+# ## nudge offset
+# add_executable(nudge_offset_example src/control_examples/nudge_offset_example.cpp)
+# add_dependencies(nudge_offset_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(nudge_offset_example  ${catkin_LIBRARIES})
