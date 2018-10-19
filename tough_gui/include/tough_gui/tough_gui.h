@@ -64,7 +64,7 @@
 #define IMAGE_WIDTH 1024
 
 namespace Ui {
-class ValkyrieGUI;
+class ToughGUI;
 }
 
 namespace rviz
@@ -86,7 +86,7 @@ public:
 
 
 private:
-    Ui::ValkyrieGUI *ui;
+    Ui::ToughGUI *ui;
 
 private:
     void initActionsConnections();
@@ -95,7 +95,7 @@ private:
     void initTools();
     void initDefaultValues();
     void initJointLimits();
-    void initValkyrieControllers();
+    void initToughControllers();
 
     void getArmState();
     void getChestState();
@@ -219,6 +219,7 @@ private:
   QString footstepTopic_;
   QString jointStatesTopic_;
   QString approveStepsTopic_;
+  bool flipImage_;
   QLabel* status_label_;
 
   // joint limits
@@ -229,8 +230,8 @@ private:
   float CHEST_YAW_MAX = 67;
   float CHEST_YAW_MIN = -76;
 
-  float PELVIS_HEIGHT_MAX = 1.16;
-  float PELVIS_HEIGHT_MIN = 0.8;
+  float PELVIS_HEIGHT_MAX = 0.95;
+  float PELVIS_HEIGHT_MIN = 0.55;
 
   float RIGHT_SHOULDER_ROLL_MAX = 1.519*TO_DEGREES;
   float RIGHT_SHOULDER_ROLL_MIN = -1.26*TO_DEGREES;
@@ -268,7 +269,7 @@ private:
 
   float LOWER_NECK_PITCH_MAX = 66.61;
   float LOWER_NECK_PITCH_MIN = 0;
-  float UPPER_NECK_PITCH_MAX = 0;
+  float UPPER_NECK_PITCH_MAX = 50.0;
   float UPPER_NECK_PITCH_MIN = -49.9;
   float NECK_YAW_MAX = 60;
   float NECK_YAW_MIN = -60;

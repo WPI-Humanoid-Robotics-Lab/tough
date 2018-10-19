@@ -102,9 +102,9 @@ public:
                 links.push_back(li);
             }
         }
-
+        ROS_INFO("Creating a self filter mask");
         sf_ = new robot_self_filter::SelfMask<pcl::PointXYZ>(tf_, links);
-
+        ROS_INFO("Self filter object initialized");
     }
 
     ~robot_filter(void)
@@ -117,9 +117,10 @@ public:
         //do not take a new scan if previous scan is not complete
         static bool isFiltering = false;
 
+//        ROS_INFO("Filtering pointcloud of size %d", msg_in->points.size());
         if (!isFiltering){
             isFiltering = true;
-            ros::WallTime start = ros::WallTime::now();
+            ros::Time start = ros::Time::now();
             //convert ros message into pcl pointcloud
             sensor_msgs::PointCloud2 msg;
             sensor_msgs::convertPointCloudToPointCloud2(*msg_in, msg);
@@ -130,7 +131,6 @@ public:
             pcl::fromPCLPointCloud2(pcl_pc2,*cloud_in);
 
             std::vector<int> mask;
-
             // all the magic happens in next line
             sf_->maskContainment(*cloud_in, mask);
 
@@ -153,7 +153,14 @@ public:
             pcl::toPCLPointCloud2(*cloud_in, pcl_pc2);
             pcl_conversions::moveFromPCL(pcl_pc2, cloud2);
             cloud2.header.frame_id.assign(cloud_in->header.frame_id);
-            cloud2.header.stamp = ros::Time(pcl_pc2.header.stamp);
+            try
+            {
+                cloud2.header.stamp = ros::Time(pcl_pc2.header.stamp);
+            }
+            catch(std::runtime_error& ex){
+//                ROS_ERROR("Caught runtime error with time duration");
+                cloud2.header.stamp = ros::Time(0);
+            }
             vmOutputPub2_.publish(cloud2);
 
             sensor_msgs::PointCloud  cloud;

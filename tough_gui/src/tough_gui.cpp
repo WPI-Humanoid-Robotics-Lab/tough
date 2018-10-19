@@ -6,7 +6,7 @@
 #include "rviz/properties/property_tree_model.h"
 #include "tough_gui/configurationreader.h"
 #include "ros/package.h"
-
+#include <boost/lexical_cast.hpp>
 
 /**
  * This class creates the GUI using rviz APIs.
@@ -14,13 +14,12 @@
 
 ToughGUI::ToughGUI(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::ValkyrieGUI),it_(nh_)
+    ui(new Ui::ToughGUI),it_(nh_)
 {
     /**
      * Set up the QT related UI components.
      */
     ui->setupUi(this);
-    changeToolButtonStatus(-2); //set the initial rviz tool to be "interact"
 
     //set all the controller pointers to null
     chestController_        = nullptr;
@@ -29,19 +28,21 @@ ToughGUI::ToughGUI(QWidget *parent) :
     walkingController_      = nullptr;
     headController_         = nullptr;
     gripperController_      = nullptr;
-    rd_ = RobotDescription::getRobotDescription(nh_);
-    currentState_ = RobotStateInformer::getRobotStateInformer(nh_);
+
     //clickedpoint is used for moving arm in taskspace
     clickedPoint_           = nullptr;
 
+    rd_ = RobotDescription::getRobotDescription(nh_);
+    currentState_ = RobotStateInformer::getRobotStateInformer(nh_);
+
     //initialize everything
     initJointLimits();
+    initToughControllers();
     initVariables();
     initDisplayWidgets();
     initTools();
     initActionsConnections();
     initDefaultValues();
-    initValkyrieControllers();
 }
 
 ToughGUI::~ToughGUI()
@@ -89,9 +90,15 @@ void ToughGUI::initVariables()
     footstepTopic_    = QString::fromStdString(configfile.currentTopics["footstepTopic"]);
     jointStatesTopic_ = QString::fromStdString(configfile.currentTopics["jointStatesTopic"]);
     approveStepsTopic_= QString::fromStdString(configfile.currentTopics["approveStepsTopic"]);
+    try{
+        flipImage_        = boost::lexical_cast<bool>(configfile.currentTopics["flip"]);
+    }
+    catch (const boost::bad_lexical_cast &e){
+        std::cerr<<"flip parameter is incorrectly set in config.ini. setting flip to false"<<std::endl;
+    }
 
     //subscribers
-    liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ToughGUI::liveVideoCallback,this,image_transport::TransportHints("compressed"));
+    liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ToughGUI::liveVideoCallback,this,image_transport::TransportHints("raw"));
     jointStatesUpdater_ = nh_.createTimer(ros::Duration(0.5), &ToughGUI::jointStateCallBack, this);
     //    @todo: add timer based callback here to call jointStateCallBack method
     clickedPointSub_= nh_.subscribe("clicked_point",1, &ToughGUI::getClickedPoint, this);
@@ -340,6 +347,9 @@ void ToughGUI::initTools(){
     setGoalTool_->getPropertyContainer()->subProp("Topic")->setValue(goalTopic_);
     setMapGoalTool_->getPropertyContainer()->subProp("Topic")->setValue(goalTopic_);
 
+    //set the initial rviz tool to be "interact"
+    changeToolButtonStatus(-2);
+
 }
 
 void ToughGUI::initJointLimits() {
@@ -444,7 +454,7 @@ void ToughGUI::initDefaultValues() {
     //    jointStateSub_.shutdown();
 }
 
-void ToughGUI::initValkyrieControllers() {
+void ToughGUI::initToughControllers() {
 
     //create a chest trajectory controller object
     chestController_ = new ChestControlInterface(nh_);
@@ -569,7 +579,13 @@ void ToughGUI::getChestState()
 
 void ToughGUI::getPelvisState()
 {
+    geometry_msgs::Pose pose;
+    pelvisHeightController_->getTaskSpaceState(pose, LEFT) ;
+    ui->txtPelvisHeight->setValue(pose.position.z);
 
+    ui->lblRobotPositionX->setText(QString::number(pose.position.x, 'f',2));
+    ui->lblRobotPositionY->setText(QString::number(pose.position.y, 'f',2));
+    ui->lblRobotPositionTheta->setText(QString::number(tf::getYaw(pose.orientation), 'f',2));
 }
 
 void ToughGUI::getNeckState()
@@ -619,6 +635,10 @@ void ToughGUI::jointStateCallBack(const ros::TimerEvent& e)
             label->setText(text.sprintf("%.2f",jointValues.at(i)));
         }
     }
+
+    // update pelvis height
+    if(!ui->txtPelvisHeight->hasFocus())
+        getPelvisState();
 }
 
 void ToughGUI::updateJointStateSub(int tabID){
@@ -853,7 +873,8 @@ void ToughGUI::setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr, bool is_RGB
     }
     cv::resize(RGBImg, RGBImg, cvSize(width, height));
     //flip the image
-    cv::flip(RGBImg, RGBImg, -1);
+    if(flipImage_)
+        cv::flip(RGBImg, RGBImg, -1);
     //  convert RGB image into QImage and publish that on the label for livevideo
     QImage qImage_= QImage((uchar*) RGBImg.data, RGBImg.cols, RGBImg.rows, RGBImg.cols*3, QImage::Format_RGB888);
     liveVideoLabel->setPixmap(QPixmap::fromImage(qImage_));
@@ -902,6 +923,7 @@ void ToughGUI::setCurrentTool(int btnID)
         ROS_INFO("2DNavGoal Tool Selected");
         toolManager_->setCurrentTool(setGoalTool_);
         mapManager_->getToolManager()->setCurrentTool(setMapGoalTool_);
+        ui->controlTabs->setCurrentIndex(4);
     }
     else if(btnID == -6)
     {

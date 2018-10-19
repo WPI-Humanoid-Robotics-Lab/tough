@@ -26,9 +26,9 @@ const std::string RECTIFIED_IMAGE_TOPIC = "/multisense/camera/left/image_rect_co
 /********* TF Frames *********/
 
 /* Multisense */
-const std::string HOKUYO_LINK_TF = "/hokuyo_link";
-const std::string HEAD_HOKUYO_FRAME_TF = "/head_hokuyo_frame";
-const std::string LEFT_CAMERA_OPTICAL_FRAME_TF = "/left_camera_optical_frame";
+const std::string HOKUYO_LINK_TF = "/multisense/hokuyo_link";
+const std::string HEAD_HOKUYO_FRAME_TF = "/multisense/head_hokuyo_frame";
+const std::string LEFT_CAMERA_OPTICAL_FRAME_TF = "/multisense/left_camera_optical_frame";
 const std::string ROBOT_HEAD_FRAME_TF = "/head";
 
 /* world frame*/
@@ -37,10 +37,10 @@ const std::string WORLD_TF = "/world";
 
 /* Moveit Groups */
 // leftArm -- > leftShoulderPitchLink to leftPalm
-const std::string LEFT_ARM_GROUP = "leftArm";
+const std::string LEFT_ARM_7DOF_GROUP = "L_SHOULDER_HAND_7DOF";
 
 // rightArm -- > rightShoulderPitchLink to rightPalm
-const std::string RIGHT_ARM_GROUP = "rightArm";
+const std::string RIGHT_ARM_7DOF_GROUP = "R_SHOULDER_HAND_7DOF";
 
 // leftArm -- > leftEndEffectorFrame wrt leftHand/leftPalm
 const std::string LEFT_END_EFFECTOR_FRAME = "left_endeffector_frame";
@@ -55,10 +55,10 @@ const std::string RIGHT_END_EFFECTOR_FRAME = "right_endeffector_frame";
 //const std::string RIGHT_PALM_GROUP = "rightPalm";
 
 // rightMiddleFingerGroup -- > pelvis to rightMiddleFingerPitch1Link
-const std::string RIGHT_ENDEFFECTOR_GROUP = "rightMiddleFingerGroup";
+const std::string RIGHT_ARM_10DOF_GROUP = "R_PELVIS_PALM_10DOF";
 
 // leftMiddleFingerGroup -- > pelvis to leftMiddleFingerPitch1Link
-const std::string LEFT_ENDEFFECTOR_GROUP = "leftMiddleFingerGroup";
+const std::string LEFT__ARM_10DOF_GROUP = "L_PELVIS_PALM_10DOF";
 
 
 }
