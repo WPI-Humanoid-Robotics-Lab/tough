@@ -19,3 +19,7 @@ devel/
 .catkin_workspace
 
 **/cmake/
+
+docs/html/
+docs/latex/
+

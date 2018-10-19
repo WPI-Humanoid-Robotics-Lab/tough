@@ -43,10 +43,10 @@ const std::string LEFT_ARM_7DOF_GROUP = "L_SHOULDER_HAND_7DOF";
 const std::string RIGHT_ARM_7DOF_GROUP = "R_SHOULDER_HAND_7DOF";
 
 // leftArm -- > leftEndEffectorFrame wrt leftHand/leftPalm
-const std::string LEFT_END_EFFECTOR_FRAME = "left_endeffector_frame";
+const std::string LEFT_END_EFFECTOR_FRAME = "l_end_eff";
 
 // rightArm -- > rightEndEffectorFrame wrt rightHand/rightPalm
-const std::string RIGHT_END_EFFECTOR_FRAME = "right_endeffector_frame";
+const std::string RIGHT_END_EFFECTOR_FRAME = "r_end_eff";
 
 //// leftPalm -- > pelvis to leftPalm
 //const std::string LEFT_PALM_GROUP = "leftPalm";

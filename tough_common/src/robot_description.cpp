@@ -177,104 +177,97 @@ RobotDescription::~RobotDescription()
 
 void RobotDescription::publishEndEffectorFrames()
 {
+
+    ROS_INFO("l_palm = %s",l_palm_exists_ ? "true" : "false");
+    ROS_INFO("r_palm = %s",r_palm_exists_ ? "true" : "false");
     tf2_ros::TransformBroadcaster tfb;
     geometry_msgs::TransformStamped leftTransformStamped;
     geometry_msgs::TransformStamped rightTransformStamped;
 
     if(l_palm_exists_)
     {
-        ROS_INFO("in Left Palm Mode");
-        leftTransformStamped.header.frame_id = "l_palm";
-        leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME;
-        leftTransformStamped.transform.translation.x = -0.0;
-        leftTransformStamped.transform.translation.y = 0.1;
-        leftTransformStamped.transform.translation.z = 0.01;
-        tf2::Quaternion q;
-        q.setRPY(0, 0, M_PI_2);
-        leftTransformStamped.transform.rotation.x = q.x();
-        leftTransformStamped.transform.rotation.y = q.y();
-        leftTransformStamped.transform.rotation.z = q.z();
-        leftTransformStamped.transform.rotation.w = q.w();
+        ROS_DEBUG("in Left Palm Mode");
+        setEndEffTransformation(0.0, 0.1, 0.0,
+                                -1.15293,-M_PI, -M_PI_2,
+                                "l_palm",
+                                TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME,
+                                leftTransformStamped
+                                );
     }
 
     else if(l_middle_finger_pitch_link_exists_)
     {
-        ROS_INFO("in Left MiddleFinger Mode");
-        leftTransformStamped.header.frame_id = "leftMiddleFingerPitch1Link";
-        leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME;
+        ROS_DEBUG("in Left MiddleFinger Mode");
+        setEndEffTransformation(0.0, 0.1, -0.01,
+                                0, 0, M_PI_2,
+                                "l_hand",
+                                TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME,
+                                leftTransformStamped
+                                );
     }
 
     else if(l_hand_exists_ && !l_palm_exists_ && !l_middle_finger_pitch_link_exists_)
     {
-        ROS_INFO("in Left Hand Mode");
-        leftTransformStamped.header.frame_id = "l_hand";
-        leftTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME;
-        leftTransformStamped.transform.translation.x = 0.0;
-        leftTransformStamped.transform.translation.y = 0.1;
-        leftTransformStamped.transform.translation.z = 0.01;
-        tf2::Quaternion q;
-        q.setRPY(0, 0, M_PI_2);
-        leftTransformStamped.transform.rotation.x = q.x();
-        leftTransformStamped.transform.rotation.y = q.y();
-        leftTransformStamped.transform.rotation.z = q.z();
-        leftTransformStamped.transform.rotation.w = q.w();
+        ROS_DEBUG("in Left Hand Mode");
+        setEndEffTransformation(0.0, 0.1, 0.0,
+                                0, 0, M_PI_2,
+                                "l_hand",
+                                TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME,
+                                leftTransformStamped
+                                );
     }
 
     else
     {
-        ROS_ERROR("End effector frames for left hand could not be configured");
+        ROS_WARN("Some Problem Occured, No Left Hand Frame Found!");
     }
 
     if(r_palm_exists_)
     {
-        ROS_INFO("in Right Palm Mode");
-        rightTransformStamped.header.frame_id = "r_palm";
-        rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME;
-        rightTransformStamped.transform.translation.x =  0;
-        rightTransformStamped.transform.translation.y =  0.1;
-        rightTransformStamped.transform.translation.z =  0;
-        tf2::Quaternion q;
-        q.setRPY(M_PI, 0, M_PI_2);
-        rightTransformStamped.transform.rotation.x = q.x();
-        rightTransformStamped.transform.rotation.y = q.y();
-        rightTransformStamped.transform.rotation.z = q.z();
-        rightTransformStamped.transform.rotation.w = q.w();
+        ROS_DEBUG("in Right Palm Mode");
+        setEndEffTransformation(0.0, 0.1, 0.0,
+                                M_PI, 0, M_PI_2,
+                                "r_palm",
+                                TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME,
+                                rightTransformStamped
+                                );
     }
 
     else if(r_middle_finger_pitch_link_exists_)
     {
-        ROS_INFO("in Right MiddleFinger Mode");
-        rightTransformStamped.header.frame_id = "rightMiddleFingerPitch1Link";
-        rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME;
+        ROS_DEBUG("in Right MiddleFinger Mode");
+        setEndEffTransformation(0.0,-0.1,-0.01,
+                                0, 0, -M_PI_2,
+                                "r_hand",
+                                TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME,
+                                rightTransformStamped
+                                );
     }
 
     else if(r_hand_exists_ && !r_palm_exists_ && !r_middle_finger_pitch_link_exists_)
     {
-        ROS_INFO("in Right Hand Mode");
-        rightTransformStamped.header.frame_id = "r_hand";
-        rightTransformStamped.child_frame_id = TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME;
-        rightTransformStamped.transform.translation.x = 0.0;
-        rightTransformStamped.transform.translation.y = -0.1;
-        rightTransformStamped.transform.translation.z = 0.01;
-        tf2::Quaternion q;
-        q.setRPY(0, 0, -M_PI_2);
-        rightTransformStamped.transform.rotation.x = q.x();
-        rightTransformStamped.transform.rotation.y = q.y();
-        rightTransformStamped.transform.rotation.z = q.z();
-        rightTransformStamped.transform.rotation.w = q.w();
+        ROS_DEBUG("in Right Hand Mode");
+        setEndEffTransformation(0.0096,-0.1000,-0.0001,
+                                0.0042, -0.0014, -1.5708,
+                                "r_hand",
+                                TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME,
+                                rightTransformStamped
+                                );
     }
     else
     {
-        ROS_ERROR("End effector frames for right hand could not be configured");
+        ROS_WARN("Some Problem Occured, No Right Hand Found!");
     }
 
     ros::Rate rate(1000);
-    while (ros::ok()){
+   while (ros::ok())
+   {
         leftTransformStamped.header.stamp = ros::Time::now();
-        tfb.sendTransform(leftTransformStamped);
         rightTransformStamped.header.stamp = ros::Time::now();
+
+        tfb.sendTransform(leftTransformStamped);
         tfb.sendTransform(rightTransformStamped);
-        ros::spinOnce();
+
         rate.sleep();
     }
 
@@ -488,6 +481,24 @@ const std::string RobotDescription::getWorldFrame() const
 void RobotDescription::setPelvisFrame(const std::string &value)
 {
     PELVIS_TF = value;
+}
+
+void RobotDescription::setEndEffTransformation(double x, double y, double z,
+                                               double roll, double pitch, double yaw,
+                                               std::string frame_id, std::string child_id,
+                                               geometry_msgs::TransformStamped &handTransform)
+{
+    handTransform.header.frame_id = frame_id;
+    handTransform.child_frame_id = child_id;
+    handTransform.transform.translation.x = x;
+    handTransform.transform.translation.y = y;
+    handTransform.transform.translation.z = z;
+    tf2::Quaternion q;
+    q.setRPY( roll, pitch, yaw);
+    handTransform.transform.rotation.x = q.x();
+    handTransform.transform.rotation.y = q.y();
+    handTransform.transform.rotation.z = q.z();
+    handTransform.transform.rotation.w = q.w();
 }
 
 
