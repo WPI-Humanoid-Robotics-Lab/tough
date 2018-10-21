@@ -31,7 +31,14 @@
         <param name="laser_snapshot_timeout" type="double" value="4.0"/>
     </node>
 
-    <node type="periodic_snapshotter" pkg="tough_perception_common" name="laser_assembler_node"  ns="$(arg robot_name)"/>
+    <node   type="periodic_snapshotter" pkg="tough_perception_common" name="laser_assembler_node"  ns="$(arg robot_name)" output="screen">
+            <param name="filter_min_x" type="double" value="-10.0" />
+            <param name="filter_max_x" type="double" value="10.0" />
+            <param name="filter_min_y" type="double" value="-10.0" />
+            <param name="filter_max_y" type="double" value="10.0" />
+            <param name="filter_min_z" type="double" value="-10.0" />
+            <param name="filter_max_z" type="double" value="10.0" />
+    </node>
     <!-- <node type="walkway_filter" pkg="tough_filters" name="walkway_filter"  ns="field"/>  -->
 
     <node type="walkway_point_generator" pkg="tough_perception_common" name="walkway_generator"  ns="$(arg robot_name)"/>

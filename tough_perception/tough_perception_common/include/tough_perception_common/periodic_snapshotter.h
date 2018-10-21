@@ -88,6 +88,9 @@ public:
     void pausePointcloudCB(const std_msgs::Bool &msg);
 
     void setBoxFilterCB(const std_msgs::Int8 &msg);
+    void clipPointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud,
+                        const pcl::PointCloud<pcl::PointXYZ>::Ptr clipped_cloud);
+
 private:
     ros::NodeHandle n_;
     ros::Publisher snapshot_pub_;
@@ -107,6 +110,15 @@ private:
     bool enable_box_filter_;
     RobotStateInformer *robot_state_;
     RobotDescription *rd_;
+
+    float filter_min_x;
+    float filter_max_x;
+
+    float filter_min_y;
+    float filter_max_y;
+
+    float filter_min_z;
+    float filter_max_z;
 
 } ;
 

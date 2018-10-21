@@ -49,6 +49,9 @@
 #include <pcl/registration/icp_nl.h>
 #include <pcl/registration/transforms.h>
 
+#include <pcl/filters/passthrough.h>
+#include <pcl/octree/octree_pointcloud_density.h>
+
 #include <pcl/visualization/pcl_visualizer.h>
 
 // Services
@@ -106,17 +109,17 @@ public:
 
 PeriodicSnapshotter::PeriodicSnapshotter()
 {
-    robot_state_  = RobotStateInformer::getRobotStateInformer(n_);
-    rd_ = RobotDescription::getRobotDescription(n_);
-    snapshot_pub_              = n_.advertise<sensor_msgs::PointCloud2>("snapshot_cloud2", 1, true);
-    registered_pointcloud_pub_ = n_.advertise<sensor_msgs::PointCloud2>("assembled_cloud2", 1, true);
-    pointcloud_for_octomap_pub_= n_.advertise<sensor_msgs::PointCloud2>("assembled_octomap_cloud2",10, true);
-    resetPointcloudSub_        = n_.subscribe("reset_pointcloud", 10, &PeriodicSnapshotter::resetPointcloudCB, this);
-    pausePointcloudSub_        = n_.subscribe("pause_pointcloud", 10, &PeriodicSnapshotter::pausePointcloudCB, this);
-    boxFilterSub_              = n_.subscribe("clearbox_pointcloud", 10, &PeriodicSnapshotter::setBoxFilterCB, this);
+    robot_state_                = RobotStateInformer::getRobotStateInformer(n_);
+    rd_                         = RobotDescription::getRobotDescription(n_);
+    snapshot_pub_               = n_.advertise<sensor_msgs::PointCloud2>("snapshot_cloud2", 1, true);
+    registered_pointcloud_pub_  = n_.advertise<sensor_msgs::PointCloud2>("assembled_cloud2", 1, true);
+    pointcloud_for_octomap_pub_ = n_.advertise<sensor_msgs::PointCloud2>("assembled_octomap_cloud2",10, true);
+    resetPointcloudSub_         = n_.subscribe("reset_pointcloud", 10, &PeriodicSnapshotter::resetPointcloudCB, this);
+    pausePointcloudSub_         = n_.subscribe("pause_pointcloud", 10, &PeriodicSnapshotter::pausePointcloudCB, this);
+    boxFilterSub_               = n_.subscribe("clearbox_pointcloud", 10, &PeriodicSnapshotter::setBoxFilterCB, this);
     // Create the service client for calling the assembler
-    client_       = n_.serviceClient<AssembleScans2>("assemble_scans2");
-    snapshot_sub_ = n_.subscribe("snapshot_cloud2",10, &PeriodicSnapshotter::mergeClouds, this);
+    client_                     = n_.serviceClient<AssembleScans2>("assemble_scans2");
+    snapshot_sub_               = n_.subscribe("snapshot_cloud2",10, &PeriodicSnapshotter::mergeClouds, this);
 
     // Start the timer that will trigger the processing loop (timerCallback)
     float timeout;
@@ -131,6 +134,16 @@ PeriodicSnapshotter::PeriodicSnapshotter()
     sensor_msgs::PointCloud2::Ptr temp(new sensor_msgs::PointCloud2);
     prev_msg_        = temp;
     resetPointcloud_ = true;
+
+    n_.param<float>("filter_min_x", filter_min_x, -10.0);
+    n_.param<float>("filter_max_x", filter_max_x, 10.0);
+
+    n_.param<float>("filter_min_y", filter_min_y, -10.0);
+    n_.param<float>("filter_max_y", filter_max_y, 10.0);
+
+    n_.param<float>("filter_min_z", filter_min_z, -10.0);
+    n_.param<float>("filter_max_z", filter_max_z, 10.0);
+
 
 }
 
@@ -373,13 +386,15 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_msg(new pcl::PointCloud<pcl::PointXYZ>);
     convertROStoPCL(msg, pcl_msg);
 
-    if (state_request == PCL_STATE_CONTROL::RESET || prev_msg_->data.empty()){
+    if (state_request == PCL_STATE_CONTROL::RESET || prev_msg_->data.empty())
+    {
         ROS_INFO("PeriodicSnapshotter::mergeClouds : Resetting Pointcloud");
         merged_cloud = msg;
         pointcloud_for_octomap_pub_.publish(prev_msg_->data.empty() ? msg : prev_msg_);
         state_request = PCL_STATE_CONTROL::RESUME;
     }
-    else {
+    else
+    {
         // merge the current msg with previous messages published till now
         // tutorial available at http://www.pointclouds.org/documentation/tutorials/pairwise_incremental_registration.php#pairwise-incremental-registration
         pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_prev_msg(new pcl::PointCloud<pcl::PointXYZ>);
@@ -399,21 +414,56 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
 
         //update the global transform
         GlobalTransform = GlobalTransform * pairTransform;
-        /*  Disabling voxel filter -- enabling this will impact rover detection
-        float leafsize  = 0.05;
-        pcl::VoxelGrid<PointT> grid;
-        grid.setLeafSize (leafsize, leafsize, leafsize);
-        grid.setInputCloud (result);
-        grid.filter (*result);
-        */
 
-        convertPCLtoROS(result,merged_cloud);
-        // publish the merged message
+//          Disabling voxel filter -- enabling this will impact rover detection
+//        float leafsize  = 0.03;
+//        pcl::VoxelGrid<PointT> grid;
+//        grid.setLeafSize (leafsize, leafsize, leafsize);
+//        grid.setInputCloud (result);
+//        grid.filter (*result);
+
+        pcl::PointCloud<pcl::PointXYZ>::Ptr result_clipped (new pcl::PointCloud<pcl::PointXYZ>);
+
+        // clip the point cloud in x y and z direction
+        clipPointCloud(result,result_clipped);
+
+        std::cout << "[PC size]"<< result->size() << std::endl;
+
+//        convertPCLtoROS(result,merged_cloud);
+        convertPCLtoROS(result_clipped,merged_cloud);
     }
 
+    // publish the merged message
     prev_msg_ = merged_cloud;
     registered_pointcloud_pub_.publish(merged_cloud);
 }
+
+void
+PeriodicSnapshotter::clipPointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud,
+                                    const pcl::PointCloud<pcl::PointXYZ>::Ptr clipped_cloud)
+{
+            pcl::PointCloud<pcl::PointXYZ>::Ptr temp = input_cloud;
+            pcl::PassThrough<pcl::PointXYZ> globalPassThroughFilter;
+            globalPassThroughFilter.setInputCloud(temp);
+
+            globalPassThroughFilter.setFilterFieldName ("z");
+            globalPassThroughFilter.setFilterLimits (filter_min_z, filter_max_z);
+            globalPassThroughFilter.filter (*clipped_cloud);
+            temp=clipped_cloud;
+
+            globalPassThroughFilter.setInputCloud(temp);
+            globalPassThroughFilter.setFilterFieldName ("y");
+            globalPassThroughFilter.setFilterLimits (filter_min_y, filter_max_y);
+            globalPassThroughFilter.filter (*clipped_cloud);
+            temp=clipped_cloud;
+
+            globalPassThroughFilter.setInputCloud(temp);
+            globalPassThroughFilter.setFilterFieldName ("x");
+            globalPassThroughFilter.setFilterLimits (filter_min_x, filter_max_x);
+            globalPassThroughFilter.filter (*clipped_cloud);
+}
+
+
 
 int main(int argc, char **argv)
 {
@@ -427,7 +477,7 @@ int main(int argc, char **argv)
     float timeout;
     n.param<float>("laser_assembler_svc/laser_snapshot_timeout", timeout, 5.0);
 
-    ros::Rate looprate(timeout);
+    ros::Rate looprate((double)timeout);
     while(ros::ok())
     {
         ros::spinOnce();
