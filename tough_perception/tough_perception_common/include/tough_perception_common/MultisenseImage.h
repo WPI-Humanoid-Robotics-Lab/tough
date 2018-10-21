@@ -157,6 +157,7 @@ public:
     MultisenseImage(ros::NodeHandle &nh_);
 
     void setDepthTopic(const std::string &topic);
+    void setImageTopic(const std::string &topic);
 
     /**
      * @brief gives an image loaded

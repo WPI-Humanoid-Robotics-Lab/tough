@@ -75,9 +75,9 @@ MultisenseImage::MultisenseImage(ros::NodeHandle &n):nh_(n),
     settings.Q_matrix_(3,2) = -610.1799470098168;
     settings.Q_matrix_(3,3) =  0.0f;
 
-    settings.camera_=(cv::Mat_<float>(3,3)<< 610.1799470098168	,0.0		,512.5,
-    								0.0			,610.1799470098168	,272.5,
-    								0.0			,0.0		,1.0);
+    settings.camera_=(cv::Mat_<float>(3,3)<<    610.1799470098168   ,0.0                ,512.5,
+                                                0.0                 ,610.1799470098168  ,272.5,
+                                                0.0                 ,0.0                ,1.0);
 
     settings.width_=1024;
     settings.height_=544;
@@ -93,6 +93,12 @@ MultisenseImage::MultisenseImage(ros::NodeHandle &n):nh_(n),
 void MultisenseImage::setDepthTopic(const std::string &topic)
 {
 	depth_topic_ = topic;
+}
+
+void
+MultisenseImage::setImageTopic(const std::string &topic)
+{
+    image_topic_ = topic;
 }
 
 /**

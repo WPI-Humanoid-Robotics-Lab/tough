@@ -10,16 +10,20 @@ find_package(catkin REQUIRED COMPONENTS
   tough_controller_interface
   tough_common
   tough_footstep
+  tough_perception_common
 )
 
 
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES tough_examples
-  CATKIN_DEPENDS 	roscpp rospy std_msgs 
-  					tough_controller_interface
-  					tough_common
-  					tough_footstep
+  CATKIN_DEPENDS 	roscpp
+                        rospy
+                        std_msgs
+                        tough_controller_interface
+                        tough_common
+                        tough_footstep
+                        tough_perception_common
 #  DEPENDS system_lib
 )
 
@@ -130,3 +134,11 @@ target_link_libraries(walk_rotate_example  ${catkin_LIBRARIES})
 add_executable(walk_steps_example src/navigation_examples/walk_steps_example.cpp )
 add_dependencies(walk_steps_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(walk_steps_example  ${catkin_LIBRARIES})
+
+
+#########################
+## Navigation examples ##
+#########################
+add_executable(multisense_image_example src/perception_examples/test_multisense_image.cpp )
+add_dependencies(multisense_image_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(multisense_image_example  ${catkin_LIBRARIES})
