@@ -422,15 +422,13 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
 //        grid.setInputCloud (result);
 //        grid.filter (*result);
 
-        pcl::PointCloud<pcl::PointXYZ>::Ptr result_clipped (new pcl::PointCloud<pcl::PointXYZ>);
 
         // clip the point cloud in x y and z direction
-        clipPointCloud(result,result_clipped);
+        clipPointCloud(result);
 
-        std::cout << "[PC size]"<< result->size() << std::endl;
+        ROS_INFO("PeriodicSnapshotter::mergeClouds : PC size : %d", result->size());
 
-//        convertPCLtoROS(result,merged_cloud);
-        convertPCLtoROS(result_clipped,merged_cloud);
+        convertPCLtoROS(result,merged_cloud);
     }
 
     // publish the merged message
@@ -439,28 +437,26 @@ void PeriodicSnapshotter::mergeClouds(const sensor_msgs::PointCloud2::Ptr msg){
 }
 
 void
-PeriodicSnapshotter::clipPointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud,
-                                    const pcl::PointCloud<pcl::PointXYZ>::Ptr clipped_cloud)
+PeriodicSnapshotter::clipPointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud)
 {
-            pcl::PointCloud<pcl::PointXYZ>::Ptr temp = input_cloud;
-            pcl::PassThrough<pcl::PointXYZ> globalPassThroughFilter;
-            globalPassThroughFilter.setInputCloud(temp);
+    pcl::PassThrough<pcl::PointXYZ> globalPassThroughFilter;
 
-            globalPassThroughFilter.setFilterFieldName ("z");
-            globalPassThroughFilter.setFilterLimits (filter_min_z, filter_max_z);
-            globalPassThroughFilter.filter (*clipped_cloud);
-            temp=clipped_cloud;
+    globalPassThroughFilter.setInputCloud(input_cloud);
+    globalPassThroughFilter.setFilterFieldName ("z");
+    globalPassThroughFilter.setFilterLimits (filter_min_z, filter_max_z);
+    globalPassThroughFilter.filter (*input_cloud);
 
-            globalPassThroughFilter.setInputCloud(temp);
-            globalPassThroughFilter.setFilterFieldName ("y");
-            globalPassThroughFilter.setFilterLimits (filter_min_y, filter_max_y);
-            globalPassThroughFilter.filter (*clipped_cloud);
-            temp=clipped_cloud;
 
-            globalPassThroughFilter.setInputCloud(temp);
-            globalPassThroughFilter.setFilterFieldName ("x");
-            globalPassThroughFilter.setFilterLimits (filter_min_x, filter_max_x);
-            globalPassThroughFilter.filter (*clipped_cloud);
+    globalPassThroughFilter.setInputCloud(input_cloud);
+    globalPassThroughFilter.setFilterFieldName ("y");
+    globalPassThroughFilter.setFilterLimits (filter_min_y, filter_max_y);
+    globalPassThroughFilter.filter (*input_cloud);
+
+
+    globalPassThroughFilter.setInputCloud(input_cloud);
+    globalPassThroughFilter.setFilterFieldName ("x");
+    globalPassThroughFilter.setFilterLimits (filter_min_x, filter_max_x);
+    globalPassThroughFilter.filter (*input_cloud);
 }
 
 

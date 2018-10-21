@@ -88,8 +88,7 @@ public:
     void pausePointcloudCB(const std_msgs::Bool &msg);
 
     void setBoxFilterCB(const std_msgs::Int8 &msg);
-    void clipPointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud,
-                        const pcl::PointCloud<pcl::PointXYZ>::Ptr clipped_cloud);
+    void clipPointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud);
 
 private:
     ros::NodeHandle n_;
