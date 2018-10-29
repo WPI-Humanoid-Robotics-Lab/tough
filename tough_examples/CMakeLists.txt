@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   tough_common
   tough_footstep
   tough_perception_common
+  tough_moveit_planners
 )
 
 
@@ -24,6 +25,7 @@ catkin_package(
                         tough_common
                         tough_footstep
                         tough_perception_common
+                        tough_moveit_planners
 #  DEPENDS system_lib
 )
 
@@ -142,3 +144,11 @@ target_link_libraries(walk_steps_example  ${catkin_LIBRARIES})
 add_executable(multisense_image_example src/perception_examples/test_multisense_image.cpp )
 add_dependencies(multisense_image_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(multisense_image_example  ${catkin_LIBRARIES})
+
+#########################
+## Manipulation examples ##
+#########################
+
+add_executable(motion_planner_example src/manipulation_examples/motion_planner_example.cpp )
+add_dependencies(motion_planner_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(motion_planner_example  ${catkin_LIBRARIES})
