@@ -47,3 +47,45 @@ bool GripperControlInterface::getJointSpaceState(std::vector<double> &joints, Ro
     joints.push_back(jointPosition);
     return true;
 }
+
+
+#ifdef ROBOTIQ_GRIPPER
+void GripperControlInterface::setMode(const RobotSide side, const GRIPPER_MODES mode)
+{
+    controlGripper(side, mode);
+}
+
+
+void GripperControlInterface::resetGripper(const RobotSide side)
+{
+    controlGripper(side, GRIPPER_MODES::RESET);
+}
+
+void GripperControlInterface::openThumb(const RobotSide side)
+{
+    controlGripper(side, ihmc_msgs::HandDesiredConfigurationRosMessage::OPEN_THUMB);
+}
+
+void GripperControlInterface::closeThumb(const RobotSide side)
+{
+    controlGripper(side, ihmc_msgs::HandDesiredConfigurationRosMessage::CLOSE_THUMB);
+}
+
+void GripperControlInterface::openFingers(const RobotSide side)
+{
+    controlGripper(side, ihmc_msgs::HandDesiredConfigurationRosMessage::OPEN_FINGERS);
+}
+
+
+void GripperControlInterface::closeFingers(const RobotSide side)
+{
+    controlGripper(side, ihmc_msgs::HandDesiredConfigurationRosMessage::CLOSE_FINGERS);
+}
+
+void GripperControlInterface::crush(const RobotSide side)
+{
+    controlGripper(side, ihmc_msgs::HandDesiredConfigurationRosMessage::CRUSH);
+
+}
+
+#endif

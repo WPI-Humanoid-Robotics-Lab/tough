@@ -3,36 +3,80 @@
 #include <std_msgs/String.h>
 #include <tough_common/tough_common_names.h>
 
+
+void demo_gripper(GripperControlInterface gripcont)
+{
+    std::vector<GripperControlInterface::GRIPPER_MODES> gripperModes{
+                    GripperControlInterface::BASIC,
+                    GripperControlInterface::PINCH,
+                    GripperControlInterface::WIDE,
+                    GripperControlInterface::SCISSOR};
+
+    std::vector<RobotSide> gripperSide{RobotSide::LEFT};
+    for(auto side:gripperSide)
+    {
+
+        for(auto mode:gripperModes)
+        {
+            ROS_INFO_STREAM("[mode] " << mode);
+            gripcont.setMode(side,mode);
+            ros::Duration(2).sleep();
+            ROS_INFO("\t closing gripper");
+            gripcont.closeGripper(side);
+            ros::Duration(2).sleep();
+            ROS_INFO("\t opening gripper");
+            gripcont.openGripper(side);
+            ros::Duration(2).sleep();
+
+            ROS_INFO("\t opening Fingers");
+            gripcont.closeFingers(side);
+            ros::Duration(2).sleep();
+            ROS_INFO("\t closing Fingers");
+            gripcont.openFingers(side);
+            ros::Duration(2).sleep();
+
+            ROS_INFO("\t opening Thumb");
+            gripcont.closeThumb(side);
+            ros::Duration(2).sleep();
+            ROS_INFO("\t closing Thumb");
+            gripcont.openThumb(side);
+            ros::Duration(2).sleep();
+        }
+        ros::Duration(2).sleep();
+        ROS_INFO("Resetting gripper");
+    //    gripcont.resetGripper(RobotSide::LEFT);
+    //    ros::Duration(8).sleep();
+        gripcont.closeGripper(side);
+    }
+
+}
+
+
 int main(int argc, char **argv){
 
     ros::init(argc, argv, "test_gripper_control");
     ros::NodeHandle nh;
     GripperControlInterface gripcont(nh);
+    std::cout << argc << std::endl;
 
-    ros::Publisher log_pub = nh.advertise<std_msgs::String>(TOUGH_COMMON_NAMES::LOG_TOPIC, 10);
-    const auto log_msg = [&log_pub](const std::string &str) {
-        std_msgs::String msg;
-        msg.data = ros::this_node::getName() + ": " + str;
-        log_pub.publish(msg);
-        ROS_INFO("%s", msg.data.c_str());
-    };
+
 
     // wait a reasonable amount of time for the subscriber to connect
     ros::Time wait_until = ros::Time::now() + ros::Duration(0.5);
-    while (log_pub.getNumSubscribers() == 0 && ros::Time::now() < wait_until) {
-        ros::spinOnce();
+    while (ros::Time::now() < wait_until) {
         ros::WallDuration(0.1).sleep();
     }
+
 
     std::vector<double> leftGrip,rightGrip;
     if(argc == 2 ){
         if (argv[1][0] == '1'){
-            log_msg("opening both grippers");
+            ROS_INFO("opening both grippers");
             gripcont.openGripper(LEFT);
             gripcont.openGripper(RIGHT);
         }
         else {
-            log_msg("closing both grippers");
+            ROS_INFO("closing both grippers");
             gripcont.closeGripper(LEFT);
             gripcont.closeGripper(RIGHT);
         }
@@ -44,18 +88,17 @@ int main(int argc, char **argv){
 
         std::string side_str = side == RobotSide::LEFT ? "left" : "right";
 
-        log_msg("moving " + side_str + " gripper to " + argv[2]);
+        ROS_INFO_STREAM("moving " << side_str << " gripper to " << argv[2]);
         gripcont.controlGripper(side, state);
     }
     else {
-        log_msg("Usage: rosrun <node_name> 1 \n to open grippers \n running demo");
+        ROS_INFO("Usage: rosrun <node_name> 1 \n to open grippers \n running demo");
+        demo_gripper(gripcont);
 
-        gripcont.controlGripper(LEFT,ihmc_msgs::HandDesiredConfigurationRosMessage::CLOSE);
-        gripcont.controlGripper(RIGHT,ihmc_msgs::HandDesiredConfigurationRosMessage::CLOSE);
     }
     ros::spinOnce();
     ros::Duration(2).sleep();
 
-    log_msg("motion complete");
+    ROS_INFO("motion complete");
     return 0;
 }
