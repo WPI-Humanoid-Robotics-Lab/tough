@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1290</width>
+    <width>1319</width>
     <height>800</height>
    </rect>
   </property>
@@ -108,7 +108,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>4</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="tabNudge">
           <attribute name="title">
@@ -259,7 +259,47 @@
               <property name="horizontalSpacing">
                <number>3</number>
               </property>
-              <item row="1" column="0" colspan="7">
+              <item row="0" column="3">
+               <widget class="QPushButton" name="btnResetArm">
+                <property name="text">
+                 <string>Reset Arm</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" colspan="2">
+               <widget class="QWidget" name="btnGrpArmSide" native="true">
+                <layout class="QHBoxLayout" name="horizontalLayout_7">
+                 <item>
+                  <widget class="QRadioButton" name="radioArmSideLeft">
+                   <property name="text">
+                    <string>Left</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">btnGroupArm</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioArmSideRight">
+                   <property name="text">
+                    <string>Right</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">btnGroupArm</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_18">
+                <property name="text">
+                 <string>Elbow</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" colspan="5">
                <widget class="QToolBox" name="tabArmControl">
                 <property name="minimumSize">
                  <size>
@@ -290,8 +330,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>450</width>
-                   <height>85</height>
+                   <width>437</width>
+                   <height>117</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -362,8 +402,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>105</width>
-                   <height>84</height>
+                   <width>112</width>
+                   <height>117</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -416,64 +456,10 @@
                 </widget>
                </widget>
               </item>
-              <item row="2" column="1" colspan="6">
+              <item row="2" column="1" colspan="4">
                <widget class="QSlider" name="sliderElbow">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0" colspan="2">
-               <widget class="QWidget" name="btnGrpArmSide" native="true">
-                <layout class="QHBoxLayout" name="horizontalLayout_7">
-                 <item>
-                  <widget class="QRadioButton" name="radioArmSideLeft">
-                   <property name="text">
-                    <string>Left</string>
-                   </property>
-                   <attribute name="buttonGroup">
-                    <string notr="true">btnGroupArm</string>
-                   </attribute>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QRadioButton" name="radioArmSideRight">
-                   <property name="text">
-                    <string>Right</string>
-                   </property>
-                   <attribute name="buttonGroup">
-                    <string notr="true">btnGroupArm</string>
-                   </attribute>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="0" column="3">
-               <widget class="QPushButton" name="btnCloseHand">
-                <property name="text">
-                 <string>Close Hand</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="5">
-               <widget class="QPushButton" name="btnResetArm">
-                <property name="text">
-                 <string>Reset Arm</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_18">
-                <property name="text">
-                 <string>Elbow</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="4">
-               <widget class="QPushButton" name="btnOpenHand">
-                <property name="text">
-                 <string>Open Hand</string>
                 </property>
                </widget>
               </item>
@@ -481,6 +467,177 @@
             </widget>
            </item>
           </layout>
+         </widget>
+         <widget class="QWidget" name="tabGripper">
+          <attribute name="title">
+           <string>Gripper</string>
+          </attribute>
+          <widget class="QPushButton" name="btnOpenHand">
+           <property name="geometry">
+            <rect>
+             <x>280</x>
+             <y>30</y>
+             <width>110</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Open Hand</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="btnCloseFingers">
+           <property name="geometry">
+            <rect>
+             <x>162</x>
+             <y>70</y>
+             <width>110</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Close Fingers</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="btnCloseHand">
+           <property name="geometry">
+            <rect>
+             <x>162</x>
+             <y>30</y>
+             <width>110</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Close Hand</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="btnOpenFingers">
+           <property name="geometry">
+            <rect>
+             <x>280</x>
+             <y>70</y>
+             <width>110</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Open Fingers</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="btnOpenThumb">
+           <property name="geometry">
+            <rect>
+             <x>280</x>
+             <y>110</y>
+             <width>110</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Open Thumb</string>
+           </property>
+          </widget>
+          <widget class="QWidget" name="btnGrpGripSide" native="true">
+           <property name="geometry">
+            <rect>
+             <x>8</x>
+             <y>20</y>
+             <width>149</width>
+             <height>40</height>
+            </rect>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
+            <item>
+             <widget class="QRadioButton" name="radioGripSideLeft">
+              <property name="text">
+               <string>Left</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">btnGroupGripper</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radioGripSideRight">
+              <property name="text">
+               <string>Right</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">btnGroupGripper</string>
+              </attribute>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QComboBox" name="cmbBoxGripMode">
+           <property name="geometry">
+            <rect>
+             <x>35</x>
+             <y>70</y>
+             <width>91</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <item>
+            <property name="text">
+             <string>BASIC</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>PINCH</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>WIDE</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>SCISSOR</string>
+            </property>
+           </item>
+          </widget>
+          <widget class="QPushButton" name="btnCloseThumb">
+           <property name="geometry">
+            <rect>
+             <x>162</x>
+             <y>110</y>
+             <width>110</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Close Thumb</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="btnCloseBothHands">
+           <property name="geometry">
+            <rect>
+             <x>161</x>
+             <y>143</y>
+             <width>231</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Close Both Hands</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="btnReset">
+           <property name="geometry">
+            <rect>
+             <x>34</x>
+             <y>110</y>
+             <width>91</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Reset</string>
+           </property>
+          </widget>
          </widget>
          <widget class="QWidget" name="tabChest">
           <attribute name="title">
@@ -1256,8 +1413,8 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1290</width>
-     <height>20</height>
+     <width>1319</width>
+     <height>25</height>
     </rect>
    </property>
   </widget>
@@ -1266,10 +1423,11 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
+  <buttongroup name="btnGroupArm"/>
+  <buttongroup name="btnGroupGripper"/>
   <buttongroup name="btnGroupRvizTools"/>
   <buttongroup name="btnGroupFeet"/>
   <buttongroup name="btnGroupNudge"/>
-  <buttongroup name="btnGroupArm"/>
   <buttongroup name="btnGroupDisplays"/>
  </buttongroups>
 </ui>

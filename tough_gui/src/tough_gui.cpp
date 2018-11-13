@@ -7,6 +7,7 @@
 #include "tough_gui/configurationreader.h"
 #include "ros/package.h"
 #include <boost/lexical_cast.hpp>
+#include <map>
 
 /**
  * This class creates the GUI using rviz APIs.
@@ -130,6 +131,16 @@ void ToughGUI::initVariables()
 
     //moveArmCommand is a flag used to check if user intends to move arm or just publish a point
     moveArmCommand_ = false;
+
+    mode_map = {{"BASIC",GripperControlInterface::GRIPPER_MODES::BASIC},
+                {"PINCH",GripperControlInterface::GRIPPER_MODES::PINCH},
+                {"WIDE",GripperControlInterface::GRIPPER_MODES::WIDE},
+                {"SCISSOR",GripperControlInterface::GRIPPER_MODES::SCISSOR}};
+    
+    prev_mode_map = {{"BASIC",0},
+                {"PINCH",1},
+                {"WIDE",2},
+                {"SCISSOR",3}};
 }
 
 void ToughGUI::initActionsConnections()
@@ -157,8 +168,16 @@ void ToughGUI::initActionsConnections()
 
     //arm control
     connect(ui->btnGroupArm,             SIGNAL(buttonClicked(int)),   this, SLOT(updateArmSide(int)));
+    connect(ui->btnGroupGripper,         SIGNAL(buttonClicked(int)),   this, SLOT(updateGripperSide(int)));
+    connect(ui->cmbBoxGripMode,          SIGNAL(currentIndexChanged(int)),  this, SLOT(setMode()));
+    connect(ui->btnReset,                SIGNAL(clicked()),            this, SLOT(resetGrippers()));
+    connect(ui->btnCloseBothHands,       SIGNAL(clicked()),            this, SLOT(closeBothGrippers()));
     connect(ui->btnCloseHand,            SIGNAL(clicked()),            this, SLOT(closeGrippers()));
     connect(ui->btnOpenHand,             SIGNAL(clicked()),            this, SLOT(openGrippers()));
+    connect(ui->btnCloseFingers,         SIGNAL(clicked()),            this, SLOT(closeFingers()));
+    connect(ui->btnOpenFingers,          SIGNAL(clicked()),            this, SLOT(openFingers()));
+    connect(ui->btnCloseThumb,           SIGNAL(clicked()),            this, SLOT(closeThumb()));
+    connect(ui->btnOpenThumb,            SIGNAL(clicked()),            this, SLOT(openThumb()));
     connect(ui->sliderShoulderRoll,      SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
     connect(ui->sliderShoulderPitch,     SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
     connect(ui->sliderShoulderYaw,       SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
@@ -419,6 +438,9 @@ void ToughGUI::initDefaultValues() {
     //Arms select left arm by default
     ui->radioArmSideLeft->setChecked(true);
     ui->radioNudgeSideLeft->setChecked(true);
+
+    //Gripper select left Gripper by default
+    ui->radioGripSideLeft->setChecked(true);
 
     //Set the default values for the offset
     ui->lineEditNumSteps->setText("2");
@@ -882,21 +904,106 @@ void ToughGUI::setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr, bool is_RGB
 
 }
 
+void ToughGUI::updateGripperSide(int btnID)
+{
+    ui->cmbBoxGripMode->setCurrentIndex((ui->radioGripSideLeft->isChecked()) ? prev_mode_map[PREVIOUS_MODE_LEFT] : prev_mode_map[PREVIOUS_MODE_RIGHT]);
+}
+
+void ToughGUI::setMode()
+{
+    if(ui->radioGripSideLeft->isChecked())
+    {
+        if(!(PREVIOUS_MODE_LEFT == ui->cmbBoxGripMode->currentText()))
+        {
+        gripperController_->setMode(RobotSide::LEFT,mode_map[ui->cmbBoxGripMode->currentText()]);
+        PREVIOUS_MODE_LEFT = ui->cmbBoxGripMode->currentText();
+        }
+    }
+    else
+    {
+        if(!(PREVIOUS_MODE_RIGHT == ui->cmbBoxGripMode->currentText()))
+        {
+        gripperController_->setMode(RobotSide::RIGHT,mode_map[ui->cmbBoxGripMode->currentText()]);
+        PREVIOUS_MODE_RIGHT = ui->cmbBoxGripMode->currentText();
+        }
+    }
+}
+
 void ToughGUI::closeGrippers()
 {
     //call close grppiers function here
-    RobotSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    setMode();
+    RobotSide side = ui->radioGripSideLeft->isChecked() ? LEFT : RIGHT;
     gripperController_->closeGripper(side);
-
 }
 
 void ToughGUI::openGrippers()
 {
     //call open grippers function here
-    RobotSide side = ui->radioArmSideLeft->isChecked() ? LEFT : RIGHT;
+    setMode();
+    RobotSide side = ui->radioGripSideLeft->isChecked() ? LEFT : RIGHT;
     gripperController_->openGripper(side);
 }
 
+void ToughGUI::closeFingers()
+{
+    setMode();
+    RobotSide side = ui->radioGripSideLeft->isChecked() ? LEFT : RIGHT;
+    gripperController_->closeFingers(side);
+
+}
+
+void ToughGUI::openFingers()
+{
+    setMode();
+    RobotSide side = ui->radioGripSideLeft->isChecked() ? LEFT : RIGHT;
+    gripperController_->openFingers(side);
+}
+
+void ToughGUI::closeThumb()
+{
+    setMode();
+    RobotSide side = ui->radioGripSideLeft->isChecked() ? LEFT : RIGHT;
+    gripperController_->closeThumb(side);
+
+}
+
+void ToughGUI::openThumb()
+{
+    setMode();
+    RobotSide side = ui->radioGripSideLeft->isChecked() ? LEFT : RIGHT;
+    gripperController_->openThumb(side);
+}
+
+void ToughGUI::resetGrippers()
+{
+    gripperController_->resetGripper(RobotSide::LEFT);
+    gripperController_->resetGripper(RobotSide::RIGHT);
+
+    PREVIOUS_MODE_LEFT = "BASIC";
+    PREVIOUS_MODE_RIGHT = "BASIC";
+
+    updateGripperSide(-1);
+}
+
+void ToughGUI::closeBothGrippers()
+{
+    // Putting both grippers in BASIC mode.
+    gripperController_->setMode(RobotSide::LEFT,GripperControlInterface::BASIC);
+    PREVIOUS_MODE_LEFT = "BASIC";
+    ros::Duration(0.1).sleep();
+
+    gripperController_->setMode(RobotSide::RIGHT,GripperControlInterface::BASIC);
+    PREVIOUS_MODE_RIGHT = "BASIC";
+    ros::Duration(0.1).sleep();
+
+    // Closing both hands
+    gripperController_->closeGripper(RobotSide::LEFT);
+    ros::Duration(0.1).sleep();
+    gripperController_->closeGripper(RobotSide::RIGHT);
+
+    updateGripperSide(-1);
+}
 void ToughGUI::setCurrentTool(int btnID)
 {
     if(btnID == -2)

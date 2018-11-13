@@ -120,10 +120,18 @@ private Q_SLOTS:
     void moveToPoint();
     void nudgeArm(int btnID);
 
+    void setMode();
     void closeGrippers();
     void openGrippers();
+    void closeFingers();
+    void openFingers();
+    void closeThumb();
+    void openThumb();
+    void closeBothGrippers();
+    void resetGrippers();
 
     void updateJointStateSub(int tabID);
+    void updateGripperSide(int btnID);
     void updateArmSide(int btnID);
 
     void resetChestOrientation();
@@ -131,6 +139,8 @@ private Q_SLOTS:
     void resetRobot();
     void createMoveitDisplay();
     void deleteMoveitDisplay();
+
+
 
 private:
   rviz::VisualizationManager* manager_;
@@ -274,8 +284,11 @@ private:
   float NECK_YAW_MAX = 60;
   float NECK_YAW_MIN = -60;
 
+  QString PREVIOUS_MODE_LEFT = "BASIC";
+  QString PREVIOUS_MODE_RIGHT = "BASIC";
 
-
+  std::map<QString,GripperControlInterface::GRIPPER_MODES> mode_map;
+  std::map<QString,int> prev_mode_map;
 };
 
 
