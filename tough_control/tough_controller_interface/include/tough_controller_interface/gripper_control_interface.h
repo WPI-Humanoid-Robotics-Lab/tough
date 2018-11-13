@@ -6,9 +6,10 @@
 #include "ihmc_msgs/HandDesiredConfigurationRosMessage.h"
 #include <tough_common/robot_description.h>
 #include "tough_controller_interface/tough_controller_interface.h"
+#include <map>
 
-#define ROBOTIQ_GRIPPER  //need to find a better way to define this
 
+//Note: HOOK Mode doesn't work. Tested on actual robotiq gripper
 
 class GripperControlInterface: public ToughControllerInterface {
 
@@ -22,8 +23,11 @@ public:
         PINCH   = ihmc_msgs::HandDesiredConfigurationRosMessage::PINCH_GRIP,
         WIDE    = ihmc_msgs::HandDesiredConfigurationRosMessage::WIDE_GRIP,
         SCISSOR = ihmc_msgs::HandDesiredConfigurationRosMessage::SCISSOR_GRIP,
+        HOOK    = ihmc_msgs::HandDesiredConfigurationRosMessage::HOOK,
         RESET   = ihmc_msgs::HandDesiredConfigurationRosMessage::RESET
     };
+
+    std::map<GRIPPER_MODES,std::string> GRIPPER_MODE_NAMES;
     /**
      * @brief gripperControl class provides ability to control the grippers.
      * @param nh nodehandle to which subscribers and publishers are attached.
@@ -50,9 +54,6 @@ public:
      */
     void openGripper(const RobotSide side);
 
-#ifdef ROBOTIQ_GRIPPER
-    // these modes are only for robotiq grippers
-
     void setMode(const RobotSide side, const GRIPPER_MODES mode);
 
     void resetGripper(const RobotSide side);
@@ -67,7 +68,9 @@ public:
 
     void crush(const RobotSide side);
 
-#endif
+    std::string getModeName(const GRIPPER_MODES mode);
+
+
 
     virtual bool getJointSpaceState(std::vector<double> &joints, RobotSide side) override;
 

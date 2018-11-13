@@ -1,11 +1,22 @@
 #include <tough_controller_interface/gripper_control_interface.h>
 #include <tf/transform_listener.h>
+#include <map>
+#include <boost/assign.hpp>
 
 GripperControlInterface::GripperControlInterface(ros::NodeHandle nh) : ToughControllerInterface(nh){
 
     gripperPublisher_ =
             nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>(control_topic_prefix_ +"/hand_desired_configuration",1,true);
 
+
+    GRIPPER_MODE_NAMES = {
+        {BASIC,"BASIC"},
+        {PINCH,"PINCH"},
+        {WIDE,"WIDE"},
+        {SCISSOR,"SCISSOR"},
+        {HOOK,"HOOK"},
+        {RESET,"RESET"},
+    };
 }
 
 GripperControlInterface::~GripperControlInterface(){
@@ -49,7 +60,7 @@ bool GripperControlInterface::getJointSpaceState(std::vector<double> &joints, Ro
 }
 
 
-#ifdef ROBOTIQ_GRIPPER
+
 void GripperControlInterface::setMode(const RobotSide side, const GRIPPER_MODES mode)
 {
     controlGripper(side, mode);
@@ -88,4 +99,9 @@ void GripperControlInterface::crush(const RobotSide side)
 
 }
 
-#endif
+std::string GripperControlInterface::getModeName(const GRIPPER_MODES mode)
+{
+    return GRIPPER_MODE_NAMES[mode];
+}
+
+

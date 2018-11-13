@@ -4,48 +4,63 @@
 #include <tough_common/tough_common_names.h>
 
 
-void demo_gripper(GripperControlInterface gripcont)
+void demo_gripper(GripperControlInterface &gripcont)
 {
     std::vector<GripperControlInterface::GRIPPER_MODES> gripperModes{
                     GripperControlInterface::BASIC,
                     GripperControlInterface::PINCH,
                     GripperControlInterface::WIDE,
-                    GripperControlInterface::SCISSOR};
+                    GripperControlInterface::SCISSOR,
+                    GripperControlInterface::HOOK};
 
-    std::vector<RobotSide> gripperSide{RobotSide::LEFT};
+    std::vector<RobotSide> gripperSide{RobotSide::LEFT, RobotSide::RIGHT};
     for(auto side:gripperSide)
     {
+        ROS_INFO("[SIDE] %s",(side==RobotSide::LEFT) ? "Left" : "Right");
 
         for(auto mode:gripperModes)
         {
-            ROS_INFO_STREAM("[mode] " << mode);
+            ROS_INFO_STREAM("[mode] " << gripcont.getModeName(mode));
+
             gripcont.setMode(side,mode);
+
             ros::Duration(2).sleep();
+
             ROS_INFO("\t closing gripper");
             gripcont.closeGripper(side);
+
             ros::Duration(2).sleep();
+
             ROS_INFO("\t opening gripper");
             gripcont.openGripper(side);
+
+            ros::Duration(2).sleep();
+
+            ROS_INFO("\t closing Fingers");
+            gripcont.closeFingers(side);
+
             ros::Duration(2).sleep();
 
             ROS_INFO("\t opening Fingers");
-            gripcont.closeFingers(side);
-            ros::Duration(2).sleep();
-            ROS_INFO("\t closing Fingers");
             gripcont.openFingers(side);
+
+            ros::Duration(2).sleep();
+
+            ROS_INFO("\t closing Thumb");
+            gripcont.closeThumb(side);
+
             ros::Duration(2).sleep();
 
             ROS_INFO("\t opening Thumb");
-            gripcont.closeThumb(side);
-            ros::Duration(2).sleep();
-            ROS_INFO("\t closing Thumb");
             gripcont.openThumb(side);
+
             ros::Duration(2).sleep();
         }
         ros::Duration(2).sleep();
         ROS_INFO("Resetting gripper");
     //    gripcont.resetGripper(RobotSide::LEFT);
     //    ros::Duration(8).sleep();
+        gripcont.setMode(side,GripperControlInterface::BASIC);
         gripcont.closeGripper(side);
     }
 
@@ -63,26 +78,31 @@ int main(int argc, char **argv){
 
     // wait a reasonable amount of time for the subscriber to connect
     ros::Time wait_until = ros::Time::now() + ros::Duration(0.5);
-    while (ros::Time::now() < wait_until) {
+    while (ros::Time::now() < wait_until)
+    {
         ros::WallDuration(0.1).sleep();
     }
 
 
     std::vector<double> leftGrip,rightGrip;
-    if(argc == 2 ){
-        if (argv[1][0] == '1'){
+    if(argc == 2 )
+    {
+        if (argv[1][0] == '1')
+        {
             ROS_INFO("opening both grippers");
             gripcont.openGripper(LEFT);
             gripcont.openGripper(RIGHT);
         }
-        else {
+        else
+        {
             ROS_INFO("closing both grippers");
             gripcont.closeGripper(LEFT);
             gripcont.closeGripper(RIGHT);
         }
 
     }
-    else if(argc == 3){
+    else if(argc == 3)
+    {
         RobotSide side = (RobotSide)std::atoi(argv[1]);
         int state = std::atoi(argv[2]);
 
@@ -91,7 +111,8 @@ int main(int argc, char **argv){
         ROS_INFO_STREAM("moving " << side_str << " gripper to " << argv[2]);
         gripcont.controlGripper(side, state);
     }
-    else {
+    else
+    {
         ROS_INFO("Usage: rosrun <node_name> 1 \n to open grippers \n running demo");
         demo_gripper(gripcont);
 
