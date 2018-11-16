@@ -33,6 +33,7 @@
 // ros
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/Bool.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
 #include <sensor_msgs/JointState.h>
@@ -140,6 +141,9 @@ private Q_SLOTS:
     void createMoveitDisplay();
     void deleteMoveitDisplay();
 
+    void resetPointcloud();
+    void pausePointcloud();
+
 
 
 private:
@@ -177,6 +181,9 @@ private:
 private:
   ros::NodeHandle nh_;
   ros::Publisher approveStepsPub_;
+
+  ros::Publisher reset_pointcloud;
+  ros::Publisher pause_pointcloud;
 //  ros::Subscriber centerDistSub;
 //  ros::Subscriber baseSensorStatus;
   ros::Subscriber rviz2DNavGoalSub;
@@ -197,6 +204,7 @@ private:
   WholebodyControlInterface *wholeBodyController_;
   CartesianPlanner      *rightArmPlanner_;
   CartesianPlanner      *leftArmPlanner_;
+
 
   RobotDescription      *rd_;
   RobotStateInformer    *currentState_;
@@ -229,6 +237,9 @@ private:
   QString footstepTopic_;
   QString jointStatesTopic_;
   QString approveStepsTopic_;
+  QString resetPointcloudTopic_;
+  QString pausePointcloudTopic_;
+
   bool flipImage_;
   QLabel* status_label_;
 
@@ -289,6 +300,8 @@ private:
 
   std::map<QString,GripperControlInterface::GRIPPER_MODES> mode_map;
   std::map<QString,int> prev_mode_map;
+  std_msgs::Empty empty_msg;
+  std_msgs::Bool bool_msg;
 };
 
 

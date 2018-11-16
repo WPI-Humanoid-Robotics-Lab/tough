@@ -77,70 +77,91 @@ void ToughGUI::initVariables()
     nh_.getParam("/ihmc_ros/robot_name", robot_name);
 
     //Assign topic names to corresponding variables
-    fixedFrame_       = QString::fromStdString(configfile.currentTopics["fixedFrame"]);
-    mapTopic_         = QString::fromStdString(configfile.currentTopics["mapTopic"]);
-    imageTopic_       = QString::fromStdString(configfile.currentTopics["imageTopic"]);
-    pointCloudTopic_  = QString::fromStdString(robot_name + "/" + configfile.currentTopics["pointCloudTopic"]);
-    octomapTopic_     = QString::fromStdString(robot_name + "/" + configfile.currentTopics["octomapTopic"]);
-    baseSensorTopic_  = QString::fromStdString(configfile.currentTopics["baseSensorTopic"]);
-    velocityTopic_    = QString::fromStdString(configfile.currentTopics["velocityTopic"]);
-    pathTopic_        = QString::fromStdString(configfile.currentTopics["pathTopic"]);
-    targetFrame_      = QString::fromStdString(configfile.currentTopics["targetFrame"]);
-    robotType_        = QString::fromStdString(configfile.currentTopics["robotType"]);
-    goalTopic_        = QString::fromStdString(configfile.currentTopics["goalTopic"]);
-    footstepTopic_    = QString::fromStdString(configfile.currentTopics["footstepTopic"]);
-    jointStatesTopic_ = QString::fromStdString(configfile.currentTopics["jointStatesTopic"]);
-    approveStepsTopic_= QString::fromStdString(configfile.currentTopics["approveStepsTopic"]);
-    try{
+    fixedFrame_             = QString::fromStdString(configfile.currentTopics["fixedFrame"]);
+    mapTopic_               = QString::fromStdString(configfile.currentTopics["mapTopic"]);
+    imageTopic_             = QString::fromStdString(configfile.currentTopics["imageTopic"]);
+    pointCloudTopic_        = QString::fromStdString(robot_name + "/" + configfile.currentTopics["pointCloudTopic"]);
+    octomapTopic_           = QString::fromStdString(robot_name + "/" + configfile.currentTopics["octomapTopic"]);
+    baseSensorTopic_        = QString::fromStdString(configfile.currentTopics["baseSensorTopic"]);
+    velocityTopic_          = QString::fromStdString(configfile.currentTopics["velocityTopic"]);
+    pathTopic_              = QString::fromStdString(configfile.currentTopics["pathTopic"]);
+    targetFrame_            = QString::fromStdString(configfile.currentTopics["targetFrame"]);
+    robotType_              = QString::fromStdString(configfile.currentTopics["robotType"]);
+    goalTopic_              = QString::fromStdString(configfile.currentTopics["goalTopic"]);
+    footstepTopic_          = QString::fromStdString(configfile.currentTopics["footstepTopic"]);
+    jointStatesTopic_       = QString::fromStdString(configfile.currentTopics["jointStatesTopic"]);
+    approveStepsTopic_      = QString::fromStdString(configfile.currentTopics["approveStepsTopic"]);
+
+    resetPointcloudTopic_   = QString::fromStdString( robot_name + "/" + configfile.currentTopics["resetPoincloudTopic"]);
+    pausePointcloudTopic_   = QString::fromStdString( robot_name + "/" + configfile.currentTopics["pausePoincloudTopic"]);
+
+
+    try
+    {
         flipImage_        = boost::lexical_cast<bool>(configfile.currentTopics["flip"]);
     }
-    catch (const boost::bad_lexical_cast &e){
+    catch (const boost::bad_lexical_cast &e)
+    {
         std::cerr<<"flip parameter is incorrectly set in config.ini. setting flip to false"<<std::endl;
     }
 
     //subscribers
-    liveVideoSub    = it_.subscribe(imageTopic_.toStdString(),1,&ToughGUI::liveVideoCallback,this,image_transport::TransportHints("raw"));
+    liveVideoSub        = it_.subscribe(imageTopic_.toStdString(),1,&ToughGUI::liveVideoCallback,this,image_transport::TransportHints("raw"));
     jointStatesUpdater_ = nh_.createTimer(ros::Duration(0.5), &ToughGUI::jointStateCallBack, this);
     //    @todo: add timer based callback here to call jointStateCallBack method
-    clickedPointSub_= nh_.subscribe("clicked_point",1, &ToughGUI::getClickedPoint, this);
+    clickedPointSub_    = nh_.subscribe("clicked_point",1, &ToughGUI::getClickedPoint, this);
 
-    approveStepsPub_ = nh_.advertise<std_msgs::Empty>(approveStepsTopic_.toStdString(), 1, true);
+    approveStepsPub_    = nh_.advertise<std_msgs::Empty>(approveStepsTopic_.toStdString(), 1, true);
     //initialize a onetime map to lookup for joint values
     std::vector<std::string> joints;
     rd_->getLeftArmJointNames(leftArmJointNames_);
     rd_->getRightArmJointNames(rightArmJointNames_);
 
-    std::vector<std::string> chest_neck_joints = {"torsoYaw", "torsoPitch", "torsoRoll","lowerNeckPitch", "neckYaw", "upperNeckPitch",
-                                                  "back_bkz", "back_bky", "back_bkx","neckry", "neckYaw2", "upperNeckPitch2"};
+    std::vector<std::string> chest_neck_joints = {  "torsoYaw", "torsoPitch", "torsoRoll",
+                                                    "lowerNeckPitch", "neckYaw", "upperNeckPitch",
+                                                    "back_bkz", "back_bky", "back_bkx",
+                                                    "neckry", "neckYaw2", "upperNeckPitch2"};
 
     joints.clear();
 
     joints.insert(joints.end(), leftArmJointNames_.begin(), leftArmJointNames_.end());
     joints.insert(joints.end(), rightArmJointNames_.begin(), rightArmJointNames_.end());
     joints.insert(joints.end(), chest_neck_joints.begin(), chest_neck_joints.end());
-    std::vector<QLabel *> jointLabels = {ui->lblLeftShoulderPitch, ui->lblLeftShoulderRoll, ui->lblLeftShoulderYaw, ui->lblLeftElbowPitch, ui->lblLeftForearmYaw, ui->lblLeftWristRoll, ui->lblLeftWristPitch,
-                                         ui->lblRightShoulderPitch, ui->lblRightShoulderRoll, ui->lblRightShoulderYaw, ui->lblRightElbowPitch, ui->lblRightForearmYaw, ui->lblRightWristRoll, ui->lblRightWristPitch,
-                                         ui->lblChestYaw, ui->lblChestPitch, ui->lblChestRoll, ui->lblLowerNeckPitch, ui->lblNeckYaw, ui->lblNeckUpperPitch,
-                                         ui->lblChestYaw, ui->lblChestPitch, ui->lblChestRoll, ui->lblLowerNeckPitch, ui->lblNeckYaw, ui->lblNeckUpperPitch};
+    std::vector<QLabel *> jointLabels = {   ui->lblLeftShoulderPitch, ui->lblLeftShoulderRoll, ui->lblLeftShoulderYaw, 
+                                            ui->lblLeftElbowPitch, ui->lblLeftForearmYaw, ui->lblLeftWristRoll, ui->lblLeftWristPitch,
+                                            ui->lblRightShoulderPitch, ui->lblRightShoulderRoll, ui->lblRightShoulderYaw, 
+                                            ui->lblRightElbowPitch, ui->lblRightForearmYaw, ui->lblRightWristRoll, 
+                                            ui->lblRightWristPitch, ui->lblChestYaw, ui->lblChestPitch, 
+                                            ui->lblChestRoll, ui->lblLowerNeckPitch, ui->lblNeckYaw, 
+                                            ui->lblNeckUpperPitch, ui->lblChestYaw, ui->lblChestPitch, 
+                                            ui->lblChestRoll, ui->lblLowerNeckPitch, ui->lblNeckYaw, 
+                                            ui->lblNeckUpperPitch};
 
     assert(joints.size() == jointLabels.size() && "joints and jointlabels must be of same size");
 
-    for(size_t i = 0; i< joints.size(); ++i){
+    for(size_t i = 0; i< joints.size(); ++i)
+    {
         jointLabelMap_[joints[i]] = jointLabels[i];
     }
 
     //moveArmCommand is a flag used to check if user intends to move arm or just publish a point
     moveArmCommand_ = false;
 
-    mode_map = {{"BASIC",GripperControlInterface::GRIPPER_MODES::BASIC},
-                {"PINCH",GripperControlInterface::GRIPPER_MODES::PINCH},
-                {"WIDE",GripperControlInterface::GRIPPER_MODES::WIDE},
-                {"SCISSOR",GripperControlInterface::GRIPPER_MODES::SCISSOR}};
+    mode_map = {    {"BASIC",   GripperControlInterface::GRIPPER_MODES::BASIC},
+                    {"PINCH",   GripperControlInterface::GRIPPER_MODES::PINCH},
+                    {"WIDE",    GripperControlInterface::GRIPPER_MODES::WIDE},
+                    {"SCISSOR", GripperControlInterface::GRIPPER_MODES::SCISSOR}
+               };
     
-    prev_mode_map = {{"BASIC",0},
-                {"PINCH",1},
-                {"WIDE",2},
-                {"SCISSOR",3}};
+    prev_mode_map = {   {"BASIC",   0},
+                        {"PINCH",   1},
+                        {"WIDE",    2},
+                        {"SCISSOR", 3}
+                    };
+
+    reset_pointcloud = nh_.advertise<std_msgs::Empty>(resetPointcloudTopic_.toStdString(), 1, true);
+    pause_pointcloud = nh_.advertise<std_msgs::Bool>(pausePointcloudTopic_.toStdString(), 1, true);
+    bool_msg.data = false;
 }
 
 void ToughGUI::initActionsConnections()
@@ -157,54 +178,60 @@ void ToughGUI::initActionsConnections()
      * Setup Signals and slots for different buttons/sliders in UI.
      */
     // Tool and display selection
-    connect(ui->btnGroupRvizTools,       SIGNAL(buttonClicked(int)),   this, SLOT(setCurrentTool(int)));
-    connect(ui->btnGroupDisplays,        SIGNAL(buttonClicked(int)),   this, SLOT(displayPointcloud(int)));
-    connect(ui->controlTabs,             SIGNAL(currentChanged(int)),  this, SLOT(updateJointStateSub(int)));
-    connect(ui->tab_display,             SIGNAL(currentChanged(int)),  this, SLOT(updateDisplay(int)));
+    connect(ui->btnGroupRvizTools,       SIGNAL(buttonClicked(int)),        this, SLOT(setCurrentTool(int)));
+    connect(ui->btnGroupDisplays,        SIGNAL(buttonClicked(int)),        this, SLOT(displayPointcloud(int)));
+    connect(ui->controlTabs,             SIGNAL(currentChanged(int)),       this, SLOT(updateJointStateSub(int)));
+    connect(ui->tab_display,             SIGNAL(currentChanged(int)),       this, SLOT(updateDisplay(int)));
+
+    //pointCloud
+    connect(ui->btnResetPointcloud,      SIGNAL(clicked()),                 this, SLOT(resetPointcloud()));
+    connect(ui->btnPausePointcloud,      SIGNAL(clicked()),                 this, SLOT(pausePointcloud()));
 
     //nudge
-    connect(ui->btnMoveToPoint,          SIGNAL(clicked()),            this, SLOT(moveToPoint()));
-    connect(ui->btnGroupNudge,           SIGNAL(buttonClicked(int)),   this, SLOT(nudgeArm(int)));
+    connect(ui->btnMoveToPoint,          SIGNAL(clicked()),                 this, SLOT(moveToPoint()));
+    connect(ui->btnGroupNudge,           SIGNAL(buttonClicked(int)),        this, SLOT(nudgeArm(int)));
 
     //arm control
-    connect(ui->btnGroupArm,             SIGNAL(buttonClicked(int)),   this, SLOT(updateArmSide(int)));
-    connect(ui->btnGroupGripper,         SIGNAL(buttonClicked(int)),   this, SLOT(updateGripperSide(int)));
+    connect(ui->btnGroupArm,             SIGNAL(buttonClicked(int)),        this, SLOT(updateArmSide(int)));
+    connect(ui->sliderShoulderRoll,      SIGNAL(sliderReleased()),          this, SLOT(moveArmJoints()));
+    connect(ui->sliderShoulderPitch,     SIGNAL(sliderReleased()),          this, SLOT(moveArmJoints()));
+    connect(ui->sliderShoulderYaw,       SIGNAL(sliderReleased()),          this, SLOT(moveArmJoints()));
+    connect(ui->sliderWristRoll,         SIGNAL(sliderReleased()),          this, SLOT(moveArmJoints()));
+    connect(ui->sliderWristPitch,        SIGNAL(sliderReleased()),          this, SLOT(moveArmJoints()));
+    connect(ui->sliderWristYaw,          SIGNAL(sliderReleased()),          this, SLOT(moveArmJoints()));
+    connect(ui->sliderElbow,             SIGNAL(sliderReleased()),          this, SLOT(moveArmJoints()));
+    connect(ui->btnResetArm,             SIGNAL(clicked()),                 this, SLOT(resetArm()));
+
+    //gripper control
+    connect(ui->btnGroupGripper,         SIGNAL(buttonClicked(int)),        this, SLOT(updateGripperSide(int)));
     connect(ui->cmbBoxGripMode,          SIGNAL(currentIndexChanged(int)),  this, SLOT(setMode()));
-    connect(ui->btnReset,                SIGNAL(clicked()),            this, SLOT(resetGrippers()));
-    connect(ui->btnCloseBothHands,       SIGNAL(clicked()),            this, SLOT(closeBothGrippers()));
-    connect(ui->btnCloseHand,            SIGNAL(clicked()),            this, SLOT(closeGrippers()));
-    connect(ui->btnOpenHand,             SIGNAL(clicked()),            this, SLOT(openGrippers()));
-    connect(ui->btnCloseFingers,         SIGNAL(clicked()),            this, SLOT(closeFingers()));
-    connect(ui->btnOpenFingers,          SIGNAL(clicked()),            this, SLOT(openFingers()));
-    connect(ui->btnCloseThumb,           SIGNAL(clicked()),            this, SLOT(closeThumb()));
-    connect(ui->btnOpenThumb,            SIGNAL(clicked()),            this, SLOT(openThumb()));
-    connect(ui->sliderShoulderRoll,      SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
-    connect(ui->sliderShoulderPitch,     SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
-    connect(ui->sliderShoulderYaw,       SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
-    connect(ui->sliderWristRoll,         SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
-    connect(ui->sliderWristPitch,        SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
-    connect(ui->sliderWristYaw,          SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
-    connect(ui->sliderElbow,             SIGNAL(sliderReleased()),     this, SLOT(moveArmJoints()));
-    connect(ui->btnResetArm,             SIGNAL(clicked()),            this, SLOT(resetArm()));
+    connect(ui->btnResetGrippers,        SIGNAL(clicked()),                 this, SLOT(resetGrippers()));
+    connect(ui->btnCloseBothHands,       SIGNAL(clicked()),                 this, SLOT(closeBothGrippers()));
+    connect(ui->btnCloseHand,            SIGNAL(clicked()),                 this, SLOT(closeGrippers()));
+    connect(ui->btnOpenHand,             SIGNAL(clicked()),                 this, SLOT(openGrippers()));
+    connect(ui->btnCloseFingers,         SIGNAL(clicked()),                 this, SLOT(closeFingers()));
+    connect(ui->btnOpenFingers,          SIGNAL(clicked()),                 this, SLOT(openFingers()));
+    connect(ui->btnCloseThumb,           SIGNAL(clicked()),                 this, SLOT(closeThumb()));
+    connect(ui->btnOpenThumb,            SIGNAL(clicked()),                 this, SLOT(openThumb()));
 
     // chest control
-    connect(ui->sliderChestRoll,         SIGNAL(sliderReleased()),    this, SLOT(moveChestJoints()));
-    connect(ui->sliderChestPitch,        SIGNAL(sliderReleased()),    this, SLOT(moveChestJoints()));
-    connect(ui->sliderChestYaw,          SIGNAL(sliderReleased()),    this, SLOT(moveChestJoints()));
-    connect(ui->btnChestReset,           SIGNAL(clicked()),           this, SLOT(resetChestOrientation()));
+    connect(ui->sliderChestRoll,         SIGNAL(sliderReleased()),          this, SLOT(moveChestJoints()));
+    connect(ui->sliderChestPitch,        SIGNAL(sliderReleased()),          this, SLOT(moveChestJoints()));
+    connect(ui->sliderChestYaw,          SIGNAL(sliderReleased()),          this, SLOT(moveChestJoints()));
+    connect(ui->btnChestReset,           SIGNAL(clicked()),                 this, SLOT(resetChestOrientation()));
 
     // neck control
-    connect(ui->sliderUpperNeckPitch,    SIGNAL(sliderReleased()),    this, SLOT(moveHeadJoints()));
-    connect(ui->sliderLowerNeckPitch,    SIGNAL(sliderReleased()),    this, SLOT(moveHeadJoints()));
-    connect(ui->sliderNeckYaw,           SIGNAL(sliderReleased()),    this, SLOT(moveHeadJoints()));
+    connect(ui->sliderUpperNeckPitch,    SIGNAL(sliderReleased()),          this, SLOT(moveHeadJoints()));
+    connect(ui->sliderLowerNeckPitch,    SIGNAL(sliderReleased()),          this, SLOT(moveHeadJoints()));
+    connect(ui->sliderNeckYaw,           SIGNAL(sliderReleased()),          this, SLOT(moveHeadJoints()));
 
     //walk
-    connect(ui->btnWalk,                 SIGNAL(clicked()),            this, SLOT(walkSteps()));
-    connect(ui->sliderPelvisHeight,      SIGNAL(sliderReleased()),     this, SLOT(changePelvisHeight()));
-    connect(ui->btnApproveSteps,         SIGNAL(clicked()),            this, SLOT(approveSteps()));
+    connect(ui->btnWalk,                 SIGNAL(clicked()),                 this, SLOT(walkSteps()));
+    connect(ui->sliderPelvisHeight,      SIGNAL(sliderReleased()),          this, SLOT(changePelvisHeight()));
+    connect(ui->btnApproveSteps,         SIGNAL(clicked()),                 this, SLOT(approveSteps()));
 
     //reset robot
-    connect(ui->btnResetRobot,           SIGNAL(clicked()),            this, SLOT(resetRobot()));
+    connect(ui->btnResetRobot,           SIGNAL(clicked()),                 this, SLOT(resetRobot()));
 
 }
 
@@ -506,6 +533,17 @@ void ToughGUI::initToughControllers() {
     //    leftArmPlanner_ = new CartesianPlanner(TOUGH_COMMON_NAMES::LEFT_ENDEFFECTOR_GROUP, TOUGH_COMMON_NAMES::WORLD_TF);
 }
 
+void ToughGUI::resetPointcloud()
+{
+    reset_pointcloud.publish(empty_msg);
+}
+
+void ToughGUI::pausePointcloud()
+{
+    pause_pointcloud.publish(bool_msg);
+    bool_msg.data = !bool_msg.data;
+    ui->btnPausePointcloud->setFlat(bool_msg.data);
+}
 void ToughGUI::getArmState()
 {
     if(jointStateMap_.empty()){
