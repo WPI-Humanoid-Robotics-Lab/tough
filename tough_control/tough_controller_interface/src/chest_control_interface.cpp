@@ -32,6 +32,15 @@ void ChestControlInterface::controlChest(float roll , float pitch , float yaw, f
 void ChestControlInterface::controlChest(geometry_msgs::Quaternion quat, float time, int execution_mode)
 {
     ihmc_msgs::ChestTrajectoryRosMessage msg;
+    generateChestMessage(quat, time, execution_mode, msg);
+
+    // publish the message
+    chestTrajPublisher_.publish(msg);
+
+}
+
+void ChestControlInterface::generateChestMessage(const geometry_msgs::Quaternion &quat,const float time, const int execution_mode, ihmc_msgs::ChestTrajectoryRosMessage &msg){
+
     ihmc_msgs::SO3TrajectoryPointRosMessage data;
 
     data.time = time;
@@ -46,9 +55,6 @@ void ChestControlInterface::controlChest(geometry_msgs::Quaternion quat, float t
 
     msg.frame_information = reference_frame;
     msg.taskspace_trajectory_points.push_back(data);
-
-    // publish the message
-    chestTrajPublisher_.publish(msg);
 
 }
 

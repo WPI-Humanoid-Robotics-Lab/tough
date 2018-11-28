@@ -1,22 +1,12 @@
 #include <tough_controller_interface/gripper_control_interface.h>
 #include <tf/transform_listener.h>
 #include <map>
-#include <boost/assign.hpp>
 
 GripperControlInterface::GripperControlInterface(ros::NodeHandle nh) : ToughControllerInterface(nh){
 
     gripperPublisher_ =
             nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>(control_topic_prefix_ +"/hand_desired_configuration",1,true);
 
-
-    GRIPPER_MODE_NAMES = {
-        {BASIC,"BASIC"},
-        {PINCH,"PINCH"},
-        {WIDE,"WIDE"},
-        {SCISSOR,"SCISSOR"},
-        {HOOK,"HOOK"},
-        {RESET,"RESET"},
-    };
 }
 
 GripperControlInterface::~GripperControlInterface(){
@@ -24,15 +14,17 @@ GripperControlInterface::~GripperControlInterface(){
 }
 
 void GripperControlInterface::controlGripper(const RobotSide side, int configuration){
-
     ihmc_msgs::HandDesiredConfigurationRosMessage msg;
-    msg.hand_desired_configuration = configuration;
-    msg.unique_id = GripperControlInterface::id_++;
-    msg.robot_side = side;
+    generateGripperMessage(side, configuration, msg);
     gripperPublisher_.publish(msg);
 
 }
 
+void GripperControlInterface::generateGripperMessage(const RobotSide side, const int configuration, ihmc_msgs::HandDesiredConfigurationRosMessage &msg){
+    msg.hand_desired_configuration = configuration;
+    msg.unique_id = GripperControlInterface::id_++;
+    msg.robot_side = side;
+}
 
 void GripperControlInterface::closeGripper(const RobotSide side)
 {
@@ -99,9 +91,9 @@ void GripperControlInterface::crush(const RobotSide side)
 
 }
 
-std::string GripperControlInterface::getModeName(const GRIPPER_MODES mode)
+std::string GripperControlInterface::getModeName(const GRIPPER_MODES mode) const
 {
-    return GRIPPER_MODE_NAMES[mode];
+    return GRIPPER_MODE_NAMES.at(mode);
 }
 
 

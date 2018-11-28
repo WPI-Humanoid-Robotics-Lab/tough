@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tough_controller_interface)
 
-set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
+add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs

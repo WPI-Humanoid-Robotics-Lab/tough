@@ -1,35 +1,19 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tough_perception_bringup)
 
-find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
-find_package(catkin REQUIRED COMPONENTS roscpp
-                                        rospy
-                                        geometric_shapes
-                                        cv_bridge
-                                        image_transport
-                                        pcl_conversions
-                                        pcl_ros
-                                        message_filters
-                                        multisense_ros
-                                        tf_conversions
-                                        laser_geometry
-                                        laser_assembler
-                                        geometry_msgs
-                                        sensor_msgs
-                                        std_msgs
-                                        tough_common
-                                        )
-find_package(Qt5Gui)
-find_package(Qt5Core)
-find_package(Qt5Widgets)
-find_package(Qt5Test)
-find_package(Qt5Concurrent)
-find_package(Qt5OpenGL)
+find_package(catkin REQUIRED COMPONENTS tough_filters tough_perception_common )
+
+#find_package(Qt5Gui)
+#find_package(Qt5Core)
+#find_package(Qt5Widgets)
+#find_package(Qt5Test)
+#find_package(Qt5Concurrent)
+#find_package(Qt5OpenGL)
 
 catkin_package(
 #  INCLUDE_DIRS include
-  LIBRARIES tough_perception_bringup
-  CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros laser_assembler tough_common tough_controller_interface
+  LIBRARIES
+  CATKIN_DEPENDS tough_filters tough_perception_common
 #  DEPENDS opencv pcl
 )
 

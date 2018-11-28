@@ -130,23 +130,29 @@ void ArmControlInterface::moveToZeroPose(RobotSide side, float time)
 bool ArmControlInterface::moveArmJoints(const RobotSide side, const std::vector<std::vector<double> > &arm_pose,const float time){
 
     ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
-    arm_traj.joint_trajectory_messages.clear();
+    if(generateArmMessage(side, arm_pose, time, arm_traj)){
+        armTrajectoryPublisher.publish(arm_traj);
+        return true;
+    }
+    return false;
+}
 
-    arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
-    arm_traj.robot_side = side;
-    arm_traj.unique_id = id_++;
+bool ArmControlInterface::generateArmMessage(const RobotSide side, const std::vector<std::vector<double> > &arm_pose, const float time, ihmc_msgs::ArmTrajectoryRosMessage &msg){
+
+    msg.joint_trajectory_messages.clear();
+
+    msg.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
+    msg.robot_side = side;
+    msg.unique_id = id_++;
     for(auto i=arm_pose.begin(); i != arm_pose.end(); i++){
         if(i->size() != NUM_ARM_JOINTS){
             ROS_WARN("Check number of trajectory points");
             return false;
         }
-        appendTrajectoryPoint(arm_traj, time/arm_pose.size(), *i);
+        appendTrajectoryPoint(msg, time/arm_pose.size(), *i);
     }
-
-    armTrajectoryPublisher.publish(arm_traj);
     return true;
 }
-
 
 ///TODO: It might be a good idea to shift this to whole body control message
 /**

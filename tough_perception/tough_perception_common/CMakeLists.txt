@@ -3,13 +3,10 @@ project(tough_perception_common)
 
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
-set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+add_definitions(-std=c++11)
 
 find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
 find_package(PCL 1.7 REQUIRED io)
-
-find_package(Qt5Test)
-find_package(Qt5Concurrent)
 
 find_package(catkin REQUIRED COMPONENTS roscpp
                                         rospy

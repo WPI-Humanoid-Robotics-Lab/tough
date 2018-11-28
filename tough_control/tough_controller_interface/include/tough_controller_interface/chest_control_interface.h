@@ -24,6 +24,7 @@ public:
     ~ChestControlInterface();
     void controlChest(float roll , float pitch , float yaw, float time = 1.0f, int execution_mode=ihmc_msgs::ChestTrajectoryRosMessage::OVERRIDE);
     void controlChest(geometry_msgs::Quaternion quat, float time = 1.0f, int execution_mode=ihmc_msgs::ChestTrajectoryRosMessage::OVERRIDE);
+    void generateChestMessage(const geometry_msgs::Quaternion &quat,const float time,const int execution_mode, ihmc_msgs::ChestTrajectoryRosMessage &msg);
     void getChestOrientation(geometry_msgs::Quaternion &orientation);
 
     virtual bool getJointSpaceState(std::vector<double> &joints, RobotSide side) override;
