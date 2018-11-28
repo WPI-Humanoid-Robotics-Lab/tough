@@ -3,7 +3,7 @@ project(tough_perception_common)
 
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
-set(CMAKE_CXX_FLAGS "-std=c++0x -g -march=native -mno-avx -Werror ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 
 find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
 find_package(PCL 1.7 REQUIRED io)
@@ -38,7 +38,6 @@ catkin_package(
    INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}
    CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros laser_assembler tough_common tough_controller_interface
-   DEPENDS opencv pcl
 )
 
 add_library(${PROJECT_NAME}  src/MultisensePointCloud.cpp
@@ -73,6 +72,13 @@ target_link_libraries(walkway_point_generator ${catkin_LIBRARIES} ${PCL_LIBRARIE
  add_dependencies(laser2point_cloud_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
  target_link_libraries(laser2point_cloud_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
 
+
+## Mark executables and/or libraries for installation
+ install(TARGETS test_lasercloud test_organizedRGBD periodic_snapshotter walkway_point_generator laser2point_cloud_node ${PROJECT_NAME}
+   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ )
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/

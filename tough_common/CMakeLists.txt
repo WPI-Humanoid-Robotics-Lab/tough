@@ -18,7 +18,7 @@ set(SOURCES
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES tough_common
+  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS roscpp urdf tf
 #  DEPENDS system_lib
 )

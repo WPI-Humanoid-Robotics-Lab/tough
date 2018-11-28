@@ -15,7 +15,7 @@ catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES tough_filters
   CATKIN_DEPENDS robot_self_filter roscpp tf
-  DEPENDS system_lib
+  DEPENDS
 )
 
 ###########
@@ -29,11 +29,11 @@ include_directories( ${catkin_INCLUDE_DIRS} include)
 
 add_executable(robot_filter src/robot_filter.cpp)
 add_dependencies(robot_filter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(robot_filter ${catkin_LIBRARIES} tough_common tough_perception_common)
+target_link_libraries(robot_filter ${catkin_LIBRARIES})
 
 add_executable(walkway_filter src/walkway_filter.cpp)
 add_dependencies(walkway_filter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(walkway_filter ${catkin_LIBRARIES} tough_common tough_perception_common)
+target_link_libraries(walkway_filter ${catkin_LIBRARIES})
 
 #############
 ## Install ##

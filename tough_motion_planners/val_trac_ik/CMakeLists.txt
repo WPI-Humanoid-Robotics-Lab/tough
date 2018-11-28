@@ -14,8 +14,8 @@ find_package(orocos_kdl REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS tf trac_ik_lib
-  DEPENDS system_lib orocos_kdl tough_common tough_footstep
+  CATKIN_DEPENDS tf trac_ik_lib tough_common tough_footstep
+  DEPENDS orocos_kdl
 )
 
 include_directories(include)

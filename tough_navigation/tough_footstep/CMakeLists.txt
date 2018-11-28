@@ -88,6 +88,19 @@ install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
   PATTERN ".svn" EXCLUDE)
 
+install(DIRECTORY config
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  PATTERN "*.yaml"
+  PATTERN "*.rviz"
+)
+
+install(DIRECTORY maps
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  PATTERN "*.yaml"
+  PATTERN "*.pgm"
+  PATTERN "*.gif"
+)
+
 #############
 ## Testing ##
 #############
