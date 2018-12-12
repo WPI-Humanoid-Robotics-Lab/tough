@@ -743,7 +743,7 @@ void ToughGUI::updateArmSide(int btnID)
 
 void ToughGUI::resetChestOrientation()
 {
-    chestController_->controlChest(0.0f, 0.0f, 0.0f);
+    chestController_->resetPose();
     getChestState();
 }
 
@@ -757,9 +757,12 @@ void ToughGUI::resetArm()
 void ToughGUI::resetRobot()
 {
     resetChestOrientation();
+    ros::Duration(0.2).sleep();
     armJointController_->moveToDefaultPose(LEFT);
     ros::Duration(0.2).sleep();
     armJointController_->moveToDefaultPose(RIGHT);
+    ros::Duration(0.2).sleep();
+    pelvisHeightController_->controlPelvisHeight(0.717);
     getArmState();
 }
 

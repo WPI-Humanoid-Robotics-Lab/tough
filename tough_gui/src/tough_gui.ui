@@ -317,7 +317,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="tabNudge">
           <attribute name="title">
@@ -539,8 +539,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>443</width>
-                   <height>81</height>
+                   <width>450</width>
+                   <height>90</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -611,8 +611,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>113</width>
-                   <height>81</height>
+                   <width>105</width>
+                   <height>84</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -1462,7 +1462,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1324</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
   </widget>
@@ -1471,11 +1471,11 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
+  <buttongroup name="btnGroupDisplays"/>
   <buttongroup name="btnGroupArm"/>
   <buttongroup name="btnGroupFeet"/>
   <buttongroup name="btnGroupNudge"/>
   <buttongroup name="btnGroupGripper"/>
   <buttongroup name="btnGroupRvizTools"/>
-  <buttongroup name="btnGroupDisplays"/>
  </buttongroups>
 </ui>

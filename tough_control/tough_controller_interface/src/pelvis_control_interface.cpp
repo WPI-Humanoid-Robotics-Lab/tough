@@ -3,7 +3,8 @@
 PelvisControlInterface::PelvisControlInterface(ros::NodeHandle nh):ToughControllerInterface(nh)
 {
     pelvisHeightPublisher_ = nh_.advertise<ihmc_msgs::PelvisHeightTrajectoryRosMessage>(control_topic_prefix_ +"/pelvis_height_trajectory",1,true);
-                                      //    ihmc_msgs/PelvisHeightTrajectoryRosMessage
+
+    homePositionPublisher_ = nh_.advertise<ihmc_msgs::GoHomeRosMessage>(control_topic_prefix_+"/go_home",1,true);
 }
 
 PelvisControlInterface::~PelvisControlInterface()
@@ -42,6 +43,18 @@ void PelvisControlInterface::controlPelvisHeight(float height, float duration)
 
 void PelvisControlInterface::publishPelvisMessage(const ihmc_msgs::PelvisHeightTrajectoryRosMessage &msg) const{
     this->pelvisHeightPublisher_.publish(msg);
+}
+
+void PelvisControlInterface::resetPose(float time)
+{
+    ihmc_msgs::GoHomeRosMessage go_home;
+    go_home.body_part = ihmc_msgs::GoHomeRosMessage::PELVIS;
+
+    go_home.trajectory_time = time;
+    go_home.unique_id = PelvisControlInterface::id_++;
+
+    homePositionPublisher_.publish(go_home);
+
 }
 
 bool PelvisControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)

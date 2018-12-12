@@ -8,6 +8,7 @@
 #include <ihmc_msgs/HandDesiredConfigurationRosMessage.h>
 #include <ihmc_msgs/HandTrajectoryRosMessage.h>
 #include <ihmc_msgs/SE3TrajectoryPointRosMessage.h>
+#include <ihmc_msgs/GoHomeRosMessage.h>
 #include <geometry_msgs/Pose.h>
 #include <trajectory_msgs/JointTrajectory.h>
 #include <tf/transform_listener.h>
@@ -166,8 +167,6 @@ private:
 
 
     const std::vector<double> ZERO_POSE;
-    const std::vector<double> DEFAULT_RIGHT_POSE;
-    const std::vector<double> DEFAULT_LEFT_POSE;
     int NUM_ARM_JOINTS;
     std::vector<std::pair<double, double> > joint_limits_left_;
     std::vector<std::pair<double, double> > joint_limits_right_;
@@ -175,6 +174,7 @@ private:
     ros::Publisher  armTrajectoryPublisher;
     ros::Publisher  handTrajectoryPublisher;
     ros::Publisher  taskSpaceTrajectoryPublisher;
+    ros::Publisher  homePositionPublisher;
     ros::Publisher  markerPub_;
     ros::Subscriber armTrajectorySubscriber;
 

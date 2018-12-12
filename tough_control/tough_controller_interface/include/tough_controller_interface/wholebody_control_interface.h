@@ -15,6 +15,12 @@
 class WholebodyControlInterface : public ToughControllerInterface
 {
 public:
+    enum class TrajectoryType {
+        INVALID,
+        SEVEN_DOF,
+        TEN_DOF
+    };
+
     WholebodyControlInterface(ros::NodeHandle &nh);
     void executeTrajectory(const RobotSide side, const trajectory_msgs::JointTrajectory &traj);
     void executeTrajectory(const RobotSide side, const  moveit_msgs::RobotTrajectory &traj);
@@ -30,6 +36,9 @@ private :
     std::vector<std::pair<double, double> > joint_limits_left_;
     std::vector<std::pair<double, double> > joint_limits_right_;
     bool validateTrajectory(const trajectory_msgs::JointTrajectory &traj);
+    TrajectoryType getTrajectoryType(const trajectory_msgs::JointTrajectory &traj);
+    void jointTrjectoryToArmMessage(const trajectory_msgs::JointTrajectory &traj, ihmc_msgs::ArmTrajectoryRosMessage &msg);
+    void generateArmMessage(RobotSide side, const trajectory_msgs::JointTrajectory traj, const   std::vector<std::string> &left_arm_joint_names, ihmc_msgs::ArmTrajectoryRosMessage & msg);
 };
 
 #endif // WHOLEBODYMANIPULATION_H

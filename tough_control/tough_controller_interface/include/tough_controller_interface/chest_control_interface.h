@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <ihmc_msgs/ChestTrajectoryRosMessage.h>
+#include <ihmc_msgs/GoHomeRosMessage.h>
 #include <tf/tf.h>
 #include <math.h>
 #include <time.h>
@@ -17,6 +18,7 @@ class ChestControlInterface: public ToughControllerInterface {
 private:
 
     ros::Publisher chestTrajPublisher_;
+    ros::Publisher homePositionPublisher_;
 
 public:
 
@@ -26,6 +28,7 @@ public:
     void controlChest(geometry_msgs::Quaternion quat, float time = 1.0f, int execution_mode=ihmc_msgs::ChestTrajectoryRosMessage::OVERRIDE);
     void generateChestMessage(const geometry_msgs::Quaternion &quat,const float time,const int execution_mode, ihmc_msgs::ChestTrajectoryRosMessage &msg);
     void getChestOrientation(geometry_msgs::Quaternion &orientation);
+    void resetPose(float time=0.0f);
 
     virtual bool getJointSpaceState(std::vector<double> &joints, RobotSide side) override;
 

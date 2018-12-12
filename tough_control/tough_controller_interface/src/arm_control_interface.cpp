@@ -5,14 +5,13 @@
 
 //add default pose for both arms. the values of joints are different.
 ArmControlInterface::ArmControlInterface(ros::NodeHandle nh):ToughControllerInterface(nh),
-    ZERO_POSE{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-    DEFAULT_RIGHT_POSE{0.4f,  0.999945f, 0.10014f,    1.30002f, 1.00166f,  0.0f, 0.0f}, // these would be different for different robots... move it elsewhere
-    DEFAULT_LEFT_POSE{ 0.4f, -0.999962f, 0.0999834f, -1.30005f, 0.999766f, 0.0f, 0.0f}
+    ZERO_POSE{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
 {
     id_++;
     armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>(control_topic_prefix_ + "/arm_trajectory", 1,true);
     handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>(control_topic_prefix_ + "/hand_desired_configuration", 1,true);
     taskSpaceTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandTrajectoryRosMessage>(control_topic_prefix_ + "/hand_trajectory", 1, true);
+    homePositionPublisher = nh_.advertise<ihmc_msgs::GoHomeRosMessage>(control_topic_prefix_+"/go_home",1,true);
     markerPub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
 
     rd_->getLeftArmJointLimits(joint_limits_left_);
@@ -84,19 +83,13 @@ void ArmControlInterface::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessa
  */
 void ArmControlInterface::moveToDefaultPose(RobotSide side, float time)
 {
-    ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
-    arm_traj.joint_trajectory_messages.clear();
+    ihmc_msgs::GoHomeRosMessage go_home;
+    go_home.body_part = ihmc_msgs::GoHomeRosMessage::ARM;
+    go_home.robot_side = (int) side;
+    go_home.trajectory_time = time;
+    go_home.unique_id = ArmControlInterface::id_++;
 
-    arm_traj.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
-
-    arm_traj.robot_side = side;
-    arm_traj.unique_id = id_++;
-    if(side == RobotSide::LEFT)
-        appendTrajectoryPoint(arm_traj, time, DEFAULT_LEFT_POSE);
-    else
-        appendTrajectoryPoint(arm_traj, time, DEFAULT_RIGHT_POSE);
-
-    armTrajectoryPublisher.publish(arm_traj);
+    homePositionPublisher.publish(go_home);
 
 }
 

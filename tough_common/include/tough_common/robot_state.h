@@ -58,15 +58,20 @@ public:
 
     bool getTransform(const std::string &frameName, tf::StampedTransform &transform, const std::string &baseFrame=TOUGH_COMMON_NAMES::WORLD_TF);
 
-    bool transformQuaternion(const geometry_msgs::QuaternionStamped &qt_in, geometry_msgs::QuaternionStamped &qt_out,const std::string target_frame="/world");
-    bool transformQuaternion(const geometry_msgs::Quaternion &qt_in, geometry_msgs::Quaternion &qt_out,const std::string &from_frame, const std::string &to_frame="/world");
-    bool transformPoint(const geometry_msgs::PointStamped &pt_in, geometry_msgs::PointStamped &pt_out,const std::string target_frame="/world");
-    bool transformPoint(const geometry_msgs::Point &pt_in, geometry_msgs::Point &pt_out,const std::string &from_frame, const std::string &to_frame="/world");
-    bool transformPose(const geometry_msgs::Pose &pose_in, geometry_msgs::Pose &pose_out,const std::string &from_frame, const std::string &to_frame="/world");
-    bool transformPose(const geometry_msgs::Pose2D &pose_in, geometry_msgs::Pose2D &pose_out,const std::string &from_frame, const std::string &to_frame="/world");
-    bool transformVector(const geometry_msgs::Vector3 &vec_in, geometry_msgs::Vector3 &vec_out,const std::string &from_frame, const std::string &to_frame="/world");
-    bool transformVector(const geometry_msgs::Vector3Stamped &vec_in, geometry_msgs::Vector3Stamped &vec_out,const std::string target_frame="/world");
+    bool transformQuaternion(const geometry_msgs::QuaternionStamped &qt_in, geometry_msgs::QuaternionStamped &qt_out,const std::string target_frame=TOUGH_COMMON_NAMES::WORLD_TF);
+    bool transformQuaternion(const geometry_msgs::Quaternion &qt_in, geometry_msgs::Quaternion &qt_out,const std::string &from_frame, const std::string &to_frame=TOUGH_COMMON_NAMES::WORLD_TF);
+
+    bool transformPoint(const geometry_msgs::PointStamped &pt_in, geometry_msgs::PointStamped &pt_out,const std::string target_frame=TOUGH_COMMON_NAMES::WORLD_TF);
+    bool transformPoint(const geometry_msgs::Point &pt_in, geometry_msgs::Point &pt_out,const std::string &from_frame, const std::string &to_frame=TOUGH_COMMON_NAMES::WORLD_TF);
+
+    bool transformPose(const geometry_msgs::Pose &pose_in, geometry_msgs::Pose &pose_out,const std::string &from_frame, const std::string &to_frame=TOUGH_COMMON_NAMES::WORLD_TF);
+    bool transformPose(const geometry_msgs::Pose2D &pose_in, geometry_msgs::Pose2D &pose_out,const std::string &from_frame, const std::string &to_frame=TOUGH_COMMON_NAMES::WORLD_TF);
+
+    bool transformVector(const geometry_msgs::Vector3 &vec_in, geometry_msgs::Vector3 &vec_out,const std::string &from_frame, const std::string &to_frame=TOUGH_COMMON_NAMES::WORLD_TF);
+    bool transformVector(const geometry_msgs::Vector3Stamped &vec_in, geometry_msgs::Vector3Stamped &vec_out,const std::string target_frame=TOUGH_COMMON_NAMES::WORLD_TF);
+
     bool isGraspped(RobotSide side);
+
     std::vector<float> closeRightGrasp,closeLeftGrasp,openGrasp;
 
 };

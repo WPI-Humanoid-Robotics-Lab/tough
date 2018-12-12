@@ -8,6 +8,9 @@ ChestControlInterface::ChestControlInterface(ros::NodeHandle nh):ToughController
 
     chestTrajPublisher_ =
             nh_.advertise<ihmc_msgs::ChestTrajectoryRosMessage>(control_topic_prefix_ +"/chest_trajectory",1,true);
+
+    homePositionPublisher_ = nh_.advertise<ihmc_msgs::GoHomeRosMessage>(control_topic_prefix_+"/go_home",1,true);
+
 }
 
 ChestControlInterface::~ChestControlInterface()
@@ -63,6 +66,16 @@ void ChestControlInterface::getChestOrientation(geometry_msgs::Quaternion &orien
         geometry_msgs::Pose chest_pose;
         state_informer_->getCurrentPose(rd_->getTorsoFrame(), chest_pose, rd_->getPelvisFrame());
         orientation = chest_pose.orientation;
+}
+
+void ChestControlInterface::resetPose(float time)
+{
+    ihmc_msgs::GoHomeRosMessage go_home;
+    go_home.body_part = ihmc_msgs::GoHomeRosMessage::CHEST;
+    go_home.trajectory_time = time;
+    go_home.unique_id = ChestControlInterface::id_++;
+    homePositionPublisher_.publish(go_home);
+
 }
 
 bool ChestControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)

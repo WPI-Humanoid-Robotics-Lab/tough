@@ -134,7 +134,7 @@ bool HeadControlInterface::getJointSpaceState(std::vector<double> &joints, Robot
 
 bool HeadControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
 {
-
+    return state_informer_->getCurrentPose("/head", pose,fixedFrame);
 }
 
 int HeadControlInterface::getNumNeckJoints() const

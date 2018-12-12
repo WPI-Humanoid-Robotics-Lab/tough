@@ -246,6 +246,7 @@ bool RobotWalker::raiseLeg(RobotSide side, float height,float stepLength)
 {
     ihmc_msgs::FootTrajectoryRosMessage foot;
     ihmc_msgs::SE3TrajectoryPointRosMessage data;
+    ihmc_msgs::FrameInformationRosMessage frameInfo;
 
     ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
     getCurrentStep(side, *current);
@@ -256,14 +257,12 @@ bool RobotWalker::raiseLeg(RobotSide side, float height,float stepLength)
     data.position.y = current->location.y;
     data.position.z = current->location.z+(stepFactor*height);
     data.orientation=current->orientation;
-    data.unique_id=100;
+    data.unique_id=id++;
     data.time=2.0;
     foot.robot_side = side;
     foot.execution_mode=0; //OVERRIDE
-    foot.unique_id=101;
+    foot.unique_id=id++;
     foot.taskspace_trajectory_points.push_back(data);
-
-
 
     //  take step forward
     // convert point to pelvis frame
@@ -274,36 +273,12 @@ bool RobotWalker::raiseLeg(RobotSide side, float height,float stepLength)
     pt_in.point.z=current->location.z;
     pt_in.header.frame_id=TOUGH_COMMON_NAMES::WORLD_TF;
     current_state_->transformPoint(pt_in,pt_out, rd_->getPelvisFrame());
-//    try{
-
-//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::PELVIS_TF,TOUGH_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPoint(TOUGH_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
-
-//    }
-//    catch (tf::TransformException ex){
-//        ROS_WARN("%s",ex.what());
-//        ros::spinOnce();
-//        return false;
-//    }
 
     // add value of step length to x axis
     pt_out.point.x +=stepLength;
 
     // convert back to world frame
     current_state_->transformPoint(pt_out, pt_out);
-
-//    try{
-
-//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF,TOUGH_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPoint(TOUGH_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
-
-//    }
-//    catch (tf::TransformException ex){
-//        ROS_WARN("%s",ex.what());
-//        ros::spinOnce();
-//        return false;
-//    }
-
 
     // add to data
     data.position.x = pt_out.point.x;
@@ -319,6 +294,11 @@ bool RobotWalker::raiseLeg(RobotSide side, float height,float stepLength)
     data.unique_id=300;
     data.time=6.0;
     //    foot.taskspace_trajectory_points.push_back(data);
+
+    frameInfo.data_reference_frame_id = rd_->getWorldFrameHash();
+    frameInfo.trajectory_reference_frame_id = rd_->getWorldFrameHash();
+
+    foot.frame_information = frameInfo;
 
     nudgestep_pub_.publish(foot);
 
@@ -479,18 +459,6 @@ bool RobotWalker::placeLeg(RobotSide side, float offset)
     pt_in.header.frame_id=TOUGH_COMMON_NAMES::WORLD_TF;
     current_state_->transformPoint(pt_in,pt_out, rd_->getPelvisFrame());
 
-//    try{
-
-//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::PELVIS_TF,TOUGH_COMMON_NAMES::WORLD_TF, ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPoint(TOUGH_COMMON_NAMES::PELVIS_TF, pt_in, pt_out);
-
-//    }
-//    catch (tf::TransformException ex){
-//        ROS_WARN("%s",ex.what());
-//        ros::spinOnce();
-//        return false;
-//    }
-
     // convert back to world frame
     if(side ==LEFT)
     {
@@ -501,36 +469,21 @@ bool RobotWalker::placeLeg(RobotSide side, float offset)
     pt_out.point.z+=offset;
     current_state_->transformPoint(pt_out, pt_out);
 
-//    try{
-
-//        tf_listener_.waitForTransform(TOUGH_COMMON_NAMES::WORLD_TF,TOUGH_COMMON_NAMES::PELVIS_TF,ros::Time(0),ros::Duration(2));
-//        tf_listener_.transformPoint(TOUGH_COMMON_NAMES::WORLD_TF, pt_out, pt_out);
-
-//    }
-//    catch (tf::TransformException ex){
-//        ROS_WARN("%s",ex.what());
-//        ros::spinOnce();
-//        return false;
-//    }
-
-
     // add to data
 
-    data.position.x = pt_out.point.x;
-    data.position.y = pt_out.point.y;
-    data.position.z = pt_out.point.z;
+    data.position = pt_out.point;
     data.orientation=current->orientation;
 
     std::cout<<"point x "<<data.position.x<<"\n";
     std::cout<<"point y "<<data.position.y<<"\n";
     std::cout<<"point z "<<data.position.z<<"\n";
 
-    data.unique_id=900;
+    data.unique_id=id++;
     data.time=3.0;
 
     foot.robot_side = side;
     foot.execution_mode=0; //OVERRIDE
-    foot.unique_id=391;
+    foot.unique_id=id++;
     foot.taskspace_trajectory_points.push_back(data);
 
     nudgestep_pub_.publish(foot);
@@ -641,26 +594,19 @@ ihmc_msgs::FootstepDataRosMessage::Ptr RobotWalker::getOffsetStepWRTPelvis(int s
 {
 
     ihmc_msgs::FootstepDataRosMessage::Ptr next(new ihmc_msgs::FootstepDataRosMessage());
-    geometry_msgs::Point currentWorldLocation,currentPelvisLocation;
+    geometry_msgs::Point currentFootPosition;
 
     // get the current step
     getCurrentStep(side, *next);
-    currentWorldLocation.x=next->location.x;
-    currentWorldLocation.y=next->location.y;
-    currentWorldLocation.z=next->location.z;
 
     // transform the step to pelvis
-    current_state_->transformPoint(currentWorldLocation,currentPelvisLocation,TOUGH_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
+    current_state_->transformPoint(next->location ,currentFootPosition,TOUGH_COMMON_NAMES::WORLD_TF,rd_->getPelvisFrame());
     // add the offsets wrt to pelvis
-    currentPelvisLocation.x+=x;
-    currentPelvisLocation.y+=y;
-    // tranform back the point to plevis
-    current_state_->transformPoint(currentPelvisLocation,currentWorldLocation,rd_->getPelvisFrame(),TOUGH_COMMON_NAMES::WORLD_TF);
+    currentFootPosition.x+=x;
+    currentFootPosition.y+=y;
+    // tranform back the point to world coordinates
+    current_state_->transformPoint(currentFootPosition,next->location,rd_->getPelvisFrame(),TOUGH_COMMON_NAMES::WORLD_TF);
 
-    // update the new location
-    next->location.x=currentWorldLocation.x;
-    next->location.y=currentWorldLocation.y;
-    next->location.z=currentWorldLocation.z;
     next->swing_height = swing_height_;
 
     // return it

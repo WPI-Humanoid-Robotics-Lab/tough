@@ -9,7 +9,7 @@ WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle &nh):ToughC
     rd_->getLeftArmJointLimits(joint_limits_left_);
     rd_->getRightArmJointLimits(joint_limits_right_);
 
-    // reduce the joint limits by 1cm to avoid excceeding limits at higher precision of float
+    // reduce the joint limits by 1cm to avoid exceeeding limits at higher precision of float
     for (size_t i = 0; i < joint_limits_left_.size(); i++ ){
         joint_limits_left_[i] = {joint_limits_left_[i].first - 0.01, joint_limits_left_[i].second - 0.01};
         joint_limits_right_[i] = {joint_limits_right_[i].first - 0.01, joint_limits_right_[i].second - 0.01};
@@ -23,8 +23,10 @@ void WholebodyControlInterface::executeTrajectory(const RobotSide side, const  m
 
 bool WholebodyControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)
 {
+    joints.clear();
     state_informer_->getJointPositions(joints);
-    return true;
+
+    return !joints.empty();
 }
 
 bool WholebodyControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
@@ -74,11 +76,16 @@ void WholebodyControlInterface::executeTrajectory(const RobotSide side, const tr
      * The last seven joints correspond to the joint angles in the arm
      * */
 
+    ArmControlInterface arm(nh_);
+
+
     // Arm
     if(side == LEFT)
     {
         wholeBodyMsg.left_arm_trajectory_message.unique_id=wholeBodyMsg.unique_id;
         leftArmMsg(wholeBodyMsg,traj,joint_limits_left_);
+        //        arm.generateArmMessage(side, poses, traj.points.at(0).time_from_start , wholeBodyMsg.left_arm_trajectory_message);
+        //generate arm message
     }
     else
     {
@@ -185,4 +192,61 @@ bool WholebodyControlInterface::validateTrajectory(const trajectory_msgs::JointT
     }
     return true;
 }
+
+WholebodyControlInterface::TrajectoryType WholebodyControlInterface::getTrajectoryType(const trajectory_msgs::JointTrajectory &traj)
+{
+    TrajectoryType type = TrajectoryType::INVALID;
+
+    // size of position vector inside every trajectory point should be either 7 or 10.
+    for (trajectory_msgs::JointTrajectoryPoint point : traj.points){
+        if (point.positions.size() == 7 && (type == TrajectoryType::SEVEN_DOF || type == TrajectoryType::INVALID)){
+            type =  TrajectoryType::SEVEN_DOF ;
+        }
+        else if (point.positions.size() == 10 && (type == TrajectoryType::TEN_DOF || type == TrajectoryType::INVALID)) {
+            type =  WholebodyControlInterface::TrajectoryType::TEN_DOF ;
+        }
+        else {
+            return TrajectoryType::INVALID;
+        }
+    }
+    return type;
+}
+
+void WholebodyControlInterface::jointTrjectoryToArmMessage(const trajectory_msgs::JointTrajectory &traj, ihmc_msgs::ArmTrajectoryRosMessage &msg)
+{
+    
+    // find left arm starting index
+    std::vector<std::string> left_arm_joint_names;
+    rd_->getLeftArmJointNames(left_arm_joint_names);
+    
+
+}
+
+void WholebodyControlInterface::generateArmMessage(RobotSide side, const trajectory_msgs::JointTrajectory traj, const   std::vector<std::string> &left_arm_joint_names, ihmc_msgs::ArmTrajectoryRosMessage & msg)
+{
+    auto it = std::find(traj.joint_names.begin(), traj.joint_names.end(), left_arm_joint_names.at(0));
+    int first = std::distance(traj.joint_names.begin(), it);
+    if(it == traj.joint_names.end()){
+        // left arm joints dont exist in the trajectory.
+    }
+    else {
+        auto it_temp = it;
+        for (auto arm_joint_it = left_arm_joint_names.begin(); arm_joint_it != left_arm_joint_names.end(); ++arm_joint_it, ++it_temp)
+        {
+            if(*it_temp != *arm_joint_it) {
+                // joints in trajectory are not in the expected sequence.
+            }
+        }
+
+        // joint names exist in trajectory and they are in expected sequence
+        std::vector<std::vector<double> > arm_pose ;
+
+        for(int index = first; index < left_arm_joint_names.size(); ++index)
+        {
+            // check size of positions here
+            arm_pose.push_back(traj.points.at(index).positions);
+        }
+    }
+}
+
 
