@@ -23,7 +23,7 @@ TOUGH library provides C++ API to humanoid robots supported by IHMC controllers.
   - [arm example](https://github.com/WPI-Humanoid-Robotics-Lab/tough/blob/kinetic-0.11.0/tough_examples/src/control_examples/arm_example.cpp)
   - [arm navigation example](https://github.com/WPI-Humanoid-Robotics-Lab/tough/blob/kinetic-0.11.0/tough_examples/src/control_examples/arm_navigation_example.cpp)
   - [chest navigation example](https://github.com/WPI-Humanoid-Robotics-Lab/tough/blob/kinetic-0.11.0/tough_examples/src/control_examples/chest_navigation_example.cpp)
-  - [gripper control example](https://github.com/WPI-Humanoid-Robotics-Lab/tough/blob/kinetic-0.11.0/tough_examples/src/control_examples/gripper_control_example.cpp)
+  - [gripper control example](https://github.com/WPI-Humanoid-Robotics-Lab/tough/wiki/GripperController-example)
   - [head navigation example](https://github.com/WPI-Humanoid-Robotics-Lab/tough/blob/kinetic-0.11.0/tough_examples/src/control_examples/head_navigation_example.cpp)
   - [interactive arm example](https://github.com/WPI-Humanoid-Robotics-Lab/tough/blob/kinetic-0.11.0/tough_examples/src/control_examples/interactive_arm_example.cpp)
   - [neck navigation example](https://github.com/WPI-Humanoid-Robotics-Lab/tough/blob/kinetic-0.11.0/tough_examples/src/control_examples/neck_navigation_example.cpp)
