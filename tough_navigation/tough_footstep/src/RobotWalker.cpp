@@ -18,10 +18,11 @@ RobotWalker::RobotWalker(ros::NodeHandle nh,double InTransferTime ,double InSwin
     rd_ = RobotDescription::getRobotDescription(nh_);
     const std::string robot_name = rd_->getRobotName();
 
-    this->footsteps_pub_   = nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/"+robot_name+"/control/footstep_list",1,true);
-    this->nudgestep_pub_   = nh_.advertise<ihmc_msgs::FootTrajectoryRosMessage>("/ihmc_ros/"+robot_name+"/control/foot_trajectory",1,true);
-    this->loadeff_pub      = nh_.advertise<ihmc_msgs::EndEffectorLoadBearingRosMessage>("/ihmc_ros/"+robot_name+"/control/end_effector_load_bearing",1,true);
-    this->footstep_status_ = nh_.subscribe("/ihmc_ros/"+robot_name+"/output/footstep_status", 20,&RobotWalker::footstepStatusCB, this);
+    this->footsteps_pub_        = nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>("/ihmc_ros/"+robot_name+"/control/footstep_list",1,true);
+    this->nudgestep_pub_        = nh_.advertise<ihmc_msgs::FootTrajectoryRosMessage>("/ihmc_ros/"+robot_name+"/control/foot_trajectory",1,true);
+    this->loadeff_pub           = nh_.advertise<ihmc_msgs::EndEffectorLoadBearingRosMessage>("/ihmc_ros/"+robot_name+"/control/end_effector_load_bearing",1,true);
+    this->abort_footsteps_pub_  = nh_.advertise<ihmc_msgs::AbortWalkingRosMessage>("/ihmc_ros/"+robot_name+"/control/abort_walking",1,true);
+    this->footstep_status_      = nh_.subscribe("/ihmc_ros/"+robot_name+"/output/footstep_status", 20,&RobotWalker::footstepStatusCB, this);
 
     transfer_time_  = InTransferTime;
     swing_time_     = InSwingTime;
@@ -310,6 +311,7 @@ bool RobotWalker::nudgeFoot(RobotSide side, float distance)
 {
     ihmc_msgs::FootTrajectoryRosMessage foot;
     ihmc_msgs::SE3TrajectoryPointRosMessage data;
+    ihmc_msgs::FrameInformationRosMessage frameInfo;
 
     ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
     getCurrentStep(side, *current);
@@ -366,6 +368,11 @@ bool RobotWalker::nudgeFoot(RobotSide side, float distance)
     foot.execution_mode=0; //OVERRIDE
     foot.unique_id=321;
     foot.taskspace_trajectory_points.push_back(data);
+
+    frameInfo.data_reference_frame_id = rd_->getWorldFrameHash();
+    frameInfo.trajectory_reference_frame_id = rd_->getWorldFrameHash();
+
+    foot.frame_information = frameInfo;
 
     nudgestep_pub_.publish(foot);
 
@@ -549,6 +556,13 @@ bool RobotWalker::getFootstep(const geometry_msgs::Pose2D &goal,ihmc_msgs::Foots
         return true;
     }
     return false;
+}
+
+void RobotWalker::abortWalk()
+{
+    ihmc_msgs::AbortWalkingRosMessage msg;
+    msg.unique_id = 1;
+    abort_footsteps_pub_.publish(msg);
 }
 
 double RobotWalker::getSwingHeight() const

@@ -229,6 +229,7 @@ void ToughGUI::initActionsConnections()
     connect(ui->btnWalk,                 SIGNAL(clicked()),                 this, SLOT(walkSteps()));
     connect(ui->sliderPelvisHeight,      SIGNAL(sliderReleased()),          this, SLOT(changePelvisHeight()));
     connect(ui->btnApproveSteps,         SIGNAL(clicked()),                 this, SLOT(approveSteps()));
+    connect(ui->btnAbortWalk,            SIGNAL(clicked()),                 this, SLOT(abortSteps()));
 
     //reset robot
     connect(ui->btnResetRobot,           SIGNAL(clicked()),                 this, SLOT(resetRobot()));
@@ -473,6 +474,9 @@ void ToughGUI::initDefaultValues() {
     ui->lineEditNumSteps->setText("2");
     ui->lineEditXOffset->setText("0.3");
     ui->lineEditYOffset->setText("0.0");
+    ui->lineEditSwingTime->setText(QString::number(swingTime_));
+    ui->lineEditTransferTime->setText(QString::number(transferTime_));
+    ui->lineEditSwingHeight->setText(QString::number(swingHeight_));
 
     //check the right foot start button
     ui->radioRightFoot->setChecked(true);
@@ -512,7 +516,10 @@ void ToughGUI::initToughControllers() {
     pelvisHeightController_ = new PelvisControlInterface(nh_);
 
     //create walking controller object
-    walkingController_ = new RobotWalker(nh_, 1.0, 1.0, 0, 0.18);
+    swingTime_ = 1.0f;
+    transferTime_ = 1.0f;
+    swingHeight_ = 0.18f;
+    walkingController_ = new RobotWalker(nh_, transferTime_, swingTime_, 0, swingHeight_);
 
     //create arm joint controller object
     armJointController_ = new ArmControlInterface(nh_);
@@ -1131,14 +1138,35 @@ void ToughGUI::walkSteps()
     int numOfSteps = ui->lineEditNumSteps->text().toInt();
     float xOffset = ui->lineEditXOffset->text().toFloat();
     float yOffset = ui->lineEditYOffset->text().toFloat();
+    float swingTime = ui->lineEditSwingTime->text().toFloat();
+    float transferTime = ui->lineEditTransferTime->text().toFloat();
+    float swingHeight = ui->lineEditSwingHeight->text().toFloat();
     if(walkingController_ != nullptr){
+
+        if (swingTime != swingTime_ || transferTime != transferTime_){
+            walkingController_->setWalkParams(transferTime, swingTime, 0);
+            swingTime_ = swingTime;
+            transferTime_ = transferTime;
+        }
+
+        if (swingHeight != swingHeight_) {
+            walkingController_->setSwingHeight(swingHeight);
+            swingHeight_ = swingHeight;
+        }
+
         walkingController_->walkNStepsWRTPelvis(numOfSteps, xOffset, yOffset, false, side, false);
     }
 }
 
-void ToughGUI::approveSteps(){
+void ToughGUI::approveSteps()
+{
     std_msgs::Empty msg;
     approveStepsPub_.publish(msg);
+}
+
+void ToughGUI::abortSteps()
+{
+    walkingController_->abortWalk();
 }
 void ToughGUI::changePelvisHeight(){
 

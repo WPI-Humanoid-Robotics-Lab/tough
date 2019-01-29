@@ -114,6 +114,7 @@ private Q_SLOTS:
 
     void changePelvisHeight();
     void walkSteps();
+    void abortSteps();
     void approveSteps();
     void moveChestJoints();
     void moveHeadJoints();
@@ -242,6 +243,11 @@ private:
 
   bool flipImage_;
   QLabel* status_label_;
+
+  //Step params
+  float swingTime_;
+  float transferTime_;
+  float swingHeight_;
 
   // joint limits
   float CHEST_ROLL_MAX = 14.61;

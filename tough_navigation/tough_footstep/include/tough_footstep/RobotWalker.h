@@ -11,6 +11,7 @@
 #include "ihmc_msgs/FootstepStatusRosMessage.h"
 #include "ihmc_msgs/FootTrajectoryRosMessage.h"
 #include "ihmc_msgs/WholeBodyTrajectoryRosMessage.h"
+#include "ihmc_msgs/AbortWalkingRosMessage.h"
 #include<ihmc_msgs/EndEffectorLoadBearingRosMessage.h>
 #include <geometry_msgs/TransformStamped.h>
 #include "std_msgs/String.h"
@@ -83,7 +84,7 @@ public:
      * @param InMode            execution mode defines if steps are to be queued with previous steps or override and start a walking message. Only Override is supported in this version.
      * @todo create separate messages for each of the parameters.
      */
-    inline void setWalkParms(float InTransferTime,float InSwingTime, int InMode)
+    inline void setWalkParams(float InTransferTime,float InSwingTime, int InMode)
     {
         this->transfer_time_  = InTransferTime;
         this->swing_time_     = InSwingTime;
@@ -197,6 +198,10 @@ public:
      * @return
      */
     bool getFootstep(const geometry_msgs::Pose2D &goal,ihmc_msgs::FootstepDataListRosMessage &list);
+    /**
+     * @brief abortWalk aborts the executing footsteps
+     */
+    void abortWalk();
 
 private:
     RobotStateInformer *current_state_;
@@ -206,7 +211,7 @@ private:
     int                         execution_mode_, step_counter_;
     ros::NodeHandle             nh_;
     ros::Time                   cbTime_;
-    ros::Publisher              footsteps_pub_ ,nudgestep_pub_,loadeff_pub;
+    ros::Publisher              footsteps_pub_ ,nudgestep_pub_,loadeff_pub, abort_footsteps_pub_;
     ros::Subscriber             footstep_status_ ;
     ros::ServiceClient          footstep_client_ ;
     std_msgs::String            right_foot_frame_,left_foot_frame_;

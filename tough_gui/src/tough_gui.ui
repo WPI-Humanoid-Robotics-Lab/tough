@@ -539,8 +539,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>450</width>
-                   <height>90</height>
+                   <width>127</width>
+                   <height>84</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -1024,17 +1024,44 @@
               <bool>true</bool>
              </property>
              <layout class="QGridLayout" name="gridLayout_14">
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_17">
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_22">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
                 <property name="text">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Lateral Distance&lt;br/&gt;(y-offset)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>Starting foot:</string>
                 </property>
                </widget>
               </item>
-              <item row="3" column="1">
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="lineEditNumSteps">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="inputMethodHints">
+                 <set>Qt::ImhDigitsOnly</set>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_13">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>No. of steps:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="3">
+               <widget class="QPushButton" name="btnAbortWalk">
+                <property name="text">
+                 <string>Abort Walking</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1" colspan="5">
                <widget class="QWidget" name="btnGroupWalkFoot" native="true">
                 <property name="enabled">
                  <bool>true</bool>
@@ -1069,6 +1096,23 @@
                 </layout>
                </widget>
               </item>
+              <item row="4" column="0">
+               <widget class="QPushButton" name="btnWalk">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Walk steps</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QPushButton" name="btnApproveSteps">
+                <property name="text">
+                 <string>Approve Steps</string>
+                </property>
+               </widget>
+              </item>
               <item row="1" column="1">
                <widget class="QLineEdit" name="lineEditXOffset">
                 <property name="enabled">
@@ -1076,46 +1120,6 @@
                 </property>
                 <property name="inputMethodHints">
                  <set>Qt::ImhDigitsOnly</set>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QLineEdit" name="lineEditYOffset">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="inputMethodHints">
-                 <set>Qt::ImhDigitsOnly</set>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="lineEditNumSteps">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="inputMethodHints">
-                 <set>Qt::ImhDigitsOnly</set>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_13">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>No. of steps:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="label_22">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Starting foot:</string>
                 </property>
                </widget>
               </item>
@@ -1133,20 +1137,65 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
-              <item row="4" column="0">
-               <widget class="QPushButton" name="btnWalk">
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_17">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
                 <property name="text">
-                 <string>Walk steps</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Lateral Distance&lt;br/&gt;(y-offset)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
-              <item row="4" column="1">
-               <widget class="QPushButton" name="btnApproveSteps">
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="lineEditYOffset">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="inputMethodHints">
+                 <set>Qt::ImhDigitsOnly</set>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QLabel" name="labelTransferTime">
                 <property name="text">
-                 <string>Approve Steps</string>
+                 <string>Transfer Time</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3" colspan="3">
+               <widget class="QLineEdit" name="lineEditTransferTime">
+                <property name="inputMethodHints">
+                 <set>Qt::ImhDigitsOnly</set>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLabel" name="labelSwingTime">
+                <property name="text">
+                 <string>Swing Time</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="3" colspan="3">
+               <widget class="QLineEdit" name="lineEditSwingTime">
+                <property name="inputMethodHints">
+                 <set>Qt::ImhDigitsOnly</set>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QLabel" name="labelSwingHeight">
+                <property name="text">
+                 <string>Swing Height</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="3" colspan="3">
+               <widget class="QLineEdit" name="lineEditSwingHeight">
+                <property name="inputMethodHints">
+                 <set>Qt::ImhDigitsOnly</set>
                 </property>
                </widget>
               </item>
@@ -1471,11 +1520,11 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
+  <buttongroup name="btnGroupRvizTools"/>
+  <buttongroup name="btnGroupGripper"/>
+  <buttongroup name="btnGroupNudge"/>
+  <buttongroup name="btnGroupFeet"/>
   <buttongroup name="btnGroupDisplays"/>
   <buttongroup name="btnGroupArm"/>
-  <buttongroup name="btnGroupFeet"/>
-  <buttongroup name="btnGroupNudge"/>
-  <buttongroup name="btnGroupGripper"/>
-  <buttongroup name="btnGroupRvizTools"/>
  </buttongroups>
 </ui>
