@@ -39,6 +39,7 @@ public:
     RobotStateInformer(RobotStateInformer const&)   = delete;
     void operator=(RobotStateInformer const&)       = delete;
 
+    void getJointStateMessage(sensor_msgs::JointState& jointState);
     void getJointPositions(std::vector<double> &positions);
     bool getJointPositions(const std::string &paramName, std::vector<double> &positions);
 

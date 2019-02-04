@@ -30,6 +30,22 @@ RobotStateInformer::~RobotStateInformer(){
     jointStateSub_.shutdown();
 }
 
+void RobotStateInformer::getJointStateMessage(sensor_msgs::JointState &jointState)
+{
+    jointState.name.clear();
+    jointState.position.clear();
+    jointState.velocity.clear();
+    jointState.effort.clear();
+    std::lock_guard<std::mutex> guard(currentStateMutex_);
+    for (auto it = currentState_.begin(); it != currentState_.end(); ++it){
+        jointState.name.push_back(it->first);
+        jointState.position.push_back(it->second.position);
+        jointState.velocity.push_back(it->second.velocity);
+        jointState.effort.push_back(it->second.effort);
+    }
+    jointState.header = std_msgs::Header();
+}
+
 void RobotStateInformer::jointStateCB(const sensor_msgs::JointStatePtr msg){
     std::lock_guard<std::mutex> guard(currentStateMutex_);
     for(size_t i = 0; i < msg->name.size(); ++i){
