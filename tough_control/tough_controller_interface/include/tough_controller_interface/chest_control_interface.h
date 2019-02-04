@@ -26,7 +26,10 @@ public:
     ~ChestControlInterface();
     void controlChest(float roll , float pitch , float yaw, float time = 1.0f, int execution_mode=ihmc_msgs::ChestTrajectoryRosMessage::OVERRIDE);
     void controlChest(geometry_msgs::Quaternion quat, float time = 1.0f, int execution_mode=ihmc_msgs::ChestTrajectoryRosMessage::OVERRIDE);
-    void generateChestMessage(const geometry_msgs::Quaternion &quat,const float time,const int execution_mode, ihmc_msgs::ChestTrajectoryRosMessage &msg);
+    void executeMessage(const ihmc_msgs::ChestTrajectoryRosMessage &msg);
+    void generateMessage(const geometry_msgs::Quaternion &quat,const float time,const int execution_mode, ihmc_msgs::ChestTrajectoryRosMessage &msg);
+    void generateMessage(const std::vector<geometry_msgs::Quaternion> &quats,const float time,const int execution_mode, ihmc_msgs::ChestTrajectoryRosMessage &msg);
+    void generateMessage(const std::vector<geometry_msgs::Quaternion> &quats,const std::vector<float> &timeVec,const int execution_mode, ihmc_msgs::ChestTrajectoryRosMessage &msg);
     void getChestOrientation(geometry_msgs::Quaternion &orientation);
     void resetPose(float time=0.0f);
 

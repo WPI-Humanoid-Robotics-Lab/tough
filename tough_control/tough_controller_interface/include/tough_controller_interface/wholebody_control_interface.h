@@ -30,6 +30,9 @@ public:
     virtual bool getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame=TOUGH_COMMON_NAMES::WORLD_TF) override;
 private :
     ros::Publisher m_wholebodyPub;
+
+    ChestControlInterface chestController_;
+
     void rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<double, double> > joint_limits_);
     void leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj, std::vector<std::pair<double, double> > joint_limits_);
     void chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj);
@@ -39,6 +42,7 @@ private :
     TrajectoryType getTrajectoryType(const trajectory_msgs::JointTrajectory &traj);
     void jointTrjectoryToArmMessage(const trajectory_msgs::JointTrajectory &traj, ihmc_msgs::ArmTrajectoryRosMessage &msg);
     void generateArmMessage(RobotSide side, const trajectory_msgs::JointTrajectory traj, const   std::vector<std::string> &left_arm_joint_names, ihmc_msgs::ArmTrajectoryRosMessage & msg);
+    void generateWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage &wholeBodyMsg, const trajectory_msgs::JointTrajectory &traj);
 };
 
 #endif // WHOLEBODYMANIPULATION_H

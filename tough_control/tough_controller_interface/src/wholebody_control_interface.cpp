@@ -1,7 +1,7 @@
 #include "tough_controller_interface/wholebody_control_interface.h"
 
 
-WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle &nh):ToughControllerInterface(nh)
+WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle &nh):ToughControllerInterface(nh), chestController_(nh)
 {
 
     m_wholebodyPub = nh_.advertise<ihmc_msgs::WholeBodyTrajectoryRosMessage>(control_topic_prefix_ + "/whole_body_trajectory", 10, true);
@@ -37,10 +37,14 @@ bool WholebodyControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, Rob
 void WholebodyControlInterface::executeTrajectory(const RobotSide side, const trajectory_msgs::JointTrajectory &traj)
 {
 
-    if(!validateTrajectory(traj)){
-        return;
-    }
+    //    if(!validateTrajectory(traj)){
+    //        return;
+    //    }
     ihmc_msgs::WholeBodyTrajectoryRosMessage wholeBodyMsg;
+    ihmc_msgs::FrameInformationRosMessage frameInfo;
+
+    frameInfo.data_reference_frame_id = rd_->getPelvisZUPFrameHash();
+    frameInfo.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash();
 
     //Solving for side conflicts
     wholeBodyMsg.left_arm_trajectory_message.robot_side = LEFT;
@@ -70,40 +74,93 @@ void WholebodyControlInterface::executeTrajectory(const RobotSide side, const tr
     wholeBodyMsg.left_hand_trajectory_message.unique_id=0;//wholeBodyMsg.unique_id;
     wholeBodyMsg.right_hand_trajectory_message.unique_id=0;//wholeBodyMsg.unique_id;
 
+    wholeBodyMsg.chest_trajectory_message.frame_information = frameInfo;
+    wholeBodyMsg.left_foot_trajectory_message.frame_information = frameInfo;
+    wholeBodyMsg.right_foot_trajectory_message.frame_information = frameInfo;
+    wholeBodyMsg.pelvis_trajectory_message.frame_information = frameInfo;
+    wholeBodyMsg.left_hand_trajectory_message.frame_information = frameInfo;
+    wholeBodyMsg.right_hand_trajectory_message.frame_information = frameInfo;
+
+
     /*
      * While using both the chest and arm together, the chain contains 10 joints from the pelvis to palm
      * The first three joints correspond to chest yaw, chest pitch and chest roll
      * The last seven joints correspond to the joint angles in the arm
      * */
 
-    ArmControlInterface arm(nh_);
+//    ArmControlInterface arm(nh_);
 
 
-    // Arm
-    if(side == LEFT)
-    {
-        wholeBodyMsg.left_arm_trajectory_message.unique_id=wholeBodyMsg.unique_id;
-        leftArmMsg(wholeBodyMsg,traj,joint_limits_left_);
-        //        arm.generateArmMessage(side, poses, traj.points.at(0).time_from_start , wholeBodyMsg.left_arm_trajectory_message);
-        //generate arm message
-    }
-    else
-    {
-        wholeBodyMsg.right_arm_trajectory_message.unique_id=wholeBodyMsg.unique_id;
-        rightArmMsg(wholeBodyMsg,traj,joint_limits_right_);
-    }
+//    // Arm
+//    if(side == LEFT)
+//    {
+//        wholeBodyMsg.left_arm_trajectory_message.unique_id=wholeBodyMsg.unique_id;
+//        leftArmMsg(wholeBodyMsg,traj,joint_limits_left_);
+//        //        arm.generateArmMessage(side, poses, traj.points.at(0).time_from_start , wholeBodyMsg.left_arm_trajectory_message);
+//        //generate arm message
+//    }
+//    else
+//    {
+//        wholeBodyMsg.right_arm_trajectory_message.unique_id=wholeBodyMsg.unique_id;
+//        rightArmMsg(wholeBodyMsg,traj,joint_limits_right_);
+//    }
 
-    // Chest
-    chestMsg(wholeBodyMsg,traj);
-
+//    // Chest
+//    chestMsg(wholeBodyMsg,traj);
+    generateWholebodyMessage(wholeBodyMsg, traj);
     m_wholebodyPub.publish(wholeBodyMsg);
     ROS_INFO("Published whole body msg");
     ros::Duration(1).sleep();
 }
 
+void WholebodyControlInterface::generateWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage &wholeBodyMsg, const trajectory_msgs::JointTrajectory &traj){
+    std::vector<std::string> left_arm_joint_names;
+    std::vector<std::string> right_arm_joint_names;
+
+    std::vector<std::pair<double, double>> left_arm_joint_limits;
+    std::vector<std::pair<double, double>> right_arm_joint_limits;
+
+    rd_->getLeftArmJointNames(left_arm_joint_names);
+    rd_->getRightArmJointNames(right_arm_joint_names);
+
+    rd_->getLeftArmJointLimits(left_arm_joint_limits);
+    rd_->getRightArmJointLimits(right_arm_joint_limits);
+
+    TrajectoryType traj_type ;
+    int armIndex;
+    // if 10 DOF, first 3 are chest and remaining are arm
+
+    if (traj.joint_names.size() == 10) {
+        traj_type = TrajectoryType::TEN_DOF;
+        chestMsg(wholeBodyMsg, traj);
+        armIndex = 3;
+
+    }
+    else if(traj.joint_names.size() == 7){
+        traj_type = TrajectoryType::SEVEN_DOF;
+        armIndex = 0;
+    }
+    else {
+        traj_type = TrajectoryType::INVALID;
+        return;
+    }
+
+    // only check the first joint and assume that planner is configured correctly!!!
+    if (traj.joint_names.at(armIndex) == left_arm_joint_names.at(0)) {
+        //generate left arm message
+        leftArmMsg(wholeBodyMsg,traj, left_arm_joint_limits);
+    }
+    else if (traj.joint_names.at(armIndex) == right_arm_joint_names.at(0)) {
+        //generate right arm message
+        rightArmMsg(wholeBodyMsg, traj, right_arm_joint_limits);
+    }
+
+}
+
 void WholebodyControlInterface::leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<double, double> > joint_limits_)
 {
     msg.left_arm_trajectory_message.joint_trajectory_messages.resize(7);
+    msg.left_arm_trajectory_message.unique_id = id_++;
     for(int trajPointNumber = 0; trajPointNumber < traj.points.size(); trajPointNumber++){
         for (int jointNumber = 3; jointNumber < 10; ++jointNumber) {
             ihmc_msgs::TrajectoryPoint1DRosMessage ihmc_pointMsg;
@@ -132,6 +189,7 @@ void WholebodyControlInterface::leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMess
 void WholebodyControlInterface::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj, std::vector<std::pair<double, double> > joint_limits_)
 {
     msg.right_arm_trajectory_message.joint_trajectory_messages.resize(7);
+    msg.right_arm_trajectory_message.unique_id = id_++;
     for(int trajPointNumber = 0; trajPointNumber < traj.points.size(); trajPointNumber++){
         for (int jointNumber = 3; jointNumber < 10; ++jointNumber) {
             ihmc_msgs::TrajectoryPoint1DRosMessage ihmc_pointMsg;
@@ -160,7 +218,10 @@ void WholebodyControlInterface::rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMes
 void WholebodyControlInterface::chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj)
 {
     geometry_msgs::Pose pelvisPose;
+    std::vector<geometry_msgs::Quaternion> quats;
+    std::vector<float> timeVec;
     state_informer_->getCurrentPose(rd_->getPelvisFrame(),pelvisPose);
+
     for (int i = 0; i < traj.points.size(); ++i) {
         float yaw   = traj.points[i].positions[0];
         float pitch = traj.points[i].positions[1];
@@ -173,13 +234,14 @@ void WholebodyControlInterface::chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessag
         tf::quaternionTFToMsg(quatPelvis, tempQuat.quaternion);
 
         state_informer_->transformQuaternion(tempQuat, tempQuat);
-
-        ihmc_msgs::SO3TrajectoryPointRosMessage data;
-        data.orientation = tempQuat.quaternion;
-        data.time = traj.points[i].time_from_start.toSec();
-        msg.chest_trajectory_message.taskspace_trajectory_points.push_back(data);
+        quats.push_back(tempQuat.quaternion);
+        timeVec.push_back(traj.points.at(i).time_from_start.toSec());
     }
 
+    chestController_.generateMessage(quats, timeVec, 0, msg.chest_trajectory_message);
+//    /// @todo: Fix the timing part of the trajectory
+//    chestController_.generateChestMessage(quats, traj.points.size()/5.0, 0, msg.chest_trajectory_message);
+//    chestController_.executeMessage(msg.chest_trajectory_message);
 }
 
 bool WholebodyControlInterface::validateTrajectory(const trajectory_msgs::JointTrajectory &traj)
