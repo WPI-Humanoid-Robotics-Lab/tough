@@ -44,7 +44,7 @@ int main(int argc, char** argv){
     ROS_INFO("executing on robot\n");
 
     WholebodyControlInterface msg(node_handle);
-    msg.executeTrajectory(RIGHT,trajectory.joint_trajectory);
+//    msg.executeTrajectory(RIGHT,trajectory.joint_trajectory);
 
     ros::Duration(5).sleep();
 

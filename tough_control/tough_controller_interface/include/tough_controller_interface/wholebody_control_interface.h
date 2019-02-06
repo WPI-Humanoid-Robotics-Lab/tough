@@ -22,8 +22,8 @@ public:
     };
 
     WholebodyControlInterface(ros::NodeHandle &nh);
-    void executeTrajectory(const RobotSide side, const trajectory_msgs::JointTrajectory &traj);
-    void executeTrajectory(const RobotSide side, const  moveit_msgs::RobotTrajectory &traj);
+    void executeTrajectory(const trajectory_msgs::JointTrajectory &traj);
+    void executeTrajectory(const  moveit_msgs::RobotTrajectory &traj);
 
     virtual bool getJointSpaceState(std::vector<double> &joints, RobotSide side) override;
 
@@ -32,17 +32,62 @@ private :
     ros::Publisher m_wholebodyPub;
 
     ChestControlInterface chestController_;
+    ArmControlInterface   armController_;
 
-    void rightArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj,std::vector<std::pair<double, double> > joint_limits_);
-    void leftArmMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj, std::vector<std::pair<double, double> > joint_limits_);
-    void chestMsg(ihmc_msgs::WholeBodyTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj);
+    void armMsg(ihmc_msgs::ArmTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj, std::vector<std::pair<double, double> > joint_limits_);
+    void chestMsg(ihmc_msgs::ChestTrajectoryRosMessage &msg, const trajectory_msgs::JointTrajectory &traj);
     std::vector<std::pair<double, double> > joint_limits_left_;
     std::vector<std::pair<double, double> > joint_limits_right_;
     bool validateTrajectory(const trajectory_msgs::JointTrajectory &traj);
-    TrajectoryType getTrajectoryType(const trajectory_msgs::JointTrajectory &traj);
-    void jointTrjectoryToArmMessage(const trajectory_msgs::JointTrajectory &traj, ihmc_msgs::ArmTrajectoryRosMessage &msg);
-    void generateArmMessage(RobotSide side, const trajectory_msgs::JointTrajectory traj, const   std::vector<std::string> &left_arm_joint_names, ihmc_msgs::ArmTrajectoryRosMessage & msg);
     void generateWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage &wholeBodyMsg, const trajectory_msgs::JointTrajectory &traj);
+    void generateWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage &wholeBodyMsg);
+    void parseTrajectory(const trajectory_msgs::JointTrajectory &traj);
+
+
+
+    std::vector<ihmc_msgs::SO3TrajectoryPointRosMessage> chest_trajectory_;
+    std::vector<ihmc_msgs::OneDoFJointTrajectoryRosMessage> left_arm_trajectory_;
+    std::vector<ihmc_msgs::OneDoFJointTrajectoryRosMessage> right_arm_trajectory_;
+
+    // chest - vector of ihmc_msgs::SO3TrajectoryPointRosMessage of size equal to number of points
+
+    // arm - vector of ihmc_msgs::OneDoFJointTrajectoryRosMessage of size 7
+
+    // leg - ?
+
+    inline void createChestQuaternion(const long start, const trajectory_msgs::JointTrajectoryPoint &traj_point, geometry_msgs::Quaternion &quat_msg){
+        // chest can only have 3 joints
+        double back_bkz = traj_point.positions[start];
+        double back_bky = traj_point.positions[start+1];
+        double back_bkx = traj_point.positions[start+2];
+        tf::Quaternion quat;
+        quat.setRPY(back_bkx, back_bky, back_bkz);
+        tf::quaternionTFToMsg(quat, quat_msg);
+    }
+
+    inline void appendArmPoint(const long start, const trajectory_msgs::JointTrajectoryPoint &traj_point,
+                               const std::vector<std::pair<double, double>> &joint_limits_, std::vector<ihmc_msgs::OneDoFJointTrajectoryRosMessage> &msg) {
+        double traj_point_time = traj_point.time_from_start.toSec();
+
+        ihmc_msgs::TrajectoryPoint1DRosMessage ihmc_pointMsg;
+        ihmc_pointMsg.time = traj_point_time;
+
+
+        for (size_t jointNumber = start; jointNumber < start + joint_limits_.size(); jointNumber++) {
+            ihmc_pointMsg.position = traj_point.positions[jointNumber];
+            if (ihmc_pointMsg.position <= joint_limits_[jointNumber - start].first) {
+                ROS_WARN("Trajectory lower limit point given for %d joint", (jointNumber - start));
+                ihmc_pointMsg.position = joint_limits_[jointNumber - start].first;
+            } else if (ihmc_pointMsg.position >= joint_limits_[jointNumber - start].second) {
+                ROS_WARN("Trajectory upper limit point given for %d joint", (jointNumber - start));
+                ihmc_pointMsg.position = joint_limits_[jointNumber - start].second;
+            }
+            ihmc_pointMsg.velocity = traj_point.velocities[jointNumber];
+            msg.at(jointNumber - start).trajectory_points.push_back(ihmc_pointMsg);
+
+            msg.at(jointNumber - start).weight = '.NAN';
+        }
+    }
 };
 
 #endif // WHOLEBODYMANIPULATION_H

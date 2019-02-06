@@ -1,7 +1,7 @@
 #include <tough_moveit_planners/tough_cartesian_planner.h>
 
 CartesianPlanner::CartesianPlanner(std::string group_name, std::string reference_frame):
-    group_name_(group_name), reference_frame_(reference_frame)
+    group_name_(group_name), reference_frame_(reference_frame), group_(new moveit::planning_interface::MoveGroupInterface(group_name))
 
 {
     /**************************************
@@ -9,16 +9,11 @@ CartesianPlanner::CartesianPlanner(std::string group_name, std::string reference
      *************************************/
     ros::AsyncSpinner spinner(1);
     spinner.start();
-
-    // set the planning group
-    group_ = new moveit::planning_interface::MoveGroupInterface(group_name_);
 }
 
 
-CartesianPlanner::~CartesianPlanner(){
-
-    // delete the pointer
-    if(group_ != nullptr)    delete group_;
+CartesianPlanner::~CartesianPlanner()
+{
 }
 
 // cartesian planner
@@ -32,8 +27,8 @@ double CartesianPlanner::getTrajFromCartPoints(std::vector<geometry_msgs::Pose> 
     joint_names = group_->getActiveJoints();
     std::vector<double> joint_values;
     joint_values = group_->getCurrentJointValues();
-    std::vector<std::string>::iterator it;
-    std::vector<double>::iterator itd;
+//    std::vector<std::string>::iterator it;
+//    std::vector<double>::iterator itd;
 //    ROS_INFO("current state");
 //    for (it=joint_names.begin(), itd=joint_values.begin(); it<joint_names.end(); it++, itd++){
 //        std::cout << *it << ": " << *itd << std::endl;

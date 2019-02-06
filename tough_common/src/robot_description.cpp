@@ -36,6 +36,7 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
 {
     param_left_arm_joint_names_  =  TOUGH_COMMON_NAMES::LEFT_ARM_JOINT_NAMES_PARAM ;
     param_right_arm_joint_names_ =  TOUGH_COMMON_NAMES::RIGHT_ARM_JOINT_NAMES_PARAM;
+    param_chest_joint_names_     =  TOUGH_COMMON_NAMES::CHEST_JOINT_NAMES_PARAM;
     param_left_foot_frame_name_  =  TOUGH_COMMON_NAMES::LEFT_FOOT_FRAME_NAME_PARAM ;
     param_right_foot_frame_name_ =  TOUGH_COMMON_NAMES::RIGHT_FOOT_FRAME_NAME_PARAM;
 
@@ -58,12 +59,15 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
 
     param_left_arm_joint_names_.insert(0, prefix);
     param_right_arm_joint_names_.insert(0, prefix);
+    param_chest_joint_names_.insert(0, prefix);
     param_left_foot_frame_name_.insert(0, prefix);
     param_right_foot_frame_name_.insert(0, prefix);
 
 
+
     if(!(nh.getParam(param_left_arm_joint_names_, left_arm_joint_names_  ) &&
          nh.getParam(param_right_arm_joint_names_, right_arm_joint_names_) &&
+         nh.getParam(param_chest_joint_names_, chest_joint_names_)         &&
          nh.getParam(param_left_foot_frame_name_, left_foot_frame_name_  ) &&
          nh.getParam(param_right_foot_frame_name_, right_foot_frame_name_) )) {
 
@@ -443,9 +447,19 @@ void RobotDescription::getRightArmJointNames(std::vector<std::string> &right_arm
     right_arm_joint_names = right_arm_joint_names_;
 }
 
+void RobotDescription::getChestJointNames(std::vector<std::string> &chest_joint_names) const
+{
+    chest_joint_names = chest_joint_names_;
+}
+
 void RobotDescription::setRightArmJointNames(const std::vector<std::string> &right_arm_joint_names)
 {
     right_arm_joint_names_ = right_arm_joint_names;
+}
+
+void RobotDescription::setChestJointNames(const std::vector<std::string> &chest_joint_names)
+{
+    chest_joint_names_ = chest_joint_names;
 }
 
 void RobotDescription::getLeftArmJointNames(std::vector<std::string> &left_arm_joint_names) const

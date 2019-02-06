@@ -66,6 +66,8 @@ public:
 
     void getRightArmJointNames(std::vector<std::string> &right_arm_joint_names) const;
 
+    void getChestJointNames(std::vector<std::string> &chest_joint_names) const;
+
     void getLeftArmFrameNames(std::vector<std::string> &left_arm_frame_names) const;
 
     void getRightArmFrameNames(std::vector<std::string>  &right_arm_frame_names) const;
@@ -104,6 +106,8 @@ protected:
     void setLeftArmJointNames(const std::vector<std::string> &left_arm_joint_names);
 
     void setRightArmJointNames(const std::vector<std::string> &right_arm_joint_names);
+
+    void setChestJointNames(const std::vector<std::string> &chest_joint_names);
 
     void setLeftArmFrameNames(const std::vector<std::string> &left_arm_frame_names);
 
@@ -147,6 +151,7 @@ private:
     std::string robot_name_;
     std::string param_left_arm_joint_names_  ;
     std::string param_right_arm_joint_names_ ;
+    std::string param_chest_joint_names_     ;
     std::string param_left_foot_frame_name_  ;
     std::string param_right_foot_frame_name_ ;
 
@@ -161,6 +166,7 @@ private:
 
     std::vector<std::string> left_arm_joint_names_;
     std::vector<std::string> right_arm_joint_names_;
+    std::vector<std::string> chest_joint_names_;
 
     std::vector<std::string> left_arm_frame_names_;
     std::vector<std::string> right_arm_frame_names_;

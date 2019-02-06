@@ -10,7 +10,7 @@ private:
     std::string reference_frame_;
 
     // planning group
-    moveit::planning_interface::MoveGroupInterface* group_;
+    moveit::planning_interface::MoveGroupInterfacePtr group_;
 
 public:
     CartesianPlanner(std::string group_name, std::string reference_frame="/world");

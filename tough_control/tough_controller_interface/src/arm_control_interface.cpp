@@ -147,6 +147,13 @@ bool ArmControlInterface::generateArmMessage(const RobotSide side, const std::ve
     return true;
 }
 
+void ArmControlInterface::generateArmMessage(const RobotSide side, const std::vector<ihmc_msgs::OneDoFJointTrajectoryRosMessage> &arm_trajectory, ihmc_msgs::ArmTrajectoryRosMessage &msg){
+    msg.execution_mode = ihmc_msgs::ArmTrajectoryRosMessage::OVERRIDE;
+    msg.joint_trajectory_messages = arm_trajectory;
+    msg.robot_side = side;
+    msg.unique_id = id_++;
+}
+
 ///TODO: It might be a good idea to shift this to whole body control message
 /**
  * @brief ArmControlInterface::moveArmJoints moves both the arms together.

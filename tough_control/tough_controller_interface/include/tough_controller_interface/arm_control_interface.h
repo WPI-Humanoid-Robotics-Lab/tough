@@ -84,6 +84,15 @@ public:
     bool generateArmMessage(const RobotSide side, const std::vector<std::vector<double> > &arm_pose, const float time, ihmc_msgs::ArmTrajectoryRosMessage &msg);
 
     /**
+     * @brief generateArmMessage Generates ros message to be sent to the arm, but does not publish anything.
+     * @param side          Side of the robot. It can be RIGHT or LEFT.
+     * @param arm_trajectory A vector of OneDoFJointTrajectoryRosMessage for the trajectory
+     * @param msg           The message is generated in this reference.
+     * @return
+     */
+    void generateArmMessage(const RobotSide side, const std::vector<ihmc_msgs::OneDoFJointTrajectoryRosMessage> &arm_trajectory, ihmc_msgs::ArmTrajectoryRosMessage &msg);
+
+    /**
      * @brief moveArmJoints Moves arm joints to given joint angles. All angles in radians.
      * @param arm_data      A vector of armJointData struct. This allows customization of individual trajectory points. For example,
      * each point can have different execution times.
