@@ -174,7 +174,7 @@ void WholebodyControlInterface::armMsg(ihmc_msgs::ArmTrajectoryRosMessage &msg, 
             ihmc_pointMsg.velocity = traj.points[trajPointNumber].velocities[jointNumber];
 
             msg.joint_trajectory_messages[jointNumber-3].trajectory_points.push_back(ihmc_pointMsg);
-            msg.joint_trajectory_messages[jointNumber-3].weight = '.NAN';
+            msg.joint_trajectory_messages[jointNumber-3].weight = nan("");
         }
 
     }
@@ -255,7 +255,6 @@ void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTraj
     else {
         // set the chest indices
         chest_start = std::distance(traj.joint_names.begin(), it);
-        ROS_INFO("chest joint at position %d", chest_start);
     }
 
     it = std::find(traj.joint_names.begin(), traj.joint_names.end(), left_arm_joint_names.at(0));
@@ -266,7 +265,6 @@ void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTraj
         // set the left arm indices
         l_arm_start = std::distance(traj.joint_names.begin(), it);
         left_arm_trajectory_.resize(left_arm_joint_names.size());
-        ROS_INFO("left arm joint at position %d", l_arm_start);
     }
 
     it = std::find(traj.joint_names.begin(), traj.joint_names.end(), right_arm_joint_names.at(0));
@@ -277,7 +275,6 @@ void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTraj
         // set the right arm indices
         r_arm_start = std::distance(traj.joint_names.begin(), it);
         right_arm_trajectory_.resize(right_arm_joint_names.size());
-        ROS_INFO("right arm joint at position %d", r_arm_start);
     }
 
     double traj_point_time = 0.0;

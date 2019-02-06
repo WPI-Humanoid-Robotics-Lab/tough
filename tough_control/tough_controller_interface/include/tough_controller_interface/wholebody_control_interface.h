@@ -76,16 +76,16 @@ private :
         for (size_t jointNumber = start; jointNumber < start + joint_limits_.size(); jointNumber++) {
             ihmc_pointMsg.position = traj_point.positions[jointNumber];
             if (ihmc_pointMsg.position <= joint_limits_[jointNumber - start].first) {
-                ROS_WARN("Trajectory lower limit point given for %d joint", (jointNumber - start));
+                ROS_WARN("Trajectory lower limit point given for %d joint", (int)(jointNumber - start));
                 ihmc_pointMsg.position = joint_limits_[jointNumber - start].first;
             } else if (ihmc_pointMsg.position >= joint_limits_[jointNumber - start].second) {
-                ROS_WARN("Trajectory upper limit point given for %d joint", (jointNumber - start));
+                ROS_WARN("Trajectory upper limit point given for %d joint", (int)(jointNumber - start));
                 ihmc_pointMsg.position = joint_limits_[jointNumber - start].second;
             }
             ihmc_pointMsg.velocity = traj_point.velocities[jointNumber];
             msg.at(jointNumber - start).trajectory_points.push_back(ihmc_pointMsg);
 
-            msg.at(jointNumber - start).weight = '.NAN';
+            msg.at(jointNumber - start).weight = nan("");
         }
     }
 };
