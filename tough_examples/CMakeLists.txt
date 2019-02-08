@@ -154,6 +154,11 @@ add_dependencies(motion_planner_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${ca
 target_link_libraries(motion_planner_example  ${catkin_LIBRARIES})
 
 
+add_executable(taskspace_planner_example src/manipulation_examples/taskspace_planner_example.cpp )
+add_dependencies(taskspace_planner_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(taskspace_planner_example  ${catkin_LIBRARIES})
+
+
 install(TARGETS reset_robot arm_example head_navigation_example arm_navigation_example
                 chest_navigation_example nudge_local_example pelvis_navigation_example
                 neck_navigation_example wrist_example gripper_control_example interactive_arm_example
