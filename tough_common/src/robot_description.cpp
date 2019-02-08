@@ -37,6 +37,8 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
   param_chest_joint_names_ = TOUGH_COMMON_NAMES::CHEST_JOINT_NAMES_PARAM;
   param_left_foot_frame_name_ = TOUGH_COMMON_NAMES::LEFT_FOOT_FRAME_NAME_PARAM;
   param_right_foot_frame_name_ = TOUGH_COMMON_NAMES::RIGHT_FOOT_FRAME_NAME_PARAM;
+  param_left_ee_frame_name_ = TOUGH_COMMON_NAMES::LEFT_EE_FRAME_NAME_PARAM;
+  param_right_ee_frame_name_ = TOUGH_COMMON_NAMES::RIGHT_EE_FRAME_NAME_PARAM;
 
   if (!nh.getParam(TOUGH_COMMON_NAMES::ROBOT_NAME_PARAM, robot_name_))
   {
@@ -63,14 +65,19 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
   param_chest_joint_names_.insert(0, prefix);
   param_left_foot_frame_name_.insert(0, prefix);
   param_right_foot_frame_name_.insert(0, prefix);
+  param_left_ee_frame_name_.insert(0, prefix);
+  param_right_ee_frame_name_.insert(0, prefix);
 
   if (!(nh.getParam(param_left_arm_joint_names_, left_arm_joint_names_) &&
         nh.getParam(param_right_arm_joint_names_, right_arm_joint_names_) &&
         nh.getParam(param_chest_joint_names_, chest_joint_names_) &&
         nh.getParam(param_left_foot_frame_name_, left_foot_frame_name_) &&
-        nh.getParam(param_right_foot_frame_name_, right_foot_frame_name_)))
+        nh.getParam(param_right_foot_frame_name_, right_foot_frame_name_) &&
+        nh.getParam(param_right_ee_frame_name_, R_END_EFFECTOR_TF) &&
+        nh.getParam(param_left_ee_frame_name_, L_END_EFFECTOR_TF)))
   {
-    ROS_ERROR("Could not read the joint names from parameter server");
+    ROS_ERROR("Could not read the joint names from parameter server. Check if you have the latest ihmc_%s_ros package",
+              robot_name_.c_str());
     return;
   }
 
@@ -97,24 +104,7 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
     //        ROS_INFO("\nFrame : %s \nJoint : %s \nLimits : <%0.4f , %0.4f>\n-------------\n",
     //        (right_arm_frame_names_.end()-1)->c_str(), joint_name.c_str(), l_limit, u_limit);
   }
-  /*  There's a better way of doing this as param server already has the joint names
-       // get a vector of all joints
-      for (std::map<std::string,boost::shared_ptr<urdf::Joint> >::const_iterator joint = model_.joints_.begin();joint!=
-     model_.joints_.end(); joint++)
-      {
-        joints_.push_back(joint->second);
-      }
 
-
-      // populate all the required joint limits
-      for( auto joint : joints_) {
-          std::cout<<joint->name<<std::endl;
-      }
-  */
-
-  // set variables that store TF
-  // set all the required frame names -- inefficient but works for now. important frame names should be on parameter
-  // server
   for (auto link : links_)
   {
     // assuming that pelvis frame will be the one with least length
@@ -122,6 +112,7 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
     {
       PELVIS_TF = link->name;
     }
+    // The else part might not be required anymore.
     else if (findSubStringIC(link->name, "l_palm"))
     {
       l_palm_exists_ = true;
@@ -156,18 +147,21 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
    * This causes footsteps to be at a height from ground. should this be fixed on JAVA side?
    */
 
-  L_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME;
-  R_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME;
-
   if (robot_name_ == "atlas")
   {
     number_of_neck_joints_ = 1;
     foot_frame_offset_ = 0.085;
+
+    // L_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::LEFT_END_EFFECTOR_FRAME;
+    // R_END_EFFECTOR_TF = TOUGH_COMMON_NAMES::RIGHT_END_EFFECTOR_FRAME;
   }
   else if (robot_name_ == "valkyrie")
   {
     number_of_neck_joints_ = 3;
     foot_frame_offset_ = 0.102;
+
+    // L_END_EFFECTOR_TF = "leftPalm";
+    // R_END_EFFECTOR_TF = "rightPalm";
   }
 
   updateFrameHash();

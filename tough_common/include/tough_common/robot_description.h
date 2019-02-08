@@ -154,6 +154,8 @@ private:
   std::string param_chest_joint_names_;
   std::string param_left_foot_frame_name_;
   std::string param_right_foot_frame_name_;
+  std::string param_left_ee_frame_name_;
+  std::string param_right_ee_frame_name_;
 
   std::string PELVIS_TF;
   std::string TORSO_TF;

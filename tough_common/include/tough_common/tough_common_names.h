@@ -16,6 +16,8 @@ const std::string RIGHT_ARM_JOINT_NAMES_PARAM = "right_arm_joint_names";
 const std::string CHEST_JOINT_NAMES_PARAM = "chest_joint_names";
 const std::string LEFT_FOOT_FRAME_NAME_PARAM = "left_foot_frame_name";
 const std::string RIGHT_FOOT_FRAME_NAME_PARAM = "right_foot_frame_name";
+const std::string LEFT_EE_FRAME_NAME_PARAM = "left_ee_frame_name";
+const std::string RIGHT_EE_FRAME_NAME_PARAM = "right_ee_frame_name";
 
 /********* Topic Names *********/
 const std::string LOG_TOPIC = "/field/log";
@@ -59,6 +61,6 @@ const std::string RIGHT_ARM_10DOF_GROUP = "R_PELVIS_PALM_10DOF";
 
 // leftMiddleFingerGroup -- > pelvis to leftMiddleFingerPitch1Link
 const std::string LEFT_ARM_10DOF_GROUP = "L_PELVIS_PALM_10DOF";
-}
+}  // namespace TOUGH_COMMON_NAMES
 
 #endif
