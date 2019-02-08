@@ -1,6 +1,6 @@
 #include <tough_moveit_planners/taskspace_planner.h>
 
-TaskspacePlanner::TaskspacePlanner(ros::NodeHandle& nh, std::string urdf_param) : nh_(nh), wholebodyController_(nh)
+TaskspacePlanner::TaskspacePlanner(ros::NodeHandle& nh, std::string urdf_param) : nh_(nh)
 {
   state_informer_ = RobotStateInformer::getRobotStateInformer(nh);
   rd_ = RobotDescription::getRobotDescription(nh);
@@ -19,6 +19,8 @@ TaskspacePlanner::TaskspacePlanner(ros::NodeHandle& nh, std::string urdf_param) 
 
   position_tolerance_ = 0.01;
   angle_tolerance_ = 0.01;
+  planning_time_ = 5.0;
+  num_planning_attempts_ = 5;
   moveit_robot_state_ = std::shared_ptr<robot_state::RobotState>(new robot_state::RobotState(robot_model_));
 
   plugin_param_ = "/move_group/planning_plugin";
@@ -30,7 +32,8 @@ TaskspacePlanner::~TaskspacePlanner()
   planner_instance.reset();
 }
 
-bool TaskspacePlanner::execute(geometry_msgs::PoseStamped& pose_msg, std::string planning_group)
+bool TaskspacePlanner::getTrajectory(geometry_msgs::PoseStamped pose_msg, std::string planning_group,
+                                     moveit_msgs::RobotTrajectory& output_robot_traj_msg)
 {
   planning_interface::MotionPlanRequest req;
   moveit_msgs::MotionPlanResponse response_msg;
@@ -52,8 +55,8 @@ bool TaskspacePlanner::execute(geometry_msgs::PoseStamped& pose_msg, std::string
       kinematic_constraints::constructGoalConstraints(ee_frame, pose_msg, position_tolerance_, angle_tolerance_);
   req.goal_constraints.push_back(pose_goal);
 
-  req.allowed_planning_time = 5.0;
-  req.num_planning_attempts = 2;
+  req.allowed_planning_time = planning_time_;
+  req.num_planning_attempts = num_planning_attempts_;
 
   planning_interface::PlanningContextPtr context =
       planner_instance->getPlanningContext(planning_scene_, req, res_.error_code_);
@@ -85,16 +88,7 @@ bool TaskspacePlanner::execute(geometry_msgs::PoseStamped& pose_msg, std::string
   timeParameterizer.computeTimeStamps(robot_traj);
 
   robot_traj.getRobotTrajectoryMsg(response_msg.trajectory);
-
-  //    for(size_t i = 0; i < response.trajectory.joint_trajectory.joint_names.size() ; i++){
-  //        ROS_INFO("%d: Joint Name %s, number of points %d", i,
-  //        response.trajectory.joint_trajectory.joint_names.at(i).c_str(),
-  //        response.trajectory.joint_trajectory.points.size());
-  //    }
-
-  /// @todo: move this into calling node
-  wholebodyController_.executeTrajectory(response_msg.trajectory);
-
+  output_robot_traj_msg = response_msg.trajectory;
   return true;
 }
 
@@ -127,6 +121,24 @@ void TaskspacePlanner::setPluginParameter(const std::string& plugin_param)
 {
   plugin_param_ = plugin_param;
   loadPlanners();
+}
+
+double TaskspacePlanner::getPlanningTime() const
+{
+  return planning_time_;
+}
+void TaskspacePlanner::setPlanningTime(const double planning_time)
+{
+  planning_time_ = planning_time;
+}
+
+int TaskspacePlanner::getNumPlanningAttempts() const
+{
+  return num_planning_attempts_;
+}
+void TaskspacePlanner::setNumPlanningAttempts(const int num_planning_attempts)
+{
+  num_planning_attempts_ = num_planning_attempts;
 }
 
 void TaskspacePlanner::fixEEOrientation(const RobotSide side, geometry_msgs::Quaternion& orientation)
@@ -163,8 +175,12 @@ void TaskspacePlanner::loadPlanners()
 
   try
   {
-    planner_plugin_loader.reset(new pluginlib::ClassLoader<planning_interface::PlannerManager>(
-        "moveit_core", "planning_interface::PlannerManager"));
+    planner_plugin_loader.reset(new pluginlib::ClassLoader<planning_interface::PlannerManager>("moveit_core", "planning"
+                                                                                                              "_interfa"
+                                                                                                              "ce::"
+                                                                                                              "PlannerM"
+                                                                                                              "anage"
+                                                                                                              "r"));
   }
   catch (pluginlib::PluginlibException& ex)
   {
