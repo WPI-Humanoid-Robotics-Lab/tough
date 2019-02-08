@@ -3,123 +3,113 @@
 #include <std_msgs/String.h>
 #include <tough_common/tough_common_names.h>
 
-
-void demo_gripper(GripperControlInterface &gripcont)
+void demo_gripper(GripperControlInterface& gripcont)
 {
-    std::vector<GripperControlInterface::GRIPPER_MODES> gripperModes{
-                    GripperControlInterface::BASIC,
-                    GripperControlInterface::PINCH,
-                    GripperControlInterface::WIDE,
-                    GripperControlInterface::SCISSOR,
-                    GripperControlInterface::HOOK};
+  std::vector<GripperControlInterface::GRIPPER_MODES> gripperModes{
+    GripperControlInterface::BASIC, GripperControlInterface::PINCH, GripperControlInterface::WIDE,
+    GripperControlInterface::SCISSOR, GripperControlInterface::HOOK
+  };
 
-    std::vector<RobotSide> gripperSide{RobotSide::LEFT, RobotSide::RIGHT};
-    for(auto side:gripperSide)
+  std::vector<RobotSide> gripperSide{ RobotSide::LEFT, RobotSide::RIGHT };
+  for (auto side : gripperSide)
+  {
+    ROS_INFO("[SIDE] %s", (side == RobotSide::LEFT) ? "Left" : "Right");
+
+    for (auto mode : gripperModes)
     {
-        ROS_INFO("[SIDE] %s",(side==RobotSide::LEFT) ? "Left" : "Right");
+      ROS_INFO_STREAM("[mode] " << gripcont.getModeName(mode));
 
-        for(auto mode:gripperModes)
-        {
-            ROS_INFO_STREAM("[mode] " << gripcont.getModeName(mode));
+      gripcont.setMode(side, mode);
 
-            gripcont.setMode(side,mode);
+      ros::Duration(2).sleep();
 
-            ros::Duration(2).sleep();
+      ROS_INFO("\t closing gripper");
+      gripcont.closeGripper(side);
 
-            ROS_INFO("\t closing gripper");
-            gripcont.closeGripper(side);
+      ros::Duration(2).sleep();
 
-            ros::Duration(2).sleep();
+      ROS_INFO("\t opening gripper");
+      gripcont.openGripper(side);
 
-            ROS_INFO("\t opening gripper");
-            gripcont.openGripper(side);
+      ros::Duration(2).sleep();
 
-            ros::Duration(2).sleep();
+      ROS_INFO("\t closing Fingers");
+      gripcont.closeFingers(side);
 
-            ROS_INFO("\t closing Fingers");
-            gripcont.closeFingers(side);
+      ros::Duration(2).sleep();
 
-            ros::Duration(2).sleep();
+      ROS_INFO("\t opening Fingers");
+      gripcont.openFingers(side);
 
-            ROS_INFO("\t opening Fingers");
-            gripcont.openFingers(side);
+      ros::Duration(2).sleep();
 
-            ros::Duration(2).sleep();
+      ROS_INFO("\t closing Thumb");
+      gripcont.closeThumb(side);
 
-            ROS_INFO("\t closing Thumb");
-            gripcont.closeThumb(side);
+      ros::Duration(2).sleep();
 
-            ros::Duration(2).sleep();
+      ROS_INFO("\t opening Thumb");
+      gripcont.openThumb(side);
 
-            ROS_INFO("\t opening Thumb");
-            gripcont.openThumb(side);
-
-            ros::Duration(2).sleep();
-        }
-        ros::Duration(2).sleep();
-        ROS_INFO("Resetting gripper");
+      ros::Duration(2).sleep();
+    }
+    ros::Duration(2).sleep();
+    ROS_INFO("Resetting gripper");
     //    gripcont.resetGripper(RobotSide::LEFT);
     //    ros::Duration(8).sleep();
-        gripcont.setMode(side,GripperControlInterface::BASIC);
-        gripcont.closeGripper(side);
-    }
-
+    gripcont.setMode(side, GripperControlInterface::BASIC);
+    gripcont.closeGripper(side);
+  }
 }
 
+int main(int argc, char** argv)
+{
+  ros::init(argc, argv, "test_gripper_control");
+  ros::NodeHandle nh;
+  GripperControlInterface gripcont(nh);
+  std::cout << argc << std::endl;
 
-int main(int argc, char **argv){
+  // wait a reasonable amount of time for the subscriber to connect
+  ros::Time wait_until = ros::Time::now() + ros::Duration(0.5);
+  while (ros::Time::now() < wait_until)
+  {
+    ros::WallDuration(0.1).sleep();
+  }
 
-    ros::init(argc, argv, "test_gripper_control");
-    ros::NodeHandle nh;
-    GripperControlInterface gripcont(nh);
-    std::cout << argc << std::endl;
-
-
-
-    // wait a reasonable amount of time for the subscriber to connect
-    ros::Time wait_until = ros::Time::now() + ros::Duration(0.5);
-    while (ros::Time::now() < wait_until)
+  std::vector<double> leftGrip, rightGrip;
+  if (argc == 2)
+  {
+    if (argv[1][0] == '1')
     {
-        ros::WallDuration(0.1).sleep();
-    }
-
-
-    std::vector<double> leftGrip,rightGrip;
-    if(argc == 2 )
-    {
-        if (argv[1][0] == '1')
-        {
-            ROS_INFO("opening both grippers");
-            gripcont.openGripper(LEFT);
-            gripcont.openGripper(RIGHT);
-        }
-        else
-        {
-            ROS_INFO("closing both grippers");
-            gripcont.closeGripper(LEFT);
-            gripcont.closeGripper(RIGHT);
-        }
-
-    }
-    else if(argc == 3)
-    {
-        RobotSide side = (RobotSide)std::atoi(argv[1]);
-        int state = std::atoi(argv[2]);
-
-        std::string side_str = side == RobotSide::LEFT ? "left" : "right";
-
-        ROS_INFO_STREAM("moving " << side_str << " gripper to " << argv[2]);
-        gripcont.controlGripper(side, state);
+      ROS_INFO("opening both grippers");
+      gripcont.openGripper(LEFT);
+      gripcont.openGripper(RIGHT);
     }
     else
     {
-        ROS_INFO("Usage: rosrun <node_name> 1 \n to open grippers \n running demo");
-        demo_gripper(gripcont);
-
+      ROS_INFO("closing both grippers");
+      gripcont.closeGripper(LEFT);
+      gripcont.closeGripper(RIGHT);
     }
-    ros::spinOnce();
-    ros::Duration(2).sleep();
+  }
+  else if (argc == 3)
+  {
+    RobotSide side = (RobotSide)std::atoi(argv[1]);
+    int state = std::atoi(argv[2]);
 
-    ROS_INFO("motion complete");
-    return 0;
+    std::string side_str = side == RobotSide::LEFT ? "left" : "right";
+
+    ROS_INFO_STREAM("moving " << side_str << " gripper to " << argv[2]);
+    gripcont.controlGripper(side, state);
+  }
+  else
+  {
+    ROS_INFO("Usage: rosrun <node_name> 1 \n to open grippers \n running demo");
+    demo_gripper(gripcont);
+  }
+  ros::spinOnce();
+  ros::Duration(2).sleep();
+
+  ROS_INFO("motion complete");
+  return 0;
 }

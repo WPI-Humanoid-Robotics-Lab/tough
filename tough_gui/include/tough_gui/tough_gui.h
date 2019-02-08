@@ -60,11 +60,11 @@
 #define TO_RADIANS 3.1415926535f / 180.0f
 #define TO_DEGREES 180.0f / 3.1415926535f
 
-
 #define IMAGE_HEIGHT 544
 #define IMAGE_WIDTH 1024
 
-namespace Ui {
+namespace Ui
+{
 class ToughGUI;
 }
 
@@ -79,99 +79,96 @@ class Panel;
 
 class ToughGUI : public QMainWindow
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    explicit ToughGUI(QWidget *parent = 0);
-    virtual ~ToughGUI();
-
-
-private:
-    Ui::ToughGUI *ui;
+  explicit ToughGUI(QWidget* parent = 0);
+  virtual ~ToughGUI();
 
 private:
-    void initActionsConnections();
-    void initDisplayWidgets();
-    void initVariables();
-    void initTools();
-    void initDefaultValues();
-    void initJointLimits();
-    void initToughControllers();
+  Ui::ToughGUI* ui;
 
-    void getArmState();
-    void getChestState();
-    void getPelvisState();
-    void getNeckState();
-    void getGripperState();
-    void getClickedPoint(const geometry_msgs::PointStamped::Ptr msg);
+private:
+  void initActionsConnections();
+  void initDisplayWidgets();
+  void initVariables();
+  void initTools();
+  void initDefaultValues();
+  void initJointLimits();
+  void initToughControllers();
+
+  void getArmState();
+  void getChestState();
+  void getPelvisState();
+  void getNeckState();
+  void getGripperState();
+  void getClickedPoint(const geometry_msgs::PointStamped::Ptr msg);
 
 private Q_SLOTS:
-    void keyPressEvent(QKeyEvent *event);
+  void keyPressEvent(QKeyEvent* event);
 
-    void setCurrentTool(int btnID);
-    void displayPointcloud(int btnID);
-    void updateDisplay(int tabID);
+  void setCurrentTool(int btnID);
+  void displayPointcloud(int btnID);
+  void updateDisplay(int tabID);
 
-    void changePelvisHeight();
-    void walkSteps();
-    void abortSteps();
-    void approveSteps();
-    void moveChestJoints();
-    void moveHeadJoints();
-    void moveArmJoints();
-    void moveToPoint();
-    void nudgeArm(int btnID);
+  void changePelvisHeight();
+  void walkSteps();
+  void abortSteps();
+  void approveSteps();
+  void moveChestJoints();
+  void moveHeadJoints();
+  void moveArmJoints();
+  void moveToPoint();
+  void nudgeArm(int btnID);
 
-    void setMode();
-    void closeGrippers();
-    void openGrippers();
-    void closeFingers();
-    void openFingers();
-    void closeThumb();
-    void openThumb();
-    void closeBothGrippers();
-    void resetGrippers();
+  void setMode();
+  void closeGrippers();
+  void openGrippers();
+  void closeFingers();
+  void openFingers();
+  void closeThumb();
+  void openThumb();
+  void closeBothGrippers();
+  void resetGrippers();
 
-    void updateJointStateSub(int tabID);
-    void updateGripperSide(int btnID);
-    void updateArmSide(int btnID);
+  void updateJointStateSub(int tabID);
+  void updateGripperSide(int btnID);
+  void updateArmSide(int btnID);
 
-    void resetChestOrientation();
-    void resetArm();
-    void resetRobot();
-    void createMoveitDisplay();
-    void deleteMoveitDisplay();
+  void resetChestOrientation();
+  void resetArm();
+  void resetRobot();
+  void createMoveitDisplay();
+  void deleteMoveitDisplay();
 
-    void resetPointcloud();
-    void pausePointcloud();
-
-
+  void resetPointcloud();
+  void pausePointcloud();
 
 private:
   rviz::VisualizationManager* manager_;
   rviz::VisualizationManager* mapManager_;
 
   rviz::RenderPanel* renderPanel_;
-  rviz::RenderPanel* mapRenderPanel_ ;
+  rviz::RenderPanel* mapRenderPanel_;
   rviz::RenderPanel* imagePanel_;
 
   rviz::ViewManager* mapViewManager_;
-  rviz::ViewController* mapViewController_ ;
+  rviz::ViewController* mapViewController_;
 
   rviz::Display* cloudDisplay_;
-//  rviz::Display* imageDisplay_;
+  //  rviz::Display* imageDisplay_;
   rviz::Display* octomapDisplay_;
-  rviz::Display* mapDisplay_ ;
+  rviz::Display* mapDisplay_;
   rviz::Display* footstepMarkersDisplay_;
   rviz::Display* footstepMarkersMainDisplay_;
   rviz::Display* goalDisplay_;
   rviz::Display* moveitDisplay_;
 
-  rviz::ToolManager* toolManager_ ;
-  rviz::ToolManager* mapToolManager_ ;
+  rviz::ToolManager* toolManager_;
+  rviz::ToolManager* mapToolManager_;
 
-  rviz::Tool* measureTool_ ;
-  rviz::Tool* pointTool_ ;
+  rviz::Tool* measureTool_;
+  rviz::Tool* pointTool_;
   rviz::Tool* interactTool_;
   rviz::Tool* mapInteractTool_;
   rviz::Tool* setGoalTool_;
@@ -185,47 +182,46 @@ private:
 
   ros::Publisher reset_pointcloud;
   ros::Publisher pause_pointcloud;
-//  ros::Subscriber centerDistSub;
-//  ros::Subscriber baseSensorStatus;
+  //  ros::Subscriber centerDistSub;
+  //  ros::Subscriber baseSensorStatus;
   ros::Subscriber rviz2DNavGoalSub;
-//  ros::Subscriber jointStateSub_;
+  //  ros::Subscriber jointStateSub_;
   ros::Subscriber clickedPointSub_;
-  ros::Timer      jointStatesUpdater_;
+  ros::Timer jointStatesUpdater_;
   tf::TransformListener listener_;
 
   image_transport::ImageTransport it_;
   image_transport::Subscriber liveVideoSub;
 
-  ChestControlInterface       *chestController_;
-  PelvisControlInterface      *pelvisHeightController_;
-  ArmControlInterface   *armJointController_;
-  RobotWalker           *walkingController_;
-  HeadControlInterface        *headController_;
-  GripperControlInterface        *gripperController_;
-  WholebodyControlInterface *wholeBodyController_;
-  CartesianPlanner      *rightArmPlanner_;
-  CartesianPlanner      *leftArmPlanner_;
+  ChestControlInterface* chestController_;
+  PelvisControlInterface* pelvisHeightController_;
+  ArmControlInterface* armJointController_;
+  RobotWalker* walkingController_;
+  HeadControlInterface* headController_;
+  GripperControlInterface* gripperController_;
+  WholebodyControlInterface* wholeBodyController_;
+  CartesianPlanner* rightArmPlanner_;
+  CartesianPlanner* leftArmPlanner_;
 
+  RobotDescription* rd_;
+  RobotStateInformer* currentState_;
+  geometry_msgs::Pose* clickedPoint_;
+  bool moveArmCommand_;
 
-  RobotDescription      *rd_;
-  RobotStateInformer    *currentState_;
-  geometry_msgs::Pose   *clickedPoint_;
-  bool                  moveArmCommand_;
-
-  std::mutex                      mtx_;
-  std::map<std::string, QLabel*>  jointLabelMap_;
-  std::map<std::string, double>    jointStateMap_;
+  std::mutex mtx_;
+  std::map<std::string, QLabel*> jointLabelMap_;
+  std::map<std::string, double> jointStateMap_;
   std::vector<std::string> leftArmJointNames_;
   std::vector<std::string> rightArmJointNames_;
 
   void distanceSubCallback(const std_msgs::Float32::ConstPtr& msg);
-  void liveVideoCallback(const sensor_msgs::ImageConstPtr &msg);
-  void setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr,bool is_RGB);
-  void jointStateCallBack(const ros::TimerEvent &e);
+  void liveVideoCallback(const sensor_msgs::ImageConstPtr& msg);
+  void setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr, bool is_RGB);
+  void jointStateCallBack(const ros::TimerEvent& e);
   void changeToolButtonStatus(int btnID);
 
   QString fixedFrame_;
-  QString targetFrame_ ;
+  QString targetFrame_;
   QString mapTopic_;
   QString imageTopic_;
   QString pointCloudTopic_;
@@ -244,7 +240,7 @@ private:
   bool flipImage_;
   QLabel* status_label_;
 
-  //Step params
+  // Step params
   float swingTime_;
   float transferTime_;
   float swingHeight_;
@@ -260,39 +256,39 @@ private:
   float PELVIS_HEIGHT_MAX = 0.95;
   float PELVIS_HEIGHT_MIN = 0.55;
 
-  float RIGHT_SHOULDER_ROLL_MAX = 1.519*TO_DEGREES;
-  float RIGHT_SHOULDER_ROLL_MIN = -1.26*TO_DEGREES;
-  float RIGHT_SHOULDER_PITCH_MAX = 2.0*TO_DEGREES;
-  float RIGHT_SHOULDER_PITCH_MIN = -2.85*TO_DEGREES;
-  float RIGHT_SHOULDER_YAW_MAX = 2.18*TO_DEGREES;
-  float RIGHT_SHOULDER_YAW_MIN = -3.1*TO_DEGREES;
+  float RIGHT_SHOULDER_ROLL_MAX = 1.519 * TO_DEGREES;
+  float RIGHT_SHOULDER_ROLL_MIN = -1.26 * TO_DEGREES;
+  float RIGHT_SHOULDER_PITCH_MAX = 2.0 * TO_DEGREES;
+  float RIGHT_SHOULDER_PITCH_MIN = -2.85 * TO_DEGREES;
+  float RIGHT_SHOULDER_YAW_MAX = 2.18 * TO_DEGREES;
+  float RIGHT_SHOULDER_YAW_MIN = -3.1 * TO_DEGREES;
 
-  float LEFT_SHOULDER_ROLL_MAX = 1.266*TO_DEGREES;
-  float LEFT_SHOULDER_ROLL_MIN = -1.519*TO_DEGREES;
-  float LEFT_SHOULDER_PITCH_MAX = 2.0*TO_DEGREES;
-  float LEFT_SHOULDER_PITCH_MIN = -2.85*TO_DEGREES;
-  float LEFT_SHOULDER_YAW_MAX = 2.18*TO_DEGREES;
-  float LEFT_SHOULDER_YAW_MIN = -3.1*TO_DEGREES;
+  float LEFT_SHOULDER_ROLL_MAX = 1.266 * TO_DEGREES;
+  float LEFT_SHOULDER_ROLL_MIN = -1.519 * TO_DEGREES;
+  float LEFT_SHOULDER_PITCH_MAX = 2.0 * TO_DEGREES;
+  float LEFT_SHOULDER_PITCH_MIN = -2.85 * TO_DEGREES;
+  float LEFT_SHOULDER_YAW_MAX = 2.18 * TO_DEGREES;
+  float LEFT_SHOULDER_YAW_MIN = -3.1 * TO_DEGREES;
 
-  float RIGHT_WRIST_ROLL_MAX = 0.62*TO_DEGREES;
-  float RIGHT_WRIST_ROLL_MIN = -0.625*TO_DEGREES;
-  float RIGHT_WRIST_PITCH_MAX = 0.36*TO_DEGREES;
-  float RIGHT_WRIST_PITCH_MIN = -0.49*TO_DEGREES;
-  float RIGHT_WRIST_YAW_MAX = 3.14*TO_DEGREES;
-  float RIGHT_WRIST_YAW_MIN = -2.019*TO_DEGREES;
+  float RIGHT_WRIST_ROLL_MAX = 0.62 * TO_DEGREES;
+  float RIGHT_WRIST_ROLL_MIN = -0.625 * TO_DEGREES;
+  float RIGHT_WRIST_PITCH_MAX = 0.36 * TO_DEGREES;
+  float RIGHT_WRIST_PITCH_MIN = -0.49 * TO_DEGREES;
+  float RIGHT_WRIST_YAW_MAX = 3.14 * TO_DEGREES;
+  float RIGHT_WRIST_YAW_MIN = -2.019 * TO_DEGREES;
 
-  float LEFT_WRIST_ROLL_MAX = 0.625*TO_DEGREES;
-  float LEFT_WRIST_ROLL_MIN = -0.62*TO_DEGREES;
-  float LEFT_WRIST_PITCH_MAX = 0.49*TO_DEGREES;
-  float LEFT_WRIST_PITCH_MIN = -0.36*TO_DEGREES;
-  float LEFT_WRIST_YAW_MAX = 3.14*TO_DEGREES;
-  float LEFT_WRIST_YAW_MIN = -2.019*TO_DEGREES;
+  float LEFT_WRIST_ROLL_MAX = 0.625 * TO_DEGREES;
+  float LEFT_WRIST_ROLL_MIN = -0.62 * TO_DEGREES;
+  float LEFT_WRIST_PITCH_MAX = 0.49 * TO_DEGREES;
+  float LEFT_WRIST_PITCH_MIN = -0.36 * TO_DEGREES;
+  float LEFT_WRIST_YAW_MAX = 3.14 * TO_DEGREES;
+  float LEFT_WRIST_YAW_MIN = -2.019 * TO_DEGREES;
 
-  float LEFT_ELBOW_MAX = 0.12*TO_DEGREES;
-  float LEFT_ELBOW_MIN = -2.174*TO_DEGREES;
+  float LEFT_ELBOW_MAX = 0.12 * TO_DEGREES;
+  float LEFT_ELBOW_MIN = -2.174 * TO_DEGREES;
 
-  float RIGHT_ELBOW_MAX = 2.174*TO_DEGREES;
-  float RIGHT_ELBOW_MIN = -0.12*TO_DEGREES;
+  float RIGHT_ELBOW_MAX = 2.174 * TO_DEGREES;
+  float RIGHT_ELBOW_MIN = -0.12 * TO_DEGREES;
 
   float LOWER_NECK_PITCH_MAX = 66.61;
   float LOWER_NECK_PITCH_MIN = 0;
@@ -304,11 +300,10 @@ private:
   QString PREVIOUS_MODE_LEFT = "BASIC";
   QString PREVIOUS_MODE_RIGHT = "BASIC";
 
-  std::map<QString,GripperControlInterface::GRIPPER_MODES> mode_map;
-  std::map<QString,int> prev_mode_map;
+  std::map<QString, GripperControlInterface::GRIPPER_MODES> mode_map;
+  std::map<QString, int> prev_mode_map;
   std_msgs::Empty empty_msg;
   std_msgs::Bool bool_msg;
 };
 
-
-#endif // VAL_GUI_H
+#endif  // VAL_GUI_H

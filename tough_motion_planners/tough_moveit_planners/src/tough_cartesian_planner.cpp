@@ -1,73 +1,78 @@
 #include <tough_moveit_planners/tough_cartesian_planner.h>
 
-CartesianPlanner::CartesianPlanner(std::string group_name, std::string reference_frame):
-    group_name_(group_name), reference_frame_(reference_frame), group_(new moveit::planning_interface::MoveGroupInterface(group_name))
+CartesianPlanner::CartesianPlanner(std::string group_name, std::string reference_frame)
+  : group_name_(group_name)
+  , reference_frame_(reference_frame)
+  , group_(new moveit::planning_interface::MoveGroupInterface(group_name))
 
 {
-    /**************************************
-     * ALWAYS START SPINNER IF USING MOVEIT
-     *************************************/
-    ros::AsyncSpinner spinner(1);
-    spinner.start();
+  /**************************************
+   * ALWAYS START SPINNER IF USING MOVEIT
+   *************************************/
+  ros::AsyncSpinner spinner(1);
+  spinner.start();
 }
-
 
 CartesianPlanner::~CartesianPlanner()
 {
 }
 
 // cartesian planner
-double CartesianPlanner::getTrajFromCartPoints(std::vector<geometry_msgs::Pose> &points, moveit_msgs::RobotTrajectory &trajectory, bool avoid_collisions, float goal_tolerance)
+double CartesianPlanner::getTrajFromCartPoints(std::vector<geometry_msgs::Pose>& points,
+                                               moveit_msgs::RobotTrajectory& trajectory, bool avoid_collisions,
+                                               float goal_tolerance)
 {
-    // set the start state to the current state of the robot
-    group_->setStartStateToCurrentState();
+  // set the start state to the current state of the robot
+  group_->setStartStateToCurrentState();
 
-    // get the current joints and their positions
-    std::vector<std::string> joint_names;
-    joint_names = group_->getActiveJoints();
-    std::vector<double> joint_values;
-    joint_values = group_->getCurrentJointValues();
-//    std::vector<std::string>::iterator it;
-//    std::vector<double>::iterator itd;
-//    ROS_INFO("current state");
-//    for (it=joint_names.begin(), itd=joint_values.begin(); it<joint_names.end(); it++, itd++){
-//        std::cout << *it << ": " << *itd << std::endl;
-//    }
+  // get the current joints and their positions
+  std::vector<std::string> joint_names;
+  joint_names = group_->getActiveJoints();
+  std::vector<double> joint_values;
+  joint_values = group_->getCurrentJointValues();
+  //    std::vector<std::string>::iterator it;
+  //    std::vector<double>::iterator itd;
+  //    ROS_INFO("current state");
+  //    for (it=joint_names.begin(), itd=joint_values.begin(); it<joint_names.end(); it++, itd++){
+  //        std::cout << *it << ": " << *itd << std::endl;
+  //    }
 
-//    ROS_INFO("Reference frame: %s", group_->getPlanningFrame().c_str());
-//    ROS_INFO("Reference frame: %s", group_->getEndEffectorLink().c_str());
+  //    ROS_INFO("Reference frame: %s", group_->getPlanningFrame().c_str());
+  //    ROS_INFO("Reference frame: %s", group_->getEndEffectorLink().c_str());
 
-    /**********************************************************************
-       * These Parameters will alter the behaviour significantly
-       *
-       * RTT gives promising results
-       * Planning attempts should be one
-       * Planning time depends on the gola location (7 should be enough)
-       * Goal tolerance is required as we dont have a defined orientation
-       **********************************************************************/
-    group_->setPlannerId("RRTkConfigDefault");
-    group_->setNumPlanningAttempts(1);
-    group_->setPlanningTime(30);
-    group_->setGoalTolerance(goal_tolerance);
+  /**********************************************************************
+     * These Parameters will alter the behaviour significantly
+     *
+     * RTT gives promising results
+     * Planning attempts should be one
+     * Planning time depends on the gola location (7 should be enough)
+     * Goal tolerance is required as we dont have a defined orientation
+     **********************************************************************/
+  group_->setPlannerId("RRTkConfigDefault");
+  group_->setNumPlanningAttempts(1);
+  group_->setPlanningTime(30);
+  group_->setGoalTolerance(goal_tolerance);
 
+  // compute the trajectory
+  ROS_INFO("Planning cartesian path now");
+  group_->setPoseReferenceFrame(reference_frame_);
+  double frac = 0.0;
+  int retry = 0;
+  while (frac < 0.98 && retry++ < 5)
+  {
+    frac = group_->computeCartesianPath(points, 0.01, 0.0, trajectory, avoid_collisions);
+  }
 
-    // compute the trajectory
-    ROS_INFO("Planning cartesian path now");
-    group_->setPoseReferenceFrame(reference_frame_);
-    double frac = 0.0;
-    int retry = 0;
-    while (frac < 0.98 && retry++ < 5){
-        frac = group_->computeCartesianPath(points, 0.01, 0.0, trajectory, avoid_collisions);
-    }
+  std::cout << "Fraction of path planned:   " << frac * 100 << " % \n";
+  //    ROS_INFO("joint names");
+  //    for (it = trajectory.joint_trajectory.joint_names.begin(); it < trajectory.joint_trajectory.joint_names.end();
+  //    it++)
+  //        std::cout << *it << std::endl;
+  //    std::cout << "joint trajectories" << std::endl;
+  //    for (std::vector<trajectory_msgs::JointTrajectoryPoint>::iterator itp =
+  //    trajectory.joint_trajectory.points.begin(); itp < trajectory.joint_trajectory.points.end(); itp++)
+  //        std::cout << *itp << std::endl;
 
-    std::cout<<"Fraction of path planned:   "<<frac*100<<" % \n";
-//    ROS_INFO("joint names");
-//    for (it = trajectory.joint_trajectory.joint_names.begin(); it < trajectory.joint_trajectory.joint_names.end(); it++)
-//        std::cout << *it << std::endl;
-//    std::cout << "joint trajectories" << std::endl;
-//    for (std::vector<trajectory_msgs::JointTrajectoryPoint>::iterator itp = trajectory.joint_trajectory.points.begin(); itp < trajectory.joint_trajectory.points.end(); itp++)
-//        std::cout << *itp << std::endl;
-
-    // return the fraction of path planned
-    return frac;
+  // return the fraction of path planned
+  return frac;
 }

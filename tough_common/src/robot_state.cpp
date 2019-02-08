@@ -3,440 +3,480 @@
 RobotStateInformer* RobotStateInformer::currentObject_ = nullptr;
 
 /* Singleton implementation */
-RobotStateInformer* RobotStateInformer::getRobotStateInformer(ros::NodeHandle nh){
-
-    // check if an object of this class already exists, if not create one
-    if(RobotStateInformer::currentObject_ == nullptr){
-        static RobotStateInformer obj(nh);
-        currentObject_ = &obj;
-    }
-    return currentObject_;
-}
-
-RobotStateInformer::RobotStateInformer(ros::NodeHandle nh):nh_(nh){
-
-    rd_ = RobotDescription::getRobotDescription(nh_);
-    nh.getParam("ihmc_ros/robot_name", robotName_);
-
-    jointStateSub_ = nh_.subscribe("ihmc_ros/" + robotName_ + "/output/joint_states", 1, &RobotStateInformer::jointStateCB, this);
-    ros::Duration(0.2).sleep();
-    closeRightGrasp={1.09,1.47,1.84,0.90,1.20,1.51,0.99,1.34,1.68,0.55,0.739,0.92,1.40};
-    closeLeftGrasp={0.0,-1.47,-1.84,-0.90,-1.20,-1.51,-0.99,-1.34,-1.68,-0.55,-0.739,-0.92,1.40};
-    openGrasp={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-
-}
-
-RobotStateInformer::~RobotStateInformer(){
-    jointStateSub_.shutdown();
-}
-
-void RobotStateInformer::getJointStateMessage(sensor_msgs::JointState &jointState)
+RobotStateInformer* RobotStateInformer::getRobotStateInformer(ros::NodeHandle nh)
 {
-    jointState.name.clear();
-    jointState.position.clear();
-    jointState.velocity.clear();
-    jointState.effort.clear();
-    std::lock_guard<std::mutex> guard(currentStateMutex_);
-    for (auto it = currentState_.begin(); it != currentState_.end(); ++it){
-        jointState.name.push_back(it->first);
-        jointState.position.push_back(it->second.position);
-        jointState.velocity.push_back(it->second.velocity);
-        jointState.effort.push_back(it->second.effort);
-    }
-    jointState.header = std_msgs::Header();
+  // check if an object of this class already exists, if not create one
+  if (RobotStateInformer::currentObject_ == nullptr)
+  {
+    static RobotStateInformer obj(nh);
+    currentObject_ = &obj;
+  }
+  return currentObject_;
 }
 
-void RobotStateInformer::jointStateCB(const sensor_msgs::JointStatePtr msg){
-    std::lock_guard<std::mutex> guard(currentStateMutex_);
-    for(size_t i = 0; i < msg->name.size(); ++i){
-        RobotState state;
-        state.name     = msg->name[i];
-        state.position = msg->position[i];
-        state.velocity = msg->velocity[i];
-        state.effort   = msg->effort[i];
-        currentState_[msg->name[i]] = state;
-    }
+RobotStateInformer::RobotStateInformer(ros::NodeHandle nh) : nh_(nh)
+{
+  rd_ = RobotDescription::getRobotDescription(nh_);
+  nh.getParam("ihmc_ros/robot_name", robotName_);
 
+  jointStateSub_ =
+      nh_.subscribe("ihmc_ros/" + robotName_ + "/output/joint_states", 1, &RobotStateInformer::jointStateCB, this);
+  ros::Duration(0.2).sleep();
+  closeRightGrasp = { 1.09, 1.47, 1.84, 0.90, 1.20, 1.51, 0.99, 1.34, 1.68, 0.55, 0.739, 0.92, 1.40 };
+  closeLeftGrasp = { 0.0, -1.47, -1.84, -0.90, -1.20, -1.51, -0.99, -1.34, -1.68, -0.55, -0.739, -0.92, 1.40 };
+  openGrasp = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 }
 
-void RobotStateInformer::getJointPositions(std::vector<double> &positions){
-    positions.clear();
-    std::lock_guard<std::mutex> guard(currentStateMutex_);
-
-    for (auto it = currentState_.begin(); it != currentState_.end(); ++it){
-        positions.push_back(it->second.position);
-    }
+RobotStateInformer::~RobotStateInformer()
+{
+  jointStateSub_.shutdown();
 }
 
-bool RobotStateInformer::getJointPositions(const std::string &paramName, std::vector<double> &positions){
-    positions.clear();
-    std::vector<std::string> jointNames;
-    std::string parameter;
-    if(paramName == "left_arm_joint_names" || paramName == "left_arm"){
-        parameter.assign("/ihmc_ros/"+robotName_ + "/left_arm_joint_names");
-    }
-    else if (paramName == "right_arm_joint_names"  || paramName == "right_arm"){
-        parameter.assign("/ihmc_ros/"+robotName_ + "/right_arm_joint_names");
-    }
-    else{
-        parameter.assign(paramName);
-    }
+void RobotStateInformer::getJointStateMessage(sensor_msgs::JointState& jointState)
+{
+  jointState.name.clear();
+  jointState.position.clear();
+  jointState.velocity.clear();
+  jointState.effort.clear();
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+  for (auto it = currentState_.begin(); it != currentState_.end(); ++it)
+  {
+    jointState.name.push_back(it->first);
+    jointState.position.push_back(it->second.position);
+    jointState.velocity.push_back(it->second.velocity);
+    jointState.effort.push_back(it->second.effort);
+  }
+  jointState.header = std_msgs::Header();
+}
 
-    std::lock_guard<std::mutex> guard(currentStateMutex_);
-    if (nh_.getParam(parameter, jointNames)){
-        for (auto joint : jointNames){
-            positions.push_back((currentState_[joint]).position);
-        }
-        return true;
+void RobotStateInformer::jointStateCB(const sensor_msgs::JointStatePtr msg)
+{
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+  for (size_t i = 0; i < msg->name.size(); ++i)
+  {
+    RobotState state;
+    state.name = msg->name[i];
+    state.position = msg->position[i];
+    state.velocity = msg->velocity[i];
+    state.effort = msg->effort[i];
+    currentState_[msg->name[i]] = state;
+  }
+}
+
+void RobotStateInformer::getJointPositions(std::vector<double>& positions)
+{
+  positions.clear();
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+
+  for (auto it = currentState_.begin(); it != currentState_.end(); ++it)
+  {
+    positions.push_back(it->second.position);
+  }
+}
+
+bool RobotStateInformer::getJointPositions(const std::string& paramName, std::vector<double>& positions)
+{
+  positions.clear();
+  std::vector<std::string> jointNames;
+  std::string parameter;
+  if (paramName == "left_arm_joint_names" || paramName == "left_arm")
+  {
+    parameter.assign("/ihmc_ros/" + robotName_ + "/left_arm_joint_names");
+  }
+  else if (paramName == "right_arm_joint_names" || paramName == "right_arm")
+  {
+    parameter.assign("/ihmc_ros/" + robotName_ + "/right_arm_joint_names");
+  }
+  else
+  {
+    parameter.assign(paramName);
+  }
+
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+  if (nh_.getParam(parameter, jointNames))
+  {
+    for (auto joint : jointNames)
+    {
+      positions.push_back((currentState_[joint]).position);
     }
+    return true;
+  }
+  return false;
+}
+
+void RobotStateInformer::getJointVelocities(std::vector<double>& velocities)
+{
+  velocities.clear();
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+
+  for (auto it = currentState_.begin(); it != currentState_.end(); ++it)
+  {
+    velocities.push_back(it->second.velocity);
+  }
+}
+
+bool RobotStateInformer::getJointVelocities(const std::string& paramName, std::vector<double>& velocities)
+{
+  velocities.clear();
+  std::vector<std::string> jointNames;
+  std::string parameter;
+  if (paramName == "left_arm_joint_names" || paramName == "left_arm")
+  {
+    parameter.assign("/ihmc_ros/" + robotName_ + "/left_arm_joint_names");
+  }
+  else if (paramName == "right_arm_joint_names" || paramName == "right_arm")
+  {
+    parameter.assign("/ihmc_ros/" + robotName_ + "/right_arm_joint_names");
+  }
+  else
+  {
+    parameter.assign(paramName);
+  }
+
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+  if (nh_.getParam(parameter, jointNames))
+  {
+    for (auto joint : jointNames)
+    {
+      velocities.push_back((currentState_[joint]).velocity);
+    }
+    return true;
+  }
+  return false;
+}
+
+void RobotStateInformer::getJointEfforts(std::vector<double>& efforts)
+{
+  efforts.clear();
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+
+  for (auto it = currentState_.begin(); it != currentState_.end(); ++it)
+  {
+    efforts.push_back(it->second.effort);
+  }
+}
+
+bool RobotStateInformer::getJointEfforts(const std::string& paramName, std::vector<double>& efforts)
+{
+  efforts.clear();
+  std::vector<std::string> jointNames;
+  std::string parameter;
+  if (paramName == "left_arm_joint_names" || paramName == "left_arm")
+  {
+    parameter.assign("/ihmc_ros/" + robotName_ + "/left_arm_joint_names");
+  }
+  else if (paramName == "right_arm_joint_names" || paramName == "right_arm")
+  {
+    parameter.assign("/ihmc_ros/" + robotName_ + "/right_arm_joint_names");
+  }
+  else
+  {
+    parameter.assign(paramName);
+  }
+
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+  if (nh_.getParam(parameter, jointNames))
+  {
+    for (auto joint : jointNames)
+    {
+      efforts.push_back((currentState_[joint]).effort);
+    }
+    return true;
+  }
+  return false;
+}
+
+double RobotStateInformer::getJointPosition(const std::string& jointName)
+{
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+  return (currentState_[jointName]).position;
+}
+
+double RobotStateInformer::getJointVelocity(const std::string& jointName)
+{
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+  return (currentState_[jointName]).velocity;
+}
+
+double RobotStateInformer::getJointEffort(const std::string& jointName)
+{
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+  return (currentState_[jointName]).effort;
+}
+
+void RobotStateInformer::getJointNames(std::vector<std::string>& jointNames)
+{
+  jointNames.clear();
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+  for (auto i : currentState_)
+  {
+    jointNames.push_back(i.first);
+  }
+}
+
+bool RobotStateInformer::getCurrentPose(const std::string& frameName, geometry_msgs::Pose& pose,
+                                        const std::string& baseFrame)
+{
+  tf::StampedTransform origin;
+
+  try
+  {
+    listener_.waitForTransform(baseFrame, frameName, ros::Time(0), ros::Duration(2));
+    listener_.lookupTransform(baseFrame, frameName, ros::Time(0), origin);
+  }
+  catch (tf::TransformException ex)
+  {
+    ROS_WARN("%s", ex.what());
+    ros::spinOnce();
     return false;
+  }
+
+  tf::pointTFToMsg(origin.getOrigin(), pose.position);
+  tf::quaternionTFToMsg(origin.getRotation(), pose.orientation);
+
+  return true;
 }
 
-void RobotStateInformer::getJointVelocities(std::vector<double> &velocities){
-    velocities.clear();
-    std::lock_guard<std::mutex> guard(currentStateMutex_);
-
-    for (auto it = currentState_.begin(); it != currentState_.end(); ++it){
-        velocities.push_back(it->second.velocity);
-    }
-}
-
-bool RobotStateInformer::getJointVelocities(const std::string &paramName, std::vector<double> &velocities){
-    velocities.clear();
-    std::vector<std::string> jointNames;
-    std::string parameter;
-    if(paramName == "left_arm_joint_names" || paramName == "left_arm"){
-        parameter.assign("/ihmc_ros/"+robotName_ + "/left_arm_joint_names");
-    }
-    else if (paramName == "right_arm_joint_names"  || paramName == "right_arm"){
-        parameter.assign("/ihmc_ros/"+robotName_ + "/right_arm_joint_names");
-    }
-    else{
-        parameter.assign(paramName);
-    }
-
-    std::lock_guard<std::mutex> guard(currentStateMutex_);
-    if (nh_.getParam(parameter, jointNames)){
-        for (auto joint : jointNames){
-            velocities.push_back((currentState_[joint]).velocity);
-        }
-        return true;
-    }
+bool RobotStateInformer::getTransform(const std::string& frameName, tf::StampedTransform& transform,
+                                      const std::string& baseFrame)
+{
+  try
+  {
+    listener_.waitForTransform(baseFrame, frameName, ros::Time(0), ros::Duration(2));
+    listener_.lookupTransform(baseFrame, frameName, ros::Time(0), transform);
+  }
+  catch (tf::TransformException ex)
+  {
+    ROS_WARN("%s", ex.what());
+    ros::spinOnce();
     return false;
+  }
+  return true;
 }
 
-
-void RobotStateInformer::getJointEfforts(std::vector<double> &efforts){
-    efforts.clear();
-    std::lock_guard<std::mutex> guard(currentStateMutex_);
-
-    for (auto it = currentState_.begin(); it != currentState_.end(); ++it){
-        efforts.push_back(it->second.effort);
-    }
-}
-
-bool RobotStateInformer::getJointEfforts(const std::string &paramName, std::vector<double> &efforts){
-    efforts.clear();
-    std::vector<std::string> jointNames;
-    std::string parameter;
-    if(paramName == "left_arm_joint_names" || paramName == "left_arm"){
-        parameter.assign("/ihmc_ros/"+robotName_ + "/left_arm_joint_names");
-    }
-    else if (paramName == "right_arm_joint_names"  || paramName == "right_arm"){
-        parameter.assign("/ihmc_ros/"+robotName_ + "/right_arm_joint_names");
-    }
-    else{
-        parameter.assign(paramName);
-    }
-
-    std::lock_guard<std::mutex> guard(currentStateMutex_);
-    if (nh_.getParam(parameter, jointNames)){
-        for (auto joint : jointNames){
-            efforts.push_back((currentState_[joint]).effort);
-        }
-        return true;
-    }
+bool RobotStateInformer::transformQuaternion(const geometry_msgs::QuaternionStamped& qt_in,
+                                             geometry_msgs::QuaternionStamped& qt_out, const std::string target_frame)
+{
+  try
+  {
+    listener_.waitForTransform(rd_->getPelvisFrame(), rd_->getWorldFrame(), ros::Time(0), ros::Duration(2));
+    listener_.transformQuaternion(target_frame, qt_in, qt_out);
+  }
+  catch (tf::TransformException ex)
+  {
+    ROS_WARN("%s", ex.what());
+    ros::spinOnce();
     return false;
+  }
+  return true;
 }
 
-
-double RobotStateInformer::getJointPosition(const std::string &jointName)
+bool RobotStateInformer::transformQuaternion(const geometry_msgs::Quaternion& qt_in, geometry_msgs::Quaternion& qt_out,
+                                             const std::string& from_frame, const std::string& to_frame)
 {
-    std::lock_guard<std::mutex> guard(currentStateMutex_);
-    return (currentState_[jointName]).position;
+  geometry_msgs::QuaternionStamped in, out;
+  in.quaternion = qt_in;
+  in.header.frame_id = from_frame;
+  try
+  {
+    listener_.waitForTransform(rd_->getPelvisFrame(), rd_->getWorldFrame(), ros::Time(0), ros::Duration(2));
+    listener_.transformQuaternion(to_frame, in, out);
+  }
+  catch (tf::TransformException ex)
+  {
+    ROS_WARN("%s", ex.what());
+    ros::spinOnce();
+    return false;
+  }
+  qt_out = out.quaternion;
+  return true;
 }
 
-double RobotStateInformer::getJointVelocity(const std::string &jointName)
+bool RobotStateInformer::transformPoint(const geometry_msgs::PointStamped& pt_in, geometry_msgs::PointStamped& pt_out,
+                                        const std::string target_frame)
 {
-    std::lock_guard<std::mutex> guard(currentStateMutex_);
-    return (currentState_[jointName]).velocity;
+  try
+  {
+    listener_.waitForTransform(rd_->getPelvisFrame(), rd_->getWorldFrame(), ros::Time(0), ros::Duration(2));
+    listener_.transformPoint(target_frame, pt_in, pt_out);
+  }
+  catch (tf::TransformException ex)
+  {
+    ROS_WARN("%s", ex.what());
+    ros::spinOnce();
+    return false;
+  }
+  return true;
 }
 
-double RobotStateInformer::getJointEffort(const std::string &jointName)
+bool RobotStateInformer::transformPose(const geometry_msgs::Pose& pose_in, geometry_msgs::Pose& pose_out,
+                                       const std::string& from_frame, const std::string& to_frame)
 {
-    std::lock_guard<std::mutex> guard(currentStateMutex_);
-    return (currentState_[jointName]).effort;
+  geometry_msgs::PoseStamped in, out;
+  in.header.frame_id = from_frame;
+  in.header.stamp = ros::Time(0);
+  in.pose = pose_in;
+  try
+  {
+    listener_.waitForTransform(rd_->getPelvisFrame(), rd_->getWorldFrame(), ros::Time(0), ros::Duration(2));
+    listener_.transformPose(to_frame, in, out);
+  }
+  catch (tf::TransformException ex)
+  {
+    ROS_WARN("%s", ex.what());
+    ros::spinOnce();
+    return false;
+  }
+
+  pose_out = out.pose;
+  return true;
 }
 
-void RobotStateInformer::getJointNames(std::vector<std::string> &jointNames)
+bool RobotStateInformer::transformPose(const geometry_msgs::Pose2D& pose_in, geometry_msgs::Pose2D& pose_out,
+                                       const std::string& from_frame, const std::string& to_frame)
 {
-    jointNames.clear();
-    std::lock_guard<std::mutex> guard(currentStateMutex_);
-    for (auto i : currentState_){
-        jointNames.push_back(i.first);
-    }
+  geometry_msgs::PoseStamped in, out;
+  in.header.frame_id = from_frame;
+  in.header.stamp = ros::Time(0);
+  in.pose.position.x = pose_in.x;
+  in.pose.position.y = pose_in.y;
+  in.pose.position.z = 0;
+  tf::quaternionTFToMsg(tf::createQuaternionFromYaw(pose_in.theta), in.pose.orientation);
+
+  try
+  {
+    listener_.waitForTransform(rd_->getPelvisFrame(), rd_->getWorldFrame(), ros::Time(0), ros::Duration(2));
+    listener_.transformPose(to_frame, in, out);
+  }
+  catch (tf::TransformException ex)
+  {
+    ROS_WARN("%s", ex.what());
+    ros::spinOnce();
+    return false;
+  }
+
+  pose_out.x = out.pose.position.x;
+  pose_out.y = out.pose.position.y;
+  pose_out.theta = tf::getYaw(out.pose.orientation);
+
+  return true;
 }
 
-bool RobotStateInformer::getCurrentPose(const std::string &frameName, geometry_msgs::Pose &pose, const std::string &baseFrame)
+bool RobotStateInformer::transformPoint(const geometry_msgs::Point& pt_in, geometry_msgs::Point& pt_out,
+                                        const std::string& from_frame, const std::string& to_frame)
 {
-    tf::StampedTransform origin;
+  geometry_msgs::PointStamped stmp_pt_in, stmp_pt_out;
+  stmp_pt_in.header.frame_id = from_frame;
+  stmp_pt_in.point = pt_in;
 
-    try {
-
-        listener_.waitForTransform(baseFrame, frameName, ros::Time(0), ros::Duration(2));
-        listener_.lookupTransform(baseFrame, frameName, ros::Time(0),origin);
-    }
-    catch (tf::TransformException ex) {
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
-
-    tf::pointTFToMsg(origin.getOrigin(), pose.position);
-    tf::quaternionTFToMsg(origin.getRotation(), pose.orientation);
-
-    return true;
+  try
+  {
+    listener_.waitForTransform(rd_->getPelvisFrame(), rd_->getWorldFrame(), ros::Time(0), ros::Duration(2));
+    listener_.transformPoint(to_frame, stmp_pt_in, stmp_pt_out);
+  }
+  catch (tf::TransformException ex)
+  {
+    ROS_WARN("%s", ex.what());
+    ros::spinOnce();
+    return false;
+  }
+  pt_out = stmp_pt_out.point;
+  return true;
 }
 
-bool RobotStateInformer::getTransform(const std::string &frameName, tf::StampedTransform &transform, const std::string &baseFrame)
+bool RobotStateInformer::transformVector(const geometry_msgs::Vector3Stamped& vec_in,
+                                         geometry_msgs::Vector3Stamped& vec_out, const std::string target_frame)
 {
-    try {
-
-        listener_.waitForTransform(baseFrame, frameName, ros::Time(0), ros::Duration(2));
-        listener_.lookupTransform(baseFrame, frameName, ros::Time(0),transform);
-    }
-    catch (tf::TransformException ex) {
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
-    return true;
+  try
+  {
+    listener_.waitForTransform(rd_->getPelvisFrame(), rd_->getWorldFrame(), ros::Time(0), ros::Duration(2));
+    listener_.transformVector(target_frame, vec_in, vec_out);
+  }
+  catch (tf::TransformException ex)
+  {
+    ROS_WARN("%s", ex.what());
+    ros::spinOnce();
+    return false;
+  }
+  return true;
 }
 
-bool RobotStateInformer::transformQuaternion(const geometry_msgs::QuaternionStamped &qt_in, geometry_msgs::QuaternionStamped &qt_out,const std::string target_frame)
+bool RobotStateInformer::transformVector(const geometry_msgs::Vector3& vec_in, geometry_msgs::Vector3& vec_out,
+                                         const std::string& from_frame, const std::string& to_frame)
 {
-    try{
-
-        listener_.waitForTransform(rd_->getPelvisFrame(),rd_->getWorldFrame(), ros::Time(0),ros::Duration(2));
-        listener_.transformQuaternion(target_frame, qt_in, qt_out);
-
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
-    return true;
-}
-
-bool RobotStateInformer::transformQuaternion(const geometry_msgs::Quaternion &qt_in, geometry_msgs::Quaternion &qt_out,const std::string &from_frame, const std::string &to_frame)
-{
-    geometry_msgs::QuaternionStamped in, out;
-    in.quaternion = qt_in;
-    in.header.frame_id = from_frame;
-    try{
-
-        listener_.waitForTransform(rd_->getPelvisFrame(),rd_->getWorldFrame(), ros::Time(0),ros::Duration(2));
-        listener_.transformQuaternion(to_frame, in, out);
-
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
-    qt_out = out.quaternion;
-    return true;
-}
-
-bool RobotStateInformer::transformPoint(const geometry_msgs::PointStamped &pt_in, geometry_msgs::PointStamped &pt_out,const std::string target_frame)
-{
-    try{
-
-        listener_.waitForTransform(rd_->getPelvisFrame(),rd_->getWorldFrame(), ros::Time(0),ros::Duration(2));
-        listener_.transformPoint(target_frame, pt_in, pt_out);
-
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
-    return true;
-}
-
-bool RobotStateInformer::transformPose(const geometry_msgs::Pose &pose_in, geometry_msgs::Pose &pose_out,const std::string &from_frame, const std::string &to_frame)
-{
-    geometry_msgs::PoseStamped in, out;
-    in.header.frame_id = from_frame;
-    in.header.stamp = ros::Time(0);
-    in.pose = pose_in;
-    try{
-
-        listener_.waitForTransform(rd_->getPelvisFrame(),rd_->getWorldFrame(), ros::Time(0),ros::Duration(2));
-        listener_.transformPose(to_frame, in, out);
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
-
-    pose_out = out.pose;
-    return true;
-}
-
-bool RobotStateInformer::transformPose(const geometry_msgs::Pose2D &pose_in, geometry_msgs::Pose2D &pose_out,const std::string &from_frame, const std::string &to_frame)
-{
-    geometry_msgs::PoseStamped in, out;
-    in.header.frame_id = from_frame;
-    in.header.stamp = ros::Time(0);
-    in.pose.position.x = pose_in.x;
-    in.pose.position.y = pose_in.y;
-    in.pose.position.z = 0;
-    tf::quaternionTFToMsg(tf::createQuaternionFromYaw(pose_in.theta), in.pose.orientation);
-
-    try{
-
-        listener_.waitForTransform(rd_->getPelvisFrame(),rd_->getWorldFrame(), ros::Time(0),ros::Duration(2));
-        listener_.transformPose(to_frame, in, out);
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
-
-    pose_out.x     = out.pose.position.x;
-    pose_out.y     = out.pose.position.y;
-    pose_out.theta = tf::getYaw(out.pose.orientation);
-
-    return true;
-}
-
-bool RobotStateInformer::transformPoint(const geometry_msgs::Point &pt_in, geometry_msgs::Point &pt_out,const std::string &from_frame, const std::string &to_frame)
-{
-    geometry_msgs::PointStamped stmp_pt_in, stmp_pt_out;
-    stmp_pt_in.header.frame_id = from_frame;
-    stmp_pt_in.point = pt_in;
-
-    try{
-
-        listener_.waitForTransform(rd_->getPelvisFrame(),rd_->getWorldFrame(), ros::Time(0),ros::Duration(2));
-        listener_.transformPoint(to_frame, stmp_pt_in, stmp_pt_out);
-
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
-    pt_out = stmp_pt_out.point;
-    return true;
-}
-
-bool RobotStateInformer::transformVector(const geometry_msgs::Vector3Stamped &vec_in, geometry_msgs::Vector3Stamped &vec_out,const std::string target_frame)
-{
-    try{
-
-        listener_.waitForTransform(rd_->getPelvisFrame(),rd_->getWorldFrame(), ros::Time(0),ros::Duration(2));
-        listener_.transformVector(target_frame, vec_in, vec_out);
-
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
-    return true;
-}
-
-
-bool RobotStateInformer::transformVector(const geometry_msgs::Vector3 &vec_in, geometry_msgs::Vector3 &vec_out,const std::string &from_frame, const std::string &to_frame)
-{
-    geometry_msgs::Vector3Stamped in, out;
-    in.vector = vec_in;
-    in.header.frame_id = from_frame;
-    try{
-
-        listener_.waitForTransform(rd_->getPelvisFrame(),rd_->getWorldFrame(), ros::Time(0),ros::Duration(2));
-        listener_.transformVector(to_frame, in, out);
-
-    }
-    catch (tf::TransformException ex){
-        ROS_WARN("%s",ex.what());
-        ros::spinOnce();
-        return false;
-    }
-    vec_out = out.vector;
-    return true;
+  geometry_msgs::Vector3Stamped in, out;
+  in.vector = vec_in;
+  in.header.frame_id = from_frame;
+  try
+  {
+    listener_.waitForTransform(rd_->getPelvisFrame(), rd_->getWorldFrame(), ros::Time(0), ros::Duration(2));
+    listener_.transformVector(to_frame, in, out);
+  }
+  catch (tf::TransformException ex)
+  {
+    ROS_WARN("%s", ex.what());
+    ros::spinOnce();
+    return false;
+  }
+  vec_out = out.vector;
+  return true;
 }
 
 /* This works only for valkyrie. This can be updated once GripperControlInterface is redesigned*/
 bool RobotStateInformer::isGraspped(RobotSide side)
 {
-    std::vector<float> jointPos,closeGrasp;
-    closeGrasp= side == LEFT ? closeLeftGrasp : closeRightGrasp;
+  std::vector<float> jointPos, closeGrasp;
+  closeGrasp = side == LEFT ? closeLeftGrasp : closeRightGrasp;
 
-    if(side ==RIGHT)
-    {
-        jointPos.push_back(getJointPosition("rightIndexFingerPitch1"));
-        jointPos.push_back(getJointPosition("rightIndexFingerPitch2"));
-        jointPos.push_back(getJointPosition("rightIndexFingerPitch3"));
-        jointPos.push_back(getJointPosition("rightMiddleFingerPitch1"));
-        jointPos.push_back(getJointPosition("rightMiddleFingerPitch2"));
-        jointPos.push_back(getJointPosition("rightMiddleFingerPitch3"));
-        jointPos.push_back(getJointPosition("rightPinkyPitch1"));
-        jointPos.push_back(getJointPosition("rightPinkyPitch2"));
-        jointPos.push_back(getJointPosition("rightPinkyPitch3"));
-        jointPos.push_back(getJointPosition("rightThumbPitch1"));
-        jointPos.push_back(getJointPosition("rightThumbPitch2"));
-        jointPos.push_back(getJointPosition("rightThumbPitch3"));
-        jointPos.push_back(getJointPosition("rightThumbRoll"));
-    }
-    else
-    {
-        jointPos.push_back(getJointPosition("leftIndexFingerPitch1"));
-        jointPos.push_back(getJointPosition("leftIndexFingerPitch2"));
-        jointPos.push_back(getJointPosition("leftIndexFingerPitch3"));
-        jointPos.push_back(getJointPosition("leftMiddleFingerPitch1"));
-        jointPos.push_back(getJointPosition("leftMiddleFingerPitch2"));
-        jointPos.push_back(getJointPosition("leftMiddleFingerPitch3"));
-        jointPos.push_back(getJointPosition("leftPinkyPitch1"));
-        jointPos.push_back(getJointPosition("leftPinkyPitch2"));
-        jointPos.push_back(getJointPosition("leftPinkyPitch3"));
-        jointPos.push_back(getJointPosition("leftThumbPitch1"));
-        jointPos.push_back(getJointPosition("leftThumbPitch2"));
-        jointPos.push_back(getJointPosition("leftThumbPitch3"));
-        jointPos.push_back(getJointPosition("leftThumbRoll"));
-    }
+  if (side == RIGHT)
+  {
+    jointPos.push_back(getJointPosition("rightIndexFingerPitch1"));
+    jointPos.push_back(getJointPosition("rightIndexFingerPitch2"));
+    jointPos.push_back(getJointPosition("rightIndexFingerPitch3"));
+    jointPos.push_back(getJointPosition("rightMiddleFingerPitch1"));
+    jointPos.push_back(getJointPosition("rightMiddleFingerPitch2"));
+    jointPos.push_back(getJointPosition("rightMiddleFingerPitch3"));
+    jointPos.push_back(getJointPosition("rightPinkyPitch1"));
+    jointPos.push_back(getJointPosition("rightPinkyPitch2"));
+    jointPos.push_back(getJointPosition("rightPinkyPitch3"));
+    jointPos.push_back(getJointPosition("rightThumbPitch1"));
+    jointPos.push_back(getJointPosition("rightThumbPitch2"));
+    jointPos.push_back(getJointPosition("rightThumbPitch3"));
+    jointPos.push_back(getJointPosition("rightThumbRoll"));
+  }
+  else
+  {
+    jointPos.push_back(getJointPosition("leftIndexFingerPitch1"));
+    jointPos.push_back(getJointPosition("leftIndexFingerPitch2"));
+    jointPos.push_back(getJointPosition("leftIndexFingerPitch3"));
+    jointPos.push_back(getJointPosition("leftMiddleFingerPitch1"));
+    jointPos.push_back(getJointPosition("leftMiddleFingerPitch2"));
+    jointPos.push_back(getJointPosition("leftMiddleFingerPitch3"));
+    jointPos.push_back(getJointPosition("leftPinkyPitch1"));
+    jointPos.push_back(getJointPosition("leftPinkyPitch2"));
+    jointPos.push_back(getJointPosition("leftPinkyPitch3"));
+    jointPos.push_back(getJointPosition("leftThumbPitch1"));
+    jointPos.push_back(getJointPosition("leftThumbPitch2"));
+    jointPos.push_back(getJointPosition("leftThumbPitch3"));
+    jointPos.push_back(getJointPosition("leftThumbRoll"));
+  }
 
-    float diffClose=0.0,diffOpen=0.0;
+  float diffClose = 0.0, diffOpen = 0.0;
 
-    for (size_t i = 0; i < closeGrasp.size(); ++i)
-    {
-        diffClose+=fabs(jointPos[i]-closeGrasp[i]);
-        diffOpen+=fabs(jointPos[i]-openGrasp[i]);
-    }
+  for (size_t i = 0; i < closeGrasp.size(); ++i)
+  {
+    diffClose += fabs(jointPos[i] - closeGrasp[i]);
+    diffOpen += fabs(jointPos[i] - openGrasp[i]);
+  }
 
-    if(fabs(diffOpen)<0.1)
-    {
-        return false;
-    }
-    else if(fabs(diffClose)<0.1)
-    {
-        return false;
-    }
-    else return true;
-
+  if (fabs(diffOpen) < 0.1)
+  {
+    return false;
+  }
+  else if (fabs(diffClose) < 0.1)
+  {
+    return false;
+  }
+  else
+    return true;
 }

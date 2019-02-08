@@ -1,15 +1,16 @@
 #include <tough_controller_interface/pelvis_control_interface.h>
 
-PelvisControlInterface::PelvisControlInterface(ros::NodeHandle nh):ToughControllerInterface(nh)
+PelvisControlInterface::PelvisControlInterface(ros::NodeHandle nh) : ToughControllerInterface(nh)
 {
-    pelvisHeightPublisher_ = nh_.advertise<ihmc_msgs::PelvisHeightTrajectoryRosMessage>(control_topic_prefix_ +"/pelvis_height_trajectory",1,true);
+  pelvisHeightPublisher_ = nh_.advertise<ihmc_msgs::PelvisHeightTrajectoryRosMessage>(
+      control_topic_prefix_ + "/pelvis_height_trajectory", 1, true);
 
-    homePositionPublisher_ = nh_.advertise<ihmc_msgs::GoHomeRosMessage>(control_topic_prefix_+"/go_home",1,true);
+  homePositionPublisher_ = nh_.advertise<ihmc_msgs::GoHomeRosMessage>(control_topic_prefix_ + "/go_home", 1, true);
 }
 
 PelvisControlInterface::~PelvisControlInterface()
 {
-    pelvisHeightPublisher_.shutdown();
+  pelvisHeightPublisher_.shutdown();
 }
 
 /**
@@ -18,51 +19,51 @@ PelvisControlInterface::~PelvisControlInterface()
  */
 void PelvisControlInterface::controlPelvisHeight(float height, float duration)
 {
-    ihmc_msgs::PelvisHeightTrajectoryRosMessage msg;
-    ihmc_msgs::EuclideanTrajectoryPointRosMessage p;
+  ihmc_msgs::PelvisHeightTrajectoryRosMessage msg;
+  ihmc_msgs::EuclideanTrajectoryPointRosMessage p;
 
-    geometry_msgs::Pose foot_pose;
-    state_informer_->getCurrentPose(rd_->getLeftFootFrameName(), foot_pose);
+  geometry_msgs::Pose foot_pose;
+  state_informer_->getCurrentPose(rd_->getLeftFootFrameName(), foot_pose);
 
-    ihmc_msgs::FrameInformationRosMessage reference_frame;
-    reference_frame.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash();   //Pelvis frame
-    reference_frame.data_reference_frame_id = rd_->getPelvisZUPFrameHash();//Pelvis frame
-    msg.frame_information = reference_frame;
-    p.position.z = height + foot_pose.position.z;
-    p.time = duration;
+  ihmc_msgs::FrameInformationRosMessage reference_frame;
+  reference_frame.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash();  // Pelvis frame
+  reference_frame.data_reference_frame_id = rd_->getPelvisZUPFrameHash();        // Pelvis frame
+  msg.frame_information = reference_frame;
+  p.position.z = height + foot_pose.position.z;
+  p.time = duration;
 
-    msg.taskspace_trajectory_points.clear();
-    msg.taskspace_trajectory_points.push_back(p);
-    msg.use_custom_control_frame = false;
+  msg.taskspace_trajectory_points.clear();
+  msg.taskspace_trajectory_points.push_back(p);
+  msg.use_custom_control_frame = false;
 
-    msg.unique_id = id_++;
+  msg.unique_id = id_++;
 
-    // publish the message
-    publishPelvisMessage(msg);
+  // publish the message
+  publishPelvisMessage(msg);
 }
 
-void PelvisControlInterface::publishPelvisMessage(const ihmc_msgs::PelvisHeightTrajectoryRosMessage &msg) const{
-    this->pelvisHeightPublisher_.publish(msg);
+void PelvisControlInterface::publishPelvisMessage(const ihmc_msgs::PelvisHeightTrajectoryRosMessage& msg) const
+{
+  this->pelvisHeightPublisher_.publish(msg);
 }
 
 void PelvisControlInterface::resetPose(float time)
 {
-    ihmc_msgs::GoHomeRosMessage go_home;
-    go_home.body_part = ihmc_msgs::GoHomeRosMessage::PELVIS;
+  ihmc_msgs::GoHomeRosMessage go_home;
+  go_home.body_part = ihmc_msgs::GoHomeRosMessage::PELVIS;
 
-    go_home.trajectory_time = time;
-    go_home.unique_id = PelvisControlInterface::id_++;
+  go_home.trajectory_time = time;
+  go_home.unique_id = PelvisControlInterface::id_++;
 
-    homePositionPublisher_.publish(go_home);
-
+  homePositionPublisher_.publish(go_home);
 }
 
-bool PelvisControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)
+bool PelvisControlInterface::getJointSpaceState(std::vector<double>& joints, RobotSide side)
 {
-    return false;
+  return false;
 }
 
-bool PelvisControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
+bool PelvisControlInterface::getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side, std::string fixedFrame)
 {
-    return state_informer_->getCurrentPose(rd_->getPelvisFrame(), pose, fixedFrame);
+  return state_informer_->getCurrentPose(rd_->getPelvisFrame(), pose, fixedFrame);
 }

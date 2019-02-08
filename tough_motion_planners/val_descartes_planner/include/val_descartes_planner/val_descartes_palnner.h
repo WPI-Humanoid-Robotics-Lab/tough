@@ -17,16 +17,11 @@
 #include <descartes_planner/dense_planner.h>
 #include <eigen_conversions/eigen_msg.h>
 
-namespace dplanner {
-
-
+namespace dplanner
+{
 descartes_core::TrajectoryPtPtr makeTolerancedCartesianPoint(const Eigen::Affine3d& pose);
-void plantrajectory(ros::NodeHandle nh, std::vector<geometry_msgs::Pose> &pose, trajectory_msgs::JointTrajectory &traj);
-void
-toROSJointTrajectory(const std::vector<descartes_core::TrajectoryPtPtr> &trajectory,
-                     const descartes_core::RobotModel& model,
-                     const std::vector<std::string>& joint_names,
-                     double time_delay,
-                     trajectory_msgs::JointTrajectory& traj);
-
+void plantrajectory(ros::NodeHandle nh, std::vector<geometry_msgs::Pose>& pose, trajectory_msgs::JointTrajectory& traj);
+void toROSJointTrajectory(const std::vector<descartes_core::TrajectoryPtPtr>& trajectory,
+                          const descartes_core::RobotModel& model, const std::vector<std::string>& joint_names,
+                          double time_delay, trajectory_msgs::JointTrajectory& traj);
 }

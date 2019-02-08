@@ -2,21 +2,21 @@
 
 long ToughControllerInterface::id_ = 1;
 
-ToughControllerInterface::ToughControllerInterface(ros::NodeHandle nh){
+ToughControllerInterface::ToughControllerInterface(ros::NodeHandle nh)
+{
+  if (!nh.getParam("ihmc_ros/robot_name", robot_name_))
+  {
+    ROS_ERROR("ihmc_ros/robot_name parameter is not on the server. Using valkyrie by default");
+    robot_name_ = "valkyrie";
+  }
 
-    if(!nh.getParam("ihmc_ros/robot_name", robot_name_)){
-        ROS_ERROR("ihmc_ros/robot_name parameter is not on the server. Using valkyrie by default");
-        robot_name_ = "valkyrie";
-    }
+  control_topic_prefix_ = "ihmc_ros/" + robot_name_ + "/control";
+  output_topic_prefix_ = "ihmc_ros/" + robot_name_ + "/output";
 
-    control_topic_prefix_ = "ihmc_ros/"+robot_name_+"/control";
-    output_topic_prefix_ = "ihmc_ros/"+robot_name_+"/output";
-
-    state_informer_ = RobotStateInformer::getRobotStateInformer(nh_);
-    rd_ = RobotDescription::getRobotDescription(nh_);
-
+  state_informer_ = RobotStateInformer::getRobotStateInformer(nh_);
+  rd_ = RobotDescription::getRobotDescription(nh_);
 }
 
-ToughControllerInterface::~ToughControllerInterface(){
-
+ToughControllerInterface::~ToughControllerInterface()
+{
 }

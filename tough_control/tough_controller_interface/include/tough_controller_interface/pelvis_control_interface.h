@@ -9,24 +9,23 @@
 #include "tough_common/robot_description.h"
 #include "tough_controller_interface/tough_controller_interface.h"
 
-class PelvisControlInterface : public ToughControllerInterface{
-
+class PelvisControlInterface : public ToughControllerInterface
+{
 private:
-    ros::Publisher pelvisHeightPublisher_;
-    ros::Publisher homePositionPublisher_;
+  ros::Publisher pelvisHeightPublisher_;
+  ros::Publisher homePositionPublisher_;
 
 public:
+  PelvisControlInterface(ros::NodeHandle nh);
+  ~PelvisControlInterface();
+  void controlPelvisHeight(float height, float duration = 2.0f);
+  void publishPelvisMessage(const ihmc_msgs::PelvisHeightTrajectoryRosMessage& msg) const;
+  void resetPose(float time = 0.0f);
 
-    PelvisControlInterface(ros::NodeHandle nh);
-    ~PelvisControlInterface();
-    void controlPelvisHeight(float height, float duration=2.0f);
-    void publishPelvisMessage(const ihmc_msgs::PelvisHeightTrajectoryRosMessage &msg) const ;
-    void resetPose(float time=0.0f);
+  virtual bool getJointSpaceState(std::vector<double>& joints, RobotSide side) override;
 
-    virtual bool getJointSpaceState(std::vector<double> &joints, RobotSide side) override;
-
-    virtual bool getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame=TOUGH_COMMON_NAMES::WORLD_TF) override;
-
+  virtual bool getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side,
+                                 std::string fixedFrame = TOUGH_COMMON_NAMES::WORLD_TF) override;
 };
 
 #endif

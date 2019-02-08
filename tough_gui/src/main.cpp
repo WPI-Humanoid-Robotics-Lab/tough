@@ -39,14 +39,14 @@
 #include "tough_gui/tough_gui.h"
 #include "tough_gui/configurationreader.h"
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-  if( !ros::isInitialized() )
+  if (!ros::isInitialized())
   {
-    ros::init( argc, argv, "myviz", ros::init_options::AnonymousName );
+    ros::init(argc, argv, "myviz", ros::init_options::AnonymousName);
   }
 
-  QApplication app( argc, argv );
+  QApplication app(argc, argv);
 
   ToughGUI* tough_gui = new ToughGUI();
   tough_gui->show();
@@ -56,5 +56,4 @@ int main(int argc, char **argv)
   delete tough_gui;
 
   return 0;
-
 }
