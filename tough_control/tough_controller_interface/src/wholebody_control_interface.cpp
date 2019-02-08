@@ -168,7 +168,7 @@ void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTraj
 
 void WholebodyControlInterface::generateWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage &wholeBodyMsg){
     if(!chest_trajectory_.empty()) {
-        chestController_.generateMessage(chest_trajectory_, 0, wholeBodyMsg.chest_trajectory_message);
+        chestController_.generateMessage(chest_trajectory_, ihmc_msgs::ChestTrajectoryRosMessage::OVERRIDE, wholeBodyMsg.chest_trajectory_message);
     }
     if(!left_arm_trajectory_.empty()){
         armController_.generateArmMessage(RobotSide::LEFT, left_arm_trajectory_, wholeBodyMsg.left_arm_trajectory_message);
@@ -192,14 +192,3 @@ bool WholebodyControlInterface::validateJointSequenceInTrajectory(const std::vec
 
     return true;
 }
-/*
- * Validate joints in the trajectory
- * auto it_temp = it;
-
-        for (auto joint_name_it = chest_joint_names_.begin(); joint_name_it != chest_joint_names_.end(); ++joint_name_it, ++it_temp)
-        {
-            if(*it_temp != *joint_name_it) {
-                // joints in trajectory are not in the expected sequence.
-            }
-        }
- */
