@@ -32,7 +32,7 @@ TaskspacePlanner::~TaskspacePlanner()
   planner_instance.reset();
 }
 
-bool TaskspacePlanner::getTrajectory(geometry_msgs::PoseStamped pose_msg, std::string planning_group,
+bool TaskspacePlanner::getTrajectory(const geometry_msgs::PoseStamped pose_msg, std::string planning_group,
                                      moveit_msgs::RobotTrajectory& output_robot_traj_msg)
 {
   planning_interface::MotionPlanRequest req;
@@ -45,12 +45,7 @@ bool TaskspacePlanner::getTrajectory(geometry_msgs::PoseStamped pose_msg, std::s
   // configured planning groups are all upper case. right arm begins with R and left arm begins with L
   std::string ee_frame = planning_group.front() == 'R' ? rd_->getRightEEFrame() : rd_->getLeftEEFrame();
 
-  if (rd_->getRobotName() == "atlas")
-  {
-    RobotSide side = planning_group.front() == 'R' ? RobotSide::RIGHT : RobotSide::LEFT;
-    fixEEOrientation(side, pose_msg.pose.orientation);
-  }
-
+  ROS_INFO("End effector name : %s", ee_frame.c_str());
   moveit_msgs::Constraints pose_goal =
       kinematic_constraints::constructGoalConstraints(ee_frame, pose_msg, position_tolerance_, angle_tolerance_);
   req.goal_constraints.push_back(pose_goal);
@@ -112,15 +107,16 @@ void TaskspacePlanner::setAngleTolerance(const double tolerance_angle)
   angle_tolerance_ = tolerance_angle;
 }
 
-std::string TaskspacePlanner::getPluginParameter() const
+std::string TaskspacePlanner::getPlugin() const
 {
   return plugin_param_;
 }
 
-void TaskspacePlanner::setPluginParameter(const std::string& plugin_param)
+/// @todo: fix this allow changing theplanner
+void TaskspacePlanner::setPlugin(const std::string& plugin_param)
 {
   plugin_param_ = plugin_param;
-  loadPlanners();
+  loadPlugin(plugin_param_);
 }
 
 double TaskspacePlanner::getPlanningTime() const
@@ -139,23 +135,6 @@ int TaskspacePlanner::getNumPlanningAttempts() const
 void TaskspacePlanner::setNumPlanningAttempts(const int num_planning_attempts)
 {
   num_planning_attempts_ = num_planning_attempts;
-}
-
-void TaskspacePlanner::fixEEOrientation(const RobotSide side, geometry_msgs::Quaternion& orientation)
-{
-  tf::Quaternion q_orig, q_rot, q_new;
-  if (side == RobotSide::LEFT)
-  {
-    q_rot = tf::createQuaternionFromRPY(0.0, 0.0, -M_PI_2);  // left hand orientation fix
-  }
-  else if (side == RobotSide::RIGHT)
-  {
-    q_rot = tf::createQuaternionFromRPY(M_PI, 0.0, M_PI_2);  // right hand orientation fix
-  }
-  tf::quaternionMsgToTF(orientation, q_orig);
-  q_new = q_rot * q_orig;
-  q_new.normalize();
-  quaternionTFToMsg(q_new, orientation);
 }
 
 void TaskspacePlanner::displayInRviz(const moveit_msgs::MotionPlanResponse& response_msg)
@@ -187,6 +166,11 @@ void TaskspacePlanner::loadPlanners()
     ROS_FATAL_STREAM("Exception while creating planning plugin loader " << ex.what());
   }
 
+  loadPlugin(planner_plugin_name);
+}
+
+void TaskspacePlanner::loadPlugin(const std::string& planner_plugin_name)
+{
   try
   {
     planner_instance.reset(planner_plugin_loader->createUnmanagedInstance(planner_plugin_name));

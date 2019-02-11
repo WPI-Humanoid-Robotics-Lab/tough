@@ -27,7 +27,7 @@ public:
   TaskspacePlanner(ros::NodeHandle& nh, std::string urdf_param = "");
   ~TaskspacePlanner();
 
-  bool getTrajectory(geometry_msgs::PoseStamped pose, std::string planning_group,
+  bool getTrajectory(const geometry_msgs::PoseStamped pose, std::string planning_group,
                      moveit_msgs::RobotTrajectory& output_robot_traj_msg);
 
   double getPositionTolerance() const;
@@ -36,9 +36,10 @@ public:
   double getAngleTolerance() const;
   void setAngleTolerance(const double tolerance_angle);
 
-  std::string getPluginParameter() const;
-  void setPluginParameter(const std::string& plugin_param);
+  std::string getPlugin() const;
+  void setPlugin(const std::string& plugin_param);
 
+  void loadPlugin(const std::string& planner_plugin_name);
   double getPlanningTime() const;
   void setPlanningTime(const double planning_time);
 
@@ -54,7 +55,6 @@ private:
 
   void displayInRviz(const moveit_msgs::MotionPlanResponse& response_msg);
   void loadPlanners();
-  void fixEEOrientation(const RobotSide side, geometry_msgs::Quaternion& orientation);
 
   // Planner parameters
   double planning_time_;

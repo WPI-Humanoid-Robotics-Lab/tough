@@ -9,13 +9,18 @@
 #include "tough_common/tough_common_names.h"
 #include <geometry_msgs/TransformStamped.h>
 
-// defines for arms
+/**
+ * @brief enum to specify side of the robot. Used for limbs and end-effectors.
+ */
 enum RobotSide
 {
   LEFT = 0,
   RIGHT
 };
 
+/**
+ * @brief enum for specifying direction.
+ */
 enum class direction
 {
   LEFT = 0,  // Positive Y 0
@@ -35,13 +40,27 @@ enum class EE_LOADING
 class RobotDescription
 {
 public:
+  /**
+   * @brief Get the Robot Description object. RobotDescription is a singleton class and only one object is shared with
+   * all the classes that need it. Hence, the consctructor is disabled and this function is provided for accessing
+   * pointer to the object.
+   *
+   * @param nh  Nodehandle
+   * @param urdf_param  This argument is only required if urdf is loaded on a different parameter on param server.
+   * robot_name variable is prefixed to this parameter.
+   * @return RobotDescription*  Pointer to the existing RobotDescription object
+   */
   static RobotDescription* getRobotDescription(ros::NodeHandle nh, std::string urdf_param = "/robot_description");
 
   // disable assign and copy
-
   RobotDescription(RobotDescription const&) = delete;
   void operator=(RobotDescription const&) = delete;
 
+  /**
+   * @brief Get the Pelvis Frame object
+   *
+   * @return const std::string
+   */
   const std::string getPelvisFrame() const;
 
   const std::string getWorldFrame() const;
@@ -75,8 +94,6 @@ public:
   void getLeftArmJointLimits(std::vector<std::pair<double, double> >& left_arm_joint_limits) const;
 
   void getRightArmJointLimits(std::vector<std::pair<double, double> >& right_arm_joint_limits) const;
-
-  void publishEndEffectorFrames();
 
   int getNumberOfNeckJoints() const;
 
@@ -207,9 +224,6 @@ private:
   int RIGHT_SOLE_FRAME_HASH_;
 
   int WORLD_FRAME_HASH_;
-  void setEndEffTransformation(double x, double y, double z, double roll, double pitch, double yaw,
-                               std::string frame_id, std::string child_id,
-                               geometry_msgs::TransformStamped& handTransform);
 };
 
 #endif  // ROBOT_DESCRIPTION_H
