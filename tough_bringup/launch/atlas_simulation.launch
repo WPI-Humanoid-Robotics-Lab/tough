@@ -28,13 +28,17 @@
     <arg name="scs_args"          value="$(arg scs_args)" />
   </include>
    
-  <!-- launching perception nodes -->
-  <include file="$(find tough_perception_bringup)/launch/field_laser_assembler.launch" />
-
-  <!-- launching footstep planner -->
-  <include file="$(find tough_footstep)/launch/tough_footstep.launch">
+  <include file="$(find tough_bringup)/launch/tough_bringup.launch">
     <arg name="robot_name" value="atlas" />
   </include>
+
+  <!-- launching perception nodes -->
+  <!-- <include file="$(find tough_perception_bringup)/launch/field_laser_assembler.launch" /> -->
+
+  <!-- launching footstep planner -->
+  <!-- <include file="$(find tough_footstep)/launch/tough_footstep.launch">
+    <arg name="robot_name" value="atlas" />
+  </include> -->
 
    
   <!-- <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 0.8"/> -->

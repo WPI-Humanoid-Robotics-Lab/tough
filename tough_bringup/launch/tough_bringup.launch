@@ -1,14 +1,17 @@
 <launch>
    
-    <arg name="robot_name" default="valkyrie" />
+    <arg name="robot_name" default="atlas" />
    
-    <arg name="moveit_config_path" value="(find $(arg robot_name)_moveit_config)/launch/move_group.launch" />
+   <!-- https://answers.ros.org/question/35283/nested-substitution-args-in-launch-files/?answer=276043#post-id-276043 -->
+    <arg name="moveit_config_path" value="(find $(arg robot_name)_moveit_config)/launch/$(arg robot_name)_moveit_planner.launch" />
     <arg name="dollar" value="$" />
    
     <node pkg="rostopic" type="rostopic" name="rostopic" args="pub /multisense/set_spindle_speed -l std_msgs/Float64 0.8"/>
 
    <!--   <include file="$(find tough_bringup)/launch/joint_state.launch" />-->
-   <include file="$(find tough_perception_bringup)/launch/field_laser_assembler.launch" />
+   <include file="$(find tough_perception_bringup)/launch/field_laser_assembler.launch" >
+      <arg name="robot_name" value="$(arg robot_name)" />  
+   </include>
 
    <!-- <include file="$(find tough_perception_bringup)/launch/field_octomap.launch"/> -->
    <include file="$(find tough_footstep)/launch/tough_footstep.launch">
@@ -30,5 +33,6 @@
        <node pkg="src_bringup" type="message_parser.py"   name="message_parser"   respawn="true"/>
    </group>
    
+   <node name="tough_gui" pkg="tough_gui" type="tough_gui"/>
    
 </launch>
