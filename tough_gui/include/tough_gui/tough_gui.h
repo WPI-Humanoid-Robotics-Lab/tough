@@ -51,7 +51,7 @@
 #include <tough_controller_interface/chest_control_interface.h>
 #include <tough_controller_interface/pelvis_control_interface.h>
 #include <tough_controller_interface/head_control_interface.h>
-#include <tough_footstep/RobotWalker.h>
+#include <tough_footstep/robot_walker.h>
 #include <tough_controller_interface/gripper_control_interface.h>
 #include "tough_moveit_planners/tough_cartesian_planner.h"
 #include <tough_controller_interface/wholebody_control_interface.h>
@@ -75,7 +75,7 @@ class RenderPanel;
 class VisualizationManager;
 class ImageDisplay;
 class Panel;
-}
+}  // namespace rviz
 
 class ToughGUI : public QMainWindow
 {

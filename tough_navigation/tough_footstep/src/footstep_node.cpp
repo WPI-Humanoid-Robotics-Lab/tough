@@ -1,7 +1,7 @@
 #include <footstep_planner/FootstepPlannerNode.h>
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
-#include <tough_footstep/RobotWalker.h>
+#include <tough_footstep/robot_walker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <thread>
 #include "tough_common/robot_description.h"

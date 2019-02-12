@@ -1,5 +1,5 @@
 #include <iostream>
-#include <tough_footstep/RobotWalker.h>
+#include <tough_footstep/robot_walker.h>
 #include <ihmc_msgs/FootstepDataListRosMessage.h>
 #include "geometry_msgs/Pose2D.h"
 
@@ -32,8 +32,8 @@ int main(int argc, char** argv)
     goal.x = std::atof(argv[1]);
     goal.y = std::atof(argv[2]);
     goal.theta = std::atof(argv[3]);
-    log_msg("Walking to x: " + std::to_string(goal.x) + ", y: " + std::to_string(goal.y) + ", theta: " +
-            std::to_string(goal.theta));
+    log_msg("Walking to x: " + std::to_string(goal.x) + ", y: " + std::to_string(goal.y) +
+            ", theta: " + std::to_string(goal.theta));
     walk.walkToGoal(goal);
   }
   else

@@ -61,6 +61,10 @@ const std::string RIGHT_ARM_10DOF_GROUP = "R_PELVIS_PALM_10DOF";
 
 // leftMiddleFingerGroup -- > pelvis to leftMiddleFingerPitch1Link
 const std::string LEFT_ARM_10DOF_GROUP = "L_PELVIS_PALM_10DOF";
+
+// Footstep planning service
+const std::string FOOTSTEP_PLANNER_SERVICE = "/plan_footsteps";
+
 }  // namespace TOUGH_COMMON_NAMES
 
 #endif

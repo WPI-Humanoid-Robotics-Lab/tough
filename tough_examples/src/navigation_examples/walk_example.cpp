@@ -1,5 +1,5 @@
 #include <iostream>
-#include <tough_footstep/RobotWalker.h>
+#include <tough_footstep/robot_walker.h>
 #include <ihmc_msgs/FootstepDataListRosMessage.h>
 #include "geometry_msgs/Pose2D.h"
 #include <ihmc_msgs/StopAllTrajectoryRosMessage.h>

@@ -49,7 +49,7 @@ catkin_package(
 include_directories( ${catkin_INCLUDE_DIRS} include)
 
 add_library(${PROJECT_NAME}
-   src/RobotWalker.cpp
+   src/robot_walker.cpp
  )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

@@ -10,7 +10,7 @@
 #include "ihmc_msgs/FootTrajectoryRosMessage.h"
 #include "ihmc_msgs/WholeBodyTrajectoryRosMessage.h"
 #include "ihmc_msgs/AbortWalkingRosMessage.h"
-#include <ihmc_msgs/EndEffectorLoadBearingRosMessage.h>
+#include "ihmc_msgs/FootLoadBearingRosMessage.h"
 #include <geometry_msgs/TransformStamped.h>
 #include "std_msgs/String.h"
 #include "ros/time.h"
@@ -18,6 +18,7 @@
 #include <tf/transform_listener.h>
 #include <tough_common/robot_state.h>
 #include "tough_common/robot_description.h"
+#include "tough_common/tough_common_names.h"
 
 /**
  * @brief The RobotWalker class This class handles all the locomotion commands to the robot.
@@ -44,7 +45,7 @@ public:
    * @param goal  pose2d message giving position and orientation of goal point.
    * @return true if footstep planning is successful else false
    */
-  bool walkToGoal(geometry_msgs::Pose2D& goal, bool waitForSteps = true);
+  bool walkToGoal(const geometry_msgs::Pose2D& goal, bool waitForSteps = true);
 
   /**
    * @brief walkNSteps Makes the robot walk given number of steps.
@@ -58,9 +59,9 @@ public:
    * @param startLeg   leg to be used to start walking. It can be RIGHT or LEFT
    * @return
    */
-  bool walkNSteps(int n, float x_offset, float y_offset = 0.0f, bool continous = false, RobotSide startLeg = RIGHT,
-                  bool waitForSteps = true);
-  bool walkNStepsWRTPelvis(int n, float x_offset, float y_offset = 0.0f, bool continous = false,
+  bool walkNSteps(const int n, const float x_offset, float y_offset = 0.0f, bool continous = false,
+                  RobotSide startLeg = RIGHT, bool waitForSteps = true);
+  bool walkNStepsWRTPelvis(const int n, const float x_offset, float y_offset = 0.0f, bool continous = false,
                            RobotSide startLeg = RIGHT, bool waitForSteps = true);
 
   /**
@@ -142,7 +143,7 @@ public:
    * @param radius is the radius of this backward curled trajectory
    * @return
    */
-  bool curlLeg(RobotSide side, float radius);
+  bool curlLeg(RobotSide side, float radius, float time = 3.0f);
 
   /**
    * @brief placeLeg is used when the swing leg is in a arbitrary lifted position and has to be placed within a z-offset
@@ -153,7 +154,7 @@ public:
    * @param offset is the offset in the z-axis
    * @return
    */
-  bool placeLeg(RobotSide side, float offset = 0.1f);
+  bool placeLeg(RobotSide side, float offset = 0.1f, float time = 2.0f);
 
   /**
    * @brief nudgeFoot nudges the foot forward or backward
@@ -161,7 +162,7 @@ public:
    * @param distance is the offset distance
    * @return
    */
-  bool nudgeFoot(RobotSide side, float distance);
+  bool nudgeFoot(RobotSide side, float distance, float time = 2.0f);
 
   /**
    * @brief getCurrentStep gives the current position of the robot wrt to world frame
@@ -174,10 +175,9 @@ public:
    * @brief raiseLeg raises the leg forward at a desired height.
    * @param side  LEFT/RIGHT
    * @param height is the height to raise the leg
-   * @param stepLength is the forward step length
    * @return
    */
-  bool raiseLeg(RobotSide side, float height, float stepLength);
+  bool raiseLeg(RobotSide side, float height, float time = 2.0f);
 
   /**
    * @brief loadEEF loads the endeffector to distribute weight evenly in both legs.
@@ -232,6 +232,32 @@ private:
 
   void footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage& msg);
   void waitForSteps(const int numSteps);
+
+  inline void initializeFootstepDataListRosMessage(ihmc_msgs::FootstepDataListRosMessage& msg)
+  {
+    msg.default_transfer_duration = transfer_time_;
+    msg.default_swing_duration = swing_time_;
+    msg.execution_mode = execution_mode_;
+
+    msg.unique_id = RobotWalker::id;
+  }
+
+  inline void initializeFootTrajectoryRosMessage(RobotSide side, ihmc_msgs::FootTrajectoryRosMessage& foot)
+  {
+    ihmc_msgs::SE3TrajectoryPointRosMessage data;
+    ihmc_msgs::FrameInformationRosMessage frameInfo;
+
+    foot.robot_side = side;
+    foot.execution_mode = 0;  // OVERRIDE
+    foot.unique_id = id++;
+    foot.taskspace_trajectory_points.push_back(data);
+
+    frameInfo.data_reference_frame_id = rd_->getWorldFrameHash();
+    frameInfo.trajectory_reference_frame_id = rd_->getWorldFrameHash();
+
+    foot.frame_information = frameInfo;
+  }
+
   ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStep(int side, float x, float y);
   ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStepWRTPelvis(int side, float x, float y);
 };

@@ -1,5 +1,5 @@
 #include <iostream>
-#include <tough_footstep/RobotWalker.h>
+#include <tough_footstep/robot_walker.h>
 #include <ihmc_msgs/FootstepDataListRosMessage.h>
 #include "geometry_msgs/Pose2D.h"
 #include "tough_common/robot_state.h"
@@ -38,8 +38,9 @@ int main(int argc, char** argv)
   if (argc == 2)
   {
     goal.theta = tf::getYaw(current->orientation) + std::atof(argv[1]);
-    log_msg("Rotating " + std::to_string(std::atof(argv[1])) + " (to yaw " + std::to_string(goal.theta) + " in world "
-                                                                                                          "frame)");
+    log_msg("Rotating " + std::to_string(std::atof(argv[1])) + " (to yaw " + std::to_string(goal.theta) +
+            " in world "
+            "frame)");
     walk.walkToGoal(goal);
   }
   else
