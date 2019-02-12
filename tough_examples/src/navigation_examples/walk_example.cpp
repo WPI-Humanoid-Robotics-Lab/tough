@@ -65,21 +65,13 @@ int main(int argc, char** argv)
       cin >> stepHeight;
       //            cout<<"enter step length \n";
       //            cin>>stepLength;
-      if (robot_side == 0)
-        walk.raiseLeg(LEFT, stepHeight, stepLength);
-      else
-        walk.raiseLeg(RIGHT, stepHeight, stepLength);
+      walk.raiseLeg((RobotSide)robot_side, stepHeight, stepLength);
     }
     else if (input == 'l')
     {
       cout << "enter side \n";
       cin >> robot_side;
-      if (robot_side == 0)
-      {
-        walk.loadEEF(LEFT, EE_LOADING::LOAD);
-      }
-      else
-        walk.loadEEF(RIGHT, EE_LOADING::LOAD);
+      walk.loadEEF((RobotSide)robot_side, EE_LOADING::LOAD);
     }
     else if (input == 'c')
     {
@@ -87,12 +79,7 @@ int main(int argc, char** argv)
       cin >> robot_side;
       cout << "enter curl radius \n";
       cin >> curl;
-      if (robot_side == 0)
-      {
-        walk.curlLeg(LEFT, curl);
-      }
-      else
-        walk.curlLeg(RIGHT, curl);
+      walk.curlLeg((RobotSide)robot_side, curl);
     }
     else if (input == 'p')
     {
@@ -100,12 +87,7 @@ int main(int argc, char** argv)
       cin >> robot_side;
       cout << "enter offset \n";
       cin >> offset;
-      if (robot_side == 0)
-      {
-        walk.placeLeg(LEFT, offset);
-      }
-      else
-        walk.placeLeg(RIGHT, offset);
+      walk.placeLeg((RobotSide)robot_side, offset);
     }
     else if (input == 'f')
     {
@@ -113,12 +95,7 @@ int main(int argc, char** argv)
       cin >> robot_side;
       cout << "enter forward distance \n";
       cin >> nudgeDistance;
-      if (robot_side == 0)
-      {
-        walk.nudgeFoot(LEFT, nudgeDistance);
-      }
-      else
-        walk.nudgeFoot(RIGHT, nudgeDistance);
+      walk.nudgeFoot((RobotSide)robot_side, nudgeDistance);
     }
     else if (input == 's')
     {
