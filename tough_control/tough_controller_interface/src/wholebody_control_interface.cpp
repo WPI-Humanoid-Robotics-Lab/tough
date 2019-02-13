@@ -4,7 +4,7 @@ WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle& nh)
   : ToughControllerInterface(nh), chestController_(nh), armController_(nh)
 {
   m_wholebodyPub = nh_.advertise<ihmc_msgs::WholeBodyTrajectoryRosMessage>(
-      control_topic_prefix_ + "/whole_body_trajectory", 10, true);
+      control_topic_prefix_ + TOUGH_COMMON_NAMES::WHOLEBODY_TRAJECTORY_TOPIC, 10, true);
 
   rd_->getLeftArmJointNames(left_arm_joint_names_);
   rd_->getRightArmJointNames(right_arm_joint_names_);

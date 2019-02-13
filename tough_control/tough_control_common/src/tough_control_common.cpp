@@ -4,11 +4,13 @@ ToughControlCommon::ToughControlCommon(ros::NodeHandle nh) : nh_(nh), armTraj(nh
 
 {
   std::string robot_name;
-  nh.getParam("ihmc_ros/robot_name", robot_name);
+  nh.getParam(TOUGH_COMMON_NAMES::ROBOT_NAME_PARAM, robot_name);
 
   // set the publisher
   stop_traj_pub_ = nh_.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>(
-      "/ihmc_ros/" + robot_name + "/control/stop_all_trajectories", 1, true);
+      TOUGH_COMMON_NAMES::TOPIC_PREFIX + robot_name + TOUGH_COMMON_NAMES::CONTROL_TOPIC_PREFIX +
+          TOUGH_COMMON_NAMES::STOP_ALL_TRAJECTORY_TOPIC,
+      1, true);
 }
 
 ToughControlCommon::~ToughControlCommon()
@@ -28,18 +30,9 @@ void ToughControlCommon::stopAllTrajectories(void)
 
 void ToughControlCommon::resetRobot()
 {
-  armTraj.moveToZeroPose(RobotSide::LEFT);
-  ros::Duration(0.3).sleep();
-  armTraj.moveToZeroPose(RobotSide::RIGHT);
-  ros::Duration(1.5).sleep();
-
-  pelvisTraj.controlPelvisHeight(0.9);
-  ros::Duration(1.5).sleep();
-  chestTraj.controlChest(2, 2, 2);
-  ros::Duration(1).sleep();
-
-  armTraj.moveToDefaultPose(RobotSide::LEFT);
-  ros::Duration(0.3).sleep();
-  armTraj.moveToDefaultPose(RobotSide::RIGHT);
-  ros::Duration(1.5).sleep();
+  armTraj.moveToDefaultPose(RobotSide::LEFT, 1.0f);
+  armTraj.moveToDefaultPose(RobotSide::RIGHT, 1.0f);
+  pelvisTraj.controlPelvisHeight(0.75f);
+  chestTraj.resetPose(2.0f);
+  ros::Duration(2).sleep();
 }

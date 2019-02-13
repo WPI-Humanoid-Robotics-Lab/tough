@@ -22,26 +22,46 @@ class RobotStateInformer
 private:
   // private constructor to disable user from creating objects
   RobotStateInformer(ros::NodeHandle nh);
-  ros::NodeHandle nh_;
-  tf::TransformListener listener_;
   static RobotStateInformer* currentObject_;
+
   RobotDescription* rd_;
 
+  ros::NodeHandle nh_;
   ros::Subscriber jointStateSub_;
-  void jointStateCB(const sensor_msgs::JointStatePtr msg);
+  tf::TransformListener listener_;
 
   std::map<std::string, RobotState> currentState_;
   std::mutex currentStateMutex_;
   std::string robotName_;
 
+  void jointStateCB(const sensor_msgs::JointStatePtr msg);
+
+  void inline parseParameter(const std::string& paramName, std::string& parameter)
+  {
+    if (paramName == "left_arm_joint_names" || paramName == "left_arm")
+    {
+      parameter.assign(TOUGH_COMMON_NAMES::TOPIC_PREFIX + robotName_ + TOUGH_COMMON_NAMES::LEFT_ARM_JOINT_NAMES_PARAM);
+    }
+    else if (paramName == "right_arm_joint_names" || paramName == "right_arm")
+    {
+      parameter.assign(TOUGH_COMMON_NAMES::TOPIC_PREFIX + robotName_ + TOUGH_COMMON_NAMES::RIGHT_ARM_JOINT_NAMES_PARAM);
+    }
+    else
+    {
+      parameter.assign(paramName);
+    }
+  }
+
 public:
   static RobotStateInformer* getRobotStateInformer(ros::NodeHandle nh);
   ~RobotStateInformer();
-  // disable assign and copy
+
+  // disable assign and copy. This is required for singleton pattern
   RobotStateInformer(RobotStateInformer const&) = delete;
   void operator=(RobotStateInformer const&) = delete;
 
   void getJointStateMessage(sensor_msgs::JointState& jointState);
+
   void getJointPositions(std::vector<double>& positions);
   bool getJointPositions(const std::string& paramName, std::vector<double>& positions);
 
@@ -82,10 +102,6 @@ public:
                        const std::string& from_frame, const std::string& to_frame = TOUGH_COMMON_NAMES::WORLD_TF);
   bool transformVector(const geometry_msgs::Vector3Stamped& vec_in, geometry_msgs::Vector3Stamped& vec_out,
                        const std::string target_frame = TOUGH_COMMON_NAMES::WORLD_TF);
-
-  bool isGraspped(RobotSide side);
-
-  std::vector<float> closeRightGrasp, closeLeftGrasp, openGrasp;
 };
 
 #endif  // VAL_ROBOT_STATE_H

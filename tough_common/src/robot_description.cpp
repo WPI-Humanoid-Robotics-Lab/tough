@@ -206,14 +206,14 @@ void RobotDescription::setNumberOfNeckJoints(int numberOfNeckJoints)
 
 bool RobotDescription::updateFrameHash()
 {
-  MIDFEET_ZUP_FRAME_HASH_ = -100;
-  PELVIS_ZUP_FRAME_HASH_ = -101;
-  PELVIS_FRAME_HASH_ = -102;
-  CHEST_FRAME_HASH_ = -103;
-  CENTER_OF_MASS_FRAME_HASH_ = -104;
-  LEFT_SOLE_FRAME_HASH_ = -105;
-  RIGHT_SOLE_FRAME_HASH_ = -106;
-  WORLD_FRAME_HASH_ = -107;
+  MIDFEET_ZUP_FRAME_HASH_ = TOUGH_COMMON_NAMES::MIDFEET_ZUP_FRAME_HASH;
+  PELVIS_ZUP_FRAME_HASH_ = TOUGH_COMMON_NAMES::PELVIS_ZUP_FRAME_HASH;
+  PELVIS_FRAME_HASH_ = TOUGH_COMMON_NAMES::PELVIS_FRAME_HASH;
+  CHEST_FRAME_HASH_ = TOUGH_COMMON_NAMES::CHEST_FRAME_HASH;
+  CENTER_OF_MASS_FRAME_HASH_ = TOUGH_COMMON_NAMES::CENTER_OF_MASS_FRAME_HASH;
+  LEFT_SOLE_FRAME_HASH_ = TOUGH_COMMON_NAMES::LEFT_SOLE_FRAME_HASH;
+  RIGHT_SOLE_FRAME_HASH_ = TOUGH_COMMON_NAMES::RIGHT_SOLE_FRAME_HASH;
+  WORLD_FRAME_HASH_ = TOUGH_COMMON_NAMES::WORLD_FRAME_HASH;
 }
 
 const std::string RobotDescription::getRightPalmFrame() const
@@ -358,7 +358,7 @@ const std::string RobotDescription::getPelvisFrame() const
 
 const std::string RobotDescription::getWorldFrame() const
 {
-  return "world";
+  return TOUGH_COMMON_NAMES::WORLD_TF;
 }
 
 void RobotDescription::setPelvisFrame(const std::string& value)

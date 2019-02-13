@@ -8,14 +8,15 @@ ArmControlInterface::ArmControlInterface(ros::NodeHandle nh)
   : ToughControllerInterface(nh), ZERO_POSE{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }
 {
   id_++;
-  armTrajectoryPublisher =
-      nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>(control_topic_prefix_ + "/arm_trajectory", 1, true);
+  armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>(
+      control_topic_prefix_ + TOUGH_COMMON_NAMES::ARM_TRAJECTORY_TOPIC, 1, true);
   handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>(
-      control_topic_prefix_ + "/hand_desired_configuration", 1, true);
-  taskSpaceTrajectoryPublisher =
-      nh_.advertise<ihmc_msgs::HandTrajectoryRosMessage>(control_topic_prefix_ + "/hand_trajectory", 1, true);
-  homePositionPublisher = nh_.advertise<ihmc_msgs::GoHomeRosMessage>(control_topic_prefix_ + "/go_home", 1, true);
-  markerPub_ = nh_.advertise<visualization_msgs::Marker>("/visualization_marker", 1, true);
+      control_topic_prefix_ + TOUGH_COMMON_NAMES::HAND_DESIRED_CONFIG_TOPIC, 1, true);
+  taskSpaceTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandTrajectoryRosMessage>(
+      control_topic_prefix_ + TOUGH_COMMON_NAMES::HAND_TRAJECTORY_TOPIC, 1, true);
+  homePositionPublisher =
+      nh_.advertise<ihmc_msgs::GoHomeRosMessage>(control_topic_prefix_ + TOUGH_COMMON_NAMES::GO_HOME_TOPIC, 1, true);
+  markerPub_ = nh_.advertise<visualization_msgs::Marker>(TOUGH_COMMON_NAMES::MARKER_TOPIC, 1, true);
 
   rd_->getLeftArmJointLimits(joint_limits_left_);
   rd_->getRightArmJointLimits(joint_limits_right_);
@@ -237,10 +238,10 @@ int ArmControlInterface::getnumArmJoints() const
 }
 
 /**
-* @brief ArmControlInterface::appendTrajectoryPoint will append a joint trajectory point
-* @param msg is the reference of the current msg where point is to be appended.
-* @param point is the joint trajectory point.
-*/
+ * @brief ArmControlInterface::appendTrajectoryPoint will append a joint trajectory point
+ * @param msg is the reference of the current msg where point is to be appended.
+ * @param point is the joint trajectory point.
+ */
 void ArmControlInterface::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage& msg,
                                                 trajectory_msgs::JointTrajectoryPoint point)
 {

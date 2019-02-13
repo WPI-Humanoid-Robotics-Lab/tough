@@ -20,12 +20,38 @@ const std::string LEFT_EE_FRAME_NAME_PARAM = "left_ee_frame_name";
 const std::string RIGHT_EE_FRAME_NAME_PARAM = "right_ee_frame_name";
 
 /********* Topic Names *********/
+const std::string TOPIC_PREFIX = "/ihmc_ros/";
 const std::string LOG_TOPIC = "/field/log";
 const std::string MARKER_TOPIC = "/visualization_marker";
 const std::string MARKER_ARRAY_TOPIC = "/visualization_marker_array";
-const std::string JOINT_STATES_TOPIC = "/joint_states";
 const std::string RECTIFIED_IMAGE_TOPIC = "/multisense/camera/left/image_rect_color";
 
+/********* Control Topics *********/
+const std::string CONTROL_TOPIC_PREFIX = "/control";
+const std::string ARM_TRAJECTORY_TOPIC = "/arm_trajectory";
+const std::string HAND_TRAJECTORY_TOPIC = "/hand_trajectory";
+const std::string CHEST_TRAJECTORY_TOPIC = "/chest_trajectory";
+const std::string HEAD_TRAJECTORY_TOPIC = "/head_trajectory";
+const std::string NECK_TRAJECTORY_TOPIC = "/neck_trajectory";
+const std::string PELVIS_HEIGHT_TRAJECTORY_TOPIC = "/pelvis_height_trajectory";
+const std::string WHOLEBODY_TRAJECTORY_TOPIC = "/whole_body_trajectory";
+const std::string STOP_ALL_TRAJECTORY_TOPIC = "/stop_all_trajectories";
+const std::string HAND_DESIRED_CONFIG_TOPIC = "/hand_desired_configuration";
+const std::string GO_HOME_TOPIC = "/go_home";
+
+/********* Output Topics *********/
+const std::string OUTPUT_TOPIC_PREFIX = "/output";
+const std::string JOINT_STATES_TOPIC = "/joint_states";
+
+/********* Frame Hash from IHMC controllers *********/
+const int MIDFEET_ZUP_FRAME_HASH = -100;
+const int PELVIS_ZUP_FRAME_HASH = -101;
+const int PELVIS_FRAME_HASH = -102;
+const int CHEST_FRAME_HASH = -103;
+const int CENTER_OF_MASS_FRAME_HASH = -104;
+const int LEFT_SOLE_FRAME_HASH = -105;
+const int RIGHT_SOLE_FRAME_HASH = -106;
+const int WORLD_FRAME_HASH = -107;
 /********* TF Frames *********/
 
 /* Multisense */

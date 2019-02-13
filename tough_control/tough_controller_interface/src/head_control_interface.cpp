@@ -2,14 +2,12 @@
 #include <tf/transform_listener.h>
 #include <tough_common/robot_state.h>
 
-const double degToRad = M_PI / 180;
-
 HeadControlInterface::HeadControlInterface(ros::NodeHandle nh) : ToughControllerInterface(nh)
 {
-  neckTrajPublisher =
-      nh_.advertise<ihmc_msgs::NeckTrajectoryRosMessage>(control_topic_prefix_ + "/neck_trajectory", 1, true);
-  headTrajPublisher =
-      nh_.advertise<ihmc_msgs::HeadTrajectoryRosMessage>(control_topic_prefix_ + "/head_trajectory", 1, true);
+  neckTrajPublisher = nh_.advertise<ihmc_msgs::NeckTrajectoryRosMessage>(
+      control_topic_prefix_ + TOUGH_COMMON_NAMES::NECK_TRAJECTORY_TOPIC, 1, true);
+  headTrajPublisher = nh_.advertise<ihmc_msgs::HeadTrajectoryRosMessage>(
+      control_topic_prefix_ + TOUGH_COMMON_NAMES::HEAD_TRAJECTORY_TOPIC, 1, true);
   NUM_NECK_JOINTS = rd_->getNumberOfNeckJoints();
 }
 
@@ -35,12 +33,8 @@ void HeadControlInterface::appendNeckTrajectoryPoint(ihmc_msgs::NeckTrajectoryRo
   }
 }
 
-void HeadControlInterface::moveHead(float roll, float pitch, float yaw, const float time)
+void HeadControlInterface::moveHead(const float roll, const float pitch, const float yaw, const float time)
 {
-  roll = degToRad * roll;
-  pitch = degToRad * pitch;
-  yaw = degToRad * yaw;
-
   tf::Quaternion q;
   q.setRPY(roll, pitch, yaw);
   geometry_msgs::Quaternion quaternion;
@@ -91,9 +85,9 @@ void HeadControlInterface::moveHead(const std::vector<std::vector<float> >& traj
   {
     ihmc_msgs::SO3TrajectoryPointRosMessage data;
 
-    float roll = degToRad * trajectory_points[i][0];
-    float pitch = degToRad * trajectory_points[i][1];
-    float yaw = degToRad * trajectory_points[i][2];
+    float roll = trajectory_points[i][0];
+    float pitch = trajectory_points[i][1];
+    float yaw = trajectory_points[i][2];
 
     data.time = time;
     tf::Quaternion q;
@@ -133,7 +127,7 @@ bool HeadControlInterface::getJointSpaceState(std::vector<double>& joints, Robot
 
 bool HeadControlInterface::getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side, std::string fixedFrame)
 {
-  return state_informer_->getCurrentPose("/head", pose, fixedFrame);
+  return state_informer_->getCurrentPose(TOUGH_COMMON_NAMES::ROBOT_HEAD_FRAME_TF, pose, fixedFrame);
 }
 
 int HeadControlInterface::getNumNeckJoints() const

@@ -53,25 +53,25 @@ target_link_libraries(reset_robot ${catkin_LIBRARIES})
 
 
 ## Test ARM
-add_executable( arm_example src/control_examples/arm_example.cpp)
-add_dependencies(arm_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(arm_example ${catkin_LIBRARIES})
+add_executable( arm_control_example src/control_examples/arm_control_example.cpp)
+add_dependencies(arm_control_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(arm_control_example ${catkin_LIBRARIES})
 
 
 ## Test head navigation
-add_executable( head_navigation_example src/control_examples/head_navigation_example.cpp)
-add_dependencies(head_navigation_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(head_navigation_example ${catkin_LIBRARIES})
+add_executable( head_control_example src/control_examples/head_control_example.cpp)
+add_dependencies(head_control_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(head_control_example ${catkin_LIBRARIES})
 
 ## Test arm navigation
-add_executable(arm_navigation_example src/control_examples/arm_navigation_example.cpp)
-add_dependencies(arm_navigation_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(arm_navigation_example  ${catkin_LIBRARIES})
+add_executable(arm_control_example2 src/control_examples/arm_control_example2.cpp)
+add_dependencies(arm_control_example2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(arm_control_example2  ${catkin_LIBRARIES})
 
 ## Test chest
-add_executable(chest_navigation_example src/control_examples/chest_navigation_example.cpp)
-add_dependencies(chest_navigation_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(chest_navigation_example  ${catkin_LIBRARIES})
+add_executable(chest_control_example src/control_examples/chest_control_example.cpp)
+add_dependencies(chest_control_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(chest_control_example  ${catkin_LIBRARIES})
 
 
 ## Test nudgeLocal
@@ -81,20 +81,15 @@ target_link_libraries(nudge_local_example  ${catkin_LIBRARIES})
 
 
 ## Test pelvis
-add_executable(pelvis_navigation_example src/control_examples/pelvis_navigation_example.cpp)
-add_dependencies(pelvis_navigation_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(pelvis_navigation_example  ${catkin_LIBRARIES})
+add_executable(pelvis_control_example src/control_examples/pelvis_control_example.cpp)
+add_dependencies(pelvis_control_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pelvis_control_example  ${catkin_LIBRARIES})
 
 
 ## Test neck
-add_executable(neck_navigation_example src/control_examples/neck_navigation_example.cpp)
-add_dependencies(neck_navigation_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(neck_navigation_example  ${catkin_LIBRARIES})
-
-## Test wrist
-add_executable(wrist_example src/control_examples/wrist_example.cpp)
-add_dependencies(wrist_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(wrist_example ${catkin_LIBRARIES})
+add_executable(neck_control_example src/control_examples/neck_control_example.cpp)
+add_dependencies(neck_control_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(neck_control_example  ${catkin_LIBRARIES})
 
 ## Test gripper
 add_executable(gripper_control_example src/control_examples/gripper_control_example.cpp)
@@ -103,9 +98,9 @@ target_link_libraries(gripper_control_example  ${catkin_LIBRARIES})
 
 
 ## interactive test
-add_executable(interactive_arm_example src/control_examples/interactive_arm_example.cpp)
-add_dependencies(interactive_arm_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(interactive_arm_example  ${catkin_LIBRARIES})
+add_executable(arm_interactive_example src/control_examples/arm_interactive_example.cpp)
+add_dependencies(arm_interactive_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(arm_interactive_example  ${catkin_LIBRARIES})
 
 # ## nudge offset
 # add_executable(nudge_offset_example src/control_examples/nudge_offset_example.cpp)
@@ -162,9 +157,9 @@ add_executable(taskspace_2stage_planner_example src/manipulation_examples/tasksp
 add_dependencies(taskspace_2stage_planner_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(taskspace_2stage_planner_example  ${catkin_LIBRARIES})
 
-install(TARGETS reset_robot arm_example head_navigation_example arm_navigation_example
-                chest_navigation_example nudge_local_example pelvis_navigation_example
-                neck_navigation_example wrist_example gripper_control_example interactive_arm_example
+install(TARGETS reset_robot arm_control_example head_control_example arm_control_example2
+                chest_control_example nudge_local_example pelvis_control_example
+                neck_control_example gripper_control_example arm_interactive_example
                 walk_forward_example walk_goal_example walk_example walk_rotate_example walk_steps_example
                 multisense_image_example motion_planner_example taskspace_planner_example 
                 taskspace_2stage_planner_example

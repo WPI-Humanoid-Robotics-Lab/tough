@@ -46,12 +46,12 @@ public:
   /**
    * @brief moveHead Moves the robot head to the given roll, pitch, and yaw. All orientations are expressed in pelvis
    * frame.
-   * @param roll The roll in degrees.
-   * @param pitch The pitch in degrees.
-   * @param yaw The yaw in degrees.
+   * @param roll The roll in radians.
+   * @param pitch The pitch in radians.
+   * @param yaw The yaw in radians.
    * @param time The time it takes to move to the given orientation. Default is 4.0
    */
-  void moveHead(float roll, float pitch, float yaw, const float time = 4.0f);
+  void moveHead(const float roll, const float pitch, const float yaw, const float time = 4.0f);
 
   /**
    * @brief moveHead Moves the robot head by the given quaternion. All orientations are expressed in pelvis frame.

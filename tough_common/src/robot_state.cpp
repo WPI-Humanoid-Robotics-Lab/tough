@@ -17,14 +17,12 @@ RobotStateInformer* RobotStateInformer::getRobotStateInformer(ros::NodeHandle nh
 RobotStateInformer::RobotStateInformer(ros::NodeHandle nh) : nh_(nh)
 {
   rd_ = RobotDescription::getRobotDescription(nh_);
-  nh.getParam("ihmc_ros/robot_name", robotName_);
+  nh.getParam(TOUGH_COMMON_NAMES::ROBOT_NAME_PARAM, robotName_);
 
-  jointStateSub_ =
-      nh_.subscribe("ihmc_ros/" + robotName_ + "/output/joint_states", 1, &RobotStateInformer::jointStateCB, this);
+  jointStateSub_ = nh_.subscribe(TOUGH_COMMON_NAMES::TOPIC_PREFIX + robotName_ +
+                                     TOUGH_COMMON_NAMES::OUTPUT_TOPIC_PREFIX + TOUGH_COMMON_NAMES::JOINT_STATES_TOPIC,
+                                 1, &RobotStateInformer::jointStateCB, this);
   ros::Duration(0.2).sleep();
-  closeRightGrasp = { 1.09, 1.47, 1.84, 0.90, 1.20, 1.51, 0.99, 1.34, 1.68, 0.55, 0.739, 0.92, 1.40 };
-  closeLeftGrasp = { 0.0, -1.47, -1.84, -0.90, -1.20, -1.51, -0.99, -1.34, -1.68, -0.55, -0.739, -0.92, 1.40 };
-  openGrasp = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 }
 
 RobotStateInformer::~RobotStateInformer()
@@ -79,18 +77,7 @@ bool RobotStateInformer::getJointPositions(const std::string& paramName, std::ve
   positions.clear();
   std::vector<std::string> jointNames;
   std::string parameter;
-  if (paramName == "left_arm_joint_names" || paramName == "left_arm")
-  {
-    parameter.assign("/ihmc_ros/" + robotName_ + "/left_arm_joint_names");
-  }
-  else if (paramName == "right_arm_joint_names" || paramName == "right_arm")
-  {
-    parameter.assign("/ihmc_ros/" + robotName_ + "/right_arm_joint_names");
-  }
-  else
-  {
-    parameter.assign(paramName);
-  }
+  parseParameter(paramName, parameter);
 
   std::lock_guard<std::mutex> guard(currentStateMutex_);
   if (nh_.getParam(parameter, jointNames))
@@ -120,18 +107,7 @@ bool RobotStateInformer::getJointVelocities(const std::string& paramName, std::v
   velocities.clear();
   std::vector<std::string> jointNames;
   std::string parameter;
-  if (paramName == "left_arm_joint_names" || paramName == "left_arm")
-  {
-    parameter.assign("/ihmc_ros/" + robotName_ + "/left_arm_joint_names");
-  }
-  else if (paramName == "right_arm_joint_names" || paramName == "right_arm")
-  {
-    parameter.assign("/ihmc_ros/" + robotName_ + "/right_arm_joint_names");
-  }
-  else
-  {
-    parameter.assign(paramName);
-  }
+  parseParameter(paramName, parameter);
 
   std::lock_guard<std::mutex> guard(currentStateMutex_);
   if (nh_.getParam(parameter, jointNames))
@@ -161,18 +137,7 @@ bool RobotStateInformer::getJointEfforts(const std::string& paramName, std::vect
   efforts.clear();
   std::vector<std::string> jointNames;
   std::string parameter;
-  if (paramName == "left_arm_joint_names" || paramName == "left_arm")
-  {
-    parameter.assign("/ihmc_ros/" + robotName_ + "/left_arm_joint_names");
-  }
-  else if (paramName == "right_arm_joint_names" || paramName == "right_arm")
-  {
-    parameter.assign("/ihmc_ros/" + robotName_ + "/right_arm_joint_names");
-  }
-  else
-  {
-    parameter.assign(paramName);
-  }
+  parseParameter(paramName, parameter);
 
   std::lock_guard<std::mutex> guard(currentStateMutex_);
   if (nh_.getParam(parameter, jointNames))
@@ -420,63 +385,4 @@ bool RobotStateInformer::transformVector(const geometry_msgs::Vector3& vec_in, g
   }
   vec_out = out.vector;
   return true;
-}
-
-/* This works only for valkyrie. This can be updated once GripperControlInterface is redesigned*/
-bool RobotStateInformer::isGraspped(RobotSide side)
-{
-  std::vector<float> jointPos, closeGrasp;
-  closeGrasp = side == LEFT ? closeLeftGrasp : closeRightGrasp;
-
-  if (side == RIGHT)
-  {
-    jointPos.push_back(getJointPosition("rightIndexFingerPitch1"));
-    jointPos.push_back(getJointPosition("rightIndexFingerPitch2"));
-    jointPos.push_back(getJointPosition("rightIndexFingerPitch3"));
-    jointPos.push_back(getJointPosition("rightMiddleFingerPitch1"));
-    jointPos.push_back(getJointPosition("rightMiddleFingerPitch2"));
-    jointPos.push_back(getJointPosition("rightMiddleFingerPitch3"));
-    jointPos.push_back(getJointPosition("rightPinkyPitch1"));
-    jointPos.push_back(getJointPosition("rightPinkyPitch2"));
-    jointPos.push_back(getJointPosition("rightPinkyPitch3"));
-    jointPos.push_back(getJointPosition("rightThumbPitch1"));
-    jointPos.push_back(getJointPosition("rightThumbPitch2"));
-    jointPos.push_back(getJointPosition("rightThumbPitch3"));
-    jointPos.push_back(getJointPosition("rightThumbRoll"));
-  }
-  else
-  {
-    jointPos.push_back(getJointPosition("leftIndexFingerPitch1"));
-    jointPos.push_back(getJointPosition("leftIndexFingerPitch2"));
-    jointPos.push_back(getJointPosition("leftIndexFingerPitch3"));
-    jointPos.push_back(getJointPosition("leftMiddleFingerPitch1"));
-    jointPos.push_back(getJointPosition("leftMiddleFingerPitch2"));
-    jointPos.push_back(getJointPosition("leftMiddleFingerPitch3"));
-    jointPos.push_back(getJointPosition("leftPinkyPitch1"));
-    jointPos.push_back(getJointPosition("leftPinkyPitch2"));
-    jointPos.push_back(getJointPosition("leftPinkyPitch3"));
-    jointPos.push_back(getJointPosition("leftThumbPitch1"));
-    jointPos.push_back(getJointPosition("leftThumbPitch2"));
-    jointPos.push_back(getJointPosition("leftThumbPitch3"));
-    jointPos.push_back(getJointPosition("leftThumbRoll"));
-  }
-
-  float diffClose = 0.0, diffOpen = 0.0;
-
-  for (size_t i = 0; i < closeGrasp.size(); ++i)
-  {
-    diffClose += fabs(jointPos[i] - closeGrasp[i]);
-    diffOpen += fabs(jointPos[i] - openGrasp[i]);
-  }
-
-  if (fabs(diffOpen) < 0.1)
-  {
-    return false;
-  }
-  else if (fabs(diffClose) < 0.1)
-  {
-    return false;
-  }
-  else
-    return true;
 }

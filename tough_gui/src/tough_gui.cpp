@@ -71,8 +71,7 @@ void ToughGUI::initVariables()
   ROS_INFO("config file : %s", configFile.c_str());
   ConfigurationReader configfile(configFile.c_str());
 
-  std::string robot_name;
-  nh_.getParam("/ihmc_ros/robot_name", robot_name);
+  std::string robot_name = rd_->getRobotName();
 
   // Assign topic names to corresponding variables
   fixedFrame_ = QString::fromStdString(configfile.currentTopics["fixedFrame"]);
@@ -408,47 +407,47 @@ void ToughGUI::initJointLimits()
     right_arm_joint_limits[i] = { right_arm_joint_limits[i].first + 0.01, right_arm_joint_limits[i].second - 0.01 };
   }
 
-  RIGHT_SHOULDER_PITCH_MAX = right_arm_joint_limits[0].second * TO_DEGREES;
-  RIGHT_SHOULDER_PITCH_MIN = right_arm_joint_limits[0].first * TO_DEGREES;
+  RIGHT_SHOULDER_PITCH_MAX = right_arm_joint_limits[0].second;
+  RIGHT_SHOULDER_PITCH_MIN = right_arm_joint_limits[0].first;
 
-  RIGHT_SHOULDER_ROLL_MAX = right_arm_joint_limits[1].second * TO_DEGREES;
-  RIGHT_SHOULDER_ROLL_MIN = right_arm_joint_limits[1].first * TO_DEGREES;
+  RIGHT_SHOULDER_ROLL_MAX = right_arm_joint_limits[1].second;
+  RIGHT_SHOULDER_ROLL_MIN = right_arm_joint_limits[1].first;
 
-  RIGHT_SHOULDER_YAW_MAX = right_arm_joint_limits[2].second * TO_DEGREES;
-  RIGHT_SHOULDER_YAW_MIN = right_arm_joint_limits[2].first * TO_DEGREES;
+  RIGHT_SHOULDER_YAW_MAX = right_arm_joint_limits[2].second;
+  RIGHT_SHOULDER_YAW_MIN = right_arm_joint_limits[2].first;
 
-  RIGHT_ELBOW_MAX = right_arm_joint_limits[3].second * TO_DEGREES;
-  RIGHT_ELBOW_MIN = right_arm_joint_limits[3].first * TO_DEGREES;
+  RIGHT_ELBOW_MAX = right_arm_joint_limits[3].second;
+  RIGHT_ELBOW_MIN = right_arm_joint_limits[3].first;
 
-  RIGHT_WRIST_YAW_MAX = right_arm_joint_limits[4].second * TO_DEGREES;
-  RIGHT_WRIST_YAW_MIN = right_arm_joint_limits[4].first * TO_DEGREES;
+  RIGHT_WRIST_YAW_MAX = right_arm_joint_limits[4].second;
+  RIGHT_WRIST_YAW_MIN = right_arm_joint_limits[4].first;
 
-  RIGHT_WRIST_ROLL_MAX = right_arm_joint_limits[5].second * TO_DEGREES;
-  RIGHT_WRIST_ROLL_MIN = right_arm_joint_limits[5].first * TO_DEGREES;
+  RIGHT_WRIST_ROLL_MAX = right_arm_joint_limits[5].second;
+  RIGHT_WRIST_ROLL_MIN = right_arm_joint_limits[5].first;
 
-  RIGHT_WRIST_PITCH_MAX = right_arm_joint_limits[6].second * TO_DEGREES;
-  RIGHT_WRIST_PITCH_MIN = right_arm_joint_limits[6].first * TO_DEGREES;
+  RIGHT_WRIST_PITCH_MAX = right_arm_joint_limits[6].second;
+  RIGHT_WRIST_PITCH_MIN = right_arm_joint_limits[6].first;
 
-  LEFT_SHOULDER_PITCH_MAX = left_arm_joint_limits[0].second * TO_DEGREES;
-  LEFT_SHOULDER_PITCH_MIN = left_arm_joint_limits[0].first * TO_DEGREES;
+  LEFT_SHOULDER_PITCH_MAX = left_arm_joint_limits[0].second;
+  LEFT_SHOULDER_PITCH_MIN = left_arm_joint_limits[0].first;
 
-  LEFT_SHOULDER_ROLL_MAX = left_arm_joint_limits[1].second * TO_DEGREES;
-  LEFT_SHOULDER_ROLL_MIN = left_arm_joint_limits[1].first * TO_DEGREES;
+  LEFT_SHOULDER_ROLL_MAX = left_arm_joint_limits[1].second;
+  LEFT_SHOULDER_ROLL_MIN = left_arm_joint_limits[1].first;
 
-  LEFT_SHOULDER_YAW_MAX = left_arm_joint_limits[2].second * TO_DEGREES;
-  LEFT_SHOULDER_YAW_MIN = left_arm_joint_limits[2].first * TO_DEGREES;
+  LEFT_SHOULDER_YAW_MAX = left_arm_joint_limits[2].second;
+  LEFT_SHOULDER_YAW_MIN = left_arm_joint_limits[2].first;
 
-  LEFT_ELBOW_MAX = left_arm_joint_limits[3].second * TO_DEGREES;
-  LEFT_ELBOW_MIN = left_arm_joint_limits[3].first * TO_DEGREES;
+  LEFT_ELBOW_MAX = left_arm_joint_limits[3].second;
+  LEFT_ELBOW_MIN = left_arm_joint_limits[3].first;
 
-  LEFT_WRIST_YAW_MAX = left_arm_joint_limits[4].second * TO_DEGREES;
-  LEFT_WRIST_YAW_MIN = left_arm_joint_limits[4].first * TO_DEGREES;
+  LEFT_WRIST_YAW_MAX = left_arm_joint_limits[4].second;
+  LEFT_WRIST_YAW_MIN = left_arm_joint_limits[4].first;
 
-  LEFT_WRIST_ROLL_MAX = left_arm_joint_limits[5].second * TO_DEGREES;
-  LEFT_WRIST_ROLL_MIN = left_arm_joint_limits[5].first * TO_DEGREES;
+  LEFT_WRIST_ROLL_MAX = left_arm_joint_limits[5].second;
+  LEFT_WRIST_ROLL_MIN = left_arm_joint_limits[5].first;
 
-  LEFT_WRIST_PITCH_MAX = left_arm_joint_limits[6].second * TO_DEGREES;
-  LEFT_WRIST_PITCH_MIN = left_arm_joint_limits[6].first * TO_DEGREES;
+  LEFT_WRIST_PITCH_MAX = left_arm_joint_limits[6].second;
+  LEFT_WRIST_PITCH_MIN = left_arm_joint_limits[6].first;
 }
 
 void ToughGUI::initDefaultValues()
@@ -561,72 +560,72 @@ void ToughGUI::getArmState()
 
   if (side == LEFT)
   {
-    double leftShoulderPitchJointVal = jointStateMap_[leftArmJointNames_.at(0)] * TO_DEGREES;
+    double leftShoulderPitchJointVal = jointStateMap_[leftArmJointNames_.at(0)];
     leftShoulderPitchJointVal = ((leftShoulderPitchJointVal - LEFT_SHOULDER_PITCH_MIN) * 100) /
                                 (LEFT_SHOULDER_PITCH_MAX - LEFT_SHOULDER_PITCH_MIN);
     ui->sliderShoulderPitch->setValue(leftShoulderPitchJointVal);
 
-    double leftShoulderRollJointVal = jointStateMap_[leftArmJointNames_.at(1)] * TO_DEGREES;
+    double leftShoulderRollJointVal = jointStateMap_[leftArmJointNames_.at(1)];
     leftShoulderRollJointVal =
         ((leftShoulderRollJointVal - LEFT_SHOULDER_ROLL_MIN) * 100) / (LEFT_SHOULDER_ROLL_MAX - LEFT_SHOULDER_ROLL_MIN);
     ui->sliderShoulderRoll->setValue(leftShoulderRollJointVal);
 
-    double leftShoulderYawJointVal = jointStateMap_[leftArmJointNames_.at(2)] * TO_DEGREES;
+    double leftShoulderYawJointVal = jointStateMap_[leftArmJointNames_.at(2)];
     leftShoulderYawJointVal =
         ((leftShoulderYawJointVal - LEFT_SHOULDER_YAW_MIN) * 100) / (LEFT_SHOULDER_YAW_MAX - LEFT_SHOULDER_YAW_MIN);
     ui->sliderShoulderYaw->setValue(leftShoulderYawJointVal);
 
-    double leftElbowPitchJointVal = jointStateMap_[leftArmJointNames_.at(3)] * TO_DEGREES;
+    double leftElbowPitchJointVal = jointStateMap_[leftArmJointNames_.at(3)];
     leftElbowPitchJointVal = ((leftElbowPitchJointVal - LEFT_ELBOW_MIN) * 100) / (LEFT_ELBOW_MAX - LEFT_ELBOW_MIN);
     ui->sliderElbow->setValue(leftElbowPitchJointVal);
 
-    double leftForearmYawJointVal = jointStateMap_[leftArmJointNames_.at(4)] * TO_DEGREES;
+    double leftForearmYawJointVal = jointStateMap_[leftArmJointNames_.at(4)];
     leftForearmYawJointVal =
         ((leftForearmYawJointVal - LEFT_WRIST_YAW_MIN) * 100) / (LEFT_WRIST_YAW_MAX - LEFT_WRIST_YAW_MIN);
     ui->sliderWristYaw->setValue(leftForearmYawJointVal);
 
-    double leftWristRollJointVal = jointStateMap_[leftArmJointNames_.at(5)] * TO_DEGREES;
+    double leftWristRollJointVal = jointStateMap_[leftArmJointNames_.at(5)];
     leftWristRollJointVal =
         ((leftWristRollJointVal - LEFT_WRIST_ROLL_MIN) * 100) / (LEFT_WRIST_ROLL_MAX - LEFT_WRIST_ROLL_MIN);
     ui->sliderWristRoll->setValue(leftWristRollJointVal);
 
-    double leftWristPitchJointVal = jointStateMap_[leftArmJointNames_.at(6)] * TO_DEGREES;
+    double leftWristPitchJointVal = jointStateMap_[leftArmJointNames_.at(6)];
     leftWristPitchJointVal =
         ((leftWristPitchJointVal - LEFT_WRIST_PITCH_MIN) * 100) / (LEFT_WRIST_PITCH_MAX - LEFT_WRIST_PITCH_MIN);
     ui->sliderWristPitch->setValue(leftWristPitchJointVal);
   }
   else
   {
-    double rightShoulderPitchJointVal = jointStateMap_[rightArmJointNames_.at(0)] * TO_DEGREES;
+    double rightShoulderPitchJointVal = jointStateMap_[rightArmJointNames_.at(0)];
     rightShoulderPitchJointVal = ((rightShoulderPitchJointVal - RIGHT_SHOULDER_PITCH_MIN) * 100) /
                                  (RIGHT_SHOULDER_PITCH_MAX - RIGHT_SHOULDER_PITCH_MIN);
     ui->sliderShoulderPitch->setValue(rightShoulderPitchJointVal);
 
-    double rightShoulderRollJointVal = jointStateMap_[rightArmJointNames_.at(1)] * TO_DEGREES;
+    double rightShoulderRollJointVal = jointStateMap_[rightArmJointNames_.at(1)];
     rightShoulderRollJointVal = ((rightShoulderRollJointVal - RIGHT_SHOULDER_ROLL_MIN) * 100) /
                                 (RIGHT_SHOULDER_ROLL_MAX - RIGHT_SHOULDER_ROLL_MIN);
     ui->sliderShoulderRoll->setValue(rightShoulderRollJointVal);
 
-    double rightShoulderYawJointVal = jointStateMap_[rightArmJointNames_.at(2)] * TO_DEGREES;
+    double rightShoulderYawJointVal = jointStateMap_[rightArmJointNames_.at(2)];
     rightShoulderYawJointVal =
         ((rightShoulderYawJointVal - RIGHT_SHOULDER_YAW_MIN) * 100) / (RIGHT_SHOULDER_YAW_MAX - RIGHT_SHOULDER_YAW_MIN);
     ui->sliderShoulderYaw->setValue(rightShoulderYawJointVal);
 
-    double rightElbowPitchJointVal = jointStateMap_[rightArmJointNames_.at(3)] * TO_DEGREES;
+    double rightElbowPitchJointVal = jointStateMap_[rightArmJointNames_.at(3)];
     rightElbowPitchJointVal = ((rightElbowPitchJointVal - RIGHT_ELBOW_MIN) * 100) / (RIGHT_ELBOW_MAX - RIGHT_ELBOW_MIN);
     ui->sliderElbow->setValue(rightElbowPitchJointVal);
 
-    double rightForearmYawJointVal = jointStateMap_[rightArmJointNames_.at(4)] * TO_DEGREES;
+    double rightForearmYawJointVal = jointStateMap_[rightArmJointNames_.at(4)];
     rightForearmYawJointVal =
         ((rightForearmYawJointVal - RIGHT_WRIST_YAW_MIN) * 100) / (RIGHT_WRIST_YAW_MAX - RIGHT_WRIST_YAW_MIN);
     ui->sliderWristYaw->setValue(rightForearmYawJointVal);
 
-    double rightWristRollJointVal = jointStateMap_[rightArmJointNames_.at(5)] * TO_DEGREES;
+    double rightWristRollJointVal = jointStateMap_[rightArmJointNames_.at(5)];
     rightWristRollJointVal =
         ((rightWristRollJointVal - RIGHT_WRIST_ROLL_MIN) * 100) / (RIGHT_WRIST_ROLL_MAX - RIGHT_WRIST_ROLL_MIN);
     ui->sliderWristRoll->setValue(rightWristRollJointVal);
 
-    double rightWristPitchJointVal = jointStateMap_[rightArmJointNames_.at(6)] * TO_DEGREES;
+    double rightWristPitchJointVal = jointStateMap_[rightArmJointNames_.at(6)];
     rightWristPitchJointVal =
         ((rightWristPitchJointVal - RIGHT_WRIST_PITCH_MIN) * 100) / (RIGHT_WRIST_PITCH_MAX - RIGHT_WRIST_PITCH_MIN);
     ui->sliderWristPitch->setValue(rightWristPitchJointVal);
@@ -1257,9 +1256,8 @@ void ToughGUI::moveArmJoints()
   //        std::vector<std::string> joints = {"leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw",
   //        "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch"};
 
-  msg.arm_pose = { shoulderPitchValue * TO_RADIANS, shoulderRollValue * TO_RADIANS, shoulderYawValue * TO_RADIANS,
-                   elbowValue * TO_RADIANS,         wristYawValue * TO_RADIANS,     wristRollValue * TO_RADIANS,
-                   wristPitchValue * TO_RADIANS };
+  msg.arm_pose = { shoulderPitchValue, shoulderRollValue, shoulderYawValue, elbowValue,
+                   wristYawValue,      wristRollValue,    wristPitchValue };
   msg.side = side;
   msg.time = 0.0;
   //    for (size_t i = 0; i< msg.arm_pose.size(); i++){

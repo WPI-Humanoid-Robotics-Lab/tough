@@ -18,7 +18,7 @@ int main(int argc, char** argv)
                  "4. Move to a specific configuration\n"
                  "5. Move arm to default pose\n"
                  "6. Move arm to zero pose\n"
-                 "7. Run Demo - Don't do this\n"
+                 "7. Run Demo - Don't do this on real robot\n"
                  "Select a motion or q to quit:";
     int choice, inputSide;
     std::cin >> choice;

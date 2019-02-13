@@ -3,9 +3,10 @@
 PelvisControlInterface::PelvisControlInterface(ros::NodeHandle nh) : ToughControllerInterface(nh)
 {
   pelvisHeightPublisher_ = nh_.advertise<ihmc_msgs::PelvisHeightTrajectoryRosMessage>(
-      control_topic_prefix_ + "/pelvis_height_trajectory", 1, true);
+      control_topic_prefix_ + TOUGH_COMMON_NAMES::PELVIS_HEIGHT_TRAJECTORY_TOPIC, 1, true);
 
-  homePositionPublisher_ = nh_.advertise<ihmc_msgs::GoHomeRosMessage>(control_topic_prefix_ + "/go_home", 1, true);
+  homePositionPublisher_ =
+      nh_.advertise<ihmc_msgs::GoHomeRosMessage>(control_topic_prefix_ + TOUGH_COMMON_NAMES::GO_HOME_TOPIC, 1, true);
 }
 
 PelvisControlInterface::~PelvisControlInterface()

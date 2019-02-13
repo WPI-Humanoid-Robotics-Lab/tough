@@ -46,7 +46,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 
-// custom Valkyrie APIs
+// TOUGH APIs
 #include <tough_controller_interface/arm_control_interface.h>
 #include <tough_controller_interface/chest_control_interface.h>
 #include <tough_controller_interface/pelvis_control_interface.h>
@@ -56,12 +56,10 @@
 #include "tough_moveit_planners/tough_cartesian_planner.h"
 #include <tough_controller_interface/wholebody_control_interface.h>
 #include "tough_common/robot_state.h"
-// Constants
-#define TO_RADIANS 3.1415926535f / 180.0f
-#define TO_DEGREES 180.0f / 3.1415926535f
 
-#define IMAGE_HEIGHT 544
-#define IMAGE_WIDTH 1024
+// Constants
+const int IMAGE_HEIGHT = 544;
+const int IMAGE_WIDTH = 1024;
 
 namespace Ui
 {
@@ -182,10 +180,7 @@ private:
 
   ros::Publisher reset_pointcloud;
   ros::Publisher pause_pointcloud;
-  //  ros::Subscriber centerDistSub;
-  //  ros::Subscriber baseSensorStatus;
   ros::Subscriber rviz2DNavGoalSub;
-  //  ros::Subscriber jointStateSub_;
   ros::Subscriber clickedPointSub_;
   ros::Timer jointStatesUpdater_;
   tf::TransformListener listener_;
@@ -246,56 +241,56 @@ private:
   float swingHeight_;
 
   // joint limits
-  float CHEST_ROLL_MAX = 14.61;
-  float CHEST_ROLL_MIN = -13;
-  float CHEST_PITCH_MAX = 38;
-  float CHEST_PITCH_MIN = -7;
-  float CHEST_YAW_MAX = 67;
-  float CHEST_YAW_MIN = -76;
+  float CHEST_ROLL_MAX = 0.2549926;
+  float CHEST_ROLL_MIN = -0.226893;
+  float CHEST_PITCH_MAX = 0.663225;
+  float CHEST_PITCH_MIN = -0.122173;
+  float CHEST_YAW_MAX = 1.16937;
+  float CHEST_YAW_MIN = -1.32645;
 
-  float PELVIS_HEIGHT_MAX = 0.95;
-  float PELVIS_HEIGHT_MIN = 0.55;
+  float PELVIS_HEIGHT_MAX = 0.8;
+  float PELVIS_HEIGHT_MIN = 0.65;
 
-  float RIGHT_SHOULDER_ROLL_MAX = 1.519 * TO_DEGREES;
-  float RIGHT_SHOULDER_ROLL_MIN = -1.26 * TO_DEGREES;
-  float RIGHT_SHOULDER_PITCH_MAX = 2.0 * TO_DEGREES;
-  float RIGHT_SHOULDER_PITCH_MIN = -2.85 * TO_DEGREES;
-  float RIGHT_SHOULDER_YAW_MAX = 2.18 * TO_DEGREES;
-  float RIGHT_SHOULDER_YAW_MIN = -3.1 * TO_DEGREES;
+  float RIGHT_SHOULDER_ROLL_MAX = 1.519;
+  float RIGHT_SHOULDER_ROLL_MIN = -1.26;
+  float RIGHT_SHOULDER_PITCH_MAX = 2.0;
+  float RIGHT_SHOULDER_PITCH_MIN = -2.85;
+  float RIGHT_SHOULDER_YAW_MAX = 2.18;
+  float RIGHT_SHOULDER_YAW_MIN = -3.1;
 
-  float LEFT_SHOULDER_ROLL_MAX = 1.266 * TO_DEGREES;
-  float LEFT_SHOULDER_ROLL_MIN = -1.519 * TO_DEGREES;
-  float LEFT_SHOULDER_PITCH_MAX = 2.0 * TO_DEGREES;
-  float LEFT_SHOULDER_PITCH_MIN = -2.85 * TO_DEGREES;
-  float LEFT_SHOULDER_YAW_MAX = 2.18 * TO_DEGREES;
-  float LEFT_SHOULDER_YAW_MIN = -3.1 * TO_DEGREES;
+  float LEFT_SHOULDER_ROLL_MAX = 1.266;
+  float LEFT_SHOULDER_ROLL_MIN = -1.519;
+  float LEFT_SHOULDER_PITCH_MAX = 2.0;
+  float LEFT_SHOULDER_PITCH_MIN = -2.85;
+  float LEFT_SHOULDER_YAW_MAX = 2.18;
+  float LEFT_SHOULDER_YAW_MIN = -3.1;
 
-  float RIGHT_WRIST_ROLL_MAX = 0.62 * TO_DEGREES;
-  float RIGHT_WRIST_ROLL_MIN = -0.625 * TO_DEGREES;
-  float RIGHT_WRIST_PITCH_MAX = 0.36 * TO_DEGREES;
-  float RIGHT_WRIST_PITCH_MIN = -0.49 * TO_DEGREES;
-  float RIGHT_WRIST_YAW_MAX = 3.14 * TO_DEGREES;
-  float RIGHT_WRIST_YAW_MIN = -2.019 * TO_DEGREES;
+  float RIGHT_WRIST_ROLL_MAX = 0.62;
+  float RIGHT_WRIST_ROLL_MIN = -0.625;
+  float RIGHT_WRIST_PITCH_MAX = 0.36;
+  float RIGHT_WRIST_PITCH_MIN = -0.49;
+  float RIGHT_WRIST_YAW_MAX = 3.14;
+  float RIGHT_WRIST_YAW_MIN = -2.019;
 
-  float LEFT_WRIST_ROLL_MAX = 0.625 * TO_DEGREES;
-  float LEFT_WRIST_ROLL_MIN = -0.62 * TO_DEGREES;
-  float LEFT_WRIST_PITCH_MAX = 0.49 * TO_DEGREES;
-  float LEFT_WRIST_PITCH_MIN = -0.36 * TO_DEGREES;
-  float LEFT_WRIST_YAW_MAX = 3.14 * TO_DEGREES;
-  float LEFT_WRIST_YAW_MIN = -2.019 * TO_DEGREES;
+  float LEFT_WRIST_ROLL_MAX = 0.625;
+  float LEFT_WRIST_ROLL_MIN = -0.62;
+  float LEFT_WRIST_PITCH_MAX = 0.49;
+  float LEFT_WRIST_PITCH_MIN = -0.36;
+  float LEFT_WRIST_YAW_MAX = 3.14;
+  float LEFT_WRIST_YAW_MIN = -2.019;
 
-  float LEFT_ELBOW_MAX = 0.12 * TO_DEGREES;
-  float LEFT_ELBOW_MIN = -2.174 * TO_DEGREES;
+  float LEFT_ELBOW_MAX = 0.12;
+  float LEFT_ELBOW_MIN = -2.174;
 
-  float RIGHT_ELBOW_MAX = 2.174 * TO_DEGREES;
-  float RIGHT_ELBOW_MIN = -0.12 * TO_DEGREES;
+  float RIGHT_ELBOW_MAX = 2.174;
+  float RIGHT_ELBOW_MIN = -0.12;
 
-  float LOWER_NECK_PITCH_MAX = 66.61;
+  float LOWER_NECK_PITCH_MAX = 1.1625638;
   float LOWER_NECK_PITCH_MIN = 0;
-  float UPPER_NECK_PITCH_MAX = 50.0;
-  float UPPER_NECK_PITCH_MIN = -49.9;
-  float NECK_YAW_MAX = 60;
-  float NECK_YAW_MIN = -60;
+  float UPPER_NECK_PITCH_MAX = 0.872665;
+  float UPPER_NECK_PITCH_MIN = -0.8709193;
+  float NECK_YAW_MAX = 1.0472;
+  float NECK_YAW_MIN = -1.0472;
 
   QString PREVIOUS_MODE_LEFT = "BASIC";
   QString PREVIOUS_MODE_RIGHT = "BASIC";

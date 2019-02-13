@@ -104,12 +104,19 @@ int main(int argc, char** argv)
   }
   else
   {
-    ROS_INFO("Usage: rosrun <node_name> 1 \n to open grippers \n running demo");
+    std::string filename = std::string(argv[0]);
+    int index = filename.find_last_of('/');
+    std::string input_trace_filename = filename.substr(index + 1);
+    ROS_INFO_STREAM("Usage : rosrun tough_example " << input_trace_filename
+                                                    << " 1 \t\t- to open both the grippers \n"
+                                                       " 0 \t\t- to close both the grippers  \n"
+                                                       "<side 0=left,1=right> <mode> \t\t refer to hand desired config "
+                                                       "message for details");
+
     demo_gripper(gripcont);
   }
   ros::spinOnce();
   ros::Duration(2).sleep();
 
-  ROS_INFO("motion complete");
   return 0;
 }
