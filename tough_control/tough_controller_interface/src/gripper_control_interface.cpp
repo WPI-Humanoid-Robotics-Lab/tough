@@ -2,7 +2,7 @@
 #include <tf/transform_listener.h>
 #include <map>
 
-GripperControlInterface::GripperControlInterface(ros::NodeHandle nh) : ToughControllerInterface(nh)
+GripperControlInterface::GripperControlInterface(ros::NodeHandle nh) : ToughControlInterface(nh)
 {
   gripperPublisher_ = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>(
       control_topic_prefix_ + TOUGH_COMMON_NAMES::HAND_DESIRED_CONFIG_TOPIC, 1, true);

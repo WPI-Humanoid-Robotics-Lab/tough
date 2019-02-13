@@ -5,7 +5,7 @@
 
 // add default pose for both arms. the values of joints are different.
 ArmControlInterface::ArmControlInterface(ros::NodeHandle nh)
-  : ToughControllerInterface(nh), ZERO_POSE{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }
+  : ToughControlInterface(nh), ZERO_POSE{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }
 {
   id_++;
   armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>(

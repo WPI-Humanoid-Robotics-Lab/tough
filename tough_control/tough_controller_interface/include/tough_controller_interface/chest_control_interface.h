@@ -11,9 +11,9 @@
 #include <geometry_msgs/Vector3.h>
 #include "tough_common/robot_state.h"
 #include "tough_common/robot_description.h"
-#include "tough_controller_interface/tough_controller_interface.h"
+#include "tough_controller_interface/tough_control_interface.h"
 
-class ChestControlInterface : public ToughControllerInterface
+class ChestControlInterface : public ToughControlInterface
 {
 private:
   ros::Publisher chestTrajPublisher_;

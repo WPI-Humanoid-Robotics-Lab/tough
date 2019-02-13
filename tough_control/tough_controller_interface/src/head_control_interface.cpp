@@ -2,7 +2,7 @@
 #include <tf/transform_listener.h>
 #include <tough_common/robot_state.h>
 
-HeadControlInterface::HeadControlInterface(ros::NodeHandle nh) : ToughControllerInterface(nh)
+HeadControlInterface::HeadControlInterface(ros::NodeHandle nh) : ToughControlInterface(nh)
 {
   neckTrajPublisher = nh_.advertise<ihmc_msgs::NeckTrajectoryRosMessage>(
       control_topic_prefix_ + TOUGH_COMMON_NAMES::NECK_TRAJECTORY_TOPIC, 1, true);

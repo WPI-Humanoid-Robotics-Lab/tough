@@ -1,5 +1,5 @@
-#ifndef TOUGHCONTROLLERINTERFACE_H
-#define TOUGHCONTROLLERINTERFACE_H
+#ifndef TOUGHCONTROLINTERFACE_H
+#define TOUGHCONTROLINTERFACE_H
 
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
@@ -7,7 +7,7 @@
 #include "tough_common/robot_state.h"
 #include "tough_common/robot_description.h"
 
-class ToughControllerInterface
+class ToughControlInterface
 {
 protected:
   ros::NodeHandle nh_;
@@ -19,11 +19,11 @@ protected:
   std::string robot_name_;
 
 public:
-  ToughControllerInterface(ros::NodeHandle nh);
-  virtual ~ToughControllerInterface() = 0;
+  ToughControlInterface(ros::NodeHandle nh);
+  virtual ~ToughControlInterface() = 0;
 
   virtual bool getJointSpaceState(std::vector<double>& joints, RobotSide side) = 0;
   virtual bool getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side, std::string fixedFrame) = 0;
 };
 
-#endif  // TOUGHCONTROLLERINTERFACE_H
+#endif  // TOUGHCONTROLINTERFACE_H

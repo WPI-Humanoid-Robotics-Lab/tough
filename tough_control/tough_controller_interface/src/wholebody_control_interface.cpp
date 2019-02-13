@@ -1,7 +1,7 @@
 #include "tough_controller_interface/wholebody_control_interface.h"
 
 WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle& nh)
-  : ToughControllerInterface(nh), chestController_(nh), armController_(nh)
+  : ToughControlInterface(nh), chestController_(nh), armController_(nh)
 {
   m_wholebodyPub = nh_.advertise<ihmc_msgs::WholeBodyTrajectoryRosMessage>(
       control_topic_prefix_ + TOUGH_COMMON_NAMES::WHOLEBODY_TRAJECTORY_TOPIC, 10, true);

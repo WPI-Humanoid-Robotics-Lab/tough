@@ -5,12 +5,12 @@
 #include <std_msgs/Float64MultiArray.h>
 #include "ihmc_msgs/HandDesiredConfigurationRosMessage.h"
 #include <tough_common/robot_description.h>
-#include "tough_controller_interface/tough_controller_interface.h"
+#include "tough_controller_interface/tough_control_interface.h"
 #include <map>
 
 // Note: HOOK Mode doesn't work. Tested on actual robotiq gripper
 
-class GripperControlInterface : public ToughControllerInterface
+class GripperControlInterface : public ToughControlInterface
 {
 private:
   ros::Publisher gripperPublisher_;

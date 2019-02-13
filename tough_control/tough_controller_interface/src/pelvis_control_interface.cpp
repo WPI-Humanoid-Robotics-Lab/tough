@@ -1,6 +1,6 @@
 #include <tough_controller_interface/pelvis_control_interface.h>
 
-PelvisControlInterface::PelvisControlInterface(ros::NodeHandle nh) : ToughControllerInterface(nh)
+PelvisControlInterface::PelvisControlInterface(ros::NodeHandle nh) : ToughControlInterface(nh)
 {
   pelvisHeightPublisher_ = nh_.advertise<ihmc_msgs::PelvisHeightTrajectoryRosMessage>(
       control_topic_prefix_ + TOUGH_COMMON_NAMES::PELVIS_HEIGHT_TRAJECTORY_TOPIC, 1, true);

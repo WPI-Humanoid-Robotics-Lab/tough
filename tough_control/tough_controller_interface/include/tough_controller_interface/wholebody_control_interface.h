@@ -12,9 +12,9 @@
 #include "tough_common/robot_state.h"
 #include "tough_controller_interface/arm_control_interface.h"
 #include "tough_controller_interface/chest_control_interface.h"
-#include "tough_controller_interface/tough_controller_interface.h"
+#include "tough_controller_interface/tough_control_interface.h"
 
-class WholebodyControlInterface : public ToughControllerInterface
+class WholebodyControlInterface : public ToughControlInterface
 {
 public:
   explicit WholebodyControlInterface(ros::NodeHandle& nh);

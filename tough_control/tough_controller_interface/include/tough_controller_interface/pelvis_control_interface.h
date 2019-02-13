@@ -7,9 +7,9 @@
 #include <tf/transform_listener.h>
 #include "tough_common/robot_state.h"
 #include "tough_common/robot_description.h"
-#include "tough_controller_interface/tough_controller_interface.h"
+#include "tough_controller_interface/tough_control_interface.h"
 
-class PelvisControlInterface : public ToughControllerInterface
+class PelvisControlInterface : public ToughControlInterface
 {
 private:
   ros::Publisher pelvisHeightPublisher_;

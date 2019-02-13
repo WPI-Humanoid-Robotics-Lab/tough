@@ -1,7 +1,7 @@
 #include <tough_controller_interface/chest_control_interface.h>
 #include <tf/transform_listener.h>
 
-ChestControlInterface::ChestControlInterface(ros::NodeHandle nh) : ToughControllerInterface(nh)
+ChestControlInterface::ChestControlInterface(ros::NodeHandle nh) : ToughControlInterface(nh)
 {
   chestTrajPublisher_ = nh_.advertise<ihmc_msgs::ChestTrajectoryRosMessage>(
       control_topic_prefix_ + TOUGH_COMMON_NAMES::CHEST_TRAJECTORY_TOPIC, 1, true);

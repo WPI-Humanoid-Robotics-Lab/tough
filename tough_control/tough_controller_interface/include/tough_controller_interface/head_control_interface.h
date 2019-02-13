@@ -14,13 +14,13 @@
 #include <geometry_msgs/Vector3.h>
 #include <tough_common/robot_state.h>
 #include "tough_common/robot_description.h"
-#include "tough_controller_interface/tough_controller_interface.h"
+#include "tough_controller_interface/tough_control_interface.h"
 
 /**
  * @brief The HeadTrajectory class provides ability to move the head of valkyrie. Current implementation provides the
  * ability to move the head to a set roll, pitch, and yaw.
  */
-class HeadControlInterface : public ToughControllerInterface
+class HeadControlInterface : public ToughControlInterface
 {
 private:
   int NUM_NECK_JOINTS;
