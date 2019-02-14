@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 # Added for unit testing
-find_package(GTest REQUIRED)
+#find_package(GTest REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
@@ -25,7 +25,7 @@ catkin_package(
 include_directories(${catkin_INCLUDE_DIRS} include)
 
 # Added for unit testing
-include_directories(${GTEST_INCLUDE_DIRS})
+#include_directories(${GTEST_INCLUDE_DIRS})
 
 #include_directories(
 #  include /${PROJECT_NAME}
@@ -75,15 +75,15 @@ install(TARGETS ${PROJECT_NAME}
 
 ## Add gtest based cpp test target and link libraries
 #catkin_add_gtest(${PROJECT_NAME}-test test/ros_gtest-test.cpp)
-catkin_add_gtest(test_pelvis_height test/pelvis_control_interface_test.cpp)
-catkin_add_gtest(test_arm_unit_test test/arm_control_interface_test.cpp)
+#catkin_add_gtest(test_pelvis_height test/pelvis_control_interface_test.cpp)
+#catkin_add_gtest(test_arm_unit_test test/arm_control_interface_test.cpp)
 
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
-target_link_libraries(test_pelvis_height ${catkin_LIBRARIES} ${PROJECT_NAME})
-target_link_libraries(test_arm_unit_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+#target_link_libraries(test_pelvis_height ${catkin_LIBRARIES} ${PROJECT_NAME})
+#target_link_libraries(test_arm_unit_test ${catkin_LIBRARIES} ${PROJECT_NAME})
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
