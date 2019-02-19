@@ -81,6 +81,8 @@ public:
 
   const std::string getRobotName() const;
 
+  const std::string getURDFParameter() const;
+
   void getLeftArmJointNames(std::vector<std::string>& left_arm_joint_names) const;
 
   void getRightArmJointNames(std::vector<std::string>& right_arm_joint_names) const;
@@ -165,6 +167,7 @@ private:
   urdf::Model model_;
   std::vector<urdf::JointSharedPtr> joints_;
   std::vector<urdf::LinkSharedPtr> links_;
+  std::string urdf_param_;
   std::string robot_name_;
   std::string param_left_arm_joint_names_;
   std::string param_right_arm_joint_names_;

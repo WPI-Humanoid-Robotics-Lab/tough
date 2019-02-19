@@ -46,7 +46,7 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
   }
 
   ROS_INFO("Robot Name : %s", robot_name_.c_str());
-  std::string prefix = "/ihmc_ros/" + robot_name_ + "/";
+  std::string prefix = TOUGH_COMMON_NAMES::TOPIC_PREFIX + robot_name_ + "/";
 
   std::string robot_xml;
   urdf_param = "/" + robot_name_ + urdf_param;
@@ -55,6 +55,7 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
     ROS_ERROR("Could not read the robot_description");
     return;
   }
+  urdf_param_ = urdf_param;
   if (robot_name_ == "")
   {
     robot_name_.assign(model_.getName());
@@ -236,6 +237,10 @@ const std::string RobotDescription::getRobotName() const
   return robot_name_;
 }
 
+const std::string RobotDescription::getURDFParameter() const
+{
+  return urdf_param_;
+}
 void RobotDescription::setRightPalmFrame(const std::string& value)
 {
   R_PALM_TF = value;

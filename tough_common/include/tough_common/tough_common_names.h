@@ -63,32 +63,19 @@ const std::string ROBOT_HEAD_FRAME_TF = "/head";
 /* world frame*/
 const std::string WORLD_TF = "/world";
 
+/********* MoveIt params *********/
 /* Moveit Groups */
-// leftArm -- > leftShoulderPitchLink to leftPalm
 const std::string LEFT_ARM_7DOF_GROUP = "L_SHOULDER_HAND_7DOF";
-
-// rightArm -- > rightShoulderPitchLink to rightPalm
 const std::string RIGHT_ARM_7DOF_GROUP = "R_SHOULDER_HAND_7DOF";
 
-// leftArm -- > leftEndEffectorFrame wrt leftHand/leftPalm
-const std::string LEFT_END_EFFECTOR_FRAME = "l_palm";
-
-// rightArm -- > rightEndEffectorFrame wrt rightHand/rightPalm
-const std::string RIGHT_END_EFFECTOR_FRAME = "r_palm";
-
-//// leftPalm -- > pelvis to leftPalm
-// const std::string LEFT_PALM_GROUP = "leftPalm";
-
-//// rightPalm -- > pelvis to rightPalm
-// const std::string RIGHT_PALM_GROUP = "rightPalm";
-
-// rightMiddleFingerGroup -- > pelvis to rightMiddleFingerPitch1Link
+const std::string LEFT_ARM_10DOF_GROUP = "L_PELVIS_PALM_10DOF";
 const std::string RIGHT_ARM_10DOF_GROUP = "R_PELVIS_PALM_10DOF";
 
-// leftMiddleFingerGroup -- > pelvis to leftMiddleFingerPitch1Link
-const std::string LEFT_ARM_10DOF_GROUP = "L_PELVIS_PALM_10DOF";
+const std::string PLANNING_PLUGIN_PARAM = "/move_group/planning_plugin";
 
-// Footstep planning service
+const std::string TRAJECTORY_DISPLAY_TOPIC = "/move_group/display_planned_path";
+
+/********* Footstep Planning *********/
 const std::string FOOTSTEP_PLANNER_SERVICE = "/plan_footsteps";
 
 }  // namespace TOUGH_COMMON_NAMES
