@@ -1,5 +1,5 @@
 <launch>
-	 <node name="laser_test" pkg="tough_perception_common" type="test_lasercloud" output="screen">
+	 <node name="laser_test" pkg="tough_perception_common" type="test_lasercloud" output="log">
 		<param name="laser_topic" value="/sensor_fusion/laser_cloud" />
 		<param name="stereo_topic" value="/multisense_sl/points2" />
         </node>

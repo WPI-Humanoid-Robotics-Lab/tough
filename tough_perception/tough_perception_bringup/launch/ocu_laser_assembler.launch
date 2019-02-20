@@ -19,7 +19,7 @@
     </node -->
 
     <node type="point_cloud_assembler" pkg="laser_assembler"
-            name="laser_assembler_svc" output="screen"  ns="ocu">
+            name="laser_assembler_svc" output="log"  ns="ocu">
         <remap from="cloud" to="/field/filtered_cloud"/>
         <param name="max_clouds" type="int" value="400" />
         <param name="fixed_frame" type="string" value="world" />

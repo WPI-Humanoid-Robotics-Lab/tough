@@ -6,7 +6,7 @@
     <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find tough_footstep)/config/rviz_footstep_planning.rviz" /> -->
   <arg name="robot_name" default="atlas" />
   
-  <node name="footstep_planner" pkg="tough_footstep" type="footstep_node" respawn="true" output="screen">
+  <node name="footstep_planner" pkg="tough_footstep" type="footstep_node" respawn="true" output="log">
     <rosparam file="$(find tough_footstep)/config/planning_params.yaml" command="load" />
     <rosparam file="$(find tough_footstep)/config/planning_params_humanoid.yaml" command="load" />
     <rosparam file="$(find tough_footstep)/config/footsteps_$(arg robot_name).yaml" command="load" />

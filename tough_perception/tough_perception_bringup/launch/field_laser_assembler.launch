@@ -2,7 +2,7 @@
 <launch>
 
     <arg name="robot_name" default="atlas" />
-
+    
     <!-- Start laser2point_cloud_node to publish pointcloud2 data -->
     <node pkg="tough_perception_common" type="laser2point_cloud_node" name="laser2point_cloud_node" ns="$(arg robot_name)" />
 
@@ -24,14 +24,14 @@
     </node>
 
    <node type="point_cloud_assembler" pkg="laser_assembler"
-            name="laser_assembler_svc" output="screen"  ns="$(arg robot_name)">
+            name="laser_assembler_svc" output="log"  ns="$(arg robot_name)">
         <remap from="cloud" to="filtered_cloud"/>
         <param name="max_clouds" type="int" value="400" />
         <param name="fixed_frame" type="string" value="world" />
         <param name="laser_snapshot_timeout" type="double" value="4.0"/>
     </node>
 
-    <node   type="periodic_snapshotter" pkg="tough_perception_common" name="laser_assembler_node"  ns="$(arg robot_name)" output="screen">
+    <node   type="periodic_snapshotter" pkg="tough_perception_common" name="laser_assembler_node"  ns="$(arg robot_name)" output="log">
             <param name="filter_min_x" type="double" value="-10.0" />
             <param name="filter_max_x" type="double" value="10.0" />
             <param name="filter_min_y" type="double" value="-10.0" />
