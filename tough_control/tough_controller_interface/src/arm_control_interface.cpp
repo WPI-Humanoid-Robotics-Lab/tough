@@ -77,7 +77,8 @@ void ArmControlInterface::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessa
 
     armMsg.joint_trajectory_messages[i].trajectory_points.push_back(p);
     armMsg.joint_trajectory_messages[i].unique_id = id;
-    armMsg.joint_trajectory_messages[i].weight = 1.0;
+    // weight should be set to NAN so the optimizer can use its predefined weights.
+    armMsg.joint_trajectory_messages[i].weight = std::nan("");
   }
 
   return;
