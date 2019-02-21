@@ -144,6 +144,10 @@ target_link_libraries(multisense_image_example  ${catkin_LIBRARIES})
 ## Manipulation examples ##
 #########################
 
+add_executable(ik_example src/manipulation_examples/ik_example.cpp )
+add_dependencies(ik_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ik_example  ${catkin_LIBRARIES})
+
 add_executable(motion_planner_example src/manipulation_examples/motion_planner_example.cpp )
 add_dependencies(motion_planner_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(motion_planner_example  ${catkin_LIBRARIES})
@@ -161,7 +165,7 @@ install(TARGETS reset_robot arm_control_example head_control_example arm_control
                 chest_control_example nudge_local_example pelvis_control_example
                 neck_control_example gripper_control_example arm_interactive_example
                 walk_forward_example walk_goal_example walk_example walk_rotate_example walk_steps_example
-                multisense_image_example motion_planner_example taskspace_planner_example 
+                multisense_image_example ik_example motion_planner_example taskspace_planner_example 
                 taskspace_2stage_planner_example
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

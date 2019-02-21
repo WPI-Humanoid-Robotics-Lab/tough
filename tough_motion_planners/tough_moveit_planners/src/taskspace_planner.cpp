@@ -7,13 +7,14 @@ TaskspacePlanner::TaskspacePlanner(ros::NodeHandle& nh, std::string urdf_param) 
 
   if (urdf_param == "")
   {
-    urdf_param.assign("/" + rd_->getRobotName() + "/robot_description");
+    urdf_param.assign(rd_->getURDFParameter());
   }
 
   robot_model_loader::RobotModelLoader robot_model_loader(urdf_param);
   robot_model_ = robot_model_loader.getModel();
 
-  display_publisher_ = nh_.advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, true);
+  display_publisher_ =
+      nh_.advertise<moveit_msgs::DisplayTrajectory>(TOUGH_COMMON_NAMES::TRAJECTORY_DISPLAY_TOPIC, 1, true);
 
   planning_scene_.reset(new planning_scene::PlanningScene(robot_model_));
 
@@ -23,13 +24,21 @@ TaskspacePlanner::TaskspacePlanner(ros::NodeHandle& nh, std::string urdf_param) 
   num_planning_attempts_ = 5;
   moveit_robot_state_ = std::shared_ptr<robot_state::RobotState>(new robot_state::RobotState(robot_model_));
 
-  plugin_param_ = "/move_group/planning_plugin";
+  plugin_param_ = TOUGH_COMMON_NAMES::PLANNING_PLUGIN_PARAM;
   loadPlanners();
+  updateKDLChains();
 }
 
 TaskspacePlanner::~TaskspacePlanner()
 {
   planner_instance.reset();
+  for (size_t i = 0; i < planning_groups_.size(); i++)
+  {
+    if (ik_solvers_.count(planning_groups_.at(i)) > 0)
+      delete ik_solvers_[planning_groups_.at(i)];
+    if (kdl_chains_.count(planning_groups_.at(i)) > 0)
+      delete kdl_chains_[planning_groups_.at(i)];
+  }
 }
 
 bool TaskspacePlanner::getTrajectory(const geometry_msgs::PoseStamped pose_msg, std::string planning_group,
@@ -45,7 +54,7 @@ bool TaskspacePlanner::getTrajectory(const geometry_msgs::PoseStamped pose_msg, 
   // configured planning groups are all upper case. right arm begins with R and left arm begins with L
   std::string ee_frame = planning_group.front() == 'R' ? rd_->getRightEEFrame() : rd_->getLeftEEFrame();
 
-  ROS_INFO("End effector name : %s", ee_frame.c_str());
+  // ROS_INFO("End effector name : %s", ee_frame.c_str());
   moveit_msgs::Constraints pose_goal =
       kinematic_constraints::constructGoalConstraints(ee_frame, pose_msg, position_tolerance_, angle_tolerance_);
   req.goal_constraints.push_back(pose_goal);
@@ -188,4 +197,113 @@ void TaskspacePlanner::loadPlugin(const std::string& planner_plugin_name)
     ROS_ERROR_STREAM("Exception while loading planner '" << planner_plugin_name << "': " << ex.what() << std::endl
                                                          << "Available plugins: " << ss.str());
   }
+}
+
+bool TaskspacePlanner::updateKDLChains()
+{
+  std::vector<std::pair<std::string, std::string> > base_frame_EE_pair = {
+    { rd_->getPelvisFrame(), rd_->getRightEEFrame() },
+    { "", rd_->getRightEEFrame() },
+    { rd_->getPelvisFrame(), rd_->getLeftEEFrame() },
+    { "", rd_->getLeftEEFrame() }
+  };
+
+  bool valid;
+  for (size_t i = 0; i < planning_groups_.size(); i++)
+  {
+    // get the current planning group
+    std::string planning_group = planning_groups_.at(i);
+
+    // create IK solver for the current planning group
+    ik_solvers_[planning_group] = new TRAC_IK::TRAC_IK(base_frame_EE_pair.at(i).first, base_frame_EE_pair.at(i).second,
+                                                       rd_->getURDFParameter(), this->planning_time_);
+
+    // get the KDL chain for current planning group and set its upper and lower joint limits
+    KDL::Chain* chain = new KDL::Chain();
+    valid = ik_solvers_[planning_group]->getKDLChain(*chain);
+    if (chain->getNrOfJoints() == 10)
+    {
+      // i = 0 and i = 2 are 10 DOF chains. (i + 1) are 7 DOF chains of the same side as i. In the following line we set
+      // base_frame_EE_pair.at(i + 1).first as the 3rd element in 10 DOF chain to get the 7 DOF chain. This is required
+      // as the current arm frames in the parameter are not sufficient for KDL. it expects parent frame but the
+      // parameter stores child frame
+      base_frame_EE_pair.at(i + 1).first = chain->getSegment(2).getName();
+    }
+    kdl_chains_[planning_group] = chain;
+    KDL::JntArray ll, ul;
+    valid = valid && ik_solvers_[planning_group]->getKDLLimits(ll, ul);
+    kdl_joint_limits_[planning_group] = std::make_pair(ll, ul);
+    if (!valid)
+    {
+      return valid;
+    }
+  }
+  return valid;
+}
+
+bool TaskspacePlanner::solve_ik(const std::string& planning_group, const geometry_msgs::PoseStamped& end_effector_pose,
+                                std::vector<double>& result)
+{
+  int index = std::distance(planning_groups_.begin(),
+                            std::find(planning_groups_.begin(), planning_groups_.end(), planning_group));
+  if (index < planning_groups_.size())
+  {
+    std::vector<double> initial_position_arms, initial_position_chest;
+    std::string prefix = TOUGH_COMMON_NAMES::TOPIC_PREFIX + rd_->getRobotName() + "/";
+    // 10 DOF joints
+    if (index == 0 || index == 2)
+    {
+      state_informer_->getJointPositions(prefix + TOUGH_COMMON_NAMES::CHEST_JOINT_NAMES_PARAM, initial_position_chest);
+    }
+    if (planning_group.at(0) == 'R')
+    {
+      state_informer_->getJointPositions(prefix + TOUGH_COMMON_NAMES::RIGHT_ARM_JOINT_NAMES_PARAM,
+                                         initial_position_arms);
+    }
+    else
+    {
+      state_informer_->getJointPositions(prefix + TOUGH_COMMON_NAMES::LEFT_ARM_JOINT_NAMES_PARAM,
+                                         initial_position_arms);
+    }
+
+    initial_position_chest.insert(initial_position_chest.end(), initial_position_arms.begin(),
+                                  initial_position_arms.end());
+    KDL::JntArray kdl_initial_position, kdl_result;
+    vectorToKDLJntArray(initial_position_chest, kdl_initial_position);
+    KDL::Frame kdl_end_effector_pose;
+
+    geometry_msgs::Pose goal_pose;
+    state_informer_->transformPose(end_effector_pose.pose, goal_pose, end_effector_pose.header.frame_id.data(),
+                                   rd_->getPelvisFrame());
+    poseToKDLFrame(goal_pose, kdl_end_effector_pose);
+    int success = ik_solvers_[planning_group]->CartToJnt(kdl_initial_position, kdl_end_effector_pose, kdl_result);
+    KDLJntArrayToVector(kdl_result, result);
+    return success >= 0;
+  }
+
+  ROS_ERROR("This function allows planning for only the following groups :");
+  for (int i = 0; i < planning_groups_.size(); i++)
+  {
+    ROS_ERROR("\t\t%s", planning_groups_.at(i).c_str());
+  }
+  return false;
+}
+
+void TaskspacePlanner::vectorToKDLJntArray(std::vector<double>& vec, KDL::JntArray& kdl_array)
+{
+  double* ptr = &vec[0];
+  Eigen::Map<Eigen::VectorXd> data(ptr, vec.size());
+  kdl_array.data = data;
+}
+
+void TaskspacePlanner::KDLJntArrayToVector(KDL::JntArray& kdl_array, std::vector<double>& vec)
+{
+  // use emplace
+  vec = std::vector<double>(kdl_array.data.data(), kdl_array.data.data() + kdl_array.data.size());
+}
+
+void TaskspacePlanner::poseToKDLFrame(const geometry_msgs::Pose& pose, KDL::Frame& frame)
+{
+  frame.M = KDL::Rotation::Quaternion(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
+  frame.p = KDL::Vector(pose.position.x, pose.position.y, pose.position.z);
 }

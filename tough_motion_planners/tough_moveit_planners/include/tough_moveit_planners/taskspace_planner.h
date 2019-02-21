@@ -16,6 +16,9 @@
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
 #include <moveit_visual_tools/moveit_visual_tools.h>
 
+#include <trac_ik/trac_ik.hpp>
+#include <kdl/chainiksolverpos_nr_jl.hpp>
+
 #include <tough_common/robot_state.h>
 #include <tough_common/robot_description.h>
 #include <tough_common/tough_common_names.h>
@@ -29,6 +32,9 @@ public:
 
   bool getTrajectory(const geometry_msgs::PoseStamped pose, std::string planning_group,
                      moveit_msgs::RobotTrajectory& output_robot_traj_msg);
+
+  bool solve_ik(const std::string& planning_group, const geometry_msgs::PoseStamped& end_effector_pose,
+                std::vector<double>& result);
 
   double getPositionTolerance() const;
   void setPositionTolerance(const double position_tolerance);
@@ -53,8 +59,20 @@ private:
   double position_tolerance_;
   double angle_tolerance_;
 
+  const std::vector<std::string> planning_groups_ = { TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP,
+                                                      TOUGH_COMMON_NAMES::RIGHT_ARM_7DOF_GROUP,
+                                                      TOUGH_COMMON_NAMES::LEFT_ARM_10DOF_GROUP,
+                                                      TOUGH_COMMON_NAMES::LEFT_ARM_7DOF_GROUP };
+
   void displayInRviz(const moveit_msgs::MotionPlanResponse& response_msg);
   void loadPlanners();
+
+  // Trac IK solvers
+  std::map<std::string, TRAC_IK::TRAC_IK*> ik_solvers_;
+  std::map<std::string, KDL::Chain*> kdl_chains_;
+  std::map<std::string, std::pair<KDL::JntArray, KDL::JntArray>> kdl_joint_limits_;
+
+  bool updateKDLChains();
 
   // Planner parameters
   double planning_time_;
@@ -79,6 +97,10 @@ private:
   // tough
   RobotStateInformer* state_informer_;
   RobotDescription* rd_;
+
+  void vectorToKDLJntArray(std::vector<double>& vec, KDL::JntArray& kdl_array);
+  void KDLJntArrayToVector(KDL::JntArray& kdl_array, std::vector<double>& vec);
+  void poseToKDLFrame(const geometry_msgs::Pose& pose, KDL::Frame& frame);
 };
 
 #endif  // TASKSPACE_PLANNER_H
