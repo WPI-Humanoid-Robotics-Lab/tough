@@ -10,7 +10,7 @@ int main(int argc, char** argv)
     std::string filename = std::string(argv[0]);
     int index = filename.find_last_of('/');
     std::string input_trace_filename = filename.substr(index + 1);
-    ROS_INFO_STREAM("Usage : rosrun tough_example "
+    ROS_INFO_STREAM("Usage : rosrun tough_examples "
                         << input_trace_filename << " <side_left=0,right=1> <jointNumber> <desiredAngle_in_radians>";);
     return -1;
   }

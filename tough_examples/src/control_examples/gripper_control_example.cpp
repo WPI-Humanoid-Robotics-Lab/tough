@@ -107,7 +107,7 @@ int main(int argc, char** argv)
     std::string filename = std::string(argv[0]);
     int index = filename.find_last_of('/');
     std::string input_trace_filename = filename.substr(index + 1);
-    ROS_INFO_STREAM("Usage : rosrun tough_example " << input_trace_filename
+    ROS_INFO_STREAM("Usage : rosrun tough_examples " << input_trace_filename
                                                     << " 1 \t\t- to open both the grippers \n"
                                                        " 0 \t\t- to close both the grippers  \n"
                                                        "<side 0=left,1=right> <mode> \t\t refer to hand desired config "

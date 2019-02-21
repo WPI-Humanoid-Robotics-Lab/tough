@@ -13,7 +13,7 @@ int main(int argc, char** argv)
     std::string filename = std::string(argv[0]);
     int index = filename.find_last_of('/');
     std::string input_trace_filename = filename.substr(index + 1);
-    ROS_INFO_STREAM("Usage : rosrun tough_example " << input_trace_filename
+    ROS_INFO_STREAM("Usage : rosrun tough_examples " << input_trace_filename
                                                     << " <side_left=0,right=1> <q0> <q1> <q2> <q3> <q4> <q5> <q6>";);
 
     return -1;
