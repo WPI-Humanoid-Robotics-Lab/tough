@@ -1,5 +1,13 @@
 # T.O.U.G.H
 Transportable Opensource UI for Generic Humanoids
+<p align="left"> 
+ <a href="https://github.com/WPI-Humanoid-Robotics-Lab/tough/blob/kinetic-0.11.0/LICENSE" alt="Contributors">
+        <img src="https://img.shields.io/apm/l/vim-mode.svg?style=popout" /></a>
+ <a href="https://github.com/WPI-Humanoid-Robotics-Lab/tough/issues" alt="Contributors">
+        <img src="https://img.shields.io/github/issues/WPI-Humanoid-Robotics-Lab/tough.svg" /></a>
+</p>
+
+
 ![logo](./docs/logo.png)
 
 
