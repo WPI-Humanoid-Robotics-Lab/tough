@@ -40,11 +40,13 @@ private:
   {
     if (paramName == "left_arm_joint_names" || paramName == "left_arm")
     {
-      parameter.assign(TOUGH_COMMON_NAMES::TOPIC_PREFIX + robotName_ + TOUGH_COMMON_NAMES::LEFT_ARM_JOINT_NAMES_PARAM);
+      parameter.assign(TOUGH_COMMON_NAMES::TOPIC_PREFIX + robotName_ + "/" +
+                       TOUGH_COMMON_NAMES::LEFT_ARM_JOINT_NAMES_PARAM);
     }
     else if (paramName == "right_arm_joint_names" || paramName == "right_arm")
     {
-      parameter.assign(TOUGH_COMMON_NAMES::TOPIC_PREFIX + robotName_ + TOUGH_COMMON_NAMES::RIGHT_ARM_JOINT_NAMES_PARAM);
+      parameter.assign(TOUGH_COMMON_NAMES::TOPIC_PREFIX + robotName_ + "/" +
+                       TOUGH_COMMON_NAMES::RIGHT_ARM_JOINT_NAMES_PARAM);
     }
     else
     {
