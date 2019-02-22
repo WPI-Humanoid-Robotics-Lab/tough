@@ -28,7 +28,7 @@ include_directories(
 
 ## Declare a C++ library
  add_library(${PROJECT_NAME}
-   src/frame_tracking.cpp
+   src/frame_tracker.cpp
    src/fall_detector.cpp
    src/map_generator.cpp
  )

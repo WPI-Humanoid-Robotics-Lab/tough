@@ -1,6 +1,6 @@
-#include <navigation_common/frame_tracking.h>
+#include <navigation_common/frame_tracker.h>
 
-frameTracking::frameTracking(ros::NodeHandle nh, std::string frame, std::string base_frame)
+FrameTracker::FrameTracker(ros::NodeHandle nh, std::string frame, std::string base_frame)
   : nh_(nh), frame_(frame), base_frame_(base_frame)
 {
   motion_status_ = frame_track_status::NOT_TRACKED;
@@ -17,21 +17,21 @@ frameTracking::frameTracking(ros::NodeHandle nh, std::string frame, std::string 
     ROS_ERROR("%s", ex.what());
   }
 
-  track_thread_ = std::thread(&frameTracking::trackFrame, this);
+  track_thread_ = std::thread(&FrameTracker::trackFrame, this);
   track_thread_.detach();
 }
 
-frameTracking::~frameTracking()
+FrameTracker::~FrameTracker()
 {
   ROS_INFO("destructor");
 }
 
-frame_track_status frameTracking::isInMotion()
+frame_track_status FrameTracker::isInMotion()
 {
   return motion_status_;
 }
 
-void frameTracking::trackFrame(void)
+void FrameTracker::trackFrame(void)
 {
   ros::Rate rate(10.0);
   tf::StampedTransform transform, transform_prev;
@@ -55,7 +55,7 @@ void frameTracking::trackFrame(void)
   }
 }
 
-bool frameTracking::isTranformChanging(tf::StampedTransform transform_curr, tf::StampedTransform transform_prev)
+bool FrameTracker::isTranformChanging(tf::StampedTransform transform_curr, tf::StampedTransform transform_prev)
 {
   bool ret = false;
   tf::StampedTransform transform_diff;

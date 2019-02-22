@@ -12,7 +12,7 @@ enum class frame_track_status
   FRAME_STATIONARY
 };
 
-class frameTracking
+class FrameTracker
 {
 private:
   tf::TransformListener listener_;
@@ -28,8 +28,8 @@ private:
   const float ORIENTATION_THRESHOLD = 0.0174533f;  // 1deg
 
 public:
-  frameTracking(ros::NodeHandle nh, std::string frame, std::string base_frame);
-  ~frameTracking();
+  FrameTracker(ros::NodeHandle nh, std::string frame, std::string base_frame);
+  ~FrameTracker();
 
   frame_track_status isInMotion(void);
 };
