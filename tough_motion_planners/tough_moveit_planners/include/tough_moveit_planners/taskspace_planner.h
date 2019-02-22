@@ -36,6 +36,8 @@ public:
   bool solve_ik(const std::string& planning_group, const geometry_msgs::PoseStamped& end_effector_pose,
                 std::vector<double>& result);
 
+  bool solve_ik(const std::string& planning_group, const geometry_msgs::PoseStamped& end_effector_pose,
+                trajectory_msgs::JointTrajectory& result, float time = 2.0f);
   double getPositionTolerance() const;
   void setPositionTolerance(const double position_tolerance);
 
@@ -71,7 +73,7 @@ private:
   std::map<std::string, TRAC_IK::TRAC_IK*> ik_solvers_;
   std::map<std::string, KDL::Chain*> kdl_chains_;
   std::map<std::string, std::pair<KDL::JntArray, KDL::JntArray>> kdl_joint_limits_;
-
+  std::vector<std::string> joint_names_in_traj_;
   bool updateKDLChains();
 
   // Planner parameters

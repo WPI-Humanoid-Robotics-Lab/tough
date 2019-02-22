@@ -242,8 +242,37 @@ bool TaskspacePlanner::updateKDLChains()
 }
 
 bool TaskspacePlanner::solve_ik(const std::string& planning_group, const geometry_msgs::PoseStamped& end_effector_pose,
+                                trajectory_msgs::JointTrajectory& result_traj, float time)
+{
+  bool success = false;
+
+  std::vector<double> joint_angles;
+  success = solve_ik(planning_group, end_effector_pose, joint_angles);
+
+  result_traj.header = std_msgs::Header();
+  result_traj.points.resize(1);
+  result_traj.joint_names.clear();
+  result_traj.points.resize(1);
+  result_traj.points.front().positions = joint_angles;
+  result_traj.points.front().velocities.resize(joint_angles.size());
+  result_traj.points.front().effort.resize(joint_angles.size());
+  result_traj.points.front().accelerations.resize(joint_angles.size());
+  result_traj.points.front().time_from_start = ros::Duration(time);
+
+  KDL::Chain* current_chain = kdl_chains_[planning_group];
+  for (size_t i = 0; i < current_chain->getNrOfJoints(); i++)
+  {
+    result_traj.joint_names.push_back(current_chain->getSegment(i).getJoint().getName());
+    ROS_INFO("Joint Name: %s, Joint angle: %.2f", current_chain->getSegment(i).getJoint().getName().c_str(),
+             result_traj.points.front().positions.at(i));
+  }
+  return success;
+}
+
+bool TaskspacePlanner::solve_ik(const std::string& planning_group, const geometry_msgs::PoseStamped& end_effector_pose,
                                 std::vector<double>& result)
 {
+  joint_names_in_traj_.clear();
   int index = std::distance(planning_groups_.begin(),
                             std::find(planning_groups_.begin(), planning_groups_.end(), planning_group));
   if (index < planning_groups_.size())
