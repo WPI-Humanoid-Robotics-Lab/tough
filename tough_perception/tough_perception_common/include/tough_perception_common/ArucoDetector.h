@@ -1,5 +1,5 @@
-#ifndef ARUCODETECOR_H_
-#define ARUCODETECOR_H_
+#ifndef ARUCODETECTOR_H_
+#define ARUCODETECTOR_H_
 
 #include <tough_perception_common/global.h>
 #include <fiducial_msgs/FiducialTransform.h>
