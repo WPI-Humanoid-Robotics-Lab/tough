@@ -42,6 +42,7 @@ add_library(${PROJECT_NAME}  src/MultisensePointCloud.cpp
 #                             src/ImageHelper.cpp
                              src/PointCloudHelper.cpp
                              src/laser2point_cloud.cpp
+                             src/ArucoDetector.cpp
 )
 									
 set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_DEFINITIONS GAZEBO_SIMULATION)
@@ -65,9 +66,14 @@ add_executable(walkway_point_generator src/walkway_generator.cpp)
 add_dependencies(walkway_point_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(walkway_point_generator ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
- add_executable(laser2point_cloud_node src/laser2point_cloud_node.cpp)
- add_dependencies(laser2point_cloud_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
- target_link_libraries(laser2point_cloud_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
+add_executable(laser2point_cloud_node src/laser2point_cloud_node.cpp)
+add_dependencies(laser2point_cloud_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(laser2point_cloud_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
+
+add_executable(test_aruco_node src/test_aruco.cpp)
+add_dependencies(test_aruco_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_aruco_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
+
 
 
 ## Mark executables and/or libraries for installation
