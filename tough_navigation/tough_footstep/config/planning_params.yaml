@@ -7,7 +7,7 @@ max_hash_size: 65536
 # the heuristic that should be used to estimate the step costs of a planning 
 # state possible choices: 
 # EuclideanHeuristic, EuclStepCostHeuristic, PathCostHeuristic
-heuristic_type: EuclStepCostHeuristic
+heuristic_type: EuclideanHeuristic
 
 
 ### planner settings ###########################################################
@@ -16,7 +16,7 @@ heuristic_type: EuclStepCostHeuristic
 # - ARAPlanner
 # - ADPlanner
 # - RSTARPlanner
-planner_type: ADPlanner
+planner_type: ARAPlanner
 
 # search until a specific time limit is reached or first solution is found
 search_until_first_solution: True
