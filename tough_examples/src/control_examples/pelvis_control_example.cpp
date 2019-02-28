@@ -22,10 +22,9 @@ int main(int argc, char** argv)
     float height = std::atof(argv[1]);
     ROS_INFO_STREAM("moving pelvis to height " + std::to_string(height));
     pelvisTraj.controlPelvisHeight(height);
+    ros::spinOnce();
+    ros::Duration(2).sleep();
   }
-
-  ros::spinOnce();
-  ros::Duration(2).sleep();
 
   return 0;
 }
