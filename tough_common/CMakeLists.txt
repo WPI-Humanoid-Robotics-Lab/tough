@@ -3,7 +3,7 @@ project(tough_common)
 
 add_definitions(-std=c++11)
 
-find_package(catkin REQUIRED COMPONENTS roscpp urdf tf)
+find_package(catkin REQUIRED COMPONENTS roscpp urdf tf ihmc_msgs std_msgs sensor_msgs geometry_msgs)
 
 #kdtree is not required here. This should be removed.
 #set(KDSourcesList src/kdtree/alglibinternal.cpp src/kdtree/ap.cpp src/kdtree/alglibmisc.cpp)
@@ -19,7 +19,7 @@ set(SOURCES
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp urdf tf
+  CATKIN_DEPENDS  roscpp urdf tf ihmc_msgs std_msgs sensor_msgs geometry_msgs
 #  DEPENDS system_lib
 )
 

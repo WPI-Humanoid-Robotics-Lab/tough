@@ -1,5 +1,6 @@
 #include "tough_common/robot_state.h"
 
+using namespace TOUGH_COMMON_NAMES;
 RobotStateInformer* RobotStateInformer::currentObject_ = nullptr;
 
 /* Singleton implementation */
@@ -17,11 +18,32 @@ RobotStateInformer* RobotStateInformer::getRobotStateInformer(ros::NodeHandle nh
 RobotStateInformer::RobotStateInformer(ros::NodeHandle nh) : nh_(nh)
 {
   rd_ = RobotDescription::getRobotDescription(nh_);
-  nh.getParam(TOUGH_COMMON_NAMES::ROBOT_NAME_PARAM, robotName_);
+  nh.getParam(ROBOT_NAME_PARAM, robotName_);
 
-  jointStateSub_ = nh_.subscribe(TOUGH_COMMON_NAMES::TOPIC_PREFIX + robotName_ +
-                                     TOUGH_COMMON_NAMES::OUTPUT_TOPIC_PREFIX + TOUGH_COMMON_NAMES::JOINT_STATES_TOPIC,
-                                 1, &RobotStateInformer::jointStateCB, this);
+  std::string prefix = TOPIC_PREFIX + robotName_ + OUTPUT_TOPIC_PREFIX;
+
+  jointStateSub_ = nh_.subscribe(prefix + JOINT_STATES_TOPIC, 1, &RobotStateInformer::jointStateCB, this);
+  pelvisIMUSub_ = nh_.subscribe(prefix + PELVIS_IMU_TOPIC, 1, &RobotStateInformer::pelvisImuCB, this);
+  centerOfMassSub_ = nh_.subscribe(prefix + CENTER_OF_MASS_TOPIC, 1, &RobotStateInformer::centerOfMassCB, this);
+  capturePointSub_ = nh_.subscribe(prefix + CAPTURE_POINT_TOPIC, 1, &RobotStateInformer::capturPointCB, this);
+  isInDoubleSupportSub_ =
+      nh_.subscribe(prefix + DOUBLE_SUPPORT_STATUS_TOPIC, 1, &RobotStateInformer::doubleSupportStatusCB, this);
+  leftFootForceSensorSub_ =
+      nh_.subscribe(prefix + LEFT_FOOT_FORCE_SENSOR_TOPIC, 1, &RobotStateInformer::leftFootForceSensorCB, this);
+  rightFootForceSensorSub_ =
+      nh_.subscribe(prefix + RIGHT_FOOT_FORCE_SENSOR_TOPIC, 1, &RobotStateInformer::rightFootForceSensorCB, this);
+  leftWristForceSensorSub_ =
+      nh_.subscribe(prefix + LEFT_WRIST_FORCE_SENSOR_TOPIC, 1, &RobotStateInformer::leftWristForceSensorCB, this);
+  rightWristForceSensorSub_ =
+      nh_.subscribe(prefix + RIGHT_WRIST_FORCE_SENSOR_TOPIC, 1, &RobotStateInformer::rightWristForceSensorCB, this);
+
+  // set default values as 0 in the force sensor maps
+  footWrenches_[RobotSide::RIGHT] = geometry_msgs::Wrench();
+  footWrenches_[RobotSide::LEFT] = geometry_msgs::Wrench();
+
+  wristWrenches_[RobotSide::RIGHT] = geometry_msgs::Wrench();
+  wristWrenches_[RobotSide::LEFT] = geometry_msgs::Wrench();
+
   ros::Duration(0.2).sleep();
 }
 
@@ -59,6 +81,100 @@ void RobotStateInformer::jointStateCB(const sensor_msgs::JointStatePtr msg)
     state.effort = msg->effort[i];
     currentState_[msg->name[i]] = state;
   }
+}
+
+void RobotStateInformer::pelvisImuCB(const sensor_msgs::Imu& msg)
+{
+  pelvisImuValue_ = msg;
+}
+void RobotStateInformer::centerOfMassCB(const geometry_msgs::Point32& msg)
+{
+  centerOfMassValue_.x = msg.x;
+  centerOfMassValue_.y = msg.y;
+  centerOfMassValue_.z = msg.z;
+}
+void RobotStateInformer::capturPointCB(const ihmc_msgs::Point2dRosMessage& msg)
+{
+  capturePointValue_.x = msg.x;
+  capturePointValue_.y = msg.y;
+  capturePointValue_.z = 0.0;
+}
+
+void RobotStateInformer::doubleSupportStatusCB(const std_msgs::Bool& msg)
+{
+  doubleSupportStatus_ = msg.data;
+}
+void RobotStateInformer::leftFootForceSensorCB(const geometry_msgs::WrenchStamped& msg)
+{
+  footWrenches_[LEFT] = msg.wrench;
+}
+void RobotStateInformer::rightFootForceSensorCB(const geometry_msgs::WrenchStamped& msg)
+{
+  footWrenches_[RIGHT] = msg.wrench;
+}
+void RobotStateInformer::leftWristForceSensorCB(const geometry_msgs::WrenchStamped& msg)
+{
+  wristWrenches_[LEFT] = msg.wrench;
+}
+void RobotStateInformer::rightWristForceSensorCB(const geometry_msgs::WrenchStamped& msg)
+{
+  wristWrenches_[RIGHT] = msg.wrench;
+}
+
+void RobotStateInformer::getFootWrenches(std::map<RobotSide, geometry_msgs::Wrench>& wrenches)
+{
+  wrenches = footWrenches_;
+}
+void RobotStateInformer::getWristWrenches(std::map<RobotSide, geometry_msgs::Wrench>& wrenches)
+{
+  wrenches = wristWrenches_;
+}
+
+void RobotStateInformer::getFootWrench(const RobotSide side, geometry_msgs::Wrench& wrench)
+{
+  wrench = footWrenches_[side];
+}
+void RobotStateInformer::getWristWrench(const RobotSide side, geometry_msgs::Wrench& wrench)
+{
+  wrench = wristWrenches_[side];
+}
+
+void RobotStateInformer::getFootForce(const RobotSide side, geometry_msgs::Vector3& force)
+{
+  force = footWrenches_[side].force;
+}
+void RobotStateInformer::getFootTorque(const RobotSide side, geometry_msgs::Vector3& torque)
+{
+  torque = footWrenches_[side].torque;
+}
+
+void RobotStateInformer::getWristForce(const RobotSide side, geometry_msgs::Vector3& force)
+{
+  force = wristWrenches_[side].force;
+}
+void RobotStateInformer::getWristTorque(const RobotSide side, geometry_msgs::Vector3& torque)
+{
+  torque = wristWrenches_[side].torque;
+}
+
+bool RobotStateInformer::isRobotInDoubleSupport()
+{
+  return doubleSupportStatus_;
+}
+
+void RobotStateInformer::getCapturePoint(geometry_msgs::Point& point)
+{
+  point = capturePointValue_;
+}
+
+void RobotStateInformer::getCenterOfMass(geometry_msgs::Point& point)
+{
+  point = centerOfMassValue_;
+}
+
+void RobotStateInformer::getPelvisIMUReading(sensor_msgs::Imu& msg)
+{
+  msg = pelvisImuValue_;
 }
 
 void RobotStateInformer::getJointPositions(std::vector<double>& positions)

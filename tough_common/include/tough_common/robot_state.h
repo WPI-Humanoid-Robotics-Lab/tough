@@ -1,5 +1,5 @@
-#ifndef VAL_ROBOT_STATE_H
-#define VAL_ROBOT_STATE_H
+#ifndef TOUGH_ROBOT_STATE_INFORMER_H
+#define TOUGH_ROBOT_STATE_INFORMER_H
 
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
@@ -8,6 +8,10 @@
 #include <mutex>
 #include <geometry_msgs/Pose2D.h>
 #include "tough_common/robot_description.h"
+#include <sensor_msgs/Imu.h>
+#include <ihmc_msgs/Point2dRosMessage.h>
+#include <geometry_msgs/WrenchStamped.h>
+#include <std_msgs/Bool.h>
 
 struct RobotState
 {
@@ -27,14 +31,41 @@ private:
   RobotDescription* rd_;
 
   ros::NodeHandle nh_;
-  ros::Subscriber jointStateSub_;
   tf::TransformListener listener_;
-
-  std::map<std::string, RobotState> currentState_;
-  std::mutex currentStateMutex_;
   std::string robotName_;
 
+  ros::Subscriber jointStateSub_;
   void jointStateCB(const sensor_msgs::JointStatePtr msg);
+  std::map<std::string, RobotState> currentState_;
+  std::mutex currentStateMutex_;
+
+  ros::Subscriber pelvisIMUSub_;
+  void pelvisImuCB(const sensor_msgs::Imu& msg);
+  sensor_msgs::Imu pelvisImuValue_;
+
+  ros::Subscriber centerOfMassSub_;
+  void centerOfMassCB(const geometry_msgs::Point32& msg);
+  geometry_msgs::Point centerOfMassValue_;
+
+  ros::Subscriber capturePointSub_;
+  void capturPointCB(const ihmc_msgs::Point2dRosMessage& msg);
+  geometry_msgs::Point capturePointValue_;
+
+  ros::Subscriber isInDoubleSupportSub_;
+  void doubleSupportStatusCB(const std_msgs::Bool& msg);
+  bool doubleSupportStatus_;
+
+  ros::Subscriber leftFootForceSensorSub_;
+  ros::Subscriber rightFootForceSensorSub_;
+  void leftFootForceSensorCB(const geometry_msgs::WrenchStamped& msg);
+  void rightFootForceSensorCB(const geometry_msgs::WrenchStamped& msg);
+  std::map<RobotSide, geometry_msgs::Wrench> footWrenches_;
+
+  ros::Subscriber leftWristForceSensorSub_;
+  ros::Subscriber rightWristForceSensorSub_;
+  void leftWristForceSensorCB(const geometry_msgs::WrenchStamped& msg);
+  void rightWristForceSensorCB(const geometry_msgs::WrenchStamped& msg);
+  std::map<RobotSide, geometry_msgs::Wrench> wristWrenches_;
 
   void inline parseParameter(const std::string& paramName, std::string& parameter)
   {
@@ -104,6 +135,26 @@ public:
                        const std::string& from_frame, const std::string& to_frame = TOUGH_COMMON_NAMES::WORLD_TF);
   bool transformVector(const geometry_msgs::Vector3Stamped& vec_in, geometry_msgs::Vector3Stamped& vec_out,
                        const std::string target_frame = TOUGH_COMMON_NAMES::WORLD_TF);
+
+  void getFootWrenches(std::map<RobotSide, geometry_msgs::Wrench>& wrenches);
+  void getWristWrenches(std::map<RobotSide, geometry_msgs::Wrench>& wrenches);
+
+  void getFootWrench(const RobotSide side, geometry_msgs::Wrench& wrench);
+  void getWristWrench(const RobotSide side, geometry_msgs::Wrench& wrench);
+
+  void getFootForce(const RobotSide side, geometry_msgs::Vector3& force);
+  void getFootTorque(const RobotSide side, geometry_msgs::Vector3& torque);
+
+  void getWristForce(const RobotSide side, geometry_msgs::Vector3& force);
+  void getWristTorque(const RobotSide side, geometry_msgs::Vector3& torque);
+
+  bool isRobotInDoubleSupport();
+
+  void getCapturePoint(geometry_msgs::Point& point);
+
+  void getCenterOfMass(geometry_msgs::Point& point);
+
+  void getPelvisIMUReading(sensor_msgs::Imu& msg);
 };
 
-#endif  // VAL_ROBOT_STATE_H
+#endif  // TOUGH_ROBOT_STATE_INFORMER_H
