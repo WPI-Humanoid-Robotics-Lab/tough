@@ -169,5 +169,5 @@ install(TARGETS reset_robot arm_control_example head_control_example arm_control
                 taskspace_2stage_planner_example
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
