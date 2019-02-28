@@ -2,7 +2,7 @@
 
 long ToughControlInterface::id_ = 1;
 
-ToughControlInterface::ToughControlInterface(ros::NodeHandle nh)
+ToughControlInterface::ToughControlInterface(ros::NodeHandle nh): nh_(nh)
 {
   if (!nh.getParam(TOUGH_COMMON_NAMES::ROBOT_NAME_PARAM, robot_name_))
   {
