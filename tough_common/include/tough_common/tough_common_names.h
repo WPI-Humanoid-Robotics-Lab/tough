@@ -42,6 +42,14 @@ const std::string GO_HOME_TOPIC = "/go_home";
 /********* Output Topics *********/
 const std::string OUTPUT_TOPIC_PREFIX = "/output";
 const std::string JOINT_STATES_TOPIC = "/joint_states";
+const std::string PELVIS_IMU_TOPIC = "/imu/pelvis_imu_sensor_at_pelvis_frame";
+const std::string CENTER_OF_MASS_TOPIC = "/capturability/center_of_mass";
+const std::string CAPTURE_POINT_TOPIC = "/capturability/capture_point";
+const std::string DOUBLE_SUPPORT_STATUS_TOPIC = "/capturability/is_in_double_support";
+const std::string LEFT_FOOT_FORCE_SENSOR_TOPIC = "/foot_force_sensor/left";
+const std::string RIGHT_FOOT_FORCE_SENSOR_TOPIC = "/foot_force_sensor/right";
+const std::string LEFT_WRIST_FORCE_SENSOR_TOPIC = "/wrist_force_sensor/left";
+const std::string RIGHT_WRIST_FORCE_SENSOR_TOPIC = "/wrist_force_sensor/right";
 
 /********* Frame Hash from IHMC controllers *********/
 const int MIDFEET_ZUP_FRAME_HASH = -100;
