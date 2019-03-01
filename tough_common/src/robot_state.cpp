@@ -1,10 +1,10 @@
 #include "tough_common/robot_state.h"
 
 using namespace TOUGH_COMMON_NAMES;
-RobotStateInformer* RobotStateInformer::currentObject_ = nullptr;
+RobotStateInformer *RobotStateInformer::currentObject_ = nullptr;
 
 /* Singleton implementation */
-RobotStateInformer* RobotStateInformer::getRobotStateInformer(ros::NodeHandle nh)
+RobotStateInformer *RobotStateInformer::getRobotStateInformer(ros::NodeHandle nh)
 {
   // check if an object of this class already exists, if not create one
   if (RobotStateInformer::currentObject_ == nullptr)
@@ -37,13 +37,6 @@ RobotStateInformer::RobotStateInformer(ros::NodeHandle nh) : nh_(nh)
   rightWristForceSensorSub_ =
       nh_.subscribe(prefix + RIGHT_WRIST_FORCE_SENSOR_TOPIC, 1, &RobotStateInformer::rightWristForceSensorCB, this);
 
-  // set default values as 0 in the force sensor maps
-  footWrenches_[RobotSide::RIGHT] = geometry_msgs::Wrench();
-  footWrenches_[RobotSide::LEFT] = geometry_msgs::Wrench();
-
-  wristWrenches_[RobotSide::RIGHT] = geometry_msgs::Wrench();
-  wristWrenches_[RobotSide::LEFT] = geometry_msgs::Wrench();
-
   ros::Duration(0.2).sleep();
 }
 
@@ -52,25 +45,14 @@ RobotStateInformer::~RobotStateInformer()
   jointStateSub_.shutdown();
 }
 
-void RobotStateInformer::getJointStateMessage(sensor_msgs::JointState& jointState)
+void RobotStateInformer::getJointStateMessage(sensor_msgs::JointState &jointState)
 {
-  jointState.name.clear();
-  jointState.position.clear();
-  jointState.velocity.clear();
-  jointState.effort.clear();
-  std::lock_guard<std::mutex> guard(currentStateMutex_);
-  for (auto it = currentState_.begin(); it != currentState_.end(); ++it)
-  {
-    jointState.name.push_back(it->first);
-    jointState.position.push_back(it->second.position);
-    jointState.velocity.push_back(it->second.velocity);
-    jointState.effort.push_back(it->second.effort);
-  }
-  jointState.header = std_msgs::Header();
+  jointState = *currentStatePtr_;
 }
 
-void RobotStateInformer::jointStateCB(const sensor_msgs::JointStatePtr msg)
+void RobotStateInformer::jointStateCB(const sensor_msgs::JointStateConstPtr msg)
 {
+  currentStatePtr_ = msg;
   std::lock_guard<std::mutex> guard(currentStateMutex_);
   for (size_t i = 0; i < msg->name.size(); ++i)
   {
@@ -83,78 +65,76 @@ void RobotStateInformer::jointStateCB(const sensor_msgs::JointStatePtr msg)
   }
 }
 
-void RobotStateInformer::pelvisImuCB(const sensor_msgs::Imu& msg)
+void RobotStateInformer::pelvisImuCB(const sensor_msgs::ImuConstPtr msg)
 {
   pelvisImuValue_ = msg;
 }
-void RobotStateInformer::centerOfMassCB(const geometry_msgs::Point32& msg)
+void RobotStateInformer::centerOfMassCB(const geometry_msgs::Point32ConstPtr msg)
 {
-  centerOfMassValue_.x = msg.x;
-  centerOfMassValue_.y = msg.y;
-  centerOfMassValue_.z = msg.z;
+  centerOfMassValue_ = msg;
 }
-void RobotStateInformer::capturPointCB(const ihmc_msgs::Point2dRosMessage& msg)
+void RobotStateInformer::capturPointCB(const ihmc_msgs::Point2dRosMessageConstPtr msg)
 {
-  capturePointValue_.x = msg.x;
-  capturePointValue_.y = msg.y;
-  capturePointValue_.z = 0.0;
+  capturePointValue_ = msg;
 }
 
-void RobotStateInformer::doubleSupportStatusCB(const std_msgs::Bool& msg)
+void RobotStateInformer::doubleSupportStatusCB(const std_msgs::Bool &msg)
 {
   doubleSupportStatus_ = msg.data;
 }
-void RobotStateInformer::leftFootForceSensorCB(const geometry_msgs::WrenchStamped& msg)
+void RobotStateInformer::leftFootForceSensorCB(const geometry_msgs::WrenchStampedConstPtr msg)
 {
-  footWrenches_[LEFT] = msg.wrench;
+  footWrenches_[LEFT] = msg;
 }
-void RobotStateInformer::rightFootForceSensorCB(const geometry_msgs::WrenchStamped& msg)
+void RobotStateInformer::rightFootForceSensorCB(const geometry_msgs::WrenchStampedConstPtr msg)
 {
-  footWrenches_[RIGHT] = msg.wrench;
+  footWrenches_[RIGHT] = msg;
 }
-void RobotStateInformer::leftWristForceSensorCB(const geometry_msgs::WrenchStamped& msg)
+void RobotStateInformer::leftWristForceSensorCB(const geometry_msgs::WrenchStampedConstPtr msg)
 {
-  wristWrenches_[LEFT] = msg.wrench;
+  wristWrenches_[LEFT] = msg;
 }
-void RobotStateInformer::rightWristForceSensorCB(const geometry_msgs::WrenchStamped& msg)
+void RobotStateInformer::rightWristForceSensorCB(const geometry_msgs::WrenchStampedConstPtr msg)
 {
-  wristWrenches_[RIGHT] = msg.wrench;
-}
-
-void RobotStateInformer::getFootWrenches(std::map<RobotSide, geometry_msgs::Wrench>& wrenches)
-{
-  wrenches = footWrenches_;
-}
-void RobotStateInformer::getWristWrenches(std::map<RobotSide, geometry_msgs::Wrench>& wrenches)
-{
-  wrenches = wristWrenches_;
+  wristWrenches_[RIGHT] = msg;
 }
 
-void RobotStateInformer::getFootWrench(const RobotSide side, geometry_msgs::Wrench& wrench)
+void RobotStateInformer::getFootWrenches(std::map<RobotSide, geometry_msgs::Wrench> &wrenches)
 {
-  wrench = footWrenches_[side];
+  wrenches[LEFT] = footWrenches_[LEFT]->wrench;
+  wrenches[RIGHT] = footWrenches_[RIGHT]->wrench;
 }
-void RobotStateInformer::getWristWrench(const RobotSide side, geometry_msgs::Wrench& wrench)
+void RobotStateInformer::getWristWrenches(std::map<RobotSide, geometry_msgs::Wrench> &wrenches)
 {
-  wrench = wristWrenches_[side];
-}
-
-void RobotStateInformer::getFootForce(const RobotSide side, geometry_msgs::Vector3& force)
-{
-  force = footWrenches_[side].force;
-}
-void RobotStateInformer::getFootTorque(const RobotSide side, geometry_msgs::Vector3& torque)
-{
-  torque = footWrenches_[side].torque;
+  wrenches[LEFT] = wristWrenches_[LEFT]->wrench;
+  wrenches[RIGHT] = wristWrenches_[RIGHT]->wrench;
 }
 
-void RobotStateInformer::getWristForce(const RobotSide side, geometry_msgs::Vector3& force)
+void RobotStateInformer::getFootWrench(const RobotSide side, geometry_msgs::Wrench &wrench)
 {
-  force = wristWrenches_[side].force;
+  wrench = footWrenches_[side]->wrench;
 }
-void RobotStateInformer::getWristTorque(const RobotSide side, geometry_msgs::Vector3& torque)
+void RobotStateInformer::getWristWrench(const RobotSide side, geometry_msgs::Wrench &wrench)
 {
-  torque = wristWrenches_[side].torque;
+  wrench = wristWrenches_[side]->wrench;
+}
+
+void RobotStateInformer::getFootForce(const RobotSide side, geometry_msgs::Vector3 &force)
+{
+  force = footWrenches_[side]->wrench.force;
+}
+void RobotStateInformer::getFootTorque(const RobotSide side, geometry_msgs::Vector3 &torque)
+{
+  torque = footWrenches_[side]->wrench.torque;
+}
+
+void RobotStateInformer::getWristForce(const RobotSide side, geometry_msgs::Vector3 &force)
+{
+  force = wristWrenches_[side]->wrench.force;
+}
+void RobotStateInformer::getWristTorque(const RobotSide side, geometry_msgs::Vector3 &torque)
+{
+  torque = wristWrenches_[side]->wrench.torque;
 }
 
 bool RobotStateInformer::isRobotInDoubleSupport()
@@ -162,42 +142,53 @@ bool RobotStateInformer::isRobotInDoubleSupport()
   return doubleSupportStatus_;
 }
 
-void RobotStateInformer::getCapturePoint(geometry_msgs::Point& point)
+void RobotStateInformer::getCapturePoint(geometry_msgs::Point &point)
 {
-  point = capturePointValue_;
+  point.x = capturePointValue_->x;
+  point.y = capturePointValue_->y;
+  point.z = 0.0;
 }
 
-void RobotStateInformer::getCenterOfMass(geometry_msgs::Point& point)
+void RobotStateInformer::getCenterOfMass(geometry_msgs::Point &point)
 {
-  point = centerOfMassValue_;
+  point.x = centerOfMassValue_->x;
+  point.y = centerOfMassValue_->y;
+  point.z = centerOfMassValue_->z;
 }
 
-void RobotStateInformer::getPelvisIMUReading(sensor_msgs::Imu& msg)
+void RobotStateInformer::getPelvisIMUReading(sensor_msgs::Imu &msg)
 {
-  msg = pelvisImuValue_;
+  msg = *pelvisImuValue_;
 }
 
-void RobotStateInformer::getJointPositions(std::vector<double>& positions)
+void RobotStateInformer::populateStateMap()
 {
-  positions.clear();
-  std::lock_guard<std::mutex> guard(currentStateMutex_);
-
-  for (auto it = currentState_.begin(); it != currentState_.end(); ++it)
+  for (size_t i = 0; i < currentStatePtr_->name.size(); ++i)
   {
-    positions.push_back(it->second.position);
+    RobotState state;
+    state.name = currentStatePtr_->name[i];
+    state.position = currentStatePtr_->position[i];
+    state.velocity = currentStatePtr_->velocity[i];
+    state.effort = currentStatePtr_->effort[i];
+    currentState_[currentStatePtr_->name[i]] = state;
   }
 }
+void RobotStateInformer::getJointPositions(std::vector<double> &positions)
+{
+  positions = currentStatePtr_->position;
+}
 
-bool RobotStateInformer::getJointPositions(const std::string& paramName, std::vector<double>& positions)
+bool RobotStateInformer::getJointPositions(const std::string &paramName, std::vector<double> &positions)
 {
   positions.clear();
   std::vector<std::string> jointNames;
   std::string parameter;
   parseParameter(paramName, parameter);
 
-  std::lock_guard<std::mutex> guard(currentStateMutex_);
   if (nh_.getParam(parameter, jointNames))
   {
+    std::lock_guard<std::mutex> guard(currentStateMutex_);
+    populateStateMap();
     for (auto joint : jointNames)
     {
       positions.push_back((currentState_[joint]).position);
@@ -207,27 +198,22 @@ bool RobotStateInformer::getJointPositions(const std::string& paramName, std::ve
   return false;
 }
 
-void RobotStateInformer::getJointVelocities(std::vector<double>& velocities)
+void RobotStateInformer::getJointVelocities(std::vector<double> &velocities)
 {
-  velocities.clear();
-  std::lock_guard<std::mutex> guard(currentStateMutex_);
-
-  for (auto it = currentState_.begin(); it != currentState_.end(); ++it)
-  {
-    velocities.push_back(it->second.velocity);
-  }
+  velocities = currentStatePtr_->velocity;
 }
 
-bool RobotStateInformer::getJointVelocities(const std::string& paramName, std::vector<double>& velocities)
+bool RobotStateInformer::getJointVelocities(const std::string &paramName, std::vector<double> &velocities)
 {
   velocities.clear();
   std::vector<std::string> jointNames;
   std::string parameter;
   parseParameter(paramName, parameter);
 
-  std::lock_guard<std::mutex> guard(currentStateMutex_);
   if (nh_.getParam(parameter, jointNames))
   {
+    std::lock_guard<std::mutex> guard(currentStateMutex_);
+    populateStateMap();
     for (auto joint : jointNames)
     {
       velocities.push_back((currentState_[joint]).velocity);
@@ -237,27 +223,22 @@ bool RobotStateInformer::getJointVelocities(const std::string& paramName, std::v
   return false;
 }
 
-void RobotStateInformer::getJointEfforts(std::vector<double>& efforts)
+void RobotStateInformer::getJointEfforts(std::vector<double> &efforts)
 {
-  efforts.clear();
-  std::lock_guard<std::mutex> guard(currentStateMutex_);
-
-  for (auto it = currentState_.begin(); it != currentState_.end(); ++it)
-  {
-    efforts.push_back(it->second.effort);
-  }
+  efforts = currentStatePtr_->effort;
 }
 
-bool RobotStateInformer::getJointEfforts(const std::string& paramName, std::vector<double>& efforts)
+bool RobotStateInformer::getJointEfforts(const std::string &paramName, std::vector<double> &efforts)
 {
   efforts.clear();
   std::vector<std::string> jointNames;
   std::string parameter;
   parseParameter(paramName, parameter);
 
-  std::lock_guard<std::mutex> guard(currentStateMutex_);
   if (nh_.getParam(parameter, jointNames))
   {
+    std::lock_guard<std::mutex> guard(currentStateMutex_);
+    populateStateMap();
     for (auto joint : jointNames)
     {
       efforts.push_back((currentState_[joint]).effort);
@@ -267,36 +248,49 @@ bool RobotStateInformer::getJointEfforts(const std::string& paramName, std::vect
   return false;
 }
 
-double RobotStateInformer::getJointPosition(const std::string& jointName)
+double RobotStateInformer::getJointPosition(const std::string &jointName)
 {
   std::lock_guard<std::mutex> guard(currentStateMutex_);
-  return (currentState_[jointName]).position;
-}
-
-double RobotStateInformer::getJointVelocity(const std::string& jointName)
-{
-  std::lock_guard<std::mutex> guard(currentStateMutex_);
-  return (currentState_[jointName]).velocity;
-}
-
-double RobotStateInformer::getJointEffort(const std::string& jointName)
-{
-  std::lock_guard<std::mutex> guard(currentStateMutex_);
-  return (currentState_[jointName]).effort;
-}
-
-void RobotStateInformer::getJointNames(std::vector<std::string>& jointNames)
-{
-  jointNames.clear();
-  std::lock_guard<std::mutex> guard(currentStateMutex_);
-  for (auto i : currentState_)
+  for (int i = 0; i < currentStatePtr_->name.size(); i++)
   {
-    jointNames.push_back(i.first);
+    if (currentStatePtr_->name.at(i) == jointName)
+    {
+      return currentStatePtr_->position.at(i);
+    }
   }
 }
 
-bool RobotStateInformer::getCurrentPose(const std::string& frameName, geometry_msgs::Pose& pose,
-                                        const std::string& baseFrame)
+double RobotStateInformer::getJointVelocity(const std::string &jointName)
+{
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+  for (int i = 0; i < currentStatePtr_->name.size(); i++)
+  {
+    if (currentStatePtr_->name.at(i) == jointName)
+    {
+      return currentStatePtr_->velocity.at(i);
+    }
+  }
+}
+
+double RobotStateInformer::getJointEffort(const std::string &jointName)
+{
+  std::lock_guard<std::mutex> guard(currentStateMutex_);
+  for (int i = 0; i < currentStatePtr_->name.size(); i++)
+  {
+    if (currentStatePtr_->name.at(i) == jointName)
+    {
+      return currentStatePtr_->effort.at(i);
+    }
+  }
+}
+
+void RobotStateInformer::getJointNames(std::vector<std::string> &jointNames)
+{
+  jointNames = currentStatePtr_->name;
+}
+
+bool RobotStateInformer::getCurrentPose(const std::string &frameName, geometry_msgs::Pose &pose,
+                                        const std::string &baseFrame)
 {
   tf::StampedTransform origin;
 
@@ -318,8 +312,8 @@ bool RobotStateInformer::getCurrentPose(const std::string& frameName, geometry_m
   return true;
 }
 
-bool RobotStateInformer::getTransform(const std::string& frameName, tf::StampedTransform& transform,
-                                      const std::string& baseFrame)
+bool RobotStateInformer::getTransform(const std::string &frameName, tf::StampedTransform &transform,
+                                      const std::string &baseFrame)
 {
   try
   {
@@ -335,8 +329,8 @@ bool RobotStateInformer::getTransform(const std::string& frameName, tf::StampedT
   return true;
 }
 
-bool RobotStateInformer::transformQuaternion(const geometry_msgs::QuaternionStamped& qt_in,
-                                             geometry_msgs::QuaternionStamped& qt_out, const std::string target_frame)
+bool RobotStateInformer::transformQuaternion(const geometry_msgs::QuaternionStamped &qt_in,
+                                             geometry_msgs::QuaternionStamped &qt_out, const std::string target_frame)
 {
   try
   {
@@ -352,8 +346,8 @@ bool RobotStateInformer::transformQuaternion(const geometry_msgs::QuaternionStam
   return true;
 }
 
-bool RobotStateInformer::transformQuaternion(const geometry_msgs::Quaternion& qt_in, geometry_msgs::Quaternion& qt_out,
-                                             const std::string& from_frame, const std::string& to_frame)
+bool RobotStateInformer::transformQuaternion(const geometry_msgs::Quaternion &qt_in, geometry_msgs::Quaternion &qt_out,
+                                             const std::string &from_frame, const std::string &to_frame)
 {
   geometry_msgs::QuaternionStamped in, out;
   in.quaternion = qt_in;
@@ -373,7 +367,7 @@ bool RobotStateInformer::transformQuaternion(const geometry_msgs::Quaternion& qt
   return true;
 }
 
-bool RobotStateInformer::transformPoint(const geometry_msgs::PointStamped& pt_in, geometry_msgs::PointStamped& pt_out,
+bool RobotStateInformer::transformPoint(const geometry_msgs::PointStamped &pt_in, geometry_msgs::PointStamped &pt_out,
                                         const std::string target_frame)
 {
   try
@@ -390,8 +384,8 @@ bool RobotStateInformer::transformPoint(const geometry_msgs::PointStamped& pt_in
   return true;
 }
 
-bool RobotStateInformer::transformPose(const geometry_msgs::Pose& pose_in, geometry_msgs::Pose& pose_out,
-                                       const std::string& from_frame, const std::string& to_frame)
+bool RobotStateInformer::transformPose(const geometry_msgs::Pose &pose_in, geometry_msgs::Pose &pose_out,
+                                       const std::string &from_frame, const std::string &to_frame)
 {
   geometry_msgs::PoseStamped in, out;
   in.header.frame_id = from_frame;
@@ -413,8 +407,8 @@ bool RobotStateInformer::transformPose(const geometry_msgs::Pose& pose_in, geome
   return true;
 }
 
-bool RobotStateInformer::transformPose(const geometry_msgs::Pose2D& pose_in, geometry_msgs::Pose2D& pose_out,
-                                       const std::string& from_frame, const std::string& to_frame)
+bool RobotStateInformer::transformPose(const geometry_msgs::Pose2D &pose_in, geometry_msgs::Pose2D &pose_out,
+                                       const std::string &from_frame, const std::string &to_frame)
 {
   geometry_msgs::PoseStamped in, out;
   in.header.frame_id = from_frame;
@@ -443,8 +437,8 @@ bool RobotStateInformer::transformPose(const geometry_msgs::Pose2D& pose_in, geo
   return true;
 }
 
-bool RobotStateInformer::transformPoint(const geometry_msgs::Point& pt_in, geometry_msgs::Point& pt_out,
-                                        const std::string& from_frame, const std::string& to_frame)
+bool RobotStateInformer::transformPoint(const geometry_msgs::Point &pt_in, geometry_msgs::Point &pt_out,
+                                        const std::string &from_frame, const std::string &to_frame)
 {
   geometry_msgs::PointStamped stmp_pt_in, stmp_pt_out;
   stmp_pt_in.header.frame_id = from_frame;
@@ -465,8 +459,8 @@ bool RobotStateInformer::transformPoint(const geometry_msgs::Point& pt_in, geome
   return true;
 }
 
-bool RobotStateInformer::transformVector(const geometry_msgs::Vector3Stamped& vec_in,
-                                         geometry_msgs::Vector3Stamped& vec_out, const std::string target_frame)
+bool RobotStateInformer::transformVector(const geometry_msgs::Vector3Stamped &vec_in,
+                                         geometry_msgs::Vector3Stamped &vec_out, const std::string target_frame)
 {
   try
   {
@@ -482,8 +476,8 @@ bool RobotStateInformer::transformVector(const geometry_msgs::Vector3Stamped& ve
   return true;
 }
 
-bool RobotStateInformer::transformVector(const geometry_msgs::Vector3& vec_in, geometry_msgs::Vector3& vec_out,
-                                         const std::string& from_frame, const std::string& to_frame)
+bool RobotStateInformer::transformVector(const geometry_msgs::Vector3 &vec_in, geometry_msgs::Vector3 &vec_out,
+                                         const std::string &from_frame, const std::string &to_frame)
 {
   geometry_msgs::Vector3Stamped in, out;
   in.vector = vec_in;
