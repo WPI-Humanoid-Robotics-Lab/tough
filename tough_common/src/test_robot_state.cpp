@@ -19,9 +19,19 @@ int main(int argc, char** argv)
     totalEffort += fabs(i);
   }
   std::cout << "Total Effort : " << totalEffort << std::endl;
-  ros::Duration(2).sleep();
-  ros::spinOnce();
-  // loop.sleep();
+
+  ros::Rate loopRate(10);
+
+  std::map<RobotSide, geometry_msgs::Wrench> wrenches;
+  while (ros::ok())
+  {
+    ROS_INFO("Double support : %s", obj->isRobotInDoubleSupport() ? "True" : "False");
+
+    obj->getFootWrenches(wrenches);
+
+    ROS_INFO("Foot force on left leg in z axis %.2f", wrenches[LEFT].force.z);
+    loopRate.sleep();
+  }
 
   return 0;
 }
