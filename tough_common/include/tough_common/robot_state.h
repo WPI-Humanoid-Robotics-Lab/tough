@@ -88,19 +88,58 @@ private:
   }
 
 public:
+  /**
+   * @brief Get the Robot State Informer object. Use this function to access a pointer to the object of
+   * RobotStateInformer. Only one object of this class is created and it is shared with all the classes that use
+   * RobotStateInformer.
+   *
+   * @param nh ros Nodehandle
+   * @return RobotStateInformer*
+   */
   static RobotStateInformer* getRobotStateInformer(ros::NodeHandle nh);
   ~RobotStateInformer();
 
-  // disable assign and copy. This is required for singleton pattern
+  /**
+   * @brief disable copy constructor. This is required for singleton pattern
+   *
+   */
   RobotStateInformer(RobotStateInformer const&) = delete;
+  /**
+   * @brief disable assignment operator. This is required for singleton pattern
+   *
+   */
   void operator=(RobotStateInformer const&) = delete;
 
+  /**
+   * @brief Get the current joint state message
+   *
+   * @param jointState [output]
+   */
   void getJointStateMessage(sensor_msgs::JointState& jointState);
 
+  /**
+   * @brief Get the current positions of all joints. Ordering is based on joint names.
+   *
+   * @param positions [output]
+   */
   void getJointPositions(std::vector<double>& positions);
+  /**
+   * @brief Get the current positions of joint names present in the parameter
+   *
+   * @param paramName - Parameter on ros param server that has an array of joint names
+   * @param positions [output]
+   * @return true when successful
+   * @return false
+   */
   bool getJointPositions(const std::string& paramName, std::vector<double>& positions);
 
+  /**
+   * @brief Get the current velocities of joints
+   *
+   * @param velocities [output]
+   */
   void getJointVelocities(std::vector<double>& velocities);
+
   bool getJointVelocities(const std::string& paramName, std::vector<double>& velocities);
 
   void getJointEfforts(std::vector<double>& efforts);
@@ -128,6 +167,8 @@ public:
   bool transformPoint(const geometry_msgs::Point& pt_in, geometry_msgs::Point& pt_out, const std::string& from_frame,
                       const std::string& to_frame = TOUGH_COMMON_NAMES::WORLD_TF);
 
+  bool transformPose(const geometry_msgs::PoseStamped& pose_in, geometry_msgs::PoseStamped& pose_out,
+                     const std::string& to_frame = TOUGH_COMMON_NAMES::WORLD_TF);
   bool transformPose(const geometry_msgs::Pose& pose_in, geometry_msgs::Pose& pose_out, const std::string& from_frame,
                      const std::string& to_frame = TOUGH_COMMON_NAMES::WORLD_TF);
   bool transformPose(const geometry_msgs::Pose2D& pose_in, geometry_msgs::Pose2D& pose_out,
