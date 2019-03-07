@@ -9,15 +9,6 @@ WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle& nh)
   rd_->getLeftArmJointNames(left_arm_joint_names_);
   rd_->getRightArmJointNames(right_arm_joint_names_);
   rd_->getChestJointNames(chest_joint_names_);
-  rd_->getLeftArmJointLimits(left_arm_joint_limits_);
-  rd_->getRightArmJointLimits(right_arm_joint_limits_);
-
-  // reduce the joint limits by 1cm to avoid exceeeding limits at higher precision of float
-  for (size_t i = 0; i < left_arm_joint_limits_.size(); i++)
-  {
-    left_arm_joint_limits_[i] = { left_arm_joint_limits_[i].first - 0.01, left_arm_joint_limits_[i].second - 0.01 };
-    right_arm_joint_limits_[i] = { right_arm_joint_limits_[i].first - 0.01, right_arm_joint_limits_[i].second - 0.01 };
-  }
 }
 
 bool WholebodyControlInterface::getJointSpaceState(std::vector<double>& joints, RobotSide side)
@@ -43,10 +34,8 @@ void WholebodyControlInterface::executeTrajectory(const trajectory_msgs::JointTr
   ihmc_msgs::WholeBodyTrajectoryRosMessage wholeBodyMsg;
 
   initializeWholebodyMessage(wholeBodyMsg);
-  parseTrajectory(traj);
-  generateWholebodyMessage(wholeBodyMsg);
+  parseTrajectory(traj, wholeBodyMsg);
   m_wholebodyPub.publish(wholeBodyMsg);
-  ROS_INFO("Published whole body msg");
   ros::Duration(0.1).sleep();
 }
 
@@ -95,13 +84,9 @@ void WholebodyControlInterface::initializeWholebodyMessage(ihmc_msgs::WholeBodyT
   wholeBodyMsg.right_hand_trajectory_message.frame_information = frameInfo;
 }
 
-void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTrajectory& traj)
+void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTrajectory& traj,
+                                                ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg)
 {
-  // reset all trajectory points
-  chest_trajectory_.resize(0);
-  left_arm_trajectory_.resize(0);
-  right_arm_trajectory_.resize(0);
-
   long chest_start = -1, l_arm_start = -1, r_arm_start = -1;
 
   auto it = std::find(traj.joint_names.begin(), traj.joint_names.end(), chest_joint_names_.at(0));
@@ -117,6 +102,7 @@ void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTraj
     {
       return;
     }
+    chestController_.setupFrameAndMode(wholeBodyMsg.chest_trajectory_message);
   }
 
   it = std::find(traj.joint_names.begin(), traj.joint_names.end(), left_arm_joint_names_.at(0));
@@ -132,13 +118,13 @@ void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTraj
     {
       return;
     }
-    left_arm_trajectory_.resize(left_arm_joint_names_.size());
+    armController_.setupArmMessage(RobotSide::LEFT, wholeBodyMsg.left_arm_trajectory_message);
   }
 
   it = std::find(traj.joint_names.begin(), traj.joint_names.end(), right_arm_joint_names_.at(0));
   if (it == traj.joint_names.end())
   {
-    // does not contain left arm points
+    // does not contain right arm points
   }
   else
   {
@@ -148,7 +134,7 @@ void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTraj
     {
       return;
     }
-    right_arm_trajectory_.resize(right_arm_joint_names_.size());
+    armController_.setupArmMessage(RobotSide::RIGHT, wholeBodyMsg.right_arm_trajectory_message);
   }
 
   double traj_point_time = 0.0;
@@ -159,39 +145,26 @@ void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTraj
     // chest - move to a new function later
     if (chest_start >= 0)
     {
-      ihmc_msgs::SO3TrajectoryPointRosMessage chest_orientation;
-      createChestQuaternion(chest_start, traj.points.at(i), chest_orientation.orientation);
-      chest_orientation.time = traj_point_time;
-      chest_trajectory_.push_back(chest_orientation);
+      geometry_msgs::Quaternion quat;
+      createChestQuaternion(chest_start, traj.points.at(i), quat);
+      chestController_.appendChestTrajectoryPoint(quat, wholeBodyMsg.chest_trajectory_message, traj_point_time);
     }
     // arms
     if (l_arm_start >= 0)
     {
-      appendArmPoint(l_arm_start, traj.points.at(i), left_arm_joint_limits_, left_arm_trajectory_);
+      std::vector<double> positions;
+      positions.assign(traj.points.at(i).positions.begin() + l_arm_start,
+                       traj.points.at(i).positions.begin() + l_arm_start + left_arm_joint_names_.size());
+      armController_.appendTrajectoryPoint(wholeBodyMsg.left_arm_trajectory_message, traj_point_time, positions);
     }
 
     if (r_arm_start >= 0)
     {
-      appendArmPoint(r_arm_start, traj.points.at(i), right_arm_joint_limits_, right_arm_trajectory_);
+      std::vector<double> positions;
+      positions.assign(traj.points.at(i).positions.begin() + r_arm_start,
+                       traj.points.at(i).positions.begin() + r_arm_start + right_arm_joint_names_.size());
+      armController_.appendTrajectoryPoint(wholeBodyMsg.right_arm_trajectory_message, traj_point_time, positions);
     }
-  }
-}
-
-void WholebodyControlInterface::generateWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg)
-{
-  if (!chest_trajectory_.empty())
-  {
-    chestController_.generateMessage(chest_trajectory_, ihmc_msgs::ChestTrajectoryRosMessage::OVERRIDE,
-                                     wholeBodyMsg.chest_trajectory_message);
-  }
-  if (!left_arm_trajectory_.empty())
-  {
-    armController_.generateArmMessage(RobotSide::LEFT, left_arm_trajectory_, wholeBodyMsg.left_arm_trajectory_message);
-  }
-  if (!right_arm_trajectory_.empty())
-  {
-    armController_.generateArmMessage(RobotSide::RIGHT, right_arm_trajectory_,
-                                      wholeBodyMsg.right_arm_trajectory_message);
   }
 }
 
