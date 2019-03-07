@@ -31,6 +31,11 @@ public:
                        ihmc_msgs::ChestTrajectoryRosMessage& msg);
   void generateMessage(const std::vector<ihmc_msgs::SO3TrajectoryPointRosMessage>& chest_trajectory,
                        const int execution_mode, ihmc_msgs::ChestTrajectoryRosMessage& msg);
+  void setupFrameAndMode(ihmc_msgs::ChestTrajectoryRosMessage& msg,
+                         const int mode = ihmc_msgs::ChestTrajectoryRosMessage::OVERRIDE,
+                         const int frame_hash = TOUGH_COMMON_NAMES::PELVIS_ZUP_FRAME_HASH);
+  void appendChestTrajectoryPoint(const geometry_msgs::Quaternion q_in, ihmc_msgs::ChestTrajectoryRosMessage& msg,
+                                  const double time = 2.0f);
   void getChestOrientation(geometry_msgs::Quaternion& orientation);
   void resetPose(float time = 2.0f);
 
