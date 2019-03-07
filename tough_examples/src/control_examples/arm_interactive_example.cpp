@@ -105,7 +105,7 @@ int main(int argc, char** argv)
         {
           side = RIGHT;
         }
-        armTraj.moveToDefaultPose(side);
+        armTraj.moveToDefaultPose(side, 3.0);
         break;
       }
       case 6:
@@ -121,7 +121,7 @@ int main(int argc, char** argv)
         {
           side = RIGHT;
         }
-        armTraj.moveToZeroPose(side);
+        armTraj.moveToZeroPose(side, 3.0);
         break;
       }
       case 7:
