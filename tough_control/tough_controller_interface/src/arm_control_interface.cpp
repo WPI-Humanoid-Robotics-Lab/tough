@@ -10,8 +10,6 @@ ArmControlInterface::ArmControlInterface(ros::NodeHandle nh)
   id_++;
   armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>(
       control_topic_prefix_ + TOUGH_COMMON_NAMES::ARM_TRAJECTORY_TOPIC, 1, true);
-  handTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandDesiredConfigurationRosMessage>(
-      control_topic_prefix_ + TOUGH_COMMON_NAMES::HAND_DESIRED_CONFIG_TOPIC, 1, true);
   taskSpaceTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandTrajectoryRosMessage>(
       control_topic_prefix_ + TOUGH_COMMON_NAMES::HAND_TRAJECTORY_TOPIC, 1, true);
   homePositionPublisher =
@@ -54,24 +52,30 @@ ArmControlInterface::~ArmControlInterface()
  * @param time is the time between last and current joint trajectory waypoint
  * @param pos is the joint position vector (size would be 7 if there are 7 joints in the arm)
  */
-void ArmControlInterface::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage& armMsg, float time,
-                                                std::vector<double> pos)
+void ArmControlInterface::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage& armMsg, const float time,
+                                                const std::vector<double>& pos)
 {
   std::vector<std::pair<double, double>>* joint_limits_;
   joint_limits_ = armMsg.robot_side == LEFT ? &joint_limits_left_ : &joint_limits_right_;
   int id = ArmControlInterface::id_;
 
+  if (pos.size() != NUM_ARM_JOINTS)
+  {
+    ROS_WARN("Check number of trajectory points");
+    return;
+  }
   // checking if all the joints are within joint limits
   for (int i = 0; i < NUM_ARM_JOINTS; i++)
   {
     ihmc_msgs::TrajectoryPoint1DRosMessage p;
 
     // checking if the position is within joint limits
-    pos[i] = pos[i] < joint_limits_->at(i).first ? joint_limits_->at(i).first : pos[i];
-    pos[i] = pos[i] > joint_limits_->at(i).second ? joint_limits_->at(i).second : pos[i];
+    float position = pos[i];
+    position = pos[i] < joint_limits_->at(i).first ? joint_limits_->at(i).first : pos[i];
+    position = pos[i] > joint_limits_->at(i).second ? joint_limits_->at(i).second : pos[i];
 
     p.time = time;
-    p.position = pos[i];
+    p.position = position;
     p.velocity = 0;
     p.unique_id = id_++;
 
@@ -97,13 +101,14 @@ void ArmControlInterface::moveToDefaultPose(RobotSide side, float time)
   go_home.unique_id = ArmControlInterface::id_++;
 
   homePositionPublisher.publish(go_home);
+  ros::Duration(0.5).sleep();
 }
 
 /**
  * @brief ArmControlInterface::moveToZeroPose moves the arm to a predefined zero pose.
  * @param side is the the side of the arm to move.
  */
-void ArmControlInterface::moveToZeroPose(RobotSide side, float time)
+void ArmControlInterface::moveToZeroPose(const RobotSide side, const float time)
 {
   ihmc_msgs::ArmTrajectoryRosMessage arm_traj;
   arm_traj.joint_trajectory_messages.clear();
@@ -138,14 +143,18 @@ bool ArmControlInterface::moveArmJoints(const RobotSide side, const std::vector<
   return false;
 }
 
-bool ArmControlInterface::generateArmMessage(const RobotSide side, const std::vector<std::vector<double>>& arm_pose,
-                                             const float time, ihmc_msgs::ArmTrajectoryRosMessage& msg)
+bool ArmControlInterface::setupArmMessage(const RobotSide side, ihmc_msgs::ArmTrajectoryRosMessage& msg)
 {
   msg.joint_trajectory_messages.clear();
-
   msg.joint_trajectory_messages.resize(NUM_ARM_JOINTS);
   msg.robot_side = side;
   msg.unique_id = id_++;
+}
+
+bool ArmControlInterface::generateArmMessage(const RobotSide side, const std::vector<std::vector<double>>& arm_pose,
+                                             const float time, ihmc_msgs::ArmTrajectoryRosMessage& msg)
+{
+  setupArmMessage(side, msg);
   for (auto i = arm_pose.begin(); i != arm_pose.end(); i++)
   {
     if (i->size() != NUM_ARM_JOINTS)
@@ -173,7 +182,7 @@ void ArmControlInterface::generateArmMessage(
  * @brief ArmControlInterface::moveArmJoints moves both the arms together.
  * @param arm_data is the combined data of both arms
  */
-bool ArmControlInterface::moveArmJoints(std::vector<ArmJointData>& arm_data)
+bool ArmControlInterface::moveArmJoints(const std::vector<ArmJointData>& arm_data)
 {
   ihmc_msgs::ArmTrajectoryRosMessage arm_traj_r;
   ihmc_msgs::ArmTrajectoryRosMessage arm_traj_l;
@@ -188,7 +197,7 @@ bool ArmControlInterface::moveArmJoints(std::vector<ArmJointData>& arm_data)
   arm_traj_l.joint_trajectory_messages.resize(NUM_ARM_JOINTS);  /// check resize issue
   arm_traj_l.unique_id = id_++;
 
-  for (std::vector<ArmJointData>::iterator i = arm_data.begin(); i != arm_data.end(); i++)
+  for (auto i = arm_data.begin(); i != arm_data.end(); i++)
   {
     if (i->arm_pose.size() != NUM_ARM_JOINTS)
     {
@@ -244,7 +253,7 @@ int ArmControlInterface::getnumArmJoints() const
  * @param point is the joint trajectory point.
  */
 void ArmControlInterface::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage& msg,
-                                                trajectory_msgs::JointTrajectoryPoint point)
+                                                const trajectory_msgs::JointTrajectoryPoint& point)
 {
   if (point.positions.size() != NUM_ARM_JOINTS)
   {
@@ -265,18 +274,19 @@ void ArmControlInterface::appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessa
     //        point.positions[i];
     //        point.positions[i] = point.positions[i] >= joint_limits_[i].second ? joint_limits_[i].second :
     //        point.positions[i];
+    float position = point.positions[i];
     if (point.positions[i] <= joint_limits_[i].first)
     {
       std::cout << "wrapped lower point " << point.positions[i] << "\n";
-      point.positions[i] = joint_limits_[i].first;
+      position = joint_limits_[i].first;
     }
     else if (point.positions[i] >= joint_limits_[i].second)
     {
       std::cout << "wrapped upper point " << point.positions[i] << "\n";
-      point.positions[i] = joint_limits_[i].second;
+      position = joint_limits_[i].second;
     }
     p.time = point.time_from_start.toSec();
-    p.position = point.positions[i];
+    p.position = position;
     p.velocity = point.velocities[i];
     p.unique_id = id_++;
     msg.joint_trajectory_messages[i].trajectory_points.push_back(p);
@@ -370,17 +380,6 @@ bool ArmControlInterface::moveArmJoint(const RobotSide side, int jointNumber, co
     return true;
   }
   return false;
-}
-
-// ************ Mesages using HandDesiredConfigurationRosMessage  ******************** //
-
-void ArmControlInterface::closeHand(const RobotSide side)
-{
-  ihmc_msgs::HandDesiredConfigurationRosMessage msg;
-  msg.robot_side = side;
-  msg.hand_desired_configuration = msg.CLOSE;
-  msg.unique_id = ArmControlInterface::id_++;
-  this->handTrajectoryPublisher.publish(msg);
 }
 
 // ************ Mesages using HandTrajectoryRosMessage  ******************** //
@@ -614,7 +613,7 @@ void ArmControlInterface::moveArmInTaskSpaceMessage(const RobotSide side,
   taskSpaceTrajectoryPublisher.publish(msg);
 }
 
-void ArmControlInterface::moveArmInTaskSpace(std::vector<ArmTaskSpaceData>& arm_data, int baseForControl)
+void ArmControlInterface::moveArmInTaskSpace(const std::vector<ArmTaskSpaceData>& arm_data, const int baseForControl)
 {
   ihmc_msgs::HandTrajectoryRosMessage msg_l;
   ihmc_msgs::HandTrajectoryRosMessage msg_r;
@@ -634,7 +633,7 @@ void ArmControlInterface::moveArmInTaskSpace(std::vector<ArmTaskSpaceData>& arm_
   msg_r.frame_information = reference_frame;
   msg_r.execution_mode = msg_r.OVERRIDE;
 
-  for (std::vector<ArmTaskSpaceData>::iterator i = arm_data.begin(); i != arm_data.end(); i++)
+  for (auto i = arm_data.begin(); i != arm_data.end(); i++)
   {
     if (i->side == RIGHT)
     {

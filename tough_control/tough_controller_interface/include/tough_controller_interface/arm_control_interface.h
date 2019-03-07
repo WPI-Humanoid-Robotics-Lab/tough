@@ -67,13 +67,13 @@ public:
    * @brief moveToDefaultPose Moves the robot arm to default position
    * @param side  Side of the robot. It can be RIGHT or LEFT.
    */
-  void moveToDefaultPose(RobotSide side, float time = 2.0f);
+  void moveToDefaultPose(const RobotSide side, const float time = 2.0f);
 
   /**
    * @brief moveToZeroPose Moves the robot arm to zero position.
    * @param side  Side of the robot. It can be RIGHT or LEFT.
    */
-  void moveToZeroPose(RobotSide side, float time = 2.0f);
+  void moveToZeroPose(const RobotSide side, const float time = 2.0f);
 
   /**
    * @brief moveArmJoints Moves arm joints to given joint angles. All angles in radians.
@@ -113,7 +113,7 @@ public:
    * For example,
    * each point can have different execution times.
    */
-  bool moveArmJoints(std::vector<ArmJointData>& arm_data);
+  bool moveArmJoints(const std::vector<ArmJointData>& arm_data);
 
   /**
    * @brief moveArmMessage    Publishes a given ros message of ihmc_msgs::ArmTrajectoryRosMessage format to the robot.
@@ -126,12 +126,6 @@ public:
    * @return
    */
   int getnumArmJoints() const;
-
-  /**
-   * @brief closeHand	Closed the hand on the give side of Valkyrie R5.
-   * @param side	Side of the robot. It can be RIGHT or LEFT.
-   */
-  void closeHand(const RobotSide side);
 
   /**
    * @brief moveArmInTaskSpaceMessage Moves the arm to a given point in task space (world frame)
@@ -157,7 +151,7 @@ public:
    */
   //    void moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data, int
   //    baseForControl=ihmc_msgs::FrameInformationRosMessage::CHEST_FRAME);
-  void moveArmInTaskSpace(std::vector<ArmTaskSpaceData>& arm_data, int baseForControl = -102);
+  void moveArmInTaskSpace(const std::vector<ArmTaskSpaceData>& arm_data, const int baseForControl = -102);
 
   /**
    * @brief moveArmTrajectory Moves the arm to follow a particular trajectory plan
@@ -166,8 +160,6 @@ public:
    */
   void moveArmTrajectory(const RobotSide side, const trajectory_msgs::JointTrajectory& traj);
 
-  void testPrint();
-
   /**
    * @brief nudgeArm Nudges the Arm in the desired direction by a given nudge step
    * @param side     Side of the Robot. it can be LEFT or RIGHT
@@ -175,15 +167,15 @@ public:
    * @param nudgeStep The step length to nudge. Default is 5cm (~6/32")
    * @return
    */
-  bool nudgeArm(const RobotSide side, const direction drct, float nudgeStep = 0.05);
+  bool nudgeArm(const RobotSide side, const direction drct, const float nudgeStep = 0.05);
 
-  bool nudgeArmLocal(const RobotSide side, const direction drct, float nudgeStep = 0.05);
+  bool nudgeArmLocal(const RobotSide side, const direction drct, const float nudgeStep = 0.05);
 
   bool generate_task_space_data(const std::vector<geometry_msgs::PoseStamped>& input_poses, const RobotSide input_side,
                                 const float desired_time,
                                 std::vector<ArmControlInterface::ArmTaskSpaceData>& arm_data_vector);
 
-  bool moveArmJoint(const RobotSide side, int jointNumber, const float targetAngle, float time = 2.0f);
+  bool moveArmJoint(const RobotSide side, const int jointNumber, const float targetAngle, const float time = 2.0f);
 
   bool nudgeArmLocal(const RobotSide side, float x, float y, float z, geometry_msgs::Pose& pose);
   bool nudgeArmPelvis(const RobotSide side, float x, float y, float z, geometry_msgs::Pose& pose);
@@ -192,6 +184,9 @@ public:
 
   virtual bool getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side,
                                  std::string fixedFrame = TOUGH_COMMON_NAMES::WORLD_TF) override;
+
+  void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage& msg, const float time, const std::vector<double>& pos);
+  bool setupArmMessage(const RobotSide side, ihmc_msgs::ArmTrajectoryRosMessage& msg);
 
 private:
   const std::vector<double> ZERO_POSE;
@@ -207,8 +202,8 @@ private:
   ros::Subscriber armTrajectorySubscriber;
 
   void poseToSE3TrajectoryPoint(const geometry_msgs::Pose& pose, ihmc_msgs::SE3TrajectoryPointRosMessage& point);
-  void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage& msg, float time, std::vector<double> pos);
-  void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage& msg, trajectory_msgs::JointTrajectoryPoint point);
+  void appendTrajectoryPoint(ihmc_msgs::ArmTrajectoryRosMessage& msg,
+                             const trajectory_msgs::JointTrajectoryPoint& point);
 };
 
 #endif  // ARM_CONTROL_INTERFACE_H
