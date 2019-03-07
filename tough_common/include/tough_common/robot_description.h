@@ -97,6 +97,8 @@ public:
 
   void getRightArmJointLimits(std::vector<std::pair<double, double> >& right_arm_joint_limits) const;
 
+  void getChestJointLimits(std::vector<std::pair<double, double> >& chest_joint_limits) const;
+
   int getNumberOfNeckJoints() const;
 
   int getMidFeetZUPFrameHash() const;
@@ -139,6 +141,8 @@ protected:
   void setLeftArmJointLimits(const std::vector<std::pair<double, double> >& left_arm_joint_limits);
 
   void setRightArmJointLimits(const std::vector<std::pair<double, double> >& right_arm_joint_limits);
+
+  void setChestJointLimits(const std::vector<std::pair<double, double> >& chest_joint_limits);
 
   void setLeftPalmFrame(const std::string& value);
 
@@ -192,12 +196,14 @@ private:
 
   std::vector<std::string> left_arm_frame_names_;
   std::vector<std::string> right_arm_frame_names_;
+  std::vector<std::string> chest_frame_names_;
 
   std::string left_foot_frame_name_;
   std::string right_foot_frame_name_;
 
   std::vector<std::pair<double, double> > left_arm_joint_limits_;
   std::vector<std::pair<double, double> > right_arm_joint_limits_;
+  std::vector<std::pair<double, double> > chest_joint_limits_;
 
   int number_of_neck_joints_;
 
@@ -227,6 +233,8 @@ private:
   int RIGHT_SOLE_FRAME_HASH_;
 
   int WORLD_FRAME_HASH_;
+
+  std::map<std::string, int> frame_hash_map_;
 };
 
 #endif  // ROBOT_DESCRIPTION_H

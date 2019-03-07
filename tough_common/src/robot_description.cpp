@@ -92,8 +92,6 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
     float u_limit = model_.joints_[joint_name]->limits->upper;
     left_arm_joint_limits_.push_back({ l_limit, u_limit });
     left_arm_frame_names_.push_back(model_.joints_[joint_name]->child_link_name);
-    //        ROS_INFO("\nFrame : %s \nJoint : %s \nLimits : <%0.4f , %0.4f>\n-------------\n",
-    //        (left_arm_frame_names_.end()-1)->c_str(), joint_name.c_str(), l_limit, u_limit);
   }
 
   for (auto joint_name : right_arm_joint_names_)
@@ -102,8 +100,14 @@ RobotDescription::RobotDescription(ros::NodeHandle nh, std::string urdf_param)
     float u_limit = model_.joints_[joint_name]->limits->upper;
     right_arm_joint_limits_.push_back({ l_limit, u_limit });
     right_arm_frame_names_.push_back(model_.joints_[joint_name]->child_link_name);
-    //        ROS_INFO("\nFrame : %s \nJoint : %s \nLimits : <%0.4f , %0.4f>\n-------------\n",
-    //        (right_arm_frame_names_.end()-1)->c_str(), joint_name.c_str(), l_limit, u_limit);
+  }
+
+  for (auto joint_name : chest_joint_names_)
+  {
+    float l_limit = model_.joints_[joint_name]->limits->lower;
+    float u_limit = model_.joints_[joint_name]->limits->upper;
+    chest_joint_limits_.push_back({ l_limit, u_limit });
+    chest_frame_names_.push_back(model_.joints_[joint_name]->child_link_name);
   }
 
   for (auto link : links_)
@@ -263,7 +267,7 @@ void RobotDescription::getRightArmJointLimits(std::vector<std::pair<double, doub
 
 void RobotDescription::setRightArmJointLimits(const std::vector<std::pair<double, double> >& right_arm_joint_limits)
 {
-  right_arm_joint_limits_ = right_arm_joint_limits;
+  right_arm_joint_limits_.assign(right_arm_joint_limits.begin(), right_arm_joint_limits.end());
 }
 
 void RobotDescription::getLeftArmJointLimits(std::vector<std::pair<double, double> >& left_arm_joint_limits) const
@@ -273,7 +277,17 @@ void RobotDescription::getLeftArmJointLimits(std::vector<std::pair<double, doubl
 
 void RobotDescription::setLeftArmJointLimits(const std::vector<std::pair<double, double> >& left_arm_joint_limits)
 {
-  left_arm_joint_limits_ = left_arm_joint_limits;
+  left_arm_joint_limits_.assign(left_arm_joint_limits.begin(), left_arm_joint_limits.end());
+}
+
+void RobotDescription::getChestJointLimits(std::vector<std::pair<double, double> >& chest_joint_limits) const
+{
+  chest_joint_limits = chest_joint_limits_;
+}
+
+void RobotDescription::setChestJointLimits(const std::vector<std::pair<double, double> >& chest_joint_limits)
+{
+  chest_joint_limits_.assign(chest_joint_limits.begin(), chest_joint_limits.end());
 }
 
 const std::string RobotDescription::getRightFootFrameName() const
@@ -303,7 +317,7 @@ void RobotDescription::getRightArmFrameNames(std::vector<std::string>& right_arm
 
 void RobotDescription::setRightArmFrameNames(const std::vector<std::string>& right_arm_frame_names)
 {
-  right_arm_frame_names_ = right_arm_frame_names;
+  right_arm_frame_names_.assign(right_arm_frame_names.begin(), right_arm_frame_names.end());
 }
 
 void RobotDescription::getLeftArmFrameNames(std::vector<std::string>& left_arm_frame_names) const
@@ -313,7 +327,7 @@ void RobotDescription::getLeftArmFrameNames(std::vector<std::string>& left_arm_f
 
 void RobotDescription::setLeftArmFrameNames(const std::vector<std::string>& left_arm_frame_names)
 {
-  left_arm_frame_names_ = left_arm_frame_names;
+  left_arm_frame_names_.assign(left_arm_frame_names.begin(), left_arm_frame_names.end());
 }
 
 void RobotDescription::getRightArmJointNames(std::vector<std::string>& right_arm_joint_names) const
@@ -328,12 +342,12 @@ void RobotDescription::getChestJointNames(std::vector<std::string>& chest_joint_
 
 void RobotDescription::setRightArmJointNames(const std::vector<std::string>& right_arm_joint_names)
 {
-  right_arm_joint_names_ = right_arm_joint_names;
+  right_arm_joint_names_.assign(right_arm_joint_names.begin(), right_arm_joint_names.end());
 }
 
 void RobotDescription::setChestJointNames(const std::vector<std::string>& chest_joint_names)
 {
-  chest_joint_names_ = chest_joint_names;
+  chest_joint_names_.assign(chest_joint_names.begin(), chest_joint_names.end());
 }
 
 void RobotDescription::getLeftArmJointNames(std::vector<std::string>& left_arm_joint_names) const
@@ -343,7 +357,7 @@ void RobotDescription::getLeftArmJointNames(std::vector<std::string>& left_arm_j
 
 void RobotDescription::setLeftArmJointNames(const std::vector<std::string>& left_arm_joint_names)
 {
-  left_arm_joint_names_ = left_arm_joint_names;
+  left_arm_joint_names_.assign(left_arm_joint_names.begin(), left_arm_joint_names.end());
 }
 
 const std::string RobotDescription::getTorsoFrame() const
