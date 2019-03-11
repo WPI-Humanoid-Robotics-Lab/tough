@@ -5,8 +5,6 @@
 #include <opencv2/core.hpp>
 #include <opencv/highgui.h>
 
-#define SCS_SIMULATION
-
 void showImage(cv::Mat& image, std::string name)
 {
   cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
@@ -25,9 +23,9 @@ int main(int argc, char** argv)
 
   tough_perception::MultisenseImage imageHandler(nh);
 
-#ifdef SCS_SIMULATION
+  // SCS has different topics
   imageHandler.setImageTopic("/multisense/left/image_rect_color/compressed");
-#endif
+
 
   ROS_INFO_STREAM("[Height]" << imageHandler.giveHeight() << " [width]" << imageHandler.giveWidth());
 

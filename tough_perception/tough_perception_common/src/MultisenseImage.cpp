@@ -32,30 +32,16 @@ bool MultisenseImage::cost_callback_active_ = false;
  *  @note do we need the NodeHandle passed??? Think benny
  */
 MultisenseImage::MultisenseImage(ros::NodeHandle& n)
-  : nh_(n), new_image_(false), new_disp_(false), new_depth_(false), new_cost_(false), it_(nh_), sync_(nullptr)
+  : nh_(n), 
+  new_image_(false), 
+  new_disp_(false), 
+  new_depth_(false), 
+  new_cost_(false), 
+  it_(nh_), 
+  sync_(nullptr)
 {
-  ros::NodeHandle pnh("~");
+ 
 
-  if (!pnh.getParam("image_topic", image_topic_))
-  {
-    image_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC;
-  }
-  if (!pnh.getParam("disp_topic", disp_topic_))
-  {
-    disp_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC;
-  }
-  if (!pnh.getParam("multisense_config_topic", multisense_topic_))
-  {
-    multisense_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_RAW_CAM_CONFIG_TOPIC;
-  }
-  if (!pnh.getParam("depth_topic", depth_topic_))
-  {
-    depth_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;
-  }
-  if (!pnh.getParam("cost_topic", depth_cost_topic_))
-  {
-    depth_cost_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_DEPTH_COST_TOPIC;
-  }
 // hard coded values specific to simulation, later on can be made to be not hard coded.
 #ifdef GAZEBO_SIMULATION
   std::cout << "Using SRCSIM dummy camera configs" << std::endl;
