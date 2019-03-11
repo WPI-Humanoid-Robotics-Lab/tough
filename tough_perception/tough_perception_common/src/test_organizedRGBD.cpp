@@ -33,18 +33,18 @@ int main(int argc, char** argv)
 
   while (ros::ok())
   {
-    if (mi.giveImage(color))
+    if (mi.getImage(color))
     {
       new_color = true;
     }
-    if (mi.giveDisparityImage(disp))
+    if (mi.getDisparityImage(disp))
     {
       new_disp = true;
     }
 
     if (new_disp && new_color)
     {
-      if (!mi.giveQMatrix(Q))
+      if (!mi.getQMatrix(Q))
       {
         ros::spinOnce();
         continue;

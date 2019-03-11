@@ -156,27 +156,27 @@ public:
    * @param img as a refernce which will be filled by the image from the multisense head
    * @return	if we have a new image
    */
-  bool giveImage(cv::Mat& img);
+  bool getImage(cv::Mat& img);
 
   /**
    * @brief gives the camera intrinsic matrix
    * @param cam the cmaera matrix
    * @return true if you have a new camera matrix
    */
-  bool giveCameraInfo(cv::Mat& cam);
+  bool getCameraInfo(cv::Mat& cam);
   /**
    * @brief gives the disparity image that the camera has for the disparity
    * @param disp_img the disparity image that the multisense gets
    * @return true if you have new disparity image
    */
-  bool giveDisparityImage(cv::Mat& disp_img);
+  bool getDisparityImage(cv::Mat& disp_img);
 
   /**
    * @brief the Q matrix that is used to convert disparity to 3D points
    * @param Q the matrix as CV::mat
    * @return true if a new value was recieved from the head
    */
-  bool giveQMatrix(cv::Mat& Q);
+  bool getQMatrix(cv::Mat& Q);
 
   /**
    * @brief this function makes sure you get a synchronized pair of color img and disp image
@@ -184,7 +184,7 @@ public:
    * @param disp  the dispaity image
    * @return
    */
-  bool giveSyncImages(cv::Mat& color, cv::Mat& disp);
+  bool getSyncImages(cv::Mat& color, cv::Mat& disp);
 
   /**
    * @brief This function was introduced in situations where you want to track the fps of the images being collected
@@ -193,20 +193,20 @@ public:
    * @param time  the timestamp on the recieved image
    * @return
    */
-  bool giveSyncImageswTime(cv::Mat& color, cv::Mat& disp, ros::Time& time);
+  bool getSyncImageswTime(cv::Mat& color, cv::Mat& disp, ros::Time& time);
 
-  bool giveCostImage(cv::Mat& img);
+  bool getCostImage(cv::Mat& img);
 
-  bool giveSyncDepthImages(cv::Mat& color, cv::Mat& disp, cv::Mat& cost);
+  bool getSyncDepthImages(cv::Mat& color, cv::Mat& disp, cv::Mat& cost);
 
-  bool giveSyncDepthImageswTime(cv::Mat& color, cv::Mat& disp, cv::Mat& cost, ros::Time& time);
+  bool getSyncDepthImageswTime(cv::Mat& color, cv::Mat& disp, cv::Mat& cost, ros::Time& time);
 
   /**
    * @brief A function to get the height in situations where you have not yet received an image.
    *        The height is read directly from the config message.
    * @return the height as an integer
    */
-  int giveHeight()
+  int getHeight()
   {
     return settings.height_;
   }
@@ -215,7 +215,7 @@ public:
    *        The width is read directly from the config message.
    * @return the width as an integer
    */
-  int giveWidth()
+  int getWidth()
   {
     return settings.width_;
   }
@@ -223,7 +223,7 @@ public:
    * @brief the baselength as read from the config message.
    * @return the baselength as a floating point number
    */
-  float giveBaseLength()
+  float getBaseLength()
   {
     return settings.baselength_;
   }
@@ -233,14 +233,14 @@ public:
    * @param time the time of image capture as told by ROS
    * @return always true
    */
-  bool giveTime(ros::Time& time);
+  bool getTime(ros::Time& time);
 
   /**
    * @brief this function is used to get the depth image that was recieved
    * @param depth_img	the depth image that was recieved
    * @return	true if new depth image
    */
-  bool giveDepthImage(cv::Mat& depth_img);
+  bool getDepthImage(cv::Mat& depth_img);
 
   virtual ~MultisenseImage();
 };

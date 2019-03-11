@@ -67,6 +67,7 @@ const std::string HOKUYO_LINK_TF = "/multisense/hokuyo_link";
 const std::string HEAD_HOKUYO_FRAME_TF = "/multisense/head_hokuyo_frame";
 const std::string LEFT_CAMERA_OPTICAL_FRAME_TF = "/multisense/left_camera_optical_frame";
 const std::string ROBOT_HEAD_FRAME_TF = "/head";
+const std::string MULTISENSE_HEAD_TF = "multisense/head";
 
 /* world frame*/
 const std::string WORLD_TF = "/world";

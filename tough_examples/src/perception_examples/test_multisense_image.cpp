@@ -27,10 +27,11 @@ int main(int argc, char** argv)
   imageHandler.setImageTopic("/multisense/left/image_rect_color/compressed");
 
 
-  ROS_INFO_STREAM("[Height]" << imageHandler.giveHeight() << " [width]" << imageHandler.giveWidth());
+  ROS_INFO_STREAM("[Height]" << imageHandler.getHeight() 
+              << " [width]" << imageHandler.getWidth());
 
   cv::Mat image;
-  status = imageHandler.giveImage(image);
+  status = imageHandler.getImage(image);
   ROS_INFO("image status %s", status ? "true" : "false");
 
   if (status)

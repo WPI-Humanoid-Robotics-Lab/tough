@@ -1,11 +1,12 @@
 #include <tough_perception_common/ArucoDetector.h>
 
+
 namespace tough_perception
 {
-ArucoDetector::ArucoDetector(ros::NodeHandle& n): nh_(n), broadcastTF(false)
+ArucoDetector::ArucoDetector(ros::NodeHandle& n)
+: nh_(n), 
+broadcastTF(false)
 {
-    frame_id_ = "multisense/head";
-    aruco_sub_topic_ = "/fiducial_transforms";
     aruco_sub = nh_.subscribe(aruco_sub_topic_,1, &ArucoDetector::fiducialCallback, this);
 }
 
