@@ -82,16 +82,10 @@ class MultisenseImage
   image_transport::SubscriberFilter*  sync_cam_sub_;
   image_transport::SubscriberFilter*  sync_cam_depth_sub_;
   image_transport::SubscriberFilter*  sync_cam_cost_sub_;
-#ifndef GAZEBO_SIMULATION
+
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image> exactTimePolicy;
   std::shared_ptr<message_filters::Synchronizer<exactTimePolicy> > sync_;
   image_transport::SubscriberFilter* sync_disp_sub_;
-
-#else
-  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, stereo_msgs::DisparityImage>
-      approxTimePolicy;
-  std::shared_ptr<message_filters::Synchronizer<approxTimePolicy> > sync_;
-#endif
 
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image>
       depthImageCostExactTimePolicy;
@@ -99,13 +93,9 @@ class MultisenseImage
 
   image_transport::Subscriber depth_sub_;
   image_transport::Subscriber cost_sub_;
-#ifndef GAZEBO_SIMULATION
+
   image_transport::Subscriber disp_sub_;
 
-#else
-  ros::Subscriber disp_sub_;
-  message_filters::Subscriber<stereo_msgs::DisparityImage>* sync_disp_sub_;
-#endif
   ros::Subscriber multisense_sub_;
 
   /**
@@ -136,19 +126,17 @@ class MultisenseImage
    */
   void loadCameraConfig(const multisense_ros::RawCamConfigConstPtr& config);
 
-#ifdef GAZEBO_SIMULATION
+
   /**
    * @brief this function loads the camera parameter from the multisense in SIM topic
    * @param config the ros data published by the multisense head in SIM
    */
   void loadDisparityImageStereoMsgs(const stereo_msgs::DisparityImageConstPtr& img);
-#endif
 
-#ifndef GAZEBO_SIMULATION
+
+
   void syncCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dimg);
-#else
-  void syncCallback(const sensor_msgs::ImageConstPtr& img, const stereo_msgs::DisparityImageConstPtr& dimg);
-#endif
+
   void syncDepthCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dimg,
                          const sensor_msgs::ImageConstPtr& cimg);
 

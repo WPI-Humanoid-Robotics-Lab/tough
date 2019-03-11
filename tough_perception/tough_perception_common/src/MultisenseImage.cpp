@@ -23,11 +23,11 @@ using namespace std;
  *  These variables are needed to prevent multiple subscribers from being generated and to be only
  *  generated in request.
  */
-bool MultisenseImage::image_callback_active_ = false;
-bool MultisenseImage::disp_callback_active_ = false;
+bool MultisenseImage::image_callback_active_  = false;
+bool MultisenseImage::disp_callback_active_   = false;
 bool MultisenseImage::config_callback_active_ = false;
-bool MultisenseImage::depth_callback_active_ = false;
-bool MultisenseImage::cost_callback_active_ = false;
+bool MultisenseImage::depth_callback_active_  = false;
+bool MultisenseImage::cost_callback_active_   = false;
 /**
  *  @note do we need the NodeHandle passed??? Think benny
  */
@@ -41,30 +41,6 @@ MultisenseImage::MultisenseImage(ros::NodeHandle& n)
   sync_(nullptr)
 {
  
-
-// hard coded values specific to simulation, later on can be made to be not hard coded.
-#ifdef GAZEBO_SIMULATION
-  std::cout << "Using SRCSIM dummy camera configs" << std::endl;
-  settings.Q_matrix_ = cv::Mat_<double>(4, 4, 0.0);
-  settings.Q_matrix_(0, 0) = 610.1799470098168 * -0.07;
-  settings.Q_matrix_(1, 1) = 610.1799470098168 * -0.07;
-  settings.Q_matrix_(0, 3) = -610.1799470098168 * 512.5 * -0.07;
-  settings.Q_matrix_(1, 3) = -610.1799470098168 * 272.5 * -0.07;
-  settings.Q_matrix_(2, 3) = 610.1799470098168 * 610.1799470098168 * -0.07;
-  settings.Q_matrix_(3, 2) = -610.1799470098168;
-  settings.Q_matrix_(3, 3) = 0.0f;
-
-  settings.camera_ =
-      (cv::Mat_<float>(3, 3) << 610.1799470098168, 0.0, 512.5, 0.0, 610.1799470098168, 272.5, 0.0, 0.0, 1.0);
-
-  settings.width_ = 1024;
-  settings.height_ = 544;
-  settings.fps_ = 30.0;
-  settings.exposure_ = 3233;
-  settings.gain_ = 0;
-  settings.baselength_ = 0.0700324326754;
-
-#endif
 }
 
 void MultisenseImage::setDepthTopic(const std::string& topic)
@@ -84,41 +60,34 @@ void MultisenseImage::setImageTopic(const std::string& topic)
 void MultisenseImage::loadCameraConfig(const multisense_ros::RawCamConfigConstPtr& config)
 {
   settings.Q_matrix_ = cv::Mat_<double>(4, 4, 0.0);
-  settings.Q_matrix_(0, 0) = config->fy * config->tx;
-  settings.Q_matrix_(1, 1) = config->fx * config->tx;
+  settings.Q_matrix_(0, 0) =  config->fy * config->tx;
+  settings.Q_matrix_(1, 1) =  config->fx * config->tx;
   settings.Q_matrix_(0, 3) = -config->fy * config->cx * config->tx;
   settings.Q_matrix_(1, 3) = -config->fx * config->cy * config->tx;
-  settings.Q_matrix_(2, 3) = config->fx * config->fy * config->tx;
+  settings.Q_matrix_(2, 3) =  config->fx * config->fy * config->tx;
   settings.Q_matrix_(3, 2) = -config->fy;
-  settings.Q_matrix_(3, 3) = 0.0f;
+  settings.Q_matrix_(3, 3) =  0.0f;
 
   settings.camera_ = (cv::Mat_<float>(3, 3) << config->fx, 0.0, config->cx, 0.0, config->fy, config->cy, 0.0, 0.0, 1.0);
 
-  settings.width_ = config->width;
-  settings.height_ = config->height;
-  settings.fps_ = config->frames_per_second;
-  settings.exposure_ = config->exposure_time;
-  settings.gain_ = config->gain;
-  settings.baselength_ = fabs(config->tx);
+  settings.width_       = config->width;
+  settings.height_      = config->height;
+  settings.fps_         = config->frames_per_second;
+  settings.exposure_    = config->exposure_time;
+  settings.gain_        = config->gain;
+  settings.baselength_  = fabs(config->tx);
 
-  ROS_INFO_STREAM_ONCE("Received new config: " << settings.Q_matrix_);
+  ROS_INFO_STREAM_ONCE("Received new camera config: " << settings.Q_matrix_);
 }
-#ifndef GAZEBO_SIMULATION
+
 void MultisenseImage::syncCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dimg)
 {
   loadImage(img);
   loadDisparityImageSensorMsgs(dimg);
 }
-#else
-void MultisenseImage::syncCallback(const sensor_msgs::ImageConstPtr& img,
-                                   const stereo_msgs::DisparityImageConstPtr& dimg)
-{
-  loadImage(img);
-  loadDisparityImageStereoMsgs(dimg);
-}
-#endif
 
-void MultisenseImage::syncDepthCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dimg,
+void MultisenseImage::syncDepthCallback(const sensor_msgs::ImageConstPtr& img, 
+                                        const sensor_msgs::ImageConstPtr& dimg,
                                         const sensor_msgs::ImageConstPtr& cimg)
 {
   loadImage(img);
@@ -142,8 +111,8 @@ void MultisenseImage::loadImage(const sensor_msgs::ImageConstPtr& img)
     {
       cv_ptr_ = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::MONO8);
     }
-    image_ = cv_ptr_->image.clone();
-    new_image_ = true;
+    image_      = cv_ptr_->image.clone();
+    new_image_  = true;
     img_header_ = cv_ptr_->header;
 
     ROS_INFO_ONCE("Received new image size: %d x %d", image_.rows, image_.cols);
@@ -171,8 +140,8 @@ void MultisenseImage::loadDepthImage(const sensor_msgs::ImageConstPtr& img)
       ROS_ERROR_STREAM("Unsupported depth map?");
       return;
     }
-    depth_ = cv_ptr_->image.clone();
-    new_depth_ = true;
+    depth_        = cv_ptr_->image.clone();
+    new_depth_    = true;
     depth_header_ = cv_ptr_->header;
 
     ROS_INFO_ONCE("Received new depth image size: %d x %d", depth_.rows, depth_.cols);
@@ -197,8 +166,8 @@ void MultisenseImage::loadCostImage(const sensor_msgs::ImageConstPtr& img)
       ROS_ERROR_STREAM("Unsupported cost map?");
       return;
     }
-    cost_ = cv_ptr_->image.clone();
-    new_cost_ = true;
+    cost_        = cv_ptr_->image.clone();
+    new_cost_    = true;
     cost_header_ = cv_ptr_->header;
 
     ROS_INFO_ONCE("Received new cost image size: %d x %d", cost_.rows, cost_.cols);
@@ -224,8 +193,8 @@ void MultisenseImage::loadDisparityImageStereoMsgs(const stereo_msgs::DisparityI
       cv::Mat_<float> disparity(img->image.height, img->image.width,
                                 const_cast<float*>(reinterpret_cast<const float*>(&img->image.data[0])));
 
-      disparity_ = disparity.clone();
-      new_disp_ = true;
+      disparity_   = disparity.clone();
+      new_disp_    = true;
       disp_header_ = img->image.header;
     }
     else if (depth == 16)
@@ -233,9 +202,9 @@ void MultisenseImage::loadDisparityImageStereoMsgs(const stereo_msgs::DisparityI
       cv::Mat_<uint16_t> disparityOrigP(img->image.height, img->image.width,
                                         const_cast<uint16_t*>(reinterpret_cast<const uint16_t*>(&img->image.data[0])));
       cv::Mat_<float> disparity(img->image.height, img->image.width);
-      disparity = disparityOrigP / 16.0f;
-      disparity_ = disparity;
-      new_disp_ = true;
+      disparity    = disparityOrigP / 16.0f;
+      disparity_   = disparity;
+      new_disp_    = true;
       disp_header_ = img->image.header;
     }
     else
@@ -265,8 +234,8 @@ void MultisenseImage::loadDisparityImageSensorMsgs(const sensor_msgs::ImageConst
       cv::Mat_<float> disparity(img->height, img->width,
                                 const_cast<float*>(reinterpret_cast<const float*>(&img->data[0])));
 
-      disparity_ = disparity.clone();
-      new_disp_ = true;
+      disparity_   = disparity.clone();
+      new_disp_    = true;
       disp_header_ = img->header;
     }
     else if (depth == 16)
@@ -274,9 +243,9 @@ void MultisenseImage::loadDisparityImageSensorMsgs(const sensor_msgs::ImageConst
       cv::Mat_<uint16_t> disparityOrigP(img->height, img->width,
                                         const_cast<uint16_t*>(reinterpret_cast<const uint16_t*>(&img->data[0])));
       cv::Mat_<float> disparity(img->height, img->width);
-      disparity = disparityOrigP / 16.0f;
-      disparity_ = disparity.clone();
-      new_disp_ = true;
+      disparity    = disparityOrigP / 16.0f;
+      disparity_   = disparity.clone();
+      new_disp_    = true;
       disp_header_ = img->header;
     }
     else
@@ -297,11 +266,8 @@ bool MultisenseImage::giveDisparityImage(cv::Mat& disp_img)
 {
   if (!disp_callback_active_)
   {
-#ifndef GAZEBO_SIMULATION
+
     disp_sub_ = it_.subscribe(disp_topic_, 1, &MultisenseImage::loadDisparityImageSensorMsgs, this);
-#else
-    disp_sub_ = nh_.subscribe(disp_topic_, 1, &MultisenseImage::loadDisparityImageStereoMsgs, this);
-#endif
     disp_callback_active_ = true;
     ROS_INFO_STREAM("Listening to: " << disp_sub_.getTopic() << endl);
     ros::Duration(1).sleep();
@@ -311,7 +277,7 @@ bool MultisenseImage::giveDisparityImage(cv::Mat& disp_img)
   {
     if (disparity_.empty())
       return false;
-    disp_img = disparity_;
+    disp_img  = disparity_;
     new_disp_ = false;
     return true;
   }
@@ -333,7 +299,7 @@ bool MultisenseImage::giveDepthImage(cv::Mat& depth_img)
   {
     if (depth_.empty())
       return false;
-    depth_img = depth_;
+    depth_img  = depth_;
     new_depth_ = false;
     return true;
   }
@@ -367,9 +333,6 @@ bool MultisenseImage::giveImage(cv::Mat& img)
 
 bool MultisenseImage::giveCostImage(cv::Mat& img)
 {
-#ifdef GAZEBO_SIMULATION
-  return false;
-#endif
   if (!cost_callback_active_)
   {
     cost_sub_ = it_.subscribe(depth_cost_topic_, 1, &MultisenseImage::loadCostImage, this);
@@ -442,23 +405,16 @@ bool MultisenseImage::giveSyncImages(cv::Mat& color, cv::Mat& disp)
     image_callback_active_ = true;
     ROS_INFO_STREAM("Listening to: " << sync_cam_sub_->getTopic() << endl);
     disp_sub_.shutdown();
-#ifndef GAZEBO_SIMULATION
-    ROS_INFO("DRCSIM not enabled");
+
     sync_disp_sub_ = new image_transport::SubscriberFilter(it_, disp_topic_, 1);
-#else
-    ROS_INFO_STREAM("DRCSIM topics enabled");
-    sync_disp_sub_ = new message_filters::Subscriber<stereo_msgs::DisparityImage>(nh_, disp_topic_, 1);
-#endif
+
     // disp_sub_=sync_disp_sub_.getSubscriber();
     disp_callback_active_ = true;
     ROS_INFO_STREAM("Listening to: " << sync_disp_sub_->getTopic() << endl);
-#ifndef GAZEBO_SIMULATION
+
     sync_.reset(
         new message_filters::Synchronizer<exactTimePolicy>(exactTimePolicy(1000), *sync_cam_sub_, *sync_disp_sub_));
-#else
-    sync_.reset(
-        new message_filters::Synchronizer<approxTimePolicy>(approxTimePolicy(100), *sync_cam_sub_, *sync_disp_sub_));
-#endif
+
     sync_->registerCallback(boost::bind(&MultisenseImage::syncCallback, this, _1, _2));
     ros::Duration(1).sleep();
     ros::spinOnce();
@@ -485,14 +441,11 @@ bool MultisenseImage::giveSyncDepthImages(cv::Mat& color, cv::Mat& disp, cv::Mat
     image_callback_active_ = true;
     ROS_INFO_STREAM("Listening to: " << sync_cam_sub_->getTopic() << endl);
     depth_sub_.shutdown();
-#ifndef GAZEBO_SIMULATION
+
     ROS_INFO("DRCSIM not enabled");
     sync_cam_depth_sub_ = new image_transport::SubscriberFilter(it_, depth_topic_, 1);
-    sync_cam_cost_sub_ = new image_transport::SubscriberFilter(it_, depth_cost_topic_, 1);
-#else
-    ROS_ERROR_STREAM("Depth Image not available in simulation");
-    return false;
-#endif
+    sync_cam_cost_sub_  = new image_transport::SubscriberFilter(it_, depth_cost_topic_, 1);
+
 
     ROS_INFO_STREAM("Listening to: " << sync_cam_depth_sub_->getTopic() << endl);
     ROS_INFO_STREAM("Listening to: " << sync_cam_cost_sub_->getTopic() << endl);
@@ -544,8 +497,8 @@ bool MultisenseImage::giveSyncDepthImageswTime(cv::Mat& color, cv::Mat& disp, cv
 MultisenseImage::~MultisenseImage()
 {
   //	sync_->~Synchronizer();
-  // sync_->~Synchronizer();
-  // delete sync_;
+  //  sync_->~Synchronizer();
+  //  delete sync_;
   //	sync_cam_sub_->unsubscribe();
   //	sync_disp_sub_->unsubscribe();
   //	delete sync_cam_sub_;
