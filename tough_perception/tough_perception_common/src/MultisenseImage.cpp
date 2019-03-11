@@ -262,7 +262,7 @@ void MultisenseImage::loadDisparityImageSensorMsgs(const sensor_msgs::ImageConst
 /**
  * @note starts the subscriber if not started
  */
-bool MultisenseImage::giveDisparityImage(cv::Mat& disp_img)
+bool MultisenseImage::getDisparityImage(cv::Mat& disp_img)
 {
   if (!disp_callback_active_)
   {
@@ -285,7 +285,7 @@ bool MultisenseImage::giveDisparityImage(cv::Mat& disp_img)
   return false;
 }
 
-bool MultisenseImage::giveDepthImage(cv::Mat& depth_img)
+bool MultisenseImage::getDepthImage(cv::Mat& depth_img)
 {
   if (!depth_callback_active_)
   {
@@ -309,7 +309,7 @@ bool MultisenseImage::giveDepthImage(cv::Mat& depth_img)
 /**
  * @note starts subscriber if not srtaed. TODO: try breaking it using multiple objects of the class
  */
-bool MultisenseImage::giveImage(cv::Mat& img)
+bool MultisenseImage::getImage(cv::Mat& img)
 {
   if (!image_callback_active_)
   {
@@ -331,7 +331,7 @@ bool MultisenseImage::giveImage(cv::Mat& img)
   return false;
 }
 
-bool MultisenseImage::giveCostImage(cv::Mat& img)
+bool MultisenseImage::getCostImage(cv::Mat& img)
 {
   if (!cost_callback_active_)
   {
@@ -356,7 +356,7 @@ bool MultisenseImage::giveCostImage(cv::Mat& img)
 /**
  * @note none
  */
-bool MultisenseImage::giveCameraInfo(cv::Mat& cam)
+bool MultisenseImage::getCameraInfo(cv::Mat& cam)
 {
   if (!config_callback_active_)
   {
@@ -376,7 +376,7 @@ bool MultisenseImage::giveCameraInfo(cv::Mat& cam)
 /**
  * @note none
  */
-bool MultisenseImage::giveQMatrix(cv::Mat& Q)
+bool MultisenseImage::getQMatrix(cv::Mat& Q)
 {
   if (!config_callback_active_)
   {
@@ -394,7 +394,7 @@ bool MultisenseImage::giveQMatrix(cv::Mat& Q)
   return false;
 }
 
-bool MultisenseImage::giveSyncImages(cv::Mat& color, cv::Mat& disp)
+bool MultisenseImage::getSyncImages(cv::Mat& color, cv::Mat& disp)
 {
   ROS_INFO_STREAM_ONCE("Requesting synchornized image");
   if (sync_ == nullptr)
@@ -423,14 +423,14 @@ bool MultisenseImage::giveSyncImages(cv::Mat& color, cv::Mat& disp)
   ROS_INFO_STREAM_ONCE("image topic: " << image_topic_);
   ROS_INFO_STREAM_ONCE("disp topic: " << disp_topic_);
 
-  if (!giveImage(color) || !giveDisparityImage(disp))
+  if (!getImage(color) || !getDisparityImage(disp))
   {
     return false;
   }
   return true;
 }
 
-bool MultisenseImage::giveSyncDepthImages(cv::Mat& color, cv::Mat& disp, cv::Mat& cost)
+bool MultisenseImage::getSyncDepthImages(cv::Mat& color, cv::Mat& disp, cv::Mat& cost)
 {
   ROS_INFO_STREAM_ONCE("Requesting synchornized depth image");
   if (sync_depth_ == nullptr)
@@ -456,7 +456,7 @@ bool MultisenseImage::giveSyncDepthImages(cv::Mat& color, cv::Mat& disp, cv::Mat
     ros::spinOnce();
   }
 
-  if (!giveImage(color) || !giveDepthImage(disp) || !giveCostImage(cost))
+  if (!getImage(color) || !getDepthImage(disp) || !getCostImage(cost))
   {
     return false;
   }
@@ -466,7 +466,7 @@ bool MultisenseImage::giveSyncDepthImages(cv::Mat& color, cv::Mat& disp, cv::Mat
 // this function is a temp function that I am implementing, maybe the statistics on the fps must be maintained
 // internally and
 // not by the called class;
-bool MultisenseImage::giveTime(ros::Time& time)
+bool MultisenseImage::getTime(ros::Time& time)
 {
   if (disp_header_.stamp == ros::Time(0))
     time = img_header_.stamp;
@@ -474,17 +474,17 @@ bool MultisenseImage::giveTime(ros::Time& time)
     time = disp_header_.stamp;
   return true;
 }
-bool MultisenseImage::giveSyncImageswTime(cv::Mat& color, cv::Mat& disp, ros::Time& time)
+bool MultisenseImage::getSyncImageswTime(cv::Mat& color, cv::Mat& disp, ros::Time& time)
 {
-  if (!giveSyncImages(color, disp))
+  if (!getSyncImages(color, disp))
     return false;
   // assert(color.empty());
   time = img_header_.stamp;
   return true;
 }
-bool MultisenseImage::giveSyncDepthImageswTime(cv::Mat& color, cv::Mat& disp, cv::Mat& cost, ros::Time& time)
+bool MultisenseImage::getSyncDepthImageswTime(cv::Mat& color, cv::Mat& disp, cv::Mat& cost, ros::Time& time)
 {
-  if (!giveSyncDepthImages(color, disp, cost))
+  if (!getSyncDepthImages(color, disp, cost))
   {
     return false;
   }
