@@ -106,7 +106,7 @@ void RobotWalker::stepAtPose(const geometry_msgs::Pose& goal, const RobotSide si
 }
 
 // walks certain number of defined footsteps. steps defined wrt world frame.
-bool RobotWalker::walkNSteps(const int numSteps, const float xOffset, float yOffset, bool continous, RobotSide startLeg,
+bool RobotWalker::walkNSteps(const int numSteps, const float xOffset, float yOffset, RobotSide startLeg,
                              bool waitForSteps)
 {
   ihmc_msgs::FootstepDataListRosMessage list;
@@ -118,19 +118,15 @@ bool RobotWalker::walkNSteps(const int numSteps, const float xOffset, float yOff
     list.footstep_data_list.push_back(*getOffsetStep(side, m * xOffset, m * yOffset));
     side = (RobotSide)!side;
   }
-
-  if (!continous)
-  {
-    list.footstep_data_list.push_back(*getOffsetStep(side, numSteps * xOffset, numSteps * yOffset));
-  }
+  list.footstep_data_list.push_back(*getOffsetStep(side, numSteps * xOffset, numSteps * yOffset));
 
   this->walkGivenSteps(list, waitForSteps);
   return true;
 }
 
 // walks certain number of defined footsteps. steps defined wrt pelvis frame.
-bool RobotWalker::walkNStepsWRTPelvis(const int numSteps, const float xOffset, float yOffset, bool continous,
-                                      RobotSide startLeg, bool waitForSteps)
+bool RobotWalker::walkNStepsWRTPelvis(const int numSteps, const float xOffset, float yOffset, RobotSide startLeg,
+                                      bool waitForSteps)
 {
   ihmc_msgs::FootstepDataListRosMessage list;
   initializeFootstepDataListRosMessage(list);
@@ -141,18 +137,16 @@ bool RobotWalker::walkNStepsWRTPelvis(const int numSteps, const float xOffset, f
     list.footstep_data_list.push_back(*getOffsetStepWRTPelvis(side, m * xOffset, m * yOffset));
     side = (RobotSide)!side;
   }
-  if (!continous)
-  {
-    list.footstep_data_list.push_back(*getOffsetStepWRTPelvis(side, numSteps * xOffset, numSteps * yOffset));
-  }
+
+  list.footstep_data_list.push_back(*getOffsetStepWRTPelvis(side, numSteps * xOffset, numSteps * yOffset));
 
   this->walkGivenSteps(list, waitForSteps);
   return true;
 }
 
 // walks predefined steps which could have varying step length and step widths. This is defined wrt World frame.
-bool RobotWalker::walkPreComputedSteps(const std::vector<float> xOffset, const std::vector<float> yOffset,
-                                       RobotSide startLeg)
+bool RobotWalker::walkPreComputedSteps(const std::vector<float>& xOffset, const std::vector<float>& yOffset,
+                                       const RobotSide startLeg)
 {
   ihmc_msgs::FootstepDataListRosMessage list;
   initializeFootstepDataListRosMessage(list);
@@ -176,8 +170,8 @@ bool RobotWalker::walkPreComputedSteps(const std::vector<float> xOffset, const s
 }
 
 // walks predefined steps which could have varying step length and step widths. This is defined wrt Pelvis frame.
-bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float> xOffset, const std::vector<float> yOffset,
-                                            RobotSide startLeg)
+bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float>& xOffset, const std::vector<float>& yOffset,
+                                            const RobotSide startLeg)
 {
   ihmc_msgs::FootstepDataListRosMessage list;
   initializeFootstepDataListRosMessage(list);
@@ -218,7 +212,7 @@ bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float> xOffset, co
   return true;
 }
 
-bool RobotWalker::walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list, bool waitForSteps)
+bool RobotWalker::walkGivenSteps(const ihmc_msgs::FootstepDataListRosMessage& list, const bool waitForSteps)
 {
   this->footsteps_pub_.publish(list);
   RobotWalker::id++;
@@ -495,7 +489,8 @@ bool RobotWalker::walkRotate(float angle)
   return walkToGoal(goal);
 }
 
-bool RobotWalker::climbStair(const std::vector<float> xOffset, const std::vector<float> zOffset, RobotSide startLeg)
+bool RobotWalker::climbStair(const std::vector<float>& xOffset, const std::vector<float>& zOffset,
+                             const RobotSide startLeg)
 {
   // This function was used for SRC. This should be generalized for any application.
   ihmc_msgs::FootstepDataListRosMessage list;
@@ -596,7 +591,7 @@ void RobotWalker::alignFeet(const RobotSide side)
   }
 }
 
-bool RobotWalker::areFeetAligned(geometry_msgs::Pose& footPose)
+bool RobotWalker::areFeetAligned(const geometry_msgs::Pose& footPose)
 {
   // If the robot is not in double support, it does not make any sense in checking the alignment
   if (current_state_->isRobotInDoubleSupport())

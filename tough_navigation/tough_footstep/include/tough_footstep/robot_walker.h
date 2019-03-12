@@ -36,35 +36,52 @@ public:
    * @param InMode            ExecutionMode can be set to OVERRIDE or QUEUE
    * @param swingHeight       Height to which a swing foot should be raised while walking
    */
-  RobotWalker(ros::NodeHandle nh, double inTransferTime = 1.5, double inSwingTime = 1.5, int inMode = 0,
-              double swing_height_ = 0.2);
+  RobotWalker(ros::NodeHandle nh, const double inTransferTime = 1.5, const double inSwingTime = 1.5,
+              const int inMode = 0, const double swing_height_ = 0.2);
   ~RobotWalker();
 
   /**
-   * @brief walkToGoal walks to a given 2D point in a map. needs a map either from map server or from octomap server
+   * @brief walkToGoal walks to a given 2D point in a map. needs a map either from map server or from octomap server and
+   * the footstep_planner service
    * @param goal  pose2d message giving position and orientation of goal point.
    * @return true if footstep planning is successful else false
    */
-  bool walkToGoal(const geometry_msgs::Pose2D& goal, bool waitForSteps = true);
-
-  void stepAtPose(const geometry_msgs::Pose& goal, const RobotSide side, bool waitForSteps);
+  bool walkToGoal(const geometry_msgs::Pose2D& goal, const bool waitForSteps = true);
 
   /**
-   * @brief walkNSteps Makes the robot walk given number of steps.
+   * @brief stepAtPose Steps at the given goal location in single step. Both position and orientation is used from the
+   * provided goal.
+   *
+   * @param goal  position and orientation of the desired footstep
+   * @param side  specifies the foot to be used for stepping
+   * @param waitForSteps  set this to true for a blocking call, otherwise false.
+   */
+  void stepAtPose(const geometry_msgs::Pose& goal, const RobotSide side, const bool waitForSteps);
+
+  /**
+   * @brief walkNSteps Makes the robot walk given number of steps. The offsets are in world frame.
    * @param n          Number of steps to walk
    * @param x_offset   distance to travel forward in half stride. First step is half the stride length as both the
    * feet are assumed to be together.
    * @param y_offset   distance to travel sideways in half a stride length. First step is half the stride length as
    * both the feet are assumed to be together.
-   * @param continous  If this is set to true, the robot stops with one foot forward. if it is false, both the feet
-   * are together at the end of walk.
    * @param startLeg   leg to be used to start walking. It can be RIGHT or LEFT
    * @return
    */
-  bool walkNSteps(const int n, const float x_offset, float y_offset = 0.0f, bool continous = false,
-                  RobotSide startLeg = RIGHT, bool waitForSteps = true);
-  bool walkNStepsWRTPelvis(const int n, const float x_offset, float y_offset = 0.0f, bool continous = false,
-                           RobotSide startLeg = RIGHT, bool waitForSteps = true);
+  bool walkNSteps(const int n, const float x_offset, float y_offset = 0.0f, const RobotSide startLeg = RIGHT,
+                  const bool waitForSteps = true);
+  /**
+   * @brief walkNStepsWRTPelvis Makes the robot walk given number of steps. The offsets are in pelvis frame.
+   * @param n          Number of steps to walk
+   * @param x_offset   distance to travel forward in half stride. First step is half the stride length as both the
+   * feet are assumed to be together.
+   * @param y_offset   distance to travel sideways in half a stride length. First step is half the stride length as
+   * both the feet are assumed to be together.
+   * @param startLeg   leg to be used to start walking. It can be RIGHT or LEFT
+   * @return
+   */
+  bool walkNStepsWRTPelvis(const int n, const float x_offset, float y_offset = 0.0f, const RobotSide startLeg = RIGHT,
+                           const bool waitForSteps = true);
 
   /**
    * @brief walkPreComputedSteps If the steps to be sent to the robot are not identical, use this function to send steps
@@ -75,7 +92,8 @@ public:
    * @param startleg  leg to be used to start walking. It can be RIGHT or LEFT
    * @return
    */
-  bool walkPreComputedSteps(const std::vector<float> x_offset, const std::vector<float> y_offset, RobotSide startleg);
+  bool walkPreComputedSteps(const std::vector<float>& x_offset, const std::vector<float>& y_offset,
+                            const RobotSide startleg);
 
   /**
    * @brief walkGivenSteps This function publishes a given list of ros messages of type
@@ -83,7 +101,7 @@ public:
    * @param list           List of steps in ihmc_msgs::FootstepDataListRosMessage format.
    * @return
    */
-  bool walkGivenSteps(ihmc_msgs::FootstepDataListRosMessage& list, bool waitForSteps = true);
+  bool walkGivenSteps(const ihmc_msgs::FootstepDataListRosMessage& list, const bool waitForSteps = true);
 
   /**
    * @brief setWalkParms      Set the values of walking parameters
@@ -94,7 +112,7 @@ public:
    * a walking message. Only Override is supported in this version.
    * @todo create separate messages for each of the parameters.
    */
-  inline void setWalkParams(float InTransferTime, float InSwingTime, int InMode)
+  inline void setWalkParams(const float InTransferTime, const float InSwingTime, const int InMode)
   {
     this->transfer_time_ = InTransferTime;
     this->swing_time_ = InSwingTime;
@@ -112,7 +130,7 @@ public:
    * @param value           Value is the swing_height that determines how high a feet should be lifted while walking in
    * meters. It should be between 0.1 and 0.25     *
    */
-  inline void setSwingHeight(double value)
+  inline void setSwingHeight(const double value)
   {
     swing_height_ = value;
   }
@@ -123,7 +141,7 @@ public:
    * DO NOT USE. ROBOT MIGHT FALL.
    * @return
    */
-  bool turn(RobotSide side);
+  bool turn(const RobotSide side);
 
   /**
    * @brief walkLocalPreComputedSteps walks predefined steps which could have varying step length and step widths. This
@@ -136,8 +154,8 @@ public:
    * @param startleg Leg to be used to start walking. It can be RIGHT or LEFT
    * @return
    */
-  bool walkLocalPreComputedSteps(const std::vector<float> xOffset, const std::vector<float> yOffset,
-                                 RobotSide startLeg);
+  bool walkLocalPreComputedSteps(const std::vector<float>& xOffset, const std::vector<float>& yOffset,
+                                 const RobotSide startLeg);
 
   /**
    * @brief curlLeg would curl the leg behind with a defined radius. it is similar to the flamingo position.
@@ -145,10 +163,13 @@ public:
    * @param radius is the radius of this backward curled trajectory
    * @return
    */
-  bool curlLeg(RobotSide side, float radius, float time = 3.0f);
+  bool curlLeg(const RobotSide side, const float radius, const float time = 3.0f);
 
-  bool areFeetAligned(geometry_msgs::Pose& leftFootPose);
-
+  /**
+   * @brief alignFeet Checks if the feet are aligned, if not, takes one step to align their position and orientation
+   *
+   * @param side is the leg used for stepping
+   */
   void alignFeet(const RobotSide side = RobotSide::LEFT);
   /**
    * @brief placeLeg is used when the swing leg is in a arbitrary lifted position and has to be placed within a z-offset
@@ -159,7 +180,7 @@ public:
    * @param offset is the offset in the z-axis
    * @return
    */
-  bool placeLeg(RobotSide side, float offset = 0.1f, float time = 2.0f);
+  bool placeLeg(const RobotSide side, const float offset = 0.1f, const float time = 2.0f);
 
   /**
    * @brief nudgeFoot nudges the foot forward or backward
@@ -186,7 +207,7 @@ public:
    * @param height is the height to raise the leg
    * @return
    */
-  bool raiseLeg(RobotSide side, float height, float time = 2.0f);
+  bool raiseLeg(const RobotSide side, const float height, const float time = 2.0f);
 
   /**
    * @brief loadEEF loads the endeffector to distribute weight evenly in both legs.
@@ -196,14 +217,14 @@ public:
    * position,
    * it can be bought back to normal stance position with weight evenly distributed in both legs.
    */
-  void loadEEF(RobotSide side, EE_LOADING load);
+  void loadEEF(const RobotSide side, const EE_LOADING load);
 
   /**
    * @brief walkRotate rotates the robot by desired angle. this is relative to the current yaw angle.
    * @param angle is the angle expressed in radians
    * @return
    */
-  bool walkRotate(float angle);
+  bool walkRotate(const float angle);
 
   /**
    * @brief climbStair is a function which can make the robot climb steps given a list of step placement locations.
@@ -212,7 +233,7 @@ public:
    * @param startLeg LEFT/ RIGHT
    * @return
    */
-  bool climbStair(const std::vector<float> xOffset, const std::vector<float> zOffset, RobotSide startLeg);
+  bool climbStair(const std::vector<float>& xOffset, const std::vector<float>& zOffset, const RobotSide startLeg);
 
   /**
    * @brief getFootstep plans footsteps to a goal.
@@ -246,6 +267,14 @@ private:
   void footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage& msg);
   void waitForSteps(const int numSteps);
 
+  // /**
+  //  * @brief areFeetAligned Checks if both the feet are in same orientation and in normal pose.
+  //  *
+  //  * @param footPose This is the footpose of one foot with respect to other
+  //  * @return true if the feet are aligned within a small threshold
+  //  * @return false otherwise
+  //  */
+  bool areFeetAligned(const geometry_msgs::Pose& footPose);
   bool isFootRotAligned(const geometry_msgs::Quaternion& q1);
   bool isFootPosAligned(const geometry_msgs::Point& p1);
 
