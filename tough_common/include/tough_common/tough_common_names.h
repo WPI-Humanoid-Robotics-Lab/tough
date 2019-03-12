@@ -38,6 +38,11 @@ const std::string WHOLEBODY_TRAJECTORY_TOPIC = "/whole_body_trajectory";
 const std::string STOP_ALL_TRAJECTORY_TOPIC = "/stop_all_trajectories";
 const std::string HAND_DESIRED_CONFIG_TOPIC = "/hand_desired_configuration";
 const std::string GO_HOME_TOPIC = "/go_home";
+const std::string FOOTSTEP_LIST_TOPIC = "/footstep_list";
+const std::string FOOTSTEP_TRAJECTORY_TOPIC = "/foot_trajectory";
+const std::string FOOTSTEP_LOAD_BEARING_TOPIC = "/foot_load_bearing";
+const std::string FOOTSTEP_STATUS_TOPIC = "/footstep_status";
+const std::string ABORT_WALKING_TOPIC = "/abort_walking";
 
 /********* Output Topics *********/
 const std::string OUTPUT_TOPIC_PREFIX = "/output";

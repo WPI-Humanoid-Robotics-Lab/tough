@@ -19,7 +19,7 @@ void WalkToGoal(const geometry_msgs::Pose2D goal)
   list.default_transfer_duration = 1.0;
   list.default_swing_duration = 1.0;
   list.execution_mode = 0;
-  list.unique_id = RobotWalker::id;
+  list.unique_id = RobotWalker::id++;
 
   bool success = walk->getFootstep(goal, list);
   std::string result = success ? "Succeded" : "Failed";
@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 
   current_state = RobotStateInformer::getRobotStateInformer(nh);
   rd_ = RobotDescription::getRobotDescription(nh);
-  walk = new RobotWalker(nh, 0.8f, 0.8f, 0, 0.18);
+  walk = new RobotWalker(nh, 1.0f, 1.0f, 0, 0.1f);
 
   ros::Subscriber nav_goal_sub = nh.subscribe("/goal", 1, &nav_goal_cb);
   ros::Subscriber nav_goal_sub2 = nh.subscribe("/move_base_simple/goal", 1, &nav_goal_cb);

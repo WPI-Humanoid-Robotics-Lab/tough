@@ -15,9 +15,10 @@ RobotStateInformer* RobotStateInformer::getRobotStateInformer(ros::NodeHandle nh
   return currentObject_;
 }
 
-RobotStateInformer::RobotStateInformer(ros::NodeHandle nh) : nh_(nh)
+RobotStateInformer::RobotStateInformer(ros::NodeHandle nh) : nh_(nh), spinner(2)
 {
   rd_ = RobotDescription::getRobotDescription(nh_);
+  spinner.start();
 
   nh.getParam(ROBOT_NAME_PARAM, robotName_);
   std::string prefix = TOPIC_PREFIX + robotName_ + OUTPUT_TOPIC_PREFIX;
@@ -39,8 +40,8 @@ RobotStateInformer::RobotStateInformer(ros::NodeHandle nh) : nh_(nh)
       nh_.subscribe(prefix + LEFT_WRIST_FORCE_SENSOR_TOPIC, 1, &RobotStateInformer::leftWristForceSensorCB, this);
   rightWristForceSensorSub_ =
       nh_.subscribe(prefix + RIGHT_WRIST_FORCE_SENSOR_TOPIC, 1, &RobotStateInformer::rightWristForceSensorCB, this);
-  ros::spinOnce();
-  ros::Duration(0.2).sleep();
+
+  initializeClassMembers();
 }
 
 RobotStateInformer::~RobotStateInformer()
@@ -54,23 +55,36 @@ RobotStateInformer::~RobotStateInformer()
   rightFootForceSensorSub_.shutdown();
   leftWristForceSensorSub_.shutdown();
   rightWristForceSensorSub_.shutdown();
+  spinner.stop();
 }
 
-void RobotStateInformer::jointStateCB(const sensor_msgs::JointStateConstPtr msg)
+void RobotStateInformer::initializeClassMembers()
+{
+  currentStatePtr_ = sensor_msgs::JointState::Ptr(new sensor_msgs::JointState());
+  pelvisImuValue_ = sensor_msgs::Imu::Ptr(new sensor_msgs::Imu());
+  centerOfMassValue_ = geometry_msgs::Point32::Ptr(new geometry_msgs::Point32());
+  capturePointValue_ = ihmc_msgs::Point2dRosMessage::Ptr(new ihmc_msgs::Point2dRosMessage());
+  doubleSupportStatus_ = true;
+  footWrenches_[LEFT] = geometry_msgs::WrenchStamped::Ptr(new geometry_msgs::WrenchStamped());
+  footWrenches_[RIGHT] = geometry_msgs::WrenchStamped::Ptr(new geometry_msgs::WrenchStamped());
+  wristWrenches_[LEFT] = geometry_msgs::WrenchStamped::Ptr(new geometry_msgs::WrenchStamped());
+  wristWrenches_[RIGHT] = geometry_msgs::WrenchStamped::Ptr(new geometry_msgs::WrenchStamped());
+}
+void RobotStateInformer::jointStateCB(const sensor_msgs::JointState::Ptr msg)
 {
   std::lock_guard<std::mutex> guard(currentStateMutex_);
   currentStatePtr_ = msg;
 }
 
-void RobotStateInformer::pelvisImuCB(const sensor_msgs::ImuConstPtr msg)
+void RobotStateInformer::pelvisImuCB(const sensor_msgs::Imu::Ptr msg)
 {
   pelvisImuValue_ = msg;
 }
-void RobotStateInformer::centerOfMassCB(const geometry_msgs::Point32ConstPtr msg)
+void RobotStateInformer::centerOfMassCB(const geometry_msgs::Point32::Ptr msg)
 {
   centerOfMassValue_ = msg;
 }
-void RobotStateInformer::capturPointCB(const ihmc_msgs::Point2dRosMessageConstPtr msg)
+void RobotStateInformer::capturPointCB(const ihmc_msgs::Point2dRosMessage::Ptr msg)
 {
   capturePointValue_ = msg;
 }
@@ -79,29 +93,25 @@ void RobotStateInformer::doubleSupportStatusCB(const std_msgs::Bool& msg)
 {
   doubleSupportStatus_ = msg.data;
 }
-void RobotStateInformer::leftFootForceSensorCB(const geometry_msgs::WrenchStampedConstPtr msg)
+void RobotStateInformer::leftFootForceSensorCB(const geometry_msgs::WrenchStamped::Ptr msg)
 {
   footWrenches_[LEFT] = msg;
 }
-void RobotStateInformer::rightFootForceSensorCB(const geometry_msgs::WrenchStampedConstPtr msg)
+void RobotStateInformer::rightFootForceSensorCB(const geometry_msgs::WrenchStamped::Ptr msg)
 {
   footWrenches_[RIGHT] = msg;
 }
-void RobotStateInformer::leftWristForceSensorCB(const geometry_msgs::WrenchStampedConstPtr msg)
+void RobotStateInformer::leftWristForceSensorCB(const geometry_msgs::WrenchStamped::Ptr msg)
 {
   wristWrenches_[LEFT] = msg;
 }
-void RobotStateInformer::rightWristForceSensorCB(const geometry_msgs::WrenchStampedConstPtr msg)
+void RobotStateInformer::rightWristForceSensorCB(const geometry_msgs::WrenchStamped::Ptr msg)
 {
   wristWrenches_[RIGHT] = msg;
 }
 
 void RobotStateInformer::getJointStateMessage(sensor_msgs::JointState& jointState)
 {
-  if (!currentStatePtr_)
-  {
-    return;
-  }
   std::lock_guard<std::mutex> guard(currentStateMutex_);
   jointState = *currentStatePtr_;
 }
@@ -182,20 +192,12 @@ void RobotStateInformer::populateStateMap()
 }
 void RobotStateInformer::getJointPositions(std::vector<double>& positions)
 {
-  if (!currentStatePtr_)
-  {
-    return;
-  }
   std::lock_guard<std::mutex> guard(currentStateMutex_);
   positions = currentStatePtr_->position;
 }
 
 bool RobotStateInformer::getJointPositions(const std::string& paramName, std::vector<double>& positions)
 {
-  if (!currentStatePtr_)
-  {
-    return false;
-  }
   positions.clear();
   std::vector<std::string> jointNames;
   std::string parameter;
@@ -216,20 +218,12 @@ bool RobotStateInformer::getJointPositions(const std::string& paramName, std::ve
 
 void RobotStateInformer::getJointVelocities(std::vector<double>& velocities)
 {
-  if (!currentStatePtr_)
-  {
-    return;
-  }
   std::lock_guard<std::mutex> guard(currentStateMutex_);
   velocities = currentStatePtr_->velocity;
 }
 
 bool RobotStateInformer::getJointVelocities(const std::string& paramName, std::vector<double>& velocities)
 {
-  if (!currentStatePtr_)
-  {
-    return false;
-  }
   velocities.clear();
   std::vector<std::string> jointNames;
   std::string parameter;
@@ -250,20 +244,12 @@ bool RobotStateInformer::getJointVelocities(const std::string& paramName, std::v
 
 void RobotStateInformer::getJointEfforts(std::vector<double>& efforts)
 {
-  if (!currentStatePtr_)
-  {
-    return;
-  }
   std::lock_guard<std::mutex> guard(currentStateMutex_);
   efforts = currentStatePtr_->effort;
 }
 
 bool RobotStateInformer::getJointEfforts(const std::string& paramName, std::vector<double>& efforts)
 {
-  if (!currentStatePtr_)
-  {
-    return false;
-  }
   efforts.clear();
   std::vector<std::string> jointNames;
   std::string parameter;
@@ -320,10 +306,6 @@ double RobotStateInformer::getJointEffort(const std::string& jointName)
 
 void RobotStateInformer::getJointNames(std::vector<std::string>& jointNames)
 {
-  if (!currentStatePtr_)
-  {
-    return;
-  }
   std::lock_guard<std::mutex> guard(currentStateMutex_);
   jointNames = currentStatePtr_->name;
 }
@@ -447,7 +429,7 @@ bool RobotStateInformer::transformPose(const geometry_msgs::Pose& pose_in, geome
   in.header.frame_id = from_frame;
   in.header.stamp = ros::Time(0);
   in.pose = pose_in;
-  if (transformPose(pose_in, pose_out, to_frame))
+  if (transformPose(in, out, to_frame))
   {
     pose_out = out.pose;
     return true;

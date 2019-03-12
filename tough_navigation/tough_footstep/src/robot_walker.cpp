@@ -8,21 +8,23 @@ int RobotWalker::id = 1;
 RobotWalker::RobotWalker(ros::NodeHandle nh, double InTransferTime, double InSwingTime, int InMode, double swingHeight)
   : nh_(nh)
 {
+  using namespace TOUGH_COMMON_NAMES;
   current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
   rd_ = RobotDescription::getRobotDescription(nh_);
   const std::string robot_name = rd_->getRobotName();
-  const std::string control_prefix = "/ihmc_ros/" + robot_name + "/control/";
-  const std::string output_prefix = "/ihmc_ros/" + robot_name + "/output/";
+  const std::string control_prefix = TOPIC_PREFIX + robot_name + CONTROL_TOPIC_PREFIX;
+  const std::string output_prefix = TOPIC_PREFIX + robot_name + OUTPUT_TOPIC_PREFIX;
 
   this->footsteps_pub_ =
-      nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>(control_prefix + "footstep_list", 1, true);
+      nh_.advertise<ihmc_msgs::FootstepDataListRosMessage>(control_prefix + FOOTSTEP_LIST_TOPIC, 1, true);
   this->nudgestep_pub_ =
-      nh_.advertise<ihmc_msgs::FootTrajectoryRosMessage>(control_prefix + "foot_trajectory", 1, true);
+      nh_.advertise<ihmc_msgs::FootTrajectoryRosMessage>(control_prefix + FOOTSTEP_TRAJECTORY_TOPIC, 1, true);
   this->loadeff_pub =
-      nh_.advertise<ihmc_msgs::FootLoadBearingRosMessage>(control_prefix + "foot_load_bearing", 1, true);
+      nh_.advertise<ihmc_msgs::FootLoadBearingRosMessage>(control_prefix + FOOTSTEP_LOAD_BEARING_TOPIC, 1, true);
   this->abort_footsteps_pub_ =
-      nh_.advertise<ihmc_msgs::AbortWalkingRosMessage>(control_prefix + "abort_walking", 1, true);
-  this->footstep_status_ = nh_.subscribe(output_prefix + "footstep_status", 20, &RobotWalker::footstepStatusCB, this);
+      nh_.advertise<ihmc_msgs::AbortWalkingRosMessage>(control_prefix + ABORT_WALKING_TOPIC, 1, true);
+  this->footstep_status_ =
+      nh_.subscribe(output_prefix + FOOTSTEP_STATUS_TOPIC, 20, &RobotWalker::footstepStatusCB, this);
 
   transfer_time_ = InTransferTime;
   swing_time_ = InSwingTime;
@@ -83,6 +85,24 @@ bool RobotWalker::walkToGoal(const geometry_msgs::Pose2D& goal, bool waitForStep
     return true;
   }
   return false;
+}
+
+// calls the footstep planner to plan path and walks to a 2D goal.
+void RobotWalker::stepAtPose(const geometry_msgs::Pose& goal, const RobotSide side, bool waitForSteps)
+{
+  ihmc_msgs::FootstepDataListRosMessage list;
+  initializeFootstepDataListRosMessage(list);
+  list.footstep_data_list.push_back(*getOffsetStep(side, goal));
+
+  this->footsteps_pub_.publish(list);
+  RobotWalker::id++;
+
+  if (waitForSteps)
+  {
+    cbTime_ = ros::Time::now();
+    this->waitForSteps(list.footstep_data_list.size());
+  }
+  return;
 }
 
 // walks certain number of defined footsteps. steps defined wrt world frame.
@@ -230,7 +250,8 @@ bool RobotWalker::raiseLeg(RobotSide side, float height, float time)
   return true;
 }
 
-bool RobotWalker::nudgeFoot(RobotSide side, float distance, float time)
+bool RobotWalker::nudgeFoot(const RobotSide side, const float x_offset, const float y_offset,
+                            const geometry_msgs::Quaternion* orientation, const float time)
 {
   ihmc_msgs::FootTrajectoryRosMessage foot;
   initializeFootTrajectoryRosMessage(side, foot);
@@ -243,14 +264,23 @@ bool RobotWalker::nudgeFoot(RobotSide side, float distance, float time)
   pt_in.header.frame_id = TOUGH_COMMON_NAMES::WORLD_TF;
   current_state_->transformPoint(pt_in, pt_out, rd_->getPelvisFrame());
 
-  pt_out.point.x += distance;
+  pt_out.point.x += x_offset;
+  pt_out.point.y += y_offset;
   pt_out.point.z += rd_->getFootFrameOffset();
   // convert back to world frame
   current_state_->transformPoint(pt_out, pt_out);
 
   // add to data
   foot.taskspace_trajectory_points.begin()->position = pt_out.point;
-  foot.taskspace_trajectory_points.begin()->orientation = current->orientation;
+  if (orientation)
+  {
+    ROS_INFO_STREAM("Foot orientation" << *orientation);
+    foot.taskspace_trajectory_points.begin()->orientation = *orientation;
+  }
+  else
+  {
+    foot.taskspace_trajectory_points.begin()->orientation = current->orientation;
+  }
 
   std::cout << "point x" << foot.taskspace_trajectory_points.begin()->position.x << "\n";
   std::cout << "point y" << foot.taskspace_trajectory_points.begin()->position.y << "\n";
@@ -377,12 +407,12 @@ double RobotWalker::getSwingHeight() const
 
 // Get starting location of the foot
 
-void RobotWalker::getCurrentStep(int side, ihmc_msgs::FootstepDataRosMessage& foot)
+void RobotWalker::getCurrentStep(int side, ihmc_msgs::FootstepDataRosMessage& foot, const std::string base_frame)
 {
   std_msgs::String foot_frame = side == LEFT ? left_foot_frame_ : right_foot_frame_;
 
   geometry_msgs::Pose footPose;
-  current_state_->getCurrentPose(foot_frame.data, footPose, rd_->getWorldFrame());
+  current_state_->getCurrentPose(foot_frame.data, footPose, base_frame);
   foot.location = footPose.position;
   foot.location.z -= rd_->getFootFrameOffset();
   foot.orientation = footPose.orientation;
@@ -405,23 +435,37 @@ ihmc_msgs::FootstepDataRosMessage::Ptr RobotWalker::getOffsetStep(int side, floa
   return next;
 }
 
+ihmc_msgs::FootstepDataRosMessage::Ptr RobotWalker::getOffsetStep(const RobotSide side, const geometry_msgs::Pose& goal,
+                                                                  const std::string base_frame)
+{
+  ihmc_msgs::FootstepDataRosMessage::Ptr next(new ihmc_msgs::FootstepDataRosMessage());
+
+  this->getCurrentStep(side, *next, base_frame);
+  geometry_msgs::Pose goal_out;
+  current_state_->transformPose(goal, goal_out, base_frame);
+  next->location = goal_out.position;
+  next->orientation = goal_out.orientation;
+  next->swing_height = swing_height_;
+  return next;
+}
+
 ihmc_msgs::FootstepDataRosMessage::Ptr RobotWalker::getOffsetStepWRTPelvis(int side, float x, float y)
 {
   ihmc_msgs::FootstepDataRosMessage::Ptr next(new ihmc_msgs::FootstepDataRosMessage());
-  geometry_msgs::Point currentFootPosition;
+  geometry_msgs::Pose nextFootPose;
 
-  // get the current step
-  getCurrentStep(side, *next);
+  // get the current step in pelvis frame
+  getCurrentStep(side, *next, rd_->getPelvisFrame());
 
-  // transform the step to pelvis
-  current_state_->transformPoint(next->location, currentFootPosition, TOUGH_COMMON_NAMES::WORLD_TF,
-                                 rd_->getPelvisFrame());
   // add the offsets wrt to pelvis
-  currentFootPosition.x += x;
-  currentFootPosition.y += y;
-  // tranform back the point to world coordinates
-  current_state_->transformPoint(currentFootPosition, next->location, rd_->getPelvisFrame(),
-                                 TOUGH_COMMON_NAMES::WORLD_TF);
+  nextFootPose.position.x = next->location.x + x;
+  nextFootPose.position.y = next->location.y + y;
+  nextFootPose.position.z = next->location.z;
+
+  // tranform back the point and quaternion to world coordinates
+  current_state_->transformPoint(nextFootPose.position, next->location, rd_->getPelvisFrame(), rd_->getWorldFrame());
+  current_state_->transformQuaternion(next->orientation, next->orientation, rd_->getPelvisFrame(),
+                                      rd_->getWorldFrame());
 
   next->swing_height = swing_height_;
 
@@ -529,4 +573,46 @@ void RobotWalker::waitForSteps(const int numSteps)
   // reset back the step counter
   step_counter_ = 0;
   return;
+}
+
+void RobotWalker::alignFeet(const RobotSide side)
+{
+  geometry_msgs::Pose swingFootPose, finalPose;
+  std::string swingFootFrame, stanceFootFrame;
+
+  swingFootFrame = (side == RobotSide::LEFT) ? left_foot_frame_.data : right_foot_frame_.data;
+  stanceFootFrame = (side == RobotSide::LEFT) ? right_foot_frame_.data : left_foot_frame_.data;
+  current_state_->getCurrentPose(swingFootFrame, swingFootPose, stanceFootFrame);
+  ROS_INFO_STREAM("swing foot pose " << swingFootPose);
+
+  if (!areFeetAligned(swingFootPose))
+  {
+    finalPose.position.y += side == LEFT ? (FOOT_SEPARATION) : (-1 * FOOT_SEPARATION);
+    finalPose.position.z -= rd_->getFootFrameOffset();
+    finalPose.orientation.w = 1.0;
+    current_state_->transformPose(finalPose, finalPose, stanceFootFrame, rd_->getWorldFrame());
+    ROS_INFO_STREAM("final pose " << finalPose);
+    stepAtPose(finalPose, side, true);
+  }
+}
+
+bool RobotWalker::areFeetAligned(geometry_msgs::Pose& footPose)
+{
+  // If the robot is not in double support, it does not make any sense in checking the alignment
+  if (current_state_->isRobotInDoubleSupport())
+  {
+    return isFootPosAligned(footPose.position) && isFootRotAligned(footPose.orientation);
+  }
+  return false;
+}
+
+bool RobotWalker::isFootPosAligned(const geometry_msgs::Point& p1)
+{
+  return (fabs(p1.x) < FOOT_ALGMT_ERR_THRESHOLD && fabs(p1.y) < (FOOT_SEPARATION + FOOT_ALGMT_ERR_THRESHOLD));
+}
+
+bool RobotWalker::isFootRotAligned(const geometry_msgs::Quaternion& q1)
+{
+  return (fabs(q1.x) > FOOT_ROT_ERR_THRESHOLD || fabs(q1.y) > FOOT_ROT_ERR_THRESHOLD ||
+          fabs(q1.z) > FOOT_ROT_ERR_THRESHOLD || fabs(q1.w) > FOOT_ROT_ERR_THRESHOLD);
 }

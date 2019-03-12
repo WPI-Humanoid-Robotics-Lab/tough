@@ -47,15 +47,17 @@ public:
    */
   bool walkToGoal(const geometry_msgs::Pose2D& goal, bool waitForSteps = true);
 
+  void stepAtPose(const geometry_msgs::Pose& goal, const RobotSide side, bool waitForSteps);
+
   /**
    * @brief walkNSteps Makes the robot walk given number of steps.
    * @param n          Number of steps to walk
-   * @param x_offset   distance to travel forward in half stride. First step is half the stride length as both the feet
-   * are assumed to be together.
-   * @param y_offset   distance to travel sideways in half a stride length. First step is half the stride length as both
-   * the feet are assumed to be together.
-   * @param continous  If this is set to true, the robot stops with one foot forward. if it is false, both the feet are
-   * together at the end of walk.
+   * @param x_offset   distance to travel forward in half stride. First step is half the stride length as both the
+   * feet are assumed to be together.
+   * @param y_offset   distance to travel sideways in half a stride length. First step is half the stride length as
+   * both the feet are assumed to be together.
+   * @param continous  If this is set to true, the robot stops with one foot forward. if it is false, both the feet
+   * are together at the end of walk.
    * @param startLeg   leg to be used to start walking. It can be RIGHT or LEFT
    * @return
    */
@@ -145,6 +147,9 @@ public:
    */
   bool curlLeg(RobotSide side, float radius, float time = 3.0f);
 
+  bool areFeetAligned(geometry_msgs::Pose& leftFootPose);
+
+  void alignFeet(const RobotSide side = RobotSide::LEFT);
   /**
    * @brief placeLeg is used when the swing leg is in a arbitrary lifted position and has to be placed within a z-offset
    * with the support leg.
@@ -162,15 +167,19 @@ public:
    * @param distance is the offset distance
    * @return
    */
-  bool nudgeFoot(RobotSide side, float distance, float time = 2.0f);
+  bool nudgeFoot(const RobotSide side, const float x_offset, const float y_offset = 0.0f,
+                 const geometry_msgs::Quaternion* orientation = nullptr, const float time = 2.0f);
 
   /**
    * @brief getCurrentStep gives the current position of the robot wrt to world frame
    * @param side LEFT/ RIGHT leg
    * @param foot is the foot msg which stores the location of the foot in world frame.
    */
-  void getCurrentStep(int side, ihmc_msgs::FootstepDataRosMessage& foot);
+  void getCurrentStep(int side, ihmc_msgs::FootstepDataRosMessage& foot,
+                      const std::string base_frame = TOUGH_COMMON_NAMES::WORLD_TF);
 
+  ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStep(const RobotSide side, const geometry_msgs::Pose& goal,
+                                                       const std::string base_frame = TOUGH_COMMON_NAMES::WORLD_TF);
   /**
    * @brief raiseLeg raises the leg forward at a desired height.
    * @param side  LEFT/RIGHT
@@ -221,8 +230,12 @@ private:
   RobotStateInformer* current_state_;
   RobotDescription* rd_;
 
+  const float FOOT_ALGMT_ERR_THRESHOLD = 0.03;
+  const float FOOT_SEPARATION = 0.33;                      // it should be moved to robot description
+  const float FOOT_ROT_ERR_THRESHOLD = 5 * M_PI / 180.0f;  // 5 degrees
   double transfer_time_, swing_time_, swing_height_;
-  int execution_mode_, step_counter_;
+  int execution_mode_, step_counter_, step_status_;
+
   ros::NodeHandle nh_;
   ros::Time cbTime_;
   ros::Publisher footsteps_pub_, nudgestep_pub_, loadeff_pub, abort_footsteps_pub_;
@@ -233,13 +246,16 @@ private:
   void footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage& msg);
   void waitForSteps(const int numSteps);
 
+  bool isFootRotAligned(const geometry_msgs::Quaternion& q1);
+  bool isFootPosAligned(const geometry_msgs::Point& p1);
+
   inline void initializeFootstepDataListRosMessage(ihmc_msgs::FootstepDataListRosMessage& msg)
   {
     msg.default_transfer_duration = transfer_time_;
     msg.default_swing_duration = swing_time_;
     msg.execution_mode = execution_mode_;
 
-    msg.unique_id = RobotWalker::id;
+    msg.unique_id = RobotWalker::id++;
   }
 
   inline void initializeFootTrajectoryRosMessage(RobotSide side, ihmc_msgs::FootTrajectoryRosMessage& foot)

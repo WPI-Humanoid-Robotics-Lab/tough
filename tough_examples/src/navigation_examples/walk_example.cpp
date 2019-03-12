@@ -50,6 +50,7 @@ int main(int argc, char** argv)
     cout << "c - curl \n";
     cout << "f - forward \n";
     cout << "p - place leg \n";
+    cout << "a - align feet\n";
 
     cin >> input;
     if (input == 'q')
@@ -101,6 +102,10 @@ int main(int argc, char** argv)
     {
       stopTraj.publish(stopMsg);
       cout << "Stopped All Trajectories \n";
+    }
+    else if (input == 'a')
+    {
+      walk.alignFeet(RobotSide::RIGHT);
     }
     else
       cout << "invalid input \n";

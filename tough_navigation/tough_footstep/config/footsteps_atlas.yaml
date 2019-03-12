@@ -19,7 +19,7 @@ footsteps:
 ### foot settings #############################################################
 foot:
   size: {x: 0.26, y: 0.16, z: 0.085}
-  separation: 0.36
+  separation: 0.33
 ### sfeng: I think origin_shift := reference point on foot to the middle of the foot. 
 ### sfeng: for sf, the origin_shift is x = 0.045, idk about BDI
   origin_shift: {x: -0.045, y: 0.0}

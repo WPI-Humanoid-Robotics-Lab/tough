@@ -27,7 +27,7 @@ private:
   // private constructor to disable user from creating objects
   RobotStateInformer(ros::NodeHandle nh);
   static RobotStateInformer* currentObject_;
-
+  ros::AsyncSpinner spinner;
   RobotDescription* rd_;
 
   ros::NodeHandle nh_;
@@ -35,22 +35,22 @@ private:
   std::string robotName_;
 
   ros::Subscriber jointStateSub_;
-  void jointStateCB(const sensor_msgs::JointStateConstPtr msg);
-  sensor_msgs::JointStateConstPtr currentStatePtr_;
+  void jointStateCB(const sensor_msgs::JointState::Ptr msg);
+  sensor_msgs::JointState::Ptr currentStatePtr_;
   std::map<std::string, RobotState> currentState_;
   std::mutex currentStateMutex_;
 
   ros::Subscriber pelvisIMUSub_;
-  void pelvisImuCB(const sensor_msgs::ImuConstPtr msg);
-  sensor_msgs::ImuConstPtr pelvisImuValue_;
+  void pelvisImuCB(const sensor_msgs::Imu::Ptr msg);
+  sensor_msgs::Imu::Ptr pelvisImuValue_;
 
   ros::Subscriber centerOfMassSub_;
-  void centerOfMassCB(const geometry_msgs::Point32ConstPtr msg);
-  geometry_msgs::Point32ConstPtr centerOfMassValue_;
+  void centerOfMassCB(const geometry_msgs::Point32::Ptr msg);
+  geometry_msgs::Point32::Ptr centerOfMassValue_;
 
   ros::Subscriber capturePointSub_;
-  void capturPointCB(const ihmc_msgs::Point2dRosMessageConstPtr msg);
-  ihmc_msgs::Point2dRosMessageConstPtr capturePointValue_;
+  void capturPointCB(const ihmc_msgs::Point2dRosMessage::Ptr msg);
+  ihmc_msgs::Point2dRosMessage::Ptr capturePointValue_;
 
   ros::Subscriber isInDoubleSupportSub_;
   void doubleSupportStatusCB(const std_msgs::Bool& msg);
@@ -58,17 +58,18 @@ private:
 
   ros::Subscriber leftFootForceSensorSub_;
   ros::Subscriber rightFootForceSensorSub_;
-  void leftFootForceSensorCB(const geometry_msgs::WrenchStampedConstPtr msg);
-  void rightFootForceSensorCB(const geometry_msgs::WrenchStampedConstPtr msg);
-  std::map<RobotSide, geometry_msgs::WrenchStampedConstPtr> footWrenches_;
+  void leftFootForceSensorCB(const geometry_msgs::WrenchStamped::Ptr msg);
+  void rightFootForceSensorCB(const geometry_msgs::WrenchStamped::Ptr msg);
+  std::map<RobotSide, geometry_msgs::WrenchStamped::Ptr> footWrenches_;
 
   ros::Subscriber leftWristForceSensorSub_;
   ros::Subscriber rightWristForceSensorSub_;
-  void leftWristForceSensorCB(const geometry_msgs::WrenchStampedConstPtr msg);
-  void rightWristForceSensorCB(const geometry_msgs::WrenchStampedConstPtr msg);
-  std::map<RobotSide, geometry_msgs::WrenchStampedConstPtr> wristWrenches_;
+  void leftWristForceSensorCB(const geometry_msgs::WrenchStamped::Ptr msg);
+  void rightWristForceSensorCB(const geometry_msgs::WrenchStamped::Ptr msg);
+  std::map<RobotSide, geometry_msgs::WrenchStamped::Ptr> wristWrenches_;
 
   void populateStateMap();
+  void initializeClassMembers();
   void inline parseParameter(const std::string& paramName, std::string& parameter)
   {
     if (paramName == "left_arm_joint_names" || paramName == "left_arm")
