@@ -1171,7 +1171,7 @@ void ToughGUI::walkSteps()
       swingHeight_ = swingHeight;
     }
 
-    walkingController_->walkNStepsWRTPelvis(numOfSteps, xOffset, yOffset, false, side, false);
+    walkingController_->walkNStepsWRTPelvis(numOfSteps, xOffset, yOffset, side, false);
   }
 }
 
