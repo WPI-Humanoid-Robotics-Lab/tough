@@ -12,6 +12,7 @@
 
 /*** INCLUDE FILES ***/
 #include <tough_perception_common/global.h>
+#include <tough_perception_common/perception_common_names.h>
 #include <image_transport/image_transport.h>
 #include <multisense_ros/RawCamConfig.h>
 #include <stereo_msgs/DisparityImage.h>
@@ -58,7 +59,11 @@ class MultisenseImage
   // use this data type instead of the image_ and img_header_??
 
   ros::NodeHandle nh_;
-  std::string image_topic_, disp_topic_, depth_topic_, depth_cost_topic_, multisense_topic_;
+  std::string image_topic_      = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC; 
+  std::string disp_topic_       = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC; 
+  std::string depth_topic_      = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC; 
+  std::string depth_cost_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_CONTROL_FPS_TOPIC; 
+  std::string multisense_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_RAW_CAM_CONFIG_TOPIC;
 
   bool new_image_;
   bool new_disp_;
@@ -73,20 +78,14 @@ class MultisenseImage
 
   image_transport::ImageTransport it_;
 
-  image_transport::Subscriber cam_sub_;
-  image_transport::SubscriberFilter* sync_cam_sub_;
-  image_transport::SubscriberFilter* sync_cam_depth_sub_;
-  image_transport::SubscriberFilter* sync_cam_cost_sub_;
-#ifndef GAZEBO_SIMULATION
+  image_transport::Subscriber         cam_sub_;
+  image_transport::SubscriberFilter*  sync_cam_sub_;
+  image_transport::SubscriberFilter*  sync_cam_depth_sub_;
+  image_transport::SubscriberFilter*  sync_cam_cost_sub_;
+
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image> exactTimePolicy;
   std::shared_ptr<message_filters::Synchronizer<exactTimePolicy> > sync_;
   image_transport::SubscriberFilter* sync_disp_sub_;
-
-#else
-  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, stereo_msgs::DisparityImage>
-      approxTimePolicy;
-  std::shared_ptr<message_filters::Synchronizer<approxTimePolicy> > sync_;
-#endif
 
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image>
       depthImageCostExactTimePolicy;
@@ -94,13 +93,9 @@ class MultisenseImage
 
   image_transport::Subscriber depth_sub_;
   image_transport::Subscriber cost_sub_;
-#ifndef GAZEBO_SIMULATION
+
   image_transport::Subscriber disp_sub_;
 
-#else
-  ros::Subscriber disp_sub_;
-  message_filters::Subscriber<stereo_msgs::DisparityImage>* sync_disp_sub_;
-#endif
   ros::Subscriber multisense_sub_;
 
   /**
@@ -131,19 +126,17 @@ class MultisenseImage
    */
   void loadCameraConfig(const multisense_ros::RawCamConfigConstPtr& config);
 
-#ifdef GAZEBO_SIMULATION
+
   /**
    * @brief this function loads the camera parameter from the multisense in SIM topic
    * @param config the ros data published by the multisense head in SIM
    */
   void loadDisparityImageStereoMsgs(const stereo_msgs::DisparityImageConstPtr& img);
-#endif
 
-#ifndef GAZEBO_SIMULATION
+
+
   void syncCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dimg);
-#else
-  void syncCallback(const sensor_msgs::ImageConstPtr& img, const stereo_msgs::DisparityImageConstPtr& dimg);
-#endif
+
   void syncDepthCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dimg,
                          const sensor_msgs::ImageConstPtr& cimg);
 
