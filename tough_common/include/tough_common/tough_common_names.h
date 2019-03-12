@@ -56,6 +56,10 @@ const std::string RIGHT_FOOT_FORCE_SENSOR_TOPIC = "/foot_force_sensor/right";
 const std::string LEFT_WRIST_FORCE_SENSOR_TOPIC = "/wrist_force_sensor/left";
 const std::string RIGHT_WRIST_FORCE_SENSOR_TOPIC = "/wrist_force_sensor/right";
 
+/********* Miscellaneous Topics *********/
+const std::string NAVIGATION_GOAL_TOPIC = "/goal";
+const std::string APPROVE_FOOTSTEPS_TOPIC = "/approve_footsteps";
+
 /********* Frame Hash from IHMC controllers *********/
 const int MIDFEET_ZUP_FRAME_HASH = -100;
 const int PELVIS_ZUP_FRAME_HASH = -101;

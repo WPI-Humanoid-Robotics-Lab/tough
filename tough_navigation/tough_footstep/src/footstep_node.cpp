@@ -64,9 +64,9 @@ int main(int argc, char** argv)
   rd_ = RobotDescription::getRobotDescription(nh);
   walk = new RobotWalker(nh, 1.0f, 1.0f, 0, 0.1f);
 
-  ros::Subscriber nav_goal_sub = nh.subscribe("/goal", 1, &nav_goal_cb);
-  ros::Subscriber nav_goal_sub2 = nh.subscribe("/move_base_simple/goal", 1, &nav_goal_cb);
-  ros::Subscriber publish_footsteps_sub = nh.subscribe("/approve_footsteps", 1, &publish_footsteps_cb);
+  ros::Subscriber nav_goal_sub = nh.subscribe(TOUGH_COMMON_NAMES::NAVIGATION_GOAL_TOPIC, 1, &nav_goal_cb);
+  ros::Subscriber publish_footsteps_sub =
+      nh.subscribe(TOUGH_COMMON_NAMES::APPROVE_FOOTSTEPS_TOPIC, 1, &publish_footsteps_cb);
 
   footstep_planner::FootstepPlannerNode planner;
   ros::spin();

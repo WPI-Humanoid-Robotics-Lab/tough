@@ -58,9 +58,9 @@ target_link_libraries(${PROJECT_NAME}  ${catkin_LIBRARIES})
 add_executable(footstep_node src/footstep_node.cpp)
 target_link_libraries(footstep_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
 
-add_executable(test_footstep src/test_footstep.cpp)
-add_dependencies(test_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_footstep  ${catkin_LIBRARIES})
+# add_executable(test_footstep src/test_footstep.cpp)
+# add_dependencies(test_footstep ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(test_footstep  ${catkin_LIBRARIES})
 
 
 
@@ -70,7 +70,6 @@ target_link_libraries(test_footstep  ${catkin_LIBRARIES})
 
 ## Mark executables and/or libraries for installation
  install(TARGETS ${PROJECT_NAME} 
-    test_footstep 
     footstep_node
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
