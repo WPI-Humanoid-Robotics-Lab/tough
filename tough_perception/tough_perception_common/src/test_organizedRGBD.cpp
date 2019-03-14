@@ -18,7 +18,9 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "test_rgbdgen");
 
   ros::NodeHandle nh;
-  MultisenseImage mi(nh);
+  // MultisenseImage mi(nh);
+  MultisenseImagePtr mi;
+  mi = MultisenseImage::getMultisenseImage(nh);
 
   StereoPointCloudColor::Ptr organized_cloud(new StereoPointCloudColor);
   cv::Mat color;
@@ -33,18 +35,18 @@ int main(int argc, char** argv)
 
   while (ros::ok())
   {
-    if (mi.getImage(color))
+    if (mi->getImage(color))
     {
       new_color = true;
     }
-    if (mi.getDisparityImage(disp))
+    if (mi->getDisparityImage(disp))
     {
       new_disp = true;
     }
 
     if (new_disp && new_color)
     {
-      if (!mi.getQMatrix(Q))
+      if (!mi->getQMatrix(Q))
       {
         ros::spinOnce();
         continue;
@@ -62,4 +64,6 @@ int main(int argc, char** argv)
     }
     ros::spinOnce();
   }
+
+  // delete mi;
 }

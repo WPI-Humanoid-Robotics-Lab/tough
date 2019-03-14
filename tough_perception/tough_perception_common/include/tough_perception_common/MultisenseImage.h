@@ -28,8 +28,10 @@
 
 namespace tough_perception
 {
+
 class MultisenseImage
 {
+private:
   DISALLOW_COPY_AND_ASSIGN(MultisenseImage)
 
   cv::Mat image_;
@@ -79,13 +81,15 @@ class MultisenseImage
   image_transport::ImageTransport it_;
 
   image_transport::Subscriber         cam_sub_;
-  image_transport::SubscriberFilter*  sync_cam_sub_;
-  image_transport::SubscriberFilter*  sync_cam_depth_sub_;
-  image_transport::SubscriberFilter*  sync_cam_cost_sub_;
+  image_transport::SubscriberFilter*  sync_cam_sub_ = nullptr;
+  image_transport::SubscriberFilter*  sync_cam_depth_sub_ = nullptr;
+  image_transport::SubscriberFilter*  sync_cam_cost_sub_ = nullptr;
+
 
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image> exactTimePolicy;
   std::shared_ptr<message_filters::Synchronizer<exactTimePolicy> > sync_;
-  image_transport::SubscriberFilter* sync_disp_sub_;
+
+  image_transport::SubscriberFilter* sync_disp_sub_ = nullptr;
 
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image>
       depthImageCostExactTimePolicy;
@@ -97,6 +101,9 @@ class MultisenseImage
   image_transport::Subscriber disp_sub_;
 
   ros::Subscriber multisense_sub_;
+
+  static MultisenseImage* current_object_;
+
 
   /**
    * @brief this function is the callback for loading the images, as of now it needs the image topic to
@@ -140,13 +147,18 @@ class MultisenseImage
   void syncDepthCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dimg,
                          const sensor_msgs::ImageConstPtr& cimg);
 
-public:
+
   /**
    * @brief Constructor
    * @param nh the ros nodehandle - why do i have this as an argument? expect for the fact to make sure
    * 		  the constructor knows that it is ros. I have no idea why I do this!
    */
-  MultisenseImage(ros::NodeHandle& nh_);
+  MultisenseImage(ros::NodeHandle& nh);
+
+public:
+  
+  static MultisenseImage* getMultisenseImage(ros::NodeHandle& nh);
+  // static std::shared_ptr<MultisenseImage> getMultisenseImage(ros::NodeHandle& nh_);
 
   void setDepthTopic(const std::string& topic);
   void setImageTopic(const std::string& topic);
@@ -242,8 +254,11 @@ public:
    */
   bool getDepthImage(cv::Mat& depth_img);
 
-  virtual ~MultisenseImage();
+  ~MultisenseImage();
 };
+
+typedef MultisenseImage* MultisenseImagePtr;
+// typedef std::shared_ptr<MultisenseImage const> MultisenseImageConstPtr;
 
 } /* namespace src_perception */
 
