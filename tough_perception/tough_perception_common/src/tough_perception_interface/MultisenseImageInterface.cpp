@@ -27,6 +27,12 @@ void MultisenseImageInterface::imageCB(const sensor_msgs::ImageConstPtr &img)
     img_ = img;
 }
 
+void MultisenseImageInterface::depthCB(const sensor_msgs::ImageConstPtr &img)
+{
+    ROS_INFO_ONCE("Listening to %s", cam_sub_depth_.getTopic().c_str());
+    depth_ = img;
+}
+
 void MultisenseImageInterface::camera_infoCB(const sensor_msgs::CameraInfoConstPtr camera_info)
 {
     ROS_INFO_ONCE("Listening to %s", camera_info_sub_.getTopic().c_str());
@@ -40,6 +46,9 @@ MultisenseImageInterface::MultisenseImageInterface(ros::NodeHandle nh)
 {
     cam_sub_ = it_.subscribe(image_topic_, 1,
                              &MultisenseImageInterface::imageCB, this);
+
+    cam_sub_depth_ = it_.subscribe(depth_topic_, 1,
+                                   &MultisenseImageInterface::depthCB, this);
 
     camera_info_sub_ = nh_.subscribe(camera_info_topic, 1,
                                      &MultisenseImageInterface::camera_infoCB, this);
@@ -79,7 +88,27 @@ bool MultisenseImageInterface::getDisparity(cv::Mat &disp_img)
 }
 bool MultisenseImageInterface::getDepthImage(cv::Mat &depth_img)
 {
-    return true;
+    ROS_INFO("fetching image");
+    if (depth_ == nullptr)
+        return false;
+    if (depth_->data.size() == 0)
+        return false;
+    try
+    {
+        ROS_INFO("converting image");
+        if (cv_bridge::getCvType(depth_->encoding) != CV_32F)
+        {
+            ROS_ERROR_STREAM("Unsupported image encoding :" << cv_bridge::getCvType(depth_->encoding));
+            return false;
+        }
+        cv_ptr_ = cv_bridge::toCvCopy(depth_, sensor_msgs::image_encodings::TYPE_32FC1);
+        depth_img = cv_ptr_->image.clone();
+        return true;
+    }
+    catch (cv_bridge::Exception &e)
+    {
+        ROS_ERROR_STREAM("Exception: " << e.what());
+    }
 }
 int MultisenseImageInterface::getHeight()
 {
@@ -95,6 +124,7 @@ MultisenseImageInterface::~MultisenseImageInterface()
     ROS_INFO("Shutting down MultisenseImageInterface");
     // spinner.stop();
     cam_sub_.shutdown();
+    cam_sub_depth_.shutdown();
     camera_info_sub_.shutdown();
     ros::Duration(0.5).sleep();
 }

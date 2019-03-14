@@ -25,12 +25,13 @@ class MultisenseImageInterface
 private:
   DISALLOW_COPY_AND_ASSIGN(MultisenseImageInterface);
 
-  cv::Mat image_;
-  cv::Mat disparity_;
-  cv::Mat depth_;
-  cv::Mat cost_;
+  // cv::Mat image_;
+  // cv::Mat disparity_;
+  // cv::Mat depth_;
+  // cv::Mat cost_;
 
   sensor_msgs::ImageConstPtr img_ = nullptr;
+  sensor_msgs::ImageConstPtr depth_ = nullptr;
   sensor_msgs::CameraInfoConstPtr camera_info_;
   cv_bridge::CvImagePtr cv_ptr_;
 
@@ -50,10 +51,13 @@ private:
   ros::AsyncSpinner spinner;
 
   // std::string image_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC;
-  std::string image_topic_ = "/multisense/left/image_rect_color/compressed";
-  std::string disp_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC;
-  std::string depth_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;
-  std::string depth_cost_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_CONTROL_FPS_TOPIC;
+  std::string image_topic_ = "/multisense/left/image_rect_color";
+  // std::string disp_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC;
+  std::string disp_topic_ = "/multisense/left/disparity";
+  // std::string depth_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;
+  std::string depth_topic_ = "/multisense/depth";
+  // std::string depth_cost_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_CONTROL_FPS_TOPIC;
+  std::string depth_cost_topic_ = "/multisense/left/cost"; // sensor_msg/Image
   std::string multisense_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_RAW_CAM_CONFIG_TOPIC;
   std::string camera_info_topic = "/multisense/left/image_rect_color/camera_info";
 
@@ -61,12 +65,14 @@ private:
   std::string transport_hint_ = "compressed";
 
   image_transport::Subscriber cam_sub_;
+  image_transport::Subscriber cam_sub_depth_;
   ros::Subscriber camera_info_sub_;
 
   static MultisenseImageInterface *current_object_;
   MultisenseImageInterface(ros::NodeHandle nh);
 
   void imageCB(const sensor_msgs::ImageConstPtr &img);
+  void depthCB(const sensor_msgs::ImageConstPtr &img);
   void camera_infoCB(const sensor_msgs::CameraInfoConstPtr camera_info);
 
 public:
