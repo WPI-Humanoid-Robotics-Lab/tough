@@ -4,11 +4,13 @@
 #include <pluginlib/class_loader.h>
 #include <ros/ros.h>
 #include <geometry_msgs/Quaternion.h>
+#include <thread>
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/planning_interface/planning_interface.h>
+#include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit_msgs/DisplayTrajectory.h>
@@ -32,6 +34,9 @@ public:
 
   bool getTrajectory(const geometry_msgs::PoseStamped pose, std::string planning_group,
                      moveit_msgs::RobotTrajectory& output_robot_traj_msg);
+
+  double getTrajFromCartPoints(const std::vector<geometry_msgs::Pose>& pose_vec, const std::string& planning_group,
+                               moveit_msgs::RobotTrajectory& robot_traj, const bool avoid_collisions = true);
 
   bool solve_ik(const std::string& planning_group, const geometry_msgs::PoseStamped& end_effector_pose,
                 std::vector<double>& result);
@@ -95,6 +100,26 @@ private:
   // Trajectory Parameters
   std::shared_ptr<robot_model::RobotState> moveit_robot_state_;
   trajectory_processing::IterativeParabolicTimeParameterization timeParameterizer;
+
+  // Cartesian Planner
+  void initializeMoveGroupsForCartesianPath(void);
+  bool is_move_group_initializing_ = true;
+
+  std::thread thread_for_move_group_init_;
+
+  double computeCartesianPath(moveit::planning_interface::MoveGroupInterface& move_group,
+                              const std::vector<geometry_msgs::Pose>& pose_vec,
+                              moveit_msgs::RobotTrajectory& robot_traj, const bool avoid_collisions);
+
+  moveit::planning_interface::MoveGroupInterface::Options* move_group_option_left_7_dof_;
+  moveit::planning_interface::MoveGroupInterface::Options* move_group_option_left_10_dof_;
+  moveit::planning_interface::MoveGroupInterface::Options* move_group_option_right_7_dof_;
+  moveit::planning_interface::MoveGroupInterface::Options* move_group_option_right_10_dof_;
+
+  moveit::planning_interface::MoveGroupInterface* move_group_left_7_dof_;
+  moveit::planning_interface::MoveGroupInterface* move_group_left_10_dof_;
+  moveit::planning_interface::MoveGroupInterface* move_group_right_7_dof_;
+  moveit::planning_interface::MoveGroupInterface* move_group_right_10_dof_;
 
   // tough
   RobotStateInformer* state_informer_;
