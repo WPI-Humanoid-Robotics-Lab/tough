@@ -28,9 +28,34 @@ bool MultisenseImage::disp_callback_active_   = false;
 bool MultisenseImage::config_callback_active_ = false;
 bool MultisenseImage::depth_callback_active_  = false;
 bool MultisenseImage::cost_callback_active_   = false;
-/**
- *  @note do we need the NodeHandle passed??? Think benny
- */
+
+MultisenseImage* MultisenseImage::current_object_ = nullptr;
+
+// MultisenseImagePtr MultisenseImage::current_object_ptr_ = nullptr;
+
+MultisenseImage*
+MultisenseImage::getMultisenseImage(ros::NodeHandle& nh)
+{
+  if (MultisenseImage::current_object_ == nullptr)
+  {
+    static MultisenseImage obj(nh);
+    current_object_ = &obj;
+  }
+  return current_object_;
+}
+
+// MultisenseImagePtr
+// MultisenseImage::getMultisenseImage(ros::NodeHandle& nh)
+// {
+//   if (MultisenseImage::current_object_ptr_ == nullptr)
+//   {
+//     current_object_ = new MultisenseImage(nh);
+//     current_object_ptr_ = std::shared_ptr<MultisenseImage>(current_object_);
+//   }
+//   return current_object_ptr_;
+// } 
+
+
 MultisenseImage::MultisenseImage(ros::NodeHandle& n)
   : nh_(n), 
   new_image_(false), 
@@ -496,13 +521,47 @@ bool MultisenseImage::getSyncDepthImageswTime(cv::Mat& color, cv::Mat& disp, cv:
  */
 MultisenseImage::~MultisenseImage()
 {
-  //	sync_->~Synchronizer();
-  //  sync_->~Synchronizer();
-  //  delete sync_;
-  //	sync_cam_sub_->unsubscribe();
-  //	sync_disp_sub_->unsubscribe();
-  //	delete sync_cam_sub_;
-  //	delete sync_disp_sub_;
+  	// sync_->~Synchronizer();
+    // sync_->~Synchronizer();
+   
+    // std::cout << __LINE__ << std::endl;
+    // cam_sub_.shutdown();
+    // std::cout << __LINE__ << std::endl;
+    // depth_sub_.shutdown();
+    // std::cout << __LINE__ << std::endl;
+    // cost_sub_.shutdown();
+    // std::cout << __LINE__ << std::endl;
+    // disp_sub_.shutdown();
+    // std::cout << __LINE__ << std::endl;
+    // multisense_sub_.shutdown();
+
+    // std::cout << __LINE__ << std::endl;
+    // if (sync_cam_sub_!=nullptr)
+    // {
+  	//   delete sync_cam_sub_;
+    // }
+
+  	// std::cout << __LINE__ << std::endl;  
+    // if (sync_disp_sub_!=nullptr)
+    // {
+    //   delete sync_disp_sub_;  
+    // }
+
+    // std::cout << __LINE__ << std::endl;
+    // if (sync_cam_depth_sub_ != nullptr)
+    // {
+    //   delete sync_cam_depth_sub_;
+    // }
+
+    // std::cout << __LINE__ << std::endl;
+    // if (sync_cam_cost_sub_!=nullptr)
+    // {
+    //   delete sync_cam_cost_sub_;
+    // }
+    
+    // nh_.shutdown();
+    // std::cout << __LINE__ << std::endl;
+
 }
 
 } /* namespace tough_perception */
