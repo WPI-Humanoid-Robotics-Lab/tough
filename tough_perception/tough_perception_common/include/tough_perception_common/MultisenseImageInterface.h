@@ -49,6 +49,13 @@ private:
   sensor_msgs::CameraInfoConstPtr camera_info_ = nullptr;
   cv_bridge::CvImagePtr cv_ptr_;
 
+  std::mutex image_mutex;
+  std::mutex depth_mutex;
+  std::mutex cost_mutex;
+  std::mutex disparity_mutex;
+  std::mutex disparity_sensor_msg_mutex;
+  std::mutex camera_info_mutex;
+
   struct
   {
     cv::Mat camera_;
@@ -103,7 +110,8 @@ private:
   bool processImage(const sensor_msgs::ImageConstPtr &in,
                     cv::Mat &out,
                     int image_encoding,
-                    std::string out_encoding);
+                    std::string out_encoding,
+                    std::mutex &resource_mutex);
 
 public:
   static MultisenseImageInterface *

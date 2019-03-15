@@ -21,7 +21,6 @@ MultisenseImageInterface::getMultisenseImageInterface(ros::NodeHandle nh)
     return current_object_;
 }
 /*
-*@ToDo: add mutex to all the callbacks
 *@ToDO: add sync callbacks
 *@ToDO: create a class for MultisenseImage Exceptions(is it reall needed? not sure)
 *@ToDo: add method to check if device running
@@ -29,36 +28,62 @@ MultisenseImageInterface::getMultisenseImageInterface(ros::NodeHandle nh)
 void MultisenseImageInterface::imageCB(const sensor_msgs::ImageConstPtr &img)
 {
     ROS_INFO_ONCE("Listening to %s", cam_sub_.getTopic().c_str());
-    img_ = img;
+    // did not use mutex lock_guard as it is a blocking call which
+    // is not good for callbacks
+    if (image_mutex.try_lock())
+    {
+        img_ = img;
+        image_mutex.unlock();
+    }
 }
 
 void MultisenseImageInterface::depthCB(const sensor_msgs::ImageConstPtr &img)
 {
     ROS_INFO_ONCE("Listening to %s", cam_sub_depth_.getTopic().c_str());
-    depth_ = img;
+    if (depth_mutex.try_lock())
+    {
+        depth_ = img;
+        depth_mutex.unlock();
+    }
 }
 
 void MultisenseImageInterface::costCB(const sensor_msgs::ImageConstPtr &img)
 {
     ROS_INFO_ONCE("Listening to %s", cam_sub_depth_.getTopic().c_str());
-    cost_ = img;
+    if (cost_mutex.try_lock())
+    {
+        cost_ = img;
+        cost_mutex.unlock();
+    }
 }
 
 void MultisenseImageInterface::disparityCB(const stereo_msgs::DisparityImageConstPtr &disp)
 {
     ROS_INFO_ONCE("Listening to %s", cam_sub_disparity_.getTopic().c_str());
-    disparity_ = disp;
+    if (disparity_mutex.try_lock())
+    {
+        disparity_ = disp;
+        disparity_mutex.unlock();
+    }
 }
 void MultisenseImageInterface::disparitySensorMsgCB(const sensor_msgs::ImageConstPtr &disp)
 {
     ROS_INFO_ONCE("Listening to %s", cam_sub_disparity_sensor_msg_.getTopic().c_str());
-    disparity_sensor_msg_ = disp;
+    if (disparity_sensor_msg_mutex.try_lock())
+    {
+        disparity_sensor_msg_ = disp;
+        disparity_sensor_msg_mutex.unlock();
+    }
 }
 
 void MultisenseImageInterface::camera_infoCB(const sensor_msgs::CameraInfoConstPtr camera_info)
 {
     ROS_INFO_ONCE("Listening to %s", camera_info_sub_.getTopic().c_str());
-    camera_info_ = camera_info;
+    if (camera_info_mutex.try_lock())
+    {
+        camera_info_ = camera_info;
+        camera_info_mutex.unlock();
+    }
 }
 
 MultisenseImageInterface::MultisenseImageInterface(ros::NodeHandle nh)
@@ -130,8 +155,10 @@ bool MultisenseImageInterface::processDisparity(const sensor_msgs::Image &disp, 
 bool MultisenseImageInterface::processImage(const sensor_msgs::ImageConstPtr &in,
                                             cv::Mat &out,
                                             int image_encoding,
-                                            std::string out_encoding)
+                                            std::string out_encoding,
+                                            std::mutex &resource_mutex)
 {
+    std::lock_guard<std::mutex> guard(resource_mutex);
     if (in == nullptr)
         return false;
     if (in->data.size() == 0)
@@ -156,7 +183,7 @@ bool MultisenseImageInterface::processImage(const sensor_msgs::ImageConstPtr &in
 
 bool MultisenseImageInterface::getImage(cv::Mat &img)
 {
-    return processImage(img_, img, CV_8UC3, sensor_msgs::image_encodings::BGR8);
+    return processImage(img_, img, CV_8UC3, sensor_msgs::image_encodings::BGR8, image_mutex);
 }
 
 bool MultisenseImageInterface::getDisparity(cv::Mat &disp_img, bool from_stereo_msg)
@@ -165,6 +192,7 @@ bool MultisenseImageInterface::getDisparity(cv::Mat &disp_img, bool from_stereo_
     if (from_stereo_msg)
     {
         ROS_INFO("Fetching disparity from stereo_msg");
+        std::lock_guard<std::mutex> guard(disparity_mutex);
         if (disparity_ == nullptr)
             return false;
         status = processDisparity(disparity_->image, disp_img);
@@ -172,6 +200,7 @@ bool MultisenseImageInterface::getDisparity(cv::Mat &disp_img, bool from_stereo_
     else
     {
         ROS_INFO("Fetching disparity from sensor_msg");
+        std::lock_guard<std::mutex> guard(disparity_sensor_msg_mutex);
         if (disparity_sensor_msg_ == nullptr)
             return false;
         status = processDisparity(*disparity_sensor_msg_, disp_img);
@@ -181,11 +210,11 @@ bool MultisenseImageInterface::getDisparity(cv::Mat &disp_img, bool from_stereo_
 
 bool MultisenseImageInterface::getDepthImage(cv::Mat &depth_img)
 {
-    return processImage(depth_, depth_img, CV_32F, sensor_msgs::image_encodings::TYPE_32FC1);
+    return processImage(depth_, depth_img, CV_32F, sensor_msgs::image_encodings::TYPE_32FC1, depth_mutex);
 }
 bool MultisenseImageInterface::getCostImage(cv::Mat &cost_img)
 {
-    return processImage(cost_, cost_img, CV_8U, sensor_msgs::image_encodings::MONO8);
+    return processImage(cost_, cost_img, CV_8U, sensor_msgs::image_encodings::MONO8, cost_mutex);
 }
 int MultisenseImageInterface::getHeight()
 {
@@ -208,15 +237,21 @@ int MultisenseImageInterface::getWidth()
 
 bool MultisenseImageInterface::getCameraInfo(MultisenseCameraModel &pinhole_model)
 {
-    pinhole_model.width = camera_info_->width;
-    pinhole_model.height = camera_info_->height;
-    pinhole_model.K = Eigen::Matrix<double, 3, 3, Eigen::RowMajor>(camera_info_->K.data());
-    pinhole_model.P = Eigen::Matrix<double, 3, 4, Eigen::RowMajor>(camera_info_->P.data());
-    pinhole_model.fx = pinhole_model.K(0, 0);
-    pinhole_model.fy = pinhole_model.K(1, 1);
-    pinhole_model.cx = pinhole_model.K(0, 2);
-    pinhole_model.cy = pinhole_model.K(1, 2);
-    pinhole_model.distortion_model = camera_info_->distortion_model;
+    if (camera_info_ != nullptr)
+    {
+        std::lock_guard<std::mutex> guard(camera_info_mutex);
+        pinhole_model.width = camera_info_->width;
+        pinhole_model.height = camera_info_->height;
+        pinhole_model.K = Eigen::Matrix<double, 3, 3, Eigen::RowMajor>(camera_info_->K.data());
+        pinhole_model.P = Eigen::Matrix<double, 3, 4, Eigen::RowMajor>(camera_info_->P.data());
+        pinhole_model.fx = pinhole_model.K(0, 0);
+        pinhole_model.fy = pinhole_model.K(1, 1);
+        pinhole_model.cx = pinhole_model.K(0, 2);
+        pinhole_model.cy = pinhole_model.K(1, 2);
+        pinhole_model.distortion_model = camera_info_->distortion_model;
+        return true;
+    }
+    return false;
 }
 
 MultisenseImageInterface::~MultisenseImageInterface()
