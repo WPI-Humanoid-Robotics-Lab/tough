@@ -32,7 +32,10 @@ private:
 
   sensor_msgs::ImageConstPtr img_ = nullptr;
   sensor_msgs::ImageConstPtr depth_ = nullptr;
-  sensor_msgs::CameraInfoConstPtr camera_info_;
+  sensor_msgs::ImageConstPtr cost_ = nullptr;
+  stereo_msgs::DisparityImageConstPtr disparity_ = nullptr;
+  sensor_msgs::ImageConstPtr disparity_sensor_msg_ = nullptr;
+  sensor_msgs::CameraInfoConstPtr camera_info_ = nullptr;
   cv_bridge::CvImagePtr cv_ptr_;
 
   struct
@@ -51,14 +54,16 @@ private:
   ros::AsyncSpinner spinner;
 
   // std::string image_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC;
-  std::string image_topic_ = "/multisense/left/image_rect_color";
   // std::string disp_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC;
-  std::string disp_topic_ = "/multisense/left/disparity";
   // std::string depth_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;
-  std::string depth_topic_ = "/multisense/depth";
   // std::string depth_cost_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_CONTROL_FPS_TOPIC;
-  std::string depth_cost_topic_ = "/multisense/left/cost"; // sensor_msg/Image
   std::string multisense_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_RAW_CAM_CONFIG_TOPIC;
+
+  std::string image_topic_ = "/multisense/left/image_rect_color";
+  std::string disp_topic_ = "/multisense/left/disparity_image";
+  std::string disp_sensor_msg_topic_ = "/multisense/left/disparity";
+  std::string depth_topic_ = "/multisense/depth";
+  std::string cost_topic_ = "/multisense/left/cost"; // sensor_msg/Image
   std::string camera_info_topic = "/multisense/left/image_rect_color/camera_info";
 
   image_transport::ImageTransport it_;
@@ -66,6 +71,10 @@ private:
 
   image_transport::Subscriber cam_sub_;
   image_transport::Subscriber cam_sub_depth_;
+  image_transport::Subscriber cam_sub_cost_;
+  image_transport::Subscriber cam_sub_disparity_sensor_msg_;
+
+  ros::Subscriber cam_sub_disparity_;
   ros::Subscriber camera_info_sub_;
 
   static MultisenseImageInterface *current_object_;
@@ -73,7 +82,13 @@ private:
 
   void imageCB(const sensor_msgs::ImageConstPtr &img);
   void depthCB(const sensor_msgs::ImageConstPtr &img);
+  void costCB(const sensor_msgs::ImageConstPtr &img);
+  void disparityCB(const stereo_msgs::DisparityImageConstPtr &disp);
+  void disparitySensorMsgCB(const sensor_msgs::ImageConstPtr &disp);
   void camera_infoCB(const sensor_msgs::CameraInfoConstPtr camera_info);
+
+  // helper functions
+  bool processDisparity(const sensor_msgs::Image &disp, cv::Mat &disp_img);
 
 public:
   static MultisenseImageInterface *
@@ -81,8 +96,9 @@ public:
   ~MultisenseImageInterface();
 
   bool getImage(cv::Mat &img);
-  bool getDisparity(cv::Mat &disp_img);
+  bool getDisparity(cv::Mat &disp_img, bool from_stereo_msg = false);
   bool getDepthImage(cv::Mat &depth_img);
+  bool getCostImage(cv::Mat &cost_img);
   int getHeight();
   int getWidth();
 };

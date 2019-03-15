@@ -10,13 +10,13 @@ void show_image(cv::Mat &image, std::string name)
 {
   cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
   cv::imshow(name, image);
-  ROS_INFO("Press ESC or q to continue");
-  while (cv::waitKey(1) != 27 && cv::waitKey(1) != 'q')
-    ;
+  ROS_INFO("Press any key continue");
+  // while (cv::waitKey(1) != 27 && cv::waitKey(1) != 'q')
+  //   ;
+  cv::waitKey(0);
   ROS_INFO("closing window");
   cv::destroyWindow(name);
-  // wait some time for the window to destroy cleanly.
-  ros::Duration(0.5).sleep();
+  ros::Duration(0.5).sleep(); // wait some time for the window to destroy cleanly.
 }
 
 void scale_depth_image(cv::Mat &depth_in_cv32F)
@@ -39,18 +39,36 @@ int main(int argc, char **argv)
   imageHandler = tough_perception::MultisenseImageInterface::getMultisenseImageInterface(nh);
 
   cv::Mat image;
-  // status = imageHandler->getImage(image);
-  status = imageHandler->getDepthImage(image);
-  scale_depth_image(image);
 
   ROS_INFO_STREAM("[Height]" << imageHandler->getHeight()
                              << " [width]"
                              << imageHandler->getWidth());
 
+  status = imageHandler->getImage(image);
+  ROS_INFO("image status %s", status ? "true" : "false");
   if (status)
     show_image(image, "RGB Image");
 
+  status = imageHandler->getDepthImage(image);
   ROS_INFO("image status %s", status ? "true" : "false");
+  scale_depth_image(image);
+  if (status)
+    show_image(image, "Depth Image");
+
+  status = imageHandler->getCostImage(image);
+  ROS_INFO("image status %s", status ? "true" : "false");
+  if (status)
+    show_image(image, "Cost Image");
+
+  status = imageHandler->getDisparity(image);
+  ROS_INFO("image status %s", status ? "true" : "false");
+  if (status)
+    show_image(image, "Disparity Image from sensor_msg");
+
+  status = imageHandler->getDisparity(image, true);
+  ROS_INFO("image status %s", status ? "true" : "false");
+  if (status)
+    show_image(image, "Disparity Image from stereo_msg");
 
   return 0;
 }
