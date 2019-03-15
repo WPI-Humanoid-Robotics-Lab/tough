@@ -244,10 +244,22 @@ int MultisenseImageInterface::getWidth()
     return camera_info_->width;
 }
 
+bool MultisenseImageInterface::getCameraInfo(MultisenseCameraModel &pinhole_model)
+{
+    pinhole_model.width = camera_info_->width;
+    pinhole_model.height = camera_info_->height;
+    pinhole_model.K = Eigen::Matrix<double, 3, 3, Eigen::RowMajor>(camera_info_->K.data());
+    pinhole_model.P = Eigen::Matrix<double, 3, 4, Eigen::RowMajor>(camera_info_->P.data());
+    pinhole_model.fx = pinhole_model.K(0, 0);
+    pinhole_model.fy = pinhole_model.K(1, 1);
+    pinhole_model.cx = pinhole_model.K(0, 2);
+    pinhole_model.cy = pinhole_model.K(1, 2);
+    pinhole_model.distortion_model = camera_info_->distortion_model;
+}
+
 MultisenseImageInterface::~MultisenseImageInterface()
 {
     ROS_INFO("Shutting down MultisenseImageInterface");
-    // spinner.stop();
     cam_sub_.shutdown();
     cam_sub_depth_.shutdown();
     cam_sub_cost_.shutdown();

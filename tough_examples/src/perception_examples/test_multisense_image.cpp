@@ -40,9 +40,19 @@ int main(int argc, char **argv)
 
   cv::Mat image;
 
-  ROS_INFO_STREAM("[Height]" << imageHandler->getHeight()
-                             << " [width]"
-                             << imageHandler->getWidth());
+  tough_perception::MultisenseCameraModel cam_model;
+  imageHandler->getCameraInfo(cam_model);
+
+  ROS_INFO_STREAM("[Height]" << cam_model.height);
+  ROS_INFO_STREAM("[width]" << cam_model.width);
+  ROS_INFO_STREAM("[fx]" << cam_model.fx);
+  ROS_INFO_STREAM("[fy]" << cam_model.fy);
+  ROS_INFO_STREAM("[cx]" << cam_model.cx);
+  ROS_INFO_STREAM("[cy]" << cam_model.cy);
+  ROS_INFO_STREAM("[K]\n"
+                  << cam_model.K);
+  ROS_INFO_STREAM("[P]\n"
+                  << cam_model.P);
 
   status = imageHandler->getImage(image);
   ROS_INFO("image status %s", status ? "true" : "false");
