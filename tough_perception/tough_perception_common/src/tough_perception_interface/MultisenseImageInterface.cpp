@@ -22,8 +22,6 @@ MultisenseImageInterface::getMultisenseImageInterface(ros::NodeHandle nh)
 }
 /*
 *@ToDo: add mutex to all the callbacks
-*@ToDo: add a common method to process sensor_msg image
-*@ToDO: add efficient method to return camera_info/config
 *@ToDO: add sync callbacks
 *@ToDO: create a class for MultisenseImage Exceptions(is it reall needed? not sure)
 *@ToDo: add method to check if device running
@@ -129,23 +127,24 @@ bool MultisenseImageInterface::processDisparity(const sensor_msgs::Image &disp, 
     }
 }
 
-bool MultisenseImageInterface::getImage(cv::Mat &img)
+bool MultisenseImageInterface::processImage(const sensor_msgs::ImageConstPtr &in,
+                                            cv::Mat &out,
+                                            int image_encoding,
+                                            std::string out_encoding)
 {
-    ROS_INFO("fetching image");
-    if (img_ == nullptr)
+    if (in == nullptr)
         return false;
-    if (img_->data.size() == 0)
+    if (in->data.size() == 0)
         return false;
     try
     {
-        ROS_INFO("converting image");
-        if (cv_bridge::getCvType(img_->encoding) != CV_8UC3)
+        if (cv_bridge::getCvType(in->encoding) != image_encoding)
         {
-            ROS_ERROR_STREAM("Unsupported image encoding :" << cv_bridge::getCvType(img_->encoding));
+            ROS_ERROR_STREAM("Unsupported image encoding :" << cv_bridge::getCvType(in->encoding));
             return false;
         }
-        cv_ptr_ = cv_bridge::toCvCopy(img_, sensor_msgs::image_encodings::BGR8);
-        img = cv_ptr_->image.clone();
+        cv_ptr_ = cv_bridge::toCvCopy(in, out_encoding);
+        out = cv_ptr_->image.clone();
         return true;
     }
     catch (cv_bridge::Exception &e)
@@ -153,6 +152,11 @@ bool MultisenseImageInterface::getImage(cv::Mat &img)
         ROS_ERROR_STREAM("Exception: " << e.what());
         return false;
     }
+}
+
+bool MultisenseImageInterface::getImage(cv::Mat &img)
+{
+    return processImage(img_, img, CV_8UC3, sensor_msgs::image_encodings::BGR8);
 }
 
 bool MultisenseImageInterface::getDisparity(cv::Mat &disp_img, bool from_stereo_msg)
@@ -177,53 +181,11 @@ bool MultisenseImageInterface::getDisparity(cv::Mat &disp_img, bool from_stereo_
 
 bool MultisenseImageInterface::getDepthImage(cv::Mat &depth_img)
 {
-    ROS_INFO("fetching image");
-    if (depth_ == nullptr)
-        return false;
-    if (depth_->data.size() == 0)
-        return false;
-    try
-    {
-        ROS_INFO("converting image");
-        if (cv_bridge::getCvType(depth_->encoding) != CV_32F)
-        {
-            ROS_ERROR_STREAM("Unsupported image encoding :" << cv_bridge::getCvType(depth_->encoding));
-            return false;
-        }
-        cv_ptr_ = cv_bridge::toCvCopy(depth_, sensor_msgs::image_encodings::TYPE_32FC1);
-        depth_img = cv_ptr_->image.clone();
-        return true;
-    }
-    catch (cv_bridge::Exception &e)
-    {
-        ROS_ERROR_STREAM("Exception: " << e.what());
-        return false;
-    }
+    return processImage(depth_, depth_img, CV_32F, sensor_msgs::image_encodings::TYPE_32FC1);
 }
 bool MultisenseImageInterface::getCostImage(cv::Mat &cost_img)
 {
-    ROS_INFO("fetching image");
-    if (cost_ == nullptr)
-        return false;
-    if (cost_->data.size() == 0)
-        return false;
-    try
-    {
-        ROS_INFO("converting image");
-        if (cv_bridge::getCvType(cost_->encoding) != CV_8U)
-        {
-            ROS_ERROR_STREAM("Unsupported image encoding :" << cv_bridge::getCvType(cost_->encoding));
-            return false;
-        }
-        cv_ptr_ = cv_bridge::toCvCopy(cost_, sensor_msgs::image_encodings::MONO8);
-        cost_img = cv_ptr_->image.clone();
-        return true;
-    }
-    catch (cv_bridge::Exception &e)
-    {
-        ROS_ERROR_STREAM("Exception: " << e.what());
-        return false;
-    }
+    return processImage(cost_, cost_img, CV_8U, sensor_msgs::image_encodings::MONO8);
 }
 int MultisenseImageInterface::getHeight()
 {

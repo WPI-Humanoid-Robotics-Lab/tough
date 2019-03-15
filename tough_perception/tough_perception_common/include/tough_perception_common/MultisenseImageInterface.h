@@ -41,11 +41,6 @@ class MultisenseImageInterface
 private:
   DISALLOW_COPY_AND_ASSIGN(MultisenseImageInterface);
 
-  // cv::Mat image_;
-  // cv::Mat disparity_;
-  // cv::Mat depth_;
-  // cv::Mat cost_;
-
   sensor_msgs::ImageConstPtr img_ = nullptr;
   sensor_msgs::ImageConstPtr depth_ = nullptr;
   sensor_msgs::ImageConstPtr cost_ = nullptr;
@@ -105,6 +100,10 @@ private:
 
   // helper functions
   bool processDisparity(const sensor_msgs::Image &disp, cv::Mat &disp_img);
+  bool processImage(const sensor_msgs::ImageConstPtr &in,
+                    cv::Mat &out,
+                    int image_encoding,
+                    std::string out_encoding);
 
 public:
   static MultisenseImageInterface *
