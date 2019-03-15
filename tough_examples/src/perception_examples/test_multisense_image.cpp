@@ -6,6 +6,8 @@
 #include <opencv2/core.hpp>
 #include <opencv/highgui.h>
 
+#define PRINT_STATUS(status) ROS_INFO("image status %s", status ? "true" : "false")
+
 void show_image(cv::Mat &image, std::string name)
 {
   cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
@@ -53,30 +55,31 @@ int main(int argc, char **argv)
                   << cam_model.K);
   ROS_INFO_STREAM("[P]\n"
                   << cam_model.P);
+  ROS_INFO_STREAM("[distortion_model] " << cam_model.distortion_model);
 
   status = imageHandler->getImage(image);
-  ROS_INFO("image status %s", status ? "true" : "false");
+  PRINT_STATUS(status);
   if (status)
     show_image(image, "RGB Image");
 
   status = imageHandler->getDepthImage(image);
-  ROS_INFO("image status %s", status ? "true" : "false");
+  PRINT_STATUS(status);
   scale_depth_image(image);
   if (status)
     show_image(image, "Depth Image");
 
   status = imageHandler->getCostImage(image);
-  ROS_INFO("image status %s", status ? "true" : "false");
+  PRINT_STATUS(status);
   if (status)
     show_image(image, "Cost Image");
 
   status = imageHandler->getDisparity(image);
-  ROS_INFO("image status %s", status ? "true" : "false");
+  PRINT_STATUS(status);
   if (status)
     show_image(image, "Disparity Image from sensor_msg");
 
   status = imageHandler->getDisparity(image, true);
-  ROS_INFO("image status %s", status ? "true" : "false");
+  PRINT_STATUS(status);
   if (status)
     show_image(image, "Disparity Image from stereo_msg");
 
