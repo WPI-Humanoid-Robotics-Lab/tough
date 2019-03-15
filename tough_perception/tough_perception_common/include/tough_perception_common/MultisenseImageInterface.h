@@ -16,9 +16,25 @@
 #include <sensor_msgs/Image.h>
 #include <image_transport/subscriber_filter.h>
 #include <memory>
+#include <mutex>
+#include <Eigen/Dense>
 
 namespace tough_perception
 {
+
+class MultisenseCameraModel
+{
+public:
+  int width;
+  int height;
+  double fx;
+  double fy;
+  double cx;
+  double cy;
+  std::string distortion_model = "";
+  Eigen::Matrix3d K;
+  Eigen::MatrixXd P;
+};
 
 class MultisenseImageInterface
 {
@@ -99,6 +115,7 @@ public:
   bool getDisparity(cv::Mat &disp_img, bool from_stereo_msg = false);
   bool getDepthImage(cv::Mat &depth_img);
   bool getCostImage(cv::Mat &cost_img);
+  bool getCameraInfo(MultisenseCameraModel &pinhole_model);
   int getHeight();
   int getWidth();
 };
