@@ -12,11 +12,8 @@ void show_image(cv::Mat &image, std::string name)
 {
   cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
   cv::imshow(name, image);
-  ROS_INFO("Press any key continue");
-  // while (cv::waitKey(1) != 27 && cv::waitKey(1) != 'q')
-  //   ;
+  ROS_INFO("Press any key to continue");
   cv::waitKey(0);
-  ROS_INFO("closing window");
   cv::destroyWindow(name);
   ros::Duration(0.5).sleep(); // wait some time for the window to destroy cleanly.
 }
@@ -45,17 +42,21 @@ int main(int argc, char **argv)
   tough_perception::MultisenseCameraModel cam_model;
   imageHandler->getCameraInfo(cam_model);
 
-  ROS_INFO_STREAM("[Height]" << cam_model.height);
-  ROS_INFO_STREAM("[width]" << cam_model.width);
-  ROS_INFO_STREAM("[fx]" << cam_model.fx);
-  ROS_INFO_STREAM("[fy]" << cam_model.fy);
-  ROS_INFO_STREAM("[cx]" << cam_model.cx);
-  ROS_INFO_STREAM("[cy]" << cam_model.cy);
-  ROS_INFO_STREAM("[K]\n"
-                  << cam_model.K);
-  ROS_INFO_STREAM("[P]\n"
-                  << cam_model.P);
-  ROS_INFO_STREAM("[distortion_model] " << cam_model.distortion_model);
+  ROS_INFO("is Multisense active %s", imageHandler->isSensorActive() ? "true" : "false");
+
+  std::cout << "-" << std::endl;
+  std::cout << "[Height]" << cam_model.height << std::endl;
+  std::cout << "[width]" << cam_model.width << std::endl;
+  std::cout << "[fx]" << cam_model.fx << std::endl;
+  std::cout << "[fy]" << cam_model.fy << std::endl;
+  std::cout << "[cx]" << cam_model.cx << std::endl;
+  std::cout << "[cy]" << cam_model.cy << std::endl;
+  std::cout << "[K]\n"
+            << cam_model.K << std::endl;
+  std::cout << "[P]\n"
+            << cam_model.P << std::endl;
+  std::cout << "[distortion_model] " << cam_model.distortion_model << std::endl;
+  std::cout << "-" << std::endl;
 
   status = imageHandler->getImage(image);
   PRINT_STATUS(status);
@@ -77,6 +78,16 @@ int main(int argc, char **argv)
   PRINT_STATUS(status);
   if (status)
     show_image(image, "Disparity Image from sensor_msg");
+
+  status = imageHandler->getDisparity(image, true);
+  PRINT_STATUS(status);
+  if (status)
+    show_image(image, "Disparity Image from stereo_msg");
+
+  imageHandler->shutdown();
+  ROS_INFO("is Multisense active %s", imageHandler->isSensorActive() ? "true" : "false");
+  imageHandler->start();
+  ROS_INFO("is Multisense active %s", imageHandler->isSensorActive() ? "true" : "false");
 
   status = imageHandler->getDisparity(image, true);
   PRINT_STATUS(status);
