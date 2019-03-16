@@ -19,8 +19,16 @@
 #include <mutex>
 #include <Eigen/Dense>
 
+typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image> exactTimePolicy;
+typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> approxTimePolicy;
+
 namespace tough_perception
 {
+
+bool isActive(const sensor_msgs::ImageConstPtr &some_msg);
+bool isActive(const stereo_msgs::DisparityImageConstPtr &some_msg);
+void resetMsg(sensor_msgs::ImageConstPtr &some_msg);
+void resetMsg(stereo_msgs::DisparityImageConstPtr &some_msg);
 
 class MultisenseCameraModel
 {
@@ -41,6 +49,7 @@ class MultisenseImageInterface
 private:
   DISALLOW_COPY_AND_ASSIGN(MultisenseImageInterface);
 
+  // ros message place holders
   sensor_msgs::ImageConstPtr img_ = nullptr;
   sensor_msgs::ImageConstPtr depth_ = nullptr;
   sensor_msgs::ImageConstPtr cost_ = nullptr;
@@ -49,12 +58,15 @@ private:
   sensor_msgs::CameraInfoConstPtr camera_info_ = nullptr;
   cv_bridge::CvImagePtr cv_ptr_;
 
+  // mutex locks
   std::mutex image_mutex;
   std::mutex depth_mutex;
   std::mutex cost_mutex;
   std::mutex disparity_mutex;
   std::mutex disparity_sensor_msg_mutex;
   std::mutex camera_info_mutex;
+
+  bool is_simulation_;
 
   struct
   {
@@ -71,6 +83,7 @@ private:
   ros::NodeHandle nh_;
   ros::AsyncSpinner spinner;
 
+  // ros topics
   // std::string image_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC;
   // std::string disp_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC;
   // std::string depth_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;
@@ -87,6 +100,7 @@ private:
   image_transport::ImageTransport it_;
   std::string transport_hint_ = "compressed";
 
+  // ros subscribers
   image_transport::Subscriber cam_sub_;
   image_transport::Subscriber cam_sub_depth_;
   image_transport::Subscriber cam_sub_cost_;
@@ -95,9 +109,13 @@ private:
   ros::Subscriber cam_sub_disparity_;
   ros::Subscriber camera_info_sub_;
 
-  static MultisenseImageInterface *current_object_;
-  MultisenseImageInterface(ros::NodeHandle nh);
+  std::shared_ptr<message_filters::Synchronizer<exactTimePolicy>> sync_img_depth_exact;
+  std::shared_ptr<message_filters::Synchronizer<exactTimePolicy>> sync_img_depth_approx;
 
+  static MultisenseImageInterface *current_object_;
+  MultisenseImageInterface(ros::NodeHandle nh, bool is_simulation);
+
+  // callbacks
   void imageCB(const sensor_msgs::ImageConstPtr &img);
   void depthCB(const sensor_msgs::ImageConstPtr &img);
   void costCB(const sensor_msgs::ImageConstPtr &img);
@@ -115,7 +133,7 @@ private:
 
 public:
   static MultisenseImageInterface *
-  getMultisenseImageInterface(ros::NodeHandle nh);
+  getMultisenseImageInterface(ros::NodeHandle nh, bool is_simulation = false);
   ~MultisenseImageInterface();
 
   bool getImage(cv::Mat &img);
@@ -125,10 +143,12 @@ public:
   bool getCameraInfo(MultisenseCameraModel &pinhole_model);
   int getHeight();
   int getWidth();
+  bool isSensorActive();
+  bool start();
+  bool shutdown();
 };
 
 typedef MultisenseImageInterface *MultisenseImageInterfacePtr;
-
 } // namespace tough_perception
 
 #endif
