@@ -27,7 +27,6 @@ private:
   // private constructor to disable user from creating objects
   RobotStateInformer(ros::NodeHandle nh);
   static RobotStateInformer* currentObject_;
-  ros::AsyncSpinner spinner;
   RobotDescription* rd_;
 
   ros::NodeHandle nh_;

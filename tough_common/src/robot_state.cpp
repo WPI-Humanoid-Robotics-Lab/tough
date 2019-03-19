@@ -15,11 +15,9 @@ RobotStateInformer* RobotStateInformer::getRobotStateInformer(ros::NodeHandle nh
   return currentObject_;
 }
 
-RobotStateInformer::RobotStateInformer(ros::NodeHandle nh) : nh_(nh), spinner(2)
+RobotStateInformer::RobotStateInformer(ros::NodeHandle nh) : nh_(nh)
 {
   rd_ = RobotDescription::getRobotDescription(nh_);
-  spinner.start();
-
   nh.getParam(ROBOT_NAME_PARAM, robotName_);
   std::string prefix = TOPIC_PREFIX + robotName_ + OUTPUT_TOPIC_PREFIX;
 
@@ -55,7 +53,6 @@ RobotStateInformer::~RobotStateInformer()
   rightFootForceSensorSub_.shutdown();
   leftWristForceSensorSub_.shutdown();
   rightWristForceSensorSub_.shutdown();
-  spinner.stop();
 }
 
 void RobotStateInformer::initializeClassMembers()
