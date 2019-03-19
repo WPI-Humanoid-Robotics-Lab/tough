@@ -165,12 +165,17 @@ add_executable(taskspace_2stage_planner_example src/manipulation_examples/tasksp
 add_dependencies(taskspace_2stage_planner_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(taskspace_2stage_planner_example  ${catkin_LIBRARIES})
 
+add_executable(follow_cartesian_path src/manipulation_examples/follow_cartesian_path.cpp )
+add_dependencies(follow_cartesian_path ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(follow_cartesian_path  ${catkin_LIBRARIES})
+
+
 install(TARGETS reset_robot arm_control_example head_control_example arm_control_example2
                 chest_control_example nudge_local_example pelvis_control_example
                 neck_control_example gripper_control_example arm_interactive_example
                 walk_forward_example walk_goal_example walk_example walk_rotate_example walk_steps_example
                 multisense_image_example ik_example motion_planner_example taskspace_planner_example 
-                taskspace_2stage_planner_example taskspace_planner_interactive_example
+                taskspace_2stage_planner_example taskspace_planner_interactive_example follow_cartesian_path
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

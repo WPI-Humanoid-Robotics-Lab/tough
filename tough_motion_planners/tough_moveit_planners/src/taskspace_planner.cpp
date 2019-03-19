@@ -27,6 +27,8 @@ TaskspacePlanner::TaskspacePlanner(ros::NodeHandle& nh, std::string urdf_param) 
   plugin_param_ = TOUGH_COMMON_NAMES::PLANNING_PLUGIN_PARAM;
   loadPlanners();
   updateKDLChains();
+
+  thread_for_move_group_init_ = std::thread(&TaskspacePlanner::initializeMoveGroupsForCartesianPath, this);
 }
 
 TaskspacePlanner::~TaskspacePlanner()
@@ -39,6 +41,35 @@ TaskspacePlanner::~TaskspacePlanner()
     if (kdl_chains_.count(planning_groups_.at(i)) > 0)
       delete kdl_chains_[planning_groups_.at(i)];
   }
+
+  delete move_group_option_left_7_dof_;
+  delete move_group_option_left_10_dof_;
+  delete move_group_option_right_7_dof_;
+  delete move_group_option_right_10_dof_;
+
+  delete move_group_left_7_dof_;
+  delete move_group_left_10_dof_;
+  delete move_group_right_7_dof_;
+  delete move_group_right_10_dof_;
+}
+
+void TaskspacePlanner::initializeMoveGroupsForCartesianPath(void)
+{
+  move_group_option_left_7_dof_ = new moveit::planning_interface::MoveGroupInterface::Options(
+      TOUGH_COMMON_NAMES::LEFT_ARM_7DOF_GROUP, rd_->getURDFParameter());
+  move_group_option_left_10_dof_ = new moveit::planning_interface::MoveGroupInterface::Options(
+      TOUGH_COMMON_NAMES::LEFT_ARM_10DOF_GROUP, rd_->getURDFParameter());
+  move_group_option_right_7_dof_ = new moveit::planning_interface::MoveGroupInterface::Options(
+      TOUGH_COMMON_NAMES::RIGHT_ARM_7DOF_GROUP, rd_->getURDFParameter());
+  move_group_option_right_10_dof_ = new moveit::planning_interface::MoveGroupInterface::Options(
+      TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP, rd_->getURDFParameter());
+
+  move_group_left_7_dof_ = new moveit::planning_interface::MoveGroupInterface(*move_group_option_left_7_dof_);
+  move_group_left_10_dof_ = new moveit::planning_interface::MoveGroupInterface(*move_group_option_left_10_dof_);
+  move_group_right_7_dof_ = new moveit::planning_interface::MoveGroupInterface(*move_group_option_right_7_dof_);
+  move_group_right_10_dof_ = new moveit::planning_interface::MoveGroupInterface(*move_group_option_right_10_dof_);
+
+  is_move_group_initializing_ = false;
 }
 
 bool TaskspacePlanner::getTrajectory(const geometry_msgs::PoseStamped pose_msg, std::string planning_group,
@@ -335,4 +366,72 @@ void TaskspacePlanner::poseToKDLFrame(const geometry_msgs::Pose& pose, KDL::Fram
 {
   frame.M = KDL::Rotation::Quaternion(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
   frame.p = KDL::Vector(pose.position.x, pose.position.y, pose.position.z);
+}
+
+double TaskspacePlanner::computeCartesianPath(moveit::planning_interface::MoveGroupInterface& move_group,
+                                              const std::vector<geometry_msgs::Pose>& pose_vec,
+                                              moveit_msgs::RobotTrajectory& robot_traj, const bool avoid_collisions)
+{
+  move_group.setStartStateToCurrentState();
+
+  move_group.setPlannerId("RRTkConfigDefault");
+  move_group.setNumPlanningAttempts(1);
+  move_group.setPlanningTime(30);
+  move_group.setGoalTolerance(position_tolerance_);
+
+  // compute the trajectory
+  ROS_INFO("Planning cartesian path now");
+  move_group.setPoseReferenceFrame(rd_->getPelvisFrame());
+  double frac = 0.0;
+  int retry = 0;
+
+  while (frac < 0.98 && retry++ < 5)
+  {
+    frac = move_group.computeCartesianPath(pose_vec, 0.1, 0.0, robot_traj, avoid_collisions);
+  }
+
+  std::cout << "Fraction of path planned:   " << frac * 100 << " % \n";
+  return frac;
+}
+
+double TaskspacePlanner::getTrajFromCartPoints(const std::vector<geometry_msgs::Pose>& pose_vec,
+                                               const std::string& planning_group,
+                                               moveit_msgs::RobotTrajectory& robot_traj, const bool avoid_collisions)
+{
+  while (is_move_group_initializing_)
+  {
+    ROS_INFO("Waiting for move_group to be initialized.");
+    ros::Duration(1.0).sleep();
+  }
+
+  double frac = 0.0;
+
+  if (is_move_group_initializing_)
+  {
+    return frac;
+  }
+  else
+  {
+    if (planning_group == TOUGH_COMMON_NAMES::LEFT_ARM_7DOF_GROUP)
+    {
+      frac = computeCartesianPath(*move_group_left_7_dof_, pose_vec, robot_traj, avoid_collisions);
+    }
+    else if (planning_group == TOUGH_COMMON_NAMES::LEFT_ARM_10DOF_GROUP)
+    {
+      frac = computeCartesianPath(*move_group_left_10_dof_, pose_vec, robot_traj, avoid_collisions);
+    }
+    else if (planning_group == TOUGH_COMMON_NAMES::RIGHT_ARM_7DOF_GROUP)
+    {
+      frac = computeCartesianPath(*move_group_right_7_dof_, pose_vec, robot_traj, avoid_collisions);
+    }
+    else if (planning_group == TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP)
+    {
+      frac = computeCartesianPath(*move_group_right_7_dof_, pose_vec, robot_traj, avoid_collisions);
+    }
+    else
+    {
+      ROS_ERROR("Invalid Planning Group %s", planning_group.c_str());
+    }
+    return frac;
+  }
 }
