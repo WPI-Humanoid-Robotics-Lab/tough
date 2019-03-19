@@ -30,7 +30,7 @@ void PelvisControlInterface::controlPelvisHeight(float height, float duration)
   reference_frame.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash();  // Pelvis frame
   reference_frame.data_reference_frame_id = rd_->getPelvisZUPFrameHash();        // Pelvis frame
   msg.frame_information = reference_frame;
-  p.position.z = height + foot_pose.position.z;
+  p.position.z = height + foot_pose.position.z - rd_->getFootFrameOffset();
   p.time = duration;
 
   msg.taskspace_trajectory_points.clear();
