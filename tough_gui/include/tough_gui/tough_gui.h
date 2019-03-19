@@ -1,5 +1,5 @@
-#ifndef VAL_GUI_H
-#define VAL_GUI_H
+#ifndef TOUGH_GUI_H
+#define TOUGH_GUI_H
 
 // QT
 #include <QMainWindow>
@@ -53,7 +53,7 @@
 #include <tough_controller_interface/head_control_interface.h>
 #include <tough_footstep/robot_walker.h>
 #include <tough_controller_interface/gripper_control_interface.h>
-#include "tough_moveit_planners/tough_cartesian_planner.h"
+#include "tough_moveit_planners/taskspace_planner.h"
 #include <tough_controller_interface/wholebody_control_interface.h>
 #include "tough_common/robot_state.h"
 
@@ -178,8 +178,8 @@ private:
   ros::NodeHandle nh_;
   ros::Publisher approveStepsPub_;
 
-  ros::Publisher reset_pointcloud;
-  ros::Publisher pause_pointcloud;
+  ros::Publisher resetPointcloudPub_;
+  ros::Publisher pausePointcloud_;
   ros::Subscriber rviz2DNavGoalSub;
   ros::Subscriber clickedPointSub_;
   ros::Timer jointStatesUpdater_;
@@ -195,8 +195,13 @@ private:
   HeadControlInterface* headController_;
   GripperControlInterface* gripperController_;
   WholebodyControlInterface* wholeBodyController_;
-  CartesianPlanner* rightArmPlanner_;
-  CartesianPlanner* leftArmPlanner_;
+  // CartesianPlanner* rightArmPlanner_;
+  // CartesianPlanner* leftArmPlanner_;
+  TaskspacePlanner* taskspacePlanner_;
+  trajectory_msgs::JointTrajectory arm_trajectory_;
+  std::vector<double> joint_angles_;
+  std::vector<std::vector<double>> arm_pose_;
+  std::string planning_group_, end_effector_frame_;
 
   RobotDescription* rd_;
   RobotStateInformer* currentState_;
@@ -205,15 +210,17 @@ private:
 
   std::mutex mtx_;
   std::map<std::string, QLabel*> jointLabelMap_;
+  std::map<std::string, QSlider*> jointSliderMap_;
   std::map<std::string, double> jointStateMap_;
-  std::vector<std::string> leftArmJointNames_;
-  std::vector<std::string> rightArmJointNames_;
+  std::vector<std::string> leftArmJointNames_, rightArmJointNames_, chestJointNames_;
+  std::vector<std::pair<double, double>> leftArmJointLimits_, rightArmJointLimits_, chestJointLimits_;
 
   void distanceSubCallback(const std_msgs::Float32::ConstPtr& msg);
   void liveVideoCallback(const sensor_msgs::ImageConstPtr& msg);
   void setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr, bool is_RGB);
   void jointStateCallBack(const ros::TimerEvent& e);
   void changeToolButtonStatus(int btnID);
+  void moveInTaskSpace(RobotSide side, geometry_msgs::PoseStamped& end_effector_pose);
 
   QString fixedFrame_;
   QString targetFrame_;
@@ -234,56 +241,24 @@ private:
 
   bool flipImage_;
   QLabel* status_label_;
+  enum ARM_JOINTS
+  {
+    SHOULDER_PITCH = 0,
+    SHOULDER_ROLL,
+    SHOULDER_YAW,
+    ELBOW,
+    WRIST_YAW,
+    WRIST_ROLL,
+    WRIST_PITCH
+  };
 
   // Step params
   float swingTime_;
   float transferTime_;
   float swingHeight_;
 
-  // joint limits
-  float CHEST_ROLL_MAX = 0.2549926;
-  float CHEST_ROLL_MIN = -0.226893;
-  float CHEST_PITCH_MAX = 0.663225;
-  float CHEST_PITCH_MIN = -0.122173;
-  float CHEST_YAW_MAX = 1.16937;
-  float CHEST_YAW_MIN = -1.32645;
-
-  float PELVIS_HEIGHT_MAX = 0.8;
+  float PELVIS_HEIGHT_MAX = 0.9;
   float PELVIS_HEIGHT_MIN = 0.65;
-
-  float RIGHT_SHOULDER_ROLL_MAX = 1.519;
-  float RIGHT_SHOULDER_ROLL_MIN = -1.26;
-  float RIGHT_SHOULDER_PITCH_MAX = 2.0;
-  float RIGHT_SHOULDER_PITCH_MIN = -2.85;
-  float RIGHT_SHOULDER_YAW_MAX = 2.18;
-  float RIGHT_SHOULDER_YAW_MIN = -3.1;
-
-  float LEFT_SHOULDER_ROLL_MAX = 1.266;
-  float LEFT_SHOULDER_ROLL_MIN = -1.519;
-  float LEFT_SHOULDER_PITCH_MAX = 2.0;
-  float LEFT_SHOULDER_PITCH_MIN = -2.85;
-  float LEFT_SHOULDER_YAW_MAX = 2.18;
-  float LEFT_SHOULDER_YAW_MIN = -3.1;
-
-  float RIGHT_WRIST_ROLL_MAX = 0.62;
-  float RIGHT_WRIST_ROLL_MIN = -0.625;
-  float RIGHT_WRIST_PITCH_MAX = 0.36;
-  float RIGHT_WRIST_PITCH_MIN = -0.49;
-  float RIGHT_WRIST_YAW_MAX = 3.14;
-  float RIGHT_WRIST_YAW_MIN = -2.019;
-
-  float LEFT_WRIST_ROLL_MAX = 0.625;
-  float LEFT_WRIST_ROLL_MIN = -0.62;
-  float LEFT_WRIST_PITCH_MAX = 0.49;
-  float LEFT_WRIST_PITCH_MIN = -0.36;
-  float LEFT_WRIST_YAW_MAX = 3.14;
-  float LEFT_WRIST_YAW_MIN = -2.019;
-
-  float LEFT_ELBOW_MAX = 0.12;
-  float LEFT_ELBOW_MIN = -2.174;
-
-  float RIGHT_ELBOW_MAX = 2.174;
-  float RIGHT_ELBOW_MIN = -0.12;
 
   float LOWER_NECK_PITCH_MAX = 1.1625638;
   float LOWER_NECK_PITCH_MIN = 0;
@@ -297,8 +272,8 @@ private:
 
   std::map<QString, GripperControlInterface::GRIPPER_MODES> mode_map;
   std::map<QString, int> prev_mode_map;
-  std_msgs::Empty empty_msg;
-  std_msgs::Bool bool_msg;
+  std_msgs::Empty resetPointcloudMsg_;
+  std_msgs::Bool pausePointcloudMsg_;
 };
 
-#endif  // VAL_GUI_H
+#endif  // TOUGH_GUI_H
