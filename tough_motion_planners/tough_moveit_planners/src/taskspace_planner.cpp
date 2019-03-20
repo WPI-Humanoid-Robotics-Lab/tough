@@ -406,32 +406,25 @@ double TaskspacePlanner::getTrajFromCartPoints(const std::vector<geometry_msgs::
 
   double frac = 0.0;
 
-  if (is_move_group_initializing_)
+  if (planning_group == TOUGH_COMMON_NAMES::LEFT_ARM_7DOF_GROUP)
   {
-    return frac;
+    frac = computeCartesianPath(*move_group_left_7_dof_, pose_vec, robot_traj, avoid_collisions);
+  }
+  else if (planning_group == TOUGH_COMMON_NAMES::LEFT_ARM_10DOF_GROUP)
+  {
+    frac = computeCartesianPath(*move_group_left_10_dof_, pose_vec, robot_traj, avoid_collisions);
+  }
+  else if (planning_group == TOUGH_COMMON_NAMES::RIGHT_ARM_7DOF_GROUP)
+  {
+    frac = computeCartesianPath(*move_group_right_7_dof_, pose_vec, robot_traj, avoid_collisions);
+  }
+  else if (planning_group == TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP)
+  {
+    frac = computeCartesianPath(*move_group_right_7_dof_, pose_vec, robot_traj, avoid_collisions);
   }
   else
   {
-    if (planning_group == TOUGH_COMMON_NAMES::LEFT_ARM_7DOF_GROUP)
-    {
-      frac = computeCartesianPath(*move_group_left_7_dof_, pose_vec, robot_traj, avoid_collisions);
-    }
-    else if (planning_group == TOUGH_COMMON_NAMES::LEFT_ARM_10DOF_GROUP)
-    {
-      frac = computeCartesianPath(*move_group_left_10_dof_, pose_vec, robot_traj, avoid_collisions);
-    }
-    else if (planning_group == TOUGH_COMMON_NAMES::RIGHT_ARM_7DOF_GROUP)
-    {
-      frac = computeCartesianPath(*move_group_right_7_dof_, pose_vec, robot_traj, avoid_collisions);
-    }
-    else if (planning_group == TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP)
-    {
-      frac = computeCartesianPath(*move_group_right_7_dof_, pose_vec, robot_traj, avoid_collisions);
-    }
-    else
-    {
-      ROS_ERROR("Invalid Planning Group %s", planning_group.c_str());
-    }
-    return frac;
+    ROS_ERROR("Invalid Planning Group %s", planning_group.c_str());
   }
+  return frac;
 }
