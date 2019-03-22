@@ -67,6 +67,7 @@ void RobotStateInformer::initializeClassMembers()
   wristWrenches_[LEFT] = geometry_msgs::WrenchStamped::Ptr(new geometry_msgs::WrenchStamped());
   wristWrenches_[RIGHT] = geometry_msgs::WrenchStamped::Ptr(new geometry_msgs::WrenchStamped());
 }
+
 void RobotStateInformer::jointStateCB(const sensor_msgs::JointState::Ptr msg)
 {
   std::lock_guard<std::mutex> guard(currentStateMutex_);
@@ -107,6 +108,22 @@ void RobotStateInformer::rightWristForceSensorCB(const geometry_msgs::WrenchStam
   wristWrenches_[RIGHT] = msg;
 }
 
+int RobotStateInformer::getJointNumber(std::string jointName)
+{
+  if (jointNames_.empty())
+  {
+    this->getJointNames(jointNames_);
+  }
+
+  for (int i = 0; i < jointNames_.size(); i++)
+  {
+    if (jointNames_.at(i) == jointName)
+    {
+      return i;
+    }
+  }
+  return jointNames_.size();
+}
 void RobotStateInformer::getJointStateMessage(sensor_msgs::JointState& jointState)
 {
   std::lock_guard<std::mutex> guard(currentStateMutex_);
@@ -267,44 +284,54 @@ bool RobotStateInformer::getJointEfforts(const std::string& paramName, std::vect
 
 double RobotStateInformer::getJointPosition(const std::string& jointName)
 {
+  return getJointPosition(getJointNumber(jointName));
+}
+
+double RobotStateInformer::getJointPosition(const int jointNumber)
+{
   std::lock_guard<std::mutex> guard(currentStateMutex_);
-  for (int i = 0; i < currentStatePtr_->name.size(); i++)
+  if (currentStatePtr_->position.size() > jointNumber)
   {
-    if (currentStatePtr_->name.at(i) == jointName)
-    {
-      return currentStatePtr_->position.at(i);
-    }
+    return currentStatePtr_->position[jointNumber];
   }
 }
 
 double RobotStateInformer::getJointVelocity(const std::string& jointName)
 {
+  return getJointVelocity(getJointNumber(jointName));
+}
+
+double RobotStateInformer::getJointVelocity(const int jointNumber)
+{
   std::lock_guard<std::mutex> guard(currentStateMutex_);
-  for (int i = 0; i < currentStatePtr_->name.size(); i++)
+  if (currentStatePtr_->velocity.size() > jointNumber)
   {
-    if (currentStatePtr_->name.at(i) == jointName)
-    {
-      return currentStatePtr_->velocity.at(i);
-    }
+    return currentStatePtr_->velocity[jointNumber];
   }
 }
 
 double RobotStateInformer::getJointEffort(const std::string& jointName)
 {
+  return getJointEffort(getJointNumber(jointName));
+}
+
+double RobotStateInformer::getJointEffort(const int jointNumber)
+{
   std::lock_guard<std::mutex> guard(currentStateMutex_);
-  for (int i = 0; i < currentStatePtr_->name.size(); i++)
+  if (currentStatePtr_->effort.size() > jointNumber)
   {
-    if (currentStatePtr_->name.at(i) == jointName)
-    {
-      return currentStatePtr_->effort.at(i);
-    }
+    return currentStatePtr_->effort[jointNumber];
   }
 }
 
 void RobotStateInformer::getJointNames(std::vector<std::string>& jointNames)
 {
-  std::lock_guard<std::mutex> guard(currentStateMutex_);
-  jointNames = currentStatePtr_->name;
+  if (jointNames_.empty())
+  {
+    std::lock_guard<std::mutex> guard(currentStateMutex_);
+    jointNames_ = currentStatePtr_->name;
+  }
+  jointNames = jointNames_;
 }
 
 bool RobotStateInformer::getCurrentPose(const std::string& frameName, geometry_msgs::Pose& pose,

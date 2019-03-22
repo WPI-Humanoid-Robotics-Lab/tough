@@ -37,6 +37,7 @@ private:
   void jointStateCB(const sensor_msgs::JointState::Ptr msg);
   sensor_msgs::JointState::Ptr currentStatePtr_;
   std::map<std::string, RobotState> currentState_;
+  std::vector<std::string> jointNames_;
   std::mutex currentStateMutex_;
 
   ros::Subscriber pelvisIMUSub_;
@@ -69,6 +70,8 @@ private:
 
   void populateStateMap();
   void initializeClassMembers();
+  int getJointNumber(std::string jointName);
+
   void inline parseParameter(const std::string& paramName, std::string& parameter)
   {
     if (paramName == "left_arm_joint_names" || paramName == "left_arm")
@@ -146,8 +149,13 @@ public:
   bool getJointEfforts(const std::string& paramName, std::vector<double>& efforts);
 
   double getJointPosition(const std::string& jointName);
+  double getJointPosition(const int jointNumber);
+
   double getJointVelocity(const std::string& jointName);
+  double getJointVelocity(const int jointNumber);
+
   double getJointEffort(const std::string& jointName);
+  double getJointEffort(const int jointNumber);
 
   void getJointNames(std::vector<std::string>& jointNames);
 
