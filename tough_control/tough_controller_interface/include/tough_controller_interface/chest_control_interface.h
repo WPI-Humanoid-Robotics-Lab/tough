@@ -18,6 +18,8 @@ class ChestControlInterface : public ToughControlInterface
 private:
   ros::Publisher chestTrajPublisher_;
   ros::Publisher homePositionPublisher_;
+  std::vector<std::string> chestJointNames_;
+  std::vector<int> chestJointNumbers_;
 
 public:
   ChestControlInterface(ros::NodeHandle nh);
