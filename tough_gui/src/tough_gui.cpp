@@ -79,9 +79,6 @@ void ToughGUI::initVariables()
   imageTopic_ = QString::fromStdString(configfile.currentTopics["imageTopic"]);
   pointCloudTopic_ = QString::fromStdString(robot_name + "/" + configfile.currentTopics["pointCloudTopic"]);
   octomapTopic_ = QString::fromStdString(robot_name + "/" + configfile.currentTopics["octomapTopic"]);
-  baseSensorTopic_ = QString::fromStdString(configfile.currentTopics["baseSensorTopic"]);
-  velocityTopic_ = QString::fromStdString(configfile.currentTopics["velocityTopic"]);
-  pathTopic_ = QString::fromStdString(configfile.currentTopics["pathTopic"]);
   targetFrame_ = QString::fromStdString(configfile.currentTopics["targetFrame"]);
   robotType_ = QString::fromStdString(configfile.currentTopics["robotType"]);
   goalTopic_ = QString::fromStdString(configfile.currentTopics["goalTopic"]);
@@ -104,11 +101,13 @@ void ToughGUI::initVariables()
   // subscribers
   liveVideoSub = it_.subscribe(imageTopic_.toStdString(), 1, &ToughGUI::liveVideoCallback, this,
                                image_transport::TransportHints("raw"));
-  jointStatesUpdater_ = nh_.createTimer(ros::Duration(0.5), &ToughGUI::jointStateCallBack, this);
+  jointStatesUpdater_ = nh_.createTimer(ros::Duration(0.25), &ToughGUI::jointStateCallBack, this);
   //    @todo: add timer based callback here to call jointStateCallBack method
   clickedPointSub_ = nh_.subscribe("clicked_point", 1, &ToughGUI::getClickedPoint, this);
 
   approveStepsPub_ = nh_.advertise<std_msgs::Empty>(approveStepsTopic_.toStdString(), 1, true);
+  centerOfMassPub_ = nh_.advertise<visualization_msgs::Marker>(COM_TOPIC, 1, false);
+
   // initialize a onetime map to lookup for joint values
   rd_->getLeftArmJointNames(leftArmJointNames_);
   rd_->getRightArmJointNames(rightArmJointNames_);
@@ -155,6 +154,26 @@ void ToughGUI::initVariables()
   resetPointcloudPub_ = nh_.advertise<std_msgs::Empty>(resetPointcloudTopic_.toStdString(), 1, true);
   pausePointcloud_ = nh_.advertise<std_msgs::Bool>(pausePointcloudTopic_.toStdString(), 1, true);
   pausePointcloudMsg_.data = false;
+
+  // CoM Marker
+  comMarker.header.frame_id = rd_->getWorldFrame();
+  comMarker.id = 0;
+  comMarker.type = visualization_msgs::Marker::SPHERE;
+  comMarker.action = visualization_msgs::Marker::ADD;
+  comMarker.pose.orientation.w = 1.0;
+  comMarker.scale.x = 0.05;
+  comMarker.scale.y = 0.05;
+  comMarker.scale.z = 0.05;
+  comMarker.color.a = 1.0;  // Don't forget to set the alpha!
+  comMarker.color.r = 0.0;
+  comMarker.color.g = 1.0;
+  comMarker.color.b = 0.0;
+
+  std::string prefix = TOUGH_COMMON_NAMES::TOPIC_PREFIX + rd_->getRobotName() + TOUGH_COMMON_NAMES::OUTPUT_TOPIC_PREFIX;
+  L_FOOT_FORCE_TOPIC = prefix + TOUGH_COMMON_NAMES::LEFT_FOOT_FORCE_SENSOR_TOPIC;
+  R_FOOT_FORCE_TOPIC = prefix + TOUGH_COMMON_NAMES::RIGHT_FOOT_FORCE_SENSOR_TOPIC;
+  L_WRIST_FORCE_TOPIC = prefix + TOUGH_COMMON_NAMES::LEFT_WRIST_FORCE_SENSOR_TOPIC;
+  R_WRIST_FORCE_TOPIC = prefix + TOUGH_COMMON_NAMES::RIGHT_WRIST_FORCE_SENSOR_TOPIC;
 }
 
 void ToughGUI::initActionsConnections()
@@ -172,9 +191,29 @@ void ToughGUI::initActionsConnections()
    */
   // Tool and display selection
   connect(ui->btnGroupRvizTools, SIGNAL(buttonClicked(int)), this, SLOT(setCurrentTool(int)));
-  connect(ui->btnGroupDisplays, SIGNAL(buttonClicked(int)), this, SLOT(displayPointcloud(int)));
   connect(ui->controlTabs, SIGNAL(currentChanged(int)), this, SLOT(updateJointStateSub(int)));
   connect(ui->tab_display, SIGNAL(currentChanged(int)), this, SLOT(updateDisplay(int)));
+
+  connect(ui->chkBoxPointcloud, static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), this,
+          [this](int state) { toggleDisplay(cloudDisplay_, state); });
+  connect(ui->chkBoxOctomap, static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), this,
+          [this](int state) { toggleDisplay(octomapDisplay_, state); });
+  connect(ui->chkBoxCoM, static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), this,
+          [this](int state) { toggleDisplay(capturabilityMarkerDisplay_, state); });
+  connect(ui->chkBoxFootForces, static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), this, [=](int state) {
+    toggleDisplay(leftFootForceDisplay_, state);
+    toggleDisplay(rightFootForceDisplay_, state);
+  });
+  connect(ui->chkBoxFootsteps, static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), this,
+          [this](int state) {
+            toggleDisplay(footstepMarkersDisplay_, state);
+            toggleDisplay(footstepMarkersMainDisplay_, state);
+          });
+  connect(ui->chkBoxWristForces, static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged), this,
+          [this](int state) {
+            toggleDisplay(leftWristForceDisplay_, state);
+            toggleDisplay(rightWristForceDisplay_, state);
+          });
 
   // pointCloud
   connect(ui->btnResetPointcloud, SIGNAL(clicked()), this, SLOT(resetPointcloud()));
@@ -223,6 +262,7 @@ void ToughGUI::initActionsConnections()
   connect(ui->sliderPelvisHeight, SIGNAL(sliderReleased()), this, SLOT(changePelvisHeight()));
   connect(ui->btnApproveSteps, SIGNAL(clicked()), this, SLOT(approveSteps()));
   connect(ui->btnAbortWalk, SIGNAL(clicked()), this, SLOT(abortSteps()));
+  connect(ui->btnAlignFeet, SIGNAL(clicked()), this, SLOT(alignFeet()));
 
   // reset robot
   connect(ui->btnResetRobot, SIGNAL(clicked()), this, SLOT(resetRobot()));
@@ -273,11 +313,11 @@ void ToughGUI::initDisplayWidgets()
   mapDisplay_->subProp("Topic")->setValue(mapTopic_);
 
   QString robotModelTopic = QString::fromStdString(rd_->getURDFParameter());
+  // add Robot model
   mapManager_->createDisplay("rviz/RobotModel", robotType_, true)
       ->subProp("Robot Description")
       ->setValue(robotModelTopic);
 
-  mapManager_->createDisplay("rviz/Path", "Global path", true)->subProp("Topic")->setValue(pathTopic_);
   mapManager_->createDisplay("rviz/Grid", "Grid", true);
   mapManager_->createDisplay("rviz/MarkerArray", "Footstep markers", true)
       ->subProp("Marker Topic")
@@ -313,43 +353,53 @@ void ToughGUI::initDisplayWidgets()
 
   octomapDisplay_->subProp("Marker Topic")->setValue(octomapTopic_);
 
-  footstepMarkersDisplay_ = manager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
-  ROS_ASSERT(footstepMarkersDisplay_ != NULL);
-
-  footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
-  footstepMarkersDisplay_->setEnabled(true);
+  // footsteps
+  createFootstepDisplay(manager_, mapManager_);
 
   // Assign Target Frame to the existing viewmanager of the visualization manager
-  rviz::ViewManager* viewManager_ = manager_->getViewManager();
-  rviz::ViewController* viewController_ = viewManager_->getCurrent();
-  viewController_->subProp("Target Frame")->setValue(targetFrame_);
-  manager_->createDisplay("rviz/Path", "Global path", true)->subProp("Topic")->setValue(pathTopic_);
+  // rviz::ViewManager* viewManager_ = manager_->getViewManager();
+  // rviz::ViewController* viewController_ = viewManager_->getCurrent();
+  // viewController_->subProp("Target Frame")->setValue(targetFrame_);
 
-  ROS_INFO("Footstep Topic : %s", footstepTopic_.toStdString().c_str());
-  footstepMarkersDisplay_ = mapManager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
-  footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
-  footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
+  // add support polygon - This needs changes to Java code
 
-  footstepMarkersMainDisplay_ = manager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
-  footstepMarkersMainDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
-  footstepMarkersMainDisplay_->subProp("Queue Size")->setValue("100");
+  // add CoM projection and 3D
+  capturabilityMarkerDisplay_ = manager_->createDisplay("rviz/Marker", "CoM", true);
+  capturabilityMarkerDisplay_->subProp("Marker Topic")->setValue(QString::fromStdString(COM_TOPIC));
+  capturabilityMarkerDisplay_->subProp("Queue Size")->setValue("1");
 
-  //    footstepMarkersDisplay_->subProp("Marker Topic")->setValue("/footstep_planner/footsteps_array");
-
-  //    footstepMarkersDisplay_->subProp("Namespaces")->setValue("valkyrie");
-  //    footstepMarkersDisplay_ = manager_->createDisplay("rviz/MarkerArray", "Footsteps", true);
-  //    ROS_ASSERT(footstepMarkersDisplay_ != NULL);
-
-  //    footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
-  //    footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
-  //    footstepMarkersDisplay_->subProp("Namespaces")->setValue("valkyrie");
-
-  //    ui->sliderLowerNeckPitch->setEnabled(false);
+  // add Forces
+  leftFootForceDisplay_ = createWrenchDisplay(manager_, L_FOOT_FORCE_TOPIC);
+  rightFootForceDisplay_ = createWrenchDisplay(manager_, R_FOOT_FORCE_TOPIC);
+  leftWristForceDisplay_ = createWrenchDisplay(manager_, L_WRIST_FORCE_TOPIC);
+  rightWristForceDisplay_ = createWrenchDisplay(manager_, R_WRIST_FORCE_TOPIC);
 
   QString imagePath = QString::fromStdString(ros::package::getPath("tough_gui") + "/resources/coordinates.png");
   QImage qImage(imagePath);
   ui->lblAxes->setPixmap(QPixmap::fromImage(qImage));
   moveitDisplay_ = nullptr;
+}
+void ToughGUI::createFootstepDisplay(rviz::VisualizationManager* manager, rviz::VisualizationManager* map_manager)
+{
+  footstepMarkersDisplay_ = map_manager->createDisplay("rviz/MarkerArray", "Footsteps", true);
+  footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
+  footstepMarkersDisplay_->subProp("Queue Size")->setValue("100");
+
+  footstepMarkersMainDisplay_ = manager->createDisplay("rviz/MarkerArray", "Footsteps", true);
+  footstepMarkersMainDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
+  footstepMarkersMainDisplay_->subProp("Queue Size")->setValue("10");
+}
+
+rviz::Display* ToughGUI::createWrenchDisplay(rviz::VisualizationManager* manager, const std::string& topic)
+{
+  rviz::Display* display;
+  display = manager->createDisplay("rviz/WrenchStamped", QString::number(qrand()), true);
+  assert(display != NULL && "Could not create a display");
+  display->subProp("Topic")->setValue(QString::fromStdString(topic));
+  display->subProp("Force Arrow Scale")->setValue("0.001");
+  display->subProp("Torque Arrow Scale")->setValue("0");
+  display->subProp("Arrow Width")->setValue("0.5");
+  return display;
 }
 
 // This doesn';t work as Moveit loads a panel which ends up with seg fault :(
@@ -367,6 +417,11 @@ void ToughGUI::deleteMoveitDisplay()
   rviz::Display* tempDisplay = moveitDisplay_;
   moveitDisplay_ = nullptr;
   delete tempDisplay;
+}
+
+void ToughGUI::toggleDisplay(rviz::Display* display, int state)
+{
+  display->setEnabled(state == Qt::Checked);
 }
 
 void ToughGUI::initTools()
@@ -413,10 +468,22 @@ void ToughGUI::initJointLimits()
 void ToughGUI::initDefaultValues()
 {
   // 3D view. select Pointcloud by default
-  ui->radioBtnPointcloud->setEnabled(true);
-  ui->radioBtnPointcloud->setChecked(true);
+  //  ui->radioBtnPointcloud->setEnabled(true);
+  //  ui->radioBtnPointcloud->setChecked(true);
+  ui->chkBoxFootsteps->setCheckState(Qt::Checked);
+  ui->chkBoxCoM->setCheckState(Qt::Unchecked);
+  ui->chkBoxFootForces->setCheckState(Qt::Unchecked);
+  ui->chkBoxWristForces->setCheckState(Qt::Unchecked);
+  ui->chkBoxPointcloud->setCheckState(Qt::Checked);
+  ui->chkBoxOctomap->setCheckState(Qt::Unchecked);
+
   octomapDisplay_->setEnabled(false);
   cloudDisplay_->setEnabled(true);
+  leftFootForceDisplay_->setEnabled(false);
+  rightFootForceDisplay_->setEnabled(false);
+  leftWristForceDisplay_->setEnabled(false);
+  rightWristForceDisplay_->setEnabled(false);
+  capturabilityMarkerDisplay_->setEnabled(false);
 
   // Arms select left arm by default
   ui->radioArmSideLeft->setChecked(true);
@@ -487,10 +554,13 @@ void ToughGUI::resetPointcloud()
 
 void ToughGUI::pausePointcloud()
 {
+  // if button is not flat, then pause the pointcloud, otherwise resume
+  bool command = !(ui->btnPausePointcloud->isFlat());
+  pausePointcloudMsg_.data = command;
   pausePointcloud_.publish(pausePointcloudMsg_);
-  pausePointcloudMsg_.data = !pausePointcloudMsg_.data;
-  ui->btnPausePointcloud->setFlat(pausePointcloudMsg_.data);
+  ui->btnPausePointcloud->setFlat(command);
 }
+
 void ToughGUI::getArmState()
 {
   if (jointStateMap_.empty())
@@ -530,7 +600,6 @@ void ToughGUI::getChestState()
   std::vector<double> joint_positions;
   chestController_->getJointSpaceState(joint_positions, LEFT);
 
-  assert(joint_positions.size() == 3);
   for (size_t i = 0; i < chestJointNames_.size(); i++)
   {
     double value = (joint_positions.at(i) - chestJointLimits_.at(i).first) * 100.0f /
@@ -559,6 +628,15 @@ void ToughGUI::getNeckState()
 
 void ToughGUI::getGripperState()
 {
+}
+
+void ToughGUI::getCoMPosition()
+{
+  currentState_->getCenterOfMass(centerOfMassPosition_);
+  comMarker.header.stamp = ros::Time();
+  comMarker.pose.position = centerOfMassPosition_;
+  comMarker.pose.position.z = 0;
+  centerOfMassPub_.publish(comMarker);
 }
 
 void ToughGUI::getClickedPoint(const geometry_msgs::PointStamped::Ptr msg)
@@ -593,7 +671,7 @@ void ToughGUI::jointStateCallBack(const ros::TimerEvent& e)
   for (size_t i = 0; i < jointNames.size(); i++)
   {
     jointStateMap_[jointNames.at(i)] = jointValues.at(i);
-    if (jointLabelMap_.find(jointNames.at(i)) != jointLabelMap_.end())
+    if (jointLabelMap_.count(jointNames.at(i)) > 0)
     {
       QLabel* label = jointLabelMap_[jointNames.at(i)];
       QString text;
@@ -604,15 +682,21 @@ void ToughGUI::jointStateCallBack(const ros::TimerEvent& e)
   // update pelvis height
   if (!ui->txtPelvisHeight->hasFocus())
     getPelvisState();
+
+  if (capturabilityMarkerDisplay_->isEnabled())
+    getCoMPosition();
+
+  updateJointStateSub(ui->controlTabs->currentIndex());
 }
 
 void ToughGUI::updateJointStateSub(int tabID)
 {
   // 0 = nudge
   // 1 = arm
-  // 2 = chest
-  // 3 = neck
-  // 4 = walk
+  // 2 = gripper
+  // 3 = chest
+  // 4 = neck
+  // 5 = walk
   //    jointStateSub_ = nh_.subscribe("/joint_states",1, &ValkyrieGUI::jointStateCallBack, this);
   switch (tabID)
   {
@@ -622,15 +706,17 @@ void ToughGUI::updateJointStateSub(int tabID)
       break;
     case 1:
       getArmState();
-      getGripperState();
       break;
     case 2:
-      getChestState();
+      getGripperState();
       break;
     case 3:
-      getNeckState();
+      getChestState();
       break;
     case 4:
+      getNeckState();
+      break;
+    case 5:
       getPelvisState();
       break;
     default:
@@ -769,16 +855,16 @@ void ToughGUI::updateDisplay(int tabID)
   switch (tabID)
   {
     case 0:
-      ui->radioBtnNone->setEnabled(true);
-      ui->radioBtnOctomap->setEnabled(true);
-      ui->radioBtnPointcloud->setEnabled(true);
+      //      ui->radioBtnNone->setEnabled(true);
+      //      ui->radioBtnOctomap->setEnabled(true);
+      //      ui->radioBtnPointcloud->setEnabled(true);
       // change current tool to interact when changing tabs
       setCurrentTool(-2);
       break;
     case 1:
-      ui->radioBtnNone->setEnabled(false);
-      ui->radioBtnOctomap->setEnabled(false);
-      ui->radioBtnPointcloud->setEnabled(false);
+      //      ui->radioBtnNone->setEnabled(false);
+      //      ui->radioBtnOctomap->setEnabled(false);
+      //      ui->radioBtnPointcloud->setEnabled(false);
       // change current tool to interact when changing tabs
       setCurrentTool(-2);
       break;
@@ -1055,6 +1141,12 @@ void ToughGUI::displayPointcloud(int btnID)
   }
 }
 
+void ToughGUI::alignFeet()
+{
+  RobotSide side = ui->radioLeftFoot->isChecked() ? LEFT : RIGHT;
+  walkingController_->alignFeet(side);
+}
+
 void ToughGUI::walkSteps()
 {
   RobotSide side = ui->radioLeftFoot->isChecked() ? LEFT : RIGHT;
@@ -1096,7 +1188,6 @@ void ToughGUI::abortSteps()
 void ToughGUI::changePelvisHeight()
 {
   float height = ui->sliderPelvisHeight->value() * (PELVIS_HEIGHT_MAX - PELVIS_HEIGHT_MIN) / 100.0f + PELVIS_HEIGHT_MIN;
-  ROS_INFO("Slider : %.2f , height : %.2f", (float)ui->sliderPelvisHeight->value(), height);
   if (pelvisHeightController_ != nullptr)
   {
     pelvisHeightController_->controlPelvisHeight(height);
@@ -1187,41 +1278,3 @@ void ToughGUI::moveHeadJoints()
     ros::spinOnce();
   }
 }
-
-/*
-//Image :
-    grid_ = manager_->createDisplay( "rviz/Image", "Image View", true );
-    ROS_ASSERT( grid_ != NULL );
-    grid_->subProp( "Image Topic" )->setValue( "/camera/rgb/image_raw" );
-    grid_->subProp( "Transport Hint" )->setValue( "theora" );
-
-
-//Depth Cloud :
-    grid_ = manager_->createDisplay( "rviz/DepthCloud", "Image View", true );
-    ROS_ASSERT( grid_ != NULL );
-
-    grid_->subProp( "Depth Map Topic" )->setValue( "/camera/depth/image_raw" );
-    grid_->subProp( "Depth Map Transport Hint" )->setValue( "raw" );
-    grid_->subProp( "Color Image Topic" )->setValue( "/camera/rgb/image_raw" );
-    grid_->subProp( "Color Transport Hint" )->setValue( "raw" );
-    grid_->subProp("Queue Size")->setValue(5);
-    grid_->subProp("Style")->setValue("Flat Squares");
-
-//    mainDisplay_ = manager_->createDisplay( "rviz/PointCloud2", "3D Pointcloud view", true );
-//    ROS_ASSERT( mainDisplay_ != NULL );
-
-//    mainDisplay_->subProp( "Topic" )->setValue( pointCloudTopic_ );
-//    mainDisplay_->subProp( "Selectable" )->setValue( "true" );
-//    mainDisplay_->subProp( "Style" )->setValue( "Boxes" );
-//    mainDisplay_->subProp("Alpha")->setValue(0.5);
-
-  manager_->createDisplay( "rviz/Grid", "Grid", true );
-
-//MarkerArray :
-rviz::Display* octomapDisplay_ = manager_->createDisplay( "rviz/MarkerArray", "Octomap view", true );
-ROS_ASSERT( octomapDisplay_ != NULL );
-
-octomapDisplay_->subProp( "Marker Topic" )->setValue( "/occupied_cells_vis_array" );
-
-
-*/

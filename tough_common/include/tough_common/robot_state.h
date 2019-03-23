@@ -70,7 +70,6 @@ private:
 
   void populateStateMap();
   void initializeClassMembers();
-  int getJointNumber(std::string jointName);
 
   void inline parseParameter(const std::string& paramName, std::string& parameter)
   {
@@ -120,8 +119,11 @@ public:
    */
   void getJointStateMessage(sensor_msgs::JointState& jointState);
 
+  int getJointNumber(std::string jointName);
+
   /**
-   * @brief Get the current positions of all joints. Ordering is based on joint names.
+   * @brief Get the current positions of all joints. Ordering is based on
+   * joint names.
    *
    * @param positions [output]
    */
