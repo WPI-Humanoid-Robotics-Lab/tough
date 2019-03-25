@@ -5,6 +5,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Quaternion.h>
 #include <thread>
+#include <map>
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_state/robot_state.h>
@@ -107,19 +108,12 @@ private:
 
   std::thread thread_for_move_group_init_;
 
-  double computeCartesianPath(moveit::planning_interface::MoveGroupInterface& move_group,
+  double computeCartesianPathFromVector(moveit::planning_interface::MoveGroupInterface& move_group,
                               const std::vector<geometry_msgs::Pose>& pose_vec,
                               moveit_msgs::RobotTrajectory& robot_traj, const bool avoid_collisions);
 
-  moveit::planning_interface::MoveGroupInterface::Options* move_group_option_left_7_dof_;
-  moveit::planning_interface::MoveGroupInterface::Options* move_group_option_left_10_dof_;
-  moveit::planning_interface::MoveGroupInterface::Options* move_group_option_right_7_dof_;
-  moveit::planning_interface::MoveGroupInterface::Options* move_group_option_right_10_dof_;
-
-  moveit::planning_interface::MoveGroupInterface* move_group_left_7_dof_;
-  moveit::planning_interface::MoveGroupInterface* move_group_left_10_dof_;
-  moveit::planning_interface::MoveGroupInterface* move_group_right_7_dof_;
-  moveit::planning_interface::MoveGroupInterface* move_group_right_10_dof_;
+  std::map<std::string, moveit::planning_interface::MoveGroupInterface::Options> move_group_interface_option_map_;
+  std::map<std::string, moveit::planning_interface::MoveGroupInterface> move_group_interface_map_;
 
   // tough
   RobotStateInformer* state_informer_;
