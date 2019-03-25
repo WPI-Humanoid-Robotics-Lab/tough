@@ -108,7 +108,6 @@ private Q_SLOTS:
   void keyPressEvent(QKeyEvent* event);
 
   void setCurrentTool(int btnID);
-  void displayPointcloud(int btnID);
   void updateDisplay(int tabID);
 
   void changePelvisHeight();

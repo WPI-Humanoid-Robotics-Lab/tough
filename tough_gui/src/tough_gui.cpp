@@ -597,14 +597,11 @@ void ToughGUI::getArmState()
 
 void ToughGUI::getChestState()
 {
-  std::vector<double> joint_positions;
-  chestController_->getJointSpaceState(joint_positions, LEFT);
-
   for (size_t i = 0; i < chestJointNames_.size(); i++)
   {
-    double value = (joint_positions.at(i) - chestJointLimits_.at(i).first) * 100.0f /
-                   (chestJointLimits_.at(i).second - chestJointLimits_.at(i).first);
-    jointSliderMap_[chestJointNames_.at(i)]->setValue(value);
+    double value = (jointStateMap_[chestJointNames_[i]] - chestJointLimits_[i].first) * 100.0f /
+                   (chestJointLimits_[i].second - chestJointLimits_[i].first);
+    jointSliderMap_[chestJointNames_[i]]->setValue(value);
   }
 
   return;
@@ -852,27 +849,33 @@ void ToughGUI::moveInTaskSpace(RobotSide side, geometry_msgs::PoseStamped& end_e
 }
 void ToughGUI::updateDisplay(int tabID)
 {
+  // 0 = 3d scene
+  // 1 = map
   switch (tabID)
   {
     case 0:
-      //      ui->radioBtnNone->setEnabled(true);
-      //      ui->radioBtnOctomap->setEnabled(true);
-      //      ui->radioBtnPointcloud->setEnabled(true);
+      ui->chkBoxCoM->setEnabled(true);
+      ui->chkBoxFootForces->setEnabled(true);
+      ui->chkBoxFootsteps->setEnabled(true);
+      ui->chkBoxOctomap->setEnabled(true);
+      ui->chkBoxPointcloud->setEnabled(true);
+      ui->chkBoxWristForces->setEnabled(true);
       // change current tool to interact when changing tabs
       setCurrentTool(-2);
       break;
     case 1:
-      //      ui->radioBtnNone->setEnabled(false);
-      //      ui->radioBtnOctomap->setEnabled(false);
-      //      ui->radioBtnPointcloud->setEnabled(false);
+      ui->chkBoxCoM->setEnabled(false);
+      ui->chkBoxFootForces->setEnabled(false);
+      ui->chkBoxFootsteps->setEnabled(true);
+      ui->chkBoxOctomap->setEnabled(false);
+      ui->chkBoxPointcloud->setEnabled(false);
+      ui->chkBoxWristForces->setEnabled(false);
       // change current tool to interact when changing tabs
       setCurrentTool(-2);
       break;
     default:
       break;
   }
-  // 0 = 3d scene
-  // 1 = map
 }
 
 void ToughGUI::keyPressEvent(QKeyEvent* event)
@@ -1063,31 +1066,26 @@ void ToughGUI::setCurrentTool(int btnID)
 {
   if (btnID == -2)
   {
-    ROS_INFO("Interact Tool Selected");
     toolManager_->setCurrentTool(interactTool_);
     mapToolManager_->setCurrentTool(mapInteractTool_);
   }
   else if (btnID == -3)
   {
-    ROS_INFO("Measure Tool Selected");
     toolManager_->setCurrentTool(measureTool_);
   }
   else if (btnID == -4)
   {
-    ROS_INFO("2DPoseEstimate Tool Selected");
     toolManager_->setCurrentTool(setInitialPoseTool_);
     mapToolManager_->setCurrentTool(setMapInitialPoseTool_);
   }
   else if (btnID == -5)
   {
-    ROS_INFO("2DNavGoal Tool Selected");
     toolManager_->setCurrentTool(setGoalTool_);
     mapManager_->getToolManager()->setCurrentTool(setMapGoalTool_);
-    ui->controlTabs->setCurrentIndex(4);
+    ui->controlTabs->setCurrentIndex(5);
   }
   else if (btnID == -6)
   {
-    ROS_INFO("PublishPoint Tool Selected");
     toolManager_->setCurrentTool(pointTool_);
   }
 
@@ -1118,26 +1116,6 @@ void ToughGUI::changeToolButtonStatus(int btnID)
       break;
     case -6:
       ui->btnRvizPublishPoint->setFlat(false);
-  }
-}
-
-void ToughGUI::displayPointcloud(int btnID)
-{
-  switch (btnID)
-  {
-    case -4:  // button ID of octomap
-      octomapDisplay_->setEnabled(true);
-      cloudDisplay_->setEnabled(false);
-      break;
-    case -2:  // button ID of Pointcloud
-      octomapDisplay_->setEnabled(false);
-      cloudDisplay_->setEnabled(true);
-      break;
-    case -3:  // button ID of None
-      octomapDisplay_->setEnabled(false);
-      cloudDisplay_->setEnabled(false);
-    default:
-      break;
   }
 }
 
@@ -1256,10 +1234,9 @@ void ToughGUI::moveChestJoints()
   float chestPitchSliderValue = jointSliderMap_[chestJointNames_.at(PITCH)]->value() *
                                     (chestJointLimits_.at(PITCH).second - chestJointLimits_.at(PITCH).first) / 100.0f +
                                 chestJointLimits_.at(PITCH).first;
-  float chestYawSliderValue =
-      -1.0f * (jointSliderMap_[chestJointNames_.at(YAW)]->value() *
-                   (chestJointLimits_.at(YAW).second - chestJointLimits_.at(YAW).first) / 100.0f +
-               chestJointLimits_.at(YAW).first);  // this is to align yaw with sliding direction
+  float chestYawSliderValue = (jointSliderMap_[chestJointNames_.at(YAW)]->value() *
+                                   (chestJointLimits_.at(YAW).second - chestJointLimits_.at(YAW).first) / 100.0f +
+                               chestJointLimits_.at(YAW).first);
 
   chestController_->controlChest(chestRollSliderValue, chestPitchSliderValue, chestYawSliderValue);
   ros::spinOnce();
