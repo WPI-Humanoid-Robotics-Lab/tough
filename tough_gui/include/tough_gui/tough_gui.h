@@ -35,6 +35,7 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Bool.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Point.h>
 #include <geometry_msgs/Pose.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Image.h>
@@ -100,17 +101,18 @@ private:
   void getPelvisState();
   void getNeckState();
   void getGripperState();
+  void getCoMPosition();
   void getClickedPoint(const geometry_msgs::PointStamped::Ptr msg);
 
 private Q_SLOTS:
   void keyPressEvent(QKeyEvent* event);
 
   void setCurrentTool(int btnID);
-  void displayPointcloud(int btnID);
   void updateDisplay(int tabID);
 
   void changePelvisHeight();
   void walkSteps();
+  void alignFeet();
   void abortSteps();
   void approveSteps();
   void moveChestJoints();
@@ -139,6 +141,7 @@ private Q_SLOTS:
   void createMoveitDisplay();
   void deleteMoveitDisplay();
 
+  void toggleDisplay(rviz::Display* display, int state);
   void resetPointcloud();
   void pausePointcloud();
 
@@ -161,7 +164,11 @@ private:
   rviz::Display* footstepMarkersMainDisplay_;
   rviz::Display* goalDisplay_;
   rviz::Display* moveitDisplay_;
-
+  rviz::Display* capturabilityMarkerDisplay_;
+  rviz::Display* leftFootForceDisplay_;
+  rviz::Display* rightFootForceDisplay_;
+  rviz::Display* leftWristForceDisplay_;
+  rviz::Display* rightWristForceDisplay_;
   rviz::ToolManager* toolManager_;
   rviz::ToolManager* mapToolManager_;
 
@@ -174,9 +181,12 @@ private:
   rviz::Tool* setInitialPoseTool_;
   rviz::Tool* setMapInitialPoseTool_;
 
+  visualization_msgs::Marker comMarker;
+
 private:
   ros::NodeHandle nh_;
   ros::Publisher approveStepsPub_;
+  ros::Publisher centerOfMassPub_;
 
   ros::Publisher resetPointcloudPub_;
   ros::Publisher pausePointcloud_;
@@ -184,7 +194,7 @@ private:
   ros::Subscriber clickedPointSub_;
   ros::Timer jointStatesUpdater_;
   tf::TransformListener listener_;
-
+  geometry_msgs::Point centerOfMassPosition_;
   image_transport::ImageTransport it_;
   image_transport::Subscriber liveVideoSub;
 
@@ -221,7 +231,8 @@ private:
   void jointStateCallBack(const ros::TimerEvent& e);
   void changeToolButtonStatus(int btnID);
   void moveInTaskSpace(RobotSide side, geometry_msgs::PoseStamped& end_effector_pose);
-
+  rviz::Display* createWrenchDisplay(rviz::VisualizationManager* manager, const std::string& topic);
+  void createFootstepDisplay(rviz::VisualizationManager* manager, rviz::VisualizationManager* map_manager);
   QString fixedFrame_;
   QString targetFrame_;
   QString mapTopic_;
@@ -269,6 +280,12 @@ private:
 
   QString PREVIOUS_MODE_LEFT = "BASIC";
   QString PREVIOUS_MODE_RIGHT = "BASIC";
+
+  const std::string COM_TOPIC = "/tough_gui/center_of_mass";
+  std::string L_FOOT_FORCE_TOPIC;
+  std::string R_FOOT_FORCE_TOPIC;
+  std::string L_WRIST_FORCE_TOPIC;
+  std::string R_WRIST_FORCE_TOPIC;
 
   std::map<QString, GripperControlInterface::GRIPPER_MODES> mode_map;
   std::map<QString, int> prev_mode_map;

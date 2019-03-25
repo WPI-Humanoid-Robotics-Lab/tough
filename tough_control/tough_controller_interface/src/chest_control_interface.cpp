@@ -8,6 +8,12 @@ ChestControlInterface::ChestControlInterface(ros::NodeHandle nh) : ToughControlI
 
   homePositionPublisher_ =
       nh_.advertise<ihmc_msgs::GoHomeRosMessage>(control_topic_prefix_ + TOUGH_COMMON_NAMES::GO_HOME_TOPIC, 1, true);
+  rd_->getChestJointNames(chestJointNames_);
+  chestJointNumbers_.resize(chestJointNames_.size());
+  for (auto&& joint : chestJointNames_)
+  {
+    chestJointNumbers_.push_back(state_informer_->getJointNumber(joint));
+  }
 }
 
 ChestControlInterface::~ChestControlInterface()
@@ -106,12 +112,10 @@ void ChestControlInterface::resetPose(float time)
 
 bool ChestControlInterface::getJointSpaceState(std::vector<double>& joints, RobotSide side)
 {
-  std::vector<std::string> chest_joint_names;
-  rd_->getChestJointNames(chest_joint_names);
-
-  for (auto joint : chest_joint_names)
+  joints.resize(chestJointNames_.size());
+  for (auto&& jointNumber : chestJointNumbers_)
   {
-    joints.push_back(state_informer_->getJointPosition(joint));
+    joints.push_back(state_informer_->getJointPosition(jointNumber));
   }
 }
 
