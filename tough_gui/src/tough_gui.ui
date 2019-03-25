@@ -1504,10 +1504,10 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="btnGroupRvizTools"/>
-  <buttongroup name="btnGroupArm"/>
-  <buttongroup name="btnGroupGripper"/>
   <buttongroup name="btnGroupNudge"/>
+  <buttongroup name="btnGroupRvizTools"/>
+  <buttongroup name="btnGroupGripper"/>
+  <buttongroup name="btnGroupArm"/>
   <buttongroup name="btnGroupFeet"/>
  </buttongroups>
 </ui>
