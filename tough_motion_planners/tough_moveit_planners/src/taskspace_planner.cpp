@@ -41,33 +41,21 @@ TaskspacePlanner::~TaskspacePlanner()
     if (kdl_chains_.count(planning_groups_.at(i)) > 0)
       delete kdl_chains_[planning_groups_.at(i)];
   }
-
-  delete move_group_option_left_7_dof_;
-  delete move_group_option_left_10_dof_;
-  delete move_group_option_right_7_dof_;
-  delete move_group_option_right_10_dof_;
-
-  delete move_group_left_7_dof_;
-  delete move_group_left_10_dof_;
-  delete move_group_right_7_dof_;
-  delete move_group_right_10_dof_;
 }
 
 void TaskspacePlanner::initializeMoveGroupsForCartesianPath(void)
 {
-  move_group_option_left_7_dof_ = new moveit::planning_interface::MoveGroupInterface::Options(
-      TOUGH_COMMON_NAMES::LEFT_ARM_7DOF_GROUP, rd_->getURDFParameter());
-  move_group_option_left_10_dof_ = new moveit::planning_interface::MoveGroupInterface::Options(
-      TOUGH_COMMON_NAMES::LEFT_ARM_10DOF_GROUP, rd_->getURDFParameter());
-  move_group_option_right_7_dof_ = new moveit::planning_interface::MoveGroupInterface::Options(
-      TOUGH_COMMON_NAMES::RIGHT_ARM_7DOF_GROUP, rd_->getURDFParameter());
-  move_group_option_right_10_dof_ = new moveit::planning_interface::MoveGroupInterface::Options(
-      TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP, rd_->getURDFParameter());
+  for (int i = 0; i < planning_groups_.size(); i++)
+  {
+    move_group_interface_option_map_.insert(
+        std::pair<std::string, moveit::planning_interface::MoveGroupInterface::Options>(
+            planning_groups_[i],
+            moveit::planning_interface::MoveGroupInterface::Options(planning_groups_[i], rd_->getURDFParameter())));
 
-  move_group_left_7_dof_ = new moveit::planning_interface::MoveGroupInterface(*move_group_option_left_7_dof_);
-  move_group_left_10_dof_ = new moveit::planning_interface::MoveGroupInterface(*move_group_option_left_10_dof_);
-  move_group_right_7_dof_ = new moveit::planning_interface::MoveGroupInterface(*move_group_option_right_7_dof_);
-  move_group_right_10_dof_ = new moveit::planning_interface::MoveGroupInterface(*move_group_option_right_10_dof_);
+    move_group_interface_map_.insert(std::pair<std::string, moveit::planning_interface::MoveGroupInterface>(
+        planning_groups_[i],
+        moveit::planning_interface::MoveGroupInterface::Options(planning_groups_[i], rd_->getURDFParameter())));
+  }
 
   is_move_group_initializing_ = false;
 }
@@ -368,7 +356,7 @@ void TaskspacePlanner::poseToKDLFrame(const geometry_msgs::Pose& pose, KDL::Fram
   frame.p = KDL::Vector(pose.position.x, pose.position.y, pose.position.z);
 }
 
-double TaskspacePlanner::computeCartesianPath(moveit::planning_interface::MoveGroupInterface& move_group,
+double TaskspacePlanner::computeCartesianPathFromVector(moveit::planning_interface::MoveGroupInterface& move_group,
                                               const std::vector<geometry_msgs::Pose>& pose_vec,
                                               moveit_msgs::RobotTrajectory& robot_traj, const bool avoid_collisions)
 {
@@ -406,25 +394,6 @@ double TaskspacePlanner::getTrajFromCartPoints(const std::vector<geometry_msgs::
 
   double frac = 0.0;
 
-  if (planning_group == TOUGH_COMMON_NAMES::LEFT_ARM_7DOF_GROUP)
-  {
-    frac = computeCartesianPath(*move_group_left_7_dof_, pose_vec, robot_traj, avoid_collisions);
-  }
-  else if (planning_group == TOUGH_COMMON_NAMES::LEFT_ARM_10DOF_GROUP)
-  {
-    frac = computeCartesianPath(*move_group_left_10_dof_, pose_vec, robot_traj, avoid_collisions);
-  }
-  else if (planning_group == TOUGH_COMMON_NAMES::RIGHT_ARM_7DOF_GROUP)
-  {
-    frac = computeCartesianPath(*move_group_right_7_dof_, pose_vec, robot_traj, avoid_collisions);
-  }
-  else if (planning_group == TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP)
-  {
-    frac = computeCartesianPath(*move_group_right_7_dof_, pose_vec, robot_traj, avoid_collisions);
-  }
-  else
-  {
-    ROS_ERROR("Invalid Planning Group %s", planning_group.c_str());
-  }
+  frac = computeCartesianPathFromVector(move_group_interface_map_.at(planning_group), pose_vec, robot_traj, avoid_collisions);
   return frac;
 }

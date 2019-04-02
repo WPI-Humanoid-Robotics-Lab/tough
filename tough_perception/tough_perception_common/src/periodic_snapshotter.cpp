@@ -1,36 +1,36 @@
 /*********************************************************************
-* Software License Agreement (BSD License)
-*
-*  Copyright (c) 2008, Willow Garage, Inc.
-*  All rights reserved.
-*
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions
-*  are met:
-*
-*   * Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   * Redistributions in binary form must reproduce the above
-*     copyright notice, this list of conditions and the following
-*     disclaimer in the documentation and/or other materials provided
-*     with the distribution.
-*   * Neither the name of the Willow Garage nor the names of its
-*     contributors may be used to endorse or promote products derived
-*     from this software without specific prior written permission.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-*  POSSIBILITY OF SUCH DAMAGE.
-*********************************************************************/
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2008, Willow Garage, Inc.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of the Willow Garage nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *********************************************************************/
 
 #include <cstdio>
 #include <ros/ros.h>
@@ -73,8 +73,8 @@ using namespace laser_assembler;
 /****************************************************
  * namespaces and typedefs required for registeration
  ****************************************************/
-using pcl::visualization::PointCloudColorHandlerGenericField;
 using pcl::visualization::PointCloudColorHandlerCustom;
+using pcl::visualization::PointCloudColorHandlerGenericField;
 
 // convenient typedefs
 typedef pcl::PointXYZ PointT;
@@ -144,6 +144,7 @@ PeriodicSnapshotter::PeriodicSnapshotter()
 
   n_.param<float>("filter_min_z", filter_min_z, -10.0);
   n_.param<float>("filter_max_z", filter_max_z, 10.0);
+  snapshotCount_ = 0;
 }
 
 void PeriodicSnapshotter::timerCallback(const ros::TimerEvent& e)
@@ -168,6 +169,11 @@ void PeriodicSnapshotter::timerCallback(const ros::TimerEvent& e)
     ROS_INFO("PeriodicSnapshotter::timerCallback : Published Cloud with %u points",
              (uint32_t)(srv.response.cloud.data.size()));
     snapshot_pub_.publish(srv.response.cloud);
+    ++snapshotCount_;
+    if (snapshotCount_ > MAX_SNAPSHOTS)
+    {
+      pausePointcloud(true);
+    }
   }
   else
   {
@@ -276,22 +282,32 @@ void PeriodicSnapshotter::resetPointcloud(bool resetPointcloud)
 {
   // reset the assembler
   state_request = PCL_STATE_CONTROL::RESET;
+  snapshotCount_ = 0;
 }
 
 void PeriodicSnapshotter::resetPointcloudCB(const std_msgs::Empty& msg)
 {
   state_request = PCL_STATE_CONTROL::RESET;
+  snapshotCount_ = 0;
 }
 
 void PeriodicSnapshotter::pausePointcloud(bool pausePointcloud)
 {
   state_request = pausePointcloud ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESUME;
+  if (!pausePointcloud)
+  {
+    snapshotCount_ = 0;
+  }
 }
 
 void PeriodicSnapshotter::pausePointcloudCB(const std_msgs::Bool& msg)
 {
   // reset will make sure that older scans are discarded
   state_request = msg.data ? PCL_STATE_CONTROL::PAUSE : PCL_STATE_CONTROL::RESUME;
+  if (!msg.data)
+  {
+    snapshotCount_ = 0;
+  }
 }
 
 void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8& msg)
@@ -345,10 +361,10 @@ void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8& msg)
   boxTranslatation[1] = pelvisPose.position.y;
   boxTranslatation[2] = pelvisPose.position.z;
   Eigen::Vector3f boxRotation;
-  boxRotation[0] = 0;  // rotation around x-axis
-  boxRotation[1] = 0;  // rotation around y-axis
-  boxRotation[2] = tf::getYaw(
-      pelvisPose.orientation);  // in radians rotation around z-axis. this rotates your cube 45deg around z-axis.
+  boxRotation[0] = 0;                                   // rotation around x-axis
+  boxRotation[1] = 0;                                   // rotation around y-axis
+  boxRotation[2] = tf::getYaw(pelvisPose.orientation);  // in radians rotation around z-axis. this rotates your cube
+                                                        // 45deg around z-axis.
 
   pcl::CropBox<pcl::PointXYZ> box_filter;
   std::vector<int> indices;
