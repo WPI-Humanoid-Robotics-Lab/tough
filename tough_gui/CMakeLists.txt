@@ -80,3 +80,7 @@ install(DIRECTORY config
   PATTERN "*.ini"
   PATTERN "*.yaml"
 )
+
+install(DIRECTORY resources
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
