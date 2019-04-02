@@ -773,80 +773,49 @@ void ToughGUI::nudgeArm(int btnID)
   //    left  -5
   //    right -6
   RobotSide side = ui->radioNudgeSideLeft->isChecked() ? LEFT : RIGHT;
-  geometry_msgs::PoseStamped end_effector_pose;
+  geometry_msgs::Pose end_effector_pose;
+  ihmc_msgs::SE3TrajectoryPointRosMessage end_effector_command;
+
   if (side == RobotSide::RIGHT)
   {
-    planning_group_ = TOUGH_COMMON_NAMES::RIGHT_ARM_7DOF_GROUP;
     end_effector_frame_ = rd_->getRightEEFrame();
   }
   else
   {
-    planning_group_ = TOUGH_COMMON_NAMES::LEFT_ARM_7DOF_GROUP;
     end_effector_frame_ = rd_->getLeftEEFrame();
   }
-  end_effector_pose.header = std_msgs::Header();
-  end_effector_pose.header.frame_id = rd_->getPelvisFrame();
-  currentState_->getCurrentPose(end_effector_frame_, end_effector_pose.pose, rd_->getPelvisFrame());
-  ROS_INFO("Current pose of %s: %.2f, %.2f, %.2f", end_effector_frame_.c_str(), end_effector_pose.pose.position.x,
-           end_effector_pose.pose.position.y, end_effector_pose.pose.position.z);
+
+  currentState_->getCurrentPose(end_effector_frame_, end_effector_pose, rd_->getPelvisFrame());
+  end_effector_command.position = end_effector_pose.position;
+  end_effector_command.orientation = end_effector_pose.orientation;
+  end_effector_command.unique_id = 1;
 
   switch (btnID)
   {
     case -2:  // down
-      end_effector_pose.pose.position.z -= 0.05;
+      end_effector_command.position.z -= 0.05;
       break;
     case -3:  // up
-      end_effector_pose.pose.position.z += 0.05;
+      end_effector_command.position.z += 0.05;
       break;
     case -4:  // back
-      end_effector_pose.pose.position.x -= 0.05;
+      end_effector_command.position.x -= 0.05;
       break;
     case -7:  // front
-      end_effector_pose.pose.position.x += 0.05;
+      end_effector_command.position.x += 0.05;
       break;
     case -5:  // left
-      end_effector_pose.pose.position.y += 0.05;
+      end_effector_command.position.y += 0.05;
       break;
     case -6:  // right
-      end_effector_pose.pose.position.y -= 0.05;
+      end_effector_command.position.y -= 0.05;
       break;
     default:
       return;
   }
-  moveInTaskSpace(side, end_effector_pose);
+  armJointController_->moveArmInTaskSpaceMessage(side, end_effector_command, rd_->getPelvisZUPFrameHash());
 }
 
-void ToughGUI::moveInTaskSpace(RobotSide side, geometry_msgs::PoseStamped& end_effector_pose)
-{
-  return;
-  end_effector_pose.pose.orientation.x = 0;
-  end_effector_pose.pose.orientation.y = 0;
-  end_effector_pose.pose.orientation.z = 0;
-  end_effector_pose.pose.orientation.w = 1.0;
-  joint_angles_.clear();
-  bool success = taskspacePlanner_->solve_ik(planning_group_, end_effector_pose, joint_angles_);
-  if (success)
-  {
-    arm_pose_.clear();
-    arm_pose_.push_back(joint_angles_);
-    armJointController_->moveArmJoints(side, arm_pose_, 0.5);
-  }
-  else
-  {
-    ROS_WARN("7DOF Planning failed. Trying 10 DOF planning");
-    if (side == RobotSide::RIGHT)
-    {
-      planning_group_ = TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP;
-    }
-    else
-    {
-      planning_group_ = TOUGH_COMMON_NAMES::LEFT_ARM_10DOF_GROUP;
-    }
-    success = taskspacePlanner_->solve_ik(planning_group_, end_effector_pose, arm_trajectory_, 0.5);
-    if (success)
-      wholeBodyController_->executeTrajectory(arm_trajectory_);
-  }
-}
 void ToughGUI::updateDisplay(int tabID)
 {
   // 0 = 3d scene
@@ -1186,6 +1155,7 @@ void ToughGUI::moveArmJoints()
   msg.side = side;
   msg.time = 1.0;
 
+  // all joint limits should be saved in a map, that can be queried by jointName
   if (side == LEFT)
   {
     for (size_t i = 0; i < leftArmJointNames_.size(); i++)
@@ -1220,6 +1190,12 @@ void ToughGUI::moveChestJoints()
     return;
   }
 
+  auto getAngle = [this](int index) -> float {
+    return jointSliderMap_[chestJointNames_.at(index)]->value() *
+               (chestJointLimits_.at(index).second - chestJointLimits_.at(index).first) / 100.0f +
+           chestJointLimits_.at(index).first;
+  };
+
   enum joint
   {
     YAW = 0,
@@ -1227,18 +1203,7 @@ void ToughGUI::moveChestJoints()
     ROLL
   };
 
-  float chestRollSliderValue = jointSliderMap_[chestJointNames_.at(ROLL)]->value() *
-                                   (chestJointLimits_.at(ROLL).second - chestJointLimits_.at(ROLL).first) / 100.0f +
-                               chestJointLimits_.at(ROLL).first;
-
-  float chestPitchSliderValue = jointSliderMap_[chestJointNames_.at(PITCH)]->value() *
-                                    (chestJointLimits_.at(PITCH).second - chestJointLimits_.at(PITCH).first) / 100.0f +
-                                chestJointLimits_.at(PITCH).first;
-  float chestYawSliderValue = (jointSliderMap_[chestJointNames_.at(YAW)]->value() *
-                                   (chestJointLimits_.at(YAW).second - chestJointLimits_.at(YAW).first) / 100.0f +
-                               chestJointLimits_.at(YAW).first);
-
-  chestController_->controlChest(chestRollSliderValue, chestPitchSliderValue, chestYawSliderValue);
+  chestController_->controlChest(getAngle(ROLL), getAngle(PITCH), getAngle(YAW));
   ros::spinOnce();
 }
 
