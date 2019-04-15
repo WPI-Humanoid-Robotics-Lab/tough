@@ -18,6 +18,7 @@ static const std::string MULTISENSE_LASER_FILTERED_CLOUD_TOPIC = "filtered_cloud
 static const std::string MULTISENSE_LASER_FILTERED_CLOUD_TOPIC2 = "filtered_cloud2";
 
 // image topics
+static const std::string MULTISENSE_LEFT_CAMERA_INFO_TOPIC = "/multisense/camera/left/camera_info";
 static const std::string MULTISENSE_LEFT_IMAGE_COLOR_TOPIC = "/multisense/camera/left/image_rect_color";
 static const std::string MULTISENSE_LEFT_DISPARITY_TOPIC = "/multisense/camera/disparity";
 // TODO: add a depth image
@@ -36,6 +37,9 @@ static const std::string MULTISENSE_CONTROL_FPS_TOPIC = "/multisense/set_fps";
 static const std::string ASSEMBLED_LASER_CLOUD_TOPIC = "assembled_cloud2";
 static const std::string ASSEMBLED_LASER_CLOUD_TOPIC_FOR_OCTOMAP = "assembled_octomap_cloud2";
 
+// Detector topics
+static const std::string ARUCO_DETECTOR_TOPIC = "/fiducial_transforms";
+
 // services
 // TODO: once we have these
 //	static const std::string PLANE_DETECTION_SERVICE = "/perception/atlas_plane_point_service";
@@ -44,6 +48,6 @@ static const std::string ASSEMBLED_LASER_CLOUD_TOPIC_FOR_OCTOMAP = "assembled_oc
 //	static const std::string OPERATIONAL_MODE_SERVICE = "/atlas/operational_mode_service";
 //	static const std::string WALK_ACTION_SERVER = "/walkToTargetAS";
 //	static const std::string DETECTION_SERVER = "/detect_debrisAS";
-}
+}  // namespace PERCEPTION_COMMON_NAMES
 
 #endif

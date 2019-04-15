@@ -4,7 +4,7 @@ project(tough_perception_common)
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 add_definitions(-std=c++11)
-
+add_definitions(-DGAZEBO_SIMULATION)
 find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
 find_package(PCL 1.7 REQUIRED io)
 
@@ -26,7 +26,10 @@ find_package(catkin REQUIRED COMPONENTS roscpp
                                         tough_common
                                         )
 
-include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} include)
+include_directories(SYSTEM 
+                        ${PCL_INCLUDE_DIRS} 
+                        ${OpenCV_INCLUDE_DIRS} 
+                        ${catkin_INCLUDE_DIRS} include)
 
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
@@ -34,18 +37,29 @@ add_definitions(${PCL_DEFINITIONS})
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}
-   CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros laser_assembler tough_common tough_controller_interface
+   CATKIN_DEPENDS 
+      roscpp 
+      cv_bridge 
+      image_transport 
+      pcl_conversions 
+      std_msgs 
+      message_filters 
+      multisense_ros 
+      laser_assembler 
+      tough_common 
+      tough_controller_interface
 )
 
 add_library(${PROJECT_NAME}  src/MultisensePointCloud.cpp
                              src/MultisenseImage.cpp
+                             src/tough_perception_interface/MultisenseImageInterface.cpp 
 #                             src/ImageHelper.cpp
                              src/PointCloudHelper.cpp
                              src/laser2point_cloud.cpp
                              src/ArucoDetector.cpp
 )
 									
-set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_DEFINITIONS GAZEBO_SIMULATION)
+set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_DEFINITIONS)
 
 target_link_libraries(${PROJECT_NAME}  ${PCL_LIBRARIES} ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_dependencies(${PROJECT_NAME}  ${catkin_EXPORTED_TARGETS} )

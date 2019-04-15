@@ -28,8 +28,10 @@
 
 namespace tough_perception
 {
+
 class MultisenseImage
 {
+private:
   DISALLOW_COPY_AND_ASSIGN(MultisenseImage)
 
   cv::Mat image_;
@@ -79,13 +81,15 @@ class MultisenseImage
   image_transport::ImageTransport it_;
 
   image_transport::Subscriber         cam_sub_;
-  image_transport::SubscriberFilter*  sync_cam_sub_;
-  image_transport::SubscriberFilter*  sync_cam_depth_sub_;
-  image_transport::SubscriberFilter*  sync_cam_cost_sub_;
+  image_transport::SubscriberFilter*  sync_cam_sub_ = nullptr;
+  image_transport::SubscriberFilter*  sync_cam_depth_sub_ = nullptr;
+  image_transport::SubscriberFilter*  sync_cam_cost_sub_ = nullptr;
+
 
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image> exactTimePolicy;
   std::shared_ptr<message_filters::Synchronizer<exactTimePolicy> > sync_;
-  image_transport::SubscriberFilter* sync_disp_sub_;
+
+  image_transport::SubscriberFilter* sync_disp_sub_ = nullptr;
 
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image>
       depthImageCostExactTimePolicy;
@@ -97,6 +101,9 @@ class MultisenseImage
   image_transport::Subscriber disp_sub_;
 
   ros::Subscriber multisense_sub_;
+
+  static MultisenseImage* current_object_;
+
 
   /**
    * @brief this function is the callback for loading the images, as of now it needs the image topic to
@@ -140,13 +147,18 @@ class MultisenseImage
   void syncDepthCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::ImageConstPtr& dimg,
                          const sensor_msgs::ImageConstPtr& cimg);
 
-public:
+
   /**
    * @brief Constructor
    * @param nh the ros nodehandle - why do i have this as an argument? expect for the fact to make sure
    * 		  the constructor knows that it is ros. I have no idea why I do this!
    */
-  MultisenseImage(ros::NodeHandle& nh_);
+  MultisenseImage(ros::NodeHandle& nh);
+
+public:
+  
+  static MultisenseImage* getMultisenseImage(ros::NodeHandle& nh);
+  // static std::shared_ptr<MultisenseImage> getMultisenseImage(ros::NodeHandle& nh_);
 
   void setDepthTopic(const std::string& topic);
   void setImageTopic(const std::string& topic);
@@ -156,27 +168,27 @@ public:
    * @param img as a refernce which will be filled by the image from the multisense head
    * @return	if we have a new image
    */
-  bool giveImage(cv::Mat& img);
+  bool getImage(cv::Mat& img);
 
   /**
    * @brief gives the camera intrinsic matrix
    * @param cam the cmaera matrix
    * @return true if you have a new camera matrix
    */
-  bool giveCameraInfo(cv::Mat& cam);
+  bool getCameraInfo(cv::Mat& cam);
   /**
    * @brief gives the disparity image that the camera has for the disparity
    * @param disp_img the disparity image that the multisense gets
    * @return true if you have new disparity image
    */
-  bool giveDisparityImage(cv::Mat& disp_img);
+  bool getDisparityImage(cv::Mat& disp_img);
 
   /**
    * @brief the Q matrix that is used to convert disparity to 3D points
    * @param Q the matrix as CV::mat
    * @return true if a new value was recieved from the head
    */
-  bool giveQMatrix(cv::Mat& Q);
+  bool getQMatrix(cv::Mat& Q);
 
   /**
    * @brief this function makes sure you get a synchronized pair of color img and disp image
@@ -184,7 +196,7 @@ public:
    * @param disp  the dispaity image
    * @return
    */
-  bool giveSyncImages(cv::Mat& color, cv::Mat& disp);
+  bool getSyncImages(cv::Mat& color, cv::Mat& disp);
 
   /**
    * @brief This function was introduced in situations where you want to track the fps of the images being collected
@@ -193,20 +205,20 @@ public:
    * @param time  the timestamp on the recieved image
    * @return
    */
-  bool giveSyncImageswTime(cv::Mat& color, cv::Mat& disp, ros::Time& time);
+  bool getSyncImageswTime(cv::Mat& color, cv::Mat& disp, ros::Time& time);
 
-  bool giveCostImage(cv::Mat& img);
+  bool getCostImage(cv::Mat& img);
 
-  bool giveSyncDepthImages(cv::Mat& color, cv::Mat& disp, cv::Mat& cost);
+  bool getSyncDepthImages(cv::Mat& color, cv::Mat& disp, cv::Mat& cost);
 
-  bool giveSyncDepthImageswTime(cv::Mat& color, cv::Mat& disp, cv::Mat& cost, ros::Time& time);
+  bool getSyncDepthImageswTime(cv::Mat& color, cv::Mat& disp, cv::Mat& cost, ros::Time& time);
 
   /**
    * @brief A function to get the height in situations where you have not yet received an image.
    *        The height is read directly from the config message.
    * @return the height as an integer
    */
-  int giveHeight()
+  int getHeight()
   {
     return settings.height_;
   }
@@ -215,7 +227,7 @@ public:
    *        The width is read directly from the config message.
    * @return the width as an integer
    */
-  int giveWidth()
+  int getWidth()
   {
     return settings.width_;
   }
@@ -223,7 +235,7 @@ public:
    * @brief the baselength as read from the config message.
    * @return the baselength as a floating point number
    */
-  float giveBaseLength()
+  float getBaseLength()
   {
     return settings.baselength_;
   }
@@ -233,17 +245,20 @@ public:
    * @param time the time of image capture as told by ROS
    * @return always true
    */
-  bool giveTime(ros::Time& time);
+  bool getTime(ros::Time& time);
 
   /**
    * @brief this function is used to get the depth image that was recieved
    * @param depth_img	the depth image that was recieved
    * @return	true if new depth image
    */
-  bool giveDepthImage(cv::Mat& depth_img);
+  bool getDepthImage(cv::Mat& depth_img);
 
-  virtual ~MultisenseImage();
+  ~MultisenseImage();
 };
+
+typedef MultisenseImage* MultisenseImagePtr;
+// typedef std::shared_ptr<MultisenseImage const> MultisenseImageConstPtr;
 
 } /* namespace src_perception */
 
