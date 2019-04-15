@@ -18,6 +18,7 @@ static const std::string MULTISENSE_LASER_FILTERED_CLOUD_TOPIC = "filtered_cloud
 static const std::string MULTISENSE_LASER_FILTERED_CLOUD_TOPIC2 = "filtered_cloud2";
 
 // image topics
+static const std::string MULTISENSE_LEFT_CAMERA_INFO_TOPIC = "/multisense/camera/left/camera_info";
 static const std::string MULTISENSE_LEFT_IMAGE_COLOR_TOPIC = "/multisense/camera/left/image_rect_color";
 static const std::string MULTISENSE_LEFT_DISPARITY_TOPIC = "/multisense/camera/disparity";
 // TODO: add a depth image
@@ -47,6 +48,6 @@ static const std::string ARUCO_DETECTOR_TOPIC = "/fiducial_transforms";
 //	static const std::string OPERATIONAL_MODE_SERVICE = "/atlas/operational_mode_service";
 //	static const std::string WALK_ACTION_SERVER = "/walkToTargetAS";
 //	static const std::string DETECTION_SERVER = "/detect_debrisAS";
-} // namespace PERCEPTION_COMMON_NAMES
+}  // namespace PERCEPTION_COMMON_NAMES
 
 #endif

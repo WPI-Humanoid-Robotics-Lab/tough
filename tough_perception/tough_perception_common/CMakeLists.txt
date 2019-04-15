@@ -4,7 +4,7 @@ project(tough_perception_common)
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 add_definitions(-std=c++11)
-
+add_definitions(-DGAZEBO_SIMULATION)
 find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
 find_package(PCL 1.7 REQUIRED io)
 

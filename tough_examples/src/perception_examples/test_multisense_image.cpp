@@ -6,19 +6,22 @@
 #include <opencv2/core.hpp>
 #include <opencv/highgui.h>
 
-#define PRINT_STATUS(status) ROS_INFO("image status %s", status ? "true" : "false")
+void printStatus(const std::string& image_name, bool status)
+{
+  ROS_INFO("%s status %s", image_name.c_str(), status ? "true" : "false");
+}
 
-void show_image(cv::Mat &image, std::string name)
+void show_image(cv::Mat& image, std::string name)
 {
   cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
   cv::imshow(name, image);
   ROS_INFO("Press any key to continue");
   cv::waitKey(0);
   cv::destroyWindow(name);
-  ros::Duration(0.5).sleep(); // wait some time for the window to destroy cleanly.
+  ros::Duration(0.5).sleep();  // wait some time for the window to destroy cleanly.
 }
 
-void scale_depth_image(cv::Mat &depth_in_cv32F)
+void scale_depth_image(cv::Mat& depth_in_cv32F)
 {
   double min;
   double max;
@@ -28,10 +31,12 @@ void scale_depth_image(cv::Mat &depth_in_cv32F)
   depth_in_cv32F = adjMap.clone();
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   ros::init(argc, argv, "test_multisense_image");
   ros::NodeHandle nh;
+  ros::AsyncSpinner spinner(2);
+  spinner.start();
   bool status;
 
   tough_perception::MultisenseImageInterfacePtr imageHandler;
@@ -51,36 +56,39 @@ int main(int argc, char **argv)
   std::cout << "[fy]" << cam_model.fy << std::endl;
   std::cout << "[cx]" << cam_model.cx << std::endl;
   std::cout << "[cy]" << cam_model.cy << std::endl;
-  std::cout << "[K]\n"
-            << cam_model.K << std::endl;
-  std::cout << "[P]\n"
-            << cam_model.P << std::endl;
+  std::cout << "[K]\n" << cam_model.K << std::endl;
+  std::cout << "[P]\n" << cam_model.P << std::endl;
   std::cout << "[distortion_model] " << cam_model.distortion_model << std::endl;
   std::cout << "-" << std::endl;
 
   status = imageHandler->getImage(image);
-  PRINT_STATUS(status);
+  printStatus("RGB Image", status);
   if (status)
     show_image(image, "RGB Image");
 
+  // gazebo doesn't provide depth images
   status = imageHandler->getDepthImage(image);
-  PRINT_STATUS(status);
+  printStatus("Depth Image", status);
   scale_depth_image(image);
   if (status)
     show_image(image, "Depth Image");
 
+  // gazebo doesn't provide cost images
   status = imageHandler->getCostImage(image);
-  PRINT_STATUS(status);
+  printStatus("Cost Image", status);
   if (status)
     show_image(image, "Cost Image");
 
+  // gazebo doesn't provide disparity using images types
   status = imageHandler->getDisparity(image);
-  PRINT_STATUS(status);
+  printStatus("Disparity Image from sensor_msg", status);
   if (status)
     show_image(image, "Disparity Image from sensor_msg");
 
-  status = imageHandler->getDisparity(image, true);
-  PRINT_STATUS(status);
+  // When using gazebo, call getDisparity from stereo message
+  bool use_stereo_msg = true;
+  status = imageHandler->getDisparity(image, use_stereo_msg);
+  printStatus("Disparity Image from stereo_msg", status);
   if (status)
     show_image(image, "Disparity Image from stereo_msg");
 
@@ -89,10 +97,11 @@ int main(int argc, char **argv)
   imageHandler->start();
   ROS_INFO("is Multisense active %s", imageHandler->isSensorActive() ? "true" : "false");
 
-  status = imageHandler->getDisparity(image, true);
-  PRINT_STATUS(status);
+  status = imageHandler->getDisparity(image, use_stereo_msg);
+  printStatus("Disparity Image from stereo_msg", status);
   if (status)
     show_image(image, "Disparity Image from stereo_msg");
 
+  spinner.stop();
   return 0;
 }

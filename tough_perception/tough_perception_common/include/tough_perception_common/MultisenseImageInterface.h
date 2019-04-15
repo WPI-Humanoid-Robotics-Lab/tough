@@ -24,11 +24,10 @@ typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sens
 
 namespace tough_perception
 {
-
-bool isActive(const sensor_msgs::ImageConstPtr &some_msg);
-bool isActive(const stereo_msgs::DisparityImageConstPtr &some_msg);
-void resetMsg(sensor_msgs::ImageConstPtr &some_msg);
-void resetMsg(stereo_msgs::DisparityImageConstPtr &some_msg);
+bool isActive(const sensor_msgs::ImageConstPtr& some_msg);
+bool isActive(const stereo_msgs::DisparityImageConstPtr& some_msg);
+void resetMsg(sensor_msgs::ImageConstPtr& some_msg);
+void resetMsg(stereo_msgs::DisparityImageConstPtr& some_msg);
 
 class MultisenseCameraModel
 {
@@ -81,21 +80,24 @@ private:
   } settings;
 
   ros::NodeHandle nh_;
-  ros::AsyncSpinner spinner;
 
   // ros topics
-  // std::string image_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC;
-  // std::string disp_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC;
-  // std::string depth_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;
-  // std::string depth_cost_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_CONTROL_FPS_TOPIC;
-  std::string multisense_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_RAW_CAM_CONFIG_TOPIC;
-
+/// @todo: move the hardcoded topic names to perception_common_names
+#ifdef GAZEBO_SIMULATION
+  std::string image_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC;
+  std::string disp_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC;  // stereo message
+  std::string depth_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;     // image
+  std::string camera_info_topic = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_CAMERA_INFO_TOPIC;
+#else
   std::string image_topic_ = "/multisense/left/image_rect_color";
   std::string disp_topic_ = "/multisense/left/disparity_image";
-  std::string disp_sensor_msg_topic_ = "/multisense/left/disparity";
   std::string depth_topic_ = "/multisense/depth";
-  std::string cost_topic_ = "/multisense/left/cost"; // sensor_msg/Image
   std::string camera_info_topic = "/multisense/left/image_rect_color/camera_info";
+#endif
+  std::string multisense_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_RAW_CAM_CONFIG_TOPIC;
+  std::string depth_cost_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_DEPTH_COST_TOPIC;  // image
+  std::string disp_sensor_msg_topic_ = "/multisense/left/disparity";
+  std::string cost_topic_ = "/multisense/left/cost";  // sensor_msg/Image
 
   image_transport::ImageTransport it_;
   std::string transport_hint_ = "compressed";
@@ -112,35 +114,31 @@ private:
   std::shared_ptr<message_filters::Synchronizer<exactTimePolicy>> sync_img_depth_exact;
   std::shared_ptr<message_filters::Synchronizer<exactTimePolicy>> sync_img_depth_approx;
 
-  static MultisenseImageInterface *current_object_;
+  static MultisenseImageInterface* current_object_;
   MultisenseImageInterface(ros::NodeHandle nh, bool is_simulation);
 
   // callbacks
-  void imageCB(const sensor_msgs::ImageConstPtr &img);
-  void depthCB(const sensor_msgs::ImageConstPtr &img);
-  void costCB(const sensor_msgs::ImageConstPtr &img);
-  void disparityCB(const stereo_msgs::DisparityImageConstPtr &disp);
-  void disparitySensorMsgCB(const sensor_msgs::ImageConstPtr &disp);
+  void imageCB(const sensor_msgs::ImageConstPtr& img);
+  void depthCB(const sensor_msgs::ImageConstPtr& img);
+  void costCB(const sensor_msgs::ImageConstPtr& img);
+  void disparityCB(const stereo_msgs::DisparityImageConstPtr& disp);
+  void disparitySensorMsgCB(const sensor_msgs::ImageConstPtr& disp);
   void camera_infoCB(const sensor_msgs::CameraInfoConstPtr camera_info);
 
   // helper functions
-  bool processDisparity(const sensor_msgs::Image &disp, cv::Mat &disp_img);
-  bool processImage(const sensor_msgs::ImageConstPtr &in,
-                    cv::Mat &out,
-                    int image_encoding,
-                    std::string out_encoding,
-                    std::mutex &resource_mutex);
+  bool processDisparity(const sensor_msgs::Image& disp, cv::Mat& disp_img);
+  bool processImage(const sensor_msgs::ImageConstPtr& in, cv::Mat& out, int image_encoding, std::string out_encoding,
+                    std::mutex& resource_mutex);
 
 public:
-  static MultisenseImageInterface *
-  getMultisenseImageInterface(ros::NodeHandle nh, bool is_simulation = false);
+  static MultisenseImageInterface* getMultisenseImageInterface(ros::NodeHandle nh, bool is_simulation = false);
   ~MultisenseImageInterface();
 
-  bool getImage(cv::Mat &img);
-  bool getDisparity(cv::Mat &disp_img, bool from_stereo_msg = false);
-  bool getDepthImage(cv::Mat &depth_img);
-  bool getCostImage(cv::Mat &cost_img);
-  bool getCameraInfo(MultisenseCameraModel &pinhole_model);
+  bool getImage(cv::Mat& img);
+  bool getDisparity(cv::Mat& disp_img, bool from_stereo_msg = false);
+  bool getDepthImage(cv::Mat& depth_img);
+  bool getCostImage(cv::Mat& cost_img);
+  bool getCameraInfo(MultisenseCameraModel& pinhole_model);
   int getHeight();
   int getWidth();
   bool isSensorActive();
@@ -148,7 +146,7 @@ public:
   bool shutdown();
 };
 
-typedef MultisenseImageInterface *MultisenseImageInterfacePtr;
-} // namespace tough_perception
+typedef MultisenseImageInterface* MultisenseImageInterfacePtr;
+}  // namespace tough_perception
 
 #endif
