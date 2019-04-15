@@ -277,7 +277,7 @@ bool MultisenseImageInterface::shutdown()
 
 MultisenseImageInterface::~MultisenseImageInterface()
 {
-  shutdown();
+  //   shutdown();
 }
 
 bool isActive(const sensor_msgs::ImageConstPtr& some_msg)
