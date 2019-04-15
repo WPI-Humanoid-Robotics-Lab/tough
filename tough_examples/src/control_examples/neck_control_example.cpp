@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     int index = filename.find_last_of('/');
     std::string input_trace_filename = filename.substr(index + 1);
     ROS_INFO_STREAM("Usage : rosrun tough_examples "
-                        << input_trace_filename << " <side_left=0,right=1> <jointNumber> <desiredAngle_in_radians>";);
+                        << input_trace_filename << " <joint1_in_radians> <joint2_in_radians> <joint3_in_radians>";);
   }
   else
   {
