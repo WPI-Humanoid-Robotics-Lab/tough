@@ -29,18 +29,30 @@ bool isActive(const stereo_msgs::DisparityImageConstPtr& some_msg);
 void resetMsg(sensor_msgs::ImageConstPtr& some_msg);
 void resetMsg(stereo_msgs::DisparityImageConstPtr& some_msg);
 
+class MultisenseImageInterface;
+void generateOrganizedRGBDCloud(const cv::Mat& dispImage, const cv::Mat& colorImage, const Eigen::Matrix4d Qmat,
+                                tough_perception::StereoPointCloudColor::Ptr& cloud);
 class MultisenseCameraModel
 {
 public:
+  MultisenseCameraModel();
+  void printCameraConfig();
+  friend MultisenseImageInterface;
+
   int width;
   int height;
-  double fx;
-  double fy;
-  double cx;
-  double cy;
+  double fx;  // focal length in x
+  double fy;  // focal length in y
+  double cx;  // center offset in x
+  double cy;  // center offset in y
+  double tx;  // negative baseline
   std::string distortion_model = "";
-  Eigen::Matrix3d K;
-  Eigen::MatrixXd P;
+  Eigen::Matrix3d K;  // K is the camera intrinsic matrix
+  Eigen::MatrixXd P;  // P is camera distortion matrix
+  Eigen::Matrix4d Q;  // Q is transformation matrix from pixel to world
+
+private:
+  void computeQ();
 };
 
 class MultisenseImageInterface
@@ -98,7 +110,7 @@ private:
   std::string depth_cost_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_DEPTH_COST_TOPIC;  // image
   std::string disp_sensor_msg_topic_ = "/multisense/left/disparity";
   std::string cost_topic_ = "/multisense/left/cost";  // sensor_msg/Image
-
+  std::string multisense_motor_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_CONTROL_MOTOR_TOPIC;
   image_transport::ImageTransport it_;
   std::string transport_hint_ = "compressed";
 
@@ -111,6 +123,7 @@ private:
   ros::Subscriber cam_sub_disparity_;
   ros::Subscriber camera_info_sub_;
 
+  ros::Publisher multisense_motor_speed_pub_;
   std::shared_ptr<message_filters::Synchronizer<exactTimePolicy>> sync_img_depth_exact;
   std::shared_ptr<message_filters::Synchronizer<exactTimePolicy>> sync_img_depth_approx;
 
@@ -142,6 +155,7 @@ public:
   int getHeight();
   int getWidth();
   bool isSensorActive();
+  void setSpindleSpeed(double speed = 2.0f);
   bool start();
   bool shutdown();
 };
