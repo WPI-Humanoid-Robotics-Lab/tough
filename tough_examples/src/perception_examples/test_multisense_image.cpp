@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 
   tough_perception::MultisenseImageInterfacePtr imageHandler;
   imageHandler = tough_perception::MultisenseImageInterface::getMultisenseImageInterface(nh);
-
+  imageHandler->setSpindleSpeed(2.0);
   cv::Mat image;
 
   tough_perception::MultisenseCameraModel cam_model;
@@ -49,18 +49,7 @@ int main(int argc, char** argv)
 
   ROS_INFO("is Multisense active %s", imageHandler->isSensorActive() ? "true" : "false");
 
-  std::cout << "-" << std::endl;
-  std::cout << "[Height]" << cam_model.height << std::endl;
-  std::cout << "[width]" << cam_model.width << std::endl;
-  std::cout << "[fx]" << cam_model.fx << std::endl;
-  std::cout << "[fy]" << cam_model.fy << std::endl;
-  std::cout << "[cx]" << cam_model.cx << std::endl;
-  std::cout << "[cy]" << cam_model.cy << std::endl;
-  std::cout << "[K]\n" << cam_model.K << std::endl;
-  std::cout << "[P]\n" << cam_model.P << std::endl;
-  std::cout << "[distortion_model] " << cam_model.distortion_model << std::endl;
-  std::cout << "-" << std::endl;
-
+  cam_model.printCameraConfig();
   status = imageHandler->getImage(image);
   printStatus("RGB Image", status);
   if (status)

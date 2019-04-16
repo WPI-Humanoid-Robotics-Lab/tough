@@ -2,10 +2,46 @@
 #include <tough_perception_common/perception_common_names.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+#include <std_msgs/Float64.h>
+#include <opencv2/core/eigen.hpp>
 
 namespace tough_perception
 {
 using namespace std;
+
+// MultisenseCameraModel
+MultisenseCameraModel::MultisenseCameraModel()
+{
+  tx = -0.07;
+}
+
+void MultisenseCameraModel::computeQ()
+{
+  this->Q << this->fy * this->tx, 0.0, 0.0, -this->fy * this->cx * this->tx,  // row 1
+      0.0, this->fx * this->tx, 0.0, -this->fx * this->cy * this->tx,         //
+      0.0, 0.0, 0.0, this->fx * this->fy * this->tx,                          //
+      0.0, 0.0, -this->fy, 0.0;
+}
+
+void MultisenseCameraModel::printCameraConfig()
+{
+  std::cout << "-" << std::endl
+            << "[Height]" << height << std::endl
+            << "[width]" << width << std::endl
+            << "[fx]" << fx << std::endl
+            << "[fy]" << fy << std::endl
+            << "[cx]" << cx << std::endl
+            << "[cy]" << cy << std::endl
+            << "[K]\n"
+            << K << std::endl
+            << "[P]\n"
+            << P << std::endl
+            << "[Q]\n"
+            << Q << std::endl
+            << "[distortion_model] " << distortion_model << std::endl
+            << "-" << std::endl;
+  return;
+}
 
 MultisenseImageInterfacePtr MultisenseImageInterface::current_object_ = nullptr;
 
@@ -99,6 +135,9 @@ bool MultisenseImageInterface::start()
   cam_sub_disparity_ = nh_.subscribe(disp_topic_, 1, &MultisenseImageInterface::disparityCB, this);
 
   camera_info_sub_ = nh_.subscribe(camera_info_topic, 1, &MultisenseImageInterface::camera_infoCB, this);
+
+  multisense_motor_speed_pub_ = nh_.advertise<std_msgs::Float64>(multisense_motor_topic_, 1);
+
   ros::Duration(1).sleep();
   ros::spinOnce();
 }
@@ -242,6 +281,7 @@ bool MultisenseImageInterface::getCameraInfo(MultisenseCameraModel& pinhole_mode
     pinhole_model.cx = pinhole_model.K(0, 2);
     pinhole_model.cy = pinhole_model.K(1, 2);
     pinhole_model.distortion_model = camera_info_->distortion_model;
+    pinhole_model.computeQ();
     return true;
   }
   return false;
@@ -274,6 +314,10 @@ bool MultisenseImageInterface::shutdown()
     ros::Duration(0.5).sleep();
   }
 }
+void MultisenseImageInterface::setSpindleSpeed(double speed)
+{
+  multisense_motor_speed_pub_.publish(speed);
+}
 
 MultisenseImageInterface::~MultisenseImageInterface()
 {
@@ -299,4 +343,38 @@ void resetMsg(stereo_msgs::DisparityImageConstPtr& some_msg)
 {
   some_msg = nullptr;
 }
+
+void generateOrganizedRGBDCloud(const cv::Mat& dispImage, const cv::Mat& colorImage, const Eigen::Matrix4d Qmat,
+                                tough_perception::StereoPointCloudColor::Ptr& cloud)
+{
+  cv::Mat xyz, QMatrix;
+  int width = dispImage.cols;
+  int height = dispImage.rows;
+  cloud->resize(width * height);
+  cloud->height = height;
+  cloud->width = width;
+
+  cv::eigen2cv(Qmat, QMatrix);
+  cv::reprojectImageTo3D(dispImage, xyz, QMatrix, false);
+
+  for (int u = 0; u < dispImage.rows; u++)
+    for (int v = 0; v < dispImage.cols; v++)
+    {
+      if (dispImage.at<float>(cv::Point(v, u)) == 0.0)
+        continue;
+      tough_perception::StereoPointColor* pt;
+      pt = &(cloud->at(v, u));
+
+      const cv::Vec3f* cv_pt = &(xyz.at<cv::Vec3f>(cv::Point(v, u)));
+      pt->x = cv_pt->val[0];
+      pt->y = cv_pt->val[1];
+      pt->z = cv_pt->val[2];
+
+      const cv::Vec3b* rgb = &(colorImage.at<cv::Vec3b>(cv::Point(v, u)));
+      pt->b = rgb->val[0];
+      pt->g = rgb->val[1];
+      pt->r = rgb->val[2];
+    }
+}
+
 }  // namespace tough_perception
