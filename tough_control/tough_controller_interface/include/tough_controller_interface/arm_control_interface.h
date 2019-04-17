@@ -128,30 +128,33 @@ public:
   int getnumArmJoints() const;
 
   /**
-   * @brief moveArmInTaskSpaceMessage Moves the arm to a given point in task space (world frame)
+   * @brief moveArmInTaskSpaceMessage Moves the arm to a given point in task space (pelvis frame by default)
    * @parm side	Side of the robot. It can be RIGHT or LEFT.
    * @param point	The point in task space to move the arm to.
    */
   //    void moveArmInTaskSpaceMessage(const RobotSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage &point, int
   //    baseForControl=ihmc_msgs::FrameInformationRosMessage::CHEST_FRAME);
   void moveArmInTaskSpaceMessage(const RobotSide side, const ihmc_msgs::SE3TrajectoryPointRosMessage& point,
-                                 int baseForControl = 0);
+                                 int baseForControl = TOUGH_COMMON_NAMES::PELVIS_ZUP_FRAME_HASH);
 
   /**
-   * @brief moveArmInTaskSpace  Moves the arm to a give pose in task space (world frame)
+   * @brief moveArmInTaskSpace  Moves the arm to a give pose in task space (pelvis frame by default)
    * @param side  Side of the robot. It can be RIGHT or LEFT.
    * @param pose  The pose in task space to move the arm to.
    * @param time  Total time to execute the trajectory.
+   * @param baseForControl FrameHash in which the pose is defined
    */
-  void moveArmInTaskSpace(const RobotSide side, const geometry_msgs::Pose& pose, const float time);
+  void moveArmInTaskSpace(const RobotSide side, const geometry_msgs::Pose& pose, const float time,
+                          int baseForControl = TOUGH_COMMON_NAMES::PELVIS_ZUP_FRAME_HASH);
 
   /**
-   * @brief moveArmInTaskSpace  Moves the arm(s) to the given position in task space (world frame).
+   * @brief moveArmInTaskSpace  Moves the arm(s) to the given position in task space (pelvis frame by default).
    * @param arm_data A vector of armTaskSpaceData struct.
    */
   //    void moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data, int
   //    baseForControl=ihmc_msgs::FrameInformationRosMessage::CHEST_FRAME);
-  void moveArmInTaskSpace(const std::vector<ArmTaskSpaceData>& arm_data, const int baseForControl = -102);
+  void moveArmInTaskSpace(const std::vector<ArmTaskSpaceData>& arm_data,
+                          const int baseForControl = TOUGH_COMMON_NAMES::PELVIS_ZUP_FRAME_HASH);
 
   /**
    * @brief moveArmTrajectory Moves the arm to follow a particular trajectory plan
