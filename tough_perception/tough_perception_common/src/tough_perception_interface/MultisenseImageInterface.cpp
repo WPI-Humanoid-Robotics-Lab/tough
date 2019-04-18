@@ -347,33 +347,33 @@ void resetMsg(stereo_msgs::DisparityImageConstPtr& some_msg)
 void generateOrganizedRGBDCloud(const cv::Mat& dispImage, const cv::Mat& colorImage, const Eigen::Matrix4d Qmat,
                                 tough_perception::StereoPointCloudColor::Ptr& cloud)
 {
-  cv::Mat xyz, QMatrix;
   int width = dispImage.cols;
   int height = dispImage.rows;
+
   cloud->resize(width * height);
   cloud->height = height;
   cloud->width = width;
 
-  cv::eigen2cv(Qmat, QMatrix);
-  cv::reprojectImageTo3D(dispImage, xyz, QMatrix, false);
-
   for (int u = 0; u < dispImage.rows; u++)
     for (int v = 0; v < dispImage.cols; v++)
     {
-      if (dispImage.at<float>(cv::Point(v, u)) == 0.0)
+      const float& currentPixelDisp = dispImage.at<float>(cv::Point(v, u));
+      if (currentPixelDisp == 0.0)
         continue;
-      tough_perception::StereoPointColor* pt;
-      pt = &(cloud->at(v, u));
+      Eigen::Vector4d pixelCoordVec(v, u, currentPixelDisp, 1);
+      pixelCoordVec = Qmat * pixelCoordVec;
+      pixelCoordVec /= pixelCoordVec(3);
 
-      const cv::Vec3f* cv_pt = &(xyz.at<cv::Vec3f>(cv::Point(v, u)));
-      pt->x = cv_pt->val[0];
-      pt->y = cv_pt->val[1];
-      pt->z = cv_pt->val[2];
+      tough_perception::StereoPointColor& pt = cloud->at(v, u);
 
-      const cv::Vec3b* rgb = &(colorImage.at<cv::Vec3b>(cv::Point(v, u)));
-      pt->b = rgb->val[0];
-      pt->g = rgb->val[1];
-      pt->r = rgb->val[2];
+      pt.x = pixelCoordVec(0);
+      pt.y = pixelCoordVec(1);
+      pt.z = pixelCoordVec(2);
+
+      const cv::Vec3b& rgb = colorImage.at<cv::Vec3b>(cv::Point(v, u));
+      pt.b = rgb.val[0];
+      pt.g = rgb.val[1];
+      pt.r = rgb.val[2];
     }
 }
 
