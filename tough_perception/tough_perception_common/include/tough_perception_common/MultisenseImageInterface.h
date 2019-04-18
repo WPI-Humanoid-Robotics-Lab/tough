@@ -28,14 +28,33 @@ bool isActive(const sensor_msgs::ImageConstPtr& some_msg);
 bool isActive(const stereo_msgs::DisparityImageConstPtr& some_msg);
 void resetMsg(sensor_msgs::ImageConstPtr& some_msg);
 void resetMsg(stereo_msgs::DisparityImageConstPtr& some_msg);
-
-class MultisenseImageInterface;
+/**
+ * @brief This function generates an Organized RGBD cloud using color and disparity images. 
+ * 
+ * @param dispImage disparity image
+ * @param colorImage RGB image
+ * @param Qmat  Q matrix for transforming pixel coordinates
+ * @param cloud  output pointer to PointcloudXYZRGB 
+ */
 void generateOrganizedRGBDCloud(const cv::Mat& dispImage, const cv::Mat& colorImage, const Eigen::Matrix4d Qmat,
                                 tough_perception::StereoPointCloudColor::Ptr& cloud);
+class MultisenseImageInterface;
+/**
+ * @brief MultisenseCamerModel class stores/provides camera information. 
+ * 
+ */
 class MultisenseCameraModel
 {
 public:
+/**
+ * @brief Construct a new Multisense Camera Model object
+ * 
+ */
   MultisenseCameraModel();
+  /**
+   * @brief print the camera config to standard output
+   * 
+   */
   void printCameraConfig();
   friend MultisenseImageInterface;
 
@@ -144,22 +163,106 @@ private:
                     std::mutex& resource_mutex);
 
 public:
+/**
+ * @brief Get the Multisense Image Interface object
+ * 
+ * @param nh Nodehandle to the running ros node
+ * @param is_simulation 
+ * @return MultisenseImageInterface* 
+ */
   static MultisenseImageInterface* getMultisenseImageInterface(ros::NodeHandle nh, bool is_simulation = false);
   ~MultisenseImageInterface();
 
+/**
+ * @brief Get RGB image from multisense camera
+ * 
+ * @param img reference to be updated
+ * @return true when image is received 
+ * @return false when image cannot be fetched
+ */
   bool getImage(cv::Mat& img);
+
+  /**
+   * @brief Get Disparity image from multisense camera
+   * 
+   * @param disp_img reference to be updated
+   * @param from_stereo_msg Set this to true for Gazebo and false otherwise 
+   * @return true when image is received
+   * @return false when image cannot be fetched
+   */
   bool getDisparity(cv::Mat& disp_img, bool from_stereo_msg = false);
+  
+  /**
+   * @brief Get the Depth Image object
+   * 
+   * @param depth_img reference to be updated
+   * @return true when image is received 
+   * @return false when image cannot be fetched
+   */
   bool getDepthImage(cv::Mat& depth_img);
   bool getCostImage(cv::Mat& cost_img);
   bool getCameraInfo(MultisenseCameraModel& pinhole_model);
+
+  /**
+   * @brief Provides disparity and rgb image along with organized pointcloud based off of those images
+   * 
+   * @param dispImage disparity image
+   * @param colorImage color image
+   * @param pointcloud organized RGBXYZ pointcloud
+   * @return true when all the references can be updated
+   * @return false when either of the three fails
+   */
+  bool getStereoData(cv::Mat& dispImage, cv::Mat& colorImage, tough_perception::StereoPointCloudColor::Ptr &pointcloud);
+  
+  /**
+   * @brief Get the Height of image
+   * 
+   * @return int 
+   */
   int getHeight();
+  /**
+   * @brief Get the Width of image
+   * 
+   * @return int 
+   */
   int getWidth();
+
+  /**
+   * @brief Check if Multisense sensor is active
+   * 
+   * @return true 
+   * @return false 
+   */
   bool isSensorActive();
+
+  /**
+   * @brief Set the Spindle Speed to given value in Gazebo
+   * 
+   * @param speed 
+   */
   void setSpindleSpeed(double speed = 2.0f);
+  
+  /**
+   * @brief Start subscribers and publishers to talk with Multisense sensor
+   * 
+   * @return true 
+   * @return false 
+   */
   bool start();
+
+  /**
+   * @brief Stop subscribers listening to Multisense sensor
+   * 
+   * @return true 
+   * @return false 
+   */
   bool shutdown();
 };
 
+/**
+ * @brief Handy typedef for MultisenseImageInterface pointer.
+ * @todo: This should be a boost shared pointer
+ */
 typedef MultisenseImageInterface* MultisenseImageInterfacePtr;
 }  // namespace tough_perception
 

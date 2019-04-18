@@ -218,7 +218,7 @@ bool MultisenseImageInterface::getDisparity(cv::Mat& disp_img, bool from_stereo_
   bool status;
   if (from_stereo_msg)
   {
-    ROS_INFO("Fetching disparity from stereo_msg");
+    ROS_DEBUG("Fetching disparity from stereo_msg");
     std::lock_guard<std::mutex> guard(disparity_mutex);
     if (disparity_ == nullptr)
       return false;
@@ -226,7 +226,7 @@ bool MultisenseImageInterface::getDisparity(cv::Mat& disp_img, bool from_stereo_
   }
   else
   {
-    ROS_INFO("Fetching disparity from sensor_msg");
+    ROS_DEBUG("Fetching disparity from sensor_msg");
     std::lock_guard<std::mutex> guard(disparity_sensor_msg_mutex);
     if (disparity_sensor_msg_ == nullptr)
       return false;
@@ -285,6 +285,23 @@ bool MultisenseImageInterface::getCameraInfo(MultisenseCameraModel& pinhole_mode
     return true;
   }
   return false;
+}
+
+bool MultisenseImageInterface::getStereoData(cv::Mat& dispImage, cv::Mat& colorImage,
+                                             tough_perception::StereoPointCloudColor::Ptr& pointcloud)
+{
+  bool status = getImage(colorImage);
+  status = status && getDisparity(dispImage, true);
+  
+  if (!status)
+    return false;
+  
+  MultisenseCameraModel cam_model;
+  this->getCameraInfo(cam_model);
+  
+  generateOrganizedRGBDCloud(dispImage, colorImage, cam_model.Q, pointcloud);
+  
+  return true;
 }
 
 bool MultisenseImageInterface::isSensorActive()
@@ -350,6 +367,9 @@ void generateOrganizedRGBDCloud(const cv::Mat& dispImage, const cv::Mat& colorIm
   int width = dispImage.cols;
   int height = dispImage.rows;
 
+  if(!cloud)
+    cloud = tough_perception::StereoPointCloudColor::Ptr(new tough_perception::StereoPointCloudColor());
+    
   cloud->resize(width * height);
   cloud->height = height;
   cloud->width = width;
