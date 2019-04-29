@@ -49,6 +49,7 @@ int main(int argc, char** argv)
     cout << "u - up \n";
     cout << "c - curl \n";
     cout << "f - forward \n";
+    cout << "m - move foot to given pose in world frame \n";
     cout << "p - place leg \n";
     cout << "a - align feet\n";
 
@@ -97,6 +98,17 @@ int main(int argc, char** argv)
       cout << "enter forward distance \n";
       cin >> nudgeDistance;
       walk.nudgeFoot((RobotSide)robot_side, nudgeDistance);
+    }
+    else if (input == 'm')
+    {
+      std::cout << "Enter <side> <x> <y> <z> <ax> <ay> <az> <aw>:";
+      geometry_msgs::Pose pt;
+      std::cin >> robot_side >> pt.position.x >> pt.position.y >> pt.position.z >> pt.orientation.x >>
+          pt.orientation.y >> pt.orientation.z >> pt.orientation.w;
+      double t;
+      std::cout << "Enter time to reach that pose : ";
+      std::cin >> t;
+      walk.moveFoot((RobotSide)robot_side, pt, t);
     }
     else if (input == 's')
     {

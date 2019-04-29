@@ -192,6 +192,19 @@ public:
                  const geometry_msgs::Quaternion* orientation = nullptr, const float time = 2.0f);
 
   /**
+   * @brief moveFoot nudges foot to the given final pose in world frame
+   *
+   * @param side LEFT/RIGHT
+   * @param foot_goal_pose a geometry_msg with desired position and orientation of the foot frame
+   * @param time Time to achieve the desired goal
+   * @return true
+   * @return false
+   */
+  bool moveFoot(const RobotSide side, const geometry_msgs::Pose& foot_goal_pose, const float time);
+
+  bool moveFoot(const RobotSide side, const std::vector<geometry_msgs::Pose> &foot_goal_poses, const float time);
+
+  /**
    * @brief getCurrentStep gives the current position of the robot wrt to world frame
    * @param side LEFT/ RIGHT leg
    * @param foot is the foot msg which stores the location of the foot in world frame.

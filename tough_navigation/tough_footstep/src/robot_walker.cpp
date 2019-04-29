@@ -288,6 +288,36 @@ bool RobotWalker::nudgeFoot(const RobotSide side, const float x_offset, const fl
   return true;
 }
 
+bool RobotWalker::moveFoot(const RobotSide side, const std::vector<geometry_msgs::Pose>& foot_goal_poses,
+                           const float time)
+{
+  ihmc_msgs::FootTrajectoryRosMessage foot;
+  initializeFootTrajectoryRosMessage(side, foot);
+
+  ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
+  getCurrentStep(side, *current);
+
+  foot.taskspace_trajectory_points.resize(foot_goal_poses.size());
+
+  for (size_t i = 0; i < foot_goal_poses.size(); i++)
+  {
+    foot.taskspace_trajectory_points[i].position = foot_goal_poses[i].position;
+    foot.taskspace_trajectory_points[i].orientation = foot_goal_poses[i].orientation;
+    foot.taskspace_trajectory_points[i].unique_id = id;
+    foot.taskspace_trajectory_points[i].time = time / (float)foot_goal_poses.size() * (i+1);
+  }
+
+  nudgestep_pub_.publish(foot);
+
+  return true;
+}
+
+bool RobotWalker::moveFoot(const RobotSide side, const geometry_msgs::Pose &foot_goal_pose, const float time)
+{
+  std::vector<geometry_msgs::Pose> temp = { foot_goal_pose };
+  return moveFoot(side, temp, time);
+}
+
 bool RobotWalker::curlLeg(RobotSide side, float radius, float time)
 {
   ihmc_msgs::FootTrajectoryRosMessage foot;
