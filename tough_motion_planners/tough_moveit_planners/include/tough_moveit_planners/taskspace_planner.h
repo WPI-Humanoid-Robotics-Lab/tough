@@ -16,7 +16,7 @@
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <moveit_msgs/PlanningScene.h>
-#include <moveit/trajectory_processing/iterative_time_parameterization.h>
+#include <moveit/trajectory_processing/iterative_spline_parameterization.h>
 #include <moveit_visual_tools/moveit_visual_tools.h>
 
 #include <trac_ik/trac_ik.hpp>
@@ -100,8 +100,8 @@ private:
 
   // Trajectory Parameters
   std::shared_ptr<robot_model::RobotState> moveit_robot_state_;
-  trajectory_processing::IterativeParabolicTimeParameterization timeParameterizer;
-
+  trajectory_processing::IterativeSplineParameterization timeParameterizer;
+  
   // Cartesian Planner
   void initializeMoveGroupsForCartesianPath(void);
   bool is_move_group_initializing_ = true;
