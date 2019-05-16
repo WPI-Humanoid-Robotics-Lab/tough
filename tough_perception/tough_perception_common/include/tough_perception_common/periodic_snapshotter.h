@@ -35,9 +35,15 @@
 #ifndef PERIODIC_SNAPSHOTTER_H
 #define PERIODIC_SNAPSHOTTER_H
 
-#include <tough_perception_common/MultisenseImage.h>
-#include <tough_perception_common/MultisensePointCloud.h>
-#include <tough_perception_common/PointCloudHelper.h>
+#include <tough_perception_common/global.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/filters/extract_indices.h>
+#include <sensor_msgs/point_cloud_conversion.h>
+#include <sensor_msgs/PointCloud2.h>
+#include "tf/tf.h"
+#include "tf/transform_listener.h"
 #include <tough_common/tough_common_names.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int8.h>
@@ -68,7 +74,7 @@ public:
    * in the launch file. example: <param name="/laser_assembler_svc/laser_snapshot_timeout" type="double" value="6.0"/>
    * @param e
    */
-  void timerCallback(const ros::TimerEvent& e);
+  void timerCallback(const ros::TimerEvent &e);
 
   /**
    * @brief mergeClouds merges the pointcloud published on assembled_cloud2 topic with the previous messages
@@ -79,15 +85,15 @@ public:
 
   void pairAlign(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_src,
                  const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_tgt, pcl::PointCloud<pcl::PointXYZ>::Ptr output,
-                 Eigen::Matrix4f& final_transform);
+                 Eigen::Matrix4f &final_transform);
 
   void resetPointcloud(bool resetPointcloud);
-  void resetPointcloudCB(const std_msgs::Empty& msg);
+  void resetPointcloudCB(const std_msgs::Empty &msg);
 
   void pausePointcloud(bool pausePointcloud);
-  void pausePointcloudCB(const std_msgs::Bool& msg);
+  void pausePointcloudCB(const std_msgs::Bool &msg);
 
-  void setBoxFilterCB(const std_msgs::Int8& msg);
+  void setBoxFilterCB(const std_msgs::Int8 &msg);
   void clipPointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud);
 
 private:
@@ -107,8 +113,8 @@ private:
   bool resetPointcloud_;
   PCL_STATE_CONTROL state_request;
   bool enable_box_filter_;
-  RobotStateInformer* robot_state_;
-  RobotDescription* rd_;
+  RobotStateInformer *robot_state_;
+  RobotDescription *rd_;
 
   float filter_min_x;
   float filter_max_x;
@@ -123,19 +129,19 @@ private:
   const int MAX_SNAPSHOTS = 5;
 };
 
-void convertROStoPCL(const sensor_msgs::PointCloud2::Ptr ros_msg, pcl::PointCloud<pcl::PointXYZ>::Ptr& pcl_msg)
+void convertROStoPCL(const sensor_msgs::PointCloud2::Ptr ros_msg, pcl::PointCloud<pcl::PointXYZ>::Ptr &pcl_msg)
 {
   pcl::PCLPointCloud2 pcl_pc2;
   pcl_conversions::toPCL(*ros_msg, pcl_pc2);
   pcl::fromPCLPointCloud2(pcl_pc2, *pcl_msg);
 }
 
-void convertPCLtoROS(const pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_msg, sensor_msgs::PointCloud2::Ptr& ros_msg)
+void convertPCLtoROS(const pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_msg, sensor_msgs::PointCloud2::Ptr &ros_msg)
 {
   pcl::PCLPointCloud2 pcl_pc2;
   pcl::toPCLPointCloud2(*pcl_msg, pcl_pc2);
   pcl_conversions::moveFromPCL(pcl_pc2, *ros_msg);
 }
-}  // namespace laser_assembler
+} // namespace laser_assembler
 
-#endif  // PERIODIC_SNAPSHOTTER_H
+#endif // PERIODIC_SNAPSHOTTER_H

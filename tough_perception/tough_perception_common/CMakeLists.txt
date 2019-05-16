@@ -50,28 +50,16 @@ catkin_package(
       tough_controller_interface
 )
 
-add_library(${PROJECT_NAME}  src/MultisensePointCloud.cpp
-                             src/MultisenseImage.cpp
-                             src/tough_perception_interface/MultisenseImageInterface.cpp 
-#                             src/ImageHelper.cpp
-                             src/PointCloudHelper.cpp
-                             src/laser2point_cloud.cpp
-                             src/ArucoDetector.cpp
+add_library(${PROJECT_NAME}  
+                              src/tough_perception_interface/MultisenseImageInterface.cpp 
+                              src/laser2point_cloud.cpp
+                              src/ArucoDetector.cpp
 )
 									
 set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_DEFINITIONS)
 
 target_link_libraries(${PROJECT_NAME}  ${PCL_LIBRARIES} ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_dependencies(${PROJECT_NAME}  ${catkin_EXPORTED_TARGETS} )
-
-add_executable(test_lasercloud  src/test_laser.cpp)
-target_link_libraries(test_lasercloud  ${PROJECT_NAME})
-
-#add_executable(test_image  src/test_image.cpp)
-#target_link_libraries(test_image  ${PROJECT_NAME})
-
-add_executable(test_organizedRGBD  src/test_organizedRGBD.cpp)
-target_link_libraries(test_organizedRGBD  ${PROJECT_NAME})
 
 add_executable(periodic_snapshotter  src/periodic_snapshotter.cpp)
 target_link_libraries(periodic_snapshotter  ${catkin_LIBRARIES} ${PROJECT_NAME})
@@ -91,7 +79,10 @@ target_link_libraries(test_aruco_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
 
 
 ## Mark executables and/or libraries for installation
- install(TARGETS test_lasercloud test_organizedRGBD periodic_snapshotter walkway_point_generator laser2point_cloud_node ${PROJECT_NAME}
+ install(TARGETS 
+         periodic_snapshotter 
+         walkway_point_generator 
+         laser2point_cloud_node ${PROJECT_NAME}
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
