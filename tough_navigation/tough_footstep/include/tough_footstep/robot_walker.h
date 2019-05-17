@@ -7,6 +7,7 @@
 #include "ihmc_msgs/FootstepDataListRosMessage.h"
 #include "ihmc_msgs/FootstepDataRosMessage.h"
 #include "ihmc_msgs/FootstepStatusRosMessage.h"
+#include "ihmc_msgs/WalkingStatusRosMessage.h"
 #include "ihmc_msgs/FootTrajectoryRosMessage.h"
 #include "ihmc_msgs/WholeBodyTrajectoryRosMessage.h"
 #include "ihmc_msgs/AbortWalkingRosMessage.h"
@@ -56,7 +57,8 @@ public:
    * @param side  specifies the foot to be used for stepping
    * @param waitForSteps  set this to true for a blocking call, otherwise false.
    */
-  void stepAtPose(const geometry_msgs::Pose& goal, const RobotSide side, const bool waitForSteps);
+  void stepAtPose(const geometry_msgs::Pose& goal, const RobotSide side, const bool waitForSteps = false,
+                  const bool queue = false, const std::string refFrame = TOUGH_COMMON_NAMES::WORLD_TF);
 
   /**
    * @brief walkNSteps Makes the robot walk given number of steps. The offsets are in world frame.
@@ -202,7 +204,7 @@ public:
    */
   bool moveFoot(const RobotSide side, const geometry_msgs::Pose& foot_goal_pose, const float time);
 
-  bool moveFoot(const RobotSide side, const std::vector<geometry_msgs::Pose> &foot_goal_poses, const float time);
+  bool moveFoot(const RobotSide side, const std::vector<geometry_msgs::Pose>& foot_goal_poses, const float time);
 
   /**
    * @brief getCurrentStep gives the current position of the robot wrt to world frame
@@ -269,15 +271,18 @@ private:
   const float FOOT_ROT_ERR_THRESHOLD = 5 * M_PI / 180.0f;  // 5 degrees
   double transfer_time_, swing_time_, swing_height_;
   int execution_mode_, step_counter_, step_status_;
+  int previous_message_id_;
+  bool isWalking;
 
   ros::NodeHandle nh_;
   ros::Time cbTime_;
   ros::Publisher footsteps_pub_, nudgestep_pub_, loadeff_pub, abort_footsteps_pub_;
-  ros::Subscriber footstep_status_;
+  ros::Subscriber footstep_status_, walking_status_;
   ros::ServiceClient footstep_client_;
   std_msgs::String right_foot_frame_, left_foot_frame_;
 
   void footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage& msg);
+  void walkingStatusCB(const ihmc_msgs::WalkingStatusRosMessage& msg);
   void waitForSteps(const int numSteps);
 
   // /**
@@ -296,24 +301,27 @@ private:
     msg.default_transfer_duration = transfer_time_;
     msg.default_swing_duration = swing_time_;
     msg.execution_mode = execution_mode_;
-
+    if(execution_mode_ == ihmc_msgs::FootstepDataListRosMessage::QUEUE) {
+      msg.previous_message_id = previous_message_id_;
+    }
+    previous_message_id_ = RobotWalker::id;
     msg.unique_id = RobotWalker::id++;
   }
 
-  inline void initializeFootTrajectoryRosMessage(RobotSide side, ihmc_msgs::FootTrajectoryRosMessage& foot)
+  inline void initializeFootTrajectoryRosMessage(const RobotSide side, ihmc_msgs::FootTrajectoryRosMessage& foot,
+                                                 const int refFrame = TOUGH_COMMON_NAMES::WORLD_FRAME_HASH)
   {
     ihmc_msgs::SE3TrajectoryPointRosMessage data;
-    ihmc_msgs::FrameInformationRosMessage frameInfo;
+    ihmc_msgs::FrameInformationRosMessage& frameInfo = foot.frame_information;
 
     foot.robot_side = side;
     foot.execution_mode = 0;  // OVERRIDE
     foot.unique_id = id++;
     foot.taskspace_trajectory_points.push_back(data);
 
-    frameInfo.data_reference_frame_id = rd_->getWorldFrameHash();
-    frameInfo.trajectory_reference_frame_id = rd_->getWorldFrameHash();
-
-    foot.frame_information = frameInfo;
+    frameInfo.data_reference_frame_id = refFrame;
+    frameInfo.trajectory_reference_frame_id = refFrame;
+    
   }
 
   ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStep(int side, float x, float y);

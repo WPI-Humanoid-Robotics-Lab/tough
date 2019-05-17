@@ -24,13 +24,16 @@ RobotWalker::RobotWalker(ros::NodeHandle nh, double InTransferTime, double InSwi
   this->abort_footsteps_pub_ =
       nh_.advertise<ihmc_msgs::AbortWalkingRosMessage>(control_prefix + ABORT_WALKING_TOPIC, 1, true);
   this->footstep_status_ =
-      nh_.subscribe(output_prefix + FOOTSTEP_STATUS_TOPIC, 20, &RobotWalker::footstepStatusCB, this);
+      nh_.subscribe(output_prefix + FOOTSTEP_STATUS_TOPIC, 5, &RobotWalker::footstepStatusCB, this);
+  this->walking_status_ =
+      nh_.subscribe(output_prefix + WALKING_STATUS_TOPIC, 0, &RobotWalker::walkingStatusCB, this);
 
   transfer_time_ = InTransferTime;
   swing_time_ = InSwingTime;
   execution_mode_ = InMode;
   swing_height_ = swingHeight;
-
+  previous_message_id_ = 0;
+  isWalking = false;
   ros::Duration(0.5).sleep();
   step_counter_ = 0;
 
@@ -67,6 +70,9 @@ void RobotWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage& ms
   return;
 }
 
+void RobotWalker::walkingStatusCB(const ihmc_msgs::WalkingStatusRosMessage& msg) {
+  isWalking = msg.status == ihmc_msgs::WalkingStatusRosMessage::STARTED;
+}
 // calls the footstep planner to plan path and walks to a 2D goal.
 bool RobotWalker::walkToGoal(const geometry_msgs::Pose2D& goal, bool waitForSteps)
 {
@@ -75,7 +81,7 @@ bool RobotWalker::walkToGoal(const geometry_msgs::Pose2D& goal, bool waitForStep
   if (this->getFootstep(goal, list))
   {
     this->footsteps_pub_.publish(list);
-    RobotWalker::id++;
+    previous_message_id_ = RobotWalker::id++;
 
     if (waitForSteps)
     {
@@ -84,18 +90,29 @@ bool RobotWalker::walkToGoal(const geometry_msgs::Pose2D& goal, bool waitForStep
     }
     return true;
   }
+  ROS_WARN("Failed to plan footsteps. Does map exist? Is the footstep planner on?");
   return false;
 }
 
-// calls the footstep planner to plan path and walks to a 2D goal.
-void RobotWalker::stepAtPose(const geometry_msgs::Pose& goal, const RobotSide side, bool waitForSteps)
+void RobotWalker::stepAtPose(const geometry_msgs::Pose& goal, const RobotSide side, bool waitForSteps,
+                             const bool queue, const std::string refFrame)
 {
+  if(queue && isWalking) {
+    this->execution_mode_ = ihmc_msgs::FootstepDataListRosMessage::QUEUE;
+  }
   ihmc_msgs::FootstepDataListRosMessage list;
   initializeFootstepDataListRosMessage(list);
-  list.footstep_data_list.push_back(*getOffsetStep(side, goal));
+  
+  if (queue)
+  {
+    this->execution_mode_ = ihmc_msgs::FootstepDataListRosMessage::OVERRIDE;
+  }
+  geometry_msgs::Pose goalInWorld;
+  current_state_->transformPose(goal, goalInWorld, refFrame);
+  list.footstep_data_list.push_back(*getOffsetStep(side, goalInWorld));
 
   this->footsteps_pub_.publish(list);
-  RobotWalker::id++;
+  previous_message_id_ = RobotWalker::id++;
 
   if (waitForSteps)
   {
@@ -215,7 +232,7 @@ bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float>& xOffset, c
 bool RobotWalker::walkGivenSteps(const ihmc_msgs::FootstepDataListRosMessage& list, const bool waitForSteps)
 {
   this->footsteps_pub_.publish(list);
-  RobotWalker::id++;
+  this->previous_message_id_ = RobotWalker::id++;
   if (waitForSteps)
   {
     cbTime_ = ros::Time::now();
@@ -304,7 +321,7 @@ bool RobotWalker::moveFoot(const RobotSide side, const std::vector<geometry_msgs
     foot.taskspace_trajectory_points[i].position = foot_goal_poses[i].position;
     foot.taskspace_trajectory_points[i].orientation = foot_goal_poses[i].orientation;
     foot.taskspace_trajectory_points[i].unique_id = id;
-    foot.taskspace_trajectory_points[i].time = time / (float)foot_goal_poses.size() * (i+1);
+    foot.taskspace_trajectory_points[i].time = time / (float)foot_goal_poses.size() * (i + 1);
   }
 
   nudgestep_pub_.publish(foot);
@@ -312,7 +329,7 @@ bool RobotWalker::moveFoot(const RobotSide side, const std::vector<geometry_msgs
   return true;
 }
 
-bool RobotWalker::moveFoot(const RobotSide side, const geometry_msgs::Pose &foot_goal_pose, const float time)
+bool RobotWalker::moveFoot(const RobotSide side, const geometry_msgs::Pose& foot_goal_pose, const float time)
 {
   std::vector<geometry_msgs::Pose> temp = { foot_goal_pose };
   return moveFoot(side, temp, time);

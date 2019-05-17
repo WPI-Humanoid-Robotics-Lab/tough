@@ -42,6 +42,7 @@ const std::string FOOTSTEP_LIST_TOPIC = "/footstep_list";
 const std::string FOOTSTEP_TRAJECTORY_TOPIC = "/foot_trajectory";
 const std::string FOOTSTEP_LOAD_BEARING_TOPIC = "/foot_load_bearing";
 const std::string FOOTSTEP_STATUS_TOPIC = "/footstep_status";
+const std::string WALKING_STATUS_TOPIC = "/walking_status";
 const std::string ABORT_WALKING_TOPIC = "/abort_walking";
 
 /********* Output Topics *********/

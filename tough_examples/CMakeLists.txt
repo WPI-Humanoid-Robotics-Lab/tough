@@ -132,6 +132,9 @@ add_executable(walk_steps_example src/navigation_examples/walk_steps_example.cpp
 add_dependencies(walk_steps_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(walk_steps_example  ${catkin_LIBRARIES})
 
+add_executable(queue_steps_example src/navigation_examples/queue_steps_example.cpp )
+add_dependencies(queue_steps_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(queue_steps_example  ${catkin_LIBRARIES})
 
 #########################
 ## Perception examples ##
@@ -178,7 +181,7 @@ install(TARGETS reset_robot arm_control_example head_control_example arm_control
                 chest_control_example nudge_local_example pelvis_control_example
                 neck_control_example gripper_control_example arm_interactive_example
                 walk_forward_example walk_goal_example walk_example walk_rotate_example walk_steps_example
-                multisense_image_example ik_example motion_planner_example taskspace_planner_example 
+                queue_steps_example multisense_image_example ik_example motion_planner_example taskspace_planner_example 
                 taskspace_2stage_planner_example taskspace_planner_interactive_example follow_cartesian_path
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
