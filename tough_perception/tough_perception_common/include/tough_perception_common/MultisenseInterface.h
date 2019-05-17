@@ -1,9 +1,10 @@
-#ifndef MULTISENSEIMAGEINTERFACE_H_
-#define MULTISENSEIMAGEINTERFACE_H_
+#ifndef MULTISENSEINTERFACE_H_
+#define MULTISENSEINTERFACE_H_
 
 /*** INCLUDE FILES ***/
 #include <tough_perception_common/global.h>
 #include <tough_perception_common/perception_common_names.h>
+#include <tough_perception_common/PerceptionHelper.h>
 #include <image_transport/image_transport.h>
 #include <multisense_ros/RawCamConfig.h>
 #include <stereo_msgs/DisparityImage.h>
@@ -24,21 +25,21 @@ typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sens
 
 namespace tough_perception
 {
-bool isActive(const sensor_msgs::ImageConstPtr& some_msg);
-bool isActive(const stereo_msgs::DisparityImageConstPtr& some_msg);
-void resetMsg(sensor_msgs::ImageConstPtr& some_msg);
-void resetMsg(stereo_msgs::DisparityImageConstPtr& some_msg);
-/**
- * @brief This function generates an Organized RGBD cloud using color and disparity images. 
- * 
- * @param dispImage disparity image
- * @param colorImage RGB image
- * @param Qmat  Q matrix for transforming pixel coordinates
- * @param cloud  output pointer to PointcloudXYZRGB 
- */
-void generateOrganizedRGBDCloud(const cv::Mat& dispImage, const cv::Mat& colorImage, const Eigen::Matrix4d Qmat,
-                                tough_perception::StereoPointCloudColor::Ptr& cloud);
-class MultisenseImageInterface;
+bool isActive(const sensor_msgs::ImageConstPtr &some_msg);
+bool isActive(const stereo_msgs::DisparityImageConstPtr &some_msg);
+void resetMsg(sensor_msgs::ImageConstPtr &some_msg);
+void resetMsg(stereo_msgs::DisparityImageConstPtr &some_msg);
+// /**
+//  * @brief This function generates an Organized RGBD cloud using color and disparity images.
+//  *
+//  * @param dispImage disparity image
+//  * @param colorImage RGB image
+//  * @param Qmat  Q matrix for transforming pixel coordinates
+//  * @param cloud  output pointer to PointcloudXYZRGB
+//  */
+// void generateOrganizedRGBDCloud(const cv::Mat &dispImage, const cv::Mat &colorImage, const Eigen::Matrix4d Qmat,
+//                                 tough_perception::StereoPointCloudColor::Ptr &cloud);
+class MultisenseInterface;
 /**
  * @brief MultisenseCamerModel class stores/provides camera information. 
  * 
@@ -46,7 +47,7 @@ class MultisenseImageInterface;
 class MultisenseCameraModel
 {
 public:
-/**
+  /**
  * @brief Construct a new Multisense Camera Model object
  * 
  */
@@ -56,28 +57,28 @@ public:
    * 
    */
   void printCameraConfig();
-  friend MultisenseImageInterface;
+  friend MultisenseInterface;
 
   int width;
   int height;
-  double fx;  // focal length in x
-  double fy;  // focal length in y
-  double cx;  // center offset in x
-  double cy;  // center offset in y
-  double tx;  // negative baseline
+  double fx; // focal length in x
+  double fy; // focal length in y
+  double cx; // center offset in x
+  double cy; // center offset in y
+  double tx; // negative baseline
   std::string distortion_model = "";
-  Eigen::Matrix3d K;  // K is the camera intrinsic matrix
-  Eigen::MatrixXd P;  // P is camera distortion matrix
-  Eigen::Matrix4d Q;  // Q is transformation matrix from pixel to world
+  Eigen::Matrix3d K; // K is the camera intrinsic matrix
+  Eigen::MatrixXd P; // P is camera distortion matrix
+  Eigen::Matrix4d Q; // Q is transformation matrix from pixel to world
 
 private:
   void computeQ();
 };
 
-class MultisenseImageInterface
+class MultisenseInterface
 {
 private:
-  DISALLOW_COPY_AND_ASSIGN(MultisenseImageInterface);
+  DISALLOW_COPY_AND_ASSIGN(MultisenseInterface);
 
   // ros message place holders
   sensor_msgs::ImageConstPtr img_ = nullptr;
@@ -116,8 +117,8 @@ private:
 /// @todo: move the hardcoded topic names to perception_common_names
 #ifdef GAZEBO_SIMULATION
   std::string image_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC;
-  std::string disp_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC;  // stereo message
-  std::string depth_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;     // image
+  std::string disp_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC; // stereo message
+  std::string depth_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;    // image
   std::string camera_info_topic = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_CAMERA_INFO_TOPIC;
 #else
   std::string image_topic_ = "/multisense/left/image_rect_color";
@@ -126,9 +127,9 @@ private:
   std::string camera_info_topic = "/multisense/left/image_rect_color/camera_info";
 #endif
   std::string multisense_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_RAW_CAM_CONFIG_TOPIC;
-  std::string depth_cost_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_DEPTH_COST_TOPIC;  // image
+  std::string depth_cost_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_DEPTH_COST_TOPIC; // image
   std::string disp_sensor_msg_topic_ = "/multisense/left/disparity";
-  std::string cost_topic_ = "/multisense/left/cost";  // sensor_msg/Image
+  std::string cost_topic_ = "/multisense/left/cost"; // sensor_msg/Image
   std::string multisense_motor_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_CONTROL_MOTOR_TOPIC;
   image_transport::ImageTransport it_;
   std::string transport_hint_ = "compressed";
@@ -146,41 +147,41 @@ private:
   std::shared_ptr<message_filters::Synchronizer<exactTimePolicy>> sync_img_depth_exact;
   std::shared_ptr<message_filters::Synchronizer<exactTimePolicy>> sync_img_depth_approx;
 
-  static MultisenseImageInterface* current_object_;
-  MultisenseImageInterface(ros::NodeHandle nh, bool is_simulation);
+  static MultisenseInterface *current_object_;
+  MultisenseInterface(ros::NodeHandle nh, bool is_simulation);
 
   // callbacks
-  void imageCB(const sensor_msgs::ImageConstPtr& img);
-  void depthCB(const sensor_msgs::ImageConstPtr& img);
-  void costCB(const sensor_msgs::ImageConstPtr& img);
-  void disparityCB(const stereo_msgs::DisparityImageConstPtr& disp);
-  void disparitySensorMsgCB(const sensor_msgs::ImageConstPtr& disp);
+  void imageCB(const sensor_msgs::ImageConstPtr &img);
+  void depthCB(const sensor_msgs::ImageConstPtr &img);
+  void costCB(const sensor_msgs::ImageConstPtr &img);
+  void disparityCB(const stereo_msgs::DisparityImageConstPtr &disp);
+  void disparitySensorMsgCB(const sensor_msgs::ImageConstPtr &disp);
   void camera_infoCB(const sensor_msgs::CameraInfoConstPtr camera_info);
 
   // helper functions
-  bool processDisparity(const sensor_msgs::Image& disp, cv::Mat& disp_img);
-  bool processImage(const sensor_msgs::ImageConstPtr& in, cv::Mat& out, int image_encoding, std::string out_encoding,
-                    std::mutex& resource_mutex);
+  bool processDisparity(const sensor_msgs::Image &disp, cv::Mat &disp_img);
+  bool processImage(const sensor_msgs::ImageConstPtr &in, cv::Mat &out, int image_encoding, std::string out_encoding,
+                    std::mutex &resource_mutex);
 
 public:
-/**
+  /**
  * @brief Get the Multisense Image Interface object
  * 
  * @param nh Nodehandle to the running ros node
  * @param is_simulation 
- * @return MultisenseImageInterface* 
+ * @return MultisenseInterface* 
  */
-  static MultisenseImageInterface* getMultisenseImageInterface(ros::NodeHandle nh, bool is_simulation = false);
-  ~MultisenseImageInterface();
+  static MultisenseInterface *getMultisenseInterface(ros::NodeHandle nh, bool is_simulation = false);
+  ~MultisenseInterface();
 
-/**
+  /**
  * @brief Get RGB image from multisense camera
  * 
  * @param img reference to be updated
  * @return true when image is received 
  * @return false when image cannot be fetched
  */
-  bool getImage(cv::Mat& img);
+  bool getImage(cv::Mat &img);
 
   /**
    * @brief Get Disparity image from multisense camera
@@ -190,8 +191,8 @@ public:
    * @return true when image is received
    * @return false when image cannot be fetched
    */
-  bool getDisparity(cv::Mat& disp_img, bool from_stereo_msg = false);
-  
+  bool getDisparity(cv::Mat &disp_img, bool from_stereo_msg = false);
+
   /**
    * @brief Get the Depth Image object
    * 
@@ -199,9 +200,9 @@ public:
    * @return true when image is received 
    * @return false when image cannot be fetched
    */
-  bool getDepthImage(cv::Mat& depth_img);
-  bool getCostImage(cv::Mat& cost_img);
-  bool getCameraInfo(MultisenseCameraModel& pinhole_model);
+  bool getDepthImage(cv::Mat &depth_img);
+  bool getCostImage(cv::Mat &cost_img);
+  bool getCameraInfo(MultisenseCameraModel &pinhole_model);
 
   /**
    * @brief Provides disparity and rgb image along with organized pointcloud based off of those images
@@ -212,8 +213,8 @@ public:
    * @return true when all the references can be updated
    * @return false when either of the three fails
    */
-  bool getStereoData(cv::Mat& dispImage, cv::Mat& colorImage, tough_perception::StereoPointCloudColor::Ptr &pointcloud);
-  
+  bool getStereoData(cv::Mat &dispImage, cv::Mat &colorImage, tough_perception::StereoPointCloudColor::Ptr &pointcloud);
+
   /**
    * @brief Get the Height of image
    * 
@@ -241,7 +242,7 @@ public:
    * @param speed 
    */
   void setSpindleSpeed(double speed = 2.0f);
-  
+
   /**
    * @brief Start subscribers and publishers to talk with Multisense sensor
    * 
@@ -260,10 +261,10 @@ public:
 };
 
 /**
- * @brief Handy typedef for MultisenseImageInterface pointer.
+ * @brief Handy typedef for MultisenseInterface pointer.
  * @todo: This should be a boost shared pointer
  */
-typedef MultisenseImageInterface* MultisenseImageInterfacePtr;
-}  // namespace tough_perception
+typedef MultisenseInterface *MultisenseInterfacePtr;
+} // namespace tough_perception
 
 #endif

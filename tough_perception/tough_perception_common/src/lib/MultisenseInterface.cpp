@@ -1,5 +1,7 @@
-#include <tough_perception_common/MultisenseImageInterface.h>
+#include <tough_perception_common/MultisenseInterface.h>
 #include <tough_perception_common/perception_common_names.h>
+#include <tough_perception_common/PerceptionHelper.h>
+
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <std_msgs/Float64.h>
@@ -43,14 +45,14 @@ void MultisenseCameraModel::printCameraConfig()
   return;
 }
 
-MultisenseImageInterfacePtr MultisenseImageInterface::current_object_ = nullptr;
+MultisenseInterfacePtr MultisenseInterface::current_object_ = nullptr;
 
-MultisenseImageInterfacePtr MultisenseImageInterface::getMultisenseImageInterface(ros::NodeHandle nh,
-                                                                                  bool is_simulation)
+MultisenseInterfacePtr MultisenseInterface::getMultisenseInterface(ros::NodeHandle nh,
+                                                                   bool is_simulation)
 {
-  if (MultisenseImageInterface::current_object_ == nullptr)
+  if (MultisenseInterface::current_object_ == nullptr)
   {
-    static MultisenseImageInterface obj(nh, is_simulation);
+    static MultisenseInterface obj(nh, is_simulation);
     current_object_ = &obj;
   }
   return current_object_;
@@ -59,7 +61,7 @@ MultisenseImageInterfacePtr MultisenseImageInterface::getMultisenseImageInterfac
  *@ToDO: add sync callbacks
  *@ToDO: create a class for MultisenseImage Exceptions(is it reall needed? not sure)
  */
-void MultisenseImageInterface::imageCB(const sensor_msgs::ImageConstPtr &img)
+void MultisenseInterface::imageCB(const sensor_msgs::ImageConstPtr &img)
 {
   ROS_INFO_ONCE("Listening to %s", cam_sub_.getTopic().c_str());
   // did not use mutex lock_guard as it is a blocking call which
@@ -71,7 +73,7 @@ void MultisenseImageInterface::imageCB(const sensor_msgs::ImageConstPtr &img)
   }
 }
 
-void MultisenseImageInterface::depthCB(const sensor_msgs::ImageConstPtr &img)
+void MultisenseInterface::depthCB(const sensor_msgs::ImageConstPtr &img)
 {
   ROS_INFO_ONCE("Listening to %s", cam_sub_depth_.getTopic().c_str());
   if (depth_mutex.try_lock())
@@ -81,7 +83,7 @@ void MultisenseImageInterface::depthCB(const sensor_msgs::ImageConstPtr &img)
   }
 }
 
-void MultisenseImageInterface::costCB(const sensor_msgs::ImageConstPtr &img)
+void MultisenseInterface::costCB(const sensor_msgs::ImageConstPtr &img)
 {
   ROS_INFO_ONCE("Listening to %s", cam_sub_depth_.getTopic().c_str());
   if (cost_mutex.try_lock())
@@ -91,7 +93,7 @@ void MultisenseImageInterface::costCB(const sensor_msgs::ImageConstPtr &img)
   }
 }
 
-void MultisenseImageInterface::disparityCB(const stereo_msgs::DisparityImageConstPtr &disp)
+void MultisenseInterface::disparityCB(const stereo_msgs::DisparityImageConstPtr &disp)
 {
   ROS_INFO_ONCE("Listening to %s", cam_sub_disparity_.getTopic().c_str());
   if (disparity_mutex.try_lock())
@@ -100,7 +102,7 @@ void MultisenseImageInterface::disparityCB(const stereo_msgs::DisparityImageCons
     disparity_mutex.unlock();
   }
 }
-void MultisenseImageInterface::disparitySensorMsgCB(const sensor_msgs::ImageConstPtr &disp)
+void MultisenseInterface::disparitySensorMsgCB(const sensor_msgs::ImageConstPtr &disp)
 {
   ROS_INFO_ONCE("Listening to %s", cam_sub_disparity_sensor_msg_.getTopic().c_str());
   if (disparity_sensor_msg_mutex.try_lock())
@@ -110,7 +112,7 @@ void MultisenseImageInterface::disparitySensorMsgCB(const sensor_msgs::ImageCons
   }
 }
 
-void MultisenseImageInterface::camera_infoCB(const sensor_msgs::CameraInfoConstPtr camera_info)
+void MultisenseInterface::camera_infoCB(const sensor_msgs::CameraInfoConstPtr camera_info)
 {
   ROS_INFO_ONCE("Listening to %s", camera_info_sub_.getTopic().c_str());
   if (camera_info_mutex.try_lock())
@@ -120,21 +122,21 @@ void MultisenseImageInterface::camera_infoCB(const sensor_msgs::CameraInfoConstP
   }
 }
 
-bool MultisenseImageInterface::start()
+bool MultisenseInterface::start()
 {
-  ROS_INFO("Starting MultisenseImageInterface");
-  cam_sub_ = it_.subscribe(image_topic_, 1, &MultisenseImageInterface::imageCB, this);
+  ROS_INFO("Starting MultisenseInterface");
+  cam_sub_ = it_.subscribe(image_topic_, 1, &MultisenseInterface::imageCB, this);
 
-  cam_sub_depth_ = it_.subscribe(depth_topic_, 1, &MultisenseImageInterface::depthCB, this);
+  cam_sub_depth_ = it_.subscribe(depth_topic_, 1, &MultisenseInterface::depthCB, this);
 
-  cam_sub_cost_ = it_.subscribe(cost_topic_, 1, &MultisenseImageInterface::costCB, this);
+  cam_sub_cost_ = it_.subscribe(cost_topic_, 1, &MultisenseInterface::costCB, this);
 
   cam_sub_disparity_sensor_msg_ =
-      it_.subscribe(disp_sensor_msg_topic_, 1, &MultisenseImageInterface::disparitySensorMsgCB, this);
+      it_.subscribe(disp_sensor_msg_topic_, 1, &MultisenseInterface::disparitySensorMsgCB, this);
 
-  cam_sub_disparity_ = nh_.subscribe(disp_topic_, 1, &MultisenseImageInterface::disparityCB, this);
+  cam_sub_disparity_ = nh_.subscribe(disp_topic_, 1, &MultisenseInterface::disparityCB, this);
 
-  camera_info_sub_ = nh_.subscribe(camera_info_topic, 1, &MultisenseImageInterface::camera_infoCB, this);
+  camera_info_sub_ = nh_.subscribe(camera_info_topic, 1, &MultisenseInterface::camera_infoCB, this);
 
   multisense_motor_speed_pub_ = nh_.advertise<std_msgs::Float64>(multisense_motor_topic_, 1);
 
@@ -142,14 +144,14 @@ bool MultisenseImageInterface::start()
   ros::spinOnce();
 }
 
-MultisenseImageInterface::MultisenseImageInterface(ros::NodeHandle nh, bool is_simulation)
+MultisenseInterface::MultisenseInterface(ros::NodeHandle nh, bool is_simulation)
     : nh_(nh), it_(nh_), is_simulation_(is_simulation)
 {
   start();
   ros::Duration(0.5).sleep();
 }
 
-bool MultisenseImageInterface::processDisparity(const sensor_msgs::Image &disp, cv::Mat &disp_img)
+bool MultisenseInterface::processDisparity(const sensor_msgs::Image &disp, cv::Mat &disp_img)
 {
   if (disp.data.size() == 0)
     return false;
@@ -187,8 +189,8 @@ bool MultisenseImageInterface::processDisparity(const sensor_msgs::Image &disp, 
   }
 }
 
-bool MultisenseImageInterface::processImage(const sensor_msgs::ImageConstPtr &in, cv::Mat &out, int image_encoding,
-                                            std::string out_encoding, std::mutex &resource_mutex)
+bool MultisenseInterface::processImage(const sensor_msgs::ImageConstPtr &in, cv::Mat &out, int image_encoding,
+                                       std::string out_encoding, std::mutex &resource_mutex)
 {
   std::lock_guard<std::mutex> guard(resource_mutex);
   if (in == nullptr)
@@ -213,7 +215,7 @@ bool MultisenseImageInterface::processImage(const sensor_msgs::ImageConstPtr &in
   }
 }
 
-bool MultisenseImageInterface::getDisparity(cv::Mat &disp_img, bool from_stereo_msg)
+bool MultisenseInterface::getDisparity(cv::Mat &disp_img, bool from_stereo_msg)
 {
   bool status;
   if (from_stereo_msg)
@@ -235,20 +237,20 @@ bool MultisenseImageInterface::getDisparity(cv::Mat &disp_img, bool from_stereo_
   return status;
 }
 
-bool MultisenseImageInterface::getImage(cv::Mat &img)
+bool MultisenseInterface::getImage(cv::Mat &img)
 {
   return processImage(img_, img, CV_8UC3, sensor_msgs::image_encodings::BGR8, image_mutex);
 }
 
-bool MultisenseImageInterface::getDepthImage(cv::Mat &depth_img)
+bool MultisenseInterface::getDepthImage(cv::Mat &depth_img)
 {
   return processImage(depth_, depth_img, CV_32F, sensor_msgs::image_encodings::TYPE_32FC1, depth_mutex);
 }
-bool MultisenseImageInterface::getCostImage(cv::Mat &cost_img)
+bool MultisenseInterface::getCostImage(cv::Mat &cost_img)
 {
   return processImage(cost_, cost_img, CV_8U, sensor_msgs::image_encodings::MONO8, cost_mutex);
 }
-int MultisenseImageInterface::getHeight()
+int MultisenseInterface::getHeight()
 {
   if (camera_info_ == nullptr)
   {
@@ -257,7 +259,7 @@ int MultisenseImageInterface::getHeight()
   }
   return camera_info_->height;
 }
-int MultisenseImageInterface::getWidth()
+int MultisenseInterface::getWidth()
 {
   if (camera_info_ == nullptr)
   {
@@ -267,7 +269,7 @@ int MultisenseImageInterface::getWidth()
   return camera_info_->width;
 }
 
-bool MultisenseImageInterface::getCameraInfo(MultisenseCameraModel &pinhole_model)
+bool MultisenseInterface::getCameraInfo(MultisenseCameraModel &pinhole_model)
 {
   if (camera_info_ != nullptr)
   {
@@ -287,8 +289,8 @@ bool MultisenseImageInterface::getCameraInfo(MultisenseCameraModel &pinhole_mode
   return false;
 }
 
-bool MultisenseImageInterface::getStereoData(cv::Mat &dispImage, cv::Mat &colorImage,
-                                             tough_perception::StereoPointCloudColor::Ptr &pointcloud)
+bool MultisenseInterface::getStereoData(cv::Mat &dispImage, cv::Mat &colorImage,
+                                        tough_perception::StereoPointCloudColor::Ptr &pointcloud)
 {
   bool status = getImage(colorImage);
   status = status && getDisparity(dispImage, true);
@@ -304,17 +306,17 @@ bool MultisenseImageInterface::getStereoData(cv::Mat &dispImage, cv::Mat &colorI
   return true;
 }
 
-bool MultisenseImageInterface::isSensorActive()
+bool MultisenseInterface::isSensorActive()
 {
   return isActive(img_) || isActive(depth_) || isActive(cost_) || isActive(disparity_sensor_msg_) ||
          isActive(disparity_);
 }
 
-bool MultisenseImageInterface::shutdown()
+bool MultisenseInterface::shutdown()
 {
   if (isSensorActive())
   {
-    ROS_INFO("Shutting down MultisenseImageInterface");
+    ROS_INFO("Shutting down MultisenseInterface");
     cam_sub_.shutdown();
     cam_sub_depth_.shutdown();
     cam_sub_cost_.shutdown();
@@ -331,12 +333,12 @@ bool MultisenseImageInterface::shutdown()
     ros::Duration(0.5).sleep();
   }
 }
-void MultisenseImageInterface::setSpindleSpeed(double speed)
+void MultisenseInterface::setSpindleSpeed(double speed)
 {
   multisense_motor_speed_pub_.publish(speed);
 }
 
-MultisenseImageInterface::~MultisenseImageInterface()
+MultisenseInterface::~MultisenseInterface()
 {
   //   shutdown();
 }
@@ -361,40 +363,40 @@ void resetMsg(stereo_msgs::DisparityImageConstPtr &some_msg)
   some_msg = nullptr;
 }
 
-void generateOrganizedRGBDCloud(const cv::Mat &dispImage, const cv::Mat &colorImage, const Eigen::Matrix4d Qmat,
-                                tough_perception::StereoPointCloudColor::Ptr &cloud)
-{
-  int width = dispImage.cols;
-  int height = dispImage.rows;
+// void generateOrganizedRGBDCloud(const cv::Mat &dispImage, const cv::Mat &colorImage, const Eigen::Matrix4d Qmat,
+//                                 tough_perception::StereoPointCloudColor::Ptr &cloud)
+// {
+//   int width = dispImage.cols;
+//   int height = dispImage.rows;
 
-  if (!cloud)
-    cloud = tough_perception::StereoPointCloudColor::Ptr(new tough_perception::StereoPointCloudColor());
+//   if (!cloud)
+//     cloud = tough_perception::StereoPointCloudColor::Ptr(new tough_perception::StereoPointCloudColor());
 
-  cloud->resize(width * height);
-  cloud->height = height;
-  cloud->width = width;
+//   cloud->resize(width * height);
+//   cloud->height = height;
+//   cloud->width = width;
 
-  for (int u = 0; u < dispImage.rows; u++)
-    for (int v = 0; v < dispImage.cols; v++)
-    {
-      const float &currentPixelDisp = dispImage.at<float>(cv::Point(v, u));
-      if (currentPixelDisp == 0.0)
-        continue;
-      Eigen::Vector4d pixelCoordVec(v, u, currentPixelDisp, 1);
-      pixelCoordVec = Qmat * pixelCoordVec;
-      pixelCoordVec /= pixelCoordVec(3);
+//   for (int u = 0; u < dispImage.rows; u++)
+//     for (int v = 0; v < dispImage.cols; v++)
+//     {
+//       const float &currentPixelDisp = dispImage.at<float>(cv::Point(v, u));
+//       if (currentPixelDisp == 0.0)
+//         continue;
+//       Eigen::Vector4d pixelCoordVec(v, u, currentPixelDisp, 1);
+//       pixelCoordVec = Qmat * pixelCoordVec;
+//       pixelCoordVec /= pixelCoordVec(3);
 
-      tough_perception::StereoPointColor &pt = cloud->at(v, u);
+//       tough_perception::StereoPointColor &pt = cloud->at(v, u);
 
-      pt.x = pixelCoordVec(0);
-      pt.y = pixelCoordVec(1);
-      pt.z = pixelCoordVec(2);
+//       pt.x = pixelCoordVec(0);
+//       pt.y = pixelCoordVec(1);
+//       pt.z = pixelCoordVec(2);
 
-      const cv::Vec3b &rgb = colorImage.at<cv::Vec3b>(cv::Point(v, u));
-      pt.b = rgb.val[0];
-      pt.g = rgb.val[1];
-      pt.r = rgb.val[2];
-    }
-}
+//       const cv::Vec3b &rgb = colorImage.at<cv::Vec3b>(cv::Point(v, u));
+//       pt.b = rgb.val[0];
+//       pt.g = rgb.val[1];
+//       pt.r = rgb.val[2];
+//     }
+// }
 
 } // namespace tough_perception

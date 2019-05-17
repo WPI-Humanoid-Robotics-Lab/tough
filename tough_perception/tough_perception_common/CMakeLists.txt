@@ -4,7 +4,9 @@ project(tough_perception_common)
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 add_definitions(-std=c++11)
-add_definitions(-DGAZEBO_SIMULATION)
+# add_definitions(-DGAZEBO_SIMULATION)
+
+
 find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
 find_package(PCL 1.7 REQUIRED io)
 
@@ -25,6 +27,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp
                                         std_msgs
                                         tough_common
                                         )
+
 
 include_directories(SYSTEM 
                         ${PCL_INCLUDE_DIRS} 
@@ -51,9 +54,10 @@ catkin_package(
 )
 
 add_library(${PROJECT_NAME}  
-                              src/tough_perception_interface/MultisenseImageInterface.cpp 
-                              src/laser2point_cloud.cpp
-                              src/ArucoDetector.cpp
+                              src/lib/MultisenseInterface.cpp 
+                              src/lib/laser2point_cloud.cpp
+                              src/lib/ArucoDetector.cpp
+                              src/lib/PerceptionHelper.cpp
 )
 									
 set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_DEFINITIONS)
@@ -61,18 +65,18 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_DEFINITIONS)
 target_link_libraries(${PROJECT_NAME}  ${PCL_LIBRARIES} ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_dependencies(${PROJECT_NAME}  ${catkin_EXPORTED_TARGETS} )
 
-add_executable(periodic_snapshotter  src/periodic_snapshotter.cpp)
+add_executable(periodic_snapshotter  src/nodes/periodic_snapshotter.cpp)
 target_link_libraries(periodic_snapshotter  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-add_executable(walkway_point_generator src/walkway_generator.cpp)
+add_executable(walkway_point_generator src/nodes/walkway_generator.cpp)
 add_dependencies(walkway_point_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(walkway_point_generator ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
-add_executable(laser2point_cloud_node src/laser2point_cloud_node.cpp)
+add_executable(laser2point_cloud_node src/nodes/laser2point_cloud_node.cpp)
 add_dependencies(laser2point_cloud_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(laser2point_cloud_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
 
-add_executable(test_aruco_node src/test_aruco.cpp)
+add_executable(test_aruco_node src/nodes/test_aruco.cpp)
 add_dependencies(test_aruco_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_aruco_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
 

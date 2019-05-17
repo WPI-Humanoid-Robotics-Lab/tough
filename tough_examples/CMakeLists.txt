@@ -136,7 +136,7 @@ target_link_libraries(walk_steps_example  ${catkin_LIBRARIES})
 #########################
 ## Perception examples ##
 #########################
-add_executable(multisense_image_example src/perception_examples/test_multisense_image.cpp )
+add_executable(multisense_image_example src/perception_examples/multisense_interface_example.cpp )
 add_dependencies(multisense_image_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(multisense_image_example  ${catkin_LIBRARIES})
 
