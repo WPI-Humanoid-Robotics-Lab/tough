@@ -183,7 +183,6 @@ private:
 };
 
 template <class T, class U>
-// void convertROStoPCL(const sensor_msgs::PointCloud2::Ptr ros_msg, pcl::PointCloud<T>::Ptr &pcl_msg)
 void convertROStoPCL(const U ros_msg, T &pcl_msg)
 {
   pcl::PCLPointCloud2 pcl_pc2;
@@ -192,7 +191,6 @@ void convertROStoPCL(const U ros_msg, T &pcl_msg)
 }
 
 template <class T, class U>
-// void convertPCLtoROS(const pcl::PointCloud<T>::Ptr pcl_msg, sensor_msgs::PointCloud2::Ptr &ros_msg)
 void convertPCLtoROS(const T pcl_msg, U &ros_msg)
 {
   pcl::PCLPointCloud2 pcl_pc2;
@@ -203,21 +201,19 @@ void convertPCLtoROS(const T pcl_msg, U &ros_msg)
 void addIntensity(const PointCloud::Ptr pc1, PointCloud_I::Ptr pc2)
 {
   copyPointCloud(*pc1, *pc2);
-  for (size_t i = 0; i < pc2->points.size(); i++)
-  {
-    pc2->points[i].intensity = 1.0f;
-  }
-  // std::for_each(pc2->points.begin(), pc2->points.end(), [](PointI &p) { p.intensity = 1.0f; })
+  std::for_each(pc2->points.begin(),
+                pc2->points.end(),
+                [](PointTI &p) { p.intensity = 1.0f; });
 }
 
 void decayPoint(PointCloud_I::Ptr pc, float step = 0.1)
 {
-  for (size_t i = 0; i < pc->size(); i++)
-  {
-    if (pc->points[i].intensity > 0.0f)
-      pc->points[i].intensity -= step;
-  }
-  // std::for_each(pc->points.begin(), pc->points.end(), [&step](PointI &p) { if (p.intensity > 0.0f) p.intensity -= step; })
+  std::for_each(pc->points.begin(),
+                pc->points.end(),
+                [&step](PointTI &p) {
+                  if (p.intensity > 0.0f)
+                    p.intensity -= step;
+                });
 }
 
 void min_internsity(PointCloud_I::Ptr pc)
