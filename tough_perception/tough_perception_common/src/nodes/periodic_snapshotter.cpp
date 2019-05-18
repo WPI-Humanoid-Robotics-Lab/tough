@@ -505,19 +505,20 @@ void PeriodicSnapshotter::mergeClouds(const PointCloudSensorMsg::Ptr msg)
 
     // ROS_INFO("PeriodicSnapshotter::mergeClouds : PC size : %d", result->size());
     ROS_INFO("PeriodicSnapshotter::mergeClouds : PC size : %d", result_I->size());
-    ROS_INFO("PeriodicSnapshotter::mergeClouds : PC intensity %f", result_I->points[0].intensity);
 
     decayPoint(result_I);
     min_internsity(pclI_msg);
     min_internsity(assembled_pc_I);
     min_internsity(result_I);
 
-    ROS_INFO("PeriodicSnapshotter::mergeClouds : result_I intensity %f", result_I->points[0].intensity);
-
     // assembled_pc = result;
     // convertPCLtoROS<PointCloud::Ptr, PointCloudSensorMsg::Ptr>(result, merged_cloud);
     convertPCLtoROS<PointCloud_I::Ptr, PointCloudSensorMsg::Ptr>(result_I, merged_cloud);
     assembled_pc_I = result_I;
+
+    ROS_INFO("PeriodicSnapshotter::mergeClouds : assembled PC size %d", assembled_pc_I->size());
+    filterDeadPointCloud(assembled_pc_I, 0.5f);
+    ROS_INFO("PeriodicSnapshotter::mergeClouds : assembled  PC size filtered %d", assembled_pc_I->size());
   }
 
   // publish the merged message

@@ -179,7 +179,7 @@ private:
   float filter_max_z;
 
   int snapshotCount_;
-  const int MAX_SNAPSHOTS = 5;
+  const int MAX_SNAPSHOTS = 10;
 };
 
 template <class T, class U>
@@ -207,6 +207,7 @@ void addIntensity(const PointCloud::Ptr pc1, PointCloud_I::Ptr pc2)
   {
     pc2->points[i].intensity = 1.0f;
   }
+  // std::for_each(pc2->points.begin(), pc2->points.end(), [](PointI &p) { p.intensity = 1.0f; })
 }
 
 void decayPoint(PointCloud_I::Ptr pc, float step = 0.1)
@@ -216,17 +217,24 @@ void decayPoint(PointCloud_I::Ptr pc, float step = 0.1)
     if (pc->points[i].intensity > 0.0f)
       pc->points[i].intensity -= step;
   }
+  // std::for_each(pc->points.begin(), pc->points.end(), [&step](PointI &p) { if (p.intensity > 0.0f) p.intensity -= step; })
 }
 
-bool myfn(PointTI i, PointTI j) { return i.intensity < j.intensity; }
 void min_internsity(PointCloud_I::Ptr pc)
 {
-  PointTI x = *std::min_element(pc->points.begin(), pc->points.end(), myfn);
+  PointTI x = *std::min_element(pc->points.begin(),
+                                pc->points.end(),
+                                [](PointTI i, PointTI j) { return i.intensity < j.intensity; });
   std::cout << "[MIN INTENSITY] " << x.intensity << std::endl;
 }
 
 void filterDeadPointCloud(PointCloud_I::Ptr pc, float dead_threshold = 0.0f)
 {
+  auto n_end = pc->points.end();
+  auto p_end = std::remove_if(pc->points.begin(),
+                              pc->points.end(),
+                              [&dead_threshold](PointTI i) { return i.intensity <= dead_threshold; });
+  pc->points.erase(p_end, n_end);
 }
 
 } // namespace laser_assembler
