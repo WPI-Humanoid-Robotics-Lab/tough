@@ -8,6 +8,8 @@
 void printStatus(const std::string &image_name, bool status)
 {
   ROS_INFO("%s status %s", image_name.c_str(), status ? "true" : "false");
+  // std::string status_str = status ? "true" : "false";
+  // std::cout << image_name << " status " << status_str << std::endl;
 }
 
 void show_image(cv::Mat &image, std::string name)
@@ -37,14 +39,15 @@ int main(int argc, char **argv)
   ros::AsyncSpinner spinner(1);
   spinner.start();
   bool status;
-
-  tough_perception::MultisenseInterfacePtr imageHandler;
-  imageHandler = tough_perception::MultisenseInterface::getMultisenseInterface(nh);
-  imageHandler->setSpindleSpeed(2.0);
   cv::Mat RGB_image;
   cv::Mat depth_image;
   cv::Mat cost_image;
   cv::Mat disparity_image;
+  cv::Mat disparity_image_stereo;
+
+  tough_perception::MultisenseInterfacePtr imageHandler;
+  imageHandler = tough_perception::MultisenseInterface::getMultisenseInterface(nh);
+  imageHandler->setSpindleSpeed(2.0);
 
   tough_perception::MultisenseCameraModel cam_model;
   imageHandler->getCameraInfo(cam_model);
@@ -78,29 +81,27 @@ int main(int argc, char **argv)
 
   // When using gazebo, call getDisparity from stereo message
   bool use_stereo_msg = true;
-  status = imageHandler->getDisparity(disparity_image, use_stereo_msg);
+  status = imageHandler->getDisparity(disparity_image_stereo, use_stereo_msg);
   printStatus("Disparity Image from stereo_msg", status);
   if (status)
-    show_image(disparity_image, "Disparity Image from stereo_msg");
-
-  imageHandler->shutdown();
-  ROS_INFO("is Multisense active %s", imageHandler->isSensorActive() ? "true" : "false");
-  imageHandler->start();
-  ROS_INFO("is Multisense active %s", imageHandler->isSensorActive() ? "true" : "false");
-
-  status = imageHandler->getDisparity(disparity_image, use_stereo_msg);
-  printStatus("Disparity Image from stereo_msg", status);
-  if (status)
-    show_image(disparity_image, "Disparity Image from stereo_msg");
+    show_image(disparity_image_stereo, "Disparity Image from stereo_msg");
 
   tough_perception::StereoPointCloudColor::Ptr cloud = tough_perception::StereoPointCloudColor::Ptr(new tough_perception::StereoPointCloudColor());
   status = imageHandler->getStereoData(disparity_image, RGB_image, cloud);
   printStatus("Stereo point cloud", status);
   if (status)
-  {
-    std::cout << cloud->size() << std::endl;
-    // std::cout << cloud->points.data << std::endl;
-  }
+    ROS_INFO_STREAM("Stereo point cloud size: " << cloud->size());
+
+  // Shutting down MultisenseInterface this shuts down the subscribers
+  imageHandler->shutdown();
+  ROS_INFO("is Multisense active %s", imageHandler->isSensorActive() ? "true" : "false");
+  imageHandler->start();
+  ROS_INFO("is Multisense active %s", imageHandler->isSensorActive() ? "true" : "false");
+
+  status = imageHandler->getDisparity(disparity_image_stereo, use_stereo_msg);
+  printStatus("Disparity Image from stereo_msg", status);
+  if (status)
+    show_image(disparity_image_stereo, "Disparity Image from stereo_msg");
 
   spinner.stop();
   return 0;

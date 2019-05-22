@@ -5,10 +5,12 @@
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "laser2point_cloud");
-  ros::NodeHandle n;
-  Laser2PointCloud laser2point(n, PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_SCAN_TOPIC, TOUGH_COMMON_NAMES::WORLD_TF,
-                               PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_CLOUD_TOPIC,
-                               PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_CLOUD_TOPIC2);
+  ros::NodeHandle nh;
+  Laser2PointCloud laser2point(nh, 
+		  PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_SCAN_TOPIC, 
+		  TOUGH_COMMON_NAMES::WORLD_TF,
+		  PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_CLOUD_TOPIC,
+		  PERCEPTION_COMMON_NAMES::MULTISENSE_LASER_CLOUD_TOPIC2);
 
   ros::spin();
 

@@ -29,16 +29,7 @@ bool isActive(const sensor_msgs::ImageConstPtr &some_msg);
 bool isActive(const stereo_msgs::DisparityImageConstPtr &some_msg);
 void resetMsg(sensor_msgs::ImageConstPtr &some_msg);
 void resetMsg(stereo_msgs::DisparityImageConstPtr &some_msg);
-// /**
-//  * @brief This function generates an Organized RGBD cloud using color and disparity images.
-//  *
-//  * @param dispImage disparity image
-//  * @param colorImage RGB image
-//  * @param Qmat  Q matrix for transforming pixel coordinates
-//  * @param cloud  output pointer to PointcloudXYZRGB
-//  */
-// void generateOrganizedRGBDCloud(const cv::Mat &dispImage, const cv::Mat &colorImage, const Eigen::Matrix4d Qmat,
-//                                 tough_perception::StereoPointCloudColor::Ptr &cloud);
+
 class MultisenseInterface;
 /**
  * @brief MultisenseCamerModel class stores/provides camera information. 
