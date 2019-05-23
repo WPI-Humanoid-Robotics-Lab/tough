@@ -58,12 +58,13 @@
 #include <pcl/visualization/pcl_visualizer.h>
 
 // Services
-#include "laser_assembler/AssembleScans2.h"
+#include <laser_assembler/AssembleScans2.h>
 
 // Messages
-#include "sensor_msgs/PointCloud2.h"
+#include <sensor_msgs/PointCloud2.h>
 
-#include "tough_perception_common/periodic_snapshotter.h"
+#include <tough_perception_common/periodic_snapshotter.h>
+#include <tough_perception_common/PerceptionHelper.h>
 
 /***
  * This used to be a simple test app that requests a point cloud from the
@@ -72,40 +73,20 @@
  */
 
 using namespace laser_assembler;
+using namespace tough_perception;
 
-/****************************************************
- * namespaces and typedefs required for registeration
- ****************************************************/
-// using pcl::visualization::PointCloudColorHandlerCustom;
-// using pcl::visualization::PointCloudColorHandlerGenericField;
-
-// // convenient typedefs
-// typedef pcl::PointXYZI PointT;
-// typedef pcl::PointCloud<PointT> PointCloud;
-// typedef pcl::PointNormal PointNormalT;
-// typedef pcl::PointCloud<PointNormalT> PointCloudWithNormals;
-
-// struct PointTWithTime
-// {
-//   PCL_ADD_POINT4D; // preferred way of adding a XYZ+padding
-//   double time;
-//   EIGEN_MAKE_ALIGNED_OPERATOR_NEW // make sure our new allocators are aligned
-// } EIGEN_ALIGN16;                  // enforce SSE padding for correct memory alignment
-
-// POINT_CLOUD_REGISTER_POINT_STRUCT(PointTWithTime, // here we assume a XYZ + "test" (as fields)
-//                                   (float, x, x)(float, y, y)(float, z, z)(double, time, time))
-
-PeriodicSnapshotter::PeriodicSnapshotter() : assembled_pc(new PointCloud),
-                                             assembled_pc_I(new PointCloud_I),
+PeriodicSnapshotter::PeriodicSnapshotter() : assembled_pc_I(new PointCloud_I),
                                              prev_msg_(new sensor_msgs::PointCloud2)
 {
   robot_state_ = RobotStateInformer::getRobotStateInformer(n_);
   rd_ = RobotDescription::getRobotDescription(n_);
 
+  // Setting all publishers
   snapshot_pub_ = n_.advertise<sensor_msgs::PointCloud2>("snapshot_cloud2", 1, true);
   registered_pointcloud_pub_ = n_.advertise<sensor_msgs::PointCloud2>("assembled_cloud2", 1, true);
   pointcloud_for_octomap_pub_ = n_.advertise<sensor_msgs::PointCloud2>("assembled_octomap_cloud2", 10, true);
 
+  // Setting all subscribers
   resetPointcloudSub_ = n_.subscribe("reset_pointcloud", 10, &PeriodicSnapshotter::resetPointcloudCB, this);
   pausePointcloudSub_ = n_.subscribe("pause_pointcloud", 10, &PeriodicSnapshotter::pausePointcloudCB, this);
   boxFilterSub_ = n_.subscribe("clearbox_pointcloud", 10, &PeriodicSnapshotter::setBoxFilterCB, this);
@@ -169,97 +150,6 @@ void PeriodicSnapshotter::timerCallback(const ros::TimerEvent &e)
   {
     ROS_WARN("Error making service call\n");
   }
-}
-
-void PeriodicSnapshotter::pairAlign(const PointCloud::Ptr cloud_src,
-                                    const PointCloud::Ptr cloud_tgt,
-                                    PointCloud::Ptr output)
-{
-  // Downsample for consistency and speed
-  // note enable this for large datasets
-  PointCloud::Ptr src(new PointCloud);
-  PointCloud::Ptr tgt(new PointCloud);
-  pcl::VoxelGrid<PointT> grid;
-  grid.setLeafSize(0.05, 0.05, 0.05);
-  grid.setInputCloud(cloud_src);
-  grid.filter(*src);
-
-  grid.setInputCloud(cloud_tgt);
-  grid.filter(*tgt);
-
-  // Compute surface normals and curvature
-  PointCloudWithNormals::Ptr points_with_normals_src(new PointCloudWithNormals);
-  PointCloudWithNormals::Ptr points_with_normals_tgt(new PointCloudWithNormals);
-
-  pcl::NormalEstimation<PointT, PointNormalT> norm_est;
-  pcl::search::KdTree<PointT>::Ptr tree(new pcl::search::KdTree<PointT>());
-  norm_est.setSearchMethod(tree);
-  norm_est.setKSearch(30);
-
-  norm_est.setInputCloud(src);
-  norm_est.compute(*points_with_normals_src);
-  pcl::copyPointCloud(*src, *points_with_normals_src);
-
-  norm_est.setInputCloud(tgt);
-  norm_est.compute(*points_with_normals_tgt);
-  pcl::copyPointCloud(*tgt, *points_with_normals_tgt);
-
-  // Instantiate our custom point representation (defined above) ...
-  customPointRepresentation point_representation;
-  // ... and weight the 'curvature' dimension so that it is balanced against x, y, and z
-  float alpha[4] = {1.0, 1.0, 1.0, 1.0};
-  point_representation.setRescaleValues(alpha);
-
-  // Align
-  pcl::IterativeClosestPointNonLinear<PointNormalT, PointNormalT> reg;
-  reg.setTransformationEpsilon(1e-6);
-  // Set the maximum distance between two correspondences (src<->tgt) to 10cm
-  // Note: adjust this based on the size of your datasets
-  reg.setMaxCorrespondenceDistance(0.1);
-  // Set the point representation
-  reg.setPointRepresentation(boost::make_shared<const customPointRepresentation>(point_representation));
-
-  reg.setInputSource(points_with_normals_src);
-  reg.setInputTarget(points_with_normals_tgt);
-
-  // Run the same optimization in a loop
-  Eigen::Matrix4f Ti = Eigen::Matrix4f::Identity(), prev, targetToSource;
-  PointCloudWithNormals::Ptr reg_result = points_with_normals_src;
-  reg.setMaximumIterations(2);
-  for (int i = 0; i < 30; ++i)
-  {
-    // save cloud for visualization purpose
-    points_with_normals_src = reg_result;
-
-    // Estimate
-    reg.setInputSource(points_with_normals_src);
-    reg.align(*reg_result);
-
-    // accumulate transformation between each Iteration
-    Ti = reg.getFinalTransformation() * Ti;
-
-    // if the difference between this transformation and the previous one
-    // is smaller than the threshold, refine the process by reducing
-    // the maximal correspondence distance
-    if (fabs((reg.getLastIncrementalTransformation() - prev).sum()) < reg.getTransformationEpsilon())
-      reg.setMaxCorrespondenceDistance(reg.getMaxCorrespondenceDistance() - 0.001);
-
-    prev = reg.getLastIncrementalTransformation();
-  }
-
-  // Get the transformation from target to source
-  targetToSource = Ti.inverse();
-
-  // Transform target back in source frame
-  pcl::transformPointCloud(*cloud_tgt, *output, targetToSource);
-
-  // PointCloudColorHandlerCustom<PointT> cloud_tgt_h(output, 0, 255, 0);
-  // PointCloudColorHandlerCustom<PointT> cloud_src_h(cloud_src, 255, 0, 0);
-
-  // add the source to the transformed target
-  *output += *cloud_src;
-
-  // final_transform = targetToSource;
 }
 
 void PeriodicSnapshotter::pairAlign_I(const PointCloud_I::Ptr cloud_src,
@@ -383,53 +273,41 @@ void PeriodicSnapshotter::pausePointcloudCB(const std_msgs::Bool &msg)
 void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8 &msg)
 {
   enable_box_filter_ = true;
+
   pcl::PointCloud<PointT>::Ptr pcl_prev_msg(new pcl::PointCloud<PointT>);
-  convertROStoPCL(prev_msg_, pcl_prev_msg);
+  // convertROStoPCL<PointCloud::Ptr, PointCloudSensorMsg::Ptr>(prev_msg_, pcl_prev_msg);
+  convertROStoPCL<PointCloud::Ptr>(prev_msg_, pcl_prev_msg);
+
   geometry_msgs::Pose pelvisPose;
   pcl::PointCloud<PointT>::Ptr tgt(new pcl::PointCloud<PointT>);
   robot_state_->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
+
   Eigen::Vector4f minPoint;
   Eigen::Vector4f maxPoint;
 
   // this indicates that if the msg contains element 1 it, would clear point cloud from waist up
-  if (msg.data == 1)
+  if (msg.data == (int8_t)BOX_FILTER_TYPE::WAIST_UP) // waist up condition
   {
-    // waist up condition
-    minPoint[0] = -1;  // x
-    minPoint[1] = -1;  // y
-    minPoint[2] = 0.0; // z
-
-    maxPoint[0] = 2;
-    maxPoint[1] = 1;
-    maxPoint[2] = 1;
+    // <x,y,z>
+    minPoint << -1, -1, 0.0;
+    maxPoint << 2, 1, 1;
   }
-  else if (msg.data == 2)
+  else if (msg.data == (int8_t)BOX_FILTER_TYPE::LARGE_BOX) // large box condition
   {
-    // large box condition
-    minPoint[0] = -1.0;
-    minPoint[1] = -1.5;
-    minPoint[2] = -0.5;
-
-    maxPoint[0] = 4;
-    maxPoint[1] = 1.5;
-    maxPoint[2] = 1.5;
+    minPoint << -1.0, -1.5, -0.5;
+    maxPoint << 4, 1.5, 1.5;
   }
-  else
+  else // full box condition
   {
-    // full box condition
-    minPoint[0] = -1;
-    minPoint[1] = -1;
-    minPoint[2] = -0.5;
-
-    maxPoint[0] = 2;
-    maxPoint[1] = 1;
-    maxPoint[2] = 1;
+    minPoint << -1, -1, -0.5;
+    maxPoint << 2, 1, 1;
   }
 
   Eigen::Vector3f boxTranslatation;
   boxTranslatation[0] = pelvisPose.position.x;
   boxTranslatation[1] = pelvisPose.position.y;
   boxTranslatation[2] = pelvisPose.position.z;
+
   Eigen::Vector3f boxRotation;
   boxRotation[0] = 0;                                  // rotation around x-axis
   boxRotation[1] = 0;                                  // rotation around y-axis
@@ -447,7 +325,8 @@ void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8 &msg)
   box_filter.setNegative(true);
   box_filter.filter(*tgt);
   sensor_msgs::PointCloud2::Ptr merged_cloud(new sensor_msgs::PointCloud2());
-  convertPCLtoROS<PointCloud::Ptr, PointCloudSensorMsg::Ptr>(tgt, merged_cloud);
+  // convertPCLtoROS<PointCloud::Ptr, PointCloudSensorMsg::Ptr>(tgt, merged_cloud);
+  convertPCLtoROS<PointCloud::Ptr>(tgt, merged_cloud);
   prev_msg_ = merged_cloud;
 
   registered_pointcloud_pub_.publish(merged_cloud);
@@ -470,7 +349,8 @@ void PeriodicSnapshotter::mergeClouds(const PointCloudSensorMsg::Ptr msg)
   PointCloud::Ptr pcl_msg(new PointCloud);
   PointCloud_I::Ptr pclI_msg(new PointCloud_I);
 
-  convertROStoPCL<PointCloud::Ptr, PointCloudSensorMsg::Ptr>(msg, pcl_msg);
+  // convertROStoPCL<PointCloud::Ptr, PointCloudSensorMsg::Ptr>(msg, pcl_msg);
+  convertROStoPCL<PointCloud::Ptr>(msg, pcl_msg);
   addIntensity(pcl_msg, pclI_msg); // add initial value
 
   if (state_request == PCL_STATE_CONTROL::RESET || prev_msg_->data.empty())
@@ -485,35 +365,22 @@ void PeriodicSnapshotter::mergeClouds(const PointCloudSensorMsg::Ptr msg)
   {
     // merge the current msg with previous messages published till now
     // http://www.pointclouds.org/documentation/tutorials/pairwise_incremental_registration.php#pairwise-incremental-registration
-    // PointCloud::Ptr pcl_prev_msg(new PointCloud);
-    // convertROStoPCL(prev_msg_, pcl_prev_msg);
-    // pcl_prev_msg = assembled_pc;
 
-    // PointCloud::Ptr result(new PointCloud);
     PointCloud_I::Ptr result_I(new PointCloud_I);
-    // Eigen::Matrix4f pairTransform;
-
-    // check if the cloud size is growing exceptionally high. if yes, downsample the pointcloud without impacting
-    // objects and features
-    // pairAlign(pcl_msg, pcl_prev_msg, result, pairTransform);
-    // pairAlign(pcl_msg, pcl_prev_msg, result);
     pairAlign_I(pclI_msg, assembled_pc_I, result_I);
 
     // clip the point cloud in x y and z direction
-    // clipPointCloud(result);
     clipPointCloud(result_I);
 
-    // ROS_INFO("PeriodicSnapshotter::mergeClouds : PC size : %d", result->size());
     ROS_INFO("PeriodicSnapshotter::mergeClouds : PC size : %d", result_I->size());
 
     decayPoint(result_I);
-    min_internsity(pclI_msg);
-    min_internsity(assembled_pc_I);
-    min_internsity(result_I);
+    ROS_INFO("min intensity of input pc is %f", min_internsity(pclI_msg));
+    ROS_INFO("min intensity of assembled pc is %f", min_internsity(assembled_pc_I));
+    ROS_INFO("min intensity of result pc is %f", min_internsity(result_I));
 
-    // assembled_pc = result;
-    // convertPCLtoROS<PointCloud::Ptr, PointCloudSensorMsg::Ptr>(result, merged_cloud);
-    convertPCLtoROS<PointCloud_I::Ptr, PointCloudSensorMsg::Ptr>(result_I, merged_cloud);
+    // convertPCLtoROS<PointCloud_I::Ptr, PointCloudSensorMsg::Ptr>(result_I, merged_cloud);
+    convertPCLtoROS<PointCloud_I::Ptr>(result_I, merged_cloud);
     assembled_pc_I = result_I;
 
     ROS_INFO("PeriodicSnapshotter::mergeClouds : assembled PC size %d", assembled_pc_I->size());
@@ -523,29 +390,7 @@ void PeriodicSnapshotter::mergeClouds(const PointCloudSensorMsg::Ptr msg)
 
   // publish the merged message
   prev_msg_ = merged_cloud;
-  // convertROStoPCL<PointCloud::Ptr, PointCloudSensorMsg::Ptr>(merged_cloud, assembled_pc);
-  // addIntensity(assembled_pc, assembled_pc_I);
   registered_pointcloud_pub_.publish(merged_cloud);
-}
-
-void PeriodicSnapshotter::clipPointCloud(const PointCloud::Ptr input_cloud)
-{
-  pcl::PassThrough<PointT> globalPassThroughFilter;
-
-  globalPassThroughFilter.setInputCloud(input_cloud);
-  globalPassThroughFilter.setFilterFieldName("z");
-  globalPassThroughFilter.setFilterLimits(filter_min_z, filter_max_z);
-  globalPassThroughFilter.filter(*input_cloud);
-
-  globalPassThroughFilter.setInputCloud(input_cloud);
-  globalPassThroughFilter.setFilterFieldName("y");
-  globalPassThroughFilter.setFilterLimits(filter_min_y, filter_max_y);
-  globalPassThroughFilter.filter(*input_cloud);
-
-  globalPassThroughFilter.setInputCloud(input_cloud);
-  globalPassThroughFilter.setFilterFieldName("x");
-  globalPassThroughFilter.setFilterLimits(filter_min_x, filter_max_x);
-  globalPassThroughFilter.filter(*input_cloud);
 }
 
 void PeriodicSnapshotter::clipPointCloud(const PointCloud_I::Ptr input_cloud)
@@ -566,6 +411,33 @@ void PeriodicSnapshotter::clipPointCloud(const PointCloud_I::Ptr input_cloud)
   globalPassThroughFilter.setFilterFieldName("x");
   globalPassThroughFilter.setFilterLimits(filter_min_x, filter_max_x);
   globalPassThroughFilter.filter(*input_cloud);
+}
+
+void PeriodicSnapshotter::addIntensity(const PointCloud::Ptr pc1, PointCloud_I::Ptr pc2)
+{
+  copyPointCloud(*pc1, *pc2);
+  std::for_each(pc2->points.begin(),
+                pc2->points.end(),
+                [](PointTI &p) { p.intensity = 1.0f; });
+}
+
+void PeriodicSnapshotter::decayPoint(PointCloud_I::Ptr pc, float step)
+{
+  std::for_each(pc->points.begin(),
+                pc->points.end(),
+                [&step](PointTI &p) {
+                  if (p.intensity > 0.0f)
+                    p.intensity -= step;
+                });
+}
+
+void PeriodicSnapshotter::filterDeadPointCloud(PointCloud_I::Ptr pc, float dead_threshold)
+{
+  auto n_end = pc->points.end();
+  auto p_end = std::remove_if(pc->points.begin(),
+                              pc->points.end(),
+                              [&dead_threshold](PointTI i) { return i.intensity <= dead_threshold; });
+  pc->points.erase(p_end, n_end);
 }
 
 int main(int argc, char **argv)

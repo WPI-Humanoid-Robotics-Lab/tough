@@ -2,7 +2,10 @@
 
 namespace tough_perception
 {
-void generateOrganizedRGBDCloud(const cv::Mat &dispImage, const cv::Mat &colorImage, const Eigen::Matrix4d Qmat,
+
+void generateOrganizedRGBDCloud(const cv::Mat &dispImage,
+                                const cv::Mat &colorImage,
+                                const Eigen::Matrix4d Qmat,
                                 tough_perception::StereoPointCloudColor::Ptr &cloud)
 {
     int width = dispImage.cols;
@@ -37,4 +40,13 @@ void generateOrganizedRGBDCloud(const cv::Mat &dispImage, const cv::Mat &colorIm
             pt.r = rgb.val[2];
         }
 }
+
+float min_internsity(PointCloud_I::Ptr pc)
+{
+    PointTI x = *std::min_element(pc->points.begin(),
+                                  pc->points.end(),
+                                  [](PointTI i, PointTI j) { return i.intensity < j.intensity; });
+    return x.intensity;
+}
+
 } // namespace tough_perception
