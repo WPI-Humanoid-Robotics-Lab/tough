@@ -160,13 +160,12 @@ void PeriodicSnapshotter::pairAlign_I(const PointCloud_I::Ptr cloud_src,
   // note enable this for large datasets
   PointCloud_I::Ptr src(new PointCloud_I);
   PointCloud_I::Ptr tgt(new PointCloud_I);
-  pcl::VoxelGrid<PointTI> grid;
-  grid.setLeafSize(0.05, 0.05, 0.05);
-  grid.setInputCloud(cloud_src);
-  grid.filter(*src);
 
-  grid.setInputCloud(cloud_tgt);
-  grid.filter(*tgt);
+  *src = *cloud_src;
+  *tgt = *cloud_tgt;
+
+  voxel_grid_filt_0_05(src);
+  voxel_grid_filt_0_05(tgt);
 
   // Compute surface normals and curvature
   PointCloudWithNormals::Ptr points_with_normals_src(new PointCloudWithNormals);
@@ -315,8 +314,8 @@ void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8 &msg)
                                                        // 45deg around z-axis.
 
   pcl::CropBox<PointT> box_filter;
-  std::vector<int> indices;
-  indices.clear();
+  // std::vector<int> indices;
+  // indices.clear();
   box_filter.setInputCloud(pcl_prev_msg);
   box_filter.setMin(minPoint);
   box_filter.setMax(maxPoint);
@@ -395,22 +394,9 @@ void PeriodicSnapshotter::mergeClouds(const PointCloudSensorMsg::Ptr msg)
 
 void PeriodicSnapshotter::clipPointCloud(const PointCloud_I::Ptr input_cloud)
 {
-  pcl::PassThrough<PointTI> globalPassThroughFilter;
-
-  globalPassThroughFilter.setInputCloud(input_cloud);
-  globalPassThroughFilter.setFilterFieldName("z");
-  globalPassThroughFilter.setFilterLimits(filter_min_z, filter_max_z);
-  globalPassThroughFilter.filter(*input_cloud);
-
-  globalPassThroughFilter.setInputCloud(input_cloud);
-  globalPassThroughFilter.setFilterFieldName("y");
-  globalPassThroughFilter.setFilterLimits(filter_min_y, filter_max_y);
-  globalPassThroughFilter.filter(*input_cloud);
-
-  globalPassThroughFilter.setInputCloud(input_cloud);
-  globalPassThroughFilter.setFilterFieldName("x");
-  globalPassThroughFilter.setFilterLimits(filter_min_x, filter_max_x);
-  globalPassThroughFilter.filter(*input_cloud);
+  pass_through_filt(input_cloud, "z", filter_min_z, filter_max_z);
+  pass_through_filt(input_cloud, "y", filter_min_y, filter_max_y);
+  pass_through_filt(input_cloud, "x", filter_min_x, filter_max_x);
 }
 
 void PeriodicSnapshotter::addIntensity(const PointCloud::Ptr pc1, PointCloud_I::Ptr pc2)

@@ -141,6 +141,9 @@ private:
   sensor_msgs::PointCloud2::Ptr prev_msg_;
   PointCloud_I::Ptr assembled_pc_I;
 
+  PassThroughFilter<PointTI> pass_through_filt;
+  VoxelGridFilter<PointTI> voxel_grid_filt_0_05;
+
   bool first_time_;
   bool downsample_;
   bool resetPointcloud_;
