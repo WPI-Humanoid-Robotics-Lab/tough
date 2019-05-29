@@ -152,91 +152,6 @@ void PeriodicSnapshotter::timerCallback(const ros::TimerEvent &e)
   }
 }
 
-void PeriodicSnapshotter::pairAlign_I(const PointCloud_I::Ptr cloud_src,
-                                      const PointCloud_I::Ptr cloud_tgt,
-                                      PointCloud_I::Ptr output)
-{
-  // Downsample for consistency and speed
-  // note enable this for large datasets
-  PointCloud_I::Ptr src(new PointCloud_I);
-  PointCloud_I::Ptr tgt(new PointCloud_I);
-
-  *src = *cloud_src;
-  *tgt = *cloud_tgt;
-
-  voxel_grid_filt_0_05(src);
-  voxel_grid_filt_0_05(tgt);
-
-  // Compute surface normals and curvature
-  PointCloudWithNormals::Ptr points_with_normals_src(new PointCloudWithNormals);
-  PointCloudWithNormals::Ptr points_with_normals_tgt(new PointCloudWithNormals);
-
-  pcl::NormalEstimation<PointTI, PointNormalT> norm_est;
-  pcl::search::KdTree<PointTI>::Ptr tree(new pcl::search::KdTree<PointTI>());
-  norm_est.setSearchMethod(tree);
-  norm_est.setKSearch(30);
-
-  norm_est.setInputCloud(src);
-  norm_est.compute(*points_with_normals_src);
-  pcl::copyPointCloud(*src, *points_with_normals_src);
-
-  norm_est.setInputCloud(tgt);
-  norm_est.compute(*points_with_normals_tgt);
-  pcl::copyPointCloud(*tgt, *points_with_normals_tgt);
-
-  // Instantiate our custom point representation (defined above) ...
-  customPointRepresentation point_representation;
-  // ... and weight the 'curvature' dimension so that it is balanced against x, y, and z
-  float alpha[4] = {1.0, 1.0, 1.0, 1.0};
-  point_representation.setRescaleValues(alpha);
-
-  // Align
-  pcl::IterativeClosestPointNonLinear<PointNormalT, PointNormalT> reg;
-  reg.setTransformationEpsilon(1e-6);
-  // Set the maximum distance between two correspondences (src<->tgt) to 10cm
-  // Note: adjust this based on the size of your datasets
-  reg.setMaxCorrespondenceDistance(0.1);
-  // Set the point representation
-  reg.setPointRepresentation(boost::make_shared<const customPointRepresentation>(point_representation));
-
-  reg.setInputSource(points_with_normals_src);
-  reg.setInputTarget(points_with_normals_tgt);
-
-  // Run the same optimization in a loop
-  Eigen::Matrix4f Ti = Eigen::Matrix4f::Identity(), prev, targetToSource;
-  PointCloudWithNormals::Ptr reg_result = points_with_normals_src;
-  reg.setMaximumIterations(2);
-  for (int i = 0; i < 30; ++i)
-  {
-    // save cloud for visualization purpose
-    points_with_normals_src = reg_result;
-
-    // Estimate
-    reg.setInputSource(points_with_normals_src);
-    reg.align(*reg_result);
-
-    // accumulate transformation between each Iteration
-    Ti = reg.getFinalTransformation() * Ti;
-
-    // if the difference between this transformation and the previous one
-    // is smaller than the threshold, refine the process by reducing
-    // the maximal correspondence distance
-    if (fabs((reg.getLastIncrementalTransformation() - prev).sum()) < reg.getTransformationEpsilon())
-      reg.setMaxCorrespondenceDistance(reg.getMaxCorrespondenceDistance() - 0.001);
-
-    prev = reg.getLastIncrementalTransformation();
-  }
-
-  // Get the transformation from target to source
-  targetToSource = Ti.inverse();
-
-  // Transform target back in source frame
-  pcl::transformPointCloud(*cloud_tgt, *output, targetToSource);
-
-  // add the source to the transformed target
-  *output += *cloud_src;
-}
-
 void PeriodicSnapshotter::resetPointcloud(bool resetPointcloud)
 {
   // reset the assembler
@@ -314,8 +229,6 @@ void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8 &msg)
                                                        // 45deg around z-axis.
 
   pcl::CropBox<PointT> box_filter;
-  // std::vector<int> indices;
-  // indices.clear();
   box_filter.setInputCloud(pcl_prev_msg);
   box_filter.setMin(minPoint);
   box_filter.setMax(maxPoint);
@@ -323,8 +236,8 @@ void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8 &msg)
   box_filter.setRotation(boxRotation);
   box_filter.setNegative(true);
   box_filter.filter(*tgt);
+
   sensor_msgs::PointCloud2::Ptr merged_cloud(new sensor_msgs::PointCloud2());
-  // convertPCLtoROS<PointCloud::Ptr, PointCloudSensorMsg::Ptr>(tgt, merged_cloud);
   convertPCLtoROS<PointCloud::Ptr>(tgt, merged_cloud);
   prev_msg_ = merged_cloud;
 
@@ -366,19 +279,14 @@ void PeriodicSnapshotter::mergeClouds(const PointCloudSensorMsg::Ptr msg)
     // http://www.pointclouds.org/documentation/tutorials/pairwise_incremental_registration.php#pairwise-incremental-registration
 
     PointCloud_I::Ptr result_I(new PointCloud_I);
-    pairAlign_I(pclI_msg, assembled_pc_I, result_I);
+    align_point_clouds(pclI_msg, assembled_pc_I, result_I);
 
-    // clip the point cloud in x y and z direction
-    clipPointCloud(result_I);
+    clipPointCloud(result_I); // clip the point cloud in x y and z direction
 
     ROS_INFO("PeriodicSnapshotter::mergeClouds : PC size : %d", result_I->size());
 
     decayPoint(result_I);
-    ROS_INFO("min intensity of input pc is %f", min_internsity(pclI_msg));
-    ROS_INFO("min intensity of assembled pc is %f", min_internsity(assembled_pc_I));
-    ROS_INFO("min intensity of result pc is %f", min_internsity(result_I));
 
-    // convertPCLtoROS<PointCloud_I::Ptr, PointCloudSensorMsg::Ptr>(result_I, merged_cloud);
     convertPCLtoROS<PointCloud_I::Ptr>(result_I, merged_cloud);
     assembled_pc_I = result_I;
 

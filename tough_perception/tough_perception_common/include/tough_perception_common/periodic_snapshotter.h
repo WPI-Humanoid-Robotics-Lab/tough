@@ -102,17 +102,6 @@ public:
    */
   void mergeClouds(const sensor_msgs::PointCloud2::Ptr msg);
 
-  /**
-   * @brief Aligns the source and target point cloud using Iterative Closest Point algorithm 
-   * 
-   * @param cloud_src 
-   * @param cloud_tgt 
-   * @param output 
-   */
-  void pairAlign_I(const PointCloud_I::Ptr cloud_src,
-                   const PointCloud_I::Ptr cloud_tgt,
-                   PointCloud_I::Ptr output);
-
   void addIntensity(const PointCloud::Ptr pc1, PointCloud_I::Ptr pc2);
   void decayPoint(PointCloud_I::Ptr pc, float step = 0.1);
   void filterDeadPointCloud(PointCloud_I::Ptr pc, float dead_threshold = 0.0f);
@@ -143,6 +132,7 @@ private:
 
   PassThroughFilter<PointTI> pass_through_filt;
   VoxelGridFilter<PointTI> voxel_grid_filt_0_05;
+  PointCloudAligner<PointTI> align_point_clouds;
 
   bool first_time_;
   bool downsample_;
