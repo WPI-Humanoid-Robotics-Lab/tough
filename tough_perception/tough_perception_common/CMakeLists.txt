@@ -4,6 +4,8 @@ project(tough_perception_common)
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 add_definitions(-std=c++11)
+# add_definitions(-DGAZEBO_SIMULATION)
+
 
 find_package(OpenCV 2.4 REQUIRED core gpu imgproc calib3d highgui)
 find_package(PCL 1.7 REQUIRED io)
@@ -26,7 +28,11 @@ find_package(catkin REQUIRED COMPONENTS roscpp
                                         tough_common
                                         )
 
-include_directories(SYSTEM ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} include)
+
+include_directories(SYSTEM 
+                        ${PCL_INCLUDE_DIRS} 
+                        ${OpenCV_INCLUDE_DIRS} 
+                        ${catkin_INCLUDE_DIRS} include)
 
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
@@ -34,50 +40,53 @@ add_definitions(${PCL_DEFINITIONS})
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}
-   CATKIN_DEPENDS roscpp cv_bridge image_transport pcl_conversions std_msgs message_filters multisense_ros laser_assembler tough_common tough_controller_interface
+   CATKIN_DEPENDS 
+      roscpp 
+      cv_bridge 
+      image_transport 
+      pcl_conversions 
+      std_msgs 
+      message_filters 
+      multisense_ros 
+      laser_assembler 
+      tough_common 
+      tough_controller_interface
 )
 
-add_library(${PROJECT_NAME}  src/MultisensePointCloud.cpp
-                             src/MultisenseImage.cpp
-#                             src/ImageHelper.cpp
-                             src/PointCloudHelper.cpp
-                             src/laser2point_cloud.cpp
-                             src/ArucoDetector.cpp
+add_library(${PROJECT_NAME}  
+                              src/lib/MultisenseInterface.cpp 
+                              src/lib/laser2point_cloud.cpp
+                              src/lib/ArucoDetector.cpp
+                              src/lib/PerceptionHelper.cpp
 )
 									
-set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_DEFINITIONS GAZEBO_SIMULATION)
+set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_DEFINITIONS)
 
 target_link_libraries(${PROJECT_NAME}  ${PCL_LIBRARIES} ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_dependencies(${PROJECT_NAME}  ${catkin_EXPORTED_TARGETS} )
 
-add_executable(test_lasercloud  src/test_laser.cpp)
-target_link_libraries(test_lasercloud  ${PROJECT_NAME})
-
-#add_executable(test_image  src/test_image.cpp)
-#target_link_libraries(test_image  ${PROJECT_NAME})
-
-add_executable(test_organizedRGBD  src/test_organizedRGBD.cpp)
-target_link_libraries(test_organizedRGBD  ${PROJECT_NAME})
-
-add_executable(periodic_snapshotter  src/periodic_snapshotter.cpp)
+add_executable(periodic_snapshotter  src/nodes/periodic_snapshotter.cpp)
 target_link_libraries(periodic_snapshotter  ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-add_executable(walkway_point_generator src/walkway_generator.cpp)
+add_executable(walkway_point_generator src/nodes/walkway_generator.cpp)
 add_dependencies(walkway_point_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(walkway_point_generator ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
-add_executable(laser2point_cloud_node src/laser2point_cloud_node.cpp)
+add_executable(laser2point_cloud_node src/nodes/laser2point_cloud_node.cpp)
 add_dependencies(laser2point_cloud_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(laser2point_cloud_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
 
-add_executable(test_aruco_node src/test_aruco.cpp)
+add_executable(test_aruco_node src/nodes/test_aruco.cpp)
 add_dependencies(test_aruco_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_aruco_node ${catkin_LIBRARIES} ${PROJECT_NAME} )
 
 
 
 ## Mark executables and/or libraries for installation
- install(TARGETS test_lasercloud test_organizedRGBD periodic_snapshotter walkway_point_generator laser2point_cloud_node ${PROJECT_NAME}
+ install(TARGETS 
+         periodic_snapshotter 
+         walkway_point_generator 
+         laser2point_cloud_node ${PROJECT_NAME}
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

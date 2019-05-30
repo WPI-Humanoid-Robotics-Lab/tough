@@ -581,23 +581,19 @@ bool ArmControlInterface::getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide
   return false;
 }
 
-void ArmControlInterface::moveArmInTaskSpace(const RobotSide side, const geometry_msgs::Pose& pose, const float time)
+void ArmControlInterface::moveArmInTaskSpace(const RobotSide side, const geometry_msgs::Pose& pose, const float time,
+                                             int baseForControl)
 {
   ihmc_msgs::SE3TrajectoryPointRosMessage point;
   poseToSE3TrajectoryPoint(pose, point);
   point.time = time;
-  this->moveArmInTaskSpaceMessage(side, point);
+  this->moveArmInTaskSpaceMessage(side, point, baseForControl);
 }
 
 void ArmControlInterface::moveArmInTaskSpaceMessage(const RobotSide side,
                                                     const ihmc_msgs::SE3TrajectoryPointRosMessage& point,
                                                     int baseForControl)
 {
-  if (baseForControl == 0)
-  {
-    baseForControl = rd_->getPelvisZUPFrameHash();
-  }
-
   ihmc_msgs::HandTrajectoryRosMessage msg;
   ihmc_msgs::FrameInformationRosMessage reference_frame;
 
