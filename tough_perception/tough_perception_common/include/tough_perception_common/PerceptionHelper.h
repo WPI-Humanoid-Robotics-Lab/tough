@@ -56,21 +56,10 @@ class customPointRepresentation : public pcl::PointRepresentation<PointNormalT>
     using pcl::PointRepresentation<PointNormalT>::nr_dimensions_;
 
 public:
-    customPointRepresentation()
-    {
-        // Define the number of dimensions
-        nr_dimensions_ = 4;
-    }
+    customPointRepresentation();
 
     // Override the copyToFloatArray method to define our feature vector
-    virtual void copyToFloatArray(const PointNormalT &p, float *out) const
-    {
-        // < x, y, z, curvature >
-        out[0] = p.x;
-        out[1] = p.y;
-        out[2] = p.z;
-        out[3] = p.curvature;
-    }
+    virtual void copyToFloatArray(const PointNormalT &p, float *out) const;
 };
 
 /**
@@ -87,16 +76,37 @@ private:
     float min_val_, max_val_;
 
 public:
-    PassThroughFilter()
+    /**
+     * @brief Construct a new Pass Through Filter 
+     * default axis is 'z', filter min and max constraints are -50,50  
+     */
+    PassThroughFilter() : axis_("z"), min_val_(-50.0), max_val_(50.0)
     {
         filter_ = std::make_shared<pcl::PassThrough<T>>();
     }
+
+    /**
+     * @brief Construct a new Pass Through Filter 
+     * 
+     * @param axis should be a string, ("x","y","z")
+     * @param min_val minimum value about that axis
+     * @param max_val maximum value about that axis
+     */
     PassThroughFilter(std::string axis, float min_val, float max_val) : axis_(axis),
                                                                         min_val_(min_val),
                                                                         max_val_(max_val)
     {
         filter_ = std::make_shared<pcl::PassThrough<T>>();
     }
+
+    /**
+     * @brief Call the filter to process given pointcloud
+     * 
+     * @param input_cloud 
+     * @param axis 
+     * @param min_val 
+     * @param max_val 
+     */
     void operator()(PointCloud_I::Ptr input_cloud,
                     std::string axis,
                     float min_val,
@@ -107,6 +117,13 @@ public:
         max_val_ = max_val;
         filter(input_cloud);
     }
+
+    /**
+     * @brief Calls the filter to process given pointcloud
+     * with default values
+     * 
+     * @param input_cloud 
+     */
     void operator()(PointCloud_I::Ptr input_cloud)
     {
         filter(input_cloud);
@@ -135,26 +152,61 @@ private:
     float leaf_size_;
 
 public:
+    /**
+     * @brief Construct a new Voxel Grid Filter 
+     * with leaf size as 0.05
+     */
     VoxelGridFilter() : leaf_size_(0.05)
     {
         filter_ = std::make_shared<pcl::VoxelGrid<T>>();
         filter_->setLeafSize(leaf_size_, leaf_size_, leaf_size_);
     }
+
+    /**
+     * @brief Construct a new Voxel Grid Filter 
+     * with specified leaf size
+     * @param leaf_size 
+     */
     VoxelGridFilter(float leaf_size) : leaf_size_(leaf_size)
     {
         filter_ = std::make_shared<pcl::PassThrough<T>>();
         filter_->setLeafSize(leaf_size_, leaf_size_, leaf_size_);
     }
+
+    /**
+     * @brief Calls the filter to process given pointcloud
+     * with given leaf size in all the 3 axis
+     * @param input_cloud 
+     * @param leaf_size 
+     */
     void operator()(PointCloud_I::Ptr input_cloud, float leaf_size)
     {
         filter_->setLeafSize(leaf_size, leaf_size, leaf_size);
         filter(input_cloud);
     }
-    void operator()(PointCloud_I::Ptr input_cloud, float leaf_size_x, float leaf_size_y, float leaf_size_z)
+
+    /**
+     * @brief Calls the filter to process given pointcloud
+     * with different leaf sizes specified for each axis
+     * @param input_cloud 
+     * @param leaf_size_x 
+     * @param leaf_size_y 
+     * @param leaf_size_z 
+     */
+    void operator()(PointCloud_I::Ptr input_cloud, 
+                    float leaf_size_x, 
+                    float leaf_size_y, 
+                    float leaf_size_z)
     {
         filter_->setLeafSize(leaf_size_x, leaf_size_y, leaf_size_z);
         filter(input_cloud);
     }
+
+    /**
+     * @brief Calls the filter to process given pointcloud
+     * with default leaf size
+     * @param input_cloud 
+     */
     void operator()(PointCloud_I::Ptr input_cloud)
     {
         // ROS_INFO("grid size %f", leaf_size_);
@@ -195,6 +247,10 @@ private:
     PointCloudWithNormals::Ptr points_with_normals_tgt;
 
 public:
+    /**
+     * @brief Construct a new Point Cloud Aligner object
+     * 
+     */
     PointCloudAligner() : tree(new pcl::search::KdTree<PointTI>()),
                           src(new PointCloud_I),
                           tgt(new PointCloud_I),
@@ -218,12 +274,21 @@ public:
             boost::make_shared<const customPointRepresentation>(point_representation));
     }
 
+    /**
+     * @brief Alligns 2 dense point clouds and returns a merged pointcloud
+     * 
+     * @param cloud_src 
+     * @param cloud_tgt 
+     * @param output 
+     */
     void operator()(const PointCloud_I::Ptr cloud_src,
                     const PointCloud_I::Ptr cloud_tgt,
                     PointCloud_I::Ptr output)
     {
         pairAlign(cloud_src, cloud_tgt, output);
     }
+
+private:
     void pairAlign(const PointCloud_I::Ptr cloud_src,
                    const PointCloud_I::Ptr cloud_tgt,
                    PointCloud_I::Ptr output)
@@ -243,7 +308,6 @@ public:
         *output += *cloud_src; // add the source to the transformed target
     }
 
-private:
     void computeAlignment()
     {
         reg.setInputSource(points_with_normals_src);

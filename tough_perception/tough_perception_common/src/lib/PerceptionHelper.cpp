@@ -3,6 +3,23 @@
 namespace tough_perception
 {
 
+/**-------------------------------------------------------**/
+/** Custom Point representation **/
+customPointRepresentation::customPointRepresentation()
+{
+    // Define the number of dimensions
+    nr_dimensions_ = 4;
+}
+
+void customPointRepresentation::copyToFloatArray(const PointNormalT &p, float *out) const
+{
+    // < x, y, z, curvature >
+    out[0] = p.x;
+    out[1] = p.y;
+    out[2] = p.z;
+    out[3] = p.curvature;
+}
+/**-------------------------------------------------------**/
 void generateOrganizedRGBDCloud(const cv::Mat &dispImage,
                                 const cv::Mat &colorImage,
                                 const Eigen::Matrix4d Qmat,
