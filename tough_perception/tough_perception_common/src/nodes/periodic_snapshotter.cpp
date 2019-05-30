@@ -31,7 +31,6 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-// #define PCL_NO_PRECOMPILE
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/io/pcd_io.h>
@@ -41,7 +40,6 @@
 #include <boost/make_shared.hpp>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
-// #include <pcl/point_representation.h>
 
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/filter.h>
@@ -76,7 +74,9 @@ using namespace laser_assembler;
 using namespace tough_perception;
 
 PeriodicSnapshotter::PeriodicSnapshotter() : assembled_pc_I(new PointCloud_I),
-                                             prev_msg_(new sensor_msgs::PointCloud2)
+                                             prev_msg_(new sensor_msgs::PointCloud2),
+                                             state_request(PCL_STATE_CONTROL::RESUME),
+                                             status_pub_thread_(&PeriodicSnapshotter::publishAssemblerStatus, this)
 {
   robot_state_ = RobotStateInformer::getRobotStateInformer(n_);
   rd_ = RobotDescription::getRobotDescription(n_);
@@ -85,6 +85,7 @@ PeriodicSnapshotter::PeriodicSnapshotter() : assembled_pc_I(new PointCloud_I),
   snapshot_pub_ = n_.advertise<sensor_msgs::PointCloud2>("snapshot_cloud2", 1, true);
   registered_pointcloud_pub_ = n_.advertise<sensor_msgs::PointCloud2>("assembled_cloud2", 1, true);
   pointcloud_for_octomap_pub_ = n_.advertise<sensor_msgs::PointCloud2>("assembled_octomap_cloud2", 10, true);
+  assembler_status_pub_ = n_.advertise<std_msgs::Int8>("assembler_status", 1, false);
 
   // Setting all subscribers
   resetPointcloudSub_ = n_.subscribe("reset_pointcloud", 10, &PeriodicSnapshotter::resetPointcloudCB, this);
@@ -100,6 +101,7 @@ PeriodicSnapshotter::PeriodicSnapshotter() : assembled_pc_I(new PointCloud_I),
   n_.param<float>("laser_assembler_svc/laser_snapshot_timeout", timeout, 5.0);
   ROS_INFO("PeriodicSnapshotter::PeriodicSnapshotter : Snapshot timeout : %.2f seconds", timeout);
   timer_ = n_.createTimer(ros::Duration(timeout, 0), &PeriodicSnapshotter::timerCallback, this);
+  // status_pub_timer_ = n_.createTimer(ros::Duration(assembler_status_pub_rate, 0), &PeriodicSnapshotter::publishAssemblerStatus, this);
 
   // Need to track if we've called the timerCallback at least once
   first_time_ = true;
@@ -115,7 +117,14 @@ PeriodicSnapshotter::PeriodicSnapshotter() : assembled_pc_I(new PointCloud_I),
 
   n_.param<float>("filter_min_z", filter_min_z, -10.0);
   n_.param<float>("filter_max_z", filter_max_z, 10.0);
+
   snapshotCount_ = 0;
+}
+
+PeriodicSnapshotter::~PeriodicSnapshotter()
+{
+  status_pub_thread_stop = true;
+  status_pub_thread_.join();
 }
 
 void PeriodicSnapshotter::timerCallback(const ros::TimerEvent &e)
@@ -243,6 +252,15 @@ void PeriodicSnapshotter::setBoxFilterCB(const std_msgs::Int8 &msg)
 
   registered_pointcloud_pub_.publish(merged_cloud);
   enable_box_filter_ = false;
+}
+
+void PeriodicSnapshotter::publishAssemblerStatus()
+{
+  while (!status_pub_thread_stop)
+  {
+    assembler_status_pub_.publish(static_cast<uint8_t>(state_request));
+    ros::Duration(assembler_status_pub_rate).sleep();
+  }
 }
 
 void PeriodicSnapshotter::mergeClouds(const PointCloudSensorMsg::Ptr msg)

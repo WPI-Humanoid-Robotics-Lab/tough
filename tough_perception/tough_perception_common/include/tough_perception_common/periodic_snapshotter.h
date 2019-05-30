@@ -32,6 +32,17 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+/**
+ * @file periodic_snapshotter.h
+ * @author Ameya Wagh[contributor] (aywagh@wpi.edu)
+ * @brief contrib - Major edits to the existing periodic snapshotter
+ * @version 0.1
+ * @date 2019-05-30
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
+
 #ifndef PERIODIC_SNAPSHOTTER_H
 #define PERIODIC_SNAPSHOTTER_H
 
@@ -56,6 +67,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <thread>
 
 namespace laser_assembler
 {
@@ -72,6 +84,10 @@ enum class PCL_STATE_CONTROL
   RESUME
 };
 
+/**
+ * @brief Enum class which holds the box filter types
+ * 
+ */
 enum class BOX_FILTER_TYPE
 {
   WAIST_UP = 1,
@@ -87,7 +103,9 @@ public:
    * resulting data
    */
   PeriodicSnapshotter();
+  ~PeriodicSnapshotter();
 
+private:
   /**
    * @brief timerCallback This callback is executed after a set timeout. This timeout is specified
    * in the launch file. example: <param name="/laser_assembler_svc/laser_snapshot_timeout" type="double" value="6.0"/>
@@ -102,29 +120,80 @@ public:
    */
   void mergeClouds(const sensor_msgs::PointCloud2::Ptr msg);
 
+  /**
+   * @brief Adds intensity value equal to 1.0 to every point
+   * 
+   * @param pc1 PointCloud<PointXYZ>
+   * @param pc2 PointCloud<PointXYZI>
+   */
   void addIntensity(const PointCloud::Ptr pc1, PointCloud_I::Ptr pc2);
+
+  /**
+   * @brief decays intensity of every point by given step value
+   * 
+   * @param pc PointCloud<PointXYZI>
+   * @param step value with which intensity to be decayed 
+   */
   void decayPoint(PointCloud_I::Ptr pc, float step = 0.1);
+
+  /**
+   * @brief removes dead points (with intensity less than dead_threshold)
+   * 
+   * @param pc PointCloud<PointXYZI>
+   * @param dead_threshold 
+   */
   void filterDeadPointCloud(PointCloud_I::Ptr pc, float dead_threshold = 0.0f);
 
+  /**
+   * @brief Resets assembled pointcloud
+   * 
+   * @param resetPointcloud true to activate
+   */
   void resetPointcloud(bool resetPointcloud);
   void resetPointcloudCB(const std_msgs::Empty &msg);
 
+  /**
+   * @brief pauses snapshotter
+   * 
+   * @param pausePointcloud true to activate
+   */
   void pausePointcloud(bool pausePointcloud);
   void pausePointcloudCB(const std_msgs::Bool &msg);
 
-  void setBoxFilterCB(const std_msgs::Int8 &msg);
+  /**
+   * @brief Clips assembled point cloud
+   * 
+   * @param input_cloud 
+   */
   void clipPointCloud(const PointCloud_I::Ptr input_cloud);
+  void setBoxFilterCB(const std_msgs::Int8 &msg);
+
+  /**
+   * @brief publishes the status of assembler given by PCL_STATE_CONTROL
+   * 
+   */
+  void publishAssemblerStatus();
 
 private:
+  // create local node handler
   ros::NodeHandle n_;
+
+  // create ros publishers
   ros::Publisher snapshot_pub_;
   ros::Publisher registered_pointcloud_pub_;
   ros::Publisher pointcloud_for_octomap_pub_;
+  ros::Publisher assembler_status_pub_;
+
+  // create ros subscribers
   ros::Subscriber snapshot_sub_;
   ros::Subscriber resetPointcloudSub_;
   ros::Subscriber pausePointcloudSub_;
   ros::Subscriber boxFilterSub_;
+
+  // create ros service client for assembler
   ros::ServiceClient client_;
+
+  // create timer for assembler
   ros::Timer timer_;
 
   sensor_msgs::PointCloud2::Ptr prev_msg_;
@@ -149,6 +218,10 @@ private:
 
   int snapshotCount_;
   const int MAX_SNAPSHOTS = 10;
+
+  float assembler_status_pub_rate = 0.5; // 2 Hz
+  std::thread status_pub_thread_;
+  bool status_pub_thread_stop = false;
 };
 
 } // namespace laser_assembler

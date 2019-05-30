@@ -1,3 +1,14 @@
+/**
+ * @file PerceptionHelper.h
+ * @author Ameya Wagh (aywagh@wpi.edu)
+ * @brief Helper functions for robot perception
+ * @version 0.1
+ * @date 2019-05-30
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
+
 #ifndef PERCEPTIONHELPER_H_
 #define PERCEPTIONHELPER_H_
 
@@ -21,7 +32,10 @@
 namespace tough_perception
 {
 
-// convenient typedefs
+/**
+ * @brief convenient typedefs for perception
+ * 
+ */
 typedef pcl::PointXYZ PointT;
 typedef pcl::PointXYZI PointTI;
 typedef sensor_msgs::PointCloud2 PointCloudSensorMsg;
@@ -320,6 +334,7 @@ void convertPCLtoROS(const T pcl_msg, PointCloudSensorMsg::Ptr &ros_msg)
  * @return float 
  */
 float min_internsity(PointCloud_I::Ptr pc);
+
 } // namespace tough_perception
 
 #endif

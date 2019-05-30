@@ -140,6 +140,10 @@ add_executable(multisense_image_example src/perception_examples/multisense_inter
 add_dependencies(multisense_image_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(multisense_image_example  ${catkin_LIBRARIES})
 
+add_executable(multisense_pc_example src/perception_examples/multisense_interface_pc_example.cpp )
+add_dependencies(multisense_pc_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(multisense_pc_example  ${catkin_LIBRARIES})
+
 #########################
 ## Manipulation examples ##
 #########################

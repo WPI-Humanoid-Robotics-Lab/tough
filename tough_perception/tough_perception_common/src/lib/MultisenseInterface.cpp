@@ -122,6 +122,21 @@ void MultisenseInterface::camera_infoCB(const sensor_msgs::CameraInfoConstPtr ca
   }
 }
 
+void MultisenseInterface::assembled_pcCB(const sensor_msgs::PointCloud2Ptr &assembled_pc)
+{
+  ROS_INFO_ONCE("Listening to %s", assembled_pc_sub_.getTopic().c_str());
+  if (assembled_pc_mutex.try_lock())
+  {
+    assembled_pc_msg = assembled_pc;
+    assembled_pc_mutex.unlock();
+  }
+}
+
+void MultisenseInterface::assemblerStatusCB(const std_msgs::Int8ConstPtr &status)
+{
+  assembler_status_ = status;
+}
+
 bool MultisenseInterface::start()
 {
   ROS_INFO("Starting MultisenseInterface");
@@ -138,7 +153,13 @@ bool MultisenseInterface::start()
 
   camera_info_sub_ = nh_.subscribe(camera_info_topic, 1, &MultisenseInterface::camera_infoCB, this);
 
+  assembled_pc_sub_ = nh_.subscribe(assembled_pc_topic_, 1, &MultisenseInterface::assembled_pcCB, this);
+
+  assembler_status_sub_ = nh_.subscribe(assembler_status_topic_, 1, &MultisenseInterface::assemblerStatusCB, this);
+
   multisense_motor_speed_pub_ = nh_.advertise<std_msgs::Float64>(multisense_motor_topic_, 1);
+  reset_assembler_pub_ = nh_.advertise<std_msgs::Empty>(assembler_reset_topic_, 1);
+  pause_assembler_pub_ = nh_.advertise<std_msgs::Bool>(assembler_pause_topic_, 1);
 
   ros::Duration(1).sleep();
   ros::spinOnce();
@@ -306,10 +327,38 @@ bool MultisenseInterface::getStereoData(cv::Mat &dispImage, cv::Mat &colorImage,
   return true;
 }
 
+bool MultisenseInterface::getLaserPointCloud(PointCloud::Ptr &pc_)
+{
+  if (!pc_) // handle uninitialized pointcloud pointers
+    pc_ = PointCloud::Ptr(new tough_perception::PointCloud());
+
+  std::lock_guard<std::mutex> guard(assembled_pc_mutex);
+  convertROStoPCL<PointCloud::Ptr>(assembled_pc_msg, pc_);
+  return pc_->empty() ? false : true;
+}
+
+LASER_ASSEMBLER_STATUS MultisenseInterface::getAssemblerStatus()
+{
+  return static_cast<LASER_ASSEMBLER_STATUS>(assembler_status_->data);
+}
+
+void MultisenseInterface::setAssemblerStatus(LASER_ASSEMBLER_STATUS status)
+{
+  if (status == LASER_ASSEMBLER_STATUS::RESET)
+  {
+    std_msgs::Empty emptyMsg;
+    reset_assembler_pub_.publish(emptyMsg);
+  }
+  else if (status == LASER_ASSEMBLER_STATUS::PAUSE)
+    pause_assembler_pub_.publish(true);
+  else if (status == LASER_ASSEMBLER_STATUS::ACTIVE)
+    pause_assembler_pub_.publish(false);
+}
+
 bool MultisenseInterface::isSensorActive()
 {
   return isActive(img_) || isActive(depth_) || isActive(cost_) || isActive(disparity_sensor_msg_) ||
-         isActive(disparity_);
+         isActive(disparity_) || isActive(assembled_pc_msg);
 }
 
 bool MultisenseInterface::shutdown()
@@ -323,12 +372,14 @@ bool MultisenseInterface::shutdown()
     cam_sub_disparity_.shutdown();
     cam_sub_disparity_sensor_msg_.shutdown();
     camera_info_sub_.shutdown();
+    assembled_pc_sub_.shutdown();
 
     resetMsg(img_);
     resetMsg(depth_);
     resetMsg(cost_);
     resetMsg(disparity_);
     resetMsg(disparity_sensor_msg_);
+    resetMsg(assembled_pc_msg);
 
     ros::Duration(0.5).sleep();
   }
@@ -353,6 +404,11 @@ bool isActive(const stereo_msgs::DisparityImageConstPtr &some_msg)
   return some_msg != nullptr;
 }
 
+bool isActive(const sensor_msgs::PointCloud2Ptr &some_msg)
+{
+  return some_msg != nullptr;
+}
+
 void resetMsg(sensor_msgs::ImageConstPtr &some_msg)
 {
   some_msg = nullptr;
@@ -363,40 +419,9 @@ void resetMsg(stereo_msgs::DisparityImageConstPtr &some_msg)
   some_msg = nullptr;
 }
 
-// void generateOrganizedRGBDCloud(const cv::Mat &dispImage, const cv::Mat &colorImage, const Eigen::Matrix4d Qmat,
-//                                 tough_perception::StereoPointCloudColor::Ptr &cloud)
-// {
-//   int width = dispImage.cols;
-//   int height = dispImage.rows;
-
-//   if (!cloud)
-//     cloud = tough_perception::StereoPointCloudColor::Ptr(new tough_perception::StereoPointCloudColor());
-
-//   cloud->resize(width * height);
-//   cloud->height = height;
-//   cloud->width = width;
-
-//   for (int u = 0; u < dispImage.rows; u++)
-//     for (int v = 0; v < dispImage.cols; v++)
-//     {
-//       const float &currentPixelDisp = dispImage.at<float>(cv::Point(v, u));
-//       if (currentPixelDisp == 0.0)
-//         continue;
-//       Eigen::Vector4d pixelCoordVec(v, u, currentPixelDisp, 1);
-//       pixelCoordVec = Qmat * pixelCoordVec;
-//       pixelCoordVec /= pixelCoordVec(3);
-
-//       tough_perception::StereoPointColor &pt = cloud->at(v, u);
-
-//       pt.x = pixelCoordVec(0);
-//       pt.y = pixelCoordVec(1);
-//       pt.z = pixelCoordVec(2);
-
-//       const cv::Vec3b &rgb = colorImage.at<cv::Vec3b>(cv::Point(v, u));
-//       pt.b = rgb.val[0];
-//       pt.g = rgb.val[1];
-//       pt.r = rgb.val[2];
-//     }
-// }
+void resetMsg(sensor_msgs::PointCloud2Ptr &some_msg)
+{
+  some_msg = nullptr;
+}
 
 } // namespace tough_perception

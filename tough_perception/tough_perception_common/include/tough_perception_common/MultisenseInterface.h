@@ -1,21 +1,38 @@
+/**
+ * @file MultisenseInterface.h
+ * @author Ameya Wagh (aywagh@wpi.edu)
+ * @brief Helper functions for robot perception
+ * @version 0.1
+ * @date 2019-05-30
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
+
 #ifndef MULTISENSEINTERFACE_H_
 #define MULTISENSEINTERFACE_H_
 
-/*** INCLUDE FILES ***/
+/*** INCLUDE FILES TOUGH ***/
 #include <tough_perception_common/global.h>
 #include <tough_perception_common/perception_common_names.h>
 #include <tough_perception_common/PerceptionHelper.h>
+
+/*** INCLUDE FILES ROS ***/
 #include <image_transport/image_transport.h>
 #include <multisense_ros/RawCamConfig.h>
 #include <stereo_msgs/DisparityImage.h>
 #include <cv_bridge/cv_bridge.h>
-
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <sensor_msgs/Image.h>
+#include <std_msgs/Int8.h>
+#include <std_msgs/Empty.h>
+#include <std_msgs/Bool.h>
 #include <image_transport/subscriber_filter.h>
+
+/*** INCLUDE FILES ROS ***/
 #include <memory>
 #include <mutex>
 #include <Eigen/Dense>
@@ -25,10 +42,21 @@ typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sens
 
 namespace tough_perception
 {
+
 bool isActive(const sensor_msgs::ImageConstPtr &some_msg);
 bool isActive(const stereo_msgs::DisparityImageConstPtr &some_msg);
+bool isActive(const sensor_msgs::PointCloud2Ptr &some_msg);
+
 void resetMsg(sensor_msgs::ImageConstPtr &some_msg);
 void resetMsg(stereo_msgs::DisparityImageConstPtr &some_msg);
+void resetMsg(sensor_msgs::PointCloud2Ptr &some_msg);
+
+enum class LASER_ASSEMBLER_STATUS
+{
+  RESET = 0,
+  PAUSE,
+  ACTIVE
+};
 
 class MultisenseInterface;
 /**
@@ -40,7 +68,7 @@ class MultisenseCameraModel
 public:
   /**
  * @brief Construct a new Multisense Camera Model object
- * 
+ *  for a pinhole camera
  */
   MultisenseCameraModel();
   /**
@@ -50,19 +78,23 @@ public:
   void printCameraConfig();
   friend MultisenseInterface;
 
-  int width;
-  int height;
-  double fx; // focal length in x
-  double fy; // focal length in y
-  double cx; // center offset in x
-  double cy; // center offset in y
-  double tx; // negative baseline
-  std::string distortion_model = "";
-  Eigen::Matrix3d K; // K is the camera intrinsic matrix
-  Eigen::MatrixXd P; // P is camera distortion matrix
-  Eigen::Matrix4d Q; // Q is transformation matrix from pixel to world
+  int width;                         // image width in pixels
+  int height;                        // image height in pixels
+  double fx;                         // focal length in x
+  double fy;                         // focal length in y
+  double cx;                         // center offset in x
+  double cy;                         // center offset in y
+  double tx;                         // negative baseline
+  std::string distortion_model = ""; // camera distortion model
+  Eigen::Matrix3d K;                 // K is the camera intrinsic matrix
+  Eigen::MatrixXd P;                 // P is camera distortion matrix
+  Eigen::Matrix4d Q;                 // Q is transformation matrix from pixel to world
 
 private:
+  /**
+   * @brief Computes Q matrix
+   * 
+   */
   void computeQ();
 };
 
@@ -78,6 +110,8 @@ private:
   stereo_msgs::DisparityImageConstPtr disparity_ = nullptr;
   sensor_msgs::ImageConstPtr disparity_sensor_msg_ = nullptr;
   sensor_msgs::CameraInfoConstPtr camera_info_ = nullptr;
+  sensor_msgs::PointCloud2Ptr assembled_pc_msg = nullptr;
+  std_msgs::Int8ConstPtr assembler_status_ = nullptr;
   cv_bridge::CvImagePtr cv_ptr_;
 
   // mutex locks
@@ -87,6 +121,7 @@ private:
   std::mutex disparity_mutex;
   std::mutex disparity_sensor_msg_mutex;
   std::mutex camera_info_mutex;
+  std::mutex assembled_pc_mutex;
 
   bool is_simulation_;
 
@@ -105,7 +140,7 @@ private:
   ros::NodeHandle nh_;
 
   // ros topics
-/// @todo: move the hardcoded topic names to perception_common_names
+  // @todo: move the hardcoded topic names to perception_common_names
 #ifdef GAZEBO_SIMULATION
   std::string image_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC;
   std::string disp_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC; // stereo message
@@ -121,7 +156,14 @@ private:
   std::string depth_cost_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_DEPTH_COST_TOPIC; // image
   std::string disp_sensor_msg_topic_ = "/multisense/left/disparity";
   std::string cost_topic_ = "/multisense/left/cost"; // sensor_msg/Image
+
   std::string multisense_motor_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_CONTROL_MOTOR_TOPIC;
+  // std::string assembled_pc_topic_ = PERCEPTION_COMMON_NAMES::ASSEMBLED_LASER_CLOUD_TOPIC;
+  std::string assembled_pc_topic_ = "/atlas/assembled_cloud2";
+  std::string assembler_status_topic_ = "/atlas/assembler_status";
+  std::string assembler_reset_topic_ = "/atlas/reset_pointcloud";
+  std::string assembler_pause_topic_ = "/atlas/pause_pointcloud";
+
   image_transport::ImageTransport it_;
   std::string transport_hint_ = "compressed";
 
@@ -134,7 +176,13 @@ private:
   ros::Subscriber cam_sub_disparity_;
   ros::Subscriber camera_info_sub_;
 
+  ros::Subscriber assembled_pc_sub_;
+  ros::Subscriber assembler_status_sub_;
+
   ros::Publisher multisense_motor_speed_pub_;
+  ros::Publisher reset_assembler_pub_;
+  ros::Publisher pause_assembler_pub_;
+
   std::shared_ptr<message_filters::Synchronizer<exactTimePolicy>> sync_img_depth_exact;
   std::shared_ptr<message_filters::Synchronizer<exactTimePolicy>> sync_img_depth_approx;
 
@@ -148,6 +196,8 @@ private:
   void disparityCB(const stereo_msgs::DisparityImageConstPtr &disp);
   void disparitySensorMsgCB(const sensor_msgs::ImageConstPtr &disp);
   void camera_infoCB(const sensor_msgs::CameraInfoConstPtr camera_info);
+  void assembled_pcCB(const sensor_msgs::PointCloud2Ptr &assembled_pc);
+  void assemblerStatusCB(const std_msgs::Int8ConstPtr &status);
 
   // helper functions
   bool processDisparity(const sensor_msgs::Image &disp, cv::Mat &disp_img);
@@ -185,14 +235,30 @@ public:
   bool getDisparity(cv::Mat &disp_img, bool from_stereo_msg = false);
 
   /**
-   * @brief Get the Depth Image object
+   * @brief Get the Depth Image from multisense camera
    * 
    * @param depth_img reference to be updated
    * @return true when image is received 
    * @return false when image cannot be fetched
    */
   bool getDepthImage(cv::Mat &depth_img);
+
+  /**
+   * @brief Get the Cost Image from multisense camera
+   * 
+   * @param cost_img 
+   * @return true 
+   * @return false 
+   */
   bool getCostImage(cv::Mat &cost_img);
+
+  /**
+   * @brief Get the Camera Info from multisense camera
+   * 
+   * @param pinhole_model 
+   * @return true 
+   * @return false 
+   */
   bool getCameraInfo(MultisenseCameraModel &pinhole_model);
 
   /**
@@ -207,11 +273,28 @@ public:
   bool getStereoData(cv::Mat &dispImage, cv::Mat &colorImage, tough_perception::StereoPointCloudColor::Ptr &pointcloud);
 
   /**
+   * @brief Get the Laser Point Cloud from assembled point cloud
+   * 
+   * @param pc 
+   * @return true 
+   * @return false 
+   */
+  bool getLaserPointCloud(PointCloud::Ptr &pc_);
+
+  /**
+   * @brief Get the Assembler Status 
+   * 
+   * @return LASER_ASSEMBLER_STATUS 
+   */
+  LASER_ASSEMBLER_STATUS getAssemblerStatus();
+
+  /**
    * @brief Get the Height of image
    * 
    * @return int 
    */
   int getHeight();
+
   /**
    * @brief Get the Width of image
    * 
@@ -233,6 +316,13 @@ public:
    * @param speed 
    */
   void setSpindleSpeed(double speed = 2.0f);
+
+  /**
+   * @brief Set the Assembler Status of periodic snapshotter node
+   * 
+   * @param LASER_ASSEMBLER_STATUS status 
+   */
+  void setAssemblerStatus(LASER_ASSEMBLER_STATUS status);
 
   /**
    * @brief Start subscribers and publishers to talk with Multisense sensor
