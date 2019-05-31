@@ -82,8 +82,28 @@ public:
    */
   void moveNeckJoints(const std::vector<std::vector<float> >& neck_pose, const float time);
 
+  /**
+   * @brief Get the current positions of all joints of head.
+   * Ordering is based on the order in the JointNames vector. The order for the Joints' Names, Numbers,
+   * Positions, Velocities and Efforts in their vectors are same.
+   * So any perticular joint will have a same index in all of the vectors.
+   *
+   * @param joints            [output]
+   * @param side              Side of the Robot. it can be LEFT or RIGHT
+   * @return true             when successful
+   * @return false
+   */
   virtual bool getJointSpaceState(std::vector<double>& joints, RobotSide side) override;
 
+  /**
+   * @brief Get the Current Pose of the head frame with respect to the fixedFrame frame
+   *
+   * @param pose              [output]
+   * @param side              Side of the Robot. it can be LEFT or RIGHT
+   * @param fixedFrame        Reference frame for the state query
+   * @return true             When successful
+   * @return false
+   */
   virtual bool getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side,
                                  std::string fixedFrame = TOUGH_COMMON_NAMES::WORLD_TF) override;
 };

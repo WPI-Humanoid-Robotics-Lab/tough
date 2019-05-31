@@ -30,34 +30,140 @@
 class TaskspacePlanner
 {
 public:
+  /**
+   * @brief This class sets up the planners for the task-space planning for the robot
+   *
+   * @param nh              nodehandle to which subscribers and publishers are attached.
+   * @param urdf_param      URDF parameter for the ros parameter server.
+   */
   TaskspacePlanner(ros::NodeHandle& nh, std::string urdf_param = "");
   ~TaskspacePlanner();
 
+  /**
+   * @brief Plans the trajectory for the planning_group to reach the given pose
+   * 
+   * @param pose                        Pose to be achieved by the robot
+   * @param planning_group              planning group for the trajectory planning, it can be for left or right side for 7 or 10 dof
+   * @param output_robot_traj_msg       [output]
+   * @return true                       When Successful
+   * @return false 
+   */
   bool getTrajectory(const geometry_msgs::PoseStamped pose, std::string planning_group,
                      moveit_msgs::RobotTrajectory& output_robot_traj_msg);
 
+  /**
+   * @brief Plans the trajector for the robot to follow a vector of poses
+   *
+   * @param pose_vec                    Vector of Poses to be followed by the robot
+   * @param planning_group              planning group for the trajectory planning, it can be for left or right side for 7 or 10 dof
+   * @param robot_traj                  [output]
+   * @param avoid_collisions            true if robot has to avoid collision, false if not.
+   * 
+   * @return double                     returns the fraction of desired trajectory planned.
+   */
   double getTrajFromCartPoints(const std::vector<geometry_msgs::Pose>& pose_vec, const std::string& planning_group,
                                moveit_msgs::RobotTrajectory& robot_traj, const bool avoid_collisions = true);
 
+  /**
+   * @brief Solves and provides result for the IK for desired end_effector_pose
+   *
+   * @param planning_group              planning group for the trajectory planning, it can be for left or right side for 7 or 10 dof
+   * @param end_effector_pose           Desired end effecotor pose to be achieved
+   * @param result                      Resultant vector of joint angles for the planning group included joints
+   * @return true                       When Successful
+   * @return false
+   */
   bool solve_ik(const std::string& planning_group, const geometry_msgs::PoseStamped& end_effector_pose,
                 std::vector<double>& result);
 
+  /**
+   * @brief Solves and provides result for the IK for desired end_effector_pose
+   *
+   * @param planning_group              planning group for the trajectory planning, it can be for left or right side for 7 or 10 dof
+   * @param end_effector_pose           Desired end effecotor pose to be achieved
+   * @param result                      Resultant vector of joint angles for the planning group included joints
+   * @param time                        Time for execution of the trajectory
+   * @return true
+   * @return false
+   */
   bool solve_ik(const std::string& planning_group, const geometry_msgs::PoseStamped& end_effector_pose,
                 trajectory_msgs::JointTrajectory& result, float time = 2.0f);
+  
+  /**
+   * @brief Get the Position Tolerance
+   * 
+   * @return double                     The set position tolerance
+   */
   double getPositionTolerance() const;
+
+  /**
+   * @brief Set the Position Tolerance 
+   * 
+   * @param position_tolerance          Desired position tolerance
+   */
   void setPositionTolerance(const double position_tolerance);
 
+  /**
+   * @brief Get the Angle Tolerance 
+   * 
+   * @return double                     The set Angle Tolerance
+   */
   double getAngleTolerance() const;
+
+  /**
+   * @brief Set the Angle Tolerance 
+   * 
+   * @param tolerance_angle             Desired Angle Tolerance
+   */
   void setAngleTolerance(const double tolerance_angle);
 
+  /**
+   * @brief Get the Plugin Parameter
+   * 
+   * @return std::string                The set Plugin Parameter
+   */
   std::string getPlugin() const;
+
+  /**
+   * @brief Set the Plugin parameter
+   * 
+   * @param plugin_param                Desired plugin parameter
+   */
   void setPlugin(const std::string& plugin_param);
 
+  /**
+   * @brief Loads and initializes the plugins
+   * 
+   * @param planner_plugin_name         Plugin to be initialized
+   */
   void loadPlugin(const std::string& planner_plugin_name);
+
+  /**
+   * @brief Get the Planning Time 
+   * 
+   * @return double                     The set planning time
+   */
   double getPlanningTime() const;
+
+  /**
+   * @brief Set the Planning Time 
+   * 
+   * @param planning_time               Desired planning time 
+   */
   void setPlanningTime(const double planning_time);
 
+  /**
+   * @brief Get the Num Planning Attempts 
+   * 
+   * @return int                        The set planning attempts
+   */
   int getNumPlanningAttempts() const;
+
+  /**
+   * @brief Set the Num Planning Attempts 
+   * 
+   * @param num_planning_attempts       Desired planning attempts
+   */
   void setNumPlanningAttempts(const int num_planning_attempts);
 
 private:

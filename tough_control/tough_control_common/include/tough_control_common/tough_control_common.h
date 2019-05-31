@@ -17,9 +17,24 @@ private:
   PelvisControlInterface pelvisTraj;
 
 public:
+
+  /**
+   * @brief The class ToughControlCommon provides methods to execute some basic tasks for whole robot.
+   * 
+   * @param nh                    - Node handle 
+   */
   ToughControlCommon(ros::NodeHandle nh);
   ~ToughControlCommon();
 
+  /**
+   * @brief Stops all the executing trajectories on the robot.
+   * 
+   */
   void stopAllTrajectories(void);
+
+  /**
+   * @brief Reset the robot to its Default Pose.
+   * 
+   */
   void resetRobot();
 };
