@@ -12,6 +12,7 @@
 #include <ihmc_msgs/Point2dRosMessage.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <std_msgs/Bool.h>
+#include <ihmc_msgs/WalkingStatusRosMessage.h>
 
 struct RobotState
 {
@@ -89,6 +90,10 @@ private:
     }
   }
 
+  ros::Subscriber walkingStatusSub_;
+  bool isWalking_;
+  void walkingStatusCB(const ihmc_msgs::WalkingStatusRosMessagePtr msg);
+
 public:
   /**
    * @brief Get the Robot State Informer object. Use this function to access a pointer to the object of
@@ -120,10 +125,10 @@ public:
   void getJointStateMessage(sensor_msgs::JointState& jointState);
 
   /**
-   * @brief The order for the Joints' Names, Numbers, Positions, Velocities and Efforts in their 
-   * vectors are same. So any perticular joint will have a same index in all of the vectors. 
-   * 
-   * This Method returns the Joint Number of a Joint Name supplied. 
+   * @brief The order for the Joints' Names, Numbers, Positions, Velocities and Efforts in their
+   * vectors are same. So any perticular joint will have a same index in all of the vectors.
+   *
+   * This Method returns the Joint Number of a Joint Name supplied.
    *
    * @param jointName
    * @return int
@@ -132,7 +137,7 @@ public:
 
   /**
    * @brief Get the current positions of all joints. Ordering is based on the order in the JointNames vector.
-   * The order for the Joints' Names, Numbers, Positions, Velocities and Efforts in their vectors are same. 
+   * The order for the Joints' Names, Numbers, Positions, Velocities and Efforts in their vectors are same.
    * So any perticular joint will have a same index in all of the vectors.
    *
    * @param positions         [output]
@@ -161,13 +166,13 @@ public:
 
   /**
    * @brief Get the Joint Velocities of joint names present in the parameter
-   * The order for the Joints' Names, Numbers, Positions, Velocities and Efforts in their vectors are same. 
+   * The order for the Joints' Names, Numbers, Positions, Velocities and Efforts in their vectors are same.
    * So any perticular joint will have a same index in all of the vectors.
    *
    * @param paramName       - Parameter name on ros param server that has an array of joint names
    * @param velocities      [output]
    * @return true           - when successful
-   * @return false 
+   * @return false
    */
   bool getJointVelocities(const std::string& paramName, std::vector<double>& velocities);
 
@@ -263,12 +268,12 @@ public:
 
   /**
    * @brief Get the Current Pose of the frameName with respect to the baseFrame
-   * 
+   *
    * @param frameName               - The name of the required frame, whose pose is to be found
    * @param pose                    - Pose of the frameName wrt baseFrame [output]
    * @param baseFrame               - The name of the Reference frame
    * @return true                   - when successful
-   * @return false 
+   * @return false
    */
   bool getCurrentPose(const std::string& frameName, geometry_msgs::Pose& pose,
                       const std::string& baseFrame = TOUGH_COMMON_NAMES::WORLD_TF);
@@ -287,16 +292,16 @@ public:
 
   /**
    * @brief Transforms the quaternion from the current reference frame to the target_frame
-   * 
+   *
    * @param qt_in                   - Input Quaternion for the transformation
    * @param qt_out                  - Output Quaternion after the transformation [output]
    * @param target_frame            - Reference frame for the transformation
    * @return true                   - When Successful
-   * @return false 
+   * @return false
    */
   bool transformQuaternion(const geometry_msgs::QuaternionStamped& qt_in, geometry_msgs::QuaternionStamped& qt_out,
                            const std::string target_frame = TOUGH_COMMON_NAMES::WORLD_TF);
-  
+
   /**
    * @brief Transforms the quaternion from the from_frame to the to_frame
    *
@@ -385,7 +390,7 @@ public:
    */
   bool transformVector(const geometry_msgs::Vector3& vec_in, geometry_msgs::Vector3& vec_out,
                        const std::string& from_frame, const std::string& to_frame = TOUGH_COMMON_NAMES::WORLD_TF);
-  
+
   /**
    * @brief Transforms the vector3 message from the current frame to the target_frame
    *
@@ -405,7 +410,7 @@ public:
    * @param wrenches                - [output]
    */
   void getFootWrenches(std::map<RobotSide, geometry_msgs::Wrench>& wrenches);
-  
+
   /**
    * @brief Get the Wrenches on the both the wrists.
    * The result is mapped with with the RobotSide, RIGHT and LEFT.
@@ -463,16 +468,16 @@ public:
   void getWristTorque(const RobotSide side, geometry_msgs::Vector3& torque);
 
   /**
-   * @brief     If the robot has both of its feet in contact with the ground, the robot is 
-   * said to be in double support. 
-   * 
+   * @brief     If the robot has both of its feet in contact with the ground, the robot is
+   * said to be in double support.
+   *
    * @return true                   - If the robot is in double support
    * @return false                  - If the robot is not in the double support
    */
   bool isRobotInDoubleSupport();
 
   /**
-   * @brief Get the position of Capture Point of the robot. A Capture Point is a point on the ground in which the 
+   * @brief Get the position of Capture Point of the robot. A Capture Point is a point on the ground in which the
    * Center of Pressure can be placed in order to stop a robot
    *
    * @param point                   - [output]
@@ -481,17 +486,25 @@ public:
 
   /**
    * @brief Get the position of Center Of Mass of the robot.
-   * 
+   *
    * @param point                   - [output]
    */
   void getCenterOfMass(geometry_msgs::Point& point);
 
   /**
-   * @brief Get the Pelvis IMU Reading 
-   * 
+   * @brief Get the Pelvis IMU Reading
+   *
    * @param msg                     - [output]
    */
   void getPelvisIMUReading(sensor_msgs::Imu& msg);
+
+  /**
+   * @brief If the robot is executing footsteps, this function returns true
+   *
+   * @return true
+   * @return false
+   */
+  const bool isRobotWalking();
 };
 
 #endif  // TOUGH_ROBOT_STATE_INFORMER_H

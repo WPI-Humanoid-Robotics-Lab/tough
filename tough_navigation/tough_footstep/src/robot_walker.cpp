@@ -23,27 +23,23 @@ RobotWalker::RobotWalker(ros::NodeHandle nh, double InTransferTime, double InSwi
       nh_.advertise<ihmc_msgs::FootLoadBearingRosMessage>(control_prefix + FOOTSTEP_LOAD_BEARING_TOPIC, 1, true);
   this->abort_footsteps_pub_ =
       nh_.advertise<ihmc_msgs::AbortWalkingRosMessage>(control_prefix + ABORT_WALKING_TOPIC, 1, true);
+  this->pause_walking_pub_ =
+      nh_.advertise<ihmc_msgs::PauseWalkingRosMessage>(control_prefix + PAUSE_WALKING_TOPIC, 1, true);
   this->footstep_status_ =
       nh_.subscribe(output_prefix + FOOTSTEP_STATUS_TOPIC, 5, &RobotWalker::footstepStatusCB, this);
-  this->walking_status_ =
-      nh_.subscribe(output_prefix + WALKING_STATUS_TOPIC, 0, &RobotWalker::walkingStatusCB, this);
+  this->walking_status_ = nh_.subscribe(output_prefix + WALKING_STATUS_TOPIC, 0, &RobotWalker::walkingStatusCB, this);
 
   transfer_time_ = InTransferTime;
   swing_time_ = InSwingTime;
   execution_mode_ = InMode;
   swing_height_ = swingHeight;
-  previous_message_id_ = 0;
-  isWalking = false;
-  ros::Duration(0.5).sleep();
   step_counter_ = 0;
+  previous_message_id_ = 0;
+  isWalking_ = false;
+  ros::Duration(0.5).sleep();
 
   right_foot_frame_.data = rd_->getRightFootFrameName();
   left_foot_frame_.data = rd_->getLeftFootFrameName();
-
-  /* This timer is used for waiting till the steps are executed. When the robot starts walking, the timer is reset and
-   * at every step it resets. If the timer crosses 5 seconds without any steps, there could be some hardware error.
-   */
-  cbTime_ = ros::Time::now();
 }
 
 /**
@@ -64,14 +60,20 @@ void RobotWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage& ms
     step_counter_++;
   }
 
-  // reset the timer
-  cbTime_ = ros::Time::now();
-
   return;
 }
 
-void RobotWalker::walkingStatusCB(const ihmc_msgs::WalkingStatusRosMessage& msg) {
-  isWalking = msg.status == ihmc_msgs::WalkingStatusRosMessage::STARTED;
+void RobotWalker::pauseWalk(bool pause)
+{
+  ihmc_msgs::PauseWalkingRosMessage msg;
+  msg.unique_id = 1;
+  msg.pause = pause;
+  pause_walking_pub_.publish(msg);
+}
+
+void RobotWalker::walkingStatusCB(const ihmc_msgs::WalkingStatusRosMessage& msg)
+{
+  isWalking_ = msg.status == ihmc_msgs::WalkingStatusRosMessage::STARTED;
 }
 // calls the footstep planner to plan path and walks to a 2D goal.
 bool RobotWalker::walkToGoal(const geometry_msgs::Pose2D& goal, bool waitForSteps)
@@ -85,8 +87,7 @@ bool RobotWalker::walkToGoal(const geometry_msgs::Pose2D& goal, bool waitForStep
 
     if (waitForSteps)
     {
-      cbTime_ = ros::Time::now();
-      this->waitForSteps(list.footstep_data_list.size());
+      this->waitForSteps();
     }
     return true;
   }
@@ -94,19 +95,12 @@ bool RobotWalker::walkToGoal(const geometry_msgs::Pose2D& goal, bool waitForStep
   return false;
 }
 
-void RobotWalker::stepAtPose(const geometry_msgs::Pose& goal, const RobotSide side, bool waitForSteps,
-                             const bool queue, const std::string refFrame)
+void RobotWalker::stepAtPose(const geometry_msgs::Pose& goal, const RobotSide side, bool waitForSteps, const bool queue,
+                             const std::string refFrame)
 {
-  if(queue && isWalking) {
-    this->execution_mode_ = ihmc_msgs::FootstepDataListRosMessage::QUEUE;
-  }
   ihmc_msgs::FootstepDataListRosMessage list;
-  initializeFootstepDataListRosMessage(list);
-  
-  if (queue)
-  {
-    this->execution_mode_ = ihmc_msgs::FootstepDataListRosMessage::OVERRIDE;
-  }
+  initializeFootstepDataListRosMessage(list, queue);
+
   geometry_msgs::Pose goalInWorld;
   current_state_->transformPose(goal, goalInWorld, refFrame);
   list.footstep_data_list.push_back(*getOffsetStep(side, goalInWorld));
@@ -116,8 +110,7 @@ void RobotWalker::stepAtPose(const geometry_msgs::Pose& goal, const RobotSide si
 
   if (waitForSteps)
   {
-    cbTime_ = ros::Time::now();
-    this->waitForSteps(list.footstep_data_list.size());
+    this->waitForSteps();
   }
   return;
 }
@@ -235,8 +228,7 @@ bool RobotWalker::walkGivenSteps(const ihmc_msgs::FootstepDataListRosMessage& li
   this->previous_message_id_ = RobotWalker::id++;
   if (waitForSteps)
   {
-    cbTime_ = ros::Time::now();
-    this->waitForSteps(list.footstep_data_list.size());
+    this->waitForSteps();
   }
   return true;
 }
@@ -285,17 +277,12 @@ bool RobotWalker::nudgeFoot(const RobotSide side, const float x_offset, const fl
   foot.taskspace_trajectory_points.begin()->position = pt_out.point;
   if (orientation)
   {
-    ROS_INFO_STREAM("Foot orientation" << *orientation);
     foot.taskspace_trajectory_points.begin()->orientation = *orientation;
   }
   else
   {
     foot.taskspace_trajectory_points.begin()->orientation = current->orientation;
   }
-
-  std::cout << "point x" << foot.taskspace_trajectory_points.begin()->position.x << "\n";
-  std::cout << "point y" << foot.taskspace_trajectory_points.begin()->position.y << "\n";
-  std::cout << "point z" << foot.taskspace_trajectory_points.begin()->position.z << "\n";
 
   foot.taskspace_trajectory_points.begin()->unique_id = id;
   foot.taskspace_trajectory_points.begin()->time = time;
@@ -598,22 +585,13 @@ bool RobotWalker::climbStair(const std::vector<float>& xOffset, const std::vecto
 }
 
 // wait till all the steps are taken
-void RobotWalker::waitForSteps(const int numSteps)
+void RobotWalker::waitForSteps()
 {
-  while (step_counter_ < numSteps && ros::ok())
+  do
   {
     ros::spinOnce();
-    if ((ros::Time::now() - cbTime_) > ros::Duration(5))
-    {
-      // This is the case when the robot stopped walking due to external conditions(it fell down, there's an obstacle,
-      // etc)
-      break;
-    }
     ros::Duration(0.1).sleep();
-  }
-
-  // reset back the step counter
-  step_counter_ = 0;
+  } while (isWalking_ && ros::ok());
   return;
 }
 

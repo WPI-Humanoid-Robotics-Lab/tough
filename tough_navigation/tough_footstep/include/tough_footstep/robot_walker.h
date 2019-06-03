@@ -11,6 +11,7 @@
 #include "ihmc_msgs/FootTrajectoryRosMessage.h"
 #include "ihmc_msgs/WholeBodyTrajectoryRosMessage.h"
 #include "ihmc_msgs/AbortWalkingRosMessage.h"
+#include "ihmc_msgs/PauseWalkingRosMessage.h"
 #include "ihmc_msgs/FootLoadBearingRosMessage.h"
 #include <geometry_msgs/TransformStamped.h>
 #include "std_msgs/String.h"
@@ -20,7 +21,6 @@
 #include <tough_common/robot_state.h>
 #include "tough_common/robot_description.h"
 #include "tough_common/tough_common_names.h"
-
 /**
  * @brief The RobotWalker class This class handles all the locomotion commands to the robot.
  */
@@ -253,7 +253,7 @@ public:
   /**
    * @brief getFootstep plans footsteps to a goal.
    * @param goal is 2D goal pose
-   * @param Is a list of footstep list
+   * @param list Is a list of footstep list
    * @return
    */
   bool getFootstep(const geometry_msgs::Pose2D& goal, ihmc_msgs::FootstepDataListRosMessage& list);
@@ -261,6 +261,13 @@ public:
    * @brief abortWalk aborts the executing footsteps
    */
   void abortWalk();
+
+  /**
+   * @brief pauseWalk pauses current footsteps by safely completing the swing or resume the footsteps that are paused.
+   *
+   * @param pause should be set to true to pause, or false to resume
+   */
+  void pauseWalk(const bool pause = true);
 
 private:
   RobotStateInformer* current_state_;
@@ -272,18 +279,17 @@ private:
   double transfer_time_, swing_time_, swing_height_;
   int execution_mode_, step_counter_, step_status_;
   int previous_message_id_;
-  bool isWalking;
+  bool isWalking_;
 
   ros::NodeHandle nh_;
-  ros::Time cbTime_;
-  ros::Publisher footsteps_pub_, nudgestep_pub_, loadeff_pub, abort_footsteps_pub_;
+  ros::Publisher footsteps_pub_, nudgestep_pub_, loadeff_pub, abort_footsteps_pub_, pause_walking_pub_;
   ros::Subscriber footstep_status_, walking_status_;
   ros::ServiceClient footstep_client_;
   std_msgs::String right_foot_frame_, left_foot_frame_;
 
   void footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage& msg);
   void walkingStatusCB(const ihmc_msgs::WalkingStatusRosMessage& msg);
-  void waitForSteps(const int numSteps);
+  void waitForSteps();
 
   // /**
   //  * @brief areFeetAligned Checks if both the feet are in same orientation and in normal pose.
@@ -296,16 +302,22 @@ private:
   bool isFootRotAligned(const geometry_msgs::Quaternion& q1);
   bool isFootPosAligned(const geometry_msgs::Point& p1);
 
-  inline void initializeFootstepDataListRosMessage(ihmc_msgs::FootstepDataListRosMessage& msg)
+  inline void initializeFootstepDataListRosMessage(ihmc_msgs::FootstepDataListRosMessage& msg, const bool queue = false)
   {
+    if (queue && isWalking_)
+    {
+      this->execution_mode_ = ihmc_msgs::FootstepDataListRosMessage::QUEUE;
+      msg.previous_message_id = previous_message_id_;
+    }
     msg.default_transfer_duration = transfer_time_;
     msg.default_swing_duration = swing_time_;
     msg.execution_mode = execution_mode_;
-    if(execution_mode_ == ihmc_msgs::FootstepDataListRosMessage::QUEUE) {
-      msg.previous_message_id = previous_message_id_;
-    }
     previous_message_id_ = RobotWalker::id;
     msg.unique_id = RobotWalker::id++;
+    if (queue)
+    {
+      this->execution_mode_ = ihmc_msgs::FootstepDataListRosMessage::OVERRIDE;
+    }
   }
 
   inline void initializeFootTrajectoryRosMessage(const RobotSide side, ihmc_msgs::FootTrajectoryRosMessage& foot,
@@ -321,7 +333,6 @@ private:
 
     frameInfo.data_reference_frame_id = refFrame;
     frameInfo.trajectory_reference_frame_id = refFrame;
-    
   }
 
   ihmc_msgs::FootstepDataRosMessage::Ptr getOffsetStep(int side, float x, float y);

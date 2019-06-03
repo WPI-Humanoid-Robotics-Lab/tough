@@ -39,7 +39,14 @@ RobotStateInformer::RobotStateInformer(ros::NodeHandle nh) : nh_(nh)
   rightWristForceSensorSub_ =
       nh_.subscribe(prefix + RIGHT_WRIST_FORCE_SENSOR_TOPIC, 1, &RobotStateInformer::rightWristForceSensorCB, this);
 
+  walkingStatusSub_ = nh_.subscribe(prefix + WALKING_STATUS_TOPIC, 0, &RobotStateInformer::walkingStatusCB, this);
+
   initializeClassMembers();
+}
+
+void RobotStateInformer::walkingStatusCB(const ihmc_msgs::WalkingStatusRosMessagePtr msg)
+{
+  isWalking_ = msg->status == ihmc_msgs::WalkingStatusRosMessage::STARTED;
 }
 
 RobotStateInformer::~RobotStateInformer()
@@ -66,6 +73,7 @@ void RobotStateInformer::initializeClassMembers()
   footWrenches_[RIGHT] = geometry_msgs::WrenchStamped::Ptr(new geometry_msgs::WrenchStamped());
   wristWrenches_[LEFT] = geometry_msgs::WrenchStamped::Ptr(new geometry_msgs::WrenchStamped());
   wristWrenches_[RIGHT] = geometry_msgs::WrenchStamped::Ptr(new geometry_msgs::WrenchStamped());
+  isWalking_ = false;
 }
 
 void RobotStateInformer::jointStateCB(const sensor_msgs::JointState::Ptr msg)
@@ -190,6 +198,11 @@ void RobotStateInformer::getCenterOfMass(geometry_msgs::Point& point)
 void RobotStateInformer::getPelvisIMUReading(sensor_msgs::Imu& msg)
 {
   msg = *pelvisImuValue_;
+}
+
+const bool RobotStateInformer::isRobotWalking()
+{
+  return isWalking_;
 }
 
 void RobotStateInformer::populateStateMap()

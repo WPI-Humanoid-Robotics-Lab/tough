@@ -44,6 +44,7 @@ const std::string FOOTSTEP_LOAD_BEARING_TOPIC = "/foot_load_bearing";
 const std::string FOOTSTEP_STATUS_TOPIC = "/footstep_status";
 const std::string WALKING_STATUS_TOPIC = "/walking_status";
 const std::string ABORT_WALKING_TOPIC = "/abort_walking";
+const std::string PAUSE_WALKING_TOPIC = "/pause_walking";
 
 /********* Output Topics *********/
 const std::string OUTPUT_TOPIC_PREFIX = "/output";

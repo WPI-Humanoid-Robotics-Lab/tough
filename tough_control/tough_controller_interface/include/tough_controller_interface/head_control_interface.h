@@ -1,5 +1,5 @@
-#ifndef VAL_HEAD_NAVIGATION_H
-#define VAL_HEAD_NAVIGATION_H
+#ifndef HEAD_CONTROL_INTERFACE_H
+#define HEAD_CONTROL_INTERFACE_H
 
 #include <ros/ros.h>
 #include <ihmc_msgs/HeadTrajectoryRosMessage.h>
@@ -108,4 +108,4 @@ public:
                                  std::string fixedFrame = TOUGH_COMMON_NAMES::WORLD_TF) override;
 };
 
-#endif  // VAL_HEAD_NAVIGATION_H
+#endif  // HEAD_CONTROL_INTERFACE_H
