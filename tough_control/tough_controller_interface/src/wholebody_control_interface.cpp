@@ -67,6 +67,8 @@ void WholebodyControlInterface::initializeWholebodyMessage(ihmc_msgs::WholeBodyT
   wholeBodyMsg.chest_trajectory_message.unique_id = 0;
   wholeBodyMsg.right_arm_trajectory_message.unique_id = 0;
   wholeBodyMsg.left_arm_trajectory_message.unique_id = 0;
+
+  // taskspace trajectories
   wholeBodyMsg.left_foot_trajectory_message.unique_id = 0;
   wholeBodyMsg.right_foot_trajectory_message.unique_id = 0;
   wholeBodyMsg.left_hand_trajectory_message.unique_id = 0;

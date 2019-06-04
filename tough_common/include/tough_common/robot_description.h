@@ -65,126 +65,126 @@ public:
 
   /**
    * @brief Get the World Frame name
-   * 
-   * @return const std::string 
+   *
+   * @return const std::string
    */
   const std::string getWorldFrame() const;
 
   /**
    * @brief Get the Torso Frame name
-   * 
-   * @return const std::string 
+   *
+   * @return const std::string
    */
   const std::string getTorsoFrame() const;
 
   /**
    * @brief Get the Left Foot Frame Name
-   * 
-   * @return const std::string 
+   *
+   * @return const std::string
    */
   const std::string getLeftFootFrameName() const;
 
   /**
    * @brief Get the Right Foot Frame Name
-   * 
-   * @return const std::string 
+   *
+   * @return const std::string
    */
   const std::string getRightFootFrameName() const;
 
   /**
    * @brief Get the Left Palm Frame
-   * 
-   * @return const std::string 
+   *
+   * @return const std::string
    */
   const std::string getLeftPalmFrame() const;
 
   /**
    * @brief Get the Right Palm Frame name
-   * 
-   * @return const std::string 
+   *
+   * @return const std::string
    */
   const std::string getRightPalmFrame() const;
 
   /**
    * @brief Get the Right End Effector Frame name
-   * 
-   * @return const std::string 
+   *
+   * @return const std::string
    */
   const std::string getRightEEFrame() const;
 
   /**
    * @brief Get the Left End Effector Frame name
-   * 
-   * @return const std::string 
+   *
+   * @return const std::string
    */
   const std::string getLeftEEFrame() const;
 
   /**
    * @brief Get the Robot Name
-   * 
-   * @return const std::string 
+   *
+   * @return const std::string
    */
   const std::string getRobotName() const;
 
   /**
    * @brief URDF Parameter name
-   * 
-   * @return const std::string 
+   *
+   * @return const std::string
    */
   const std::string getURDFParameter() const;
 
   /**
    * @brief Get the vector of Left Arm Joint Names
-   * 
+   *
    * @param left_arm_joint_names  a vector of std::string [output]
    */
   void getLeftArmJointNames(std::vector<std::string>& left_arm_joint_names) const;
 
   /**
    * @brief Get the vector of Right Arm Joint Names
-   * 
+   *
    * @param right_arm_joint_names  a vector of std::string [output]
    */
   void getRightArmJointNames(std::vector<std::string>& right_arm_joint_names) const;
 
   /**
-   * @brief Get the vector of Chest Joint Names 
-   * 
+   * @brief Get the vector of Chest Joint Names
+   *
    * @param chest_joint_names  a vector of std::string [output]
    */
   void getChestJointNames(std::vector<std::string>& chest_joint_names) const;
 
   /**
-   * @brief Get the vector of Left Arm Frame Names 
-   * 
+   * @brief Get the vector of Left Arm Frame Names
+   *
    * @param left_arm_frame_names  a vector of std::string [output]
    */
   void getLeftArmFrameNames(std::vector<std::string>& left_arm_frame_names) const;
 
   /**
-   * @brief Get the vector of Right Arm Frame Names 
-   * 
+   * @brief Get the vector of Right Arm Frame Names
+   *
    * @param right_arm_frame_names  a vector of std::string [output]
    */
   void getRightArmFrameNames(std::vector<std::string>& right_arm_frame_names) const;
 
   /**
    * @brief Get the Left Arm Joint Limits
-   * 
+   *
    * @param left_arm_joint_limits  a vector of pair of double for minimum and maximum joint limit [output]
    */
   void getLeftArmJointLimits(std::vector<std::pair<double, double> >& left_arm_joint_limits) const;
 
   /**
    * @brief Get the Right Arm Joint Limits
-   * 
+   *
    * @param right_arm_joint_limits  a vector of pair of double for minimum and maximum joint limit [output]
    */
   void getRightArmJointLimits(std::vector<std::pair<double, double> >& right_arm_joint_limits) const;
 
   /**
    * @brief Get the Chest Joint Limits
-   * 
+   *
    * @param chest_joint_limits  a vector of pair of double for minimum and maximum joint limit [output]
    */
   void getChestJointLimits(std::vector<std::pair<double, double> >& chest_joint_limits) const;
@@ -202,42 +202,42 @@ public:
 
   /**
    * @brief Frame Hash values are used while sending trajectories in a specific frame. This method returns the hash for
-   * the Pelvis frame where the Z axis is always pointing up. (While walking, the local Pelvis frame might rotate/move. The
-   * 'PelvisZUP' frame will always point upwards, but still locating at the pelvis frame)
+   * the Pelvis frame where the Z axis is always pointing up. (While walking, the local Pelvis frame might rotate/move.
+   * The 'PelvisZUP' frame will always point upwards, but still locating at the pelvis frame)
    *
    * @return int
    */
   int getPelvisZUPFrameHash() const;
 
   /**
-   * @brief Frame Hash values are used while sending trajectories in a specific frame. This method returns the hash for 
+   * @brief Frame Hash values are used while sending trajectories in a specific frame. This method returns the hash for
    * the Pelvis Frame (Z axis pointing down).
-   * 
-   * @return int 
+   *
+   * @return int
    */
   int getPelvisFrameHash() const;
 
   /**
-   * @brief Frame Hash values are used while sending trajectories in a specific frame. This method returns the hash for 
+   * @brief Frame Hash values are used while sending trajectories in a specific frame. This method returns the hash for
    * the Chest Frame
-   * 
-   * @return int 
+   *
+   * @return int
    */
   int getChestFrameHash() const;
 
   /**
-   * @brief Frame Hash values are used while sending trajectories in a specific frame. This method returns the hash for 
+   * @brief Frame Hash values are used while sending trajectories in a specific frame. This method returns the hash for
    * the Frame at the Center of Mass.
-   * 
-   * @return int 
+   *
+   * @return int
    */
   int getCenterOfMassFrameHash() const;
 
   /**
-   * @brief Frame Hash values are used while sending trajectories in a specific frame. This method returns the hash for 
+   * @brief Frame Hash values are used while sending trajectories in a specific frame. This method returns the hash for
    * the Frame at the Left Sole of the robot feet.
-   * 
-   * @return int 
+   *
+   * @return int
    */
   int getLeftSoleFrameHash() const;
 
@@ -250,20 +250,31 @@ public:
   int getRightSoleFrameHash() const;
 
   /**
-   * @brief Frame Hash values are used while sending trajectories in a specific frame. This method returns the hash for 
+   * @brief Frame Hash values are used while sending trajectories in a specific frame. This method returns the hash for
    * the World Frame.
-   * 
-   * @return int 
+   *
+   * @return int
    */
   int getWorldFrameHash() const;
 
   /**
-   * @brief Foot frame is slightly higher than the world frame when the robot spawns. This offset is required if user 
+   * @brief Foot frame is slightly higher than the world frame when the robot spawns. This offset is required if user
    * wants to get a point on foot ground where the foot touches. Get the Foot Frame Offset object
-   * 
-   * @return double 
+   *
+   * @return double
    */
   double getFootFrameOffset() const;
+
+  /**
+   * @brief Get the Foot Frame of required side
+   *
+   * @param side side of the robot, LEFT or RIGHT
+   * @return const std::string frame name for the foot of requested side.
+   */
+  inline const std::string getFootFrame(RobotSide side) const
+  {
+    return side == RobotSide::LEFT ? getLeftFootFrameName() : getRightFootFrameName();
+  }
 
 protected:
   void setPelvisFrame(const std::string& value);

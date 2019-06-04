@@ -11,6 +11,8 @@ int main(int argc, char** argv)
   signal(SIGINT, signalHandler);
   ros::init(argc, argv, "walk_test", ros::init_options::AnonymousName);
   ros::NodeHandle nh;
+  ros::AsyncSpinner spinner(1);
+  spinner.start();
   RobotWalker walk(nh, 0.8, 1.2);
   int side;
   while (ros::ok())
