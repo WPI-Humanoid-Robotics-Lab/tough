@@ -17,7 +17,7 @@ ToughControlCommon::~ToughControlCommon()
 {
 }
 
-void ToughControlCommon::stopAllTrajectories(void)
+void ToughControlCommon::stopAllTrajectories()
 {
   ihmc_msgs::StopAllTrajectoryRosMessage stop_msg;
   stop_msg.unique_id = -1;
@@ -25,14 +25,17 @@ void ToughControlCommon::stopAllTrajectories(void)
   // send the message
   stop_traj_pub_.publish(stop_msg);
 
-  ros::Duration(1).sleep();
+  ros::Duration(0.1).sleep();
 }
 
-void ToughControlCommon::resetRobot()
+void ToughControlCommon::resetRobot(float time, bool blockCall)
 {
-  armTraj.moveToDefaultPose(RobotSide::LEFT, 1.0f);
-  armTraj.moveToDefaultPose(RobotSide::RIGHT, 1.0f);
-  pelvisTraj.controlPelvisHeight(0.75f);
-  chestTraj.resetPose(2.0f);
-  ros::Duration(2).sleep();
+  armTraj.moveToDefaultPose(RobotSide::LEFT, time);
+  armTraj.moveToDefaultPose(RobotSide::RIGHT, time);
+  pelvisTraj.resetPose(time);
+  chestTraj.resetPose(time);
+  if (blockCall)
+  {
+    ros::Duration(time).sleep();
+  }
 }
