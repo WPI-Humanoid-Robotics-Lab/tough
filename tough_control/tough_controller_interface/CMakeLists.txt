@@ -41,6 +41,7 @@ include_directories(${catkin_INCLUDE_DIRS} include)
    src/head_control_interface.cpp
    src/gripper_control_interface.cpp
    src/wholebody_control_interface.cpp
+   src/leg_control_interface.cpp
 )
 
  target_link_libraries(${PROJECT_NAME}
