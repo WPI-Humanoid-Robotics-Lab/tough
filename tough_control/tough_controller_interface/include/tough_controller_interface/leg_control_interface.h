@@ -18,11 +18,11 @@ public:
   ~LegControlInterface();
   virtual bool getJointSpaceState(std::vector<double>& joints, RobotSide side);
   virtual bool getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side, std::string fixedFrame);
-  void moveFoot(const RobotSide side, const std::vector<geometry_msgs::Pose>& foot_goal_poses, const float time);
-  void moveFoot(const RobotSide side, const geometry_msgs::Pose& foot_goal_pose, const float time);
-  void raiseLeg(const RobotSide side, const float offset, const float time);
-  void placeLeg(const RobotSide side, const float offset, const float time);
-  void curlLeg(RobotSide side, float radius, float time);
+  void moveFoot(const RobotSide side, const std::vector<geometry_msgs::Pose>& foot_goal_poses, const float time = 2.0f);
+  void moveFoot(const RobotSide side, const geometry_msgs::Pose& foot_goal_pose, const float time = 2.0f);
+  void raiseLeg(const RobotSide side, const float offset, const float time = 2.0f);
+  void placeLeg(const RobotSide side, const float offset, const float time = 2.0f);
+  void curlLeg(RobotSide side, float radius, float time = 3.0f);
 
 private:
   ros::Publisher legTrajectoryPub_, loadEndEffPub_;

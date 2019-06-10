@@ -38,7 +38,8 @@ void LegControlInterface::moveFoot(const RobotSide side, const std::vector<geome
 
 void LegControlInterface::moveFoot(const RobotSide side, const geometry_msgs::Pose& foot_goal_pose, const float time)
 {
-  return moveFoot(side, { foot_goal_pose }, time);
+  std::vector<geometry_msgs::Pose> goals = { foot_goal_pose };
+  moveFoot(side, goals, time);
 }
 
 void LegControlInterface::raiseLeg(const RobotSide side, const float offset, const float time)
