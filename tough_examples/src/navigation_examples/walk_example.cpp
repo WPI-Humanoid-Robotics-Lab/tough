@@ -1,5 +1,6 @@
 #include <iostream>
 #include <tough_footstep/robot_walker.h>
+#include <tough_control_common/tough_control_common.h>
 #include <ihmc_msgs/FootstepDataListRosMessage.h>
 #include "geometry_msgs/Pose2D.h"
 #include <ihmc_msgs/StopAllTrajectoryRosMessage.h>
@@ -11,14 +12,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   ros::Rate loop_rate(10);
   RobotWalker walk(nh, 1.0, 1.0, 0);
-
-  std::string robot_name;
-  nh.getParam("ihmc_ros/robot_name", robot_name);
-
-  ros::Publisher stopTraj = nh.advertise<ihmc_msgs::StopAllTrajectoryRosMessage>(
-      "/ihmc_ros/" + robot_name + "/control/stop_all_trajectories", 1, true);
-  ihmc_msgs::StopAllTrajectoryRosMessage stopMsg;
-  stopMsg.unique_id = 45;
+  ToughControlCommon tough_contol_common(nh);
 
   char input;
   int robot_side;
@@ -112,7 +106,7 @@ int main(int argc, char** argv)
     }
     else if (input == 's')
     {
-      stopTraj.publish(stopMsg);
+      tough_contol_common.stopAllTrajectories();
       cout << "Stopped All Trajectories \n";
     }
     else if (input == 'a')

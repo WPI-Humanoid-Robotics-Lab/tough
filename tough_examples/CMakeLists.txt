@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   tough_footstep
   tough_perception_common
   tough_moveit_planners
+  tough_control_common
 )
 
 
@@ -26,6 +27,7 @@ catkin_package(
                         tough_footstep
                         tough_perception_common
                         tough_moveit_planners
+                        tough_control_common
 #  DEPENDS system_lib
 )
 
@@ -95,6 +97,11 @@ target_link_libraries(neck_control_example  ${catkin_LIBRARIES})
 add_executable(gripper_control_example src/control_examples/gripper_control_example.cpp)
 add_dependencies(gripper_control_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gripper_control_example  ${catkin_LIBRARIES})
+
+## Test legs
+add_executable(leg_control_example src/control_examples/leg_control_example.cpp)
+add_dependencies(leg_control_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(leg_control_example  ${catkin_LIBRARIES})
 
 
 ## interactive test
@@ -179,7 +186,7 @@ target_link_libraries(follow_cartesian_path  ${catkin_LIBRARIES})
 
 install(TARGETS reset_robot arm_control_example head_control_example arm_control_example2
                 chest_control_example nudge_local_example pelvis_control_example
-                neck_control_example gripper_control_example arm_interactive_example
+                neck_control_example gripper_control_example leg_control_example arm_interactive_example
                 walk_forward_example walk_goal_example walk_example walk_rotate_example walk_steps_example
                 queue_steps_example multisense_image_example ik_example motion_planner_example taskspace_planner_example 
                 taskspace_2stage_planner_example taskspace_planner_interactive_example follow_cartesian_path

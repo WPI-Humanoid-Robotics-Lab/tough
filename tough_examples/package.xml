@@ -19,6 +19,7 @@
   <build_depend>tough_footstep</build_depend>
   <build_depend>tough_perception_common</build_depend>
   <build_depend>tough_moveit_planners</build_depend>
+  <build_depend>tough_control_common</build_depend>
 
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
@@ -28,6 +29,7 @@
   <build_export_depend>tough_footstep</build_export_depend>
   <build_export_depend>tough_perception_common</build_export_depend>
   <build_export_depend>tough_moveit_planners</build_export_depend>
+  <build_export_depend>tough_control_common</build_export_depend>
 
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
@@ -37,6 +39,7 @@
   <exec_depend>tough_footstep</exec_depend>
   <exec_depend>tough_perception_common</exec_depend>
   <exec_depend>tough_moveit_planners</exec_depend>
+  <exec_depend>tough_control_common</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
