@@ -155,6 +155,7 @@ bool ArmControlInterface::generateArmMessage(const RobotSide side, const std::ve
                                              const float time, ihmc_msgs::ArmTrajectoryRosMessage& msg)
 {
   setupArmMessage(side, msg);
+  int index_from_start;
   for (auto i = arm_pose.begin(); i != arm_pose.end(); i++)
   {
     if (i->size() != NUM_ARM_JOINTS)
@@ -162,7 +163,8 @@ bool ArmControlInterface::generateArmMessage(const RobotSide side, const std::ve
       ROS_WARN("Check number of trajectory points");
       return false;
     }
-    appendTrajectoryPoint(msg, time / arm_pose.size(), *i);
+    index_from_start = (std::distance(arm_pose.begin(), i) + 1);
+    appendTrajectoryPoint(msg, time / arm_pose.size()*index_from_start, *i);
   }
   return true;
 }
