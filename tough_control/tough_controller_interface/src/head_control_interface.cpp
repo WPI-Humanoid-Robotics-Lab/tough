@@ -53,6 +53,7 @@ void HeadControlInterface::moveHead(const geometry_msgs::Quaternion& quaternion,
   msg.frame_information = reference_frame;
 
   data.orientation = quaternion;
+  data.time = time;
 
   HeadControlInterface::id_++;
   msg.unique_id = HeadControlInterface::id_;
