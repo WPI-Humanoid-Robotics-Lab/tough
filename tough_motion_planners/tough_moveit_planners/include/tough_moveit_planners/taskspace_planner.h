@@ -166,6 +166,12 @@ public:
    */
   void setNumPlanningAttempts(const int num_planning_attempts);
 
+  /**
+   * @brief Waits for the move group initialization to finish
+   * 
+   */
+  void waitForMoveGroupInitialization();
+
 private:
   ros::NodeHandle nh_;
   ros::Publisher display_publisher_;

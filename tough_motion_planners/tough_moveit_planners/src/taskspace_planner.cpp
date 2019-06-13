@@ -60,6 +60,14 @@ void TaskspacePlanner::initializeMoveGroupsForCartesianPath(void)
   is_move_group_initializing_ = false;
 }
 
+void TaskspacePlanner::waitForMoveGroupInitialization()
+{
+   if(is_move_group_initializing_)
+   {
+     thread_for_move_group_init_.join();
+   }
+}
+
 bool TaskspacePlanner::getTrajectory(const geometry_msgs::PoseStamped pose_msg, std::string planning_group,
                                      moveit_msgs::RobotTrajectory& output_robot_traj_msg)
 {
@@ -386,11 +394,7 @@ double TaskspacePlanner::getTrajFromCartPoints(const std::vector<geometry_msgs::
                                                const std::string& planning_group,
                                                moveit_msgs::RobotTrajectory& robot_traj, const bool avoid_collisions)
 {
-  while (is_move_group_initializing_)
-  {
-    ROS_INFO("Waiting for move_group to be initialized.");
-    ros::Duration(1.0).sleep();
-  }
+  waitForMoveGroupInitialization();
 
   double frac = 0.0;
 
