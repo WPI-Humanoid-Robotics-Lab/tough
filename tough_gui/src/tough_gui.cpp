@@ -128,9 +128,9 @@ void ToughGUI::initVariables()
 
   std::vector<QSlider*> jointSliders = { ui->sliderShoulderPitch, ui->sliderShoulderRoll,  ui->sliderShoulderYaw,
                                          ui->sliderElbow,         ui->sliderWristYaw,      ui->sliderWristRoll,
-                                         ui->sliderWristYaw,      ui->sliderShoulderPitch, ui->sliderShoulderRoll,
+                                         ui->sliderWristPitch,    ui->sliderShoulderPitch, ui->sliderShoulderRoll,
                                          ui->sliderShoulderYaw,   ui->sliderElbow,         ui->sliderWristYaw,
-                                         ui->sliderWristRoll,     ui->sliderWristYaw,      ui->sliderChestYaw,
+                                         ui->sliderWristRoll,     ui->sliderWristPitch,      ui->sliderChestYaw,
                                          ui->sliderChestPitch,    ui->sliderChestRoll };
 
   assert(joints.size() == jointLabels.size() && "joints and jointlabels must be of same size");
