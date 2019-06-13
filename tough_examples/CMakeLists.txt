@@ -109,11 +109,6 @@ add_executable(arm_interactive_example src/control_examples/arm_interactive_exam
 add_dependencies(arm_interactive_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(arm_interactive_example  ${catkin_LIBRARIES})
 
-# ## nudge offset
-# add_executable(nudge_offset_example src/control_examples/nudge_offset_example.cpp)
-# add_dependencies(nudge_offset_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(nudge_offset_example  ${catkin_LIBRARIES})
-
 
 #########################
 ## Navigation examples ##

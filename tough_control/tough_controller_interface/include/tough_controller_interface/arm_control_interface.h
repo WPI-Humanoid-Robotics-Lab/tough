@@ -239,34 +239,6 @@ public:
   bool moveArmJoint(const RobotSide side, const int jointNumber, const float targetAngle, const float time = 2.0f);
 
   /**
-   * @brief ArmControlInterface::nudgeArmLocal will nudge the arm wrt to local end effector coordinates. It is the
-   * middle finger in case of Valkyrie arms. Does not execute the motion. 
-   *
-   * @param                   Side of the Robot. it can be LEFT or RIGHT
-   * @param                   x increment in x
-   * @param                   y increment in y
-   * @param                   z increment in z
-   * @param                   pose is the pointer to pose where modified value will be stored.
-   * 
-   * @return
-   */
-  bool nudgeArmLocal(const RobotSide side, float x, float y, float z, geometry_msgs::Pose& pose);
-
-  /**
-   * @brief ArmControlInterface::nudgeArmPelvis will nudge the arm wrt to pelvis coordinates. z+ is up. x+ is forward.
-   * y+ is right.
-   *
-   * @param                   Side of the Robot. it can be LEFT or RIGHT
-   * @param                   x increment in x
-   * @param                   y increment in y
-   * @param                   z increment in z
-   * @param                   pose is the pointer to pose where modified value will be stored.
-   *
-   * @return
-   */
-  bool nudgeArmPelvis(const RobotSide side, float x, float y, float z, geometry_msgs::Pose& pose);
-
-  /**
    * @brief Get the current positions of all joints of the side of the arm.
    * Ordering is based on the order in the JointNames vector. The order for the Joints' Names, Numbers,
    * Positions, Velocities and Efforts in their vectors are same.
