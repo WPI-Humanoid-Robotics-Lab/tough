@@ -5,26 +5,34 @@
 
 int main(int argc, char** argv)
 {
-  if (argc != 4)
+  ros::init(argc, argv, "test_neck_navigation");
+  ros::NodeHandle nh;
+  RobotDescription* rd = RobotDescription::getRobotDescription(nh);
+  int n = rd->getNumberOfNeckJoints();
+  if (argc != n + 1)
   {
     std::string filename = std::string(argv[0]);
     int index = filename.find_last_of('/');
-    std::string input_trace_filename = filename.substr(index + 1);
-    ROS_INFO_STREAM("Usage : rosrun tough_examples "
-                        << input_trace_filename << " <joint1_in_radians> <joint2_in_radians> <joint3_in_radians>";);
+    std::stringstream input_trace_filename;
+    input_trace_filename << "Usage : rosrun tough_examples " << filename.substr(index + 1);
+    for (size_t count = 0; count < n; count++)
+    {
+      input_trace_filename << " <joint" << count + 1 << "_in_radians> ";
+    }
+    ROS_INFO_STREAM(input_trace_filename.str());
   }
   else
   {
-    ros::init(argc, argv, "test_neck_navigation");
-    ros::NodeHandle nh;
-    float val1 = std::atof(argv[1]);
-    float val2 = std::atof(argv[2]);
-    float val3 = std::atof(argv[3]);
+    std::vector<float> neck_joint_values;
+    for (size_t count = 0; count < n; count++)
+    {
+      neck_joint_values.push_back(std::atof(argv[count + 1]));
+    }
 
     ROS_INFO("Moving the neck");
-
+    std::vector<std::vector<float>> traj_points = { neck_joint_values };
     HeadControlInterface headTraj(nh);
-    headTraj.moveNeckJoints({ { val1, val2, val3 } }, 2.0f);
+    headTraj.moveNeckJoints(traj_points, 2.0f);
 
     ros::spinOnce();
     ros::Duration(2).sleep();

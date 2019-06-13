@@ -80,7 +80,7 @@ public:
    * @param neck_pose       The angles of the joints of the neck as a series of trajectory points to pass through.
    * @param time            The total time of the trajectories (each trajectory is spaced equally in time).
    */
-  void moveNeckJoints(const std::vector<std::vector<float> >& neck_pose, const float time = 4.0f);
+  bool moveNeckJoints(const std::vector<std::vector<float> >& neck_pose, const float time = 4.0f);
 
   /**
    * @brief Get the current positions of all joints of head.

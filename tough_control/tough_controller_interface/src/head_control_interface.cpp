@@ -29,6 +29,7 @@ void HeadControlInterface::appendNeckTrajectoryPoint(ihmc_msgs::NeckTrajectoryRo
     p.unique_id = HeadControlInterface::id_;
     t.trajectory_points.push_back(p);
     t.unique_id = HeadControlInterface::id_;
+    t.weight = std::nan("");
     msg.joint_trajectory_messages.push_back(t);
   }
 }
@@ -103,7 +104,7 @@ void HeadControlInterface::moveHead(const std::vector<std::vector<float> >& traj
   headTrajPublisher.publish(msg);
 }
 
-void HeadControlInterface::moveNeckJoints(const std::vector<std::vector<float> >& neck_pose, const float time)
+bool HeadControlInterface::moveNeckJoints(const std::vector<std::vector<float> >& neck_pose, const float time)
 {
   ihmc_msgs::NeckTrajectoryRosMessage msg;
 
@@ -114,11 +115,15 @@ void HeadControlInterface::moveNeckJoints(const std::vector<std::vector<float> >
   for (int i = 0; i < neck_pose.size(); i++)
   {
     if (neck_pose[i].size() != NUM_NECK_JOINTS)
+    {
       ROS_ERROR("Check number of trajectory points");
+      return false;
+    }
     appendNeckTrajectoryPoint(msg, time / neck_pose.size(), neck_pose[i]);
   }
   // publish the message
   neckTrajPublisher.publish(msg);
+  return true;
 }
 
 bool HeadControlInterface::getJointSpaceState(std::vector<double>& joints, RobotSide side)
