@@ -39,7 +39,11 @@ int main(int argc, char** argv)
 
   std::string planning_group;
 
-  while (true)
+  bool RUN_STATUS = true;
+
+  planner->waitForMoveGroupInitialization();
+
+  while (RUN_STATUS)
   {
     std::cout << "\n\n\t************************\n"
                  "\tTaskspace Arm Planning\n"
@@ -167,9 +171,16 @@ int main(int argc, char** argv)
       }
       default:
       {
-        return 0;
+        RUN_STATUS = false;
+        break;
       }
         ros::Duration(3.0).sleep();
     }
   }
+
+  delete wb_controller;  
+  delete planner;
+  delete chest_controller;
+  delete arm_controller;  
+  return 0;
 }
