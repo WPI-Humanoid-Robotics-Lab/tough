@@ -13,29 +13,29 @@ int main(int argc, char** argv)
   spinner.start();
   ros::NodeHandle nh;
 
-  WholebodyControlInterface wb_controller(nh);
-  geometry_msgs::PoseStamped pose;
-  pose.pose.orientation.w = 1.0;
-  pose.header.frame_id = "pelvis";
+  WholebodyControlInterface wholebody_control(nh);
+  geometry_msgs::PoseStamped goal_pose;
+  goal_pose.pose.orientation.w = 1.0;
+  goal_pose.header.frame_id = "pelvis";
 
   if (argc != 4)
   {
-    pose.pose.position.x = 0.4;
-    pose.pose.position.y = 0.8;
-    pose.pose.position.z = 0.2;
+    goal_pose.pose.position.x = 0.6;
+    goal_pose.pose.position.y = -0.6;
+    goal_pose.pose.position.z = 0.2;
   }
   else
   {
-    pose.pose.position.x = std::atof(argv[1]);
-    pose.pose.position.y = std::atof(argv[2]);
-    pose.pose.position.z = std::atof(argv[3]);
+    goal_pose.pose.position.x = std::atof(argv[1]);
+    goal_pose.pose.position.y = std::atof(argv[2]);
+    goal_pose.pose.position.z = std::atof(argv[3]);
   }
-  TaskspacePlanner man(nh);
+  TaskspacePlanner taskspace_planner(nh);
 
   std::string planner_group = TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP;
   moveit_msgs::RobotTrajectory trajectory_msg;
 
-  man.getTrajectory(pose, planner_group, trajectory_msg);
-  wb_controller.executeTrajectory(trajectory_msg);
+  taskspace_planner.getTrajectory(goal_pose, planner_group, trajectory_msg);
+  wholebody_control.executeTrajectory(trajectory_msg);
   return 0;
 }
