@@ -65,6 +65,19 @@ public:
                                moveit_msgs::RobotTrajectory& robot_traj, const bool avoid_collisions = true);
 
   /**
+   * @brief Plans the trajector for the robot to follow a vector of poses
+   *
+   * @param pose_array                  geometry_msgs::PoseArray object consisting of Poses to be followed by the robot
+   * @param planning_group              planning group for the trajectory planning, it can be for left or right side for 7 or 10 dof
+   * @param robot_traj                  [output]
+   * @param avoid_collisions            true if robot has to avoid collision, false if not.
+   * 
+   * @return double                     returns the fraction of desired trajectory planned.
+   */
+  double getTrajFromCartPoints(const geometry_msgs::PoseArray& pose_array, const std::string& planning_group,
+                               moveit_msgs::RobotTrajectory& robot_traj, const bool avoid_collisions = true);
+
+  /**
    * @brief Solves and provides result for the IK for desired end_effector_pose
    *
    * @param planning_group              planning group for the trajectory planning, it can be for left or right side for 7 or 10 dof

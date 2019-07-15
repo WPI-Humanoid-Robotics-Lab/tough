@@ -16,7 +16,7 @@ int main(int argc, char** argv)
   RobotDescription* rd = RobotDescription::getRobotDescription(nh);
 
   geometry_msgs::Pose pose_point;
-  std::vector<geometry_msgs::Pose> pose_point_vector;
+  geometry_msgs::PoseArray pose_array;
 
   // Give a start point of the trajectory,
   pose_point.position.x = 0.4;
@@ -28,7 +28,7 @@ int main(int argc, char** argv)
   pose_point.orientation.x = 0.0;
   pose_point.orientation.z = 0.0;
 
-  pose_point_vector.push_back(pose_point);
+  pose_array.poses.push_back(pose_point);
 
   // Appending the subseqent points to be followed onto
   // existing trajectory and pushing into the vector.
@@ -37,14 +37,14 @@ int main(int argc, char** argv)
   for (int i = 0; i < 10; i++)
   {
     pose_point.position.z -= 0.02;
-    pose_point_vector.push_back(pose_point);
+    pose_array.poses.push_back(pose_point);
   }
 
   std::string planning_groups = TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP;
   moveit_msgs::RobotTrajectory robot_traj;
 
   TaskspacePlanner taskspacePlanner(nh);
-  taskspacePlanner.getTrajFromCartPoints(pose_point_vector, planning_groups, robot_traj);
+  taskspacePlanner.getTrajFromCartPoints(pose_array, planning_groups, robot_traj);
 
   WholebodyControlInterface wholeBodyCont(nh);
   wholeBodyCont.executeTrajectory(robot_traj);

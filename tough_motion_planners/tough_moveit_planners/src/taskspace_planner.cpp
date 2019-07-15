@@ -401,3 +401,10 @@ double TaskspacePlanner::getTrajFromCartPoints(const std::vector<geometry_msgs::
   frac = computeCartesianPathFromVector(move_group_interface_map_.at(planning_group), pose_vec, robot_traj, avoid_collisions);
   return frac;
 }
+
+double TaskspacePlanner::getTrajFromCartPoints(const geometry_msgs::PoseArray& pose_array,
+                                               const std::string& planning_group,
+                                               moveit_msgs::RobotTrajectory& robot_traj, const bool avoid_collisions)
+{
+  return getTrajFromCartPoints(pose_array.poses, planning_group, robot_traj, avoid_collisions);
+}
