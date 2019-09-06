@@ -10,10 +10,15 @@ find_package(catkin REQUIRED COMPONENTS
   tough_controller_interface
   tough_common
   tough_footstep
-  tough_perception_common
+  # tough_perception_common
   tough_moveit_planners
 )
 
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(SBPL REQUIRED sbpl)
+include_directories(${SBPL_INCLUDE_DIRS})
+link_directories(${SBPL_LIBRARY_DIRS})
 
 catkin_package(
   INCLUDE_DIRS include
@@ -24,9 +29,9 @@ catkin_package(
                         tough_controller_interface
                         tough_common
                         tough_footstep
-                        tough_perception_common
+                        # tough_perception_common
                         tough_moveit_planners
-#  DEPENDS system_lib
+ DEPENDS SBPL
 )
 
 
@@ -39,6 +44,7 @@ catkin_package(
 include_directories(
  include
   ${catkin_INCLUDE_DIRS}
+  ${SBPL_INCLUDE_DIRS}
 )
 
 ######################
@@ -112,6 +118,10 @@ target_link_libraries(arm_interactive_example  ${catkin_LIBRARIES})
 ## Navigation examples ##
 #########################
 
+pkg_check_modules(SBPL REQUIRED sbpl)
+include_directories(${SBPL_INCLUDE_DIRS})
+link_directories(${SBPL_LIBRARY_DIRS})
+
 add_executable(walk_forward_example src/navigation_examples/walk_forward_example.cpp )
 add_dependencies(walk_forward_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(walk_forward_example  ${catkin_LIBRARIES})
@@ -136,13 +146,13 @@ target_link_libraries(walk_steps_example  ${catkin_LIBRARIES})
 #########################
 ## Perception examples ##
 #########################
-add_executable(multisense_image_example src/perception_examples/multisense_interface_example.cpp )
-add_dependencies(multisense_image_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(multisense_image_example  ${catkin_LIBRARIES})
+# add_executable(multisense_image_example src/perception_examples/multisense_interface_example.cpp )
+# add_dependencies(multisense_image_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(multisense_image_example  ${catkin_LIBRARIES})
 
-add_executable(multisense_pc_example src/perception_examples/multisense_interface_pc_example.cpp )
-add_dependencies(multisense_pc_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(multisense_pc_example  ${catkin_LIBRARIES})
+# add_executable(multisense_pc_example src/perception_examples/multisense_interface_pc_example.cpp )
+# add_dependencies(multisense_pc_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(multisense_pc_example  ${catkin_LIBRARIES})
 
 #########################
 ## Manipulation examples ##
@@ -152,9 +162,14 @@ add_executable(ik_example src/manipulation_examples/ik_example.cpp )
 add_dependencies(ik_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(ik_example  ${catkin_LIBRARIES})
 
+pkg_check_modules(SBPL REQUIRED sbpl)
+include_directories(${SBPL_INCLUDE_DIRS})
+link_directories(${SBPL_LIBRARY_DIRS})
+
 add_executable(motion_planner_example src/manipulation_examples/motion_planner_example.cpp )
 add_dependencies(motion_planner_example ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(motion_planner_example  ${catkin_LIBRARIES})
+target_link_libraries(motion_planner_example  ${catkin_LIBRARIES} ${SBPL_LIBRARY_DIRS})
+
 
 
 add_executable(taskspace_planner_example src/manipulation_examples/taskspace_planner_example.cpp )
@@ -178,9 +193,11 @@ install(TARGETS reset_robot arm_control_example head_control_example arm_control
                 chest_control_example nudge_local_example pelvis_control_example
                 neck_control_example gripper_control_example arm_interactive_example
                 walk_forward_example walk_goal_example walk_example walk_rotate_example walk_steps_example
-                multisense_image_example ik_example motion_planner_example taskspace_planner_example 
+                ik_example motion_planner_example taskspace_planner_example
                 taskspace_2stage_planner_example taskspace_planner_interactive_example follow_cartesian_path
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+        # multisense_image_example
 

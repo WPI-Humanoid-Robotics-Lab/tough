@@ -20,6 +20,12 @@ find_package(catkin REQUIRED COMPONENTS
   tough_footstep
 )
 
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(SBPL REQUIRED sbpl)
+include_directories(${SBPL_INCLUDE_DIRS})
+link_directories(${SBPL_LIBRARY_DIRS})
+
 set(HEADER_FILES
   include/${PROJECT_NAME}/tough_gui.h
   include/${PROJECT_NAME}/configurationreader.h

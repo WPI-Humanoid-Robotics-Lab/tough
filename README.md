@@ -26,6 +26,27 @@ We are skipping 0.10 version of ihmc controllers more details [here](https://git
  - Requires: Ubuntu 16.04, ROS-Kinetic
  - [tough-kinetic-installation-instructions](https://github.com/WPI-Humanoid-Robotics-Lab/tough/wiki/Tough-0.11-Installation-using-vcstool)
 
+ - Bionic (18.04), ROS-Melodic
+ ```bash
+ sudo apt install ros-melodic-map-server* ros-melodic-controller-interface ros-melodic-effort-controllers  ros-melodic-multisense-* ros-melodic-robot-self-filter ros-melodic-trac-ik-* ros-melodic-moveit-* ros-melodic-moveit-ros-* ros-melodic-laser-assembler ros-melodic-fiducials ros-melodic-octomap* qt4-default qt4-qtconfig libqt4-dev qt4-qmake openjdk-8-jdk openjfx xsltproc
+ mkdir -p ~/hn_ws/src && cd ~/hn_ws/src
+ git clone https://github.com/DhruvKoolRajamani/humanoid_msgs.git
+ cd ../
+ catkin_make
+ source devel/setup.bash
+ cd src
+ git clone https://github.com/DhruvKoolRajamani/humanoid_navigation.git
+ cd ../
+ catkin_make
+ source devel/setup.bash
+ mkdir -p ~/Downloads/Java/ && cd ~/Downloads/Java/
+ wget https://chriswhocodes.com/downloads/openjfx-8u60-sdk-overlay-linux-amd64.zip
+ unzip -q openjfx-8u60-sdk-overlay-linux-amd64.zip
+ rm openjfx-8u60-sdk-overlay-linux-amd64.zip
+ sudo cp * /usr/lib/jvm/java-8-openjdk-amd64/
+ ```
+ - Then follow the steps from **step 4** in [tough-kinetic-installation-instructions](https://github.com/WPI-Humanoid-Robotics-Lab/tough/wiki/Tough-0.11-Installation-using-vcstool)
+
 ### Tutorials
 - Control examples
   - [arm example](https://github.com/WPI-Humanoid-Robotics-Lab/tough/blob/kinetic-0.11.0/tough_examples/src/control_examples/arm_control_example.cpp)
