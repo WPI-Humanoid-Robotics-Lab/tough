@@ -189,6 +189,29 @@ public:
    */
   void getChestJointLimits(std::vector<std::pair<double, double> >& chest_joint_limits) const;
 
+  /**
+   * @brief Get the Chest Frame Names 
+   * 
+   * @param chest_frame_names         - [output] returns the chest frame names
+   */
+  void getChestFrameNames(std::vector<std::string>& chest_frame_names) const;
+
+  /**
+   * @brief Returns the joint names for the joints considered in the Move Groups.
+   * 
+   * @param move_group                - The move group name for which the joint names are needed
+   * @return std::vector<std::string> - [output] returns the vector of joint names for the move group.
+   */
+  const std::vector<std::string> getFrameNamesInMoveGroup(const std::string& move_group);
+
+  /**
+   * @brief Get the Parent Frame For Move Groups 
+   * 
+   * @param move_group                - The move group name for which the parent frame name is needed
+   * @return const std::string        - [output] returns the parent frame name for the move_group
+   */
+  const std::string getParentFrameForMoveGroups(const std::string& move_group);
+
   int getNumberOfNeckJoints() const;
 
   /**
@@ -290,6 +313,8 @@ protected:
   void setLeftArmFrameNames(const std::vector<std::string>& left_arm_frame_names);
 
   void setRightArmFrameNames(const std::vector<std::string>& right_arm_frame_names);
+
+  void setChestFrameNames(const std::vector<std::string>& chest_frame_names);
 
   void setLeftFootFrameName(const std::string& left_foot_frame_name);
 
