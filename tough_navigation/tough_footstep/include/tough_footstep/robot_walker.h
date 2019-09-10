@@ -239,7 +239,7 @@ public:
    * @param angle is the angle expressed in radians
    * @return
    */
-  bool walkRotate(const float angle);
+  bool walkRotate(const float angle, const bool waitForSteps = true);
 
   /**
    * @brief climbStair is a function which can make the robot climb steps given a list of step placement locations.

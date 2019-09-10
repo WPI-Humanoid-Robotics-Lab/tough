@@ -510,7 +510,7 @@ void RobotWalker::loadEEF(RobotSide side, EE_LOADING load)
   loadeff_pub.publish(msg);
 }
 
-bool RobotWalker::walkRotate(float angle)
+bool RobotWalker::walkRotate(float angle, bool waitForSteps)
 {
   // get current position
   ihmc_msgs::FootstepDataRosMessage::Ptr current(new ihmc_msgs::FootstepDataRosMessage());
@@ -520,7 +520,7 @@ bool RobotWalker::walkRotate(float angle)
   goal.x = current->location.x;
   goal.y = current->location.y;
   goal.theta = tf::getYaw(current->orientation) + angle;
-  return walkToGoal(goal);
+  return walkToGoal(goal, waitForSteps);
 }
 
 bool RobotWalker::climbStair(const std::vector<float>& xOffset, const std::vector<float>& zOffset,
