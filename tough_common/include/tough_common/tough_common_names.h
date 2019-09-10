@@ -2,6 +2,7 @@
 #define VAL_COMMON_NAMES_H
 
 #include <string>
+#include <vector>
 
 namespace TOUGH_COMMON_NAMES
 {
@@ -94,6 +95,11 @@ const std::string RIGHT_ARM_10DOF_GROUP = "R_PELVIS_PALM_10DOF";
 const std::string PLANNING_PLUGIN_PARAM = "/move_group/planning_plugin";
 
 const std::string TRAJECTORY_DISPLAY_TOPIC = "/move_group/display_planned_path";
+
+const std::vector<std::string> PLANNING_GROUPS = { RIGHT_ARM_10DOF_GROUP,
+                                                   RIGHT_ARM_7DOF_GROUP,
+                                                   LEFT_ARM_10DOF_GROUP,
+                                                   LEFT_ARM_7DOF_GROUP };
 
 /********* Footstep Planning *********/
 const std::string FOOTSTEP_PLANNER_SERVICE = "/plan_footsteps";
