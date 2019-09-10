@@ -13,6 +13,8 @@ int main(int argc, char** argv)
   ros::Rate loop_rate(10);
   RobotWalker walk(nh, 1.0, 1.0, 0);
   ToughControlCommon tough_contol_common(nh);
+  RobotDescription* rd_ = RobotDescription::getRobotDescription(nh);
+  RobotStateInformer* state_informer_ = RobotStateInformer::getRobotStateInformer(nh);
 
   char input;
   int robot_side;
@@ -97,11 +99,17 @@ int main(int argc, char** argv)
     {
       std::cout << "Enter <side> <x> <y> <z> <ax> <ay> <az> <aw>:";
       geometry_msgs::Pose pt;
+      std::string frame_name;
+      unsigned int frame = 1;
       std::cin >> robot_side >> pt.position.x >> pt.position.y >> pt.position.z >> pt.orientation.x >>
           pt.orientation.y >> pt.orientation.z >> pt.orientation.w;
       double t;
       std::cout << "Enter time to reach that pose : ";
       std::cin >> t;
+      std::cout << "Enter 1 for reference frame to be world and 0 for pelvis" << std::endl;
+      std::cin >> frame;
+      frame_name = frame == 1 ? rd_->getWorldFrame() : rd_->getPelvisFrame();
+      state_informer_->transformPose(pt, pt, frame_name, rd_->getWorldFrame());
       walk.moveFoot((RobotSide)robot_side, pt, t);
     }
     else if (input == 's')
