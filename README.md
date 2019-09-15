@@ -39,13 +39,49 @@ We are skipping 0.10 version of ihmc controllers more details [here](https://git
  cd ../
  catkin_make
  source devel/setup.bash
+ echo "source ~/hn_ws/devel/setup.bash" >> ~/.bashrc
  mkdir -p ~/Downloads/Java/ && cd ~/Downloads/Java/
  wget https://chriswhocodes.com/downloads/openjfx-8u60-sdk-overlay-linux-amd64.zip
  unzip -q openjfx-8u60-sdk-overlay-linux-amd64.zip
  rm openjfx-8u60-sdk-overlay-linux-amd64.zip
  sudo cp * /usr/lib/jvm/java-8-openjdk-amd64/
  ```
- - Then follow the steps from **step 4** in [tough-kinetic-installation-instructions](https://github.com/WPI-Humanoid-Robotics-Lab/tough/wiki/Tough-0.11-Installation-using-vcstool)
+ - Modify `~/.bashrc` file to include `JAVA_HOME` and `IHMC_SOURCE_LOCATION` variable. Add these to the end of your `~/.bashrc`. We will download ihmc source in following steps.
+ ```bash
+ export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
+ export IHMC_SOURCE_LOCATION=~/repository-group/ihmc-open-robotics-software
+```
+> Notice the folder `~/repository-group`. This is going to hold all of the low-level controller java code. All ros related repos will go in the catkin workspace `~/catkin_ws`.
+- Download IHMC Open robotics software. It is preferable to use the paths as given here. If this path changes, ~/.bashrc needs to be updated as well.
+```bash
+ # We start in the user's home directory.
+ cd && git clone https://github.com/ihmcrobotics/repository-group.git 
+ cd repository-group && git checkout 0.11.0
+ git clone https://github.com/WPI-Humanoid-Robotics-Lab/ihmc-open-robotics-software --branch 0.11.0-warner --single-branch
+```
+### Installing TOUGH
+- Install vcstool and catkin_tools if not already installed. Instructions are available [here](https://github.com/DhruvKoolRajamani/atlas_workspace/tree/melodic-devel). Once vcstool is available run the following commands to download required repositories.
+```bash
+ # skip next 2 lines if you already have a catkin workspace created
+ mkdir ~/catkin_ws && cd ~/catkin_ws 
+ catkin config --init --mkdirs  
+ # Navigate to src directory of catkin workspace 
+ cd src  
+ # download vcs config file
+ wget https://github.com/DhruvKoolRajamani/atlas_workspace/raw/melodic-devel/atlas_ws_0.11.yaml
+ vcs import < atlas_ws_0.11.yaml  
+ cd .. && catkin_make
+```
+- Source the ros packages, this can be added to `~/.bashrc`.
+```bash
+source devel/setup.bash
+# Or
+# echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+```
+- We can start the simulation that compiles everything when it runs for the first time. It will take about 10-15 minutes in the run. Later runs would be faster
+```bash
+ roslaunch ihmc_atlas_ros ihmc_atlas_scs_demo01.launch use_local_build:=true
+```
 
 ### Tutorials
 - Control examples
