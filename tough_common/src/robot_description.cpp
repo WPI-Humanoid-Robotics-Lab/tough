@@ -457,6 +457,12 @@ const std::string RobotDescription::getParentFrameForMoveGroups(const std::strin
   return parent_frame;
 }
 
+const std::string RobotDescription::getParentFrameForJointName(const std::string& joint_name)
+{
+  std::string parent_frame = model_.links_[joint_name]->getParent()->name;
+  return parent_frame;
+}
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "test_urdf");

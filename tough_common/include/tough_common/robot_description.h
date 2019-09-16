@@ -212,6 +212,14 @@ public:
    */
   const std::string getParentFrameForMoveGroups(const std::string& move_group);
 
+  /**
+   * @brief Get the Parent Frame name for the given joint namej
+   * 
+   * @param joint_name                - Joint Name 
+   * @return const std::string        - Returns the parent frame name for the joint name
+   */
+  const std::string getParentFrameForJointName(const std::string& joint_name);
+
   int getNumberOfNeckJoints() const;
 
   /**
