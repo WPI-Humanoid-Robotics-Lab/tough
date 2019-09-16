@@ -22,7 +22,7 @@ private:
 
   std::string chain_start_, chain_end_;
   const std::string chain_name_prefix = "CUSTOM_CHAIN_";
-  float planning_time_;
+  float planning_time_=1.0;
   int custom_chain_number_ = 1;
 
   // IK solver
