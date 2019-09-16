@@ -54,6 +54,7 @@ bool ToughKinematics::solve_ik(const std::string& planning_group, const geometry
   success = solve_ik(planning_group, end_effector_pose, joint_angles);
 
   result_traj.header = std_msgs::Header();
+  result_traj.header.frame_id = end_effector_pose.header.frame_id;
   result_traj.points.resize(1);
   result_traj.joint_names.clear();
   result_traj.points.resize(1);
@@ -97,10 +98,11 @@ bool ToughKinematics::solve_ik(const std::string& planning_group, const geometry
 
 bool ToughKinematics::add_custom_chain(const std::string& chain_start, const std::string& chain_end)
 {
-  std::string custom_chain_name = chain_name_prefix + std::to_string(custom_chain_number_);
+  std::string custom_chain_name = chain_name_prefix + std::to_string(custom_chain_number_++);
   custom_chain_start_.push_back(chain_start);
   custom_chain_end_.push_back(chain_end);
-  return addChainToMap(chain_start, chain_end, custom_chain_name);
+  std::string chain_start_parent = rd_->getParentFrameForJointName(chain_start);
+  return addChainToMap(chain_start_parent, chain_end, custom_chain_name);
 }
 
 int ToughKinematics::get_IK_joint_angles(const std::string& planning_group, std::vector<double>& initial_position, const geometry_msgs::PoseStamped& end_effector_pose, std::vector<double>& result)
@@ -133,8 +135,12 @@ int ToughKinematics::get_index_of_chain(const std::string& chain_start, const st
 {
   std::vector<std::string>::iterator chain_start_iterator, chain_end_iterator;
   for (int i = 0; i < custom_chain_start_.size(); ++i)
-    if (custom_chain_start_.at(i) != chain_start && custom_chain_end_.at(i) != chain_end)
-      return i;
+  {
+    bool first_match = custom_chain_start_.at(i).compare(chain_start) == 0;
+    bool second_match = custom_chain_end_.at(i).compare(chain_end) == 0;
+    if (first_match && second_match)
+    return i;
+  }
   return -1;
 }
 
