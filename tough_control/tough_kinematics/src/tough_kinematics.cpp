@@ -55,8 +55,11 @@ bool ToughKinematics::solve_ik(const std::string& planning_group, const geometry
 
   result_traj.header = std_msgs::Header();
   result_traj.header.frame_id = end_effector_pose.header.frame_id;
-  result_traj.points.resize(1);
+  result_traj.header.seq = 1;
+
   result_traj.joint_names.clear();
+  
+  result_traj.points.resize(1);
   result_traj.points.resize(1);
   result_traj.points.front().positions = joint_angles;
   result_traj.points.front().velocities.resize(joint_angles.size());
