@@ -1,3 +1,6 @@
+#ifndef TOUGH_KINEMATICS_H
+#define TOUGH_KINEMATICS_H
+
 #include <ros/ros.h>
 #include <trajectory_msgs/JointTrajectory.h>
 
@@ -123,3 +126,5 @@ public:
   bool add_custom_chain(const std::string& chain_start, const std::string& chain_end);
 
 };
+
+#endif // TOUGH_KINEMATICS_H
