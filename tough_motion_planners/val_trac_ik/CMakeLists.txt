@@ -10,12 +10,18 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(orocos_kdl REQUIRED)
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(SBPL REQUIRED sbpl)
+include_directories(${SBPL_INCLUDE_DIRS})
+link_directories(${SBPL_LIBRARY_DIRS})
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS tf trac_ik_lib tough_common tough_footstep
   DEPENDS orocos_kdl
+  DEPENDS SBPL
 )
 
 include_directories(include)

@@ -21,11 +21,11 @@ find_package(catkin REQUIRED COMPONENTS
   tough_common
   tough_controller_interface
   )
-#find_package(PkgConfig REQUIRED)
+find_package(PkgConfig REQUIRED)
 
-#pkg_check_modules(SBPL REQUIRED sbpl)
-#include_directories(${SBPL_INCLUDE_DIRS})
-#link_directories(${SBPL_LIBRARY_DIRS})
+pkg_check_modules(SBPL REQUIRED sbpl)
+include_directories(${SBPL_INCLUDE_DIRS})
+link_directories(${SBPL_LIBRARY_DIRS})
 
  add_message_files(DIRECTORY msg
   FILES
@@ -41,12 +41,13 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS message_runtime humanoid_nav_msgs tough_common
+  DEPENDS SBPL
   )
 
 ###########
 ## Build ##
 ###########
-include_directories( ${catkin_INCLUDE_DIRS} include)
+include_directories( ${catkin_INCLUDE_DIRS} ${SBPL_INCLUDE_DIRS} include)
 
 add_library(${PROJECT_NAME}
    src/robot_walker.cpp
