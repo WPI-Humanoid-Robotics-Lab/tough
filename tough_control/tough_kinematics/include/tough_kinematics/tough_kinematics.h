@@ -23,7 +23,6 @@ private:
   std::vector<std::string> joint_names_in_traj_;
   std::vector<std::string> custom_chain_start_, custom_chain_end_;
 
-  std::string chain_start_, chain_end_;
   const std::string chain_name_prefix = "CUSTOM_CHAIN_";
   float planning_time_=1.0;
   int custom_chain_number_ = 0;
@@ -53,12 +52,6 @@ private:
   RobotStateInformer* state_informer_;
   RobotDescription* rd_;
 
-
-  const std::vector<std::string> PLANNING_GROUPS = { TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP,
-                                                     TOUGH_COMMON_NAMES::RIGHT_ARM_7DOF_GROUP,
-                                                     TOUGH_COMMON_NAMES::LEFT_ARM_10DOF_GROUP,
-                                                     TOUGH_COMMON_NAMES::LEFT_ARM_7DOF_GROUP };
-
 public:
   ToughKinematics(ros::NodeHandle& nh, std::string urdf_param = "");
   ~ToughKinematics();
@@ -78,19 +71,6 @@ public:
   /**
    * @brief Solves and provides result for the IK for desired end_effector_pose
    *
-   * @param chain_start                 link name for the start of the chain
-   * @param chain_end                   link name for the end of the chain
-   * @param end_effector_pose           Desired end effecotor pose to be achieved
-   * @param result                      Resultant vector of joint angles for the planning group included joints
-   * @return true                       When Successful
-   * @return false
-   */
-  bool solve_ik(const std::string& chain_start, const std::string& chain_end, const geometry_msgs::PoseStamped& end_effector_pose,
-                std::vector<double>& result);
-
-  /**
-   * @brief Solves and provides result for the IK for desired end_effector_pose
-   *
    * @param planning_group              planning group for the trajectory planning, it can be for left or right side for 7 or 10 dof
    * @param end_effector_pose           Desired end effecotor pose to be achieved
    * @param result                      Resultant vector of joint angles for the planning group included joints
@@ -102,7 +82,8 @@ public:
                 trajectory_msgs::JointTrajectory& result, float time = 2.0f);
 
   /**
-   * @brief Solves and provides result for the IK for desired end_effector_pose
+   * @brief Solves and provides result for the IK from custom chain for desired end_effector_pose
+   *            ** THE CUSTOM CHAIN MUST BE FIRST ADDED USING add_custom_chain **
    *
    * @param chain_start                 link name for the start of the chain
    * @param chain_end                   link name for the end of the chain
@@ -111,7 +92,7 @@ public:
    * @param time                        Time for execution of the trajectory
    * @return true
    */
-  bool solve_custom_chain_ik(const std::string& chain_start, const std::string& chain_end,
+  bool solve_ik(const std::string& chain_start, const std::string& chain_end,
                              const geometry_msgs::PoseStamped& end_effector_pose,
                              trajectory_msgs::JointTrajectory& result, float time = 2.0f);
 
@@ -125,6 +106,19 @@ public:
    */
   bool add_custom_chain(const std::string& chain_start, const std::string& chain_end);
 
+  /**
+   * @brief Get the planning time object
+   * 
+   * @return double                     Current time set for the planning.
+   */
+  double get_planning_time();
+
+  /**
+   * @brief Set the planning time object
+   * 
+   * @param time                        Time to set for the planning.
+   */
+  void set_planning_time(const double time);
 };
 
 #endif // TOUGH_KINEMATICS_H

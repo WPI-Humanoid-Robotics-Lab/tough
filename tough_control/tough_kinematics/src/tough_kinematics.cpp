@@ -15,10 +15,10 @@ ToughKinematics::~ToughKinematics()
 bool ToughKinematics::addExistingKDLChains()
 {
   bool valid;
-  for (size_t i = 0; i < PLANNING_GROUPS.size(); i++)
+  for (size_t i = 0; i < TOUGH_COMMON_NAMES::PLANNING_GROUPS.size(); i++)
   {
     // get the current planning group
-    std::string planning_group = PLANNING_GROUPS.at(i);
+    std::string planning_group = TOUGH_COMMON_NAMES::PLANNING_GROUPS.at(i);
 
     valid = addChainToMap(rd_->getParentFrameForMoveGroups(planning_group),
                           rd_->getFrameNamesInMoveGroup(planning_group).back(), planning_group);
@@ -81,9 +81,7 @@ bool ToughKinematics::solve_ik(const std::string& planning_group, const geometry
                                 std::vector<double>& result)
 {
   joint_names_in_traj_.clear();
-    std::vector<double> initial_position_arms, initial_position_chest, initial_position;
-    std::vector<std::string> joint_names_in_group;
-    std::string prefix = TOUGH_COMMON_NAMES::TOPIC_PREFIX + rd_->getRobotName() + "/";
+    std::vector<double> initial_position;
     
     KDL::Chain* current_chain = kdl_chains_[planning_group];
     double current_joint_angle;
@@ -123,7 +121,7 @@ int ToughKinematics::get_IK_joint_angles(const std::string& planning_group, std:
   return success;
 }
 
-bool ToughKinematics::solve_custom_chain_ik(const std::string& chain_start, const std::string& chain_end,
+bool ToughKinematics::solve_ik(const std::string& chain_start, const std::string& chain_end,
                              const geometry_msgs::PoseStamped& end_effector_pose,
                              trajectory_msgs::JointTrajectory& result, float time)
 {
@@ -131,7 +129,7 @@ bool ToughKinematics::solve_custom_chain_ik(const std::string& chain_start, cons
   if(index_of_chain == -1)
     return false;
   std::string custom_chain_name = chain_name_prefix + std::to_string(index_of_chain);
-  return solve_ik(custom_chain_name, end_effector_pose, result);
+    return solve_ik(custom_chain_name, end_effector_pose, result);
 }
 
 int ToughKinematics::get_index_of_chain(const std::string& chain_start, const std::string& chain_end)
@@ -166,3 +164,12 @@ void ToughKinematics::poseToKDLFrame(const geometry_msgs::Pose& pose, KDL::Frame
   frame.p = KDL::Vector(pose.position.x, pose.position.y, pose.position.z);
 }
 
+double ToughKinematics::get_planning_time()
+{
+  return planning_time_;
+}
+
+void ToughKinematics::set_planning_time(const double time)
+{
+  planning_time_ = time;
+}
