@@ -16,11 +16,12 @@ int main(int argc, char** argv)
   spinner.start();
   ros::NodeHandle nh;
 
+  RobotDescription* rd = RobotDescription::getRobotDescription(nh);
   WholebodyControlInterface wb_controller(nh);
   // ArmControlInterface arm_controller(nh);
   geometry_msgs::PoseStamped pose;
   pose.pose.orientation.w = 1.0;
-  pose.header.frame_id = "pelvis";
+  pose.header.frame_id = rd->getPelvisFrame();
   
   if (argc != 4)
   {
@@ -38,23 +39,14 @@ int main(int argc, char** argv)
   trajectory_msgs::JointTrajectory result_joint_angles;
 
   ToughKinematics tough_kinematics(nh);
-  if(tough_kinematics.solve_ik(TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP, pose, result_joint_angles))
+  tough_kinematics.add_custom_chain("utorso", rd->getRightEEFrame());
+  // if (tough_kinematics.solve_ik("utorso", rd->getRightEEFrame(), pose, result_joint_angles))
+  if (tough_kinematics.solve_ik(TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP, pose, result_joint_angles))
+  {
     wb_controller.executeTrajectory(result_joint_angles);
+    ros::Duration(1).sleep();
+  }
   else
     ROS_ERROR("COULD NOT PLAN FOR THE TRAJECTORY");
-
-  // float solve_fraction = tough_kinematics.solve_ik(TOUGH_COMMON_NAMES::RIGHT_ARM_7DOF_GROUP, pose, joint_angles);
-  // TaskspacePlanner man(nh);
-  // man.solve_ik(TOUGH_COMMON_NAMES::RIGHT_ARM_7DOF_GROUP, pose, joint_angles);
-
-  // std::vector<std::vector<double> > arm_poses;
-  // arm_poses.push_back(joint_angles);
-  // // wb_controller.executeTrajectory()
-  // if(solve_fraction>0.9)
-  // arm_controller.moveArmJoints(RobotSide::RIGHT, arm_poses, 1.0f);
-  // // wb_controller.executeTrajectory()
-  // else
-  //   ROS_ERROR("COULD NOT PLAN FOR THE TRAJECTORY");
-  ros::Duration(1).sleep();
   return 0;
 }
