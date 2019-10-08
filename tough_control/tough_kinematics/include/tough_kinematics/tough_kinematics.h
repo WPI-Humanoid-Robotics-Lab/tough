@@ -19,13 +19,12 @@ private:
   std::map<std::string, TRAC_IK::TRAC_IK*> ik_solvers_;
   std::map<std::string, KDL::Chain*> kdl_chains_;
   std::map<std::string, std::pair<KDL::JntArray, KDL::JntArray>> kdl_joint_limits_;
+  std::map<std::pair<std::string,std::string>, std::string> links_group_name_map_;
   
   std::vector<std::string> joint_names_in_traj_;
-  std::vector<std::string> custom_chain_start_, custom_chain_end_;
 
-  const std::string chain_name_prefix = "CUSTOM_CHAIN_";
   float planning_time_=1.0;
-  int custom_chain_number_ = 0;
+  float traj_exec_time_ = 2.0;
 
   // IK solver
   bool addExistingKDLChains();
@@ -33,19 +32,18 @@ private:
   /**
    * @brief 
    * 
-   * @param chain_start           Parent of the first actuating link
+   * @param chain_start_parent    Parent of the first actuating link
    * @param chain_end             Last link of the chain
    * @param group_name            Group name of the chain 
    * @return true 
    * @return false 
    */
-  bool addChainToMap(const std::string& chain_start, const std::string& chain_end, const std::string& group_name);
+  bool addChainToMap(const std::string& chain_start_parent, const std::string& chain_end, const std::string& group_name);
 
   void vectorToKDLJntArray(std::vector<double>& vec, KDL::JntArray& kdl_array);
   void KDLJntArrayToVector(KDL::JntArray& kdl_array, std::vector<double>& vec);
   void poseToKDLFrame(const geometry_msgs::Pose& pose, KDL::Frame& frame);
 
-  int get_index_of_chain(const std::string& chain_start, const std::string& chain_end);
   int get_IK_joint_angles(const std::string& planning_group, std::vector<double>& initial_joint_angles, const geometry_msgs::PoseStamped& end_effector_pose, std::vector<double>& result);
 
   // tough
@@ -119,6 +117,20 @@ public:
    * @param time                        Time to set for the planning.
    */
   void set_planning_time(const double time);
+
+  /**
+   * @brief Get the traj_exec time object
+   * 
+   * @return double                     Current time set for the traj_exec.
+   */
+  double get_traj_exec_time();
+
+  /**
+   * @brief Set the traj_exec time object
+   * 
+   * @param time                        Time to set for the traj_exec.
+   */
+  void set_traj_exec_time(const double time);
 };
 
 #endif // TOUGH_KINEMATICS_H
