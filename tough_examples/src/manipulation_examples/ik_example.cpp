@@ -39,8 +39,6 @@ int main(int argc, char** argv)
   trajectory_msgs::JointTrajectory result_joint_angles;
 
   ToughKinematics tough_kinematics(nh);
-  tough_kinematics.add_custom_chain("utorso", rd->getRightEEFrame());
-  // if (tough_kinematics.solve_ik("utorso", rd->getRightEEFrame(), pose, result_joint_angles))
   if (tough_kinematics.solve_ik(TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP, pose, result_joint_angles))
   {
     wb_controller.executeTrajectory(result_joint_angles);
