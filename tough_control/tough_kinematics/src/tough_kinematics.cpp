@@ -65,7 +65,7 @@ bool ToughKinematics::solve_ik(const std::string& planning_group, const geometry
   result_traj.points.front().velocities.resize(joint_angles.size());
   result_traj.points.front().effort.resize(joint_angles.size());
   result_traj.points.front().accelerations.resize(joint_angles.size());
-  result_traj.points.front().time_from_start = ros::Duration(traj_exec_time_);
+  result_traj.points.front().time_from_start = ros::Duration(time);
 
 
   KDL::Chain* current_chain = kdl_chains_[planning_group];
@@ -146,7 +146,7 @@ bool ToughKinematics::solve_ik(const std::string& chain_start, const std::string
     add_custom_chain(chain_start, chain_end);
   }
   std::string group_name = links_group_name_map_[std::make_pair(chain_start_parent, chain_end)];
-  return solve_ik(group_name, end_effector_pose, result);
+  return solve_ik(group_name, end_effector_pose, result, time);
 }
 
 void ToughKinematics::vectorToKDLJntArray(std::vector<double>& vec, KDL::JntArray& kdl_array)
@@ -176,14 +176,4 @@ double ToughKinematics::get_planning_time()
 void ToughKinematics::set_planning_time(const double time)
 {
   planning_time_ = time;
-}
-
-double ToughKinematics::get_traj_exec_time()
-{
-  return traj_exec_time_;
-}
-
-void ToughKinematics::set_traj_exec_time(const double time)
-{
-  traj_exec_time_ = time;
 }

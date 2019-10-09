@@ -24,7 +24,6 @@ private:
   std::vector<std::string> joint_names_in_traj_;
 
   float planning_time_=1.0;
-  float traj_exec_time_ = 2.0;
 
   // IK solver
   bool addExistingKDLChains();
@@ -117,20 +116,6 @@ public:
    * @param time                        Time to set for the planning.
    */
   void set_planning_time(const double time);
-
-  /**
-   * @brief Get the traj_exec time object
-   * 
-   * @return double                     Current time set for the traj_exec.
-   */
-  double get_traj_exec_time();
-
-  /**
-   * @brief Set the traj_exec time object
-   * 
-   * @param time                        Time to set for the traj_exec.
-   */
-  void set_traj_exec_time(const double time);
 };
 
 #endif // TOUGH_KINEMATICS_H
