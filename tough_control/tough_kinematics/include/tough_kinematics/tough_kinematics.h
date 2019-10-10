@@ -26,7 +26,7 @@ private:
   float planning_time_=1.0;
 
   // IK solver
-  bool addExistingKDLChains();
+  void addExistingKDLChains();
 
   /**
    * @brief 
@@ -37,17 +37,67 @@ private:
    * @return true 
    * @return false 
    */
-  bool addChainToMap(const std::string& chain_start_parent, const std::string& chain_end, const std::string& group_name);
+  bool registerChain(const std::string& chain_start_parent, const std::string& chain_end, const std::string& group_name);
 
-  void vectorToKDLJntArray(std::vector<double>& vec, KDL::JntArray& kdl_array);
-  void KDLJntArrayToVector(KDL::JntArray& kdl_array, std::vector<double>& vec);
-  void poseToKDLFrame(const geometry_msgs::Pose& pose, KDL::Frame& frame);
+  void vectorToKDLJntArray(std::vector<double>& vec, KDL::JntArray& kdl_array) const;
+  void KDLJntArrayToVector(const KDL::JntArray& kdl_array, std::vector<double>& vec) const;
+  void poseToKDLFrame(const geometry_msgs::Pose& pose, KDL::Frame& frame) const;
 
-  int get_IK_joint_angles(const std::string& planning_group, std::vector<double>& initial_joint_angles, const geometry_msgs::PoseStamped& end_effector_pose, std::vector<double>& result);
+  bool getIK(const std::string& planning_group, std::vector<double>& initial_joint_angles,
+             const geometry_msgs::PoseStamped& desired_ee_pose, std::vector<double>& result);
+
+  inline std::string getJointNameAtIndex(KDL::Chain* current_chain, int index)
+  {
+    return current_chain->getSegment(index).getJoint().getName();
+  }
 
   // tough
   RobotStateInformer* state_informer_;
   RobotDescription* rd_;
+
+
+public:
+  ToughKinematics(ros::NodeHandle& nh);
+  ~ToughKinematics();
+
+  /**
+   * @brief Solves and provides result for the IK for desired end_effector_pose
+   *
+   * @param planning_group              planning group for the trajectory planning, it can be for left or right side for 7 or 10 dof
+   * @param desired_ee_pose             Desired end effecotor pose to be achieved
+   * @param result                      Resultant vector of joint angles for the planning group included joints
+   * @return true                       When Successful
+   * @return false
+   */
+  bool solveIK(const std::string& planning_group, const geometry_msgs::PoseStamped& desired_ee_pose,
+                std::vector<double>& result);
+
+  /**
+   * @brief Solves and provides result for the IK for desired end_effector_pose
+   *
+   * @param planning_group              planning group for the trajectory planning, it can be for left or right side for 7 or 10 dof
+   * @param desired_ee_pose             Desired end effecotor pose to be achieved
+   * @param result                      Resultant vector of joint angles for the planning group included joints
+   * @param time                        Time for execution of the trajectory
+   * @return true
+   * @return false
+   */
+  bool solveIK(const std::string& planning_group, const geometry_msgs::PoseStamped& desired_ee_pose,
+                trajectory_msgs::JointTrajectory& result, float time = 2.0f);
+
+  /**
+   * @brief Get the planning time object
+   * 
+   * @return double                     Current time set for the planning.
+   */
+  double getPlanningTime() const;
+
+  /**
+   * @brief Set the planning time object
+   * 
+   * @param time                        Time to set for the planning.
+   */
+  void setPlanningTime(const double time);
 
   /*  CURRENTLY WHOLEBODY CONTROLLER ONLY TAKES THE JOINT ANGLES 
       FOR ALL THE JOINTS IN CHEST/ARMS. THOUGH THESE FUNCTIONS WILL 
@@ -63,13 +113,13 @@ private:
    *
    * @param chain_start                 link name for the start of the chain
    * @param chain_end                   link name for the end of the chain
-   * @param end_effector_pose           Desired end effecotor pose to be achieved
+   * @param desired_ee_pose             Desired end effecotor pose to be achieved
    * @param result                      Resultant vector of joint angles for the planning group included joints
    * @param time                        Time for execution of the trajectory
    * @return true
    */
-  bool solve_ik(const std::string& chain_start, const std::string& chain_end,
-                             const geometry_msgs::PoseStamped& end_effector_pose,
+  bool solveIK(const std::string& chain_start, const std::string& chain_end,
+                             const geometry_msgs::PoseStamped& desired_ee_pose,
                              trajectory_msgs::JointTrajectory& result, float time = 2.0f);
 
   /**
@@ -80,50 +130,7 @@ private:
    * @return true 
    * @return false 
    */
-  bool add_custom_chain(const std::string& chain_start, const std::string& chain_end);
-
-public:
-  ToughKinematics(ros::NodeHandle& nh, std::string urdf_param = "");
-  ~ToughKinematics();
-
-  /**
-   * @brief Solves and provides result for the IK for desired end_effector_pose
-   *
-   * @param planning_group              planning group for the trajectory planning, it can be for left or right side for 7 or 10 dof
-   * @param end_effector_pose           Desired end effecotor pose to be achieved
-   * @param result                      Resultant vector of joint angles for the planning group included joints
-   * @return true                       When Successful
-   * @return false
-   */
-  bool solve_ik(const std::string& planning_group, const geometry_msgs::PoseStamped& end_effector_pose,
-                std::vector<double>& result);
-
-  /**
-   * @brief Solves and provides result for the IK for desired end_effector_pose
-   *
-   * @param planning_group              planning group for the trajectory planning, it can be for left or right side for 7 or 10 dof
-   * @param end_effector_pose           Desired end effecotor pose to be achieved
-   * @param result                      Resultant vector of joint angles for the planning group included joints
-   * @param time                        Time for execution of the trajectory
-   * @return true
-   * @return false
-   */
-  bool solve_ik(const std::string& planning_group, const geometry_msgs::PoseStamped& end_effector_pose,
-                trajectory_msgs::JointTrajectory& result, float time = 2.0f);
-
-  /**
-   * @brief Get the planning time object
-   * 
-   * @return double                     Current time set for the planning.
-   */
-  double get_planning_time();
-
-  /**
-   * @brief Set the planning time object
-   * 
-   * @param time                        Time to set for the planning.
-   */
-  void set_planning_time(const double time);
+  bool addCustomChain(const std::string& chain_start, const std::string& chain_end);
 };
 
 #endif // TOUGH_KINEMATICS_H

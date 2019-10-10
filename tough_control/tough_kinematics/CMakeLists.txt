@@ -3,12 +3,12 @@ project(tough_kinematics)
 
 add_definitions(-std=c++11)
 
-find_package(catkin REQUIRED tough_common trac_ik_lib)
+find_package(catkin REQUIRED tough_common trac_ik_lib kdl_parser)
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES tough_kinematics
-  CATKIN_DEPENDS tough_common trac_ik_lib
+  CATKIN_DEPENDS tough_common trac_ik_lib kdl_parser
 #  DEPENDS system_lib
 )
 

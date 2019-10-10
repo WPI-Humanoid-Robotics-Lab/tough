@@ -1,6 +1,6 @@
 #include <tough_kinematics/tough_kinematics.h>
 
-ToughKinematics::ToughKinematics(ros::NodeHandle& nh, std::string urdf_param) : nh_(nh)
+ToughKinematics::ToughKinematics(ros::NodeHandle& nh) : nh_(nh)
 {
   state_informer_ = RobotStateInformer::getRobotStateInformer(nh);
   rd_ = RobotDescription::getRobotDescription(nh);
@@ -10,24 +10,25 @@ ToughKinematics::ToughKinematics(ros::NodeHandle& nh, std::string urdf_param) : 
 
 ToughKinematics::~ToughKinematics()
 {
+  for(auto i:ik_solvers_)
+    delete i.second;
+  for(auto j:kdl_chains_)
+    delete j.second;
 }
 
-bool ToughKinematics::addExistingKDLChains()
+void ToughKinematics::addExistingKDLChains()
 {
-  bool valid;
   for (std::string planning_group : TOUGH_COMMON_NAMES::PLANNING_GROUPS)
   {
     std::string chain_start_parent = rd_->getParentFrameForMoveGroups(planning_group);
     std::string chain_end = rd_->getFrameNamesInMoveGroup(planning_group).back();
-
-    valid = addChainToMap(chain_start_parent, chain_end, planning_group);
+    registerChain(chain_start_parent, chain_end, planning_group);
   }
-  return valid;
 }
 
-bool ToughKinematics::addChainToMap(const std::string& chain_start_parent, const std::string& chain_end, const std::string& planning_group)
+bool ToughKinematics::registerChain(const std::string& chain_start_parent, const std::string& chain_end, const std::string& planning_group)
 {
-  bool valid;
+  bool valid = false;
   ik_solvers_[planning_group] = new TRAC_IK::TRAC_IK(chain_start_parent,
                                                      chain_end,
                                                      rd_->getURDFParameter(), this->planning_time_);
@@ -42,24 +43,29 @@ bool ToughKinematics::addChainToMap(const std::string& chain_start_parent, const
   KDL::JntArray ll, ul;
   valid = valid && ik_solvers_[planning_group]->getKDLLimits(ll, ul);
   kdl_joint_limits_.insert({planning_group, std::make_pair(ll, ul) });
+
   return valid;
 }
 
-bool ToughKinematics::solve_ik(const std::string& planning_group, const geometry_msgs::PoseStamped& end_effector_pose,
+bool ToughKinematics::solveIK(const std::string& planning_group, const geometry_msgs::PoseStamped& desired_ee_pose,
                                 trajectory_msgs::JointTrajectory& result_traj, float time)
 {
   bool success = false;
 
   std::vector<double> joint_angles;
-  success = solve_ik(planning_group, end_effector_pose, joint_angles);
+  success = solveIK(planning_group, desired_ee_pose, joint_angles);
+  if(!success)
+  {
+    ROS_ERROR("Failed to solve the IK for the planning group %s.", planning_group.c_str());
+    return false;
+  }
 
   result_traj.header = std_msgs::Header();
-  result_traj.header.frame_id = end_effector_pose.header.frame_id;
+  result_traj.header.frame_id = desired_ee_pose.header.frame_id;
   // result_traj.header.seq = rand()%100;
 
   result_traj.joint_names.clear();
   
-  result_traj.points.resize(1);
   result_traj.points.resize(1);
   result_traj.points.front().positions = joint_angles;
   result_traj.points.front().velocities.resize(joint_angles.size());
@@ -67,18 +73,18 @@ bool ToughKinematics::solve_ik(const std::string& planning_group, const geometry
   result_traj.points.front().accelerations.resize(joint_angles.size());
   result_traj.points.front().time_from_start = ros::Duration(time);
 
-
-  KDL::Chain* current_chain = kdl_chains_[planning_group];
-  for (size_t i = 0; i < current_chain->getNrOfJoints(); i++)
+  if(kdl_chains_.find(planning_group)!=kdl_chains_.end())
   {
-    result_traj.joint_names.push_back(current_chain->getSegment(i).getJoint().getName());
-    // ROS_INFO("Joint Name: %s, Joint angle: %.2f", current_chain->getSegment(i).getJoint().getName().c_str(),
-            //  result_traj.points.front().positions.at(i));
+    KDL::Chain* current_chain = kdl_chains_[planning_group];
+    for (size_t i = 0; i < current_chain->getNrOfJoints(); i++)
+    {
+      result_traj.joint_names.push_back(getJointNameAtIndex(current_chain, i));
+    }
   }
   return success;
 }
 
-bool ToughKinematics::solve_ik(const std::string& planning_group, const geometry_msgs::PoseStamped& end_effector_pose,
+bool ToughKinematics::solveIK(const std::string& planning_group, const geometry_msgs::PoseStamped& desired_ee_pose,
                                 std::vector<double>& result)
 {
   joint_names_in_traj_.clear();
@@ -91,89 +97,110 @@ bool ToughKinematics::solve_ik(const std::string& planning_group, const geometry
       std::string current_joint_name;
       for (size_t i = 0; i < current_chain->getNrOfJoints(); i++)
       {
-        current_joint_name = current_chain->getSegment(i).getJoint().getName();
+        current_joint_name = getJointNameAtIndex(current_chain, i);
         current_joint_angle = state_informer_->getJointPosition(current_joint_name);
         initial_position.push_back(current_joint_angle);
       }
+      bool success = getIK(planning_group, initial_position, desired_ee_pose, result);
 
-      int success = get_IK_joint_angles(planning_group, initial_position, end_effector_pose, result);
-      return success >= 0;
+      return success;
     }
     else
     {
-      ROS_ERROR("Planning Group %s not found in kdl chain map.", planning_group);
+      ROS_ERROR("Planning Group %s not found in kdl chain map.", planning_group.c_str());
       return false;
     }
 }
 
-bool ToughKinematics::add_custom_chain(const std::string& chain_start, const std::string& chain_end)
+bool ToughKinematics::addCustomChain(const std::string& chain_start, const std::string& chain_end)
 {
   std::string chain_start_parent = rd_->getParentFrameForJointName(chain_start);
   std::string custom_chain_name = chain_start_parent + "_" + chain_end;
   links_group_name_map_.insert({ std::make_pair(chain_start_parent, chain_end), custom_chain_name });
-  return addChainToMap(chain_start_parent, chain_end, custom_chain_name);
+  return registerChain(chain_start_parent, chain_end, custom_chain_name);
 }
 
-int ToughKinematics::get_IK_joint_angles(const std::string& planning_group, std::vector<double>& initial_position, const geometry_msgs::PoseStamped& end_effector_pose, std::vector<double>& result)
+bool ToughKinematics::getIK(const std::string& planning_group, std::vector<double>& initial_position, const geometry_msgs::PoseStamped& desired_ee_pose, std::vector<double>& result)
 {
   KDL::JntArray kdl_initial_position, kdl_result;
   vectorToKDLJntArray(initial_position, kdl_initial_position);
-  KDL::Frame kdl_end_effector_pose;
+  KDL::Frame kdl_desired_ee_pose;
   geometry_msgs::Pose goal_pose;
-  std::string first_frame = kdl_chains_[planning_group]->getSegment(0).getName();
-  state_informer_->transformPose(end_effector_pose.pose, goal_pose, end_effector_pose.header.frame_id.data(),
-                                 rd_->getParentFrameForJointName(first_frame));
-  poseToKDLFrame(goal_pose, kdl_end_effector_pose);
+
+  if(kdl_chains_.find(planning_group)!=kdl_chains_.end())
+  {
+    std::string first_frame = kdl_chains_[planning_group]->getSegment(0).getName();
+    state_informer_->transformPose(desired_ee_pose.pose, goal_pose, desired_ee_pose.header.frame_id.data(),
+                                  rd_->getParentFrameForJointName(first_frame));
+  }
+  else
+  {
+    ROS_ERROR("Planning Group %s not found in kdl chain map.", planning_group.c_str());
+    return false;
+  }
+  poseToKDLFrame(goal_pose, kdl_desired_ee_pose);
   if(ik_solvers_.find(planning_group) != ik_solvers_.end())
   {
-    int success = ik_solvers_[planning_group]->CartToJnt(kdl_initial_position, kdl_end_effector_pose, kdl_result);
-    KDLJntArrayToVector(kdl_result, result);
+    // CartToJnt returns the int value of number of solutions computed.
+    int no_of_sols = ik_solvers_[planning_group]->CartToJnt(kdl_initial_position, kdl_desired_ee_pose, kdl_result);
+    
+    bool success = no_of_sols > 0;
+    if (success)
+    {
+      KDLJntArrayToVector(kdl_result, result);
+    }    
     return success;
   }
   else
   {
-    ROS_ERROR("Planning group %s not initialized for ik solvers", planning_group);
+    ROS_ERROR("Planning group %s not initialized for ik solvers", planning_group.c_str());
+    return false;
   }
 }
 
-bool ToughKinematics::solve_ik(const std::string& chain_start, const std::string& chain_end,
-                             const geometry_msgs::PoseStamped& end_effector_pose,
+bool ToughKinematics::solveIK(const std::string& chain_start, const std::string& chain_end,
+                             const geometry_msgs::PoseStamped& desired_ee_pose,
                              trajectory_msgs::JointTrajectory& result, float time)
 {
   std::string chain_start_parent = rd_->getParentFrameForJointName(chain_start);
-  if(links_group_name_map_.find(std::make_pair(chain_start_parent, chain_end)) == links_group_name_map_.end())
+  if (links_group_name_map_.find(std::make_pair(chain_start_parent, chain_end)) == links_group_name_map_.end())
   {
-    add_custom_chain(chain_start, chain_end);
+    bool success = addCustomChain(chain_start, chain_end);
+    if(!success)
+    {
+      ROS_ERROR("Failed to add chain from %s to %s", chain_start.c_str(), chain_end.c_str());
+      return success;
+    }
   }
   std::string group_name = links_group_name_map_[std::make_pair(chain_start_parent, chain_end)];
-  return solve_ik(group_name, end_effector_pose, result, time);
+  return solveIK(group_name, desired_ee_pose, result, time);
 }
 
-void ToughKinematics::vectorToKDLJntArray(std::vector<double>& vec, KDL::JntArray& kdl_array)
+void ToughKinematics::vectorToKDLJntArray(std::vector<double>& vec, KDL::JntArray& kdl_array) const
 {
   double* ptr = &vec[0];
   Eigen::Map<Eigen::VectorXd> data(ptr, vec.size());
   kdl_array.data = data;
 }
 
-void ToughKinematics::KDLJntArrayToVector(KDL::JntArray& kdl_array, std::vector<double>& vec)
+void ToughKinematics::KDLJntArrayToVector(const KDL::JntArray& kdl_array, std::vector<double>& vec) const
 {
   // use emplace
   vec = std::vector<double>(kdl_array.data.data(), kdl_array.data.data() + kdl_array.data.size());
 }
 
-void ToughKinematics::poseToKDLFrame(const geometry_msgs::Pose& pose, KDL::Frame& frame)
+void ToughKinematics::poseToKDLFrame(const geometry_msgs::Pose& pose, KDL::Frame& frame) const
 {
   frame.M = KDL::Rotation::Quaternion(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
   frame.p = KDL::Vector(pose.position.x, pose.position.y, pose.position.z);
 }
 
-double ToughKinematics::get_planning_time()
+double ToughKinematics::getPlanningTime() const
 {
   return planning_time_;
 }
 
-void ToughKinematics::set_planning_time(const double time)
+void ToughKinematics::setPlanningTime(const double time)
 {
   planning_time_ = time;
 }
