@@ -449,7 +449,7 @@ const std::vector<std::string> RobotDescription::getFrameNamesInMoveGroup(const 
   return frame_names;
 }
 
-const std::string RobotDescription::getParentFrameForMoveGroups(const std::string& move_group)
+std::string RobotDescription::getParentFrameForMoveGroups(const std::string& move_group)
 {
   std::vector<std::string> frame_names = this->getFrameNamesInMoveGroup(move_group);
   std::string first_frame = frame_names.front();
@@ -457,7 +457,7 @@ const std::string RobotDescription::getParentFrameForMoveGroups(const std::strin
   return parent_frame;
 }
 
-const std::string RobotDescription::getParentFrameForJointName(const std::string& joint_name)
+std::string RobotDescription::getParentFrameForJointName(const std::string& joint_name)
 {
   std::string parent_frame = model_.links_[joint_name]->getParent()->name;
   return parent_frame;
