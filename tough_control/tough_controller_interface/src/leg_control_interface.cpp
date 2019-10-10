@@ -8,14 +8,14 @@ LegControlInterface::LegControlInterface(ros::NodeHandle nh) : ToughControlInter
   this->legTrajectoryPub_ =
       nh_.advertise<ihmc_msgs::FootTrajectoryRosMessage>(control_topic_prefix_ + FOOTSTEP_TRAJECTORY_TOPIC, 1);
   this->loadEndEffPub_ =
-      nh_.advertise<ihmc_msgs::FootLoadBearingRosMessage>(control_topic_prefix_ + FOOTSTEP_LOAD_BEARING_TOPIC, 1);
+      nh_.advertise<ihmc_msgs::EndEffectorLoadBearingRosMessage>(control_topic_prefix_ + FOOTSTEP_LOAD_BEARING_TOPIC, 1);
 }
 
 LegControlInterface::~LegControlInterface()
 {
 }
 
-void LegControlInterface::moveFoot(const RobotSide side, const std::vector<geometry_msgs::Pose>& foot_goal_poses,
+void LegControlInterface::moveFoot(const RobotSide side, const std::vector<geometry_msgs::Pose> &foot_goal_poses,
                                    const float time)
 {
   ihmc_msgs::FootTrajectoryRosMessage foot;
@@ -25,7 +25,10 @@ void LegControlInterface::moveFoot(const RobotSide side, const std::vector<geome
 
   for (size_t i = 0; i < foot_goal_poses.size(); i++)
   {
-    foot.taskspace_trajectory_points[i].position = foot_goal_poses[i].position;
+    foot.taskspace_trajectory_points[i].position.x = foot_goal_poses[i].position.x;
+    foot.taskspace_trajectory_points[i].position.y = foot_goal_poses[i].position.y;
+    foot.taskspace_trajectory_points[i].position.z = foot_goal_poses[i].position.z;
+
     foot.taskspace_trajectory_points[i].orientation = foot_goal_poses[i].orientation;
     foot.taskspace_trajectory_points[i].unique_id = id_;
     foot.taskspace_trajectory_points[i].time = time / (float)foot_goal_poses.size() * (i + 1);
@@ -36,9 +39,9 @@ void LegControlInterface::moveFoot(const RobotSide side, const std::vector<geome
   return;
 }
 
-void LegControlInterface::moveFoot(const RobotSide side, const geometry_msgs::Pose& foot_goal_pose, const float time)
+void LegControlInterface::moveFoot(const RobotSide side, const geometry_msgs::Pose &foot_goal_pose, const float time)
 {
-  std::vector<geometry_msgs::Pose> goals = { foot_goal_pose };
+  std::vector<geometry_msgs::Pose> goals = {foot_goal_pose};
   moveFoot(side, goals, time);
 }
 
@@ -80,7 +83,10 @@ void LegControlInterface::curlLeg(RobotSide side, float radius, float time)
 
   // get current position
   foot.taskspace_trajectory_points.resize(1);
-  foot.taskspace_trajectory_points.begin()->position = goal.position;
+  foot.taskspace_trajectory_points.begin()->position.x = goal.position.x;
+  foot.taskspace_trajectory_points.begin()->position.y = goal.position.y;
+  foot.taskspace_trajectory_points.begin()->position.z = goal.position.z;
+
   foot.taskspace_trajectory_points.begin()->orientation = goal.orientation;
   foot.taskspace_trajectory_points.begin()->unique_id = id_;
   foot.taskspace_trajectory_points.begin()->time = time;
@@ -89,12 +95,12 @@ void LegControlInterface::curlLeg(RobotSide side, float radius, float time)
   return;
 }
 
-bool LegControlInterface::getJointSpaceState(std::vector<double>& joints, RobotSide side)
+bool LegControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)
 {
   return false;
 }
 
-bool LegControlInterface::getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side, std::string fixedFrame)
+bool LegControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
 {
   return state_informer_->getCurrentPose(rd_->getFootFrame(side), pose, fixedFrame);
 }

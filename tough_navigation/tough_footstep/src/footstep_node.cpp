@@ -6,9 +6,9 @@
 #include <thread>
 #include "tough_common/robot_description.h"
 
-RobotWalker* walk;
-RobotStateInformer* current_state;
-RobotDescription* rd_;
+RobotWalker *walk;
+RobotStateInformer *current_state;
+RobotDescription *rd_;
 ihmc_msgs::FootstepDataListRosMessage list;
 geometry_msgs::Pose pelvisPose;
 
@@ -16,8 +16,8 @@ void WalkToGoal(const geometry_msgs::Pose2D goal)
 {
   current_state->getCurrentPose(rd_->getPelvisFrame(), pelvisPose);
   list.footstep_data_list.clear();
-  list.default_transfer_duration = 1.0;
-  list.default_swing_duration = 1.0;
+  list.transfer_time = 1.0;
+  list.swing_time = 1.0;
   list.execution_mode = 0;
   list.unique_id = RobotWalker::id++;
 
@@ -25,7 +25,7 @@ void WalkToGoal(const geometry_msgs::Pose2D goal)
   std::string result = success ? "Succeded" : "Failed";
 }
 
-double distanceBetweenPoints(const geometry_msgs::Point& point1, const geometry_msgs::Point& point2)
+double distanceBetweenPoints(const geometry_msgs::Point &point1, const geometry_msgs::Point &point2)
 {
   return sqrt(pow(point1.x - point2.x, 2) + pow(point1.y - point2.y, 2) + pow(point1.z - point2.z, 2));
 }
@@ -45,7 +45,7 @@ void publish_footsteps_cb(const std_msgs::Empty msg)
   list.footstep_data_list.clear();
 }
 
-void nav_goal_cb(const geometry_msgs::PoseStamped::Ptr& goal_3d)
+void nav_goal_cb(const geometry_msgs::PoseStamped::Ptr &goal_3d)
 {
   geometry_msgs::Pose2D goal_2d;
   goal_2d.x = goal_3d->pose.position.x;
@@ -55,7 +55,7 @@ void nav_goal_cb(const geometry_msgs::PoseStamped::Ptr& goal_3d)
   t1.detach();
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "footstep_node");
   ros::NodeHandle nh;

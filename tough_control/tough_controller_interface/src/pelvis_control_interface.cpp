@@ -21,29 +21,31 @@ PelvisControlInterface::~PelvisControlInterface()
 void PelvisControlInterface::controlPelvisHeight(float height, float duration)
 {
   ihmc_msgs::PelvisHeightTrajectoryRosMessage msg;
-  ihmc_msgs::EuclideanTrajectoryPointRosMessage p;
+  ihmc_msgs::TrajectoryPoint1DRosMessage p;
 
   geometry_msgs::Pose foot_pose;
   state_informer_->getCurrentPose(rd_->getLeftFootFrameName(), foot_pose);
 
-  ihmc_msgs::FrameInformationRosMessage reference_frame;
-  reference_frame.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash();  // Pelvis frame
-  reference_frame.data_reference_frame_id = rd_->getPelvisZUPFrameHash();        // Pelvis frame
-  msg.frame_information = reference_frame;
-  p.position.z = height + foot_pose.position.z - rd_->getFootFrameOffset();
+  // not supported in 0.8.2
+  // ihmc_msgs::FrameInformationRosMessage reference_frame;
+  // reference_frame.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash();  // Pelvis frame
+  // reference_frame.data_reference_frame_id = rd_->getPelvisZUPFrameHash();        // Pelvis frame
+  // msg.frame_information = reference_frame;
+  p.position = height + foot_pose.position.z - rd_->getFootFrameOffset();
   p.time = duration;
 
-  msg.taskspace_trajectory_points.clear();
-  msg.taskspace_trajectory_points.push_back(p);
-  msg.use_custom_control_frame = false;
+  // msg.taskspace_trajectory_points.clear();
+  // msg.taskspace_trajectory_points.push_back(p);
+  // msg.use_custom_control_frame = false;
 
+  msg.trajectory_points.push_back(p);
   msg.unique_id = id_++;
 
   // publish the message
   publishPelvisMessage(msg);
 }
 
-void PelvisControlInterface::publishPelvisMessage(const ihmc_msgs::PelvisHeightTrajectoryRosMessage& msg) const
+void PelvisControlInterface::publishPelvisMessage(const ihmc_msgs::PelvisHeightTrajectoryRosMessage &msg) const
 {
   this->pelvisHeightPublisher_.publish(msg);
 }
@@ -59,12 +61,12 @@ void PelvisControlInterface::resetPose(float time)
   homePositionPublisher_.publish(go_home);
 }
 
-bool PelvisControlInterface::getJointSpaceState(std::vector<double>& joints, RobotSide side)
+bool PelvisControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)
 {
   return false;
 }
 
-bool PelvisControlInterface::getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side, std::string fixedFrame)
+bool PelvisControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
 {
   return state_informer_->getCurrentPose(rd_->getPelvisFrame(), pose, fixedFrame);
 }

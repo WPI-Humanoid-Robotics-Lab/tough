@@ -1,5 +1,5 @@
-#ifndef VAL_COMMON_NAMES_H
-#define VAL_COMMON_NAMES_H
+#ifndef TOUGH_COMMON_NAMES_H
+#define TOUGH_COMMON_NAMES_H
 
 #include <string>
 
@@ -98,6 +98,6 @@ const std::string TRAJECTORY_DISPLAY_TOPIC = "/move_group/display_planned_path";
 /********* Footstep Planning *********/
 const std::string FOOTSTEP_PLANNER_SERVICE = "/plan_footsteps";
 
-}  // namespace TOUGH_COMMON_NAMES
+} // namespace TOUGH_COMMON_NAMES
 
-#endif
+#endif // TOUGH_COMMON_NAMES_H

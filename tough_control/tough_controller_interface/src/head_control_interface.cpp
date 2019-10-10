@@ -15,7 +15,7 @@ HeadControlInterface::~HeadControlInterface()
 {
 }
 
-void HeadControlInterface::appendNeckTrajectoryPoint(ihmc_msgs::NeckTrajectoryRosMessage& msg, float time,
+void HeadControlInterface::appendNeckTrajectoryPoint(ihmc_msgs::NeckTrajectoryRosMessage &msg, float time,
                                                      std::vector<float> pos)
 {
   for (int i = 0; i < NUM_NECK_JOINTS; i++)
@@ -29,7 +29,7 @@ void HeadControlInterface::appendNeckTrajectoryPoint(ihmc_msgs::NeckTrajectoryRo
     p.unique_id = HeadControlInterface::id_;
     t.trajectory_points.push_back(p);
     t.unique_id = HeadControlInterface::id_;
-    t.weight = std::nan("");
+    // t.weight = std::nan("");
     msg.joint_trajectory_messages.push_back(t);
   }
 }
@@ -43,15 +43,17 @@ void HeadControlInterface::moveHead(const float roll, const float pitch, const f
   moveHead(quaternion, time);
 }
 
-void HeadControlInterface::moveHead(const geometry_msgs::Quaternion& quaternion, const float time)
+void HeadControlInterface::moveHead(const geometry_msgs::Quaternion &quaternion, const float time)
 {
   ihmc_msgs::HeadTrajectoryRosMessage msg;
   ihmc_msgs::SO3TrajectoryPointRosMessage data;
-  ihmc_msgs::FrameInformationRosMessage reference_frame;
 
-  reference_frame.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash();  // Pelvis frame
-  reference_frame.data_reference_frame_id = rd_->getPelvisZUPFrameHash();        // Pelvis frame
-  msg.frame_information = reference_frame;
+  // not supported in 0.8.2
+  // ihmc_msgs::FrameInformationRosMessage reference_frame;
+
+  // reference_frame.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash(); // Pelvis frame
+  // reference_frame.data_reference_frame_id = rd_->getPelvisZUPFrameHash();       // Pelvis frame
+  // msg.frame_information = reference_frame;
 
   data.orientation = quaternion;
   data.time = time;
@@ -68,14 +70,15 @@ void HeadControlInterface::moveHead(const geometry_msgs::Quaternion& quaternion,
   headTrajPublisher.publish(msg);
 }
 
-void HeadControlInterface::moveHead(const std::vector<std::vector<float> >& trajectory_points, const float time)
+void HeadControlInterface::moveHead(const std::vector<std::vector<float>> &trajectory_points, const float time)
 {
   ihmc_msgs::HeadTrajectoryRosMessage msg;
-  ihmc_msgs::FrameInformationRosMessage reference_frame;
+  // ihmc_msgs::FrameInformationRosMessage reference_frame;
 
-  reference_frame.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash();  // Pelvis frame
-  reference_frame.data_reference_frame_id = rd_->getPelvisZUPFrameHash();        // Pelvis frame
-  msg.frame_information = reference_frame;
+  // not supported in 0.8.2
+  // reference_frame.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash(); // Pelvis frame
+  // reference_frame.data_reference_frame_id = rd_->getPelvisZUPFrameHash();       // Pelvis frame
+  // msg.frame_information = reference_frame;
 
   HeadControlInterface::id_++;
   msg.unique_id = HeadControlInterface::id_;
@@ -104,7 +107,7 @@ void HeadControlInterface::moveHead(const std::vector<std::vector<float> >& traj
   headTrajPublisher.publish(msg);
 }
 
-bool HeadControlInterface::moveNeckJoints(const std::vector<std::vector<float> >& neck_pose, const float time)
+bool HeadControlInterface::moveNeckJoints(const std::vector<std::vector<float>> &neck_pose, const float time)
 {
   ihmc_msgs::NeckTrajectoryRosMessage msg;
 
@@ -126,12 +129,12 @@ bool HeadControlInterface::moveNeckJoints(const std::vector<std::vector<float> >
   return true;
 }
 
-bool HeadControlInterface::getJointSpaceState(std::vector<double>& joints, RobotSide side)
+bool HeadControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)
 {
   return false;
 }
 
-bool HeadControlInterface::getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side, std::string fixedFrame)
+bool HeadControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
 {
   return state_informer_->getCurrentPose(TOUGH_COMMON_NAMES::ROBOT_HEAD_FRAME_TF, pose, fixedFrame);
 }

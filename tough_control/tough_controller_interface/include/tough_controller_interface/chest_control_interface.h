@@ -62,7 +62,7 @@ public:
    *
    * @param msg                       ChestTrajectoryRosMessage to be executed
    */
-  void executeMessage(const ihmc_msgs::ChestTrajectoryRosMessage& msg);
+  void executeMessage(const ihmc_msgs::ChestTrajectoryRosMessage &msg);
 
   /**
    * @brief Generates the ChestTrajectoryRosMessage from the quaternions. Does not publish or executes anything, only
@@ -73,8 +73,8 @@ public:
    * @param execution_mode            Whether to OVERRIDE the ongoing trajectory, or QUEUE
    * @param msg                       [output]
    */
-  void generateMessage(const geometry_msgs::Quaternion& quat, const float time, const int execution_mode,
-                       ihmc_msgs::ChestTrajectoryRosMessage& msg);
+  void generateMessage(geometry_msgs::Quaternion &quat, const float time, const int execution_mode,
+                       ihmc_msgs::ChestTrajectoryRosMessage &msg);
 
   /**
    * @brief Generates the ChestTrajectoryRosMessage from the IHMC message. Does not publish or executes anything, only
@@ -85,8 +85,8 @@ public:
    * @param execution_mode            Whether to OVERRIDE the ongoing trajectory, or QUEUE
    * @param msg                       [output]
    */
-  void generateMessage(const std::vector<ihmc_msgs::SO3TrajectoryPointRosMessage>& chest_trajectory,
-                       const int execution_mode, ihmc_msgs::ChestTrajectoryRosMessage& msg);
+  void generateMessage(std::vector<ihmc_msgs::SO3TrajectoryPointRosMessage> &chest_trajectory,
+                       const int execution_mode, ihmc_msgs::ChestTrajectoryRosMessage &msg);
 
   /**
    * @brief Sets up the msg for usage. This does not either enters data into the msg, or execute any
@@ -96,7 +96,7 @@ public:
    * @param mode                      Whether to OVERRIDE the ongoing trajectory, or QUEUE
    * @param frame_hash                The reference frame for the chest control.
    */
-  void setupFrameAndMode(ihmc_msgs::ChestTrajectoryRosMessage& msg,
+  void setupFrameAndMode(ihmc_msgs::ChestTrajectoryRosMessage &msg,
                          const int mode = ihmc_msgs::ChestTrajectoryRosMessage::OVERRIDE,
                          const int frame_hash = TOUGH_COMMON_NAMES::PELVIS_ZUP_FRAME_HASH);
 
@@ -107,7 +107,7 @@ public:
    * @param msg                       [output]
    * @param time                      Time of execution for the trajectory.
    */
-  void appendChestTrajectoryPoint(const geometry_msgs::Quaternion q_in, ihmc_msgs::ChestTrajectoryRosMessage& msg,
+  void appendChestTrajectoryPoint(const geometry_msgs::Quaternion q_in, ihmc_msgs::ChestTrajectoryRosMessage &msg,
                                   const double time = 2.0f);
 
   /**
@@ -115,7 +115,7 @@ public:
    *
    * @param orientation               Desired Quaternions for the chest control
    */
-  void getChestOrientation(geometry_msgs::Quaternion& orientation);
+  void getChestOrientation(geometry_msgs::Quaternion &orientation);
 
   /**
    * @brief Resets the chest orientation to default zero pose.
@@ -134,7 +134,7 @@ public:
    * @return true                     When Successful
    * @return false
    */
-  virtual bool getJointSpaceState(std::vector<double>& joints, RobotSide side) override;
+  virtual bool getJointSpaceState(std::vector<double> &joints, RobotSide side) override;
 
   /**
    * @brief Get the current positions of all joints of the side of the chest.
@@ -148,8 +148,8 @@ public:
    * @return true             When successful
    * @return false
    */
-  virtual bool getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side,
+  virtual bool getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side,
                                  std::string fixedFrame = TOUGH_COMMON_NAMES::WORLD_TF) override;
 };
 
-#endif  // CHEST_CONTROL_INTERFACE_H
+#endif // CHEST_CONTROL_INTERFACE_H

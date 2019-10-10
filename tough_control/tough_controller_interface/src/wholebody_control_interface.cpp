@@ -1,7 +1,7 @@
 #include "tough_controller_interface/wholebody_control_interface.h"
 
-WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle& nh)
-  : ToughControlInterface(nh), chestController_(nh), armController_(nh)
+WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle &nh)
+    : ToughControlInterface(nh), chestController_(nh), armController_(nh)
 {
   m_wholebodyPub = nh_.advertise<ihmc_msgs::WholeBodyTrajectoryRosMessage>(
       control_topic_prefix_ + TOUGH_COMMON_NAMES::WHOLEBODY_TRAJECTORY_TOPIC, 10, true);
@@ -11,7 +11,7 @@ WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle& nh)
   rd_->getChestJointNames(chest_joint_names_);
 }
 
-bool WholebodyControlInterface::getJointSpaceState(std::vector<double>& joints, RobotSide side)
+bool WholebodyControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)
 {
   joints.clear();
   state_informer_->getJointPositions(joints);
@@ -19,17 +19,17 @@ bool WholebodyControlInterface::getJointSpaceState(std::vector<double>& joints, 
   return !joints.empty();
 }
 
-bool WholebodyControlInterface::getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side, std::string fixedFrame)
+bool WholebodyControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
 {
   return state_informer_->getCurrentPose(rd_->getPelvisFrame(), pose, fixedFrame);
 }
 
-void WholebodyControlInterface::executeTrajectory(const moveit_msgs::RobotTrajectory& traj)
+void WholebodyControlInterface::executeTrajectory(const moveit_msgs::RobotTrajectory &traj)
 {
   return executeTrajectory(traj.joint_trajectory);
 }
 
-void WholebodyControlInterface::executeTrajectory(const trajectory_msgs::JointTrajectory& traj)
+void WholebodyControlInterface::executeTrajectory(const trajectory_msgs::JointTrajectory &traj)
 {
   ihmc_msgs::WholeBodyTrajectoryRosMessage wholeBodyMsg;
 
@@ -39,7 +39,7 @@ void WholebodyControlInterface::executeTrajectory(const trajectory_msgs::JointTr
   ros::Duration(0.1).sleep();
 }
 
-void WholebodyControlInterface::initializeWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg)
+void WholebodyControlInterface::initializeWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage &wholeBodyMsg)
 {
   // Setting unique id non zero for messages to be used
   wholeBodyMsg.unique_id = ros::Time::now().toSec();
@@ -74,20 +74,21 @@ void WholebodyControlInterface::initializeWholebodyMessage(ihmc_msgs::WholeBodyT
   wholeBodyMsg.left_hand_trajectory_message.unique_id = 0;
   wholeBodyMsg.right_hand_trajectory_message.unique_id = 0;
 
-  ihmc_msgs::FrameInformationRosMessage frameInfo;
-  frameInfo.data_reference_frame_id = rd_->getPelvisZUPFrameHash();
-  frameInfo.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash();
+  // not supported in 0.8.2
+  // ihmc_msgs::FrameInformationRosMessage frameInfo;
+  // frameInfo.data_reference_frame_id = rd_->getPelvisZUPFrameHash();
+  // frameInfo.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash();
 
-  wholeBodyMsg.chest_trajectory_message.frame_information = frameInfo;
-  wholeBodyMsg.left_foot_trajectory_message.frame_information = frameInfo;
-  wholeBodyMsg.right_foot_trajectory_message.frame_information = frameInfo;
-  wholeBodyMsg.pelvis_trajectory_message.frame_information = frameInfo;
-  wholeBodyMsg.left_hand_trajectory_message.frame_information = frameInfo;
-  wholeBodyMsg.right_hand_trajectory_message.frame_information = frameInfo;
+  // wholeBodyMsg.chest_trajectory_message.frame_information = frameInfo;
+  // wholeBodyMsg.left_foot_trajectory_message.frame_information = frameInfo;
+  // wholeBodyMsg.right_foot_trajectory_message.frame_information = frameInfo;
+  // wholeBodyMsg.pelvis_trajectory_message.frame_information = frameInfo;
+  // wholeBodyMsg.left_hand_trajectory_message.frame_information = frameInfo;
+  // wholeBodyMsg.right_hand_trajectory_message.frame_information = frameInfo;
 }
 
-void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTrajectory& traj,
-                                                ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg)
+void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTrajectory &traj,
+                                                ihmc_msgs::WholeBodyTrajectoryRosMessage &wholeBodyMsg)
 {
   long chest_start = -1, l_arm_start = -1, r_arm_start = -1;
 
@@ -170,8 +171,8 @@ void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTraj
   }
 }
 
-bool WholebodyControlInterface::validateJointSequenceInTrajectory(const std::vector<std::string>& traj_joint_names,
-                                                                  const std::vector<std::string>& joint_names,
+bool WholebodyControlInterface::validateJointSequenceInTrajectory(const std::vector<std::string> &traj_joint_names,
+                                                                  const std::vector<std::string> &joint_names,
                                                                   long start)
 {
   for (auto joint_name_it = joint_names.begin(); joint_name_it != joint_names.end(); ++joint_name_it, ++start)

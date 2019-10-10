@@ -10,7 +10,7 @@ ChestControlInterface::ChestControlInterface(ros::NodeHandle nh) : ToughControlI
       nh_.advertise<ihmc_msgs::GoHomeRosMessage>(control_topic_prefix_ + TOUGH_COMMON_NAMES::GO_HOME_TOPIC, 1, true);
   rd_->getChestJointNames(chestJointNames_);
   chestJointNumbers_.resize(chestJointNames_.size());
-  for (auto&& joint : chestJointNames_)
+  for (auto &&joint : chestJointNames_)
   {
     chestJointNumbers_.push_back(state_informer_->getJointNumber(joint));
   }
@@ -34,32 +34,34 @@ void ChestControlInterface::controlChest(const float roll, const float pitch, co
 void ChestControlInterface::controlChest(const geometry_msgs::Quaternion quat, const float time, int execution_mode)
 {
   ihmc_msgs::ChestTrajectoryRosMessage msg;
-  generateMessage(quat, time, execution_mode, msg);
+  geometry_msgs::Quaternion q = quat;
+  generateMessage(q, time, execution_mode, msg);
 
   // publish the message
   chestTrajPublisher_.publish(msg);
 }
 
-void ChestControlInterface::executeMessage(const ihmc_msgs::ChestTrajectoryRosMessage& msg)
+void ChestControlInterface::executeMessage(const ihmc_msgs::ChestTrajectoryRosMessage &msg)
 {
   chestTrajPublisher_.publish(msg);
 }
 
-void ChestControlInterface::setupFrameAndMode(ihmc_msgs::ChestTrajectoryRosMessage& msg, const int mode,
+void ChestControlInterface::setupFrameAndMode(ihmc_msgs::ChestTrajectoryRosMessage &msg, const int mode,
                                               const int frame_hash)
 {
   msg.unique_id = ChestControlInterface::id_++;
   msg.execution_mode = mode;
-
-  ihmc_msgs::FrameInformationRosMessage reference_frame;
-  reference_frame.trajectory_reference_frame_id = frame_hash;
-  reference_frame.data_reference_frame_id = frame_hash;
-  msg.frame_information = reference_frame;
+  ROS_INFO("Frame cannot be set in version 0.8.2");
+  // ihmc_msgs::FrameInformationRosMessage reference_frame;
+  // reference_frame.trajectory_reference_frame_id = frame_hash;
+  // reference_frame.data_reference_frame_id = frame_hash;
+  // msg.frame_information = reference_frame;
 }
 
-void ChestControlInterface::appendChestTrajectoryPoint(const geometry_msgs::Quaternion q_in,
-                                                       ihmc_msgs::ChestTrajectoryRosMessage& msg, const double time)
+void ChestControlInterface::appendChestTrajectoryPoint(geometry_msgs::Quaternion q_in,
+                                                       ihmc_msgs::ChestTrajectoryRosMessage &msg, const double time)
 {
+  state_informer_->transformQuaternion(q_in, q_in, rd_->getPelvisFrame(), rd_->getWorldFrame());
   ihmc_msgs::SO3TrajectoryPointRosMessage point;
   point.orientation.x = q_in.x;
   point.orientation.y = q_in.y;
@@ -70,30 +72,36 @@ void ChestControlInterface::appendChestTrajectoryPoint(const geometry_msgs::Quat
   msg.taskspace_trajectory_points.push_back(point);
 }
 
-void ChestControlInterface::generateMessage(const geometry_msgs::Quaternion& quat, const float time,
-                                            const int execution_mode, ihmc_msgs::ChestTrajectoryRosMessage& msg)
+void ChestControlInterface::generateMessage(geometry_msgs::Quaternion &quat, const float time,
+                                            const int execution_mode, ihmc_msgs::ChestTrajectoryRosMessage &msg)
 {
   setupFrameAndMode(msg, execution_mode);
   appendChestTrajectoryPoint(quat, msg, time);
 }
 
 void ChestControlInterface::generateMessage(
-    const std::vector<ihmc_msgs::SO3TrajectoryPointRosMessage>& chest_trajectory, const int execution_mode,
-    ihmc_msgs::ChestTrajectoryRosMessage& msg)
+    std::vector<ihmc_msgs::SO3TrajectoryPointRosMessage> &chest_trajectory, const int execution_mode,
+    ihmc_msgs::ChestTrajectoryRosMessage &msg)
 {
   msg.unique_id = ChestControlInterface::id_++;
   msg.execution_mode = execution_mode;
 
-  ihmc_msgs::FrameInformationRosMessage reference_frame;
-  reference_frame.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash();  // Pelvis frame
-  reference_frame.data_reference_frame_id = rd_->getPelvisZUPFrameHash();        // Pelvis frame
+  // not supported in 0.8.2
+  // ihmc_msgs::FrameInformationRosMessage reference_frame;
+  // reference_frame.trajectory_reference_frame_id = rd_->getPelvisZUPFrameHash(); // Pelvis frame
+  // reference_frame.data_reference_frame_id = rd_->getPelvisZUPFrameHash();       // Pelvis frame
 
-  msg.frame_information = reference_frame;
+  // msg.frame_information = reference_frame;
+  for (auto &traj_point : chest_trajectory)
+  {
+    state_informer_->transformQuaternion(traj_point.orientation, traj_point.orientation, rd_->getPelvisFrame(), rd_->getWorldFrame());
+  }
+
   msg.taskspace_trajectory_points.resize(chest_trajectory.size());
   msg.taskspace_trajectory_points = chest_trajectory;
 }
 
-void ChestControlInterface::getChestOrientation(geometry_msgs::Quaternion& orientation)
+void ChestControlInterface::getChestOrientation(geometry_msgs::Quaternion &orientation)
 {
   geometry_msgs::Pose chest_pose;
   state_informer_->getCurrentPose(rd_->getTorsoFrame(), chest_pose, rd_->getPelvisFrame());
@@ -110,16 +118,16 @@ void ChestControlInterface::resetPose(float time)
   ros::Duration(0.5).sleep();
 }
 
-bool ChestControlInterface::getJointSpaceState(std::vector<double>& joints, RobotSide side)
+bool ChestControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)
 {
   joints.resize(chestJointNames_.size());
-  for (auto&& jointNumber : chestJointNumbers_)
+  for (auto &&jointNumber : chestJointNumbers_)
   {
     joints.push_back(state_informer_->getJointPosition(jointNumber));
   }
 }
 
-bool ChestControlInterface::getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side, std::string fixedFrame)
+bool ChestControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
 {
   return state_informer_->getCurrentPose(rd_->getTorsoFrame(), pose, fixedFrame);
 }

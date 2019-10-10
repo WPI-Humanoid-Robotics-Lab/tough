@@ -3,10 +3,30 @@
 #include <iostream>
 #include <ros/ros.h>
 
+geometry_msgs::Vector3 pointToVector(const geometry_msgs::Point in)
+{
+  geometry_msgs::Vector3 out;
+  out.x = in.x;
+  out.y = in.y;
+  out.z = in.z;
+
+  return out;
+}
+
+geometry_msgs::Point vectorToPoint(const geometry_msgs::Vector3 in)
+{
+  geometry_msgs::Point out;
+  out.x = in.x;
+  out.y = in.y;
+  out.z = in.z;
+
+  return out;
+}
+
 int RobotWalker::id = 1;
 
 RobotWalker::RobotWalker(ros::NodeHandle nh, double InTransferTime, double InSwingTime, int InMode, double swingHeight)
-  : nh_(nh)
+    : nh_(nh)
 {
   using namespace TOUGH_COMMON_NAMES;
   current_state_ = RobotStateInformer::getRobotStateInformer(nh_);
@@ -20,7 +40,7 @@ RobotWalker::RobotWalker(ros::NodeHandle nh, double InTransferTime, double InSwi
   this->nudgestep_pub_ =
       nh_.advertise<ihmc_msgs::FootTrajectoryRosMessage>(control_prefix + FOOTSTEP_TRAJECTORY_TOPIC, 1, true);
   this->loadeff_pub =
-      nh_.advertise<ihmc_msgs::FootLoadBearingRosMessage>(control_prefix + FOOTSTEP_LOAD_BEARING_TOPIC, 1, true);
+      nh_.advertise<ihmc_msgs::EndEffectorLoadBearingRosMessage>(control_prefix + FOOTSTEP_LOAD_BEARING_TOPIC, 1, true);
   this->abort_footsteps_pub_ =
       nh_.advertise<ihmc_msgs::AbortWalkingRosMessage>(control_prefix + ABORT_WALKING_TOPIC, 1, true);
   this->pause_walking_pub_ =
@@ -53,7 +73,7 @@ RobotWalker::~RobotWalker()
  * @brief RobotWalker::footstepStatusCB is a callback function that updates footstep status
  * @param msg
  */
-void RobotWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage& msg)
+void RobotWalker::footstepStatusCB(const ihmc_msgs::FootstepStatusRosMessage &msg)
 {
   if (msg.status == ihmc_msgs::FootstepStatusRosMessage::COMPLETED)
   {
@@ -71,12 +91,12 @@ void RobotWalker::pauseWalk(bool pause)
   pause_walking_pub_.publish(msg);
 }
 
-void RobotWalker::walkingStatusCB(const ihmc_msgs::WalkingStatusRosMessage& msg)
+void RobotWalker::walkingStatusCB(const ihmc_msgs::WalkingStatusRosMessage &msg)
 {
   isWalking_ = msg.status == ihmc_msgs::WalkingStatusRosMessage::STARTED;
 }
 // calls the footstep planner to plan path and walks to a 2D goal.
-bool RobotWalker::walkToGoal(const geometry_msgs::Pose2D& goal, bool waitForSteps)
+bool RobotWalker::walkToGoal(const geometry_msgs::Pose2D &goal, bool waitForSteps)
 {
   ihmc_msgs::FootstepDataListRosMessage list;
   initializeFootstepDataListRosMessage(list);
@@ -95,7 +115,7 @@ bool RobotWalker::walkToGoal(const geometry_msgs::Pose2D& goal, bool waitForStep
   return false;
 }
 
-void RobotWalker::stepAtPose(const geometry_msgs::Pose& goal, const RobotSide side, bool waitForSteps, const bool queue,
+void RobotWalker::stepAtPose(const geometry_msgs::Pose &goal, const RobotSide side, bool waitForSteps, const bool queue,
                              const std::string refFrame)
 {
   ihmc_msgs::FootstepDataListRosMessage list;
@@ -155,7 +175,7 @@ bool RobotWalker::walkNStepsWRTPelvis(const int numSteps, const float xOffset, f
 }
 
 // walks predefined steps which could have varying step length and step widths. This is defined wrt World frame.
-bool RobotWalker::walkPreComputedSteps(const std::vector<float>& xOffset, const std::vector<float>& yOffset,
+bool RobotWalker::walkPreComputedSteps(const std::vector<float> &xOffset, const std::vector<float> &yOffset,
                                        const RobotSide startLeg)
 {
   ihmc_msgs::FootstepDataListRosMessage list;
@@ -180,7 +200,7 @@ bool RobotWalker::walkPreComputedSteps(const std::vector<float>& xOffset, const 
 }
 
 // walks predefined steps which could have varying step length and step widths. This is defined wrt Pelvis frame.
-bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float>& xOffset, const std::vector<float>& yOffset,
+bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float> &xOffset, const std::vector<float> &yOffset,
                                             const RobotSide startLeg)
 {
   ihmc_msgs::FootstepDataListRosMessage list;
@@ -202,7 +222,10 @@ bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float>& xOffset, c
     getCurrentStep(side, *current);
     side = (RobotSide)!side;
 
-    currentWorldLocation = current->location;
+    currentWorldLocation.x = current->location.x;
+    currentWorldLocation.y = current->location.y;
+    currentWorldLocation.z = current->location.z;
+
     current_state_->transformPoint(currentWorldLocation, currentPelvisLocation, TOUGH_COMMON_NAMES::WORLD_TF,
                                    rd_->getPelvisFrame());
 
@@ -210,7 +233,10 @@ bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float>& xOffset, c
     currentPelvisLocation.y += yOffset.at(m - 1);
     current_state_->transformPoint(currentPelvisLocation, currentWorldLocation, rd_->getPelvisFrame(),
                                    TOUGH_COMMON_NAMES::WORLD_TF);
-    newFootStep->location = currentWorldLocation;
+
+    newFootStep->location.x = currentWorldLocation.x;
+    newFootStep->location.y = currentWorldLocation.y;
+
     newFootStep->location.z = current->location.z;
     newFootStep->orientation = current->orientation;
     newFootStep->robot_side = current->robot_side;
@@ -222,7 +248,7 @@ bool RobotWalker::walkLocalPreComputedSteps(const std::vector<float>& xOffset, c
   return true;
 }
 
-bool RobotWalker::walkGivenSteps(const ihmc_msgs::FootstepDataListRosMessage& list, const bool waitForSteps)
+bool RobotWalker::walkGivenSteps(const ihmc_msgs::FootstepDataListRosMessage &list, const bool waitForSteps)
 {
   this->footsteps_pub_.publish(list);
   this->previous_message_id_ = RobotWalker::id++;
@@ -254,7 +280,7 @@ bool RobotWalker::raiseLeg(RobotSide side, float height, float time)
 }
 
 bool RobotWalker::nudgeFoot(const RobotSide side, const float x_offset, const float y_offset,
-                            const geometry_msgs::Quaternion* orientation, const float time)
+                            const geometry_msgs::Quaternion *orientation, const float time)
 {
   ihmc_msgs::FootTrajectoryRosMessage foot;
   initializeFootTrajectoryRosMessage(side, foot);
@@ -263,7 +289,8 @@ bool RobotWalker::nudgeFoot(const RobotSide side, const float x_offset, const fl
   getCurrentStep(side, *current);
 
   geometry_msgs::PointStamped pt_in, pt_out;
-  pt_in.point = current->location;
+  pt_in.point = vectorToPoint(current->location);
+
   pt_in.header.frame_id = TOUGH_COMMON_NAMES::WORLD_TF;
   current_state_->transformPoint(pt_in, pt_out, rd_->getPelvisFrame());
 
@@ -274,7 +301,9 @@ bool RobotWalker::nudgeFoot(const RobotSide side, const float x_offset, const fl
   current_state_->transformPoint(pt_out, pt_out);
 
   // add to data
-  foot.taskspace_trajectory_points.begin()->position = pt_out.point;
+  foot.taskspace_trajectory_points.begin()->position.x = pt_out.point.x;
+  foot.taskspace_trajectory_points.begin()->position.y = pt_out.point.y;
+  foot.taskspace_trajectory_points.begin()->position.z = pt_out.point.z;
   if (orientation)
   {
     foot.taskspace_trajectory_points.begin()->orientation = *orientation;
@@ -292,7 +321,7 @@ bool RobotWalker::nudgeFoot(const RobotSide side, const float x_offset, const fl
   return true;
 }
 
-bool RobotWalker::moveFoot(const RobotSide side, const std::vector<geometry_msgs::Pose>& foot_goal_poses,
+bool RobotWalker::moveFoot(const RobotSide side, const std::vector<geometry_msgs::Pose> &foot_goal_poses,
                            const float time)
 {
   ihmc_msgs::FootTrajectoryRosMessage foot;
@@ -305,7 +334,7 @@ bool RobotWalker::moveFoot(const RobotSide side, const std::vector<geometry_msgs
 
   for (size_t i = 0; i < foot_goal_poses.size(); i++)
   {
-    foot.taskspace_trajectory_points[i].position = foot_goal_poses[i].position;
+    foot.taskspace_trajectory_points[i].position = pointToVector(foot_goal_poses[i].position);
     foot.taskspace_trajectory_points[i].orientation = foot_goal_poses[i].orientation;
     foot.taskspace_trajectory_points[i].unique_id = id;
     foot.taskspace_trajectory_points[i].time = time / (float)foot_goal_poses.size() * (i + 1);
@@ -316,9 +345,9 @@ bool RobotWalker::moveFoot(const RobotSide side, const std::vector<geometry_msgs
   return true;
 }
 
-bool RobotWalker::moveFoot(const RobotSide side, const geometry_msgs::Pose& foot_goal_pose, const float time)
+bool RobotWalker::moveFoot(const RobotSide side, const geometry_msgs::Pose &foot_goal_pose, const float time)
 {
-  std::vector<geometry_msgs::Pose> temp = { foot_goal_pose };
+  std::vector<geometry_msgs::Pose> temp = {foot_goal_pose};
   return moveFoot(side, temp, time);
 }
 
@@ -333,7 +362,7 @@ bool RobotWalker::curlLeg(RobotSide side, float radius, float time)
   // converting point in pelvis frame
   geometry_msgs::PointStamped pt_in, pt_out;
   geometry_msgs::Pose final;
-  pt_in.point = current->location;
+  pt_in.point = vectorToPoint(current->location);
   pt_in.header.frame_id = TOUGH_COMMON_NAMES::WORLD_TF;
   current_state_->transformPoint(pt_in, pt_out, rd_->getPelvisFrame());
 
@@ -350,7 +379,10 @@ bool RobotWalker::curlLeg(RobotSide side, float radius, float time)
   current_state_->transformPose(final, final, rd_->getPelvisFrame());
 
   // get current position
-  foot.taskspace_trajectory_points.begin()->position = final.position;
+  foot.taskspace_trajectory_points.begin()->position.x = final.position.x;
+  foot.taskspace_trajectory_points.begin()->position.y = final.position.y;
+  foot.taskspace_trajectory_points.begin()->position.z = final.position.z;
+
   foot.taskspace_trajectory_points.begin()->orientation = final.orientation;
   foot.taskspace_trajectory_points.begin()->unique_id = id;
   foot.taskspace_trajectory_points.begin()->time = time;
@@ -365,7 +397,7 @@ bool RobotWalker::placeLeg(RobotSide side, float offset, float time)
 }
 
 // Calls the footstep planner service to get footsteps to reach goal
-bool RobotWalker::getFootstep(const geometry_msgs::Pose2D& goal, ihmc_msgs::FootstepDataListRosMessage& list)
+bool RobotWalker::getFootstep(const geometry_msgs::Pose2D &goal, ihmc_msgs::FootstepDataListRosMessage &list)
 {
   /// @todo fix the robot pose, if the legs are not together before walking.
 
@@ -382,7 +414,7 @@ bool RobotWalker::getFootstep(const geometry_msgs::Pose2D& goal, ihmc_msgs::Foot
 
   start.x = (leftFootPose.position.x + rightFootPose.position.x) / 2.0f;
   start.y = (leftFootPose.position.y + rightFootPose.position.y) /
-            2.0f;  // This is required to offset the left foot to get center of the
+            2.0f; // This is required to offset the left foot to get center of the
   //    std::cout<< "Start Position  x = " << start.x << "  y = " << start.y<<std::endl;
 
   start.theta = tf::getYaw(rightFootPose.orientation);
@@ -435,13 +467,13 @@ double RobotWalker::getSwingHeight() const
 
 // Get starting location of the foot
 
-void RobotWalker::getCurrentStep(int side, ihmc_msgs::FootstepDataRosMessage& foot, const std::string base_frame)
+void RobotWalker::getCurrentStep(int side, ihmc_msgs::FootstepDataRosMessage &foot, const std::string base_frame)
 {
   std_msgs::String foot_frame = side == LEFT ? left_foot_frame_ : right_foot_frame_;
 
   geometry_msgs::Pose footPose;
   current_state_->getCurrentPose(foot_frame.data, footPose, base_frame);
-  foot.location = footPose.position;
+  foot.location = pointToVector(footPose.position);
   foot.location.z -= rd_->getFootFrameOffset();
   foot.orientation = footPose.orientation;
   foot.robot_side = side;
@@ -463,7 +495,7 @@ ihmc_msgs::FootstepDataRosMessage::Ptr RobotWalker::getOffsetStep(int side, floa
   return next;
 }
 
-ihmc_msgs::FootstepDataRosMessage::Ptr RobotWalker::getOffsetStep(const RobotSide side, const geometry_msgs::Pose& goal,
+ihmc_msgs::FootstepDataRosMessage::Ptr RobotWalker::getOffsetStep(const RobotSide side, const geometry_msgs::Pose &goal,
                                                                   const std::string base_frame)
 {
   ihmc_msgs::FootstepDataRosMessage::Ptr next(new ihmc_msgs::FootstepDataRosMessage());
@@ -471,7 +503,7 @@ ihmc_msgs::FootstepDataRosMessage::Ptr RobotWalker::getOffsetStep(const RobotSid
   this->getCurrentStep(side, *next, base_frame);
   geometry_msgs::Pose goal_out;
   current_state_->transformPose(goal, goal_out, base_frame);
-  next->location = goal_out.position;
+  next->location = pointToVector(goal_out.position);
   next->orientation = goal_out.orientation;
   next->swing_height = swing_height_;
   return next;
@@ -490,8 +522,10 @@ ihmc_msgs::FootstepDataRosMessage::Ptr RobotWalker::getOffsetStepWRTPelvis(int s
   nextFootPose.position.y = next->location.y + y;
   nextFootPose.position.z = next->location.z;
 
+  geometry_msgs::Point nextLocation = vectorToPoint(next->location);
   // tranform back the point and quaternion to world coordinates
-  current_state_->transformPoint(nextFootPose.position, next->location, rd_->getPelvisFrame(), rd_->getWorldFrame());
+  current_state_->transformPoint(nextFootPose.position, nextLocation, rd_->getPelvisFrame(), rd_->getWorldFrame());
+  next->location = pointToVector(nextLocation);
   current_state_->transformQuaternion(next->orientation, next->orientation, rd_->getPelvisFrame(),
                                       rd_->getWorldFrame());
 
@@ -503,10 +537,10 @@ ihmc_msgs::FootstepDataRosMessage::Ptr RobotWalker::getOffsetStepWRTPelvis(int s
 
 void RobotWalker::loadEEF(RobotSide side, EE_LOADING load)
 {
-  ihmc_msgs::FootLoadBearingRosMessage msg;
+  ihmc_msgs::EndEffectorLoadBearingRosMessage msg;
   msg.unique_id = 1;
   msg.robot_side = side;
-  msg.request = (int)load;  // 0 -load 1 -unload
+  msg.request = (int)load; // 0 -load 1 -unload
   loadeff_pub.publish(msg);
 }
 
@@ -523,7 +557,7 @@ bool RobotWalker::walkRotate(float angle, bool waitForSteps)
   return walkToGoal(goal, waitForSteps);
 }
 
-bool RobotWalker::climbStair(const std::vector<float>& xOffset, const std::vector<float>& zOffset,
+bool RobotWalker::climbStair(const std::vector<float> &xOffset, const std::vector<float> &zOffset,
                              const RobotSide startLeg)
 {
   // This function was used for SRC. This should be generalized for any application.
@@ -547,7 +581,7 @@ bool RobotWalker::climbStair(const std::vector<float>& xOffset, const std::vecto
   {
     getCurrentStep(side, *current);
     side = (RobotSide)!side;
-    currentWorldLocation = current->location;
+    currentWorldLocation = vectorToPoint(current->location);
 
     current_state_->transformPoint(currentWorldLocation, currentPelvisLocation, TOUGH_COMMON_NAMES::WORLD_TF,
                                    rd_->getPelvisFrame());
@@ -556,12 +590,15 @@ bool RobotWalker::climbStair(const std::vector<float>& xOffset, const std::vecto
 
     current_state_->transformPoint(currentPelvisLocation, currentWorldLocation, rd_->getPelvisFrame(),
                                    TOUGH_COMMON_NAMES::WORLD_TF);
-    newFootStep->location = currentWorldLocation;
+
+    newFootStep->location = pointToVector(currentWorldLocation);
     newFootStep->orientation = current->orientation;
     newFootStep->robot_side = current->robot_side;
     newFootStep->trajectory_type = ihmc_msgs::FootstepDataRosMessage::OBSTACLE_CLEARANCE;
 
-    currentWorldLocation = current->location;
+    currentWorldLocation.x = current->location.x;
+    currentWorldLocation.y = current->location.y;
+    currentWorldLocation.z = current->location.z;
 
     if (m > 2)
     {
@@ -572,11 +609,16 @@ bool RobotWalker::climbStair(const std::vector<float>& xOffset, const std::vecto
       current_state_->transformPoint(currentPelvisLocation, currentWorldLocation, rd_->getPelvisFrame(),
                                      TOUGH_COMMON_NAMES::WORLD_TF);
 
-      newFootStep->position_waypoints.push_back(currentWorldLocation);
-      newFootStep->trajectory_type = ihmc_msgs::FootstepDataRosMessage::CUSTOM;
+      newFootStep->location.x = currentWorldLocation.x;
+      newFootStep->location.y = currentWorldLocation.y;
+      newFootStep->location.z = currentWorldLocation.z;
+      newFootStep->trajectory_type = ihmc_msgs::FootstepDataRosMessage::DEFAULT;
     }
 
-    newFootStep->position_waypoints.push_back(currentWorldLocation);
+    newFootStep->location.x = currentWorldLocation.x;
+    newFootStep->location.y = currentWorldLocation.y;
+    newFootStep->location.z = currentWorldLocation.z;
+
     list.footstep_data_list.push_back(*newFootStep);
   }
 
@@ -616,7 +658,7 @@ void RobotWalker::alignFeet(const RobotSide side)
   }
 }
 
-bool RobotWalker::areFeetAligned(const geometry_msgs::Pose& footPose)
+bool RobotWalker::areFeetAligned(const geometry_msgs::Pose &footPose)
 {
   // If the robot is not in double support, it does not make any sense in checking the alignment
   if (current_state_->isRobotInDoubleSupport())
@@ -626,12 +668,12 @@ bool RobotWalker::areFeetAligned(const geometry_msgs::Pose& footPose)
   return false;
 }
 
-bool RobotWalker::isFootPosAligned(const geometry_msgs::Point& p1)
+bool RobotWalker::isFootPosAligned(const geometry_msgs::Point &p1)
 {
   return (fabs(p1.x) < FOOT_ALGMT_ERR_THRESHOLD && fabs(p1.y) < (FOOT_SEPARATION + FOOT_ALGMT_ERR_THRESHOLD));
 }
 
-bool RobotWalker::isFootRotAligned(const geometry_msgs::Quaternion& q1)
+bool RobotWalker::isFootRotAligned(const geometry_msgs::Quaternion &q1)
 {
   return (fabs(q1.x) > FOOT_ROT_ERR_THRESHOLD || fabs(q1.y) > FOOT_ROT_ERR_THRESHOLD ||
           fabs(q1.z) > FOOT_ROT_ERR_THRESHOLD || fabs(q1.w) > FOOT_ROT_ERR_THRESHOLD);

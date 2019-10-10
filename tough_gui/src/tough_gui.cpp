@@ -13,7 +13,7 @@
  * This class creates the GUI using rviz APIs.
  */
 
-ToughGUI::ToughGUI(QWidget* parent) : QMainWindow(parent), ui(new Ui::ToughGUI), it_(nh_)
+ToughGUI::ToughGUI(QWidget *parent) : QMainWindow(parent), ui(new Ui::ToughGUI), it_(nh_)
 {
   /**
    * Set up the QT related UI components.
@@ -93,7 +93,7 @@ void ToughGUI::initVariables()
   {
     flipImage_ = boost::lexical_cast<bool>(configfile.currentTopics["flip"]);
   }
-  catch (const boost::bad_lexical_cast& e)
+  catch (const boost::bad_lexical_cast &e)
   {
     std::cerr << "flip parameter is incorrectly set in config.ini. setting flip to false" << std::endl;
   }
@@ -119,19 +119,19 @@ void ToughGUI::initVariables()
   joints.insert(joints.end(), chestJointNames_.begin(), chestJointNames_.end());
 
   // the values of labels and sliders is hardcoded to match with jointnames at the same index
-  std::vector<QLabel*> jointLabels = { ui->lblLeftShoulderPitch, ui->lblLeftShoulderRoll,   ui->lblLeftShoulderYaw,
-                                       ui->lblLeftElbowPitch,    ui->lblLeftForearmYaw,     ui->lblLeftWristRoll,
-                                       ui->lblLeftWristPitch,    ui->lblRightShoulderPitch, ui->lblRightShoulderRoll,
-                                       ui->lblRightShoulderYaw,  ui->lblRightElbowPitch,    ui->lblRightForearmYaw,
-                                       ui->lblRightWristRoll,    ui->lblRightWristPitch,    ui->lblChestYaw,
-                                       ui->lblChestPitch,        ui->lblChestRoll };
+  std::vector<QLabel *> jointLabels = {ui->lblLeftShoulderPitch, ui->lblLeftShoulderRoll, ui->lblLeftShoulderYaw,
+                                       ui->lblLeftElbowPitch, ui->lblLeftForearmYaw, ui->lblLeftWristRoll,
+                                       ui->lblLeftWristPitch, ui->lblRightShoulderPitch, ui->lblRightShoulderRoll,
+                                       ui->lblRightShoulderYaw, ui->lblRightElbowPitch, ui->lblRightForearmYaw,
+                                       ui->lblRightWristRoll, ui->lblRightWristPitch, ui->lblChestYaw,
+                                       ui->lblChestPitch, ui->lblChestRoll};
 
-  std::vector<QSlider*> jointSliders = { ui->sliderShoulderPitch, ui->sliderShoulderRoll,  ui->sliderShoulderYaw,
-                                         ui->sliderElbow,         ui->sliderWristYaw,      ui->sliderWristRoll,
-                                         ui->sliderWristPitch,    ui->sliderShoulderPitch, ui->sliderShoulderRoll,
-                                         ui->sliderShoulderYaw,   ui->sliderElbow,         ui->sliderWristYaw,
-                                         ui->sliderWristRoll,     ui->sliderWristPitch,      ui->sliderChestYaw,
-                                         ui->sliderChestPitch,    ui->sliderChestRoll };
+  std::vector<QSlider *> jointSliders = {ui->sliderShoulderPitch, ui->sliderShoulderRoll, ui->sliderShoulderYaw,
+                                         ui->sliderElbow, ui->sliderWristYaw, ui->sliderWristRoll,
+                                         ui->sliderWristPitch, ui->sliderShoulderPitch, ui->sliderShoulderRoll,
+                                         ui->sliderShoulderYaw, ui->sliderElbow, ui->sliderWristYaw,
+                                         ui->sliderWristRoll, ui->sliderWristPitch, ui->sliderChestYaw,
+                                         ui->sliderChestPitch, ui->sliderChestRoll};
 
   assert(joints.size() == jointLabels.size() && "joints and jointlabels must be of same size");
 
@@ -144,12 +144,12 @@ void ToughGUI::initVariables()
   // moveArmCommand is a flag used to check if user intends to move arm or just publish a point
   moveArmCommand_ = false;
 
-  mode_map = { { "BASIC", GripperControlInterface::GRIPPER_MODES::BASIC },
-               { "PINCH", GripperControlInterface::GRIPPER_MODES::PINCH },
-               { "WIDE", GripperControlInterface::GRIPPER_MODES::WIDE },
-               { "SCISSOR", GripperControlInterface::GRIPPER_MODES::SCISSOR } };
+  mode_map = {{"BASIC", GripperControlInterface::GRIPPER_MODES::BASIC},
+              {"PINCH", GripperControlInterface::GRIPPER_MODES::PINCH},
+              {"WIDE", GripperControlInterface::GRIPPER_MODES::WIDE},
+              {"SCISSOR", GripperControlInterface::GRIPPER_MODES::SCISSOR}};
 
-  prev_mode_map = { { "BASIC", 0 }, { "PINCH", 1 }, { "WIDE", 2 }, { "SCISSOR", 3 } };
+  prev_mode_map = {{"BASIC", 0}, {"PINCH", 1}, {"WIDE", 2}, {"SCISSOR", 3}};
 
   resetPointcloudPub_ = nh_.advertise<std_msgs::Empty>(resetPointcloudTopic_.toStdString(), 1, true);
   pausePointcloud_ = nh_.advertise<std_msgs::Bool>(pausePointcloudTopic_.toStdString(), 1, true);
@@ -164,7 +164,7 @@ void ToughGUI::initVariables()
   comMarker.scale.x = 0.05;
   comMarker.scale.y = 0.05;
   comMarker.scale.z = 0.05;
-  comMarker.color.a = 1.0;  // Don't forget to set the alpha!
+  comMarker.color.a = 1.0; // Don't forget to set the alpha!
   comMarker.color.r = 0.0;
   comMarker.color.g = 1.0;
   comMarker.color.b = 0.0;
@@ -184,7 +184,7 @@ void ToughGUI::initActionsConnections()
    */
   status_label_ = new QLabel("");
   statusBar()->addPermanentWidget(status_label_, 1);
-  connect(manager_, SIGNAL(statusUpdate(const QString&)), status_label_, SLOT(setText(const QString&)));
+  connect(manager_, SIGNAL(statusUpdate(const QString &)), status_label_, SLOT(setText(const QString &)));
 
   /**
    * Setup Signals and slots for different buttons/sliders in UI.
@@ -379,7 +379,7 @@ void ToughGUI::initDisplayWidgets()
   ui->lblAxes->setPixmap(QPixmap::fromImage(qImage));
   moveitDisplay_ = nullptr;
 }
-void ToughGUI::createFootstepDisplay(rviz::VisualizationManager* manager, rviz::VisualizationManager* map_manager)
+void ToughGUI::createFootstepDisplay(rviz::VisualizationManager *manager, rviz::VisualizationManager *map_manager)
 {
   footstepMarkersDisplay_ = map_manager->createDisplay("rviz/MarkerArray", "Footsteps", true);
   footstepMarkersDisplay_->subProp("Marker Topic")->setValue(footstepTopic_);
@@ -390,9 +390,9 @@ void ToughGUI::createFootstepDisplay(rviz::VisualizationManager* manager, rviz::
   footstepMarkersMainDisplay_->subProp("Queue Size")->setValue("10");
 }
 
-rviz::Display* ToughGUI::createWrenchDisplay(rviz::VisualizationManager* manager, const std::string& topic)
+rviz::Display *ToughGUI::createWrenchDisplay(rviz::VisualizationManager *manager, const std::string &topic)
 {
-  rviz::Display* display;
+  rviz::Display *display;
   display = manager->createDisplay("rviz/WrenchStamped", QString::number(qrand()), true);
   assert(display != NULL && "Could not create a display");
   display->subProp("Topic")->setValue(QString::fromStdString(topic));
@@ -414,12 +414,12 @@ void ToughGUI::createMoveitDisplay()
 
 void ToughGUI::deleteMoveitDisplay()
 {
-  rviz::Display* tempDisplay = moveitDisplay_;
+  rviz::Display *tempDisplay = moveitDisplay_;
   moveitDisplay_ = nullptr;
   delete tempDisplay;
 }
 
-void ToughGUI::toggleDisplay(rviz::Display* display, int state)
+void ToughGUI::toggleDisplay(rviz::Display *display, int state)
 {
   display->setEnabled(state == Qt::Checked);
 }
@@ -460,8 +460,8 @@ void ToughGUI::initJointLimits()
   // have same number of joints
   for (size_t i = 0; i < leftArmJointLimits_.size(); i++)
   {
-    leftArmJointLimits_[i] = { leftArmJointLimits_[i].first + 0.01, leftArmJointLimits_[i].second - 0.01 };
-    rightArmJointLimits_[i] = { rightArmJointLimits_[i].first + 0.01, rightArmJointLimits_[i].second - 0.01 };
+    leftArmJointLimits_[i] = {leftArmJointLimits_[i].first + 0.01, leftArmJointLimits_[i].second - 0.01};
+    rightArmJointLimits_[i] = {rightArmJointLimits_[i].first + 0.01, rightArmJointLimits_[i].second - 0.01};
   }
 }
 
@@ -654,7 +654,7 @@ void ToughGUI::getClickedPoint(const geometry_msgs::PointStamped::Ptr msg)
   moveArmCommand_ = false;
 }
 
-void ToughGUI::jointStateCallBack(const ros::TimerEvent& e)
+void ToughGUI::jointStateCallBack(const ros::TimerEvent &e)
 {
   static std::vector<std::string> jointNames;
   static std::vector<double> jointValues;
@@ -670,7 +670,7 @@ void ToughGUI::jointStateCallBack(const ros::TimerEvent& e)
     jointStateMap_[jointNames.at(i)] = jointValues.at(i);
     if (jointLabelMap_.count(jointNames.at(i)) > 0)
     {
-      QLabel* label = jointLabelMap_[jointNames.at(i)];
+      QLabel *label = jointLabelMap_[jointNames.at(i)];
       QString text;
       label->setText(text.sprintf("%.2f", jointValues.at(i)));
     }
@@ -697,27 +697,27 @@ void ToughGUI::updateJointStateSub(int tabID)
   //    jointStateSub_ = nh_.subscribe("/joint_states",1, &ValkyrieGUI::jointStateCallBack, this);
   switch (tabID)
   {
-    case 0:
-      getArmState();
-      getGripperState();
-      break;
-    case 1:
-      getArmState();
-      break;
-    case 2:
-      getGripperState();
-      break;
-    case 3:
-      getChestState();
-      break;
-    case 4:
-      getNeckState();
-      break;
-    case 5:
-      getPelvisState();
-      break;
-    default:
-      break;
+  case 0:
+    getArmState();
+    getGripperState();
+    break;
+  case 1:
+    getArmState();
+    break;
+  case 2:
+    getGripperState();
+    break;
+  case 3:
+    getChestState();
+    break;
+  case 4:
+    getNeckState();
+    break;
+  case 5:
+    getPelvisState();
+    break;
+  default:
+    break;
   }
 
   //    jointStateSub_.shutdown();
@@ -786,32 +786,34 @@ void ToughGUI::nudgeArm(int btnID)
   }
 
   currentState_->getCurrentPose(end_effector_frame_, end_effector_pose, rd_->getPelvisFrame());
-  end_effector_command.position = end_effector_pose.position;
+  end_effector_command.position.x = end_effector_pose.position.x;
+  end_effector_command.position.y = end_effector_pose.position.y;
+  end_effector_command.position.z = end_effector_pose.position.z;
   end_effector_command.orientation = end_effector_pose.orientation;
   end_effector_command.unique_id = 1;
 
   switch (btnID)
   {
-    case -2:  // down
-      end_effector_command.position.z -= 0.05;
-      break;
-    case -3:  // up
-      end_effector_command.position.z += 0.05;
-      break;
-    case -4:  // back
-      end_effector_command.position.x -= 0.05;
-      break;
-    case -7:  // front
-      end_effector_command.position.x += 0.05;
-      break;
-    case -5:  // left
-      end_effector_command.position.y += 0.05;
-      break;
-    case -6:  // right
-      end_effector_command.position.y -= 0.05;
-      break;
-    default:
-      return;
+  case -2: // down
+    end_effector_command.position.z -= 0.05;
+    break;
+  case -3: // up
+    end_effector_command.position.z += 0.05;
+    break;
+  case -4: // back
+    end_effector_command.position.x -= 0.05;
+    break;
+  case -7: // front
+    end_effector_command.position.x += 0.05;
+    break;
+  case -5: // left
+    end_effector_command.position.y += 0.05;
+    break;
+  case -6: // right
+    end_effector_command.position.y -= 0.05;
+    break;
+  default:
+    return;
   }
   armJointController_->moveArmInTaskSpaceMessage(side, end_effector_command, rd_->getPelvisZUPFrameHash());
 }
@@ -822,56 +824,56 @@ void ToughGUI::updateDisplay(int tabID)
   // 1 = map
   switch (tabID)
   {
-    case 0:
-      ui->chkBoxCoM->setEnabled(true);
-      ui->chkBoxFootForces->setEnabled(true);
-      ui->chkBoxFootsteps->setEnabled(true);
-      ui->chkBoxOctomap->setEnabled(true);
-      ui->chkBoxPointcloud->setEnabled(true);
-      ui->chkBoxWristForces->setEnabled(true);
-      // change current tool to interact when changing tabs
-      setCurrentTool(-2);
-      break;
-    case 1:
-      ui->chkBoxCoM->setEnabled(false);
-      ui->chkBoxFootForces->setEnabled(false);
-      ui->chkBoxFootsteps->setEnabled(true);
-      ui->chkBoxOctomap->setEnabled(false);
-      ui->chkBoxPointcloud->setEnabled(false);
-      ui->chkBoxWristForces->setEnabled(false);
-      // change current tool to interact when changing tabs
-      setCurrentTool(-2);
-      break;
-    default:
-      break;
+  case 0:
+    ui->chkBoxCoM->setEnabled(true);
+    ui->chkBoxFootForces->setEnabled(true);
+    ui->chkBoxFootsteps->setEnabled(true);
+    ui->chkBoxOctomap->setEnabled(true);
+    ui->chkBoxPointcloud->setEnabled(true);
+    ui->chkBoxWristForces->setEnabled(true);
+    // change current tool to interact when changing tabs
+    setCurrentTool(-2);
+    break;
+  case 1:
+    ui->chkBoxCoM->setEnabled(false);
+    ui->chkBoxFootForces->setEnabled(false);
+    ui->chkBoxFootsteps->setEnabled(true);
+    ui->chkBoxOctomap->setEnabled(false);
+    ui->chkBoxPointcloud->setEnabled(false);
+    ui->chkBoxWristForces->setEnabled(false);
+    // change current tool to interact when changing tabs
+    setCurrentTool(-2);
+    break;
+  default:
+    break;
   }
 }
 
-void ToughGUI::keyPressEvent(QKeyEvent* event)
+void ToughGUI::keyPressEvent(QKeyEvent *event)
 {
   switch (event->key())
   {
-    case Qt::Key_W:
-      closeGrippers();
-      ROS_INFO("key W pressed");
-      break;
-    case Qt::Key_A:
-      ROS_INFO("key A pressed");
-      break;
-    case Qt::Key_D:
-      ROS_INFO("key D pressed");
-      break;
-    case Qt::Key_S:
-      openGrippers();
-      ROS_INFO("key S pressed");
-      break;
-    default:
-      QWidget::keyPressEvent(event);
-      break;
+  case Qt::Key_W:
+    closeGrippers();
+    ROS_INFO("key W pressed");
+    break;
+  case Qt::Key_A:
+    ROS_INFO("key A pressed");
+    break;
+  case Qt::Key_D:
+    ROS_INFO("key D pressed");
+    break;
+  case Qt::Key_S:
+    openGrippers();
+    ROS_INFO("key S pressed");
+    break;
+  default:
+    QWidget::keyPressEvent(event);
+    break;
   }
 }
 
-void ToughGUI::liveVideoCallback(const sensor_msgs::ImageConstPtr& msg)
+void ToughGUI::liveVideoCallback(const sensor_msgs::ImageConstPtr &msg)
 {
   /**
    * Adding Image display opens up the image in a new window.
@@ -892,7 +894,7 @@ void ToughGUI::liveVideoCallback(const sensor_msgs::ImageConstPtr& msg)
       cv_ptr = cv_bridge::toCvCopy(msg, msg->encoding);
     }
   }
-  catch (cv_bridge::Exception& e)
+  catch (cv_bridge::Exception &e)
   {
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return;
@@ -901,10 +903,10 @@ void ToughGUI::liveVideoCallback(const sensor_msgs::ImageConstPtr& msg)
   setVideo(ui->liveVideoLabel, cv_ptr, is_rgb);
 }
 
-void ToughGUI::setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr, bool is_RGB)
+void ToughGUI::setVideo(QLabel *label, cv_bridge::CvImagePtr cv_ptr, bool is_RGB)
 {
   cv::Mat RGBImg;
-  QLabel* liveVideoLabel = label;
+  QLabel *liveVideoLabel = label;
 
   // To avoid auto expansion of QLabel,keep the video dimensions slightly less than the label dimension
   int height = liveVideoLabel->height() - 1;
@@ -927,15 +929,14 @@ void ToughGUI::setVideo(QLabel* label, cv_bridge::CvImagePtr cv_ptr, bool is_RGB
   if (flipImage_)
     cv::flip(RGBImg, RGBImg, -1);
   //  convert RGB image into QImage and publish that on the label for livevideo
-  QImage qImage_ = QImage((uchar*)RGBImg.data, RGBImg.cols, RGBImg.rows, RGBImg.cols * 3, QImage::Format_RGB888);
+  QImage qImage_ = QImage((uchar *)RGBImg.data, RGBImg.cols, RGBImg.rows, RGBImg.cols * 3, QImage::Format_RGB888);
   liveVideoLabel->setPixmap(QPixmap::fromImage(qImage_));
   liveVideoLabel->show();
 }
 
 void ToughGUI::updateGripperSide(int btnID)
 {
-  ui->cmbBoxGripMode->setCurrentIndex((ui->radioGripSideLeft->isChecked()) ? prev_mode_map[PREVIOUS_MODE_LEFT] :
-                                                                             prev_mode_map[PREVIOUS_MODE_RIGHT]);
+  ui->cmbBoxGripMode->setCurrentIndex((ui->radioGripSideLeft->isChecked()) ? prev_mode_map[PREVIOUS_MODE_LEFT] : prev_mode_map[PREVIOUS_MODE_RIGHT]);
 }
 
 void ToughGUI::setMode()
@@ -1071,20 +1072,20 @@ void ToughGUI::changeToolButtonStatus(int btnID)
 
   switch (btnID)
   {
-    case -2:
-      ui->btnRvizInteract->setFlat(false);
-      break;
-    case -3:
-      ui->btnRvizMeasure->setFlat(false);
-      break;
-    case -4:
-      ui->btnRvizPoseEstimate->setFlat(false);
-      break;
-    case -5:
-      ui->btnRvizNavGoal->setFlat(false);
-      break;
-    case -6:
-      ui->btnRvizPublishPoint->setFlat(false);
+  case -2:
+    ui->btnRvizInteract->setFlat(false);
+    break;
+  case -3:
+    ui->btnRvizMeasure->setFlat(false);
+    break;
+  case -4:
+    ui->btnRvizPoseEstimate->setFlat(false);
+    break;
+  case -5:
+    ui->btnRvizNavGoal->setFlat(false);
+    break;
+  case -6:
+    ui->btnRvizPublishPoint->setFlat(false);
   }
 }
 
