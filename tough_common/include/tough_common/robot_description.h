@@ -59,79 +59,79 @@ public:
   /**
    * @brief Get the Pelvis Frame name
    *
-   * @return const std::string
+   * @return std::string
    */
-  const std::string getPelvisFrame() const;
+  std::string getPelvisFrame() const;
 
   /**
    * @brief Get the World Frame name
    *
-   * @return const std::string
+   * @return std::string
    */
-  const std::string getWorldFrame() const;
+  std::string getWorldFrame() const;
 
   /**
    * @brief Get the Torso Frame name
    *
-   * @return const std::string
+   * @return std::string
    */
-  const std::string getTorsoFrame() const;
+  std::string getTorsoFrame() const;
 
   /**
    * @brief Get the Left Foot Frame Name
    *
-   * @return const std::string
+   * @return std::string
    */
-  const std::string getLeftFootFrameName() const;
+  std::string getLeftFootFrameName() const;
 
   /**
    * @brief Get the Right Foot Frame Name
    *
-   * @return const std::string
+   * @return std::string
    */
-  const std::string getRightFootFrameName() const;
+  std::string getRightFootFrameName() const;
 
   /**
    * @brief Get the Left Palm Frame
    *
-   * @return const std::string
+   * @return std::string
    */
-  const std::string getLeftPalmFrame() const;
+  std::string getLeftPalmFrame() const;
 
   /**
    * @brief Get the Right Palm Frame name
    *
-   * @return const std::string
+   * @return std::string
    */
-  const std::string getRightPalmFrame() const;
+  std::string getRightPalmFrame() const;
 
   /**
    * @brief Get the Right End Effector Frame name
    *
-   * @return const std::string
+   * @return std::string
    */
-  const std::string getRightEEFrame() const;
+  std::string getRightEEFrame() const;
 
   /**
    * @brief Get the Left End Effector Frame name
    *
-   * @return const std::string
+   * @return std::string
    */
-  const std::string getLeftEEFrame() const;
+  std::string getLeftEEFrame() const;
 
   /**
    * @brief Get the Robot Name
    *
-   * @return const std::string
+   * @return std::string
    */
-  const std::string getRobotName() const;
+  std::string getRobotName() const;
 
   /**
    * @brief URDF Parameter name
    *
-   * @return const std::string
+   * @return std::string
    */
-  const std::string getURDFParameter() const;
+  std::string getURDFParameter() const;
 
   /**
    * @brief Get the vector of Left Arm Joint Names
@@ -190,25 +190,25 @@ public:
   void getChestJointLimits(std::vector<std::pair<double, double> >& chest_joint_limits) const;
 
   /**
-   * @brief Get the Chest Frame Names 
-   * 
+   * @brief Get the Chest Frame Names
+   *
    * @param chest_frame_names         - [output] returns the chest frame names
    */
   void getChestFrameNames(std::vector<std::string>& chest_frame_names) const;
 
   /**
    * @brief Returns the joint names for the joints considered in the Move Groups.
-   * 
+   *
    * @param move_group                - The move group name for which the joint names are needed
    * @return std::vector<std::string> - [output] returns the vector of joint names for the move group.
    */
   const std::vector<std::string> getFrameNamesInMoveGroup(const std::string& move_group);
 
   /**
-   * @brief Get the Parent Frame For Move Groups 
-   * 
+   * @brief Get the Parent Frame For Move Groups
+   *
    * @param move_group                - The move group name for which the parent frame name is needed
-   * @return const std::string        - [output] returns the parent frame name for the move_group
+   * @return std::string        - [output] returns the parent frame name for the move_group
    */
   std::string getParentFrameForMoveGroups(const std::string& move_group);
 
@@ -300,9 +300,9 @@ public:
    * @brief Get the Foot Frame of required side
    *
    * @param side side of the robot, LEFT or RIGHT
-   * @return const std::string frame name for the foot of requested side.
+   * @return std::string frame name for the foot of requested side.
    */
-  inline const std::string getFootFrame(RobotSide side) const
+  inline std::string getFootFrame(RobotSide side) const
   {
     return side == RobotSide::LEFT ? getLeftFootFrameName() : getRightFootFrameName();
   }

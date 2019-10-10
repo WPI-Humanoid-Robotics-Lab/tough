@@ -221,27 +221,27 @@ bool RobotDescription::updateFrameHash()
   WORLD_FRAME_HASH_ = TOUGH_COMMON_NAMES::WORLD_FRAME_HASH;
 }
 
-const std::string RobotDescription::getRightPalmFrame() const
+std::string RobotDescription::getRightPalmFrame() const
 {
   return R_PALM_TF;
 }
 
-const std::string RobotDescription::getRightEEFrame() const
+std::string RobotDescription::getRightEEFrame() const
 {
   return R_END_EFFECTOR_TF;
 }
 
-const std::string RobotDescription::getLeftEEFrame() const
+std::string RobotDescription::getLeftEEFrame() const
 {
   return L_END_EFFECTOR_TF;
 }
 
-const std::string RobotDescription::getRobotName() const
+std::string RobotDescription::getRobotName() const
 {
   return robot_name_;
 }
 
-const std::string RobotDescription::getURDFParameter() const
+std::string RobotDescription::getURDFParameter() const
 {
   return urdf_param_;
 }
@@ -250,7 +250,7 @@ void RobotDescription::setRightPalmFrame(const std::string& value)
   R_PALM_TF = value;
 }
 
-const std::string RobotDescription::getLeftPalmFrame() const
+std::string RobotDescription::getLeftPalmFrame() const
 {
   return L_PALM_TF;
 }
@@ -290,7 +290,7 @@ void RobotDescription::setChestJointLimits(const std::vector<std::pair<double, d
   chest_joint_limits_.assign(chest_joint_limits.begin(), chest_joint_limits.end());
 }
 
-const std::string RobotDescription::getRightFootFrameName() const
+std::string RobotDescription::getRightFootFrameName() const
 {
   return right_foot_frame_name_;
 }
@@ -300,7 +300,7 @@ void RobotDescription::setRightFootFrameName(const std::string& right_foot_frame
   right_foot_frame_name_ = right_foot_frame_name;
 }
 
-const std::string RobotDescription::getLeftFootFrameName() const
+std::string RobotDescription::getLeftFootFrameName() const
 {
   return left_foot_frame_name_;
 }
@@ -370,7 +370,7 @@ void RobotDescription::setLeftArmJointNames(const std::vector<std::string>& left
   left_arm_joint_names_.assign(left_arm_joint_names.begin(), left_arm_joint_names.end());
 }
 
-const std::string RobotDescription::getTorsoFrame() const
+std::string RobotDescription::getTorsoFrame() const
 {
   return TORSO_TF;
 }
@@ -380,12 +380,12 @@ void RobotDescription::setTorsoFrame(const std::string& value)
   TORSO_TF = value;
 }
 
-const std::string RobotDescription::getPelvisFrame() const
+std::string RobotDescription::getPelvisFrame() const
 {
   return PELVIS_TF;
 }
 
-const std::string RobotDescription::getWorldFrame() const
+std::string RobotDescription::getWorldFrame() const
 {
   return TOUGH_COMMON_NAMES::WORLD_TF;
 }
@@ -402,23 +402,23 @@ const std::vector<std::string> RobotDescription::getFrameNamesInMoveGroup(const 
   std::string end_effector_frame;
   chest_frame_names.resize(0);
 
-  if(move_group == TOUGH_COMMON_NAMES::LEFT_ARM_7DOF_GROUP)
+  if (move_group == TOUGH_COMMON_NAMES::LEFT_ARM_7DOF_GROUP)
   {
     this->getLeftArmFrameNames(arm_frame_names);
     end_effector_frame = this->getLeftEEFrame();
   }
-  else if(move_group == TOUGH_COMMON_NAMES::RIGHT_ARM_7DOF_GROUP)
+  else if (move_group == TOUGH_COMMON_NAMES::RIGHT_ARM_7DOF_GROUP)
   {
     this->getRightArmFrameNames(arm_frame_names);
     end_effector_frame = this->getRightEEFrame();
   }
-  else if(move_group == TOUGH_COMMON_NAMES::LEFT_ARM_10DOF_GROUP)
+  else if (move_group == TOUGH_COMMON_NAMES::LEFT_ARM_10DOF_GROUP)
   {
     this->getLeftArmFrameNames(arm_frame_names);
     this->getChestFrameNames(chest_frame_names);
     end_effector_frame = this->getLeftEEFrame();
   }
-  else if(move_group == TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP)
+  else if (move_group == TOUGH_COMMON_NAMES::RIGHT_ARM_10DOF_GROUP)
   {
     this->getRightArmFrameNames(arm_frame_names);
     this->getChestFrameNames(chest_frame_names);
@@ -429,18 +429,18 @@ const std::vector<std::string> RobotDescription::getFrameNamesInMoveGroup(const 
   frame_names.insert(frame_names.end(), arm_frame_names.begin(), arm_frame_names.end());
 
   // check valkyrie frames if it has an additional frame between end effector and the end of arm
-  
-  //An intermediate palm frame exists between end_effector_frame and the last frame in the arm joints. 
+
+  // An intermediate palm frame exists between end_effector_frame and the last frame in the arm joints.
   std::string last_frame_name = frame_names.back();
   std::string intermediate_frame_name = model_.links_[last_frame_name]->child_joints.at(0)->child_link_name;
-  
-  //add intermediate frame only if the parent of end_effector frame is same as the intermediate frame.
+
+  // add intermediate frame only if the parent of end_effector frame is same as the intermediate frame.
   if (intermediate_frame_name == model_.links_[end_effector_frame]->getParent()->name)
   {
     frame_names.push_back(intermediate_frame_name);
   }
 
-  //To add the end effector frame to the frame_names vector, if not already there
+  // To add the end effector frame to the frame_names vector, if not already there
   if (end_effector_frame != frame_names.back())
   {
     frame_names.push_back(end_effector_frame);
@@ -484,6 +484,6 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "test_urdf");
   ros::NodeHandle nh;
   RobotDescription* robot = RobotDescription::getRobotDescription(nh);
-  
+
   return 0;
 }
