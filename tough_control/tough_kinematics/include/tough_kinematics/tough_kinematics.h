@@ -33,11 +33,11 @@ private:
    * 
    * @param chain_start_parent    Parent of the first actuating link
    * @param chain_end             Last link of the chain
-   * @param group_name            Group name of the chain 
+   * @param chain_name            Group name of the chain 
    * @return true 
    * @return false 
    */
-  bool registerChain(const std::string& chain_start_parent, const std::string& chain_end, const std::string& group_name);
+  bool registerChain(const std::string& chain_start_parent, const std::string& chain_end, const std::string& chain_name);
 
   void vectorToKDLJntArray(std::vector<double>& vec, KDL::JntArray& kdl_array) const;
   void KDLJntArrayToVector(const KDL::JntArray& kdl_array, std::vector<double>& vec) const;
@@ -55,6 +55,38 @@ private:
   RobotStateInformer* state_informer_;
   RobotDescription* rd_;
 
+  /*  CURRENTLY WHOLEBODY CONTROLLER ONLY TAKES THE JOINT ANGLES 
+      FOR ALL THE JOINTS IN CHEST/ARMS. THOUGH THESE FUNCTIONS WILL 
+      GIVE THE IK FOR CUSTOM CHAIN, THEY CANNOT BE EXECUTED. HENCE
+      MAKING THESE WORKING FUNCTIONS AS PRIVATE FOR NOW.
+
+      MOVE THESE FUNCTIONS TO PUBLIC WHEN THE WHOLEBODY CONTROLLER
+      CAN ACCEPT INCOMPLETE CHAINS FOR EXECUTION.                */
+
+  /**
+   * @brief Solves and provides result for the IK from custom chain for desired end_effector_pose
+   *            ** THE CUSTOM CHAIN MUST BE FIRST ADDED USING add_custom_chain **
+   *
+   * @param chain_start                 link name for the start of the chain
+   * @param chain_end                   link name for the end of the chain
+   * @param desired_ee_pose             Desired end effecotor pose to be achieved
+   * @param result                      Resultant vector of joint angles for the planning group included joints
+   * @param time                        Time for execution of the trajectory
+   * @return true
+   */
+  bool solveIK(const std::string& chain_start, const std::string& chain_end,
+                             const geometry_msgs::PoseStamped& desired_ee_pose,
+                             trajectory_msgs::JointTrajectory& result, float time = 2.0f);
+
+  /**
+   * @brief Add custom chain for the IK solving.
+   * 
+   * @param chain_start                 link name for the start of the chain
+   * @param chain_end                   link name for the end of the chain
+   * @return true 
+   * @return false 
+   */
+  bool addCustomChain(const std::string& chain_start, const std::string& chain_end);
 
 public:
   ToughKinematics(ros::NodeHandle& nh);
@@ -99,38 +131,6 @@ public:
    */
   void setPlanningTime(const double time);
 
-  /*  CURRENTLY WHOLEBODY CONTROLLER ONLY TAKES THE JOINT ANGLES 
-      FOR ALL THE JOINTS IN CHEST/ARMS. THOUGH THESE FUNCTIONS WILL 
-      GIVE THE IK FOR CUSTOM CHAIN, THEY CANNOT BE EXECUTED. HENCE
-      MAKING THESE WORKING FUNCTIONS AS PRIVATE FOR NOW.
-
-      MOVE THESE FUNCTIONS TO PUBLIC WHEN THE WHOLEBODY CONTROLLER
-      CAN ACCEPT INCOMPLETE CHAINS FOR EXECUTION.                */
-
-  /**
-   * @brief Solves and provides result for the IK from custom chain for desired end_effector_pose
-   *            ** THE CUSTOM CHAIN MUST BE FIRST ADDED USING add_custom_chain **
-   *
-   * @param chain_start                 link name for the start of the chain
-   * @param chain_end                   link name for the end of the chain
-   * @param desired_ee_pose             Desired end effecotor pose to be achieved
-   * @param result                      Resultant vector of joint angles for the planning group included joints
-   * @param time                        Time for execution of the trajectory
-   * @return true
-   */
-  bool solveIK(const std::string& chain_start, const std::string& chain_end,
-                             const geometry_msgs::PoseStamped& desired_ee_pose,
-                             trajectory_msgs::JointTrajectory& result, float time = 2.0f);
-
-  /**
-   * @brief Add custom chain for the IK solving.
-   * 
-   * @param chain_start                 link name for the start of the chain
-   * @param chain_end                   link name for the end of the chain
-   * @return true 
-   * @return false 
-   */
-  bool addCustomChain(const std::string& chain_start, const std::string& chain_end);
 };
 
 #endif // TOUGH_KINEMATICS_H

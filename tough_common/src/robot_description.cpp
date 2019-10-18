@@ -453,30 +453,30 @@ std::string RobotDescription::getParentFrameForMoveGroups(const std::string& mov
 {
   std::vector<std::string> frame_names = this->getFrameNamesInMoveGroup(move_group);
   std::string first_frame = frame_names.front();
+  std::string parent_frame = "";
   if(model_.links_.find(first_frame) != model_.links_.end())
   {
-    std::string parent_frame = model_.links_[first_frame]->getParent()->name;
-    return parent_frame;
+    parent_frame = model_.links_[first_frame]->getParent()->name;
   }
   else
   {
     ROS_ERROR("No link named %s found in URDF", first_frame.c_str());
-    return "";
   }
+  return parent_frame;
 }
 
 std::string RobotDescription::getParentFrameForJointName(const std::string& joint_name)
 {
-  if(model_.links_.find(joint_name) != model_.links_.end())
+  std::string parent_frame = "";
+  if (model_.links_.find(joint_name) != model_.links_.end())
   {
-    std::string parent_frame = model_.links_[joint_name]->getParent()->name;
-    return parent_frame;
+    parent_frame = model_.links_[joint_name]->getParent()->name;
   }
   else
   {
     ROS_ERROR("No link named %s found in URDF", joint_name.c_str());
-    return "";
   }
+  return parent_frame;
 }
 
 int main(int argc, char** argv)

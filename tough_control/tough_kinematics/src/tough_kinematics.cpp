@@ -10,9 +10,9 @@ ToughKinematics::ToughKinematics(ros::NodeHandle& nh) : nh_(nh)
 
 ToughKinematics::~ToughKinematics()
 {
-  for(auto i:ik_solvers_)
+  for(auto& i:ik_solvers_)
     delete i.second;
-  for(auto j:kdl_chains_)
+  for(auto& j:kdl_chains_)
     delete j.second;
 }
 
