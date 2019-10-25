@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <ihmc_msgs/HeadTrajectoryRosMessage.h>
 #include <ihmc_msgs/NeckTrajectoryRosMessage.h>
+#include <ihmc_msgs/NeckDesiredAccelerationsRosMessage.h>
 #include <ihmc_msgs/OneDoFJointTrajectoryRosMessage.h>
 #include <ihmc_msgs/TrajectoryPoint1DRosMessage.h>
 #include <tf/tf.h>
@@ -27,6 +28,7 @@ private:
 
   ros::Publisher headTrajPublisher;
   ros::Publisher neckTrajPublisher;
+  ros::Publisher neckAccnPublisher;
   void appendNeckTrajectoryPoint(ihmc_msgs::NeckTrajectoryRosMessage& msg, float time, std::vector<float> pos);
 
   // protected:
@@ -67,6 +69,31 @@ public:
    * @param time              The time it takes to move to the given orientation. Default is 4.0
    */
   void moveHead(const std::vector<std::vector<float> >& trajectory_points, const float time = 4.0f);
+
+  /**
+   * @brief moveHeadWithAcceleration: moves Head with the given accelerations. DOES NOT CONTROL THE MOTION.
+   *
+   * This message gives the user the option to bypass IHMC feedback controllers for the arm joints 
+   * by sending desired arm joint accelerations.
+   * One needs experience in control when activating the bypass as it can result in unexpected 
+   * behaviors for unreasonable accelerations.
+   
+   * 
+   * @return true 
+   * @return false 
+   */
+  bool moveHeadWithAcceleration(const std::vector<double>& neck_accelerations);
+
+  /**
+   * @brief generates the NeckDesiredAccelerationsRosMessage. DOES NOT EXECUTE ANY MOTION.
+   * 
+   * @param neck_accelerations      Vector of the accelerations to be executed.
+   * @param msg                     [output]
+   * @return true                   If the message is generated
+   * @return false                  If the message is not generated
+   */
+  bool generateMessage(const std::vector<double>& neck_accelerations,
+                       ihmc_msgs::NeckDesiredAccelerationsRosMessage& msg);
 
   /**
    * @brief getNumNeckJoints Gives back the number of neck joints for Valkyrie R5

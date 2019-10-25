@@ -8,6 +8,8 @@ HeadControlInterface::HeadControlInterface(ros::NodeHandle nh) : ToughControlInt
       control_topic_prefix_ + TOUGH_COMMON_NAMES::NECK_TRAJECTORY_TOPIC, 1, true);
   headTrajPublisher = nh_.advertise<ihmc_msgs::HeadTrajectoryRosMessage>(
       control_topic_prefix_ + TOUGH_COMMON_NAMES::HEAD_TRAJECTORY_TOPIC, 1, true);
+  neckAccnPublisher = nh_.advertise<ihmc_msgs::NeckDesiredAccelerationsRosMessage>(
+      control_topic_prefix_ + TOUGH_COMMON_NAMES::NECK_DESIRED_JOINT_ACCELERATION_TOPIC, 1, true);
   NUM_NECK_JOINTS = rd_->getNumberOfNeckJoints();
 }
 
@@ -102,6 +104,36 @@ void HeadControlInterface::moveHead(const std::vector<std::vector<float> >& traj
   }
   // publish the message
   headTrajPublisher.publish(msg);
+}
+
+bool HeadControlInterface::moveHeadWithAcceleration(const std::vector<double>& neck_accelerations)
+{
+  bool success = false;
+  ihmc_msgs::NeckDesiredAccelerationsRosMessage neck_msg;
+  if(generateMessage(neck_accelerations, neck_msg))
+  {
+    neckAccnPublisher.publish(neck_msg);
+    success = true;
+  }
+  return success;
+}
+
+bool HeadControlInterface::generateMessage(const std::vector<double>& neck_accelerations, ihmc_msgs::NeckDesiredAccelerationsRosMessage& msg)
+{
+  bool success = false;
+  if(neck_accelerations.size() != NUM_NECK_JOINTS)
+  {
+    ROS_ERROR("Invalid Number of neck joints provided. \n Expected %i number of joints, \n Received %i number of "
+              "joints.",
+              NUM_NECK_JOINTS, neck_accelerations.size());
+  }
+  else
+  {
+    msg.unique_id = HeadControlInterface::id_++;
+    msg.desired_joint_accelerations = neck_accelerations;
+    success = true;
+  }
+  return success;
 }
 
 bool HeadControlInterface::moveNeckJoints(const std::vector<std::vector<float> >& neck_pose, const float time)
