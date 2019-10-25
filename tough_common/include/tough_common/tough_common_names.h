@@ -32,6 +32,7 @@ const std::string ARM_TRAJECTORY_TOPIC = "/arm_trajectory";
 const std::string ARM_DESIRED_JOINT_ACCELERATION_TOPIC = "/arm_desired_joint_accelerations";
 const std::string HAND_TRAJECTORY_TOPIC = "/hand_trajectory";
 const std::string CHEST_TRAJECTORY_TOPIC = "/chest_trajectory";
+const std::string SPINE_DESIRED_JOINT_ACCELERATION_TOPIC = "/spine_desired_joint_accelerations";
 const std::string HEAD_TRAJECTORY_TOPIC = "/head_trajectory";
 const std::string NECK_TRAJECTORY_TOPIC = "/neck_trajectory";
 const std::string PELVIS_HEIGHT_TRAJECTORY_TOPIC = "/pelvis_height_trajectory";

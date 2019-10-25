@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <ihmc_msgs/ChestTrajectoryRosMessage.h>
+#include <ihmc_msgs/SpineDesiredAccelerationsRosMessage.h>
 #include <ihmc_msgs/GoHomeRosMessage.h>
 #include <tf/tf.h>
 #include <math.h>
@@ -22,6 +23,7 @@ class ChestControlInterface : public ToughControlInterface
 private:
   ros::Publisher chestTrajPublisher_;
   ros::Publisher homePositionPublisher_;
+  ros::Publisher spineAccnPublisher_;
   std::vector<std::string> chestJointNames_;
   std::vector<int> chestJointNumbers_;
 
@@ -58,6 +60,20 @@ public:
                     int execution_mode = ihmc_msgs::ChestTrajectoryRosMessage::OVERRIDE);
 
   /**
+   * @brief Executes the chest accelerations given on the robot. DOES NOT CONTROL IT
+   * This message gives the user the option to bypass IHMC feedback controllers for the arm joints 
+   * by sending desired arm joint accelerations.
+   * One needs experience in control when activating the bypass as it can result in unexpected 
+   * behaviors for unreasonable accelerations.
+   * 
+   * @param chest_accelerations      Vector of chest accelerations to be executed.
+   * 
+   * @return true                    If the motion is executed.
+   * @return false                   If the motion is not executed.
+   */
+  bool executeChestAccelerations(const std::vector<double>& chest_accelerations);
+
+  /**
    * @brief Execute the ChestTrajectoryRosMessage
    *
    * @param msg                       ChestTrajectoryRosMessage to be executed
@@ -87,6 +103,17 @@ public:
    */
   void generateMessage(const std::vector<ihmc_msgs::SO3TrajectoryPointRosMessage>& chest_trajectory,
                        const int execution_mode, ihmc_msgs::ChestTrajectoryRosMessage& msg);
+
+  /**
+   * @brief Generates the ChestTrajectoryRosMessage from the IHMC message. Does not publish or executes anything, only
+   * generates the ros message.
+   *
+   *
+   * @param chest_accelerations       Chest accelerations to be given
+   * @param msg                       [output]
+   */
+  bool generateMessage(const std::vector<double>& chest_accelerations,
+                       ihmc_msgs::SpineDesiredAccelerationsRosMessage& msg);
 
   /**
    * @brief Sets up the msg for usage. This does not either enters data into the msg, or execute any

@@ -8,6 +8,10 @@ ChestControlInterface::ChestControlInterface(ros::NodeHandle nh) : ToughControlI
 
   homePositionPublisher_ =
       nh_.advertise<ihmc_msgs::GoHomeRosMessage>(control_topic_prefix_ + TOUGH_COMMON_NAMES::GO_HOME_TOPIC, 1, true);
+
+  spineAccnPublisher_ = nh_.advertise<ihmc_msgs::SpineDesiredAccelerationsRosMessage>(
+      control_topic_prefix_ + TOUGH_COMMON_NAMES::SPINE_DESIRED_JOINT_ACCELERATION_TOPIC, 1, true);
+
   rd_->getChestJointNames(chestJointNames_);
   chestJointNumbers_.resize(chestJointNames_.size());
   for (auto&& joint : chestJointNames_)
@@ -43,6 +47,18 @@ void ChestControlInterface::controlChest(const geometry_msgs::Quaternion quat, c
 void ChestControlInterface::executeMessage(const ihmc_msgs::ChestTrajectoryRosMessage& msg)
 {
   chestTrajPublisher_.publish(msg);
+}
+
+bool ChestControlInterface::executeChestAccelerations(const std::vector<double>& chest_accelerations)
+{
+  bool success = false;
+  ihmc_msgs::SpineDesiredAccelerationsRosMessage spine_msg;
+  if (generateMessage(chest_accelerations, spine_msg))
+  {
+    spineAccnPublisher_.publish(spine_msg);
+    success = true;
+  }
+  return success;
 }
 
 void ChestControlInterface::setupFrameAndMode(ihmc_msgs::ChestTrajectoryRosMessage& msg, const int mode,
@@ -91,6 +107,25 @@ void ChestControlInterface::generateMessage(
   msg.frame_information = reference_frame;
   msg.taskspace_trajectory_points.resize(chest_trajectory.size());
   msg.taskspace_trajectory_points = chest_trajectory;
+}
+
+bool ChestControlInterface::generateMessage(const std::vector<double>& chest_accelerations, ihmc_msgs::SpineDesiredAccelerationsRosMessage& msg)
+{
+  bool success = false;
+  size_t number_of_chest_joints = chestJointNames_.size();
+  if (chest_accelerations.size() != number_of_chest_joints)
+  {
+    ROS_ERROR("Invalid number of chest joints supplied. \n Expected %i number of joints, \n Received %i number of "
+              "joints",
+              number_of_chest_joints, chest_accelerations.size());
+  }
+  else
+  {
+    msg.unique_id = ChestControlInterface::id_++;
+    msg.desired_joint_accelerations = chest_accelerations;
+    success = true;
+  }
+  return success;
 }
 
 void ChestControlInterface::getChestOrientation(geometry_msgs::Quaternion& orientation)
