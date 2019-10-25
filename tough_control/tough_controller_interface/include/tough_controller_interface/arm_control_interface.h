@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <ihmc_msgs/ArmTrajectoryRosMessage.h>
+#include <ihmc_msgs/ArmDesiredAccelerationsRosMessage.h>
 #include <ihmc_msgs/OneDoFJointTrajectoryRosMessage.h>
 #include <ihmc_msgs/TrajectoryPoint1DRosMessage.h>
 #include <ihmc_msgs/HandDesiredConfigurationRosMessage.h>
@@ -34,13 +35,13 @@ public:
 
   /**
    * @brief The armJointData struct is a structure that can store details required to generate a ros message for
-   * controlling arm. 
-   * 
-   * RobotSide can be either RIGHT or LEFT. 
-   * 
+   * controlling arm.
+   *
+   * RobotSide can be either RIGHT or LEFT.
+   *
    * arm_pose is a vector of float of size 7 that stores joint angels of all 7 joints in the arm.
-   * 
-   * Time is the relative time for executing the trajectory but it increments for every 
+   *
+   * Time is the relative time for executing the trajectory but it increments for every
    * additional trajectory point. For example: if a trajectory needs to be in
    * pose 1 at 2sec, pose 2 at 5sec, then create 2 objects of this struct one for pose 1 and other for pose 2. pose1
    * object will have time=2 and pose2 will have time=5.
@@ -55,9 +56,9 @@ public:
   /**
    * @brief The armTaskSpaceData struct is a structure that can store details required to generate a ros message for
    * controlling the hand trajectory in task space.
-   * 
-   * side can be either RIGHT or LEFT. 
-   * pose is a Pose in task space (world frame) that the hand should move to. 
+   *
+   * side can be either RIGHT or LEFT.
+   * pose is a Pose in task space (world frame) that the hand should move to.
    * time is the total execution time of the trajectory.
    */
   struct ArmTaskSpaceData
@@ -76,14 +77,14 @@ public:
 
   /**
    * @brief moveToZeroPose Moves the robot arm to zero position.
-   * 
+   *
    * @param side  Side of the robot. It can be RIGHT or LEFT.
    */
   void moveToZeroPose(const RobotSide side, const float time = 2.0f);
 
   /**
    * @brief moveArmJoints Moves arm joints to given joint angles. All angles in radians.
-   * 
+   *
    * @param side          Side of the robot. It can be RIGHT or LEFT.
    * @param arm_pose      A vector that stores a vector with 7 values one for each joint. Number of values in the vector
    *                      are the number of trajectory points.
@@ -93,13 +94,13 @@ public:
 
   /**
    * @brief generateArmMessage Generates ros message to be sent to the arm, but does not publish anything.
-   * 
+   *
    * @param side          Side of the robot. It can be RIGHT or LEFT.
    * @param arm_pose      A vector that stores a vector with 7 values one for each joint. Number of values in the vector
    * are the number of trajectory points.
    * @param time          Total time to execute the trajectory. each trajectory point is equally spaced in time.
    * @param msg           The message is generated in this reference.
-   * 
+   *
    * @return
    */
   bool generateArmMessage(const RobotSide side, const std::vector<std::vector<double> >& arm_pose, const float time,
@@ -107,11 +108,11 @@ public:
 
   /**
    * @brief generateArmMessage Generates ros message to be sent to the arm, but does not publish anything.
-   * 
+   *
    * @param side          Side of the robot. It can be RIGHT or LEFT.
    * @param arm_trajectory A vector of OneDoFJointTrajectoryRosMessage for the trajectory
    * @param msg           The message is generated in this reference.
-   * 
+   *
    * @return
    */
   void generateArmMessage(const RobotSide side,
@@ -119,35 +120,48 @@ public:
                           ihmc_msgs::ArmTrajectoryRosMessage& msg);
 
   /**
+   * @brief generateArmMessage Generates ros message to be sent to the arm, but does not publish anything.
+   *
+   * @param side                  Side of the robot. It can be RIGHT or LEFT.
+   * @param joints_acceleration   A vector that stores a vector with 7 values one for each joint. Number of values in
+   * the vector
+   *                              are the number of trajectory points.
+   * @param msg                   The message is generated in this reference.
+   *
+   */
+  bool generateArmMessage(const RobotSide side, const std::vector<double>& joints_acceleration,
+                          ihmc_msgs::ArmDesiredAccelerationsRosMessage& msg);
+
+  /**
    * @brief moveArmJoints Moves arm joints to given joint angles. All angles in radians.
-   * 
+   *
    * @param arm_data      A vector of armJointData struct. This allows customization of individual trajectory points.
-   * 
+   *
    * For example,
    * each point can have different execution times.
-   * 
+   *
    * @return true         - When motion is executed
-   * @return false        
+   * @return false
    */
   bool moveArmJoints(const std::vector<ArmJointData>& arm_data);
 
   /**
    * @brief moveArmMessage    Publishes a given ros message of ihmc_msgs::ArmTrajectoryRosMessage format to the robot.
-   * 
+   *
    * @param msg               message to be sent to the robot.
    */
   void moveArmMessage(const ihmc_msgs::ArmTrajectoryRosMessage& msg);
 
   /**
    * @brief getnumArmJoints Gives back the number of arm joints for the robot
-   * 
+   *
    * @return
    */
   int getnumArmJoints() const;
 
   /**
    * @brief moveArmInTaskSpaceMessage Moves the arm to a given point in task space (world frame)
-   * 
+   *
    * @param side	Side of the robot. It can be RIGHT or LEFT.
    * @param point	The point in task space to move the arm to.
    */
@@ -158,7 +172,7 @@ public:
 
   /**
    * @brief moveArmInTaskSpace  Moves the arm to a give pose in task space (world frame)
-   * 
+   *
    * @param side  Side of the robot. It can be RIGHT or LEFT.
    * @param pose  The pose in task space to move the arm to.
    * @param time  Total time to execute the trajectory.
@@ -169,7 +183,7 @@ public:
 
   /**
    * @brief moveArmInTaskSpace  Moves the arm(s) to the given position in task space (world frame).
-   * 
+   *
    * @param arm_data A vector of armTaskSpaceData struct.
    */
   //    void moveArmInTaskSpace(std::vector<armTaskSpaceData> &arm_data, int
@@ -179,28 +193,43 @@ public:
 
   /**
    * @brief moveArmTrajectory Moves the arm to follow a particular trajectory plan
-   * 
+   *
    * @param side              Side of the robot. It can be RIGHT or LEFT.
    * @param traj              Trajectory in the form of trajectory_msgs::JointTrajectory
    */
   void moveArmTrajectory(const RobotSide side, const trajectory_msgs::JointTrajectory& traj);
 
   /**
+   * @brief moveArmJointsAcceleration moves the arm joints with the desired joint accelration.
+   * This message gives the user the option to bypass IHMC feedback controllers for the arm joints by sending desired
+   arm joint accelerations.
+     One needs experience in control when activating the bypass as it can result in unexpected behaviors for
+   unreasonable accelerations.
+
+   * @param side                Side of the Robot. it can be LEFT or RIGHT
+   * @param accelration_vector  vector of the values for the acceleration of the arm joints.
+   *
+   * @return true               When the trajectory is executed
+   * @return false
+   */
+  bool moveArmJointsAcceleration(const RobotSide side, const std::vector<double>& accelration_vector);
+
+  /**
    * @brief nudgeArm Nudges the Arm in the desired direction by a given nudge step with respect
    *            to the pelvis frame of the robot.
-   * 
+   *
    * @param side              Side of the Robot. it can be LEFT or RIGHT
    * @param drct              Which side we want to nudge. UP, DOWN, LEFT, RIGHT, FRONT or BACK
    * @param nudgeStep         The step length to nudge. Default is 5cm (~6/32")
-   * 
+   *
    * @return true             When the trajectory is executed
-   * @return false 
+   * @return false
    */
   bool nudgeArm(const RobotSide side, const direction drct, const float nudgeStep = 0.05);
 
   /**
    * @brief nudgeArmLocal     Nudges the Arm in the desired direction by a given nudge step with
-   *              respect to the local frame, which is the palm frame of the robot. 
+   *              respect to the local frame, which is the palm frame of the robot.
    *
    * @param side              Side of the Robot. it can be LEFT or RIGHT
    * @param drct              Which side we want to nudge. UP, DOWN, LEFT, RIGHT, FRONT or BACK
@@ -230,7 +259,7 @@ public:
    * @brief Moves the specific joint of arm of the robot.
    *
    * @param side              Side of the Robot. it can be LEFT or RIGHT
-   * @param jointNumber       The jointNumber of the joint to be moved. 
+   * @param jointNumber       The jointNumber of the joint to be moved.
    * @param targetAngle       Desired angle for the motion
    * @param time              Time of execution of the trajectory
    * @return true             When successfull
@@ -265,7 +294,7 @@ public:
 
   /**
    * @brief This will append a joint trajectory point
-   * 
+   *
    * @param msg               msg is the reference of the current msg where point is to be appended.
    * @param time              time is the time between last and current joint trajectory waypoint
    * @param pos               pos is the joint position vector (size would be 7 if there are 7 joints in the arm)
@@ -290,6 +319,7 @@ private:
   std::vector<std::pair<double, double> > joint_limits_right_;
 
   ros::Publisher armTrajectoryPublisher;
+  ros::Publisher armJointAccelerationPublisher;
   ros::Publisher handTrajectoryPublisher;
   ros::Publisher taskSpaceTrajectoryPublisher;
   ros::Publisher homePositionPublisher;

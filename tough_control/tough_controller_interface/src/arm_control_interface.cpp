@@ -10,6 +10,8 @@ ArmControlInterface::ArmControlInterface(ros::NodeHandle nh)
   id_++;
   armTrajectoryPublisher = nh_.advertise<ihmc_msgs::ArmTrajectoryRosMessage>(
       control_topic_prefix_ + TOUGH_COMMON_NAMES::ARM_TRAJECTORY_TOPIC, 1, true);
+  armJointAccelerationPublisher = nh.advertise<ihmc_msgs::ArmDesiredAccelerationsRosMessage>(
+      control_topic_prefix_ + TOUGH_COMMON_NAMES::ARM_DESIRED_JOINT_ACCELERATION_TOPIC, 1, true);
   taskSpaceTrajectoryPublisher = nh_.advertise<ihmc_msgs::HandTrajectoryRosMessage>(
       control_topic_prefix_ + TOUGH_COMMON_NAMES::HAND_TRAJECTORY_TOPIC, 1, true);
   homePositionPublisher =
@@ -177,6 +179,21 @@ void ArmControlInterface::generateArmMessage(
   msg.joint_trajectory_messages = arm_trajectory;
   msg.robot_side = side;
   msg.unique_id = id_++;
+}
+
+bool ArmControlInterface::generateArmMessage(const RobotSide side, const std::vector<double>& joints_acceleration,
+                                             ihmc_msgs::ArmDesiredAccelerationsRosMessage& msg)
+{
+  if (joints_acceleration.size() != NUM_ARM_JOINTS)
+  {
+    ROS_ERROR("Expecting joint accelerations for %i number of joints. \nReceived %i number of joints.", NUM_ARM_JOINTS,
+              joints_acceleration.size());
+    return false;
+  }
+  msg.robot_side = side;
+  msg.unique_id = id_++;
+  msg.desired_joint_accelerations = joints_acceleration;
+  return true;
 }
 
 /// TODO: It might be a good idea to shift this to whole body control message
@@ -582,4 +599,17 @@ void ArmControlInterface::moveArmInTaskSpace(const std::vector<ArmTaskSpaceData>
   taskSpaceTrajectoryPublisher.publish(msg_r);
   ros::Duration(0.02).sleep();
   taskSpaceTrajectoryPublisher.publish(msg_l);
+}
+
+bool ArmControlInterface::moveArmJointsAcceleration(const RobotSide side, const std::vector<double>& accelration_vector)
+{
+  ihmc_msgs::ArmDesiredAccelerationsRosMessage arm_accn_msg;
+  bool success = false;
+  if (generateArmMessage(side, accelration_vector, arm_accn_msg))
+  {
+    armJointAccelerationPublisher.publish(arm_accn_msg);
+    ros::Duration(0.02).sleep();
+    success = true;
+  }
+  return success;
 }

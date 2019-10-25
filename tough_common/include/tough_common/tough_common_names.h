@@ -29,6 +29,7 @@ const std::string RECTIFIED_IMAGE_TOPIC = "/multisense/camera/left/image_rect_co
 /********* Control Topics *********/
 const std::string CONTROL_TOPIC_PREFIX = "/control";
 const std::string ARM_TRAJECTORY_TOPIC = "/arm_trajectory";
+const std::string ARM_DESIRED_JOINT_ACCELERATION_TOPIC = "/arm_desired_joint_accelerations";
 const std::string HAND_TRAJECTORY_TOPIC = "/hand_trajectory";
 const std::string CHEST_TRAJECTORY_TOPIC = "/chest_trajectory";
 const std::string HEAD_TRAJECTORY_TOPIC = "/head_trajectory";
