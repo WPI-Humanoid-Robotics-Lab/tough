@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   tough_perception_common
   tough_moveit_planners
   tough_control_common
+  tough_kinematics
 )
 
 
@@ -28,6 +29,7 @@ catkin_package(
                         tough_perception_common
                         tough_moveit_planners
                         tough_control_common
+                        tough_kinematics
 #  DEPENDS system_lib
 )
 
