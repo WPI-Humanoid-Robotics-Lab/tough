@@ -41,9 +41,13 @@ void WholebodyControlInterface::executeTrajectory(const trajectory_msgs::JointTr
 
 void WholebodyControlInterface::initializeWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg)
 {
-  // Setting unique id non zero for messages to be used
-  wholeBodyMsg.unique_id = ros::Time::now().toSec();
+  // Setting seed for random number generator.
+  // More details: https://stackoverflow.com/questions/9459035/why-does-rand-yield-the-same-sequence-of-numbers-on-every-run
+  srand(time(NULL));
 
+  // Setting unique id non zero for messages to be used
+  wholeBodyMsg.unique_id = rand() % 100 + 1;
+  
   // setting default values for empty messages
   wholeBodyMsg.left_arm_trajectory_message.robot_side = LEFT;
   wholeBodyMsg.right_arm_trajectory_message.robot_side = RIGHT;
@@ -64,9 +68,9 @@ void WholebodyControlInterface::initializeWholebodyMessage(ihmc_msgs::WholeBodyT
   wholeBodyMsg.right_hand_trajectory_message.execution_mode = ihmc_msgs::HandTrajectoryRosMessage::OVERRIDE;
 
   // unique ID will be updated if there is a valid trajectory point available
-  wholeBodyMsg.chest_trajectory_message.unique_id = 0;
-  wholeBodyMsg.right_arm_trajectory_message.unique_id = 0;
-  wholeBodyMsg.left_arm_trajectory_message.unique_id = 0;
+  wholeBodyMsg.chest_trajectory_message.unique_id = rand() % 100 + 1;
+  wholeBodyMsg.right_arm_trajectory_message.unique_id = rand() % 100 + 1;
+  wholeBodyMsg.left_arm_trajectory_message.unique_id = rand() % 100 + 1;
 
   // taskspace trajectories
   wholeBodyMsg.left_foot_trajectory_message.unique_id = 0;
@@ -84,105 +88,53 @@ void WholebodyControlInterface::initializeWholebodyMessage(ihmc_msgs::WholeBodyT
   wholeBodyMsg.pelvis_trajectory_message.frame_information = frameInfo;
   wholeBodyMsg.left_hand_trajectory_message.frame_information = frameInfo;
   wholeBodyMsg.right_hand_trajectory_message.frame_information = frameInfo;
+
+  chestController_.setupFrameAndMode(wholeBodyMsg.chest_trajectory_message);
+  armController_.setupArmMessage(RobotSide::LEFT, wholeBodyMsg.left_arm_trajectory_message);
+  armController_.setupArmMessage(RobotSide::RIGHT, wholeBodyMsg.right_arm_trajectory_message);
 }
 
 void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTrajectory& traj,
                                                 ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg)
 {
-  long chest_start = -1, l_arm_start = -1, r_arm_start = -1;
+  std::vector<double> joint_positions_;
 
-  auto it = std::find(traj.joint_names.begin(), traj.joint_names.end(), chest_joint_names_.at(0));
-  if (it == traj.joint_names.end())
-  {
-    // does not contain chest points
-  }
-  else
-  {
-    // set the chest indices
-    chest_start = std::distance(traj.joint_names.begin(), it);
-    if (!validateJointSequenceInTrajectory(traj.joint_names, chest_joint_names_, chest_start))
-    {
-      return;
-    }
-    chestController_.setupFrameAndMode(wholeBodyMsg.chest_trajectory_message);
-  }
+  // Sometimes state informer returns empty vector.
+  // Better implementation needed.
+  while (joint_positions_.empty())
+    state_informer_->getJointPositions(joint_positions_);
 
-  it = std::find(traj.joint_names.begin(), traj.joint_names.end(), left_arm_joint_names_.at(0));
-  if (it == traj.joint_names.end())
-  {
-    // does not contain left arm points
-  }
-  else
-  {
-    // set the left arm indices
-    l_arm_start = std::distance(traj.joint_names.begin(), it);
-    if (!validateJointSequenceInTrajectory(traj.joint_names, left_arm_joint_names_, l_arm_start))
-    {
-      return;
-    }
-    armController_.setupArmMessage(RobotSide::LEFT, wholeBodyMsg.left_arm_trajectory_message);
-  }
-
-  it = std::find(traj.joint_names.begin(), traj.joint_names.end(), right_arm_joint_names_.at(0));
-  if (it == traj.joint_names.end())
-  {
-    // does not contain right arm points
-  }
-  else
-  {
-    // set the right arm indices
-    r_arm_start = std::distance(traj.joint_names.begin(), it);
-    if (!validateJointSequenceInTrajectory(traj.joint_names, right_arm_joint_names_, r_arm_start))
-    {
-      return;
-    }
-    armController_.setupArmMessage(RobotSide::RIGHT, wholeBodyMsg.right_arm_trajectory_message);
-  }
+  const int chest_start_index_ = state_informer_->getJointNumber(chest_joint_names_.front());
+  const int left_arm_start_index_ = state_informer_->getJointNumber(left_arm_joint_names_.front());
+  const int right_arm_start_index_ = state_informer_->getJointNumber(right_arm_joint_names_.front());
 
   double traj_point_time = 0.0;
-  for (size_t i = 0; i < traj.points.size(); i++)
+
+  for (auto& traj_pts : traj.points)
   {
-    traj_point_time = traj.points.at(i).time_from_start.toSec();
+    traj_point_time = traj_pts.time_from_start.toSec();
 
-    // chest - move to a new function later
-    if (chest_start >= 0)
+    for (int i = 0; i < traj.joint_names.size(); i++)
     {
-      geometry_msgs::Quaternion quat;
-      createChestQuaternion(chest_start, traj.points.at(i), quat);
-      chestController_.appendChestTrajectoryPoint(quat, wholeBodyMsg.chest_trajectory_message, traj_point_time);
-    }
-    // arms
-    if (l_arm_start >= 0)
-    {
-      std::vector<double> positions;
-      positions.assign(traj.points.at(i).positions.begin() + l_arm_start,
-                       traj.points.at(i).positions.begin() + l_arm_start + left_arm_joint_names_.size());
-      armController_.appendTrajectoryPoint(wholeBodyMsg.left_arm_trajectory_message, traj_point_time, positions);
+      int index = state_informer_->getJointNumber(traj.joint_names.at(i));
+      joint_positions_.at(index) = traj_pts.positions.at(i);
     }
 
-    if (r_arm_start >= 0)
-    {
-      std::vector<double> positions;
-      positions.assign(traj.points.at(i).positions.begin() + r_arm_start,
-                       traj.points.at(i).positions.begin() + r_arm_start + right_arm_joint_names_.size());
-      armController_.appendTrajectoryPoint(wholeBodyMsg.right_arm_trajectory_message, traj_point_time, positions);
-    }
+    // CHEST TRAJECTORY
+    geometry_msgs::Quaternion quat;
+    quat = getChestQuaternion(chest_start_index_, joint_positions_);
+    chestController_.appendChestTrajectoryPoint(quat, wholeBodyMsg.chest_trajectory_message, traj_point_time);
+
+    // LEFT ARM TRAJECTORY
+    std::vector<double> positions;
+    positions.assign(joint_positions_.begin() + left_arm_start_index_,
+                     joint_positions_.begin() + left_arm_start_index_ + left_arm_joint_names_.size());
+    armController_.appendTrajectoryPoint(wholeBodyMsg.left_arm_trajectory_message, traj_point_time, positions);
+
+    // RIGHT ARM TRAJECTORY
+    positions.clear();
+    positions.assign(joint_positions_.begin() + right_arm_start_index_,
+                     joint_positions_.begin() + right_arm_start_index_ + right_arm_joint_names_.size());
+    armController_.appendTrajectoryPoint(wholeBodyMsg.right_arm_trajectory_message, traj_point_time, positions);
   }
-}
-
-bool WholebodyControlInterface::validateJointSequenceInTrajectory(const std::vector<std::string>& traj_joint_names,
-                                                                  const std::vector<std::string>& joint_names,
-                                                                  long start)
-{
-  for (auto joint_name_it = joint_names.begin(); joint_name_it != joint_names.end(); ++joint_name_it, ++start)
-  {
-    if (traj_joint_names[start] != *joint_name_it)
-    {
-      // joints in trajectory are not in the expected sequence.
-      ROS_ERROR("Joints in the trajectory are not in the expected sequence.");
-      return false;
-    }
-  }
-
-  return true;
 }
