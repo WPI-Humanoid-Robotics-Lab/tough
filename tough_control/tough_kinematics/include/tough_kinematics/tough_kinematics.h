@@ -55,38 +55,6 @@ private:
   RobotStateInformer* state_informer_;
   RobotDescription* rd_;
 
-  /*  CURRENTLY WHOLEBODY CONTROLLER ONLY TAKES THE JOINT ANGLES 
-      FOR ALL THE JOINTS IN CHEST/ARMS. THOUGH THESE FUNCTIONS WILL 
-      GIVE THE IK FOR CUSTOM CHAIN, THEY CANNOT BE EXECUTED. HENCE
-      MAKING THESE WORKING FUNCTIONS AS PRIVATE FOR NOW.
-
-      MOVE THESE FUNCTIONS TO PUBLIC WHEN THE WHOLEBODY CONTROLLER
-      CAN ACCEPT INCOMPLETE CHAINS FOR EXECUTION.                */
-
-  /**
-   * @brief Solves and provides result for the IK from custom chain for desired end_effector_pose
-   *            ** THE CUSTOM CHAIN MUST BE FIRST ADDED USING add_custom_chain **
-   *
-   * @param chain_start                 link name for the start of the chain
-   * @param chain_end                   link name for the end of the chain
-   * @param desired_ee_pose             Desired end effecotor pose to be achieved
-   * @param result                      Resultant vector of joint angles for the planning group included joints
-   * @param time                        Time for execution of the trajectory
-   * @return true
-   */
-  bool solveIK(const std::string& chain_start, const std::string& chain_end,
-                             const geometry_msgs::PoseStamped& desired_ee_pose,
-                             trajectory_msgs::JointTrajectory& result, float time = 2.0f);
-
-  /**
-   * @brief Add custom chain for the IK solving.
-   * 
-   * @param chain_start                 link name for the start of the chain
-   * @param chain_end                   link name for the end of the chain
-   * @return true 
-   * @return false 
-   */
-  bool addCustomChain(const std::string& chain_start, const std::string& chain_end);
 
 public:
   ToughKinematics(ros::NodeHandle& nh);
@@ -117,6 +85,31 @@ public:
   bool solveIK(const std::string& planning_group, const geometry_msgs::PoseStamped& desired_ee_pose,
                 trajectory_msgs::JointTrajectory& result, float time = 2.0f);
 
+  /**
+   * @brief Solves and provides result for the IK from custom chain for desired end_effector_pose
+   *            ** THE CUSTOM CHAIN MUST BE FIRST ADDED USING add_custom_chain **
+   *
+   * @param chain_start                 link name for the start of the chain
+   * @param chain_end                   link name for the end of the chain
+   * @param desired_ee_pose             Desired end effecotor pose to be achieved
+   * @param result                      Resultant vector of joint angles for the planning group included joints
+   * @param time                        Time for execution of the trajectory
+   * @return true
+   */
+  bool solveIK(const std::string& chain_start, const std::string& chain_end,
+                             const geometry_msgs::PoseStamped& desired_ee_pose,
+                             trajectory_msgs::JointTrajectory& result, float time = 2.0f);
+
+  /**
+   * @brief Add custom chain for the IK solving.
+   * 
+   * @param chain_start                 link name for the start of the chain
+   * @param chain_end                   link name for the end of the chain
+   * @return true 
+   * @return false 
+   */
+  bool addCustomChain(const std::string& chain_start, const std::string& chain_end);
+  
   /**
    * @brief Get the planning time object
    * 
