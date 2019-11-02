@@ -81,6 +81,10 @@ private:
   std::vector<std::string> right_arm_joint_names_;
   std::vector<std::string> chest_joint_names_;
 
+  std::vector<double> joint_positions_;
+
+  int chest_start_index_, left_arm_start_index_, right_arm_start_index_;
+
   void initializeWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg);
   void parseTrajectory(const trajectory_msgs::JointTrajectory& traj,
                        ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg);

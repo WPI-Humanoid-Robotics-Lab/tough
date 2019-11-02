@@ -9,6 +9,10 @@ WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle& nh)
   rd_->getLeftArmJointNames(left_arm_joint_names_);
   rd_->getRightArmJointNames(right_arm_joint_names_);
   rd_->getChestJointNames(chest_joint_names_);
+
+  chest_start_index_ = state_informer_->getJointNumber(chest_joint_names_.front());
+  left_arm_start_index_ = state_informer_->getJointNumber(left_arm_joint_names_.front());
+  right_arm_start_index_ = state_informer_->getJointNumber(right_arm_joint_names_.front());
 }
 
 bool WholebodyControlInterface::getJointSpaceState(std::vector<double>& joints, RobotSide side)
@@ -42,12 +46,13 @@ void WholebodyControlInterface::executeTrajectory(const trajectory_msgs::JointTr
 void WholebodyControlInterface::initializeWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg)
 {
   // Setting seed for random number generator.
-  // More details: https://stackoverflow.com/questions/9459035/why-does-rand-yield-the-same-sequence-of-numbers-on-every-run
+  // More details:
+  // https://stackoverflow.com/questions/9459035/why-does-rand-yield-the-same-sequence-of-numbers-on-every-run
   srand(time(NULL));
 
   // Setting unique id non zero for messages to be used
   wholeBodyMsg.unique_id = rand() % 100 + 1;
-  
+
   // setting default values for empty messages
   wholeBodyMsg.left_arm_trajectory_message.robot_side = LEFT;
   wholeBodyMsg.right_arm_trajectory_message.robot_side = RIGHT;
@@ -97,16 +102,8 @@ void WholebodyControlInterface::initializeWholebodyMessage(ihmc_msgs::WholeBodyT
 void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTrajectory& traj,
                                                 ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg)
 {
-  std::vector<double> joint_positions_;
-
-  // Sometimes state informer returns empty vector.
-  // Better implementation needed.
-  while (joint_positions_.empty())
-    state_informer_->getJointPositions(joint_positions_);
-
-  const int chest_start_index_ = state_informer_->getJointNumber(chest_joint_names_.front());
-  const int left_arm_start_index_ = state_informer_->getJointNumber(left_arm_joint_names_.front());
-  const int right_arm_start_index_ = state_informer_->getJointNumber(right_arm_joint_names_.front());
+  joint_positions_.resize(0);
+  state_informer_->getJointPositions(joint_positions_);
 
   double traj_point_time = 0.0;
 
