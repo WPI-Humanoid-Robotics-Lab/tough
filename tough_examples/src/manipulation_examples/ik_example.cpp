@@ -17,12 +17,14 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
 
   RobotDescription* rd = RobotDescription::getRobotDescription(nh);
+  RobotStateInformer* state_informer_ = RobotStateInformer::getRobotStateInformer(nh);
+  ros::Duration(0.01).sleep();
   WholebodyControlInterface wb_controller(nh);
   // ArmControlInterface arm_controller(nh);
   geometry_msgs::PoseStamped pose;
   pose.pose.orientation.w = 1.0;
   pose.header.frame_id = rd->getPelvisFrame();
-  
+
   if (argc != 4)
   {
     pose.pose.position.x = 0.4;
