@@ -608,7 +608,6 @@ bool ArmControlInterface::moveArmJointsAcceleration(const RobotSide side, const 
   if (generateArmMessage(side, accelration_vector, arm_accn_msg))
   {
     armJointAccelerationPublisher.publish(arm_accn_msg);
-    ros::Duration(0.02).sleep();
     success = true;
   }
   return success;

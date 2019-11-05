@@ -35,6 +35,13 @@ public:
    *
    * @param traj                      JointTrajectory message to be executed on the robot.
    */
+  void executeAccnTrajectory(const trajectory_msgs::JointTrajectory& traj);
+
+  /**
+   * @brief This method executes the trajectory on the Robot
+   *
+   * @param traj                      JointTrajectory message to be executed on the robot.
+   */
   void executeTrajectory(const trajectory_msgs::JointTrajectory& traj);
 
   /**
@@ -80,16 +87,20 @@ private:
   std::vector<std::string> left_arm_joint_names_;
   std::vector<std::string> right_arm_joint_names_;
   std::vector<std::string> chest_joint_names_;
+  std::vector<std::string> joint_names_;
 
   std::vector<double> joint_positions_;
+  std::vector<double> joint_acceleration_;
+  std::vector<double> chest_acceleration_, left_arm_acceleration_, right_arm_acceleration_;
 
   int chest_start_index_, left_arm_start_index_, right_arm_start_index_;
 
   void initializeWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg);
   void parseTrajectory(const trajectory_msgs::JointTrajectory& traj,
                        ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg);
-  
-    inline geometry_msgs::Quaternion getChestQuaternion(const long start, const std::vector<double>& traj_vector)
+  void parseAccnTrajectory(const trajectory_msgs::JointTrajectory& traj);
+
+  inline geometry_msgs::Quaternion getChestQuaternion(const long start, const std::vector<double>& traj_vector)
   {
     geometry_msgs::Quaternion quat_msg;
     // chest can only have 3 joints

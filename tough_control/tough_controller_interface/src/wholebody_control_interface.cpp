@@ -13,6 +13,8 @@ WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle& nh)
   chest_start_index_ = state_informer_->getJointNumber(chest_joint_names_.front());
   left_arm_start_index_ = state_informer_->getJointNumber(left_arm_joint_names_.front());
   right_arm_start_index_ = state_informer_->getJointNumber(right_arm_joint_names_.front());
+
+  state_informer_->getJointNames(joint_names_);
 }
 
 bool WholebodyControlInterface::getJointSpaceState(std::vector<double>& joints, RobotSide side)
@@ -133,5 +135,42 @@ void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTraj
     positions.assign(joint_positions_.begin() + right_arm_start_index_,
                      joint_positions_.begin() + right_arm_start_index_ + right_arm_joint_names_.size());
     armController_.appendTrajectoryPoint(wholeBodyMsg.right_arm_trajectory_message, traj_point_time, positions);
+  }
+}
+
+void WholebodyControlInterface::executeAccnTrajectory(const trajectory_msgs::JointTrajectory& traj)
+{
+  for (auto& traj_pts : traj.points)
+  {
+    chest_acceleration_.resize(0);
+    left_arm_acceleration_.resize(0);
+    right_arm_acceleration_.resize(0);
+    
+    joint_acceleration_.resize(joint_names_.size());
+    std::fill(joint_acceleration_.begin(), joint_acceleration_.end(), 0);
+
+    for (int i = 0; i < traj.joint_names.size(); i++)
+    {
+      int index = state_informer_->getJointNumber(traj.joint_names.at(i));
+      joint_acceleration_.at(index) = traj_pts.accelerations.at(i);
+    }
+
+    // CHEST TRAJECTORY
+    chest_acceleration_.insert(chest_acceleration_.begin(), joint_acceleration_.begin() + chest_start_index_,
+                               joint_acceleration_.begin() + chest_start_index_ + chest_joint_names_.size());
+    // chestController_.executeChestAccelerations(chest_acceleration_);
+
+    // LEFT ARM TRAJECTORY
+    left_arm_acceleration_.insert(left_arm_acceleration_.begin(), joint_acceleration_.begin() + left_arm_start_index_,
+                                  joint_acceleration_.begin() + left_arm_start_index_ + left_arm_joint_names_.size());
+    armController_.moveArmJointsAcceleration(RobotSide::LEFT, left_arm_acceleration_);
+    ros::Duration(0.01).sleep();
+
+    // RIGHT ARM TRAJECTORY
+    right_arm_acceleration_.insert(
+        right_arm_acceleration_.begin(), joint_acceleration_.begin() + right_arm_start_index_,
+        joint_acceleration_.begin() + right_arm_start_index_ + right_arm_joint_names_.size());
+    armController_.moveArmJointsAcceleration(RobotSide::RIGHT, right_arm_acceleration_);
+    ros::Duration(0.01).sleep();
   }
 }
