@@ -158,7 +158,7 @@ void WholebodyControlInterface::executeAccnTrajectory(const trajectory_msgs::Joi
     // CHEST TRAJECTORY
     chest_acceleration_.insert(chest_acceleration_.begin(), joint_acceleration_.begin() + chest_start_index_,
                                joint_acceleration_.begin() + chest_start_index_ + chest_joint_names_.size());
-    // chestController_.executeChestAccelerations(chest_acceleration_);
+    chestController_.executeChestAccelerations(chest_acceleration_);
 
     // LEFT ARM TRAJECTORY
     left_arm_acceleration_.insert(left_arm_acceleration_.begin(), joint_acceleration_.begin() + left_arm_start_index_,
