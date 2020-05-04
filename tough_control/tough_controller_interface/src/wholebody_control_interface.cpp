@@ -1,7 +1,7 @@
 #include "tough_controller_interface/wholebody_control_interface.h"
 
-WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle& nh)
-  : ToughControlInterface(nh), chestController_(nh), armController_(nh)
+WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle &nh)
+    : ToughControlInterface(nh), chestController_(nh), armController_(nh)
 {
   m_wholebodyPub = nh_.advertise<ihmc_msgs::WholeBodyTrajectoryRosMessage>(
       control_topic_prefix_ + TOUGH_COMMON_NAMES::WHOLEBODY_TRAJECTORY_TOPIC, 10, true);
@@ -17,7 +17,7 @@ WholebodyControlInterface::WholebodyControlInterface(ros::NodeHandle& nh)
   state_informer_->getJointNames(joint_names_);
 }
 
-bool WholebodyControlInterface::getJointSpaceState(std::vector<double>& joints, RobotSide side)
+bool WholebodyControlInterface::getJointSpaceState(std::vector<double> &joints, RobotSide side)
 {
   joints.clear();
   state_informer_->getJointPositions(joints);
@@ -25,17 +25,17 @@ bool WholebodyControlInterface::getJointSpaceState(std::vector<double>& joints, 
   return !joints.empty();
 }
 
-bool WholebodyControlInterface::getTaskSpaceState(geometry_msgs::Pose& pose, RobotSide side, std::string fixedFrame)
+bool WholebodyControlInterface::getTaskSpaceState(geometry_msgs::Pose &pose, RobotSide side, std::string fixedFrame)
 {
   return state_informer_->getCurrentPose(rd_->getPelvisFrame(), pose, fixedFrame);
 }
 
-void WholebodyControlInterface::executeTrajectory(const moveit_msgs::RobotTrajectory& traj)
+void WholebodyControlInterface::executeTrajectory(const moveit_msgs::RobotTrajectory &traj)
 {
   return executeTrajectory(traj.joint_trajectory);
 }
 
-void WholebodyControlInterface::executeTrajectory(const trajectory_msgs::JointTrajectory& traj)
+void WholebodyControlInterface::executeTrajectory(const trajectory_msgs::JointTrajectory &traj)
 {
   ihmc_msgs::WholeBodyTrajectoryRosMessage wholeBodyMsg;
 
@@ -45,7 +45,7 @@ void WholebodyControlInterface::executeTrajectory(const trajectory_msgs::JointTr
   ros::Duration(0.1).sleep();
 }
 
-void WholebodyControlInterface::initializeWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg)
+void WholebodyControlInterface::initializeWholebodyMessage(ihmc_msgs::WholeBodyTrajectoryRosMessage &wholeBodyMsg)
 {
   // Setting seed for random number generator.
   // More details:
@@ -101,22 +101,29 @@ void WholebodyControlInterface::initializeWholebodyMessage(ihmc_msgs::WholeBodyT
   armController_.setupArmMessage(RobotSide::RIGHT, wholeBodyMsg.right_arm_trajectory_message);
 }
 
-void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTrajectory& traj,
-                                                ihmc_msgs::WholeBodyTrajectoryRosMessage& wholeBodyMsg)
+void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTrajectory &traj,
+                                                ihmc_msgs::WholeBodyTrajectoryRosMessage &wholeBodyMsg)
 {
   joint_positions_.resize(0);
   state_informer_->getJointPositions(joint_positions_);
 
   double traj_point_time = 0.0;
 
-  for (auto& traj_pts : traj.points)
+  for (auto &traj_pts : traj.points)
   {
     traj_point_time = traj_pts.time_from_start.toSec();
 
     for (int i = 0; i < traj.joint_names.size(); i++)
     {
       int index = state_informer_->getJointNumber(traj.joint_names.at(i));
-      joint_positions_.at(index) = traj_pts.positions.at(i);
+      if (index < joint_positions_.size() - 1)
+      {
+        joint_positions_.at(index) = traj_pts.positions.at(i);
+      }
+      else
+      {
+        ROS_ERROR("Joint name %s not found in State Informer", traj.joint_names.at(i).c_str());
+      }
     }
 
     // CHEST TRAJECTORY
@@ -138,14 +145,14 @@ void WholebodyControlInterface::parseTrajectory(const trajectory_msgs::JointTraj
   }
 }
 
-void WholebodyControlInterface::executeAccnTrajectory(const trajectory_msgs::JointTrajectory& traj)
+void WholebodyControlInterface::executeAccnTrajectory(const trajectory_msgs::JointTrajectory &traj)
 {
-  for (auto& traj_pts : traj.points)
+  for (auto &traj_pts : traj.points)
   {
     chest_acceleration_.resize(0);
     left_arm_acceleration_.resize(0);
     right_arm_acceleration_.resize(0);
-    
+
     joint_acceleration_.resize(joint_names_.size());
     std::fill(joint_acceleration_.begin(), joint_acceleration_.end(), 0);
 
