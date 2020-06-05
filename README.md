@@ -51,4 +51,16 @@ We are skipping 0.10 version of ihmc controllers more details [here](https://git
 - Perception examples
   - [MultisenseImage](https://github.com/WPI-Humanoid-Robotics-Lab/tough/wiki/MultisenseImage-example)
 
+### Citation
+If you find this work useful in your research, please consider to cite:
+```
+@article{Jagtap2020,
+    author = {Jagtap, Vinayak and Agarwal, Shlok and Wagh, Ameya and Gennert, Michael},
+    journal = {Int. J. Adv. Robot. Syst.},
+    keywords = {Humanoid robots,ROS,open-source projects and applications for robotics},
+    title = {{Transportable open-source application program interface and user interface for generic humanoids: TOUGH}},
+    volume = {17},
+    year = {2020}
+}
+```
 ### Checkout [Wiki](https://github.com/WPI-Humanoid-Robotics-Lab/tough/wiki) for further instructions
