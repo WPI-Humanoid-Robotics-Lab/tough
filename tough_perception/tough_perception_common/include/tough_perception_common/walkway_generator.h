@@ -33,7 +33,7 @@ private:
                         pcl::PointCloud<pcl::PointXYZ>::Ptr& out_cloud);
   bool getLargestCluster(pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
-  const float CLUSTER_TOLERANCE = 0.058f;
+  const float CLUSTER_TOLERANCE = 0.8f;
 };
 
 #endif  // WALKWAY_GENERATOR_H

@@ -163,17 +163,20 @@ void MapGenerator::convertToOccupancyGrid(const sensor_msgs::PointCloud2Ptr msg)
   mtx.lock();
   for (; iter_x != iter_x.end(); ++iter_x, ++iter_y)
   {
-    float x = *iter_x;
-    float y = *iter_y;
+    for(float i = -0.1; i<=0.1; i+=MAP_RESOLUTION)
+    {
+      float x = *iter_x + i;
+      float y = *iter_y + i;
 
-    if (occGrid_.data.at(getIndex(x, y)) == OCCUPIED)
-    {
-      occGrid_.data.at(getIndex(x, y)) = FREE;
-    }
-    // update visited map only if it is completely occupied. value = 50 means visited in that map
-    if (visitedOccGrid_.data.at(getIndex(x, y)) == OCCUPIED)
-    {
-      visitedOccGrid_.data.at(getIndex(x, y)) = FREE;
+      if (occGrid_.data.at(getIndex(x, y)) == OCCUPIED)
+      {
+        occGrid_.data.at(getIndex(x, y)) = FREE;
+      }
+      // update visited map only if it is completely occupied. value = 50 means visited in that map
+      if (visitedOccGrid_.data.at(getIndex(x, y)) == OCCUPIED)
+      {
+        visitedOccGrid_.data.at(getIndex(x, y)) = FREE;
+      }
     }
   }
   mtx.unlock();
