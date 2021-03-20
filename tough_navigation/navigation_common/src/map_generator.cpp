@@ -57,9 +57,9 @@ MapGenerator::MapGenerator(ros::NodeHandle& n) : nh_(n)
   ros::Duration(0.2).sleep();
 
   // Assuming robot always starts in a clear space of 1m X 1m
-  for (float x = -10.5f; x < 10.5f; x += MAP_RESOLUTION / 10)
+  for (float x = -0.5f; x < 0.5f; x += MAP_RESOLUTION / 10)
   {
-    for (float y = -10.5f; y < 10.5f; y += MAP_RESOLUTION / 10)
+    for (float y = -0.5f; y < 0.5f; y += MAP_RESOLUTION / 10)
     {
       occGrid_.data.at(getIndex(pelvisPose.position.x + x, pelvisPose.position.y + y)) = FREE;
       visitedOccGrid_.data.at(getIndex(pelvisPose.position.x + x, pelvisPose.position.y + y)) = FREE;
@@ -93,9 +93,9 @@ void MapGenerator::resetMap(const std_msgs::Empty& msg)
   visitedOccGrid_ = occGrid_;
 
   mtx.lock();
-  for (float x = -10.5f; x < 10.5f; x += MAP_RESOLUTION / 10)
+  for (float x = -0.5f; x < 0.5f; x += MAP_RESOLUTION / 10)
   {
-    for (float y = -10.5f; y < 10.5f; y += MAP_RESOLUTION / 10)
+    for (float y = -0.5f; y < 0.5f; y += MAP_RESOLUTION / 10)
     {
       geometry_msgs::Pose pelvisPose;
       pelvisPose.position.x = x;
