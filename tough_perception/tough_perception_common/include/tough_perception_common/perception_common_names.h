@@ -19,6 +19,7 @@ static const std::string MULTISENSE_LASER_FILTERED_CLOUD_TOPIC2 = "filtered_clou
 
 // image topics
 static const std::string MULTISENSE_LEFT_CAMERA_INFO_TOPIC = "/multisense/camera/left/camera_info";
+static const std::string MULTISENSE_LEFT_IMAGE_COLOR_COMPRESSED_TOPIC = "/multisense/left/image_rect_color/compressed";
 static const std::string MULTISENSE_LEFT_IMAGE_COLOR_TOPIC = "/multisense/camera/left/image_rect_color";
 static const std::string MULTISENSE_LEFT_DISPARITY_TOPIC = "/multisense/camera/disparity";
 // TODO: add a depth image

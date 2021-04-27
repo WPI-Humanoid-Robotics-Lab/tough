@@ -142,7 +142,7 @@ private:
   // ros topics
   // @todo: move the hardcoded topic names to perception_common_names
 #ifdef GAZEBO_SIMULATION
-  std::string image_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_TOPIC;
+  std::string image_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_IMAGE_COLOR_COMPRESSED_TOPIC;
   std::string disp_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DISPARITY_TOPIC; // stereo message
   std::string depth_topic_ = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_DEPTH_TOPIC;    // image
   std::string camera_info_topic = PERCEPTION_COMMON_NAMES::MULTISENSE_LEFT_CAMERA_INFO_TOPIC;
